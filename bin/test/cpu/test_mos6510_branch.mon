@@ -1,0 +1,375 @@
+#
+# MOS6510 CPU test suite.
+#
+# If a test fails the emulator is halted with exit code 0.
+# If all tests succeed the emulator is terminated with exit code 1.
+#
+########################################
+# Clean registers
+########################################
+# A = X = Y = 0; S = FF; P = 0 ($20)
+a 5000
+a9 00
+a2 ff
+9a
+a0 00
+a2 00
+48
+28
+.
+b 500b
+
+
+########################################
+# Copy ROM onto RAM
+# A = Starting page; X = Pages to copy
+########################################
+#
+#       sta $fc
+#       lda #$00
+#       sta $fb
+#       ldy #$00
+# loop: lda ($fb), y
+#       sta $(fb), y
+#       iny
+#       bne $loop
+#       inc $fc
+#       dex
+#       bne $loop
+#       rts
+#
+a 5010
+85 fc
+a9 00
+85 fb
+a0 00
+b1 fb
+91 fb
+c8
+d0 f9
+e6 fb
+ca
+d0 f4
+60
+.
+
+
+########################################
+# Copy Basic and kernal ROMs onto RAM
+########################################
+#
+#   lda #$e0        ;Kernal
+#   ldx #$20
+#   jsr $5010
+#   lda #$a0        ;Basic
+#   ldx #$20
+#   jmp $5010
+#
+a 5030
+a9 e0
+a2 20
+20 10 50
+a9 a0
+a2 20
+4c 10 50
+.
+
+
+########################################
+# BPL $rel      - 10
+########################################
+#
+#       ldx #$ff
+#       bpl $err
+#       inx
+#       bpl $ok
+# err:  kil
+# ok:
+#
+a 4000
+ea
+a2 ff
+10 03
+e8
+10 01
+02
+ea
+02
+.
+b 4009
+b 400a rp == #$22
+g 5000
+g 4000
+g .
+bd 4009
+
+
+########################################
+# BMI $rel      - 30
+########################################
+#
+#       ldx #$00
+#       bmi $err
+#       dex
+#       bmi $ok
+# err:  kil
+# ok:
+#
+a 4000
+ea
+a2 00
+30 03
+ca
+30 01
+02
+ea
+02
+.
+b 4009
+b 400a rp == #$a0
+g 5000
+g 4000
+g .
+bd 4009
+bd 400a
+
+
+########################################
+# BVC $rel      - 50
+########################################
+#
+#       lda #$83
+#       adc #$83
+#       bvc $err
+#       lda #$00
+#       adc #$00
+#       bvc $ok
+# err:  kil
+# ok:
+#
+a 4000
+ea
+a9 83
+69 83
+50 06
+a9 00
+69 00
+50 01
+02
+02
+.
+b 400e
+g 5000
+g 4000
+bd 400e
+
+
+########################################
+# BVS $rel      - 70
+########################################
+#
+#       lda #$00
+#       adc #$00
+#       bvs $err
+#       lda #$40
+#       pha
+#       plp
+#       bvs $ok
+# err:  kil
+# ok:
+#
+a 4000
+ea
+a9 00
+69 00
+70 06
+a9 40
+48
+28
+70 01
+02
+02
+.
+b 400e
+g 5000
+g 4000
+bd 400e
+
+
+########################################
+# BCC $rel      - 90
+########################################
+#
+#       sec
+#       bcc $err
+#       clc
+#       bcc $ok
+# err:  kil
+# ok:
+#
+a 4000
+ea
+38
+90 03
+18
+90 01
+02
+02
+.
+b 4008
+g 5000
+g 4000
+bd 4008
+
+
+########################################
+# BCS $rel      - B0
+########################################
+#
+#       clc
+#       bcs $err
+#       sec
+#       bcs $ok
+# err:  kil
+# ok:
+#
+a 4000
+ea
+18
+b0 03
+38
+b0 01
+02
+02
+.
+b 4008
+g 5000
+g 4000
+bd 4008
+
+
+########################################
+# BNE $rel      - D0
+########################################
+#
+#       lda #$50
+#       cmp #$51
+#       bne $ok
+#       kil
+# ok:
+#
+a 4000
+ea
+a9 50
+c9 51
+d0 01
+02
+02
+.
+b 4008
+g 5000
+g 4000
+bd 4008
+
+
+########################################
+# BEQ $rel      - F0
+########################################
+#
+#       lda #$50
+#       cmp #$50
+#       beq $ok
+#       kil
+# .ok:
+#
+a 4000
+ea
+a9 50
+c9 50
+f0 01
+02
+02
+.
+b 4008
+g 5000
+g 4000
+bd 4008
+
+
+########################################
+# BRK           - 00
+# RTI           - 40
+# JSR           - 20
+# RTS           - 60
+# JMP           - 4C
+########################################
+#
+#       nop
+#       sec
+#       bcs $beg        ;jmp $beg
+#
+# isr:  php
+#       pla
+#       sta $fc
+#       and #$14        ;B and I must  be set
+#       cmp #$14
+#       beq $ok
+#       kil
+# ok:   rti
+#
+# beg:  jsr $5030       ;Copy ROM on RAM (this tests: JSR, RTS and JMP)
+#       lda #$04        ;Set isr as irq handler
+#       sta $fffe
+#       lda #$40
+#       sta $ffff
+#       lda $01         ;Make ram under basic and kernal visible
+#       pha
+#       and #$fd        ;~2 (2=HIRAM)
+#       ;sei
+#       sta $01
+#
+#       brk
+#       kil             ;Return address of BRK is PC+2. It must not end here.
+#
+#       pla             ;Restore basic and kernal ROMs where they where
+#       sta $01
+#       ;cli
+#
+a 4000
+ea
+38
+b0 0a
+08
+68
+29 14
+c9 14
+f0 01
+02
+40
+20 30 50
+a9 04
+8d fe ff
+a9 40
+8d ff ff
+a5 01
+48
+29 fd
+85 01
+00
+02
+68
+85 01
+02
+.
+b 4029
+b 4027 rp == $31
+
+g 4000
+bd 4029
+bd 4027
+
+
+#
+# Success
+#
+quit 1

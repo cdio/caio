@@ -1,0 +1,360 @@
+#
+# MOS6510 CPU test suite.
+#
+# If a test fails the emulator is halted with exit code 0.
+# If all tests succeed the emulator is terminated with exit code 1.
+#
+########################################
+# Clear registers
+########################################
+a 5000
+a9 00
+a0 00
+a2 00
+48
+28
+.
+b 5008
+
+
+########################################
+# DEC $zp - C6
+########################################
+#
+# lda #$ff
+# sta $0050
+# dec $50       ;Z must be active after this
+# lda $50       ;A must have 0 after this
+#
+a 4000
+ea
+a9 01
+8d 50 00
+c6 50
+a5 50
+ea
+02
+.
+b 4008 rp == #$22
+b 400a ra == #$00
+b 400b rp == #$22
+g 5000
+g 4000
+g .
+g .
+bd 4008
+bd 400a
+bd 400b
+
+
+########################################
+# DEC $abs - CE
+########################################
+#
+# lda #$ff
+# sta $0050
+# dec $0050     ;Z must be active after this
+# lda $50       ;A must be 0 after this
+#
+a 4000
+ea
+a9 01
+8d 50 00
+ce 50 00
+a5 50
+ea
+02
+.
+b 4009 rp == #$22
+b 400b ra == #$00
+b 400c rp == #$22
+g 5000
+g 4000
+g .
+g .
+bd 4009
+bd 400b
+bd 400c
+
+
+########################################
+# DEC $zp, X - D6
+########################################
+#
+# lda #$05
+# sta $0054
+# lda #$00      ;Z is set after this
+# dec $54       ;Z must be unset after this
+# lda $54       ;A must be #$04 after this
+#
+a 4000
+ea
+a9 05
+8d 54 00
+a9 00
+d6 54
+a5 54
+02
+.
+b 4008 rp == #$22
+b 400a rp == #$20
+b 400c ra == #$04
+g 5000
+g 4000
+g .
+g .
+bd 4008
+bd 400a
+bd 400c
+
+
+########################################
+# DEC $abs, X - DE
+########################################
+#
+# lda #$05
+# sta $0054
+# lda #$00      ;Z is set after this
+# dec $0054     ;Z must be unset after this
+# lda $54       ;A must be #$04 after this
+#
+a 4000
+ea
+a9 05
+8d 54 00
+a9 00
+de 54 00
+a5 54
+02
+.
+b 4008 rp == #$22
+b 400b rp == #$20
+b 400d ra == #$04
+g 5000
+g 4000
+g .
+g .
+bd 4008
+bd 400b
+bd 400d
+
+
+########################################
+# DEX - CA
+########################################
+#
+# ldx #$00
+# dex
+#
+a 4000
+ea
+a2 00
+ca
+ea
+02
+.
+b 4004 rx == #$ff
+b 4005 rp == #$a0
+g 5000
+g 4000
+g .
+bd 4004
+bd 4005
+
+
+########################################
+# DEY - 88
+########################################
+#
+# ldy #$00
+# dey
+#
+a 4000
+ea
+a0 01
+88
+ea
+02
+.
+b 4004 ry == #$00
+b 4005 rp == #$22
+g 5000
+g 4000
+g .
+bd 4004
+bd 4005
+
+
+########################################
+# INC $zp - E6
+########################################
+#
+# lda #$00
+# sta $0050     ;Z must be active here
+# inc $50       ;Z must be unset after this
+# lda $50       ;A must have 1 after this
+#
+a 4000
+ea
+a9 00
+8d 50 00
+e6 50
+a5 50
+02
+.
+b 4006 rp == #$22
+b 4008 rp == #$20
+b 400a ra == #$01
+g 5000
+g 4000
+g .
+g .
+bd 4006
+bd 4008
+bd 400a
+
+
+########################################
+# INC $abs - EE
+########################################
+#
+# lda #$00
+# sta $0050     ;Z must be active here
+# inc $50       ;Z must be unset after this
+# lda $0050     ;A must have 1 after this
+#
+a 4000
+ea
+a9 00
+8d 50 00
+ee 50 00
+a5 50
+02
+.
+b 4006 rp == #$22
+b 4009 rp == #$20
+b 400b ra == #$01
+g 5000
+g 4000
+g .
+g .
+bd 4006
+bd 4009
+bd 400b
+
+
+########################################
+# INC $zp, x - F6
+########################################
+#
+# lda #$00
+# sta $0050     ;Z must be active here
+# ldx #$10
+# inc $40, x    ;Z must be unset after this
+# lda $50       ;A must have 1 after this
+#
+a 4000
+ea
+a9 00
+8d 50 00
+a2 10
+f6 40
+a5 50
+02
+.
+b 4006 rp == #$22
+b 400a rp == #$20
+b 400c ra == #$01
+g 5000
+g 4000
+g .
+g .
+bd 4006
+bd 400a
+bd 400c
+
+
+########################################
+# INC $abs, x - FE
+########################################
+#
+# lda #$00
+# sta $0050     ;Z must be active here
+# ldx #$10
+# inc $0040, x  ;Z must be unset after this
+# lda $50       ;A must have 1 after this
+#
+a 4000
+ea
+a9 00
+8d 50 00
+a2 10
+fe 40 00
+a5 50
+02
+.
+b 4006 rp == #$22
+b 400b rp == #$20
+b 400d ra == #$01
+g 5000
+g 4000
+g .
+g .
+bd 4006
+bd 400b
+bd 400d
+
+
+########################################
+# INX - E8
+########################################
+#
+# ldx #$00
+# inx
+#
+a 4000
+ea
+a2 00
+e8
+ea
+02
+.
+b 4004 rx == #$01
+b 4005 rp == #$20
+g 5000
+g 4000
+g .
+bd 4004
+bd 4005
+
+
+########################################
+# INY - C8
+########################################
+#
+# ldy #$ff
+# iny
+#
+a 4000
+ea
+a0 ff
+c8
+ea
+02
+.
+b 4003 rp == #$a0
+b 4004 ry == #$00
+b 4005 rp == #$22
+g 5000
+g 4000
+g .
+g .
+bd 4003
+bd 4004
+bd 4005
+
+
+#
+# Success
+#
+quit 1

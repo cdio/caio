@@ -1,0 +1,160 @@
+#
+# CEMU Keyboard mappings: Italian Layout -> C64
+#
+# The PC key names use the US-ANSI layout as reference.
+#
+# Format:
+#   <pc-key> [<pc-shift>] [<pc-altgr>]  <c64-key> [<c64-shift>]
+#
+###############################################################
+# PC-KEY-NAME       SHIFT   ALTGR   C64-KEY-NAME        SHIFT
+###############################################################
+  KEY_ESC                           KEY_RUNSTOP
+  KEY_ESC           SHIFT           KEY_RUNSTOP         SHIFT
+
+  KEY_F1                            KEY_F1
+  KEY_F2                            KEY_F1              SHIFT
+  KEY_F3                            KEY_F3
+  KEY_F4                            KEY_F3              SHIFT
+  KEY_F5                            KEY_F5
+  KEY_F6                            KEY_F5              SHIFT
+  KEY_F7                            KEY_F7
+  KEY_F8                            KEY_F7              SHIFT
+
+  KEY_GRAVE_ACCENT                  KEY_LEFT_ARROW
+  KEY_GRAVE_ACCENT  SHIFT           KEY_LEFT_ARROW      SHIFT
+
+  KEY_1                             KEY_1
+  KEY_2                             KEY_2
+  KEY_3                             KEY_3
+  KEY_4                             KEY_4
+  KEY_5                             KEY_5
+  KEY_6                             KEY_6
+  KEY_7                             KEY_7
+  KEY_8                             KEY_8
+  KEY_9                             KEY_9
+  KEY_0                             KEY_0
+
+  KEY_1             SHIFT           KEY_1               SHIFT
+  KEY_2             SHIFT           KEY_2               SHIFT
+  KEY_3             SHIFT           KEY_POUND
+  KEY_4             SHIFT           KEY_4               SHIFT
+  KEY_5             SHIFT           KEY_5               SHIFT
+  KEY_6             SHIFT           KEY_6               SHIFT
+  KEY_7             SHIFT           KEY_SLASH
+  KEY_8             SHIFT           KEY_8               SHIFT
+  KEY_9             SHIFT           KEY_9               SHIFT
+  KEY_0             SHIFT           KEY_EQUAL
+
+  KEY_MINUS                         KEY_7               SHIFT
+  KEY_MINUS         SHIFT           KEY_SLASH           SHIFT
+
+  KEY_EQUAL                         KEY_UP_ARROW
+  KEY_EQUAL         SHIFT           KEY_UP_ARROW        SHIFT
+
+  KEY_BACKSPACE                     KEY_DELETE
+  KEY_BACKSPACE     SHIFT           KEY_DELETE          SHIFT
+
+  KEY_TAB                           KEY_CTRL
+  KEY_Q                             KEY_Q
+  KEY_W                             KEY_W
+  KEY_E                             KEY_E
+  KEY_R                             KEY_R
+  KEY_T                             KEY_T
+  KEY_Y                             KEY_Y
+  KEY_U                             KEY_U
+  KEY_I                             KEY_I
+  KEY_O                             KEY_O
+  KEY_P                             KEY_P
+
+  KEY_TAB           SHIFT           KEY_CTRL            SHIFT
+  KEY_Q             SHIFT           KEY_Q               SHIFT
+  KEY_W             SHIFT           KEY_W               SHIFT
+  KEY_E             SHIFT           KEY_E               SHIFT
+  KEY_R             SHIFT           KEY_R               SHIFT
+  KEY_T             SHIFT           KEY_T               SHIFT
+  KEY_Y             SHIFT           KEY_Y               SHIFT
+  KEY_U             SHIFT           KEY_U               SHIFT
+  KEY_I             SHIFT           KEY_I               SHIFT
+  KEY_O             SHIFT           KEY_O               SHIFT
+  KEY_P             SHIFT           KEY_P               SHIFT
+
+  KEY_OPEN_BRACKET          ALTGR   KEY_COLON           SHIFT
+  KEY_CLOSE_BRACKET         ALTGR   KEY_SEMICOLON       SHIFT
+  KEY_CLOSE_BRACKET                 KEY_PLUS
+  KEY_CLOSE_BRACKET SHIFT           KEY_ASTERISK
+
+  KEY_BACKSLASH                     KEY_UP_ARROW
+  KEY_BACKSLASH     SHIFT           KEY_UP_ARROW        SHIFT
+
+  KEY_A                             KEY_A
+  KEY_S                             KEY_S
+  KEY_D                             KEY_D
+  KEY_F                             KEY_F
+  KEY_G                             KEY_G
+  KEY_H                             KEY_H
+  KEY_J                             KEY_J
+  KEY_K                             KEY_K
+  KEY_L                             KEY_L
+  KEY_SEMICOLON             ALTGR   KEY_AT
+  KEY_APOSTROPHE            ALTGR   KEY_3               SHIFT
+
+  KEY_A             SHIFT           KEY_A               SHIFT
+  KEY_S             SHIFT           KEY_S               SHIFT
+  KEY_D             SHIFT           KEY_D               SHIFT
+  KEY_F             SHIFT           KEY_F               SHIFT
+  KEY_G             SHIFT           KEY_G               SHIFT
+  KEY_H             SHIFT           KEY_H               SHIFT
+  KEY_J             SHIFT           KEY_J               SHIFT
+  KEY_K             SHIFT           KEY_K               SHIFT
+  KEY_L             SHIFT           KEY_L               SHIFT
+  KEY_SEMICOLON     SHIFT           KEY_AT              SHIFT
+  KEY_APOSTROPHE    SHIFT           KEY_3               SHIFT
+
+  KEY_ENTER                         KEY_RETURN
+  KEY_ENTER         SHIFT           KEY_RETURN          SHIFT
+
+  KEY_LEFT_SHIFT                    KEY_LEFT_SHIFT
+
+  KEY_Z                             KEY_Z
+  KEY_X                             KEY_X
+  KEY_C                             KEY_C
+  KEY_V                             KEY_V
+  KEY_B                             KEY_B
+  KEY_N                             KEY_N
+  KEY_M                             KEY_M
+  KEY_COMMA                         KEY_COMMA
+  KEY_DOT                           KEY_DOT
+  KEY_SLASH                         KEY_MINUS
+
+  KEY_Z             SHIFT           KEY_Z               SHIFT
+  KEY_X             SHIFT           KEY_X               SHIFT
+  KEY_C             SHIFT           KEY_C               SHIFT
+  KEY_V             SHIFT           KEY_V               SHIFT
+  KEY_B             SHIFT           KEY_B               SHIFT
+  KEY_N             SHIFT           KEY_N               SHIFT
+  KEY_M             SHIFT           KEY_M               SHIFT
+  KEY_COMMA         SHIFT           KEY_SEMICOLON
+  KEY_DOT           SHIFT           KEY_COLON
+  KEY_SLASH         SHIFT           KEY_LEFT_ARROW
+  KEY_RIGHT_SHIFT                   KEY_RIGHT_SHIFT
+
+  KEY_LEFT_CTRL                     KEY_CBM
+  KEY_SPACE                         KEY_SPACE
+
+  KEY_CURSOR_LEFT                   KEY_CURSOR_RIGHT    SHIFT
+  KEY_CURSOR_RIGHT                  KEY_CURSOR_RIGHT
+  KEY_CURSOR_UP                     KEY_CURSOR_DOWN     SHIFT
+  KEY_CURSOR_DOWN                   KEY_CURSOR_DOWN
+
+  KEY_DELETE                        KEY_DELETE
+  KEY_DELETE        SHIFT           KEY_DELETE
+  KEY_INSERT                        KEY_DELETE          SHIFT
+  KEY_INSERT        SHIFT           KEY_DELETE          SHIFT
+  KEY_HOME                          KEY_HOME
+  KEY_HOME          SHIFT           KEY_HOME            SHIFT
+  KEY_PAGE_DOWN                     KEY_UP_ARROW
+  KEY_PAGE_DOWN     SHIFT           KEY_UP_ARROW        SHIFT
+
+  KEY_LT                            KEY_COMMA           SHIFT
+  KEY_LT            SHIFT           KEY_DOT             SHIFT
