@@ -28,6 +28,8 @@ CEMU requires [clang-6](https://clang.llvm.org) or later,
     $ sudo make PREFIX=/usr/local install
 ```
 
+The default *PREFIX* is */opt/cemu*.
+
 
 ## Usage
 
