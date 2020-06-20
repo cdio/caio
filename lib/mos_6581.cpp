@@ -45,38 +45,35 @@ const std::array<float, 16> Mos6581::Envelope::decay_times = {
 float Mos6581::Oscillator::tick()
 {
     if (_test) {
-        return ((_type == WAVE_PULSE) ? 1.0f : 0.0f);
+        _A = (_type == WAVE_PULSE ? 1.0f : 0.0f);
+        return _A;
     }
 
     if (_sync) {
         _t = _syncos.time();
     }
 
-    float tria   = 1.0f;
-    float sawa   = 1.0f;
-    float pulsea = 1.0f;
-    float noisea = 1.0f;
+    if (_type != WAVE_NONE) {
+        _A = 1.0f;
 
-    if (_type & WAVE_TRIANGLE) {
-        tria = signal::triangle(_t, _T) * ((_ring) ? _syncos.amplitude() : 1.0f);
+        if (_type & WAVE_TRIANGLE) {
+            _A *= signal::triangle(_t, _T) * ((_ring) ? _syncos.amplitude() : 1.0f);
+        }
+
+        if (_type & WAVE_SAWTOOTH) {
+            _A *= signal::sawtooth(_t, _T);
+        }
+
+        if (_type & WAVE_PULSE) {
+            _A *= signal::square(_t, _T * _width);
+        }
+
+        if (_type & WAVE_NOISE) {
+            _A *= signal::rand();    // FIXME Frequency limited noise.
+        }
+    } else {
+        _A = 0.0f;
     }
-
-    if (_type & WAVE_SAWTOOTH) {
-        sawa = signal::sawtooth(_t, _T);
-    }
-
-    if (_type & WAVE_PULSE) {
-        pulsea = signal::square(_t, _T * _width);
-    }
-
-    if (_type & WAVE_NOISE) {
-        noisea = signal::rand();    // FIXME Frequency limited noise.
-    }
-
-    /*
-     * Not additive, it seems it is more like an "electrical AND" operation.
-     */
-    _A = tria * sawa * pulsea * noisea * 0.5f;
 
     _t += DT;
 
@@ -88,6 +85,31 @@ float Mos6581::Oscillator::tick()
 }
 
 
+void Mos6581::Envelope::gate(bool gb)
+{
+    _gate = gb;
+
+    /*
+     * The Mos6581::tick() method is called each SAMPLES_TIME seconds.
+     * When state changes are faster than that time (f.ex. sustain level 0)
+     * some programs change the gate so fast that this device does not get noticed.
+     * Placing the following initialisation here (instead of Envelope::tick()) this
+     * evenlope generator will always be in the proper state.
+     */
+    if (_gate) {
+        _attack_slope = 1.0f / _attack_time;
+        if (_attack_time + _decay_time < SAMPLES_TIME) {
+            _A = 1.0f;
+        }
+        _cycle = CYCLE_ATTACK;
+    } else {
+        _release_A = _A;
+        _cycle = CYCLE_RELEASE;
+    }
+
+    _t = 0.0f;
+}
+
 float Mos6581::Envelope::tick()
 {
     if (_gate) {
@@ -95,13 +117,6 @@ float Mos6581::Envelope::tick()
          * GATE is ON: Attack-Decay-Sustain cycle.
          */
         switch (_cycle) {
-        case CYCLE_NONE:
-        case CYCLE_RELEASE:
-            _attack_slope = 1.0f / _attack_time;
-            _t = 0.0f;
-            _cycle = CYCLE_ATTACK;
-            /* PASSTRHOUGH */
-
         case CYCLE_ATTACK:
             if (_A < 1.0f) {
                 _A += _attack_slope * _t;
@@ -113,20 +128,19 @@ float Mos6581::Envelope::tick()
 
             _t = 0.0f;
             _cycle = CYCLE_DECAY;
-            /* PASSTRHOUGH */
+            /* PASSTHROUGH */
 
         case CYCLE_DECAY:
             if (_t < _decay_time) {
-                _A = signal::exp(_sustain, _sustain, _t, _decay_time / 4.0f);
+                _A = signal::exp(_sustain, 1.0f - _sustain, _t, _decay_time / 4.0f);
                 break;
             }
 
             _t = 0.0f;
             _cycle = CYCLE_SUSTAIN;
-            /* PASSTRHOUGH */
+            /* PASSTHROUGH */
 
         case CYCLE_SUSTAIN:
-            _A = _sustain;
             break;
 
         default:;
@@ -136,14 +150,6 @@ float Mos6581::Envelope::tick()
          * GATE is OFF: Release cycle.
          */
         switch (_cycle) {
-        case CYCLE_ATTACK:
-        case CYCLE_DECAY:
-        case CYCLE_SUSTAIN:
-            _t = 0.0f;
-            _release_A = _A;
-            _cycle = CYCLE_RELEASE;
-            /* PASSTRHOUGH */
-
         case CYCLE_RELEASE:
             if (_t < _release_time) {
                 _A = signal::exp(0.0f, _release_A, _t, _release_time / 4.0f);
@@ -189,17 +195,17 @@ void Mos6581::Filter::generate()
          */
         if (_lopass) {
             _klo = gsl::span{_klo_data.data(), _klo_data.size()};
-            _klo = signal::lopass(_klo, fc, SAMPLING_RATE, rs);     //FIXME: decrease of 12dB/Octave
+            _klo = signal::lopass(_klo, fc, SAMPLING_RATE, rs);
         }
 
         if (_hipass) {
             _khi = gsl::span{_khi_data.data(), _khi_data.size()};
-            _khi = signal::hipass(_khi, fc, SAMPLING_RATE, rs);     //FIXME: decrease of 12dB/Octave
+            _khi = signal::hipass(_khi, fc, SAMPLING_RATE, rs);
         }
 
         if (_bandpass) {
             _kbd = gsl::span{_kbd_data.data(), _kbd_data.size()};
-            _kbd = signal::bapass(_kbd, fc, fc, SAMPLING_RATE, rs); //FIXME: decrease of 6dB/Octave
+            _kbd = signal::bapass(_kbd, fc, fc, SAMPLING_RATE, rs);
         }
 
         _generated = true;

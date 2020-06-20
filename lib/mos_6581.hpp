@@ -30,9 +30,9 @@ namespace cemu {
  * consequently this implementation does not sound exactly like the real chip.
  *
  * @see Mos6581I
- * @see mos_6581_sid.pdf
  * @see https://en.wikipedia.org/wiki/MOS_Technology_SID
  * @see https://web.archive.org/web/20070222065716/http://stud1.tuwien.ac.at/~e9426444/yannes.html
+ * @see https://www.c64-wiki.com/wiki/Commodore_64_Programmer%27s_Reference_Guide
  */
 class Mos6581 : public Mos6581I {
 public:
@@ -176,9 +176,7 @@ public:
             _release_time = decay_times[value] * _tadj;
         }
 
-        void gate(bool gb) {
-            _gate = gb;
-        }
+        void gate(bool gb);
 
         float amplitude() const {
             return _A;
@@ -189,11 +187,11 @@ public:
     private:
         float _tadj;              /* Timing adjustment factor: 1MHz / system_clock_freq */
 
-        float _attack_time{};
+        float _attack_time{attack_times[0]};
         float _attack_slope{};
-        float _decay_time{};
+        float _decay_time{decay_times[0]};
         float _sustain{};
-        float _release_time{};
+        float _release_time{decay_times[0]};
         float _release_A{};
 
         float _t{};
@@ -252,7 +250,7 @@ public:
         void control(uint8_t value);
 
         float tick() {
-            return _osc.tick() * _env.tick();
+            return _osc.tick() * _env.tick() * 0.50f;
         }
 
     private:
