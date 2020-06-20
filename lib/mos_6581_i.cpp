@@ -39,10 +39,4 @@ std::ostream &Mos6581I::dump(std::ostream &os, addr_t base) const
     return utils::dump(os, regs, base);
 }
 
-size_t Mos6581I::tick(const Clock &clk)
-{
-    play();
-    return _samples_cycles;
-}
-
 }

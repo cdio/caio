@@ -140,7 +140,10 @@ protected:
      * @see Clockable::tick(const Clock &)
      * @see play()
      */
-    size_t tick(const Clock &clk) override;
+    size_t tick(const Clock &clk) override {
+        play();
+        return _samples_cycles;
+    }
 
     /**
      * Generate and play an audio signal of SAMPLES_TIME seconds.
