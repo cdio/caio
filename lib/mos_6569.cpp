@@ -54,7 +54,7 @@ uint8_t Mos6569::read(addr_t addr) const
     try {
         data = _regs.at(addr);
     } catch (const std::out_of_range &) {
-        throw InternalError{"Mos6569::read: Invalid address: $" + utils::to_string(addr)};
+        throw InternalError{*this, "read: Invalid address: $" + utils::to_string(addr)};
     }
 
     switch (addr) {
@@ -168,7 +168,7 @@ void Mos6569::write(addr_t addr, uint8_t data)
     try {
         _regs.at(addr) = data;
     } catch (const std::out_of_range &) {
-        throw InternalError{"Mos6569::write: Invalid address: $" + utils::to_string(addr)};
+        throw InternalError{*this, "write: Invalid address: $" + utils::to_string(addr)};
     }
 }
 
