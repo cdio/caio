@@ -45,6 +45,7 @@ extern std::uniform_real_distribution<float> uni_random;
 /**
  * @return A positive random value between 0.0 and 1.0.
  */
+__attribute__((always_inline))
 static inline float prand()
 {
     return std::abs(rand());
@@ -54,6 +55,7 @@ static inline float prand()
 /**
  * @return A random value between -1.0 and 1.0.
  */
+__attribute__((always_inline))
 static inline float rand()
 {
     return uni_random(rd);
@@ -68,6 +70,7 @@ static inline float rand()
  * @param T  Time constant.
  * @return The amplitude at the specified time position: A0 + A * e^(-t/T).
  */
+__attribute__((always_inline))
 static inline float exp(float A0, float A, float t, float T)
 {
     return A0 + A * std::exp(-t / T);
@@ -80,6 +83,7 @@ static inline float exp(float A0, float A, float t, float T)
  * @param T Period.
  * @return The amplitude at the specified time position.
  */
+__attribute__((always_inline))
 static inline float triangle(float t, float T)
 {
     const float hhT = 0.25f * T;
@@ -94,6 +98,7 @@ static inline float triangle(float t, float T)
  * @param T Period.
  * @return The amplitude at the specified time position.
  */
+__attribute__((always_inline))
 static inline float sawtooth(float t, float T)
 {
     const float hT = 0.5f * T;
@@ -108,6 +113,7 @@ static inline float sawtooth(float t, float T)
  * @param dc Duty cycle.
  * @return 1.0 if t <= dc: 0.0f otherwise.
  */
+__attribute__((always_inline))
 static inline float pulse(float t, float dc)
 {
     return (t < dc ? 1.0f : 0.0f);
@@ -120,6 +126,7 @@ static inline float pulse(float t, float dc)
  * @param dc Duty cycle.
  * @return 1.0 if t <= dc: -1.0f otherwise.
  */
+__attribute__((always_inline))
 static inline float square(float t, float dc)
 {
     return (t < dc ? 1.0f : -1.0f);
@@ -131,6 +138,7 @@ static inline float square(float t, float dc)
  * @param x Radians.
  * @return sin(x) / x.
  */
+__attribute__((always_inline))
 static inline float sinc(float x)
 {
     return ((x == 0.0f) ? 1.0f : std::sin(x) / x);
@@ -223,6 +231,7 @@ gsl::span<float> lopass(gsl::span<float> &buf, float fc, float fs, float rs, boo
  * @return A subspan of the buffer containing the actual kernel.
  * @see kernel_size()
  */
+__attribute__((always_inline))
 static inline gsl::span<float> hipass(gsl::span<float> &buf, float fc, float fs, float rs, bool osiz = true)
 {
     auto hi = lopass(buf, fc, fs, rs, osiz);
@@ -259,6 +268,7 @@ gsl::span<float> stopband(gsl::span<float> &buf, float fcl, float fch, float fs,
  * @return A subspan of the buffer containing the actual kernel.
  * @see kernel_size()
  */
+__attribute__((always_inline))
 static inline gsl::span<float> bapass(gsl::span<float> &buf, float fcl, float fch, float fs, float rs, bool osiz = true)
 {
     auto bp = stopband(buf, fcl, fch, fs, osiz);
@@ -296,6 +306,7 @@ T to_integer(float value)
  * @return The 16 bits unsigned value.
  * @see to_integer()
  */
+__attribute__((always_inline))
 static inline int16_t to_i16(float value)
 {
     return to_integer<int16_t>(value);

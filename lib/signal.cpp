@@ -84,8 +84,9 @@ gsl::span<float> lopass(gsl::span<float> &buf, float fc, float fs, float rs, boo
 
     /*
      * The "resonance" that is artificially generated here is completely guessed
-     * and it probably does not alter the spectrum as the audiophiles want.
+     * and it probably does not alter the spectrum as the audiophiles expect.
      */
+    rs -= 0.50f;
     for (size_t k = 0; k < N; ++k, t += ts) {
         float value = (sinc(w * t) + rs * std::sin(w * t)) * blackman(k, N);
         buf[k] = value;
