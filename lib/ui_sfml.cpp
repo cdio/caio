@@ -299,7 +299,7 @@ private:
     unsigned _saved_H{};
 
     /**
-     * Saved main window horizontal position (set when moving to fullscreen mode).
+     * Saved main window position (set when moving to fullscreen mode).
      */
     sf::Vector2i _saved_pos{};
 

@@ -94,7 +94,7 @@ void Mos6581::Envelope::gate(bool gb)
      * When state changes are faster than that time (f.ex. sustain level 0)
      * some programs change the gate so fast that this device does not get noticed.
      * Placing the following initialisation here (instead of Envelope::tick()) this
-     * evenlope generator will always be in the proper state.
+     * envelope generator will always be in the proper state.
      */
     if (_gate) {
         _attack_slope = 1.0f / _attack_time;
