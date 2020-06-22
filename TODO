@@ -4,11 +4,10 @@
 - CIA:      Test ToD and Timer interrupts
 - misc:     Fix Giana timeout
 - CIA:      Serial interface
-- UI:       Restore previous window position when exiting fullscreen mode
 - UI:       Map gamepad X, Y, A buttons to F1, F3, SPACE (config options)
 - CPU:      Ghost instructions
 - I/O:      D64 support (use some existing 1541 impl).
-- SID:      Something is missing (snoopy steps, ghettoblaster)
+- SID:      "Hey Taxi!" and SAM
 - SID:      Noise frequency range
 - signal:   Evaluate use of lookup tables
 - config:   realpath(3) on user defined directories
