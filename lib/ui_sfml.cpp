@@ -299,6 +299,11 @@ private:
     unsigned _saved_H{};
 
     /**
+     * Saved main window horizontal position (set when moving to fullscreen mode).
+     */
+    sf::Vector2i _saved_pos{};
+
+    /**
      * Screen texture width.
      */
     unsigned _width{};
@@ -494,8 +499,6 @@ UISfml::UISfml(const Config &conf)
 
     _W       = vconf.width * vconf.scale;
     _H       = vconf.height * vconf.scale;
-    _saved_W = _W;
-    _saved_H = _H;
     _width   = _W;
     _height  = _H;
     _aratio  = static_cast<float>(_W) / static_cast<float>(_H);
@@ -512,6 +515,10 @@ UISfml::UISfml(const Config &conf)
 
     _window.display();
     _window.setActive(false);
+
+    _saved_pos = _window.getPosition();
+    _saved_W   = _W;
+    _saved_H   = _H;
 
     auto desktop_size = sf::VideoMode::getDesktopMode();
     if (!_render_tex.create(desktop_size.width, desktop_size.height)) {
@@ -632,17 +639,21 @@ void UISfml::toggle_fullscreen()
         _H = _saved_H;
 
         _window.create(sf::VideoMode{_W, _H}, title, sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
+        _window.setMouseCursorVisible(true);
+        _window.setPosition(_saved_pos);
 
         resize_event(_W, _H);
 
     } else {
         _is_fullscreen = true;
 
+        _saved_pos = _window.getPosition();
+        _saved_W   = _W;
+        _saved_H   = _H;
+
         auto desktop_size = sf::VideoMode().getDesktopMode();
         _window.create(desktop_size, title, sf::Style::Fullscreen);
-
-        _saved_W = _W;
-        _saved_H = _H;
+        _window.setMouseCursorVisible(false);
 
         resize_event(desktop_size.width, desktop_size.height);
     }
