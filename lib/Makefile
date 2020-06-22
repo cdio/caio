@@ -27,7 +27,6 @@ include ${ROOT}/mk/config.mk
 # Core
 #
 CXXSRCS=	aspace.cpp \
-		c64_config.cpp \
 		clock.cpp \
 		config.cpp \
 		confile.cpp \
@@ -61,7 +60,6 @@ CXXSRCS=	aspace.cpp \
 		utils.cpp
 
 INCS=		aspace.hpp \
-		c64_config.hpp \
 		cbmbus.hpp \
 		clock.hpp \
 		config.hpp \
