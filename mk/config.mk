@@ -61,6 +61,7 @@ override LD=		${CXX}
 LN?=			ln
 override MKDEP=		${CXX}
 NPROC?=			nproc
+PERL?=			perl
 PKG_CONFIG?=		pkg-config
 SED?=			sed
 
