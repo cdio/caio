@@ -133,7 +133,7 @@ private:
 
 class UISfml : public UI {
 public:
-    UISfml(const Config &conf);
+    explicit UISfml(const Config &conf);
 
     virtual ~UISfml() {
     }
@@ -214,6 +214,7 @@ public:
      */
     void icon(const Image &img) override {
         if (img) {
+            _icon = img;
             _window.setIcon(img.width, img.height, reinterpret_cast<const uint8_t *>(img.data.data()));
         }
     }
@@ -243,13 +244,6 @@ private:
      * Toggle the fullscreen mode.
      */
     void toggle_fullscreen();
-
-    /**
-     * @return true if fullscreen mode is active; false otherwise.
-     */
-    bool is_fullscreen() const {
-        return _is_fullscreen;
-    }
 
     /**
      * Process the window resize event.
@@ -370,6 +364,11 @@ private:
      * Texture for the scanline effect.
      */
     sf::Texture _scanline_tex{};
+
+    /**
+     * Window icon.
+     */
+    Image _icon{};
 
     /**
      * Audio output stream.
@@ -505,7 +504,7 @@ UISfml::UISfml(const Config &conf)
     _scale_x = _scale_y = vconf.scale;
 
     _window.create(sf::VideoMode{_W, _H}, vconf.title, sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
-    _window.setVerticalSyncEnabled(true);
+    _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(vconf.fps);
     _window.setKeyRepeatEnabled(false);
     _window.clear(sf::Color::Black);
@@ -641,6 +640,9 @@ void UISfml::toggle_fullscreen()
         _window.create(sf::VideoMode{_W, _H}, title, sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
         _window.setMouseCursorVisible(true);
         _window.setPosition(_saved_pos);
+        if (_icon) {
+            _window.setIcon(_icon.width, _icon.height, reinterpret_cast<const uint8_t *>(_icon.data.data()));
+        }
 
         resize_event(_W, _H);
 
@@ -658,7 +660,7 @@ void UISfml::toggle_fullscreen()
         resize_event(desktop_size.width, desktop_size.height);
     }
 
-    _window.setVerticalSyncEnabled(true);
+    _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(_conf.video.fps);
     _window.setKeyRepeatEnabled(false);
 }
