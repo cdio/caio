@@ -35,7 +35,7 @@ public:
     using ior_t = std::function<uint8_t(uint8_t)>;
     using iow_t = std::function<void(uint8_t, uint8_t)>;
 
-    Gpio(ior_t ior = {}, iow_t iow = {})
+    Gpio(const ior_t &ior = {}, const iow_t &iow = {})
         : _ior{ior},
           _iow{iow} {
     }
@@ -49,7 +49,7 @@ public:
      * @param ior Method to call when input I/O pins are read;
      * @param iow Method to call when output I/O pins are written.
      */
-    void gpio(ior_t ior, iow_t iow) {
+    void gpio(const ior_t &ior, const iow_t &iow) {
         _ior = ior;
         _iow = iow;
     }
