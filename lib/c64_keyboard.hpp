@@ -211,7 +211,7 @@ private:
     /**
      * The (negated) row being scanned.
      */
-    uint8_t _scanrow{};
+    uint8_t _scanrow{255};
 
     /**
      * The keyboard matrix.

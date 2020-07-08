@@ -354,31 +354,15 @@ uint8_t C64Keyboard::read()
 {
     std::lock_guard<std::mutex> lock{_matrix_mutex};
 
-    /*
-     * Activity check.
-     */
-    if (_scanrow == 0) {
-        return (~(_matrix[0] | _matrix[1] | _matrix[2] | _matrix[3] |
-                  _matrix[4] | _matrix[5] | _matrix[6] | _matrix[7]));
-    }
+    uint8_t cols{0};
 
-    /*
-     * Row being scanned.
-     */
-    uint8_t row = ~_scanrow;
-    if (utils::is_power_of_two(row)) {
-        /*
-         * Scanned columns.
-         */
-        uint8_t r = 0;
-        for (r = 0; row != 1; row >>= 1, ++r);
-
-        if (r < _matrix.size()) {
-            return (~_matrix[r]);
+    for (auto r = 0; r < _matrix.size(); ++r) {
+        if ((_scanrow & (1 << r)) == 0) {
+            cols |= _matrix[r];
         }
     }
 
-    return 255;
+    return ~cols;
 }
 
 void C64Keyboard::add_key_map(const std::string &key_name, bool key_shift, bool key_altgr, const std::string &impl_name,
