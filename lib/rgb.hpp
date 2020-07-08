@@ -115,20 +115,20 @@ struct Rgba {
 class RgbaTable : public std::vector<Rgba> {
 public:
     /**
-     * Initialise this RGBA table with values from disk.
-     * @param fname Name of the file containing the colour table.
-     * @exception IOError
-     */
-    RgbaTable(const std::string &fname) {
-        load(fname);
-    }
-
-    /**
      * Initialise this RGBA table with values from memory.
      * @param il RGBA values.
      */
     RgbaTable(const std::initializer_list<Rgba> &il)
         : std::vector<Rgba>(il) {
+    }
+
+    /**
+     * Initialise this RGBA table with values from disk.
+     * @param fname Name of the file containing the colour table.
+     * @exception IOError
+     */
+    explicit RgbaTable(const std::string &fname) {
+        load(fname);
     }
 
     /**

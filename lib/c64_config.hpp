@@ -38,7 +38,7 @@ public:
     C64Confile() {
     }
 
-    C64Confile(Confile &&other) {
+    explicit C64Confile(Confile &&other) {
         *this = std::move(other);
     }
 
@@ -64,7 +64,7 @@ struct C64Config : public Config {
     C64Config() {
     }
 
-    C64Config(const Confile &conf) {
+    explicit C64Config(const Confile &conf) {
         *this = conf;
     }
 

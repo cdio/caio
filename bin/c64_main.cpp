@@ -35,8 +35,8 @@ int main(int argc, char *const *argv)
 {
     try {
         C64Cmdline cmdline{};
-        C64Confile cfile = cmdline.parse(argc, argv);
-        C64Config conf = cfile;
+        C64Confile cfile{cmdline.parse(argc, argv)};
+        C64Config conf{cfile};
 
         log.logfile(conf.logfile);
         log.loglevel(conf.loglevel);

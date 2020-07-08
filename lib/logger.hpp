@@ -61,7 +61,7 @@ public:
         _os.open(DEFAULT_LOGFILE);
     }
 
-    Logger(Level lv)
+    explicit Logger(Level lv)
         : _lv{lv} {
     }
 

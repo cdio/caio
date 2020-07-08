@@ -31,7 +31,7 @@ public:
     Name() {
     }
 
-    Name(const std::string &type, const std::string &label = {})
+    explicit Name(const std::string &type, const std::string &label = {})
         : _type{type},
           _label{label} {
     }

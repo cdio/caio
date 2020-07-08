@@ -117,7 +117,7 @@ public:
      * @param mmap System mappings.
      * @see ASpace
      */
-    Mos6510(std::shared_ptr<ASpace> mmap)
+    explicit Mos6510(std::shared_ptr<ASpace> mmap)
         : Mos6510{LABEL, mmap} {
     }
 

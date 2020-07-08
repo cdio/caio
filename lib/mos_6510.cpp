@@ -470,7 +470,7 @@ size_t Mos6510::single_step()
     }
 
     if (_nmi.is_active()) {
-        _nmi.reset();       /* Edge triggered */
+        _nmi.reset();       /* TODO Implement edge triggered interrupts */
         addr = _mmap->read_addr(vNMI);
         is_nmi = true;
     } else if (is_irq_enabled() && _irq.is_active()) {
