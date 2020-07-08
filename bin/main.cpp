@@ -54,7 +54,7 @@ int main(int argc, char * const *argv)
             name = {};
         }
 
-        if (name == "" || name == "--help" | name == "-h" || name == "-?") {
+        if (name == "" || name == "--help" || name == "-h" || name == "-?") {
             std::cerr << "usage: " << progname << " <arch> [--help]" << std::endl
                       << "where arch is one of: "                        << std::endl
                       << "c64"                                           << std::endl
