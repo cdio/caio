@@ -37,6 +37,7 @@ class Mos6526 : public Device, public Gpio, public Clockable {
 public:
     constexpr static const char *TYPE = "MOS6526";
 
+
     enum Registers {
         PRA         = 0,    /* Port A                       */
         PRB         = 1,    /* Port B                       */
@@ -58,83 +59,45 @@ public:
         REGMAX
     };
 
+
+    enum class TimerMode {
+        PHI2        = 0,    /* CLK                          */
+        CNT         = 1,    /* /CNT negative transition     */
+        TA          = 2,    /* Timer A underflow            */
+        TA_CNT      = 3     /* Timer A underflow + /CNT low */
+    };
+
+
     constexpr static uint8_t ICR_TA        = 0x01;
     constexpr static uint8_t ICR_TB        = 0x02;
     constexpr static uint8_t ICR_ALRM      = 0x04;
     constexpr static uint8_t ICR_SP        = 0x08;
     constexpr static uint8_t ICR_FLG       = 0x10;
     constexpr static uint8_t ICR_IR        = 0x80;
+    constexpr static uint8_t ICR_SRC_MASK  = ICR_FLG | ICR_SP | ICR_ALRM | ICR_TB | ICR_TA;
 
     constexpr static uint8_t CRx_START     = 0x01;
     constexpr static uint8_t CRx_PBON      = 0x02;
-    constexpr static uint8_t CRx_OUTTOGGLE = 0x04;
-    constexpr static uint8_t CRx_RUNMODE   = 0x08;
-    constexpr static uint8_t CRx_FORCELOAD = 0x10;
-    constexpr static uint8_t CRx_INMODE    = 0x20;
-    constexpr static uint8_t CRx_SPMODE    = 0x40;
-    constexpr static uint8_t CRx_TODIN     = 0x80;
-    constexpr static uint8_t CRB_INMODE    = 0x20 | 0x40;
-    constexpr static uint8_t CRB_ALARM     = 0x80;
+    constexpr static uint8_t CRx_PBTOGGLE  = 0x04;          /* 0: Pulse Port B bit; 1: Toggle Port B bit    */
+    constexpr static uint8_t CRx_ONESHOT   = 0x08;          /* 0: Continuous, 1: One-shot                   */
+    constexpr static uint8_t CRx_FORCELOAD = 0x10;          /* Timer force load. No storage for this bit    */
 
-    constexpr static uint8_t PB6           = 0x40;
-    constexpr static uint8_t PB7           = 0x80;
+    constexpr static uint8_t CRA_INMODE    = 0x20;          /* Timer A mode                                 */
+    constexpr static uint8_t CRA_SPMODE    = 0x40;
+    constexpr static uint8_t CRA_TODIN     = 0x80;
 
-    /**
-     * Initalise this CIA instance.
-     * @param label Label assigned to this device.
-     */
-    Mos6526(const std::string &label = {})
-        : Device{TYPE, label},
-          _timer_A{_port_B, PB6},
-          _timer_B{_port_B, PB7} {
-    }
+    constexpr static uint8_t CRB_INMODE    = 0x20 | 0x40;   /* Timer B mode                                 */
+    constexpr static uint8_t CRB_ALARM     = 0x80;          /* 0: Set ToD clock; 1: Set ToD alarm           */
 
-    virtual ~Mos6526() {
-    }
+    constexpr static uint8_t PB6           = 0x40;          /* Port B bit for timer A                       */
+    constexpr static uint8_t PB7           = 0x80;          /* Port B bit for timer B                       */
 
-    /**
-     * @see Device::size()
-     */
-    size_t size() const override {
-        return REGMAX;
-    }
 
-    /**
-     * @see Device::read()
-     */
-    uint8_t read(addr_t addr) const override;
-
-    /**
-     * @see Device::write()
-     */
-    void write(addr_t addr, uint8_t data) override;
-
-    /**
-     * @see Device::dump()
-     */
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
-
-    /**
-     * Set the IRQ pin callback.
-     * The IRQ pin callback is called when the status of the IRQ output pin of this device is changed.
-     * @param trigger_irq IRQ pin callback.
-     */
-    void irq(std::function<void(bool)> trigger_irq) {
-        _trigger_irq = trigger_irq;
-    }
-
-private:
-    /**
-     * Interval timer.
-     */
     class Timer {
     public:
-        Timer(uint8_t &portb, uint8_t pbit)
-            : _portb{portb},
+        Timer(Mos6526 &dev, uint8_t pbit)
+            : _dev{dev},
               _pbit{pbit} {
-        }
-
-        ~Timer() {
         }
 
         uint8_t counter_hi() const {
@@ -155,7 +118,7 @@ private:
 
         void prescaler_hi(uint8_t prehi) {
             _prescaler = (_prescaler & 0x00FF) | (static_cast<uint16_t>(prehi) << 8);
-            if (!is_running() || is_forceload()) {
+            if (!is_start()) {
                 _counter = _prescaler;
             }
         }
@@ -164,72 +127,50 @@ private:
             _prescaler = (_prescaler & 0xFF00) | prelo;
         }
 
-        bool is_running() const {
+        bool is_start() const {
             return (_cr & CRx_START);
         }
 
-        bool is_forceload() const {
-            return (_cr & CRx_FORCELOAD);
-        }
-
         bool is_oneshot() const {
-            return (_cr & CRx_RUNMODE);
+            return (_cr & CRx_ONESHOT);
         }
 
         bool is_pbon() const {
             return (_cr & CRx_PBON);
         }
 
+        bool is_pbtoggle() const {
+            return (_cr & CRx_PBTOGGLE);
+        }
+
         uint8_t cr() const {
             return _cr;
         }
 
-        void cr(uint8_t data) {
-            _cr = data;
-        }
+        void cr(uint8_t data);
 
         void stop() {
             _cr &= ~CRx_START;
         }
 
         void tick() {
-            if (_counter > 0) {
-                --_counter;
-            }
+            --_counter;
         }
 
-        void setpb() {
-            if (is_pbon()) {
-                if (_cr & CRx_OUTTOGGLE) {
-                    /* Toggle port-B bit */
-                    _portb ^= _pbit;
-                } else {
-                    /* Set port-B bit active for one cycle. See unsetpb() */
-                    _portb |= _pbit;
-                }
-            }
-        }
+        void setpb();
 
-        void unsetpb() {
-            /* Unset the port-B bit. This must be called 1 cycle after setpb() */
-            if (is_pbon() && !(_cr & CRx_OUTTOGGLE) && (_portb & _pbit)) {
-                _portb &= ~_pbit;
-            }
-        }
+        void unsetpb();
 
     private:
-        uint8_t &_portb;        /* Output port      */
-        uint8_t  _pbit;         /* Output pin       */
+        Mos6526 &_dev;
+        uint8_t  _pbit;
 
-        uint8_t  _cr{};         /* Control register */
-        uint16_t _counter{};    /* Counter          */
-        uint16_t _prescaler{};  /* Prescaler        */
+        uint8_t  _cr{};
+        uint16_t _counter{0xFFFF};
+        uint16_t _prescaler{0xFFFF};
     };
 
 
-    /**
-     * Time Of Day (TOD) RT clock.
-     */
     class Tod {
     public:
         constexpr static const float TICK_INTERVAL = 0.1f;     /* TOD resolution is 1/10th seconds */
@@ -255,6 +196,9 @@ private:
             TodData &operator++();
         };
 
+
+        Tod() {
+        }
 
         void tod_hour(uint8_t hour) {
             stop();
@@ -315,18 +259,10 @@ private:
             _is_running = false;
         }
 
-        bool is_running() const {
-            return _is_running;
-        }
-
-        bool is_alarm() const {
-            return (_tod == _alarm);
-        }
-
         bool tick(const Clock &clk);
 
     private:
-        std::atomic_bool _is_running{true};
+        bool             _is_running{};
         TodData          _tod{};
         TodData          _alarm{};
         mutable TodData  _latch{};
@@ -335,44 +271,83 @@ private:
 
 
     /**
+     * Initalise this CIA instance.
+     * @param label Label assigned to this device.
+     */
+    explicit Mos6526(const std::string &label = {})
+        : Device{TYPE, label},
+          _timer_A{*this, PB6},
+          _timer_B{*this, PB7} {
+    }
+
+    virtual ~Mos6526() {
+    }
+
+    /**
+     * @see Device::size()
+     */
+    size_t size() const override {
+        return REGMAX;
+    }
+
+    /**
+     * @see Device::read()
+     */
+    uint8_t read(addr_t addr) const override;
+
+    /**
+     * @see Device::write()
+     */
+    void write(addr_t addr, uint8_t data) override;
+
+    /**
+     * @see Device::dump()
+     */
+    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
+
+    /**
+     * Set the IRQ pin callback.
+     * The IRQ pin callback is called when the status of the IRQ output pin of this device is changed.
+     * @param trigger_irq IRQ pin callback.
+     */
+    void irq(std::function<void(bool)> trigger_irq) {
+        _trigger_irq = trigger_irq;
+    }
+
+private:
+    /**
      * @see Clockable::tick()
      */
     size_t tick(const Clock &clk) override;
 
-    /**
-     * Tick event for a specified timer.
-     * @param t Timer to tick.
-     * @return true if the timer expired; false otherwise.
-     */
-    bool tick(Timer &t);
+    bool tick(Timer &timer, TimerMode mode);
 
-    /**
-     * Set the status of the IRQ output pin.
-     * @param active true if the IRQ pin must be activated; false otherwise.
-     * @see _trigger_irq
-     */
-    void irq_out(bool active);
+    TimerMode timer_A_mode() const {
+        return static_cast<TimerMode>((_timer_A.cr() & CRA_INMODE) >> 5);
+    }
 
-    /**
-     * IRQ output trigger.
-     */
+    TimerMode timer_B_mode() const {
+        return static_cast<TimerMode>((_timer_B.cr() & CRB_INMODE) >> 5);
+    }
+
+    void irq_out(bool active) {
+        if (_trigger_irq) {
+            _trigger_irq(active);
+        }
+    }
+
     std::function<void(bool)> _trigger_irq{};
-
-    uint8_t _port_A{};
-    uint8_t _port_A_dir{};      /* 1=Input/Output; 0=Input  */
-
-    uint8_t _port_B{};
-    uint8_t _port_B_dir{};      /* 1=Input/Output; 0=Input  */
 
     Timer   _timer_A;
     Timer   _timer_B;
 
     Tod     _tod{};
 
-    uint8_t _icr_data{};        /* ICR read register        */
-    uint8_t _icr_mask{};        /* ICR write register       */
+    uint8_t _port_A_dir{};      /* 0 = Input; 1 = Output    */
+    uint8_t _port_B_dir{};      /* 0 = Input; 1 = Output    */
 
-    bool    _irq_pin{};         /* IRQ output pin           */
+    uint8_t _icr_data{};
+    uint8_t _icr_mask{};
 };
 
 }

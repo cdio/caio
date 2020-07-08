@@ -29,9 +29,11 @@ uint8_t Mos6526::read(addr_t addr) const
 {
     switch (addr) {
     case PRA:
+        //FIXME timer port-b status
         return ior(PRA);
 
     case PRB:
+        //FIXME timer port-b status
         return ior(PRB);
 
     case DDRA:
@@ -74,7 +76,9 @@ uint8_t Mos6526::read(addr_t addr) const
          */
         uint8_t data = _icr_data;
         const_cast<Mos6526 *>(this)->_icr_data = 0;
-        const_cast<Mos6526 *>(this)->irq_out(false);
+        if ((data & ICR_IR) != 0) {
+            const_cast<Mos6526 *>(this)->irq_out(false);
+        }
         return data;
     }
 
@@ -84,27 +88,20 @@ uint8_t Mos6526::read(addr_t addr) const
     case CRB:
         return _timer_B.cr();
 
-    default:;
+    default:
+        throw InternalError{*this, "Invalid read address: $" + utils::to_string(addr)};
     }
-
-    return 0;
 }
 
 void Mos6526::write(addr_t addr, uint8_t data)
 {
-    uint8_t odata;
-
     switch (addr) {
     case PRA:
-        odata = (data & _port_A_dir);
-        _port_A = (_port_A & ~_port_A_dir) | odata;
-        iow(PRA, odata);
+        iow(PRA, data & _port_A_dir);
         break;
 
     case PRB:
-        odata = (data & _port_B_dir);
-        _port_B = (_port_B & ~_port_B_dir) | odata;
-        iow(PRB, odata);
+        iow(PRB, data & _port_B_dir);
         break;
 
     case DDRA:
@@ -132,16 +129,36 @@ void Mos6526::write(addr_t addr, uint8_t data)
         break;
 
     case TOD_10THS:
-        return ((_timer_B.cr() & CRB_ALARM) ? _tod.alarm_tth(data) : _tod.tod_tth(data));
+        if (_timer_B.cr() & CRB_ALARM) {
+            _tod.alarm_tth(data);
+        } else {
+            _tod.tod_tth(data);
+        }
+        break;
 
     case TOD_SEC:
-        return ((_timer_B.cr() & CRB_ALARM) ? _tod.alarm_sec(data) : _tod.tod_sec(data));
+        if (_timer_B.cr() & CRB_ALARM) {
+            _tod.alarm_sec(data);
+        } else {
+            _tod.tod_sec(data);
+        }
+        break;
 
     case TOD_MIN:
-        return ((_timer_B.cr() & CRB_ALARM) ? _tod.alarm_min(data) : _tod.tod_min(data));
+        if (_timer_B.cr() & CRB_ALARM) {
+            _tod.alarm_min(data);
+        } else {
+            _tod.tod_min(data);
+        }
+        break;
 
     case TOD_HR:
-        return ((_timer_B.cr() & CRB_ALARM) ? _tod.alarm_hour(data) : _tod.tod_hour(data));
+        if (_timer_B.cr() & CRB_ALARM) {
+            _tod.alarm_hour(data);
+        } else {
+            _tod.tod_hour(data);
+        }
+        break;
 
     case SDR:
         //TODO
@@ -154,14 +171,14 @@ void Mos6526::write(addr_t addr, uint8_t data)
          * When writing to the MASK regis­ter, if bit 7 (SET/CLEAR) of the data written
          * is a ZERO, any mask bit written with a one will be cleared, while those mask
          * bits written with a zero will be unaffected. If bit 7 of the data written is
-         * a ON E, any mask bit written with a one will be set, while those mask bits
+         * a ONE, any mask bit written with a one will be set, while those mask bits
          * written with a zero will be unaffected. In order for an interrupt flag to set
          * IR and generate an Interrupt Request, the corresponding MASK bit must be set."
          */
         if (data & ICR_IR) {
-            _icr_mask |= (data & ~ICR_IR);
+            _icr_mask |= data & ICR_SRC_MASK;
         } else {
-            _icr_mask &= ~data;
+            _icr_mask &= (~data) & ICR_SRC_MASK;
         }
         break;
 
@@ -173,7 +190,45 @@ void Mos6526::write(addr_t addr, uint8_t data)
         _timer_B.cr(data);
         break;
 
-    default:;
+    default:
+        throw InternalError{*this, "Invalid write address: $" + utils::to_string(addr)};
+    }
+}
+
+
+void Mos6526::Timer::cr(uint8_t data)
+{
+    if (data & CRx_FORCELOAD) {
+        reload();
+        data &= ~CRx_FORCELOAD;
+    }
+
+    if (!is_start() && (data & CRx_START) && is_pbon() && is_pbtoggle()) {
+        /* Toggle mode, port-B bit is set when it starts */
+        _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) | _pbit);
+    }
+
+    _cr = data;
+}
+
+void Mos6526::Timer::setpb()
+{
+    if (is_pbon()) {
+        if (is_pbtoggle()) {
+            /* Toggle port-B bit */
+            _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) ^ _pbit);
+        } else {
+            /* Set port-B bit active for one clock cycle. See unsetpb() */
+            _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) | _pbit);
+        }
+    }
+}
+
+void Mos6526::Timer::unsetpb()
+{
+    /* This must be called one clock cycle after setpb() */
+    if (is_pbon() && !is_pbtoggle()) {
+        _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) & ~_pbit);
     }
 }
 
@@ -224,32 +279,29 @@ Mos6526::Tod::TodData &Mos6526::Tod::TodData::operator++()
     return *this;
 }
 
-
 bool Mos6526::Tod::tick(const Clock &clk)
 {
-    if (!is_running()) {
-        return false;
-    }
+    if (_is_running) {
+        if (_cycles == 0) {
+            ++_tod;
+            _cycles = static_cast<size_t>(clk.freq() * TICK_INTERVAL);
+            return (_tod == _alarm);
+        }
 
-    if (_cycles == 0) {
-        ++_tod;
-        _cycles = static_cast<size_t>(clk.freq() * TICK_INTERVAL);
-
-    } else {
         --_cycles;
     }
 
-    return is_alarm();
+    return false;
 }
 
 
 size_t Mos6526::tick(const Clock &clk)
 {
-    if (tick(_timer_A)) {
+    if (tick(_timer_A, timer_A_mode())) {
         _icr_data |= ICR_TA;
     }
 
-    if (tick(_timer_B)) {
+    if (tick(_timer_B, timer_B_mode())) {
         _icr_data |= ICR_TB;
     }
 
@@ -265,35 +317,40 @@ size_t Mos6526::tick(const Clock &clk)
     return 1;
 }
 
-bool Mos6526::tick(Timer &t)
+bool Mos6526::tick(Timer &timer, TimerMode mode)
 {
-    if (t.is_running()) {
-        if (t.counter() == 0) {
-            t.reload();
-            t.setpb();
-            if (t.is_oneshot()) {
-                t.stop();
+    if (timer.is_start()) {
+        timer.unsetpb();
+
+        switch (mode) {
+        case TimerMode::PHI2:
+            timer.tick();
+            break;
+
+        case TimerMode::TA:
+            if (_timer_A.is_start() && _timer_A.counter() == 0xFFFF) {
+                timer.tick();
+            }
+            break;
+
+        case TimerMode::CNT:
+        case TimerMode::TA_CNT:
+        default:
+            throw NotImplemented{*this, "Timer mode not implemented: $" + utils::to_string(static_cast<uint8_t>(mode))};
+        }
+
+        if (timer.counter() == 0xFFFF) {
+            timer.reload();
+            timer.setpb();
+            if (timer.is_oneshot()) {
+                timer.stop();
             }
 
             return true;
-
-        } else {
-            t.unsetpb();
-            t.tick();
         }
     }
 
     return false;
-}
-
-void Mos6526::irq_out(bool active)
-{
-    if (_irq_pin != active) {
-        _irq_pin = active;
-        if (_trigger_irq) {
-            _trigger_irq(active);
-        }
-    }
 }
 
 std::ostream &Mos6526::dump(std::ostream &os, addr_t base) const
