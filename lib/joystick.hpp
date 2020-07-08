@@ -58,7 +58,7 @@ public:
     /**
      * Reset this joystick.
      */
-    void reset() {
+    virtual void reset() {
         _position = JOY_NONE;
     }
 

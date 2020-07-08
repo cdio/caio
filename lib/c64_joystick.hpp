@@ -44,10 +44,17 @@ public:
      */
     C64Joystick(const std::string &label = {})
         : Joystick{label} {
-        position(C64_JOY_NONE);
+        C64Joystick::reset();
     }
 
     virtual ~C64Joystick() {
+    }
+
+    /**
+     * @see Joystick::reset().
+     */
+    void reset() override {
+        Joystick::position(~C64_JOY_NONE);
     }
 
     /**
