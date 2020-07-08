@@ -25,13 +25,13 @@ void ASpace::reset(addrmap_t rmaps, addrmap_t wmaps)
 {
     auto banks = wmaps->size();
     if (!banks) {
-        throw InvalidArgument{"ASpace::reset(): 0 banks specified"};
+        throw InternalError{"ASpace::reset(): 0 banks specified"};
     }
 
     auto bsize = (static_cast<size_t>(std::numeric_limits<addr_t>::max()) + 1) / banks;
     auto bmask = bsize - 1;
     if ((bsize & bmask) != 0) {
-        throw InvalidArgument{"ASpace::reset(): Bank size is not a power of 2: " + std::to_string(bsize)};
+        throw InternalError{"ASpace::reset(): Bank size is not a power of 2: " + std::to_string(bsize)};
     }
 
     _rmaps = rmaps;

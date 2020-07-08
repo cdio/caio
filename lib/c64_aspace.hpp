@@ -61,7 +61,7 @@ public:
      */
     C64ASpace(devptr_t ram, devptr_t basic, devptr_t kernal, devptr_t chargen, devptr_t io, devptr_t cart)
         : ASpace{} {
-        reset(ram, basic, kernal, chargen, io, cart);
+        C64ASpace::reset(ram, basic, kernal, chargen, io, cart);
     }
 
     virtual ~C64ASpace() {

@@ -123,7 +123,7 @@ protected:
      * Initialise this address space.
      * @param rmaps Address mappings for read operations (it must have the same size as the write map);
      * @param wmaps Address mappings for write operations (it must have the same size as the read map).
-     * @exception InvalidArgument
+     * @exception InternalError
      * @see reset()
      */
     ASpace(addrmap_t &rmaps, addrmap_t &wmaps) {
@@ -138,7 +138,7 @@ protected:
      * - The size of a bank must be a power of 2.
      * @param rmaps Address mappings for read operations;
      * @param wmaps Address mappings for write operations;
-     * @exception InvalidArgument if one of the parameters is ill formed.
+     * @exception InternalError if one of the parameters is ill formed.
      */
     void reset(addrmap_t rmaps, addrmap_t wmaps);
 
