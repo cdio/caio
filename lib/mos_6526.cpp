@@ -328,7 +328,7 @@ bool Mos6526::tick(Timer &timer, TimerMode mode)
             break;
 
         case TimerMode::TA:
-            if (_timer_A.is_start() && _timer_A.counter() == 0xFFFF) {
+            if (_timer_A.is_start() && _timer_A.is_underflow()) {
                 timer.tick();
             }
             break;
@@ -339,7 +339,7 @@ bool Mos6526::tick(Timer &timer, TimerMode mode)
             throw NotImplemented{*this, "Timer mode not implemented: $" + utils::to_string(static_cast<uint8_t>(mode))};
         }
 
-        if (timer.counter() == 0xFFFF) {
+        if (timer.is_underflow()) {
             timer.reload();
             timer.setpb();
             if (timer.is_oneshot()) {

@@ -143,6 +143,10 @@ public:
             return (_cr & CRx_PBTOGGLE);
         }
 
+        bool is_underflow() const {
+            return _is_underflow;
+        }
+
         uint8_t cr() const {
             return _cr;
         }
@@ -154,7 +158,7 @@ public:
         }
 
         void tick() {
-            --_counter;
+            _is_underflow = (--_counter == 0xFFFF);
         }
 
         void setpb();
@@ -168,6 +172,7 @@ public:
         uint8_t  _cr{};
         uint16_t _counter{0xFFFF};
         uint16_t _prescaler{0xFFFF};
+        bool     _is_underflow{};
     };
 
 
