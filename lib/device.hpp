@@ -54,7 +54,10 @@ public:
      * @return The address stored at the specified address.
      * @exception InternalError if the specified address is not handled by this device.
      */
-    addr_t read_addr(size_t addr, bool is_le = true) const;
+    addr_t read_addr(size_t addr, bool is_le = true) const {
+        return (is_le ? (static_cast<addr_t>(read(addr + 1)) << 8) | read(addr) :
+                        (static_cast<addr_t>(read(addr)) << 8) | read(addr + 1));
+    }
 
     /**
      * Write an address into an address.

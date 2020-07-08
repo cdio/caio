@@ -30,15 +30,6 @@ std::string Device::to_string() const
     return os.str();
 }
 
-addr_t Device::read_addr(size_t addr, bool is_le) const
-{
-    uint8_t lo = (is_le ? read(addr) : read(addr + 1));
-    uint8_t hi = (is_le ? read(addr + 1) : read(addr));
-    addr_t  val = (static_cast<addr_t>(hi) << 8) | lo;
-
-    return val;
-}
-
 void Device::write_addr(addr_t addr, addr_t data, bool is_le)
 {
     uint8_t lo = static_cast<uint8_t>(data & 0xFF);
