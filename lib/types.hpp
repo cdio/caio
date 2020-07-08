@@ -53,8 +53,8 @@ public:
      * @param reason Reason for this error.
      */
     Error(const std::string &elem, const std::string &reason)
-        : std::exception{} {
-        _reason = (elem.empty() ? reason : elem + ": " + reason);
+        : std::exception{},
+          _reason{(elem.empty() ? reason : elem + ": " + reason)} {
     }
 
     /**
