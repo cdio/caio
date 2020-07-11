@@ -230,6 +230,25 @@ public:
      */
     std::string to_string() const override;
 
+    /**
+     * Get the number of clock cycles correspoinding to a time interval.
+     * @param secs Time interval (seconds).
+     * @return The clock cycles corresponding to the specified time interval.
+     */
+    size_t cycles(float secs) {
+        return cycles(secs, _freq);
+    }
+
+    /**
+     * Get the number of clock cycles correspoinding to a time interval.
+     * @param secs Time interval (seconds);
+     * @param freq Clock frequency (Hz).
+     * @return The clock cycles corresponding to the specified time interval.
+     */
+    static size_t cycles(float secs, size_t freq) {
+        return static_cast<size_t>(secs * freq);
+    }
+
 private:
     size_t                        _freq{};
     float                         _delay{};
