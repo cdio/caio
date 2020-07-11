@@ -237,8 +237,10 @@ Mos6581::Mos6581(const std::string &label, unsigned clkf)
       _voice_3{clkf, _voice_2},
       _v1(SAMPLES, 0.0f),
       _v2(SAMPLES, 0.0f),
-      _v3(SAMPLES, 0.0f)
+      _v3(SAMPLES, 0.0f),
+      _v4(SAMPLES, 0.0f)
 {
+    _samples_cycles = Clock::cycles(DT, clkf);
 }
 
 uint8_t Mos6581::read(addr_t addr) const
@@ -375,7 +377,20 @@ void Mos6581::write(addr_t addr, uint8_t value)
         _filter.lopass(value & 0x10);
         _filter.bandpass(value & 0x20);
         _filter.hipass(value & 0x40);
-        _voice_3_off = (value & 0x80);
+        _voice_3_off = value & 0x80;
+
+        /* Volume bug or "fourth voice" */
+        if (_prev_volume != _volume) {
+            _prev_volume = _volume;
+            float value = _volume * 4.0f - 1.0f;
+            if (_prev_index < _sample_index) {
+                std::fill_n(_v4.begin() + _prev_index, _sample_index - _prev_index, value);
+            } else {
+                std::fill(_v4.begin() + _prev_index, _v4.end(), value);
+                std::fill_n(_v4.begin(), _sample_index, value);
+            }
+        }
+        _prev_index = _sample_index;
         break;
 
     case ADC_1:
@@ -389,6 +404,17 @@ void Mos6581::write(addr_t addr, uint8_t value)
     }
 
     _last_value = value;
+}
+
+size_t Mos6581::tick(const Clock &clk)
+{
+    ++_sample_index;
+    if (_sample_index == SAMPLES) {
+        _sample_index = 0;
+        play();
+    }
+
+    return _samples_cycles;
 }
 
 void Mos6581::play()
@@ -415,7 +441,7 @@ void Mos6581::play()
         }
 
         for (size_t i = 0; i < v.size(); ++i) {
-            float value = _v1[i] + _v2[i] + (is_v3_active() ? _v3[i] : 0.0f);
+            float value = _v1[i] + _v2[i] + (is_v3_active() ? _v3[i] : 0.0f) + _v4[i];
             if (value > 1.0f) {
                 value = 1.0f;
             } else if (value < -1.0f) {
@@ -425,6 +451,7 @@ void Mos6581::play()
             v[i] = signal::to_i16(value * _volume);
         }
 
+        std::fill(_v4.begin(), _v4.end(), 0.0f);
         v.dispatch();
     }
 }

@@ -358,9 +358,15 @@ public:
 
 private:
     /**
-     * @see Mos6581I::play()
+     * Generate and play an audio signal.
+     * This method must be called by the system clock.
+     * @param clk Caller clock.
+     * @return The number of clock cycles that must pass before this method could be called again.
+     * @see Clockable::tick(const Clock &)
      */
-    void play() override;
+    size_t tick(const Clock &clk) override;
+
+    void play();
 
     bool is_v1_filtered() const {
         return _voice_1_filtered;
@@ -385,6 +391,7 @@ private:
     samples_fp _v1;
     samples_fp _v2;
     samples_fp _v3;
+    samples_fp _v4;
 
     bool       _voice_1_filtered{};
     bool       _voice_2_filtered{};
@@ -394,6 +401,10 @@ private:
     Filter     _filter{};
 
     float      _volume{};
+    float      _prev_volume{};
+
+    size_t     _sample_index{};
+    size_t     _prev_index{};
 
     uint8_t    _last_value{};
 };

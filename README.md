@@ -117,11 +117,14 @@ Up to two gamepads should work (tested using only one Logitech F710).
 
 The emulation of the MOS6581 chip is based on the specifications found on the
 [C64 User's Guide](https://www.c64-wiki.com/wiki/Commodore_64_User%27s_Guide)
-but ["Many characteristics of the SID sound are bugs"](https://www.c64-wiki.com/wiki/SID#Trivia)
-consequently, CEMU's implementation does not sound 100% like the original chip.
-Nevertheless, CEMU has a wrapper that uses the very accurate
-[reSID](https://en.wikipedia.org/wiki/ReSID) library; it can be enabled
-using the *resid* option.
+but since ["Many characteristics of the SID sound are bugs"](https://www.c64-wiki.com/wiki/SID#Trivia)
+CEMU's implementation does not sound 100% like the original chip.
+Nevertheless, the volume "click" bug is implemented so programs like
+[SAM](https://en.wikipedia.org/wiki/Software_Automatic_Mouth) should work.
+
+Besides the internal implementation, CEMU has a wrapper that uses the very
+accurate [reSID](https://en.wikipedia.org/wiki/ReSID) library; it can be
+enabled using the *resid* option.
 
 
 ## Status

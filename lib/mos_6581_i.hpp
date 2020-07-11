@@ -129,27 +129,8 @@ protected:
     Mos6581I(const std::string &label, unsigned clkf)
         : Device{TYPE, label},
           _clkf{clkf},
-          _samples_cycles{static_cast<unsigned>(SAMPLES_TIME * clkf)} {
+          _samples_cycles{Clock::cycles(SAMPLES_TIME, clkf)} {
     }
-
-    /**
-     * Generate and play an audio signal.
-     * This method must be called by the system clock.
-     * @param clk Caller clock.
-     * @return The number of clock cycles that must pass before this method could be called again.
-     * @see Clockable::tick(const Clock &)
-     * @see play()
-     */
-    size_t tick(const Clock &clk) override {
-        play();
-        return _samples_cycles;
-    }
-
-    /**
-     * Generate and play an audio signal of SAMPLES_TIME seconds.
-     * @see SAMPLES_TIME
-     */
-    virtual void play() = 0;
 
     std::shared_ptr<UI> _ui{};
     unsigned            _clkf{};

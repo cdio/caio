@@ -47,9 +47,13 @@ public:
 
 private:
     /**
-     * @see Mos6581I::play()
+     * Generate and play an audio signal.
+     * This method must be called by the system clock.
+     * @param clk Caller clock.
+     * @return The number of clock cycles that must pass before this method could be called again.
+     * @see Clockable::tick(const Clock &)
      */
-    void play() override;
+    size_t tick(const Clock &clk) override;
 
     std::shared_ptr<class SID> _resid{};
 };

@@ -6,7 +6,7 @@
 - UI:       Map gamepad X, Y, A buttons to F1, F3, SPACE (config options)
 - CPU:      Ghost instructions
 - I/O:      D64 support (use some existing 1541 impl).
-- SID:      "Hey Taxi!" and SAM
+- SID:      "Hey Taxi!"
 - SID:      Noise frequency range
 - signal:   Evaluate use of lookup tables
 - config:   realpath(3) on user defined directories
