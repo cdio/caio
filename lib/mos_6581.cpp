@@ -193,20 +193,14 @@ void Mos6581::Filter::generate()
         /*
          * These are almost ideal. Should we implement Chebyshev? Also to speed-up?
          */
-        if (_lopass) {
-            _klo = gsl::span{_klo_data.data(), _klo_data.size()};
-            _klo = signal::lopass(_klo, fc, SAMPLING_RATE, rs);
-        }
+        _klo = gsl::span{_klo_data.data(), _klo_data.size()};
+        _klo = signal::lopass(_klo, fc, SAMPLING_RATE, rs);
 
-        if (_hipass) {
-            _khi = gsl::span{_khi_data.data(), _khi_data.size()};
-            _khi = signal::hipass(_khi, fc, SAMPLING_RATE, rs);
-        }
+        _khi = gsl::span{_khi_data.data(), _khi_data.size()};
+        _khi = signal::hipass(_khi, fc, SAMPLING_RATE, rs);
 
-        if (_bandpass) {
-            _kbd = gsl::span{_kbd_data.data(), _kbd_data.size()};
-            _kbd = signal::bapass(_kbd, fc, fc, SAMPLING_RATE, rs);
-        }
+        _kbd = gsl::span{_kbd_data.data(), _kbd_data.size()};
+        _kbd = signal::bapass(_kbd, fc, fc, SAMPLING_RATE, rs);
 
         _generated = true;
     }
@@ -408,6 +402,28 @@ void Mos6581::write(addr_t addr, uint8_t value)
 
 size_t Mos6581::tick(const Clock &clk)
 {
+    _v1[_sample_index] = _voice_1.tick();
+    _v2[_sample_index] = _voice_2.tick();
+    _v3[_sample_index] = _voice_3.tick();
+
+    /*
+     * When a voice is filtered but the filter is disabled the sampled value is set to 0.
+     * This allows PWM using filter activation/deactivation.
+     */
+    if (_filter.is_disabled()) {
+        if (is_v1_filtered()) {
+            _v1[_sample_index] = 0.0f;
+        }
+
+        if (is_v2_filtered()) {
+            _v2[_sample_index] = 0.0f;
+        }
+
+        if (is_v3_filtered()) {
+            _v3[_sample_index] = 0.0f;
+        }
+    }
+
     ++_sample_index;
     if (_sample_index == SAMPLES) {
         _sample_index = 0;
@@ -421,23 +437,19 @@ void Mos6581::play()
 {
     auto v = _ui->audio_buffer();
     if (v) {
-        for (size_t i = 0; i < _v1.size(); ++i) {
-            _v1[i] = _voice_1.tick();
-            _v2[i] = _voice_2.tick();
-            _v3[i] = _voice_3.tick();
-        }
+        if (_filter.is_enabled()) {
+            /* FIXME: optimise */
+            if (is_v1_filtered()) {
+                _filter.apply(_v1);
+            }
 
-        /* FIXME: optimise */
-        if (is_v1_filtered()) {
-            _filter.apply(_v1);
-        }
+            if (is_v2_filtered()) {
+                _filter.apply(_v2);
+            }
 
-        if (is_v2_filtered()) {
-            _filter.apply(_v2);
-        }
-
-        if (is_v3_filtered()) {
-            _filter.apply(_v3);
+            if (is_v3_filtered()) {
+                _filter.apply(_v3);
+            }
         }
 
         for (size_t i = 0; i < v.size(); ++i) {

@@ -314,6 +314,14 @@ public:
             return _bandpass;
         }
 
+        bool is_enabled() const {
+            return (_lopass || _hipass || _bandpass);
+        }
+
+        bool is_disabled() const {
+            return (!is_enabled());
+        }
+
         void apply(samples_fp &v);
 
     private:
