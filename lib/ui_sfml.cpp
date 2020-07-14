@@ -67,7 +67,15 @@ public:
         _free_queue.push(samples_i16(aconf.samples));
         _free_queue.push(samples_i16(aconf.samples));
         _free_queue.push(samples_i16(aconf.samples));
+        _free_queue.push(samples_i16(aconf.samples));
+        _free_queue.push(samples_i16(aconf.samples));
+        _stop = false;
         sf::SoundStream::initialize(aconf.channels, aconf.srate);
+    }
+
+    void stop() override {
+        _stop = true;
+        sf::SoundStream::stop();
     }
 
     /**
@@ -86,8 +94,17 @@ public:
         };
 
         while (_free_queue.size() == 0) {
-            if (sf::SoundStream::getStatus() == sf::SoundSource::Status::Stopped) {
+            if (_stop) {
                 return {{}, {}};
+            }
+
+            if (sf::SoundStream::getStatus() == sf::SoundSource::Status::Stopped && !_stop) {
+                /*
+                 * For some reason, sometimes SFML stops the audio stream.
+                 * We just ignore SFML and start the stream again.
+                 */
+                log.debug("SFML stopped the audio stream. Restarting...\n");
+                sf::SoundStream::play();
             }
 
             std::this_thread::sleep_for(10ms);
@@ -128,6 +145,7 @@ private:
 
     LockedQueue<samples_i16> _free_queue{};
     LockedQueue<samples_i16> _playing_queue{};
+    std::atomic_bool         _stop{};
 };
 
 
