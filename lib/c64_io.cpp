@@ -39,8 +39,7 @@ uint8_t C64IO::read(addr_t addr) const
         /*
          * SID.
          */
-        addr = (addr - SID_ADDR) % 32;
-        return _sid->read(addr);
+        return _sid->read((addr - SID_ADDR) % 32);
     }
 
     if (addr < CIA1_ADDR) {
@@ -54,14 +53,14 @@ uint8_t C64IO::read(addr_t addr) const
         /*
          * CIA1.
          */
-        return _cia1->read(addr - CIA1_ADDR);
+        return _cia1->read((addr - CIA1_ADDR) % 0x10);
     }
 
     if (addr < RESERVED_ADDR) {
         /*
          * CIA2.
          */
-        return _cia2->read(addr - CIA2_ADDR);
+        return _cia2->read((addr - CIA2_ADDR) % 0x10);
     }
 
     /* Reserved */
@@ -86,8 +85,7 @@ void C64IO::write(addr_t addr, uint8_t value)
         /*
          * SID.
          */
-        addr = (addr - SID_ADDR) % 32;
-        return _sid->write(addr, value);
+        return _sid->write((addr - SID_ADDR) % 32, value);
     }
 
     if (addr < CIA1_ADDR) {
@@ -102,7 +100,7 @@ void C64IO::write(addr_t addr, uint8_t value)
         /*
          * CIA1.
          */
-        _cia1->write(addr - CIA1_ADDR, value);
+        _cia1->write((addr - CIA1_ADDR) % 0x10, value);
         return;
     }
 
@@ -110,7 +108,7 @@ void C64IO::write(addr_t addr, uint8_t value)
         /*
          * CIA2.
          */
-        _cia2->write(addr - CIA2_ADDR, value);
+        _cia2->write((addr - CIA2_ADDR) % 0x10, value);
         return;
     }
 }
