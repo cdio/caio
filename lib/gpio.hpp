@@ -20,63 +20,67 @@
 
 #include <cstdint>
 #include <functional>
+#include <utility>
+#include <vector>
 
 
 namespace cemu {
 
 /**
- * Generic Gpio.
- * A Gpio exposes an 8 bits address range where data can be written to or read from.
+ * Generic GPIO.
+ * A GPIO exposes an 8 bits address range where data can be written to or read from.
  * Read and write operations are done through user defined callbacks.
- * This class is used as a glue to interconnect components exposing I/O pins.
  */
 class Gpio {
 public:
     using ior_t = std::function<uint8_t(uint8_t)>;
     using iow_t = std::function<void(uint8_t, uint8_t)>;
 
-    Gpio(const ior_t &ior = {}, const iow_t &iow = {})
-        : _ior{ior},
-          _iow{iow} {
+    using ior_mask_t = std::pair<ior_t, uint8_t>;
+    using iow_mask_t = std::pair<iow_t, uint8_t>;
+
+
+    explicit Gpio() {
     }
 
     virtual ~Gpio() {
     }
 
     /**
-     * Set the Gpio pins callbacks.
-     * The ior callback must implement the proper device behaviour (pull-up, floating pin, etc).
-     * @param ior Method to call when input I/O pins are read;
-     * @param iow Method to call when output I/O pins are written.
+     * Add an input callback.
+     * @param ior  Input callback;
+     * @param mask Bits to read.
      */
-    void gpio(const ior_t &ior, const iow_t &iow) {
-        _ior = ior;
-        _iow = iow;
+    void add_ior(const ior_t &ior, uint8_t mask) {
+        _iors.push_back({ior, mask});
     }
 
     /**
-     * Read from an input Gpio.
+     * Add an ouput callback.
+     * @param iow  Output callback;
+     * @param mask Bits to write.
+     */
+    void add_iow(const iow_t &iow, uint8_t mask) {
+        _iows.push_back({iow, mask});
+    }
+
+    /**
+     * Read from input pins.
      * @param addr Address to read from.
-     * @return The Gpio value.
+     * @return The input value.
      */
-    uint8_t ior(uint8_t addr) const {
-        return (_ior ? _ior(addr) : 0);
-    }
+    uint8_t ior(uint8_t addr) const;
 
     /**
-     * Write to an output Gpio.
+     * Write to output pins.
      * @param addr  Address to write;
      * @param value Value to write.
      */
-    void iow(uint8_t addr, uint8_t value) {
-        if (_iow) {
-            _iow(addr, value);
-        }
-    }
+    void iow(uint8_t addr, uint8_t value);
 
 private:
-    ior_t _ior{};
-    iow_t _iow{};
+    std::vector<ior_mask_t> _iors{};
+    std::vector<iow_mask_t> _iows{};
 };
 
 }
