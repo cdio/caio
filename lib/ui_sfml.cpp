@@ -67,8 +67,6 @@ public:
         _free_queue.push(samples_i16(aconf.samples));
         _free_queue.push(samples_i16(aconf.samples));
         _free_queue.push(samples_i16(aconf.samples));
-        _free_queue.push(samples_i16(aconf.samples));
-        _free_queue.push(samples_i16(aconf.samples));
         _stop = false;
         sf::SoundStream::initialize(aconf.channels, aconf.srate);
     }
