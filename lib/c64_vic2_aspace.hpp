@@ -32,7 +32,7 @@ namespace c64 {
  * The VIC2 Address Space implements the memory mappings seen by the MOS6569 on a C64.
  * Since the MOS6569 controller has an address space of 16K, the memory of the C64 is divided
  * into 4 banks of 16K each. The video controller can see only one of these banks at a time.
- * The selection of the bank is defined by bits 0 and 1 of the CIA-2 chip Port-A.
+ * The selection of the bank is defined by ports PA0 and PA1 of the CIA-2 device.
  * @see ASpace
  * @see Mos6526
  */
@@ -41,24 +41,17 @@ public:
     constexpr static const size_t MEMORY_BANKS = 4;
 
     /**
-     * @see reset()
+     * Initialise this VIC2 Address Space.
+     * @param cia2    CIA#2 Device;
+     * @param ram     RAM (64K);
+     * @param chargen Chargen ROM (4K).
      */
-    Vic2ASpace(std::shared_ptr<Mos6526> cia2, devptr_t ram, devptr_t chargen) {
-        reset(cia2, ram, chargen);
-    }
+    Vic2ASpace(std::shared_ptr<Mos6526> cia2, devptr_t ram, devptr_t chargen);
 
     virtual ~Vic2ASpace() {
     }
 
 private:
-    /**
-     * Reset this address space with a new set of devices.
-     * @param cia2    CIA#2 Device;
-     * @param ram     RAM (64K);
-     * @param chargen Chargen ROM (4K).
-     */
-    void reset(std::shared_ptr<Mos6526> cia2, devptr_t ram, devptr_t chargen);
-
     /**
      * Set the memory bank seen by the video controller.
      */

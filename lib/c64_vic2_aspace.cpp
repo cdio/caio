@@ -22,7 +22,8 @@
 namespace cemu {
 namespace c64 {
 
-void Vic2ASpace::reset(std::shared_ptr<Mos6526> cia2, devptr_t ram, devptr_t chargen)
+Vic2ASpace::Vic2ASpace(std::shared_ptr<Mos6526> cia2, devptr_t ram, devptr_t chargen)
+    : _cia2{cia2}
 {
     /*
      * The 16K address space of a memory bank is subdivided into four 4K mappings.
@@ -135,37 +136,22 @@ void Vic2ASpace::reset(std::shared_ptr<Mos6526> cia2, devptr_t ram, devptr_t cha
     _wbanks = _rbanks;
 
     /*
-     * Connect the CIA-2 output Port A to this instance.
+     * Connect to Port pins PA0 and PA1 of CIA-2.
      */
-    auto iow = [this](addr_t addr, uint8_t value) {
-        /*
-         * This method is called when a value is written into the CIA-2 Port-A,
-         * it sets the proper video memory bank seen by the video controller.
-         */
+    auto iow = [this](uint8_t addr, uint8_t value) {
         if (addr == Mos6526::PRA) {
-            bank(value & 3);
+            bank(value);
         }
     };
 
-    auto ior = [](addr_t) -> uint8_t {
-        /*
-         * Pull-up resistors.
-         */
-        return 255;
-    };
+    _cia2->add_iow(iow, Mos6526::P0 | Mos6526::P1);
 
-    if (_cia2) {
-        _cia2->gpio({}, {});
-    }
-
-    _cia2 = cia2;
-
-    if (_cia2) {
-        _cia2->gpio(ior, iow);
-    }
-
+    /*
+     * Default bank.
+     */
     bank(3);
 }
 
 }
 }
+
