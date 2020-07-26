@@ -51,7 +51,7 @@ public:
         TOD_SEC     = 9,    /* Seconds register             */
         TOD_MIN     = 10,   /* Minutes register             */
         TOD_HR      = 11,   /* Hours AM/PM register         */
-        SDR         = 12,   /* Serial date register         */
+        SDR         = 12,   /* Serial data register         */
         ICR         = 13,   /* Interrupt control register   */
         CRA         = 14,   /* Control register A           */
         CRB         = 15,   /* Control register B           */
@@ -89,8 +89,17 @@ public:
     constexpr static uint8_t CRB_INMODE    = 0x20 | 0x40;   /* Timer B mode                                 */
     constexpr static uint8_t CRB_ALARM     = 0x80;          /* 0: Set ToD clock; 1: Set ToD alarm           */
 
-    constexpr static uint8_t PB6           = 0x40;          /* Port B bit for timer A                       */
-    constexpr static uint8_t PB7           = 0x80;          /* Port B bit for timer B                       */
+    constexpr static uint8_t P0            = 0x01;
+    constexpr static uint8_t P1            = 0x02;
+    constexpr static uint8_t P2            = 0x04;
+    constexpr static uint8_t P3            = 0x08;
+    constexpr static uint8_t P4            = 0x10;
+    constexpr static uint8_t P5            = 0x20;
+    constexpr static uint8_t P6            = 0x40;
+    constexpr static uint8_t P7            = 0x80;
+
+    constexpr static uint8_t PB6           = P6;            /* Port B bit for timer A                       */
+    constexpr static uint8_t PB7           = P7;            /* Port B bit for timer B                       */
 
 
     class Timer {

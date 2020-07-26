@@ -29,11 +29,9 @@ uint8_t Mos6526::read(addr_t addr) const
 {
     switch (addr) {
     case PRA:
-        //FIXME timer port-b status
         return ior(PRA);
 
     case PRB:
-        //FIXME timer port-b status
         return ior(PRB);
 
     case DDRA:
@@ -97,11 +95,11 @@ void Mos6526::write(addr_t addr, uint8_t data)
 {
     switch (addr) {
     case PRA:
-        iow(PRA, data & _port_A_dir);
+        iow(PRA, (ior(addr) & ~_port_A_dir) | (data & _port_A_dir));
         break;
 
     case PRB:
-        iow(PRB, data & _port_B_dir);
+        iow(PRB, (ior(addr) & ~_port_B_dir) | (data & _port_B_dir));
         break;
 
     case DDRA:
