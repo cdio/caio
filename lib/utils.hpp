@@ -54,7 +54,7 @@ template <typename... Ts> struct is_container<gsl::span<Ts...>> : std::true_type
  * @param val Value to align.
  * @return The aligned value.
  */
-template<typename T, typename = std::enable_if<std::is_integral<T>::value>>
+template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
 constexpr static inline int align(T val)
 {
     return ((val + (sizeof(T) - 1)) & ~(sizeof(T) - 1));
@@ -65,7 +65,7 @@ constexpr static inline int align(T val)
  * Ceil method as constant expression.
  * @see std::ceil()
  */
-template<typename T, typename = std::enable_if<std::is_floating_point<T>::value>>
+template<typename T, typename = std::enable_if_t<std::is_floating_point<T>::value>>
 constexpr static inline int ceil(T fval)
 {
     int val = static_cast<int>(fval);
@@ -119,11 +119,19 @@ static inline std::string toup(const std::string &str)
  *
  * FIXME: this method exists in the standard library
  */
-template<typename T, typename = std::enable_if<std::is_integral<T>::value>>
+template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
 bool is_power_of_two(T n)
 {
     return (n != 0 && (n & (n - 1)) == 0);
 }
+
+
+/**
+ * Convert a byte buffer to string.
+ * @param buf Byte buffer to convert.
+ * @return The string.
+ */
+std::string to_string(const std::vector<uint8_t> &buf);
 
 
 /**
@@ -132,7 +140,7 @@ bool is_power_of_two(T n)
  * @param v Value to convert.
  * @return The generated string.
  */
-template<typename T, typename = std::enable_if<std::is_integral<T>::value>>
+template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
 std::string to_string(T v)
 {
     std::stringstream ss{};
@@ -211,7 +219,7 @@ unsigned long long to_ulonglong(const std::string &str, size_t max);
  * @return The converted number.
  * @exception InvalidNumber
  */
-template<typename T, typename = std::enable_if<std::is_integral<T>::value>>
+template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
 T to_number(const std::string &str)
 {
     return static_cast<T>(to_ulonglong(str, std::numeric_limits<T>::max()));

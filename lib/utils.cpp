@@ -49,5 +49,16 @@ unsigned long long to_ulonglong(const std::string &str, size_t max)
     return val;
 }
 
+std::string to_string(const std::vector<uint8_t> &buf)
+{
+    std::string str{};
+
+    for (auto &value : buf) {
+        str.push_back(static_cast<char>(value));
+    }
+
+    return str;
+}
+
 }
 }
