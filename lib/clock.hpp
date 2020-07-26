@@ -235,7 +235,7 @@ public:
      * @param secs Time interval (seconds).
      * @return The clock cycles corresponding to the specified time interval.
      */
-    size_t cycles(float secs) {
+    size_t cycles(float secs) const {
         return cycles(secs, _freq);
     }
 
