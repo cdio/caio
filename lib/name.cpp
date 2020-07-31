@@ -28,10 +28,7 @@ std::string Name::to_string() const
 {
     std::ostringstream os{};
 
-    os << "type " << std::quoted(type());
-    if (!_label.empty()) {
-       os << ", label " << std::quoted(label());
-    }
+    os << type() << "(" << std::quoted(label().empty() ? "" : label()) << ")";
 
     return os.str();
 }

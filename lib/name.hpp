@@ -28,12 +28,14 @@ namespace cemu {
  */
 class Name {
 public:
+    constexpr static const char *TYPE_UNKNOWN = "UNK";
+
     Name() {
     }
 
     explicit Name(const std::string &type, const std::string &label = {})
-        : _type{type},
-          _label{label} {
+        : _type{(type.empty() ? TYPE_UNKNOWN : type)},
+          _label{(label.empty() ? "" : label)} {
     }
 
     virtual ~Name() {
