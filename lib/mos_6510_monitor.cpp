@@ -260,7 +260,7 @@ size_t Mos6510Monitor::run()
         }
     }
 
-    /* The user wants to terminate the session or some other error occured */
+    /* The user wants to terminate the session or some other error occurred */
     return Clockable::HALT;
 }
 
