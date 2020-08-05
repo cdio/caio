@@ -111,6 +111,14 @@ static inline std::string toup(const std::string &str)
     return ustr;
 }
 
+/**
+ * Split a string.
+ * @param str String to split;
+ * @param sep Separator.
+ * @return The splitted string without the separator.
+ */
+std::vector<std::string> split(const std::string &str, char sep);
+
 
 /**
  * Detect whether a number is a power of two.

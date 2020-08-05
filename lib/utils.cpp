@@ -22,6 +22,20 @@
 namespace cemu {
 namespace utils {
 
+std::vector<std::string> split(const std::string &str, char sep)
+{
+    std::vector<std::string> v{};
+    size_t pos{}, ipos{};
+
+    do {
+        pos = str.find(sep, ipos);
+        v.push_back(str.substr(ipos, pos - ipos));
+        ipos = pos + 1;
+    } while (pos != std::string::npos);
+
+    return v;
+}
+
 unsigned long long to_ulonglong(const std::string &str, size_t max)
 {
     if (str.empty()) {
