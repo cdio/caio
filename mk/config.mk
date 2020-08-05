@@ -35,7 +35,8 @@ CXXFLAGS=		-Wall \
 ifeq (${DEBUG}, yes)
 CPPFLAGS+=		-DD_DEBUG
 CXXFLAGS+=		-O0 \
-			-g
+			-g \
+			-fstandalone-debug
 else
 CXXFLAGS+=		-O3
 LDFLAGS+=		-Wl,-s
