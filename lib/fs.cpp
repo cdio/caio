@@ -23,8 +23,10 @@
 #include <unistd.h>
 
 #include <cstdlib>
+#include <iterator>
 
 #include "logger.hpp"
+#include "types.hpp"
 
 
 namespace cemu {
@@ -49,6 +51,7 @@ std::string fix_home(const std::string &path)
 
 bool exists(const std::string &path)
 {
+    //TODO: use std::filesystem::exists() ?
     struct ::stat st{};
     return (::stat(path.c_str(), &st) == 0);
 }
@@ -102,6 +105,32 @@ std::string basename(const std::string &fullpath)
 {
     auto pos = fullpath.find_last_of("/");
     return (pos == std::string::npos ? fullpath : fullpath.substr(pos + 1));
+}
+
+void concat(const std::string &dst, const std::string &src)
+{
+    std::ifstream is{src, std::ios_base::in | std::ios_base::binary};
+    if (!is) {
+        throw IOError{"Can't open input file: " + src + ": " + Error::to_string(errno)};
+    }
+
+    std::ofstream os{dst, std::ios_base::out | std::ios_base::app | std::ios_base::binary};
+    if (!os) {
+        throw IOError{"Can't open output file: " + dst + ": " + Error::to_string(errno)};
+    }
+
+    try {
+        is.unsetf(std::ios_base::skipws);
+        std::copy(std::istream_iterator<uint8_t>(is), std::istream_iterator<uint8_t>(),
+            std::ostream_iterator<uint8_t>(os));
+    } catch (const std::exception &err) {
+        throw IOError{err};
+    }
+}
+
+bool unlink(const std::string &fname)
+{
+    return (fname.empty() || !::unlink(fname.c_str()));
 }
 
 }

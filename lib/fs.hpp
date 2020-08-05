@@ -66,5 +66,23 @@ std::string search(const std::string &fname, const std::initializer_list<std::st
  */
 std::string basename(const std::string &fullpath);
 
+
+/**
+ * Concatenate files.
+ * If the destination file exists it is opened in append mode.
+ * @param dst Destination file name;
+ * @param src Source file name.
+ * @exception IOError
+ */
+void concat(const std::string &dst, const std::string &src);
+
+
+/**
+ * Remove a file.
+ * @param fname File remove.
+ * @return True on success; false on error.
+ */
+bool unlink(const std::string &fname);
+
 }
 }
