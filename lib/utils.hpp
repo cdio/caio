@@ -111,6 +111,7 @@ static inline std::string toup(const std::string &str)
     return ustr;
 }
 
+
 /**
  * Split a string.
  * @param str String to split;

@@ -30,6 +30,7 @@ namespace fs {
  */
 std::string home();
 
+
 /**
  * Set a the proper home path.
  * If the specified path starts with '~' it is replaced
@@ -39,12 +40,14 @@ std::string home();
  */
 std::string fix_home(const std::string &path);
 
+
 /**
  * Detect whether a file exists or not.
  * @param path Path to the file.
  * @return True if the specified file exists; false otherwise.
  */
 bool exists(const std::string &path);
+
 
 /**
  * Search for a file.
@@ -60,6 +63,7 @@ bool exists(const std::string &path);
  * @return The existing file name; an empty string if the file is not found.
  */
 std::string search(const std::string &fname, const std::initializer_list<std::string> &spath = {}, bool cwd = false);
+
 
 /**
  * @return The base name given a full path name.
