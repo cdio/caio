@@ -156,7 +156,8 @@ public:
 
     /**
      * Execute a clock tick loop.
-     * This method returns when one of the registered clockables returns clockable::HALT.
+     * This method returns when the clock is stopped or
+     * one of the registered clockables returns clockable::HALT.
      * @see stop()
      * @see tick()
      */
@@ -215,7 +216,7 @@ public:
      * When this value is set and a clock tick round is ended this clock is put
      * to sleep for the specified amount of time. After that, this clock restarts its
      * tick round again. In order to achieve synchronisation this method must be called
-     * continiously by the clockable.
+     * continuously by the clockable.
      * Usually, the video controller device is the clockable in charge of calling this
      * method to synchronise the system clock with the emulated vertical screen refresh
      * (usually at a rate of 50Hz).
@@ -231,7 +232,7 @@ public:
     std::string to_string() const override;
 
     /**
-     * Get the number of clock cycles correspoinding to a time interval.
+     * Get the number of clock cycles correspoinding to a given time interval.
      * @param secs Time interval (seconds).
      * @return The clock cycles corresponding to the specified time interval.
      */
@@ -240,13 +241,32 @@ public:
     }
 
     /**
-     * Get the number of clock cycles correspoinding to a time interval.
+     * Get the time interval corresponding to a given number of clock cycles.
+     * @param cycles Cycles.
+     * @return The time interval corresponding to the specified clock cycles.
+     */
+    float time(size_t cycles) const {
+        return time(cycles, _freq);
+    }
+
+    /**
+     * Get the number of clock cycles correspoinding to a given time interval.
      * @param secs Time interval (seconds);
      * @param freq Clock frequency (Hz).
      * @return The clock cycles corresponding to the specified time interval.
      */
-    static size_t cycles(float secs, size_t freq) {
+    constexpr static size_t cycles(float secs, size_t freq) {
         return static_cast<size_t>(secs * freq);
+    }
+
+    /**
+     * Get the time corresponding to a given number of cycles.
+     * @param cycles Cycles;
+     * @param freq   Clock frequency (Hz).
+     * @return The time interval corresponding to the specified cycles.
+     */
+    constexpr static float time(size_t cycles, size_t freq) {
+        return (cycles / static_cast<float>(freq));
     }
 
 private:
