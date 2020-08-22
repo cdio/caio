@@ -134,8 +134,10 @@ public:
     bool is_breakpoint(addr_t addr) const;
 
 private:
-    constexpr static const char *PROMPT_PREFIX  = "(";
-    constexpr static const char *PROMPT_POSTFIX = ")> ";
+    constexpr static const char *PROMPT_PREFIX = "";
+    constexpr static const char *PROMPT_SUFFIX = "> ";
+
+    using fn_t = bool (*)(Mos6510Monitor &, const std::vector<std::string> &args);
 
 
     struct Command {
@@ -143,7 +145,7 @@ private:
         const std::string short_command;
         const std::string args;
         const std::string help;
-        bool (*fn)(Mos6510Monitor &, const std::vector<std::string> &args);
+        fn_t              fn;
     };
 
 
@@ -173,12 +175,14 @@ private:
     //FIXME: move to utils
     size_t to_count(const std::string &str);
 
-    std::istream &           _is;
-    std::ostream &           _os;
-    class Mos6510 &          _cpu;
+    std::istream  &_is;
+    std::ostream  &_os;
+    class Mos6510 &_cpu;
+
     size_t                   _count{};
     bool                     _is_running{};
     std::string              _prev_line{};
+    fn_t                     _prev_fn{};
     std::map<addr_t, cond_t> _breakpoints{};
 
 

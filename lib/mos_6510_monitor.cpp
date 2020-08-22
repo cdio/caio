@@ -251,6 +251,8 @@ size_t Mos6510Monitor::run()
         }
 
         _prev_line = line;
+        _prev_fn = it->fn;
+
         if (it->fn(*this, args)) {
             /*
              * The command wants to exit the monitor letting
@@ -296,7 +298,16 @@ bool Mos6510Monitor::is_breakpoint(addr_t addr) const
 
 std::string Mos6510Monitor::prompt()
 {
-    return (PROMPT_PREFIX + std::to_string(++_count) + PROMPT_POSTFIX);
+    std::ostringstream os{};
+
+    if (_prev_fn == Mos6510Monitor::step) {
+        _cpu.disass(os, _cpu._regs.PC, 10, true);
+        os << _cpu._regs.to_string() << std::endl;
+    }
+
+    os << PROMPT_PREFIX << "$" << utils::to_string(_cpu._regs.PC) << PROMPT_SUFFIX;
+
+    return os.str();
 }
 
 addr_t Mos6510Monitor::to_addr(const std::string &str, addr_t defval)
