@@ -23,6 +23,9 @@
 #include "fs.hpp"
 #include "ui.hpp"
 
+#include "cbm_bus.hpp"
+
+#include "c64_bus_controller.hpp"
 #include "c64_config.hpp"
 
 
@@ -144,33 +147,36 @@ private:
      */
     void start();
 
-    C64Config                        _conf{};
+    C64Config                         _conf{};
 
-    bool                             _paused{};
+    bool                              _paused{};
 
-    devptr_t                         _ram{};
-    devptr_t                         _basic{};
-    devptr_t                         _kernal{};
-    devptr_t                         _chargen{};
-    devptr_t                         _io{};
-    devptr_t                         _cart{};
+    devptr_t                          _ram{};
+    devptr_t                          _basic{};
+    devptr_t                          _kernal{};
+    devptr_t                          _chargen{};
+    devptr_t                          _io{};
+    devptr_t                          _cart{};
 
-    std::shared_ptr<class ASpace>    _mmap{};
-    std::shared_ptr<class Mos6510>   _cpu{};
+    std::shared_ptr<class ASpace>     _mmap{};
+    std::shared_ptr<class Mos6510>    _cpu{};
 
-    std::shared_ptr<class Mos6569>   _vic2{};
-    std::shared_ptr<class NibbleRAM> _vcolor{};
-    std::shared_ptr<class Mos6581I>  _sid{};
-    std::shared_ptr<class Mos6526>   _cia1{};
-    std::shared_ptr<class Mos6526>   _cia2{};
+    std::shared_ptr<class Mos6569>    _vic2{};
+    std::shared_ptr<class NibbleRAM>  _vcolor{};
+    std::shared_ptr<class Mos6581I>   _sid{};
+    std::shared_ptr<class Mos6526>    _cia1{};
+    std::shared_ptr<class Mos6526>    _cia2{};
 
-    std::shared_ptr<class Clock>     _clk{};
+    std::shared_ptr<cbm_bus::Bus>     _bus{};
+    std::shared_ptr<C64BusController> _busdev{};
 
-    std::shared_ptr<class Keyboard>  _kbd{};
-    std::shared_ptr<class Joystick>  _joy1{};
-    std::shared_ptr<class Joystick>  _joy2{};
+    std::shared_ptr<class Clock>      _clk{};
 
-    std::shared_ptr<UI>              _ui{};
+    std::shared_ptr<class Keyboard>   _kbd{};
+    std::shared_ptr<class Joystick>   _joy1{};
+    std::shared_ptr<class Joystick>   _joy2{};
+
+    std::shared_ptr<UI>               _ui{};
 };
 
 }

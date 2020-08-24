@@ -193,6 +193,9 @@ void C64::reset()
     _cia1    = std::make_shared<Mos6526>("CIA1");
     _cia2    = std::make_shared<Mos6526>("CIA2");
 
+    _bus     = std::make_shared<cbm_bus::Bus>("C64 BUS");
+    _busdev  = std::make_shared<C64BusController>(_bus, _cia2);
+
     auto vic2_mmap = std::make_shared<Vic2ASpace>(_cia2, _ram, _chargen);
     _vic2    = std::make_shared<Mos6569>("VIC-II", vic2_mmap, _vcolor);
 
@@ -270,6 +273,11 @@ void C64::reset()
 
     _sid->ui(_ui);
 
+    /*
+     * Keyboard and joysticks.
+     */
+    constexpr uint8_t KBD_MASK = 255;
+
     auto kbd_read = [this](uint8_t addr) -> uint8_t {
         switch (addr) {
         case Mos6526::PRA:
@@ -292,8 +300,8 @@ void C64::reset()
             break;
 
         case Mos6526::PRB:
-            if (value & 0x10) {
-                /* Bit 4 of Port B is connected to the LP edge triggered input */
+            if (value & Mos6526::P4) {
+                /* Port B4 is connected to the LP edge triggered input */
                 _vic2->trigger_lp();
             }
             break;
@@ -314,7 +322,6 @@ void C64::reset()
             if (!_conf.monitor) {
                 break;
             }
-
             /* PASSTHROUGH */
 
         case Keyboard::KEY_CTRL_C:
@@ -346,7 +353,8 @@ void C64::reset()
     _joy1 = std::make_shared<C64Joystick>("C64 JOY1");
     _joy2 = std::make_shared<C64Joystick>("C64 JOY2");
 
-    _cia1->gpio(kbd_read, kbd_write);
+    _cia1->add_ior(kbd_read, KBD_MASK);
+    _cia1->add_iow(kbd_write, KBD_MASK);
 
     if (!_conf.keymapsfile.empty()) {
         const auto kpath = keymapspath(_conf.keymapsfile);
@@ -432,7 +440,10 @@ std::string C64::to_string() const
        os << "  " << _cart->to_string() << std::endl;
     }
 
-    os << "  " << _kbd->to_string() << std::endl
+    os << "  " << _kbd->to_string()     << std::endl
+       << "  " << _joy1->to_string()    << std::endl
+       << "  " << _joy2->to_string()    << std::endl
+       << "  " << _bus->to_string()     << std::endl
        << std::endl
        << "UI backend: " << _ui->to_string() << std::endl;
 

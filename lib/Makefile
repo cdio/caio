@@ -105,6 +105,7 @@ INCS=		aspace.hpp \
 #
 CXXSRCS+=	c64.cpp \
 		c64_aspace.cpp \
+		c64_bus_controller.cpp \
 		c64_config.cpp \
 		c64_crt.cpp \
 		c64_io.cpp \
@@ -114,6 +115,7 @@ CXXSRCS+=	c64.cpp \
 
 INCS+=		c64.hpp \
 		c64_aspace.hpp \
+		c64_bus_controller.hpp \
 		c64_config.hpp \
 		c64_crt.hpp \
 		c64_io.hpp \
