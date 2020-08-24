@@ -27,6 +27,7 @@ include ${ROOT}/mk/config.mk
 # Core
 #
 CXXSRCS=	aspace.cpp \
+		cbm_bus.cpp \
 		clock.cpp \
 		config.cpp \
 		confile.cpp \
@@ -34,6 +35,7 @@ CXXSRCS=	aspace.cpp \
 		device_none.cpp \
 		device_rom.cpp \
 		fs.cpp \
+		gpio.cpp \
 		icon.cpp \
 		keyboard.cpp \
 		logger.cpp \
@@ -60,7 +62,7 @@ CXXSRCS=	aspace.cpp \
 		utils.cpp
 
 INCS=		aspace.hpp \
-		cbmbus.hpp \
+		cbm_bus.hpp \
 		clock.hpp \
 		config.hpp \
 		confile.hpp \
