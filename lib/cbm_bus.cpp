@@ -111,19 +111,6 @@ std::string Bus::to_string() const
 }
 
 
-std::string ByteTR::to_string() const
-{
-    std::ostringstream os{};
-
-    os << "curbit $"    << utils::to_string(_curbit)
-       << ", ready "    << +_ready
-       << ", last "     << +_last
-       << ", byte $"    << utils::to_string(_byte);
-
-   return os.str();
-}
-
-
 Device::Device(uint8_t unit, const std::shared_ptr<Bus> &bus)
     : Name{TYPE, LABEL_PREFIX + std::to_string(+unit)},
       Clockable{},
@@ -131,7 +118,7 @@ Device::Device(uint8_t unit, const std::shared_ptr<Bus> &bus)
       _bus{bus}
 {
     if (!_bus) {
-        throw InternalError{*this, "Empty bus parameter"};
+        throw InvalidArgument{*this, "Empty bus parameter"};
     }
 
     _bus->add(this);
@@ -141,6 +128,14 @@ Device::Device(uint8_t unit, const std::shared_ptr<Bus> &bus)
 Device::~Device()
 {
     _bus->del(this);
+}
+
+void Device::reset()
+{
+    _mode = Mode::IDLE;
+    _role = Role::NONE;
+    _state = State::IDLE;
+    release();
 }
 
 size_t Device::tick(const Clock &clock)
@@ -338,8 +333,8 @@ size_t Device::tick(const Clock &clock)
          * Transmit.
          */
         if (_bytetr.ready()) {
-            auto value = read(_cmd.chunit());
-            if (value == -1) {
+            auto rb = read(_cmd.chunit());
+            if (rb.is_eof()) {
                 /*
                  * Emtpy stream: Release the bus lines and go IDLE.
                  * When the stream is empty we just move to IDLE mode and stay there,
@@ -352,7 +347,7 @@ size_t Device::tick(const Clock &clock)
                 break;
             }
 
-            _bytetr.byte(value & 255, value < 0);
+            _bytetr.byte(rb.value(), rb.is_last());
             state(State::IDLE);
 
             CBMBUS_DEBUG("Talker device: Transmitting byte $%02X, islast %d, bus %s\n", _bytetr.byte(),
@@ -713,7 +708,7 @@ bool Device::process_secondary(bool with_param)
             open(_cmd.chunit(), arg);
         } else {
             /*
-             * OPEN has an optional <filename> argument and it was not received.
+             * OPEN has an optional argument and it was not received.
              */
             CBMBUS_DEBUG("Exec delayed: OPEN channel %d\n", _cmd.chunit());
             return true;
@@ -726,15 +721,22 @@ bool Device::process_secondary(bool with_param)
         break;
 
     case REOPEN:
-        if (_role == Role::LISTENER && !with_param) {
-            /*
-             * REOPEN as listener has an optional data buffer and it was not received.
-             */
-            CBMBUS_DEBUG("Exec delayed: REOPEN channel %d\n", _cmd.chunit());
-            return true;
+        if (_role == Role::LISTENER) {
+            if (!with_param) {
+                /*
+                 * REOPEN as listener has an optional data buffer and it was not received.
+                 */
+                CBMBUS_DEBUG("Exec delayed: REOPEN channel %d\n", _cmd.chunit());
+                return true;
+            } else {
+                /*
+                 * Write the received buffer into the specified channel.
+                 */
+                write(_cmd.chunit(), _cmd.param());
+            }
         } else {
             /*
-             * REOPEN as a talker, the channel should be already open.
+             * REOPEN a channel as a talker.
              */
             CBMBUS_DEBUG("Exec: REOPEN channel %d\n", _cmd.chunit());
         }

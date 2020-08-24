@@ -157,7 +157,7 @@ public:
 
     /**
      * Recalculate the status of this bus' data lines.
-     * Traverse all connected devices and update the status of the data lines of this bus.
+     * Traverse all connected devices and update the status of this bus lines.
      */
     void propagate();
 
@@ -189,13 +189,6 @@ public:
     }
 
     /**
-     * @return True if this byte is ready to be transmitted or it is fully received; false otherwise.
-     */
-    bool ready() const {
-        return _ready;
-    }
-
-    /**
      * @return True if this is the last byte to be transmitted or received; false otherwise.
      */
     bool last() const {
@@ -203,7 +196,16 @@ public:
     }
 
     /**
-     * @return True if the byte transmission or reception is completed; false otherwise.
+     * @return True if this byte is ready to be transmitted or it is fully received
+     * and the state machine is ready for another byte; false otherwise.
+     */
+    bool ready() const {
+        return _ready;
+    }
+
+    /**
+     * @return True if the transmission or reception of this byte is completed
+     * but the state machine is not ready for another byte; false otherwise.
      */
     bool complete() const {
         return (_curbit == 0);
@@ -222,15 +224,6 @@ public:
     }
 
     /**
-     * Set the ready state of this byte.
-     * A byte is ready when all its bits are completely transmitted or received.
-     * @param ready True if this is byte is ready; false otherwise.
-     */
-    void ready(bool ready) {
-        _ready = ready;
-    }
-
-    /**
      * Set the last state of this byte.
      * @param last True if this is the last byte to be transmitted or received; false otherwise.
      */
@@ -239,7 +232,17 @@ public:
     }
 
     /**
-     * Set the next received bit.
+     * Set the ready state of this byte.
+     * A byte is ready when all its bits are completely transmitted or received.
+     * @param ready True if this is byte is ready; false otherwise.
+     * @see ready()
+     */
+    void ready(bool ready) {
+        _ready = ready;
+    }
+
+    /**
+     * Set a new received bit.
      * @param bit Received bit (true is 1, false is 0).
      */
     void bit(bool bit) {
@@ -250,19 +253,13 @@ public:
     }
 
     /**
-     * @return The next bit to transmit.
+     * @return The next bit to transmit (true is 1, false is 0).
      */
     bool bit() {
         bool b = _byte & _curbit;
         _curbit <<= 1;
         return b;
     }
-
-    void clear() {
-        byte(0, false);
-    }
-
-    std::string to_string() const;
 
 private:
     uint8_t _byte{};
@@ -333,6 +330,36 @@ private:
 
 
 /**
+ * Byte read from a channel.
+ */
+class ReadByte {
+public:
+    ReadByte()
+        : _value{-1} {
+    }
+
+    ReadByte(uint8_t byte, bool is_last)
+        : _value{byte | (is_last ? ~255 : 0)} {
+    }
+
+    uint8_t value() const {
+        return (_value & 255);
+    }
+
+    bool is_last() const {
+        return (_value < 0);
+    }
+
+    bool is_eof() const {
+        return (_value == -1);
+    }
+
+private:
+    int _value;
+};
+
+
+/**
  * CBM-BUS Device.
  * Device attached to a CBM-BUS.
  * This class must be derived by the actual device implementation.
@@ -383,10 +410,10 @@ public:
         IDLE,               /* IDLE                                             */
         COMMAND,            /* The controller is sending a command              */
         SECONDARY,          /* The controller is sending a secondary address    */
-        DATA,               /* The controller is sending the channel name       */
+        DATA,               /* The controller is sending secondary data         */
         TURNAROUND,         /* This device is becoming a talker                 */
-        TURN_HOLD,          /* This device is becoming a talker                 */
-        TALKER,             /* This device is talker                            */
+        TURN_HOLD,          /* This device is becoming a talker (ack)           */
+        TALKER,             /* This device is a talker                          */
         WAIT                /* Wait until ATN is disabled                       */
     };
 
@@ -395,10 +422,10 @@ public:
      * Device role.
      */
     enum class Role {
-        NONE,
-        PASSIVE,
-        LISTENER,
-        TALKER
+        NONE,               /* Not selected                                     */
+        PASSIVE,            /* Not selected but listening ATN commands          */
+        LISTENER,           /* Selected, this device is a listener              */
+        TALKER              /* Selected, this device is a talker                */
     };
 
 
@@ -420,11 +447,18 @@ public:
     /**
      * Initialise this CBM-BUS Device.
      * @param unit The unit number;
-     * @param bus  The CBM-BUS to attach to.
+     * @param bus  The CBM-BUS to connect to.
+     * @exception InvalidArgument
      */
     Device(uint8_t unit, const std::shared_ptr<Bus> &bus);
 
     virtual ~Device();
+
+    /**
+     * Reset this device.
+     * This device is moved to IDLE mode and the bus lines are released.
+     */
+    virtual void reset();
 
     /**
      * @return This device's unit number.
@@ -458,9 +492,10 @@ public:
     /**
      * Read a byte from a channel.
      * @param ch Channel to read from (0..15).
-     * @return The read byte (negative integer if this is the last byte in the stream); -1 in case of EOF.
+     * @return The read byte.
+     * @see ReadByte
      */
-    virtual int read(uint8_t ch) = 0;
+    virtual ReadByte read(uint8_t ch) = 0;
 
     /**
      * Write a byte buffer into a channel.
@@ -576,13 +611,13 @@ private:
  */
 class Controller : public Device {
 public:
-    constexpr static const char *LABEL_SUFFIX      = "controller";
-    constexpr static const uint8_t UNIT_CONTROLLER = 255;
+    constexpr static const char *LABEL  = "controller";
+    constexpr static const uint8_t UNIT = 255;
 
 
     Controller(const std::shared_ptr<Bus> &bus)
-        : Device{UNIT_CONTROLLER, bus} {
-        label(std::string{LABEL_PREFIX} + LABEL_SUFFIX);
+        : Device{UNIT, bus} {
+        label(LABEL);
     }
 
     virtual ~Controller() {
@@ -595,8 +630,8 @@ private:
     void close(uint8_t ch) override {
     }
 
-    int read(uint8_t ch) override {
-        return -1;
+    ReadByte read(uint8_t ch) override {
+        return {};
     }
 
     void write(uint8_t ch, const buf_t &value) override {
