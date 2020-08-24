@@ -201,7 +201,7 @@ void Mos6526::Timer::cr(uint8_t data)
         data &= ~CRx_FORCELOAD;
     }
 
-    if (!is_start() && (data & (CRx_START | CRx_PBON | CRx_PBTOGGLE)) == (CRx_START | CRx_PBON | CRx_PBTOGGLE)) {
+    if (!is_started() && (data & (CRx_START | CRx_PBON | CRx_PBTOGGLE)) == (CRx_START | CRx_PBON | CRx_PBTOGGLE)) {
         /* Toggle mode, port-B bit is set when it starts */
         _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) | _pbit);
     }
@@ -317,7 +317,7 @@ size_t Mos6526::tick(const Clock &clk)
 
 bool Mos6526::tick(Timer &timer, TimerMode mode)
 {
-    if (timer.is_start()) {
+    if (timer.is_started()) {
         timer.unsetpb();
 
         switch (mode) {
@@ -330,7 +330,7 @@ bool Mos6526::tick(Timer &timer, TimerMode mode)
              * FIXME: When timer_A runs as one-shot it is stopped as soon as it underflows
              *        making this code to lose a last tick.
              */
-            if (_timer_A.is_start() && _timer_A.is_underflow()) {
+            if (_timer_A.is_started() && _timer_A.is_underflow()) {
                 timer.tick();
             }
             break;

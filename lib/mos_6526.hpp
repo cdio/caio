@@ -127,7 +127,7 @@ public:
 
         void prescaler_hi(uint8_t prehi) {
             _prescaler = (_prescaler & 0x00FF) | (static_cast<uint16_t>(prehi) << 8);
-            if (!is_start()) {
+            if (!is_started()) {
                 _counter = _prescaler;
             }
         }
@@ -136,7 +136,7 @@ public:
             _prescaler = (_prescaler & 0xFF00) | prelo;
         }
 
-        bool is_start() const {
+        bool is_started() const {
             return (_cr & CRx_START);
         }
 
