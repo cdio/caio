@@ -121,8 +121,8 @@ std::string Clock::to_string() const
     std::stringstream os{};
 
     os << Name::to_string()
-       << ", freq " + std::to_string(_freq) << "Hz"
-       << ", delay " + std::to_string(_delay);
+       << ", freq " << _freq << "Hz"
+       << ", delay " << std::setprecision(3) << _delay;
 
     return os.str();
 }
