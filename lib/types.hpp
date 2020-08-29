@@ -192,7 +192,15 @@ class NotImplemented : public Error {
 
 
 /**
- * User Interfac Error.
+ * Not supported.
+ */
+class NotSupported : public Error {
+    using Error::Error;
+};
+
+
+/**
+ * User Interface Error.
  */
 class UIError : public Error {
     using Error::Error;
