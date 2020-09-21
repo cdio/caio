@@ -20,6 +20,7 @@
 
 #include <array>
 
+#include "logger.hpp"
 #include "utils.hpp"
 
 
@@ -338,7 +339,8 @@ bool Mos6526::tick(Timer &timer, TimerMode mode)
         case TimerMode::CNT:
         case TimerMode::TA_CNT:
         default:
-            throw NotImplemented{*this, "Timer mode not implemented: $" + utils::to_string(static_cast<uint8_t>(mode))};
+//          throw NotImplemented{*this, "Timer mode not implemented: $" + utils::to_string(static_cast<uint8_t>(mode))};
+            log.warn("%s: Timer mode not implemented: $%02X\n", Name::to_string().c_str(), static_cast<uint8_t>(mode));
         }
 
         if (timer.is_underflow()) {
