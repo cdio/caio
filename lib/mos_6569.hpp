@@ -588,7 +588,7 @@ private:
      * @return The vertical position of the specified sprite.
      */
     unsigned mib_position_y(uint8_t mib) const {
-        return (_regs[REG_MIB_0_Y + (mib << 1)]);
+        return (1 + _regs[REG_MIB_0_Y + (mib << 1)]);
     }
 
     /**
