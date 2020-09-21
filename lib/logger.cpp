@@ -109,44 +109,52 @@ Logger &Logger::log(Level lv, const char *fmt, ...)
 
 Logger &Logger::error(const char *fmt, ...)
 {
-    va_list ap;
+    if (is_level_error()) {
+        va_list ap;
 
-    va_start(ap, fmt);
-    error(fmt, ap);
-    va_end(ap);
+        va_start(ap, fmt);
+        error(fmt, ap);
+        va_end(ap);
+    }
 
     return *this;
 }
 
 Logger &Logger::warn(const char *fmt, ...)
 {
-    va_list ap;
+    if (is_level_warn()) {
+        va_list ap;
 
-    va_start(ap, fmt);
-    warn(fmt, ap);
-    va_end(ap);
+        va_start(ap, fmt);
+        warn(fmt, ap);
+        va_end(ap);
+    }
 
     return *this;
 }
 
 Logger &Logger::info(const char *fmt, ...)
 {
-    va_list ap;
+    if (is_level_info()) {
+        va_list ap;
 
-    va_start(ap, fmt);
-    info(fmt, ap);
-    va_end(ap);
+        va_start(ap, fmt);
+        info(fmt, ap);
+        va_end(ap);
+    }
 
     return *this;
 }
 
 Logger &Logger::debug(const char *fmt, ...)
 {
-    va_list ap;
+    if (is_level_debug()) {
+        va_list ap;
 
-    va_start(ap, fmt);
-    debug(fmt, ap);
-    va_end(ap);
+        va_start(ap, fmt);
+        debug(fmt, ap);
+        va_end(ap);
+    }
 
     return *this;
 }
