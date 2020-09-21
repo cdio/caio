@@ -21,7 +21,9 @@ CEMU requires [clang-6](https://clang.llvm.org) or later,
 ```
     $ sudo apt install clang
     ...
-    $ sudo apt install sfml-dev
+    $ sudo apt install libsfml-dev
+    ...
+    $ sudo apt install pkg-config
     ...
     $ make PREFIX=/usr/local
     ...
@@ -113,14 +115,25 @@ Up to two gamepads should work (tested using only one Logitech F710).
   active the emulation is terminated).
 
 
+## Disk Drive
+
+There is a [C1541](https://en.wikipedia.org/wiki/Commodore_1541) implementation that
+access the host filesystem. Host directories are recursively traversed so it must be
+used with care.
+
+D64 files are not supported yet.
+
+For more information please check the *--8* command line option.
+
+
 ## C64 SID Chip
 
 The emulation of the MOS6581 chip is based on the specifications found on the
 [C64 User's Guide](https://www.c64-wiki.com/wiki/Commodore_64_User%27s_Guide)
 but since ["Many characteristics of the SID sound are bugs"](https://www.c64-wiki.com/wiki/SID#Trivia)
 CEMU's implementation does not sound 100% like the original chip.
-Nevertheless, the volume "click" bug is implemented so programs like
-[SAM](https://en.wikipedia.org/wiki/Software_Automatic_Mouth) should work.
+Nevertheless, the volume "click" bug and others are implemented so programs
+like [SAM](https://en.wikipedia.org/wiki/Software_Automatic_Mouth) work.
 
 Besides the internal implementation, CEMU has a wrapper that uses the very
 accurate [reSID](https://en.wikipedia.org/wiki/ReSID) library; it can be
