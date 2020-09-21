@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <chrono>
 #include <cstdint>
 #include <iomanip>
 #include <limits>
@@ -208,6 +209,21 @@ std::ostream &dump(std::ostream &os, const Container &cont, addr_t base = 0)
 
 
 /**
+ * Dump a byte buffer to a string.
+ * @param cont Container to dump;
+ * @param base Base address.
+ * @return The string.
+ */
+template <typename Container>
+std::string dump(const Container &cont, addr_t base = 0)
+{
+    std::ostringstream os{};
+    dump(os, cont, base);
+    return os.str();
+}
+
+
+/**
  * Convert a string to unsigned long long.
  * If the string is prefixed by '$' an hexadecimal number is considered, decimal numbers must be prefixed with '#'.
  * By default (no prefix) the string is considered to contain an hexadecimal number.
@@ -361,6 +377,17 @@ void convert_01_10_to_11(C &bytes)
         byte = convert_01_10_to_11(byte);
     }
 }
+
+
+/**
+ * @return The current time in microseconds.
+ */
+static inline uint64_t now()
+{
+    auto now = std::chrono::steady_clock::now().time_since_epoch();
+    return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(now).count());
+}
+
 
 }
 }
