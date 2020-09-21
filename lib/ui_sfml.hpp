@@ -31,10 +31,10 @@ namespace sfml {
  * Create a SFML user interface.
  * @param conf Configuration parameters;
  * @param icon Icon image.
- * @return The SFML user interface.
+ * @return The user interface using SFML as backend.
  * @exception UIError
  */
-std::shared_ptr<UI> create_ui(const ui::Config &conf, const Image &icon = {});
+std::shared_ptr<UI> create(const ui::Config &conf, const Image &icon = {});
 
 }
 }

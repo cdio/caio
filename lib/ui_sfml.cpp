@@ -898,7 +898,7 @@ bool UISfml::process_events()
 }
 
 
-std::shared_ptr<UI> create_ui(const ui::Config &conf, const Image &icon)
+std::shared_ptr<UI> create(const ui::Config &conf, const Image &icon)
 {
     auto ui = std::make_shared<UISfml>(conf);
     ui->icon(icon);
