@@ -18,8 +18,13 @@
  */
 #pragma once
 
+#include <cstdint>
+#include <filesystem>
+#include <functional>
 #include <initializer_list>
 #include <string>
+#include <utility>
+#include <vector>
 
 
 namespace cemu {
@@ -47,6 +52,24 @@ std::string fix_home(const std::string &path);
  * @return True if the specified file exists; false otherwise.
  */
 bool exists(const std::string &path);
+
+
+/**
+ * std::filesystem::is_directory() wrapper.
+ */
+static inline bool is_directory(const std::string &path)
+{
+    return std::filesystem::is_directory(path);
+}
+
+
+/**
+ * std::filesystem::file_size() wrapper.
+ */
+static inline std::uintmax_t file_size(const std::string &path)
+{
+    return std::filesystem::file_size(path);
+}
 
 
 /**
@@ -87,6 +110,39 @@ void concat(const std::string &dst, const std::string &src);
  * @return True on success; false on error.
  */
 bool unlink(const std::string &fname);
+
+
+/**
+ * Match a file.
+ * @param fname   File name;
+ * @param pattern fnmatch(3) style pattern.
+ * @return True if the file name matches the specified pattern; false otherwise.
+ * @see ::fnmatch(3)
+ */
+bool match(const std::string &path, const std::string &pattern);
+
+
+/**
+ * Get a directory listing.
+ * @param dirpath  Directory;
+ * @param pattern  Matching pattern (see fs::match());
+ * @param callback User defined callback (return false to stop directory traversing).
+ * @return False if the callback stopped the traversal; true otherwise.
+ * @see fs::match()
+ */
+bool directory(const std::string &path, const std::string &pattern,
+    const std::function<bool(const std::string &, uint64_t)> &callback);
+
+
+/**
+ * Get a directory listing.
+ * @param dirpath Directory;
+ * @param pattern Matching pattern.
+ * @return The entries that match the specified pattern plus their size on disk.
+ * @see directory(const std::string &, const std::string &, const std::function<void(const std::string &, uint64_t)> &)
+ * @see fs::match()
+ */
+std::vector<std::pair<std::string, uint64_t>> directory(const std::string &path, const std::string &pattern);
 
 }
 }

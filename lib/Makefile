@@ -27,7 +27,6 @@ include ${ROOT}/mk/config.mk
 # Core
 #
 CXXSRCS=	aspace.cpp \
-		cbm_bus.cpp \
 		clock.cpp \
 		config.cpp \
 		confile.cpp \
@@ -62,7 +61,6 @@ CXXSRCS=	aspace.cpp \
 		utils.cpp
 
 INCS=		aspace.hpp \
-		cbm_bus.hpp \
 		clock.hpp \
 		config.hpp \
 		confile.hpp \
@@ -99,6 +97,19 @@ INCS=		aspace.hpp \
 		ui_config.hpp \
 		utils.hpp \
 		version.hpp
+
+#
+# Commodore Specifics
+#
+CXXSRCS+=	cbm_bus.cpp \
+		c1541.cpp \
+		c1541_factory.cpp \
+		c1541_fs.cpp
+
+INCS+=		cbm_bus.hpp \
+		c1541.hpp \
+		c1541_factory.hpp \
+		c1541_fs.hpp
 
 #
 # C64 Specifics

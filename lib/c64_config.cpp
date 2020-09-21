@@ -68,6 +68,16 @@ C64Config &C64Config::operator=(const Confile &conf)
         if (it != sec.end()) {
             Config::palettefile = palette_file(it->second);
         }
+
+        it = sec.find(C64Confile::C64_UNIT_8_CONFIG_KEY);
+        if (it != sec.end()) {
+            unit8 = it->second;
+        }
+
+        it = sec.find(C64Confile::C64_UNIT_9_CONFIG_KEY);
+        if (it != sec.end()) {
+            unit9 = it->second;
+        }
     }
 
     return *this;
@@ -80,8 +90,10 @@ std::string C64Config::to_string() const
     os << Config::to_string() << std::endl
        << "  Use MOS6581 reSID:  " << (resid ? "yes" : "no") << std::endl
        << "  Swap Joysticks:     " << (swapj ? "yes" : "no") << std::endl
-       << "  Attached Cartridge: " << std::quoted(cartfile) << std::endl
-       << "  Attached PRG:       " << std::quoted(prgfile);
+       << "  Attached Cartridge: " << std::quoted(cartfile)  << std::endl
+       << "  Attached PRG:       " << std::quoted(prgfile)   << std::endl
+       << "  Unit-8:             " << std::quoted(unit8)     << std::endl
+       << "  Unit-9:             " << std::quoted(unit9);
 
     return os.str();
 }

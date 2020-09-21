@@ -20,6 +20,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fnmatch.h>
 #include <unistd.h>
 
 #include <cstdlib>
@@ -131,6 +132,44 @@ void concat(const std::string &dst, const std::string &src)
 bool unlink(const std::string &fname)
 {
     return (fname.empty() || !::unlink(fname.c_str()));
+}
+
+bool match(const std::string &path, const std::string &pattern)
+{
+    const char *cpath = path.c_str();
+    const char *cpattern = pattern.c_str();
+    return (!::fnmatch(cpattern, cpath, FNM_NOESCAPE));
+}
+
+bool directory(const std::string &path, const std::string &pattern,
+    const std::function<bool(const std::string &, uint64_t)> &callback)
+{
+    const auto &end = std::filesystem::end(std::filesystem::recursive_directory_iterator{});
+    std::filesystem::recursive_directory_iterator it{path, std::filesystem::directory_options::skip_permission_denied};
+
+    for (; it != end; ++it) {
+        const auto &entry = it->path();
+        if (!std::filesystem::is_directory(entry) && fs::match(entry, pattern)) {
+            auto size = std::filesystem::file_size(entry);
+            if (callback(entry, size) == false) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+std::vector<std::pair<std::string, uint64_t>> directory(const std::string &path, const std::string &pattern)
+{
+    std::vector<std::pair<std::string, uint64_t>> entries{};
+
+    directory(path, pattern, [&entries](const std::string &entry, uint64_t size) -> bool {
+        entries.push_back({entry, size});
+        return true;
+    });
+
+    return entries;
 }
 
 }

@@ -34,6 +34,8 @@ public:
     constexpr static const char *C64_PRGFILE_CONFIG_KEY  = "prg";
     constexpr static const char *C64_RESID_CONFIG_KEY    = "resid";
     constexpr static const char *C64_SWAPJOY_CONFIG_KEY  = "swapj";
+    constexpr static const char *C64_UNIT_8_CONFIG_KEY   = "unit8";
+    constexpr static const char *C64_UNIT_9_CONFIG_KEY   = "unit9";
 
     C64Confile() {
     }
@@ -60,6 +62,8 @@ struct C64Config : public Config {
     std::string prgfile{};
     bool        resid{};
     bool        swapj{};
+    std::string unit8{};
+    std::string unit9{};
 
     C64Config() {
     }

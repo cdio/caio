@@ -30,7 +30,9 @@ const std::vector<::option> C64Cmdline::lopts = {
     { "cart",   required_argument,  nullptr,    C64Cmdline::C64_OPTION_CARTFILE },
     { "prg",    required_argument,  nullptr,    C64Cmdline::C64_OPTION_PRGFILE  },
     { "resid",  required_argument,  nullptr,    C64Cmdline::C64_OPTION_RESID    },
-    { "swapj",  no_argument,        nullptr,    C64Cmdline::C64_OPTION_SWAPJOY  }
+    { "swapj",  no_argument,        nullptr,    C64Cmdline::C64_OPTION_SWAPJOY  },
+    { "8",      required_argument,  nullptr,    C64Cmdline::C64_OPTION_UNIT_8   },
+    { "9",      required_argument,  nullptr,    C64Cmdline::C64_OPTION_UNIT_9   }
 };
 
 
@@ -44,6 +46,8 @@ void C64Cmdline::usage()
               << "C64 specific:"                                                                    << std::endl
               << " --cart <cart>          Attach a ROM image (RAW or CRT formats, 8K or 16K only)"  << std::endl
               << " --prg <prg>            Load a PRG file as soon as the basic is ready"            << std::endl
+              << " --8 <path>             Attach a disk drive unit 8"                               << std::endl
+              << " --9 <path>             Attach a disk drive unit 9"                               << std::endl
               << " --resid <yes|no>       Use the MOS6581 reSID library"                            << std::endl
               << "                        (default is no; cemu implementation is used)"             << std::endl
               << " --swapj                Swap Joysticks"                                           << std::endl;
@@ -60,6 +64,14 @@ bool C64Cmdline::parse(Confile &conf, int opt, const std::string &arg)
 
     case C64_OPTION_PRGFILE:    /* Load a PRG file */
         sec[C64Confile::C64_PRGFILE_CONFIG_KEY] = arg;
+        break;
+
+    case C64_OPTION_UNIT_8:
+        sec[C64Confile::C64_UNIT_8_CONFIG_KEY] = arg;
+        break;
+
+    case C64_OPTION_UNIT_9:
+        sec[C64Confile::C64_UNIT_9_CONFIG_KEY] = arg;
         break;
 
     case C64_OPTION_RESID:      /* reSID library */

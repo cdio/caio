@@ -16,35 +16,27 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
+#include "c64.hpp"
+
 #include <iostream>
 #include <sstream>
 #include <thread>
 
 #include "icon.hpp"
+#include "fs.hpp"
+#include "prg.hpp"
 #include "utils.hpp"
+#include "ui_sfml.hpp"
 #include "version.hpp"
 
-#include "device_ram.hpp"
-#include "device_rom.hpp"
-#include "nibble_ram.hpp"
-
-#include "mos_6510.hpp"
-#include "mos_6526.hpp"
-#include "mos_6569.hpp"
 #include "mos_6581.hpp"
 #include "mos_6581_resid.hpp"
 
-#include "prg.hpp"
-#include "ui_sfml.hpp"
-
-#include "c64_aspace.hpp"
 #include "c64_crt.hpp"
 #include "c64_io.hpp"
-#include "c64_joystick.hpp"
-#include "c64_keyboard.hpp"
 #include "c64_vic2_aspace.hpp"
 
-#include "c64.hpp"
+#include "c1541_factory.hpp"
 
 
 namespace cemu {
@@ -216,6 +208,16 @@ void C64::reset()
     _clk->add(_cia2);
     _clk->add(_sid);
 
+    if (!_conf.unit8.empty()) {
+        _unit8 = c1541::create(_conf.unit8, 8, _bus);
+        _clk->add(_unit8);
+    }
+
+    if (!_conf.unit9.empty()) {
+        _unit9 = c1541::create(_conf.unit9, 9, _bus);
+        _clk->add(_unit9);
+    }
+
     ui::Config uiconf {
         .audio = {
             .enabled       = _conf.audio_enabled,
@@ -235,7 +237,7 @@ void C64::reset()
         }
     };
 
-    _ui = ui::sfml::create_ui(uiconf, icon32());
+    _ui = ui::sfml::create(uiconf, icon32());
 
     auto trigger_irq = [this](bool active) {
         _cpu->trigger_irq(active);
@@ -423,7 +425,7 @@ std::string C64::to_string() const
 
     os << _conf.to_string()             << std::endl
        << std::endl
-       << "Connected devices: "         << std::endl
+       << "Connected devices:"          << std::endl
        << "  " << _clk->to_string()     << std::endl
        << "  " << _cpu->to_string()     << std::endl
        << "  " << _vic2->to_string()    << std::endl
@@ -444,8 +446,9 @@ std::string C64::to_string() const
        << "  " << _joy1->to_string()    << std::endl
        << "  " << _joy2->to_string()    << std::endl
        << "  " << _bus->to_string()     << std::endl
-       << std::endl
-       << "UI backend: " << _ui->to_string() << std::endl;
+       << std::endl;
+
+    os << "UI backend: " << _ui->to_string() << std::endl;
 
     return os.str();
 }

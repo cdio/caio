@@ -18,47 +18,29 @@
  */
 #pragma once
 
-#include "c64_config.hpp"
-#include "cemu_cmdline.hpp"
+#include <cstdint>
+#include <memory>
+#include <string>
+
+#include "cbm_bus.hpp"
+#include "c1541.hpp"
 
 
 namespace cemu {
-namespace c64 {
+namespace c1541 {
 
 /**
- * Command line and configuration file C64 parser.
+ * Create a C1541 unit based on the path to attach.
+ * @param path Directory, file or device to attach to;
+ * @param unit Unit number assigned to the device;
+ * @param bus  Bus to connect to.
+ * @return A pointer to the C1541 implementation.
+ * @exception InvalidArgument
+ * @exception IOError
+ * @see C1541::C1541()
+ * @see C1541::attach()
  */
-class C64Cmdline : public CemuCmdline {
-public:
-    enum C64Options {
-        C64_OPTION_CARTFILE = Options::OPTION_MAX,
-        C64_OPTION_PRGFILE,
-        C64_OPTION_UNIT_8,
-        C64_OPTION_UNIT_9,
-        C64_OPTION_RESID,
-        C64_OPTION_SWAPJOY,
-
-        C64_OPTION_MAX
-    };
-
-    C64Cmdline()
-        : CemuCmdline{lopts} {
-    }
-
-    virtual ~C64Cmdline() {
-    }
-
-    Confile parse(int argc, char *const *argv) override {
-        return CemuCmdline::parse(argc, argv);
-    }
-
-private:
-    void usage() override;
-
-    bool parse(Confile &conf, int opt, const std::string &arg) override;
-
-    static const std::vector<::option> lopts;
-};
+std::shared_ptr<C1541> create(const std::string &path, uint8_t unit, const std::shared_ptr<cbm_bus::Bus> &bus);
 
 }
 }

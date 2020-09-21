@@ -20,13 +20,22 @@
 
 #include "clock.hpp"
 #include "device.hpp"
-#include "fs.hpp"
+#include "device_ram.hpp"
+#include "device_rom.hpp"
+#include "nibble_ram.hpp"
 #include "ui.hpp"
 
-#include "cbm_bus.hpp"
+#include "mos_6510.hpp"
+#include "mos_6526.hpp"
+#include "mos_6569.hpp"
+#include "mos_6581_i.hpp"
 
+#include "c64_aspace.hpp"
 #include "c64_bus_controller.hpp"
 #include "c64_config.hpp"
+#include "c64_joystick.hpp"
+#include "c64_keyboard.hpp"
+#include "c64_vic2_aspace.hpp"
 
 
 namespace cemu {
@@ -50,7 +59,7 @@ constexpr static const addr_t BASIC_VARTAB        = 0x002D;     /* Pointer to en
 constexpr static const addr_t BASIC_ARYTAB        = 0x002F;     /* Pointer to start of basic array variables    */
 constexpr static const addr_t BASIC_STREND        = 0x0031;     /* Pointer to end of basic array variables      */
 constexpr static const addr_t BASIC_KEYB_BUFF     = 0x0277;     /* Keyboard buffer used by basic (10 bytes)     */
-constexpr static const addr_t BASIC_KEYB_BUFF_POS = 0x00c6;     /* Number of elements in the keyboard buffer    */
+constexpr static const addr_t BASIC_KEYB_BUFF_POS = 0x00C6;     /* Number of elements in the keyboard buffer    */
 
 
 /**
@@ -70,7 +79,7 @@ public:
     }
 
     /**
-     * Reset and Start this C64.
+     * Reset and start this C64.
      * @see reset()
      * @see start()
      */
@@ -158,23 +167,25 @@ private:
     devptr_t                          _io{};
     devptr_t                          _cart{};
 
-    std::shared_ptr<class ASpace>     _mmap{};
-    std::shared_ptr<class Mos6510>    _cpu{};
+    std::shared_ptr<ASpace>           _mmap{};
+    std::shared_ptr<Mos6510>          _cpu{};
 
-    std::shared_ptr<class Mos6569>    _vic2{};
-    std::shared_ptr<class NibbleRAM>  _vcolor{};
-    std::shared_ptr<class Mos6581I>   _sid{};
-    std::shared_ptr<class Mos6526>    _cia1{};
-    std::shared_ptr<class Mos6526>    _cia2{};
+    std::shared_ptr<Mos6569>          _vic2{};
+    std::shared_ptr<NibbleRAM>        _vcolor{};
+    std::shared_ptr<Mos6581I>         _sid{};
+    std::shared_ptr<Mos6526>          _cia1{};
+    std::shared_ptr<Mos6526>          _cia2{};
 
     std::shared_ptr<cbm_bus::Bus>     _bus{};
     std::shared_ptr<C64BusController> _busdev{};
+    std::shared_ptr<cbm_bus::Device>  _unit8{};
+    std::shared_ptr<cbm_bus::Device>  _unit9{};
 
-    std::shared_ptr<class Clock>      _clk{};
+    std::shared_ptr<Clock>            _clk{};
 
-    std::shared_ptr<class Keyboard>   _kbd{};
-    std::shared_ptr<class Joystick>   _joy1{};
-    std::shared_ptr<class Joystick>   _joy2{};
+    std::shared_ptr<Keyboard>         _kbd{};
+    std::shared_ptr<Joystick>         _joy1{};
+    std::shared_ptr<Joystick>         _joy2{};
 
     std::shared_ptr<UI>               _ui{};
 };
