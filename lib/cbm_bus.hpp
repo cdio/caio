@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -41,79 +42,85 @@ using buf_t = std::vector<uint8_t>;
  */
 class BusData {
 public:
-    constexpr static const uint8_t SRQ        = 0x01;
-    constexpr static const uint8_t ATN        = 0x02;
-    constexpr static const uint8_t CLK        = 0x04;
-    constexpr static const uint8_t DAT        = 0x08;
-    constexpr static const uint8_t RST        = 0x10;
-    constexpr static const uint8_t RELEASED   = 0xFF;
+    constexpr static const bool RELEASED = true;
 
 
-    explicit BusData(uint8_t data = RELEASED)
-        : _data{data} {
+    explicit BusData() {
     }
 
     BusData(const BusData &bd)
-        : BusData{bd._data} {
+        : _srq{bd._srq},
+          _atn{bd._atn},
+          _clk{bd._clk},
+          _dat{bd._dat},
+          _rst{bd._rst} {
     }
 
     bool is_released() const {
-        return (_data == RELEASED);
+        return (_srq == RELEASED && _atn == RELEASED && _clk == RELEASED && _dat == RELEASED && _rst == RELEASED);
     }
 
     bool srq() const {
-        return (_data & SRQ);
+        return _srq;
     }
 
     bool atn() const {
-        return (_data & ATN);
+        return _atn;
     }
 
     bool clk() const {
-        return (_data & CLK);
+        return _clk;
     }
 
     bool dat() const {
-        return (_data & DAT);
+        return _dat;
     }
 
     bool rst() const {
-        return (_data & RST);
+        return _rst;
     }
 
     void srq(bool release) {
-        _data = (release ? (_data | SRQ) : (_data & ~SRQ));
+        _srq = release;
     }
 
     void atn(bool release) {
-        _data = (release ? (_data | ATN) : (_data & ~ATN));
+        _atn = release;
     }
 
     void clk(bool release) {
-        _data = (release ? (_data | CLK) : (_data & ~CLK));
+        _clk = release;
     }
 
     void dat(bool release) {
-        _data = (release ? (_data | DAT) : (_data & ~DAT));
+        _dat = release;
     }
 
     void rst(bool release) {
-        _data = (release ? (_data | RST) : (_data & ~RST));
+        _rst = release;
     }
 
     void release() {
-        _data = RELEASED;
+        _srq = _atn = _clk = _dat = _rst = RELEASED;
     }
 
     BusData &operator&=(const BusData &bd) {
-        _data &= bd._data;
+        _srq &= bd._srq;
+        _atn &= bd._atn;
+        _clk &= bd._clk;
+        _dat &= bd._dat;
+        _rst &= bd._rst;
         return *this;
     }
 
     std::string to_string() const;
 
 private:
-    uint8_t _data{RELEASED};
+    bool _srq{RELEASED};
+    bool _atn{RELEASED};
+    bool _clk{RELEASED};
+    bool _dat{RELEASED};
+    bool _rst{RELEASED};
 };
 
 
@@ -140,13 +147,13 @@ public:
      * @return True on success; false if another device with
      * the same unit number is already attached to this bus.
      */
-    bool add(class Device *dev);
+    bool add(class Controller *dev);
 
     /**
      * Detach a device from this bus.
      * @param dev Device to detach.
      */
-    void del(class Device *dev);
+    void del(class Controller *dev);
 
     /**
      * @return A reference to this bus' data lines.
@@ -168,8 +175,110 @@ public:
     std::string to_string() const override;
 
 private:
-    BusData                     _data{};    /* Bus lines                        */
-    std::vector<class Device *> _devs{};    /* Devices connected to this bus    */
+    BusData                         _data{};    /* Bus lines                        */
+    std::vector<class Controller *> _devs{};    /* Devices connected to this bus    */
+};
+
+
+/**
+ * CBM-BUS Controlller.
+ * The bus controller handles the BUS lines.
+ */
+class Controller : public Name {
+public:
+    constexpr static const char *TYPE              = "CBM-BUS-DEVICE";
+    constexpr static const char *LABEL             = "controller";
+    constexpr static const uint8_t CONTROLLER_UNIT = 255;
+
+
+    /**
+     * Initialise this bus controller.
+     * @param bus   Bus to connect to;
+     * @param label Label asssigned to this controller.
+     * @exception InvalidArgument if the bus is empty.
+     */
+    Controller(const std::shared_ptr<Bus> &bus)
+        : Controller{CONTROLLER_UNIT, bus, LABEL} {
+    }
+
+    virtual ~Controller() {
+    }
+
+    uint8_t unit() const {
+        return _unit;
+    }
+
+    const BusData &bus_data() const {
+        return _bus->data();
+    }
+
+    const BusData &data() const {
+        return _data;
+    }
+
+    bool srq() const {
+        return bus_data().srq();
+    }
+
+    bool atn() const {
+        return bus_data().atn();
+    }
+
+    bool clk() const {
+        return bus_data().clk();
+    }
+
+    bool dat() const {
+        return bus_data().dat();
+    }
+
+    bool rst() const {
+        return bus_data().rst();
+    }
+
+    void srq(bool release) {
+        _data.srq(release);
+        _bus->propagate();
+    }
+
+    void atn(bool release) {
+        _data.atn(release);
+        _bus->propagate();
+    }
+
+    void clk(bool release) {
+        _data.clk(release);
+        _bus->propagate();
+    }
+
+    void dat(bool release) {
+        _data.dat(release);
+        _bus->propagate();
+    }
+
+    void rst(bool release) {
+        _data.rst(release);
+        _bus->propagate();
+    }
+
+    void release() {
+        _data.release();
+        _bus->propagate();
+    }
+
+protected:
+    /**
+     * Initialise this bus controller.
+     * @param unit  Unit number assigned to this controller;;
+     * @param bus   Bus to connect to;
+     * @param label Label asssigned to this controller.
+     * @exception InvalidArgument if the bus is empty.
+     */
+    Controller(uint8_t unit, const std::shared_ptr<Bus> &bus, const std::string &label = LABEL);
+
+    uint8_t              _unit;
+    std::shared_ptr<Bus> _bus;
+    BusData              _data{};
 };
 
 
@@ -364,9 +473,8 @@ private:
  * Device attached to a CBM-BUS.
  * This class must be derived by the actual device implementation.
  */
-class Device : public Name, public Clockable {
+class Device : public Controller, public Clockable {
 public:
-    constexpr static const char *TYPE                   = "CBM-BUS-DEVICE";
     constexpr static const char *LABEL_PREFIX           = "unit-";
 
     constexpr static const bool ACTIVE                  = false;
@@ -388,19 +496,19 @@ public:
 
     constexpr static const size_t MAX_CHANNELS          = 16;
 
-    constexpr static const uint64_t NON_EOI_TIME        = 60;               /* T_NE */
-    constexpr static const uint64_t EOI_TIME            = 200;              /* T_YE */
-    constexpr static const uint64_t EOI_HOLD_TIME       = 80;               /* T_EI */
-    constexpr static const uint64_t TURN_HOLD_TIME      = 80;               /* T_DA */
+    constexpr static const uint64_t NON_EOI_TIME        = 60;           /* T_NE */
+    constexpr static const uint64_t EOI_TIME            = 200;          /* T_YE */
+    constexpr static const uint64_t EOI_HOLD_TIME       = 80;           /* T_EI */
+    constexpr static const uint64_t TURN_HOLD_TIME      = 80;           /* T_DA */
 
-    constexpr static const uint64_t BIT_SETUP_TIME      = 80;               /* T_S  */
-    constexpr static const uint64_t BIT_VALID_TIME      = 80;               /* T_V  */
+    constexpr static const uint64_t BIT_SETUP_TIME      = 80;           /* T_S  */
+    constexpr static const uint64_t BIT_VALID_TIME      = 80;           /* T_V  */
 
-    constexpr static const uint64_t BETWEEN_BYTES_TIME  = 100;              /* T_BB */
-    constexpr static const uint64_t EOI_ACK_TIME        = 60;               /* T_FR */
+    constexpr static const uint64_t BETWEEN_BYTES_TIME  = 100;          /* T_BB */
+    constexpr static const uint64_t EOI_ACK_TIME        = 60;           /* T_FR */
     constexpr static const uint64_t FRAME_TIMEOUT       = 1000;
 
-    constexpr static const uint64_t TIMEOUT             = 1'000'000;        /* Timeout of 1s on blocking states */
+    constexpr static const uint64_t TIMEOUT             = 1'000'000;    /* Timeout of 1s on blocking states */
 
 
     /*
@@ -422,10 +530,9 @@ public:
      * Device role.
      */
     enum class Role {
-        NONE,               /* Not selected                                     */
-        PASSIVE,            /* Not selected but listening ATN commands          */
-        LISTENER,           /* Selected, this device is a listener              */
-        TALKER              /* Selected, this device is a talker                */
+        PASSIVE,            /* Device not selected but listening ATN commands   */
+        LISTENER,           /* This device is a listener                        */
+        TALKER              /* This device is a talker                          */
     };
 
 
@@ -461,45 +568,41 @@ public:
     virtual void reset();
 
     /**
-     * @return This device's unit number.
-     */
-    uint8_t unit() const {
-        return _unit;
-    }
-
-    /**
-     * @return A reference to this device's lines (not the bus lines).
-     * @see bus_data()
-     * @see BusData
-     */
-    const BusData &data() const {
-        return _data;
-    }
-
-    /**
      * Open a channel.
-     * @param ch    Channel to open (0..15);
+     * @param ch    Channel to open;
      * @param param Channel parameters.
      */
     virtual void open(uint8_t ch, const std::string &param) = 0;
 
     /**
      * Close a channel.
-     * @param ch Channel to close (0..15).
+     * @param ch Channel to close.
      */
     virtual void close(uint8_t ch) = 0;
 
     /**
      * Read a byte from a channel.
-     * @param ch Channel to read from (0..15).
+     * @param ch Channel to read from.
      * @return The read byte.
      * @see ReadByte
+     * @see push_back()
      */
     virtual ReadByte read(uint8_t ch) = 0;
 
     /**
+     * Push back the previous read byte.
+     * This method is called when the bus controller aborts
+     * (activating the ATN line) an ongoing transmission
+     * from this device in order to push the untransmitted
+     * value back into the channel.
+     * @param ch Channel.
+     * @see read()
+     */
+    virtual void push_back(uint8_t ch) = 0;
+
+    /**
      * Write a byte buffer into a channel.
-     * @param ch    Channel to write to (0..15);
+     * @param ch    Channel to write to:
      * @param value Buffer to write.
      */
     virtual void write(uint8_t ch, const buf_t &buf) = 0;
@@ -510,67 +613,13 @@ protected:
      */
     size_t tick(const Clock &clock) override;
 
-    const BusData &bus_data() const {
-        return _bus->data();
-    }
-
-    bool srq() const {
-        return bus_data().srq();
-    }
-
-    bool atn() const {
-        return bus_data().atn();
-    }
-
-    bool clk() const {
-        return bus_data().clk();
-    }
-
-    bool dat() const {
-        return bus_data().dat();
-    }
-
-    bool rst() const {
-        return bus_data().rst();
-    }
-
-    void srq(bool release) {
-        _data.srq(release);
-        _bus->propagate();
-    }
-
-    void atn(bool release) {
-        _data.atn(release);
-        _bus->propagate();
-    }
-
-    void clk(bool release) {
-        _data.clk(release);
-        _bus->propagate();
-    }
-
-    void dat(bool release) {
-        _data.dat(release);
-        _bus->propagate();
-    }
-
-    void rst(bool release) {
-        _data.rst(release);
-        _bus->propagate();
-    }
-
-    void release() {
-        _data.release();
-        _bus->propagate();
-    }
-
     bool tick_rx();
 
     void tick_tx();
 
     bool parse_command(uint8_t byte);
 
-    void process_command();
+    bool process_command();
 
     bool process_secondary(bool with_param);
 
@@ -592,54 +641,13 @@ protected:
     }
 
 private:
-    uint8_t              _unit;
-    std::shared_ptr<Bus> _bus;
-
-    Mode                 _mode{Mode::IDLE};
-    Role                 _role{Role::NONE};
-    State                _state{State::IDLE};
-    BusData              _data{};
-    uint64_t             _time{};
-    Command              _cmd{};
-    ByteTR               _bytetr{};
-};
-
-
-/**
- * CBM-BUS Controlller.
- * A bus controller handles the BUS lines directly and it is not scheduled by a clock.
- */
-class Controller : public Device {
-public:
-    constexpr static const char *LABEL  = "controller";
-    constexpr static const uint8_t UNIT = 255;
-
-
-    Controller(const std::shared_ptr<Bus> &bus)
-        : Device{UNIT, bus} {
-        label(LABEL);
-    }
-
-    virtual ~Controller() {
-    }
-
-private:
-    void open(uint8_t ch, const std::string &param) override {
-    }
-
-    void close(uint8_t ch) override {
-    }
-
-    ReadByte read(uint8_t ch) override {
-        return {};
-    }
-
-    void write(uint8_t ch, const buf_t &value) override {
-    }
-
-    size_t tick(const Clock &clock) override {
-        throw InternalError{"Bus Controller can't be ticked"};
-    }
+    Mode     _mode{Mode::IDLE};
+    Role     _role{Role::PASSIVE};
+    State    _state{State::IDLE};
+    BusData  _data{};
+    uint64_t _time{};
+    Command  _cmd{};
+    ByteTR   _bytetr{};
 };
 
 }

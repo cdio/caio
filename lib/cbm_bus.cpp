@@ -62,14 +62,14 @@ std::string BusData::to_string() const
 }
 
 
-bool Bus::add(Device *dev)
+bool Bus::add(Controller *dev)
 {
-    auto it = std::find_if(_devs.begin(), _devs.end(), [&dev](const Device *rdev) -> bool {
+    auto it = std::find_if(_devs.begin(), _devs.end(), [&dev](const Controller *rdev) -> bool {
         return (rdev == dev || rdev->unit() == dev->unit());
     });
 
     if (it != _devs.end()) {
-        log.error("%s: Can't add device to bus: %s. Existing device: %s\n", to_string().c_str(),
+        log.error("%s: Can't add device to bus: %s. Existing device: %s\n", Name::to_string().c_str(),
             dev->to_string().c_str(), (*it)->to_string().c_str());
         return false;
     }
@@ -78,7 +78,7 @@ bool Bus::add(Device *dev)
     return true;
 }
 
-void Bus::del(Device *dev)
+void Bus::del(Controller *dev)
 {
     auto it = std::find(_devs.begin(), _devs.end(), dev);
     if (it != _devs.end()) {
@@ -104,16 +104,15 @@ std::string Bus::to_string() const
     os << Name::to_string() << (_devs.size() ? ": " : "");
 
     for (auto it = _devs.begin(); it != _devs.end(); ++it) {
-        os << (*it)->to_string() << ((it + 1) == _devs.end() ? "" : ", ");
+        os << (*it)->Name::to_string() << ((it + 1) == _devs.end() ? "" : ", ");
     }
 
     return os.str();
 }
 
 
-Device::Device(uint8_t unit, const std::shared_ptr<Bus> &bus)
-    : Name{TYPE, LABEL_PREFIX + std::to_string(+unit)},
-      Clockable{},
+Controller::Controller(uint8_t unit, const std::shared_ptr<Bus> &bus, const std::string &label)
+    : Name{TYPE, label},
       _unit{unit},
       _bus{bus}
 {
@@ -125,6 +124,13 @@ Device::Device(uint8_t unit, const std::shared_ptr<Bus> &bus)
     _bus->propagate();
 }
 
+
+Device::Device(uint8_t unit, const std::shared_ptr<Bus> &bus)
+    : Controller{unit, bus, LABEL_PREFIX + std::to_string(+unit)},
+      Clockable{}
+{
+}
+
 Device::~Device()
 {
     _bus->del(this);
@@ -133,7 +139,7 @@ Device::~Device()
 void Device::reset()
 {
     _mode = Mode::IDLE;
-    _role = Role::NONE;
+    _role = Role::PASSIVE;
     _state = State::IDLE;
     release();
 }
@@ -153,13 +159,13 @@ size_t Device::tick(const Clock &clock)
          */
         _cmd.clear();
         _mode = Mode::COMMAND;
-        _role = Role::NONE;
+        _role = Role::PASSIVE;
         state(State::IDLE);
         CBMBUS_DEBUG("ATN line ON: Mode IDLE -> Mode COMMAND\n");
         /* PASSTHROUGH */
 
     case Mode::COMMAND:
-        if ((_role == Role::PASSIVE || _role == Role::NONE) && atn() == INACTIVE) {
+        if (_role == Role::PASSIVE && atn() == INACTIVE) {
             release();
             _mode = Mode::IDLE;
             CBMBUS_DEBUG("Passive device: Mode COMMAND -> Mode IDLE\n");
@@ -183,28 +189,36 @@ size_t Device::tick(const Clock &clock)
             break;
         }
 
-        process_command();
-
-        if (_role == Role::NONE) {
+        if (process_command()) {
+            /*
+             * Command processed, the secondary is not present.
+             */
+            release();
+            _mode = Mode::IDLE;
             CBMBUS_DEBUG("Unselected device: Mode COMMAND -> Mode IDLE\n");
-            break;
-        }
-
-        _mode = Mode::SECONDARY;
-        CBMBUS_DEBUG("%s device: Mode COMMAND -> Mode SECONDARY\n", (_role == Role::PASSIVE ? "Passive" : "Selected"));
-        /* PASSTHROUGH */
-
-    case Mode::SECONDARY:
-        if (!tick_rx()) {
             break;
         }
 
         if (_role == Role::PASSIVE) {
             /*
-             * If we are a passive device go back to COMMAND mode ignoring the secondary.
+             * Device not selected, release the bus and wait until ATN is OFF.
+             *
+             * It seems that passive devices must receive all commands
+             * (and ignore them) until ATN is OFF then its bus lines
+             * must be released. We won't do that unless it is necessary.
              */
-            _mode = Mode::COMMAND;
-            CBMBUS_DEBUG("Passive device: Mode SECONDARY -> Mode COMMAND\n");
+            release();
+            _mode = Mode::WAIT;
+            CBMBUS_DEBUG("Passive device: Mode COMMAND -> Mode WAIT\n");
+            break;
+        }
+
+        _mode = Mode::SECONDARY;
+        CBMBUS_DEBUG("Selected device: Mode COMMAND -> Mode SECONDARY\n");
+        /* PASSTHROUGH */
+
+    case Mode::SECONDARY:
+        if (!tick_rx()) {
             break;
         }
 
@@ -216,8 +230,8 @@ size_t Device::tick(const Clock &clock)
              * Unrecognised command: Go back to COMMAND mode.
              */
             _mode = Mode::COMMAND;
-            _role = Role::NONE;
-            CBMBUS_DEBUG("Unrecognised command: Mode SECONDARY -> Mode COMMAND, role changed to NONE\n");
+            _role = Role::PASSIVE;
+            CBMBUS_DEBUG("Unrecognised command: Mode SECONDARY -> Mode COMMAND, new role PASSIVE\n");
             break;
         }
 
@@ -314,7 +328,16 @@ size_t Device::tick(const Clock &clock)
              */
             release();
             _mode = Mode::IDLE;
-            CBMBUS_DEBUG("Talker device: ATN line ON: Mode TALKER -> Mode IDLE\n");
+            if (!_bytetr.ready()) {
+                /*
+                 * The ongoing transmission is aborted. Put back the read byte.
+                 */
+                push_back(_cmd.chunit());
+                CBMBUS_DEBUG("Talker device: ATN line ON: Mode TALKER -> Mode IDLE. "
+                    "Pushed back untransmitted byte $%02X\n", _bytetr.byte());
+            } else {
+                CBMBUS_DEBUG("Talker device: ATN line ON: Mode TALKER -> Mode IDLE\n");
+            }
             break;
         }
 
@@ -360,9 +383,9 @@ size_t Device::tick(const Clock &clock)
 
     /*
      * Do not starve the hosting cpu unnecessarily,
-     * sleep for 800us when this cbm bus device is in idle mode.
+     * sleep for 900us when this cbm bus device is in idle mode.
      */
-    uint64_t T = (_mode == Mode::IDLE ? 800 : 10);
+    uint64_t T = (_mode == Mode::IDLE ? 900 : 10);
     _time += T;
     return clock.cycles(T / 1000000.0f);
 }
@@ -668,34 +691,34 @@ bool Device::parse_command(uint8_t byte)
     return false;
 }
 
-void Device::process_command()
+bool Device::process_command()
 {
     switch (_cmd.command()) {
     case LISTEN:
         _role = (_unit == _cmd.chunit() ? Role::LISTENER : Role::PASSIVE);
         CBMBUS_DEBUG("Exec: LISTEN unit %d, role %s\n", _cmd.chunit(),
             (_role == Role::PASSIVE ? "PASSIVE" : "LISTENER"));
-        return;
+        break;
 
     case TALK:
         _role = (_unit == _cmd.chunit() ? Role::TALKER : Role::PASSIVE);
         CBMBUS_DEBUG("Exec: TALK unit %d, role %s\n", _cmd.chunit(), (_role == Role::PASSIVE ? "PASSIVE" : "TALKER"));
-        return;
+        break;
 
     case UNLISTEN:
-        _role = Role::NONE;
+        _role = Role::PASSIVE;
         CBMBUS_DEBUG("Exec: UNLISTEN\n");
-        return;
+        return true;
 
     case UNTALK:
-        _role = Role::NONE;
+        _role = Role::PASSIVE;
         CBMBUS_DEBUG("Exec: UNTALK\n");
-        return;
+        return true;
 
     default:;
     }
 
-    _role = Role::PASSIVE;
+    return false;
 }
 
 bool Device::process_secondary(bool with_param)
