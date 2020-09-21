@@ -283,9 +283,13 @@ Status C1541Fs::channel_open(uint8_t ch, const std::string &petfname, FileType t
     auto &channel = _channels[ch];
 
     if (channel.is_open()) {
-        log.error("%s: Open \"%s\": Channel already open on file \"%s\"\n", name(ch).c_str(), petfname.c_str(),
-            channel.fname.c_str());
-        return Status::NO_CHANNELS_AVAILABLE;
+        if (ch != LOAD_CHANNEL && ch != SAVE_CHANNEL) {
+            log.error("%s: Open \"%s\": Channel already open on file \"%s\"\n", name(ch).c_str(), petfname.c_str(),
+                channel.fname.c_str());
+            return Status::NO_CHANNELS_AVAILABLE;
+        }
+
+        channel_close(ch);
     }
 
     auto fname = pet_to_u8(petfname);
