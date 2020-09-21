@@ -824,28 +824,28 @@ void UISfml::joy_event(const sf::Event &event)
         float uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::PovX);
         if (uipos == 0.0f) {
             uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::X);
-            if (uipos > -1.0f && uipos < 1.0f) {
+            if (uipos > -38.0f && uipos < 38.0f) {
                 uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::U);
             }
         }
 
-        if (uipos < -1.0f) {
+        if (uipos < -38.0f) {
             pos |= Joystick::JOY_LEFT;
-        } else if (uipos > 1.0f) {
+        } else if (uipos > 38.0f) {
             pos |= Joystick::JOY_RIGHT;
         }
 
         uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::PovY);
-        if (uipos == 0) {
+        if (uipos == 0.0f) {
             uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::Y);
-            if (uipos > -1.0f && uipos < 1.0f) {
+            if (uipos > -38.0f && uipos < 38.0f) {
                 uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::V);
             }
         }
 
-        if (uipos < -1.0f) {
+        if (uipos < -38.0f) {
             pos |= Joystick::JOY_UP;
-        } else if (uipos > 1.0f) {
+        } else if (uipos > 38.0f) {
             pos |= Joystick::JOY_DOWN;
         }
 
