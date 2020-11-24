@@ -464,14 +464,14 @@ void Mos6569::paint_byte(unsigned start, uint8_t bitmap, const color2_t &colors)
         const auto &bg_color = *colors[0];
         const auto &fg_color = *colors[1];
 
-        _scanline[start    ].set((bitmap & 128) ? fg_color : bg_color);
-        _scanline[start + 1].set((bitmap &  64) ? fg_color : bg_color);
-        _scanline[start + 2].set((bitmap &  32) ? fg_color : bg_color);
-        _scanline[start + 3].set((bitmap &  16) ? fg_color : bg_color);
-        _scanline[start + 4].set((bitmap &   8) ? fg_color : bg_color);
-        _scanline[start + 5].set((bitmap &   4) ? fg_color : bg_color);
-        _scanline[start + 6].set((bitmap &   2) ? fg_color : bg_color);
-        _scanline[start + 7].set((bitmap &   1) ? fg_color : bg_color);
+        _scanline.at(start    ).set((bitmap & 128) ? fg_color : bg_color);
+        _scanline.at(start + 1).set((bitmap &  64) ? fg_color : bg_color);
+        _scanline.at(start + 2).set((bitmap &  32) ? fg_color : bg_color);
+        _scanline.at(start + 3).set((bitmap &  16) ? fg_color : bg_color);
+        _scanline.at(start + 4).set((bitmap &   8) ? fg_color : bg_color);
+        _scanline.at(start + 5).set((bitmap &   4) ? fg_color : bg_color);
+        _scanline.at(start + 6).set((bitmap &   2) ? fg_color : bg_color);
+        _scanline.at(start + 7).set((bitmap &   1) ? fg_color : bg_color);
 
     } catch (const std::out_of_range &) {
         /* Position exceeded because of the horizontal scroll or sprite out of screen. */
@@ -484,23 +484,23 @@ void Mos6569::paint_mcm_byte(unsigned start, uint8_t bitmap, const color4_t &col
     try {
         uint8_t index = (bitmap >> 6);
         auto *color = colors[index];
-        _scanline[start    ].set(*color);
-        _scanline[start + 1].set(*color);
+        _scanline.at(start    ).set(*color);
+        _scanline.at(start + 1).set(*color);
 
         index = (bitmap >> 4) & 3;
         color = colors[index];
-        _scanline[start + 2].set(*color);
-        _scanline[start + 3].set(*color);
+        _scanline.at(start + 2).set(*color);
+        _scanline.at(start + 3).set(*color);
 
         index = (bitmap >> 2) & 3;
         color = colors[index];
-        _scanline[start + 4].set(*color);
-        _scanline[start + 5].set(*color);
+        _scanline.at(start + 4).set(*color);
+        _scanline.at(start + 5).set(*color);
 
         index = bitmap & 3;
         color = colors[index];
-        _scanline[start + 6].set(*color);
-        _scanline[start + 7].set(*color);
+        _scanline.at(start + 6).set(*color);
+        _scanline.at(start + 7).set(*color);
 
     } catch (const std::out_of_range &) {
         /* Position exceeded because of the horizontal scroll or sprite out of screen. */
