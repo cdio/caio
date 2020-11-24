@@ -805,9 +805,11 @@ void UISfml::joy_event(const sf::Event &event)
         switch (event.type) {
         case sf::Event::JoystickConnected:
         case sf::Event::JoystickDisconnected:
+            log.debug("Joystick " + std::to_string(jid) +
+                ((event.type == sf::Event::JoystickConnected) ? " connected\n" : " disconnected\n"));
             sf::Joystick::update();
             joy->reset();
-            return;
+            break;
 
         case sf::Event::JoystickButtonPressed:
             pos = Joystick::JOY_FIRE;
