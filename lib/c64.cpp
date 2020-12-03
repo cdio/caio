@@ -316,8 +316,8 @@ void C64::reset()
         switch (key) {
         case Keyboard::KEY_ALT_J:
             /* Swap joysticks */
-            log.debug("Joysticks swapped %d <-> %d\n", _conf.swapj, _conf.swapj ^ 1);
             _conf.swapj ^= 1;
+            log.debug("Joysticks %sswapped\n", (_conf.swapj ? "" : "un"));
             break;
 
         case Keyboard::KEY_ALT_M:
