@@ -63,6 +63,18 @@ static inline float rand()
 
 
 /**
+ * Sinc function.
+ * @param x Radians.
+ * @return sin(x) / x.
+ */
+__attribute__((always_inline))
+static inline float sinc(float x)
+{
+    return ((x == 0.0f) ? 1.0f : std::sin(x) / x);
+}
+
+
+/**
  * Get the value of an exponential signal.
  * @param A0 DC component;
  * @param A  Exponential maximum value;
@@ -86,10 +98,10 @@ static inline float exp(float A0, float A, float t, float T)
 __attribute__((always_inline))
 static inline float triangle(float t, float T)
 {
-    const float hhT = 0.25f * T;
-    const float slope = 1.0f / hhT;
-    return ((t > hhT && t < 0.75f * T) ? (2.0f - slope * t) : slope * (t - ((t <= hhT) ? 0.0f : T)));
-}
+    const float slope = 4.0f / T;
+    const float T50   = 0.5f * T;
+    return (t < T50 ? slope * t - 1.0f : 1.0f - slope * (t - T50));
+ }
 
 
 /**
@@ -101,9 +113,9 @@ static inline float triangle(float t, float T)
 __attribute__((always_inline))
 static inline float sawtooth(float t, float T)
 {
-    const float hT = 0.5f * T;
-    const float slope = 2.0f / T;
-    return slope * (t - ((t > hT) ? T : 0.0f));
+    const float slope = 4.0f / T;
+    const float T50   = 0.5f * T;
+    return (-1.0f + slope * (t < T50 ? t : t - T50));
 }
 
 
@@ -130,18 +142,6 @@ __attribute__((always_inline))
 static inline float square(float t, float dc)
 {
     return (t < dc ? 1.0f : -1.0f);
-}
-
-
-/**
- * Sinc function.
- * @param x Radians.
- * @return sin(x) / x.
- */
-__attribute__((always_inline))
-static inline float sinc(float x)
-{
-    return ((x == 0.0f) ? 1.0f : std::sin(x) / x);
 }
 
 
