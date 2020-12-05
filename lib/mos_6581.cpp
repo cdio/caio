@@ -42,6 +42,44 @@ const std::array<float, 16> Mos6581::Envelope::decay_times = {
 };
 
 
+uint8_t Mos6581::Oscillator::rand()
+{
+    /*
+     * See http://www.sidmusic.org/sid/sidtech5.html.
+     */
+    uint8_t value =
+        ((_rreg & (1 << 22)) ? 0x80 : 0x00) |
+        ((_rreg & (1 << 20)) ? 0x40 : 0x00) |
+        ((_rreg & (1 << 16)) ? 0x20 : 0x00) |
+        ((_rreg & (1 << 13)) ? 0x10 : 0x00) |
+        ((_rreg & (1 << 11)) ? 0x08 : 0x00) |
+        ((_rreg & (1 <<  7)) ? 0x04 : 0x00) |
+        ((_rreg & (1 <<  4)) ? 0x02 : 0x00) |
+        ((_rreg & (1 <<  2)) ? 0x01 : 0x00);
+
+    bool bit22 = _rreg & (1 << 22);
+    bool bit17 = _rreg & (1 << 17);
+
+    _rreg = (_rreg << 1) | (bit22 ^ bit17);
+
+    return value;
+}
+
+float Mos6581::Oscillator::noise()
+{
+    /*
+     * See http://www.sidmusic.org/sid/sidtech5.html.
+     */
+    if (_ndelay <= 0) {
+        _ndelay += NOISE_DELAY / (_clkf / Mos6581::SAMPLING_RATE);
+        _nvalue = (rand() - 128.0f) / 128.0f;
+    }
+
+    _ndelay -= _ufreq;
+
+    return _nvalue;
+}
+
 float Mos6581::Oscillator::tick()
 {
     if (_test) {
@@ -69,7 +107,8 @@ float Mos6581::Oscillator::tick()
         }
 
         if (_type & WAVE_NOISE) {
-            _A *= signal::rand();    // FIXME Frequency limited noise.
+            _A *= noise();
+
         }
     } else {
         _A = 0.0f;
@@ -83,7 +122,6 @@ float Mos6581::Oscillator::tick()
 
     return _A;
 }
-
 
 void Mos6581::Envelope::gate(bool gb)
 {
@@ -173,7 +211,6 @@ float Mos6581::Envelope::tick()
     return _A;
 }
 
-
 void Mos6581::Voice::control(uint8_t value)
 {
     _osc.type(value >> 4);
@@ -182,7 +219,6 @@ void Mos6581::Voice::control(uint8_t value)
     _osc.sync(value & 2);
     _env.gate(value & 1);
 }
-
 
 void Mos6581::Filter::generate()
 {
@@ -222,7 +258,6 @@ void Mos6581::Filter::apply(samples_fp &v)
         signal::conv_kernel(v, _kbd);
     }
 }
-
 
 Mos6581::Mos6581(const std::string &label, unsigned clkf)
     : Mos6581I{label, clkf},
@@ -338,6 +373,9 @@ void Mos6581::write(addr_t addr, uint8_t value)
 
     case VOICE_3_CONTROL:
         _voice_3.control(value);
+        if (_voice_3._osc.is_test()) {
+            _voice_3._osc.rand_reset();
+        }
         break;
 
     case VOICE_3_ATTACK_DECAY:

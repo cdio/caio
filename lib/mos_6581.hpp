@@ -33,6 +33,7 @@ namespace cemu {
  * @see https://en.wikipedia.org/wiki/MOS_Technology_SID
  * @see https://web.archive.org/web/20070222065716/http://stud1.tuwien.ac.at/~e9426444/yannes.html
  * @see https://www.c64-wiki.com/wiki/Commodore_64_Programmer%27s_Reference_Guide
+ * @see http://www.sidmusic.org/sid/sidtech5.html
  */
 class Mos6581 : public Mos6581I {
 public:
@@ -42,6 +43,9 @@ public:
 
     class Oscillator {
     public:
+        constexpr static const uint32_t RANDOM_IV   = 0x007FFFF8;
+        constexpr static const uint32_t NOISE_DELAY = 0x00100000;
+
         enum WaveType : unsigned {
             WAVE_NONE     = 0x00,
             WAVE_TRIANGLE = 0x01,
@@ -102,12 +106,20 @@ public:
             _sync = sb;
         }
 
+        bool is_test() const {
+            return _test;
+        }
+
         float amplitude() const {
             return _A;
         }
 
         float time() const {
             return _t;
+        }
+
+        void rand_reset() {
+            _rreg = RANDOM_IV;
         }
 
         float tick();
@@ -121,6 +133,10 @@ public:
         void setwidth() {
             _width = ((_uwidth == 0) ? 1.0f : static_cast<float>(_uwidth) / 4095.0f);
         }
+
+        uint8_t rand();
+
+        float noise();
 
         float       _clkf;
         Oscillator &_syncos;
@@ -138,10 +154,13 @@ public:
         uint16_t    _uwidth{};
         float       _width{};
 
+        uint32_t    _rreg{RANDOM_IV};
+        int         _ndelay{};
+        float       _nvalue{};
+
         float       _A{};
         float       _t{};
     };
-
 
     class Envelope {
     public:
@@ -204,7 +223,6 @@ public:
         static const std::array<float, 16> decay_times;
     };
 
-
     class Voice {
     public:
         Voice(unsigned clkf, Voice &svoice)
@@ -259,7 +277,6 @@ public:
 
         friend class Mos6581;
     };
-
 
     class Filter {
     public:
@@ -342,7 +359,6 @@ public:
         gsl::span<float> _khi{};
         gsl::span<float> _kbd{};
     };
-
 
     /**
      * Initalise this SID instance.
