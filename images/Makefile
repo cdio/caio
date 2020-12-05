@@ -43,9 +43,9 @@ include ${ROOT}/mk/config.mk
 
 all clean debug:
 
-install: ${DST_IMGDIR} ${ALL}
+install: ${ALL}
 
-${DST_IMAGES}: ${notdir $@}
+${DST_IMAGES}: ${DST_IMGDIR} ${notdir $@}
 	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${notdir $@} $@
 
 ${DST_README}: ${README}
