@@ -482,11 +482,7 @@ size_t Mos6510::single_step()
         push_P();
         _regs.PC = addr;
         flag(Flags::I);
-
-        if (_log.is_level_debug()) {
-            _log.debug("Detected %s interrupt. Extra cycles=7\n", (is_nmi ? "NMI" : "IRQ"));
-        }
-
+        _log.debug("Detected %s interrupt. Extra cycles=7\n", (is_nmi ? "NMI" : "IRQ"));
         return 7;
     }
 
@@ -567,7 +563,7 @@ size_t Mos6510::single_step()
 
     if (_log.is_level_debug()) {
         std::ostringstream msg{};
-        msg << std::setw(35) << std::left << line << _regs.to_string() << "  cycles=" << ins.cycles;
+        msg << std::setw(35) << std::left << line << _regs.to_string() << "  cycles=" << ins.cycles << std::endl;
         _log.debug(msg.str());
     }
 
