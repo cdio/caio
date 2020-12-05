@@ -1,7 +1,8 @@
+- SID:      Fix white noise on some uridium hacks
+- C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
 - UI:       Accept CTRL-C (console) on pause mode
-- UI:       Improve joystick threeshold (PS3 gamepad)
 - UI:       SFML keyboard in/out focus problem
 - UI:       Widget panel
 - misc:     Fix Giana timeout
@@ -9,10 +10,10 @@
 - VIC:      Cycles emulation
 - VIC:      Implement open-border bug
 - UI:       Map gamepad X, Y, A buttons to F1, F3, SPACE (config options)
-- SID:      Noise frequency range
 - signal:   Evaluate use of lookup tables
 - config:   realpath(3) on user defined directories
 - misc:     Speed-up
+- misc:     Do not add the palette extension when it is set by the user
 - Apple2
 - BBC Micro
 - Daewoo DPC-200
