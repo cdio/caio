@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # Copyright (C) 2020 Claudio Castiglia
 #
@@ -16,38 +17,21 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ..}
+PNG="$1"
 
-IMAGES=		c64.gif \
-		compopicasso.png \
-		gyruss.gif \
-		q-bert.gif \
-		zauberwald.png
+NAME="${PNG%%.png}_png"
+SIZE=$(ls -l ${PNG} | awk '{print $5'})
 
-README=		${ROOT}/README.md
+cat <<-END
+/*
+ * Automatically generated from ${PNG}
+ */
+static const std::array<uint8_t, ${SIZE}> ${NAME}{
+END
 
-DST_IMGDIR=	${DST_DATADIR}/images
+printf "    "
+hexdump -e '16/1 "0x%02x, " "\n    "' ${PNG} | sed -e 's/, 0x  //g' -e 's/    $//'
 
-DST_IMAGES=	${IMAGES:%=${DST_IMGDIR}/%}
-
-DST_README=	${DST_DATADIR}/${notdir ${README}}
-
-ALL=		${DST_IMAGES} \
-		${DST_README}
-
-include ${ROOT}/mk/config.mk
-
-.PHONY: all clean debug install
-
-all clean debug:
-
-install: ${ALL}
-
-${DST_IMAGES}: ${DST_IMGDIR} ${notdir $@}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${notdir $@} $@
-
-${DST_README}: ${README}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} $< $@
-
-${DST_IMGDIR}:
-	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
+cat <<-END
+};
+END

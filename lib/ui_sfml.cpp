@@ -18,398 +18,18 @@
  */
 #include "ui_sfml.hpp"
 
-#include <array>
-#include <mutex>
-#include <queue>
-#include <sstream>
-#include <thread>
+#include <algorithm>
 
-#include <SFML/Audio.hpp>
-#include <SFML/Graphics.hpp>
-
-#include "locked_queue.hpp"
+#include "icon.hpp"
 #include "logger.hpp"
-#include "types.hpp"
 
-#define UISFML_VERSION      "SFML-" CEMU_STR(SFML_VERSION_MAJOR) "." \
-                                    CEMU_STR(SFML_VERSION_MINOR) "." \
-                                    CEMU_STR(SFML_VERSION_PATCH)
 
 namespace cemu {
 namespace ui {
 namespace sfml {
 
-using namespace std::chrono_literals;
+std::stringstream sfml_err{};
 
-
-class AudioStream : public sf::SoundStream {
-public:
-    AudioStream()
-        : sf::SoundStream{} {
-    }
-
-    virtual ~AudioStream() {
-    }
-
-    /**
-     * Reset this audio stream.
-     * @param aconf Audio configuration.
-     */
-    void reset(const ui::AudioConfig &aconf) {
-        sf::SoundStream::stop();
-        _playing_queue.clear();
-        _free_queue.clear();
-        _free_queue.push(samples_i16(aconf.samples));
-        _free_queue.push(samples_i16(aconf.samples));
-        _free_queue.push(samples_i16(aconf.samples));
-        _free_queue.push(samples_i16(aconf.samples));
-        _free_queue.push(samples_i16(aconf.samples));
-        _free_queue.push(samples_i16(aconf.samples));
-        _free_queue.push(samples_i16(aconf.samples));
-        _free_queue.push(samples_i16(aconf.samples));
-        _stop = false;
-        sf::SoundStream::initialize(aconf.channels, aconf.srate);
-    }
-
-    void stop() override {
-        _stop = true;
-        sf::SoundStream::stop();
-    }
-
-    /**
-     * Get a free audio buffer.
-     * The returned audio buffer must be filled with audio samples and then dispatched (returned back).
-     * The audio buffer's dispatch method enqueues the buffer into this audio stream's playing queue.
-     * @return A dispatchable audio buffer.
-     * @see onGetData()
-     */
-    AudioBuffer buffer() {
-        static auto dispatcher = [this](samples_i16 &&buf) {
-            _playing_queue.push(std::move(buf));
-            if (sf::SoundStream::getStatus() == sf::SoundSource::Status::Stopped) {
-                sf::SoundStream::play();
-            }
-        };
-
-        while (_free_queue.size() == 0) {
-            if (_stop) {
-                return {{}, {}};
-            }
-
-            if (sf::SoundStream::getStatus() == sf::SoundSource::Status::Stopped && !_stop) {
-                /*
-                 * For some reason, sometimes SFML stops the audio stream.
-                 * We just ignore SFML and start the stream again.
-                 */
-                log.debug("SFML stopped the audio stream. Restarting...\n");
-                sf::SoundStream::play();
-            }
-
-            std::this_thread::sleep_for(10ms);
-        }
-
-        return AudioBuffer{dispatcher, _free_queue.pop()};
-    }
-
-private:
-    /**
-     * Audio samples provider.
-     * This method is called by the SFML audio stream thread to get audio samples to play.
-     * Sample buffers are retrieved from the playing queue and moved into the free queue.
-     * Given that the queues contain several sample buffers it gives the SFML thread enough
-     * time to copy the playing buffers before they are overwritten with new audio data
-     * (this approach is not nice neither the behaviour of SFML).
-     */
-    bool onGetData(sf::SoundStream::Chunk &chk) override {
-        while (_playing_queue.size() == 0) {
-            if (sf::SoundStream::getStatus() == sf::SoundSource::Status::Stopped) {
-                return false;
-            }
-
-            std::this_thread::sleep_for(10ms);
-        }
-
-        _free_queue.push(_playing_queue.pop());
-        const auto &samples = _free_queue.back();
-
-        chk.sampleCount = samples.size();
-        chk.samples = samples.data();
-
-        return true;
-    }
-
-    void onSeek(sf::Time offset) override {
-    }
-
-    LockedQueue<samples_i16> _free_queue{};
-    LockedQueue<samples_i16> _playing_queue{};
-    std::atomic_bool         _stop{};
-};
-
-
-class UISfml : public UI {
-public:
-    explicit UISfml(const Config &conf);
-
-    virtual ~UISfml() {
-    }
-
-    /**
-     * @see UI::audio_play()
-     */
-    void audio_play() override {
-        if (audio_enabled()) {
-            _audio_stream.play();
-        }
-    }
-
-    /**
-     * @see UI::audio_pause()
-     */
-    void audio_pause() override {
-        if (audio_enabled()) {
-            _audio_stream.pause();
-        }
-    }
-
-    /**
-     * @see UI::audio_stop()
-     */
-    void audio_stop() override {
-        if (audio_enabled()) {
-            _audio_stream.stop();
-        }
-    }
-
-    /**
-     * @see UI::audio_volume(float)
-     */
-    void audio_volume(float vol) override {
-        if (audio_enabled()) {
-            _audio_stream.setVolume((vol > 1.0f) ? 100.0f : vol * 100.0f);
-        }
-    }
-
-    /**
-     * @see UI::audio_volume()
-     */
-    float audio_volume() const override {
-        return (audio_enabled() ? _audio_stream.getVolume() / 100.0f : 0.0f);
-    }
-
-    /**
-     * @see UI::audio_buffer()
-     */
-    AudioBuffer audio_buffer() override {
-        if (audio_enabled()) {
-            return _audio_stream.buffer();
-        }
-
-        return {{}, {}};
-    }
-
-    /**
-     * @see UI::render_line()
-     */
-    void render_line(unsigned line, const Scanline &sline) override;
-
-    /**
-     * @see UI::process_events()
-     */
-    bool process_events() override;
-
-    /**
-     * @see UI::title()
-     */
-    void title(const std::string &title) override {
-        _window.setTitle(title);
-    }
-
-    /**
-     * @see UI::icon()
-     */
-    void icon(const Image &img) override {
-        if (img) {
-            _icon = img;
-            _window.setIcon(img.width, img.height, reinterpret_cast<const uint8_t *>(img.data.data()));
-        }
-    }
-
-    /**
-     * @see UI::to_string()
-     */
-    std::string to_string() const override {
-        return UISFML_VERSION;
-    }
-
-private:
-    /**
-     * Render the main window.
-     * @see render_screen()
-     */
-    void render_window();
-
-    /**
-     * Render the texture screen into the UI window.
-     * @see _screen_tex
-     * @see render_line()
-     */
-    void render_screen();
-
-    /**
-     * Toggle the fullscreen mode.
-     */
-    void toggle_fullscreen();
-
-    /**
-     * Process the window resize event.
-     * Adapt the video renderer to the new size.
-     * @param w New absolute width;
-     * @param h New absolute height.
-     */
-    void resize_event(unsigned w, unsigned h);
-
-    /**
-     * Keyboard event handler.
-     * @param event SFML keyboard event.
-     */
-    void kbd_event(const sf::Event &event);
-
-    /**
-     * Joystick event handler.
-     * @param event SFML joystick event.
-     */
-    void joy_event(const sf::Event &event);
-
-    /**
-     * Convert a SFML key code to Keyboard::Key code.
-     * @param key SFML Key code.
-     * @return Keyboard::Key code.
-     */
-    static Keyboard::Key to_key(const sf::Keyboard::Key &key);
-
-    /**
-     * Main window width.
-     */
-    unsigned _W{};
-
-    /**
-     * Main window height.
-     */
-    unsigned _H{};
-
-    /**
-     * Saved main window width (set when moving to fullscreen mode).
-     */
-    unsigned _saved_W{};
-
-    /**
-     * Saved main window height (set when moving to fullscreen mode).
-     */
-    unsigned _saved_H{};
-
-    /**
-     * Saved main window position (set when moving to fullscreen mode).
-     */
-    sf::Vector2i _saved_pos{};
-
-    /**
-     * Screen texture width.
-     */
-    unsigned _width{};
-
-    /**
-     * Screen texture height.
-     */
-    unsigned _height{};
-
-    /**
-     * Screen aspect ratio.
-     * This value is fixed and calculated from the configuration.
-     */
-    float _aratio{};
-
-    /**
-     * Scale factor X.
-     * This value depends on the Main window width.
-     */
-    float _scale_x{};
-
-    /**
-     * Scale factor Y.
-     * This value depends on the Main window height.
-     */
-    float _scale_y{};
-
-    /**
-     * Fullscreen mode.
-     */
-    bool _is_fullscreen{};
-
-    /**
-     * Main window.
-     */
-    sf::RenderWindow _window{};
-
-    /**
-     * View Port.
-     * Support for resizing events.
-     */
-    sf::View _view{};
-
-    /**
-     * Screen rendering buffer.
-     * This texture is rendered in the main window at frame rate speed.
-     */
-    sf::RenderTexture _render_tex{};
-
-    /**
-     * Screen pixel data.
-     * @see _screen_tex
-     */
-    std::vector<Rgba> _screen_raw{};
-
-    /**
-     * Screen texture.
-     * This texture is updated with new pixel data at frame rate speed.
-     * @see _screen_raw
-     */
-    sf::Texture _screen_tex{};
-
-    /**
-     * Texture for the scanline effect.
-     */
-    sf::Texture _scanline_tex{};
-
-    /**
-     * Window icon.
-     */
-    Image _icon{};
-
-    /**
-     * Audio output stream.
-     */
-    AudioStream _audio_stream{};
-
-    /**
-     * Work-around for the keyboard handling deficiency of SFML.
-     */
-    bool _unknown_key_pressed{};
-    Keyboard::Key _unknown_key{Keyboard::KEY_NONE};
-
-    /**
-     * Conversion map from SFML key code to Keyboard::Key code.
-     */
-    static std::map<sf::Keyboard::Key, Keyboard::Key> sfml_to_key;
-
-    /**
-     * SFML error stream.
-     */
-    static std::stringstream sfml_err;
-};
-
-
-std::stringstream UISfml::sfml_err{};
 
 std::map<sf::Keyboard::Key, Keyboard::Key> UISfml::sfml_to_key{
     { sf::Keyboard::Key::A,         Keyboard::KEY_A             },
@@ -494,14 +114,26 @@ std::map<sf::Keyboard::Key, Keyboard::Key> UISfml::sfml_to_key{
     { sf::Keyboard::Key::F11,       Keyboard::KEY_F11           },
     { sf::Keyboard::Key::F12,       Keyboard::KEY_F12           }
 
-    /* KEY_LT missing on SFML */
+    /* KEY_LT missing on SFML; see _unknown_key_pressed */
 };
 
+
+std::shared_ptr<UI> UISfml::create(const ui::Config &conf)
+{
+    auto ui = std::make_shared<UISfml>(conf);
+    ui->icon(icon32());
+    return ui;
+}
 
 Keyboard::Key UISfml::to_key(const sf::Keyboard::Key &code)
 {
     auto it = sfml_to_key.find(code);
     return (it == sfml_to_key.end() ? Keyboard::KEY_NONE : it->second);
+}
+
+sf::Vector2u UISfml::window_size(bool panel_visible, const sf::Vector2u &screen_size)
+{
+    return {screen_size.x, screen_size.y + PanelSfml::size(panel_visible, screen_size.x).y};
 }
 
 UISfml::UISfml(const Config &conf)
@@ -512,31 +144,36 @@ UISfml::UISfml(const Config &conf)
     const auto &vconf = conf.video;
     const auto &aconf = conf.audio;
 
-    _W       = vconf.width * vconf.scale;
-    _H       = vconf.height * vconf.scale;
-    _width   = _W;
-    _height  = _H;
-    _aratio  = static_cast<float>(_W) / static_cast<float>(_H);
-    _scale_x = _scale_y = vconf.scale;
+    _screen_size = {
+        static_cast<unsigned>(vconf.width * vconf.scale),
+        static_cast<unsigned>(vconf.height * vconf.scale)
+    };
 
-    _window.create(sf::VideoMode{_W, _H}, vconf.title, sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
+    _screen_ratio = static_cast<float>(vconf.width) / static_cast<float>(vconf.height);
+    _scale = {vconf.scale, vconf.scale};
+
+    _win_size = UISfml::window_size(vconf.panel, _screen_size);
+
+    _window.create(sf::VideoMode{_win_size.x, _win_size.y}, vconf.title,
+        sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
+
     _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(vconf.fps);
     _window.setKeyRepeatEnabled(false);
     _window.clear(sf::Color::Black);
 
-    _view.reset(sf::FloatRect{0.0f, 0.0f, static_cast<float>(_W), static_cast<float>(_H)});
+    _view.reset(sf::FloatRect{0.0f, 0.0f, static_cast<float>(_win_size.x), static_cast<float>(_win_size.y)});
     _window.setView(_view);
 
     _window.display();
     _window.setActive(false);
 
-    _saved_pos = _window.getPosition();
-    _saved_W   = _W;
-    _saved_H   = _H;
+    _saved_win_pos = _window.getPosition();
+    _saved_win_size = _win_size;
 
-    auto desktop_size = sf::VideoMode::getDesktopMode();
-    if (!_render_tex.create(desktop_size.width, desktop_size.height)) {
+    _desktop_mode = sf::VideoMode::getDesktopMode();
+
+    if (!_render_tex.create(_desktop_mode.width, _desktop_mode.height)) {
         throw UIError{"Can't create the render texture: SFML: " + sfml_err.str()};
     }
 
@@ -556,6 +193,11 @@ UISfml::UISfml(const Config &conf)
 
     Rgba slcolor{SCANLINE_COLOR};
     _scanline_tex.update(reinterpret_cast<const uint8_t *>(&slcolor));
+
+    _panel = std::make_shared<PanelSfml>(vconf.panel, _screen_size.x);
+    if (!_panel) {
+        throw UIError{"Can't instantiate SFML panel: " + Error::to_string()};
+    }
 
     _is_fullscreen = false;
     if (vconf.fullscreen) {
@@ -582,7 +224,7 @@ void UISfml::render_line(unsigned line, const Scanline &sline)
     std::copy(sline.begin(), sline.end(), _screen_raw.begin() + line * _conf.video.width);
 }
 
-void UISfml::render_screen()
+sf::Sprite UISfml::render_screen()
 {
     const auto &vconf = _conf.video;
 
@@ -590,32 +232,32 @@ void UISfml::render_screen()
 
     _screen_tex.update(reinterpret_cast<const uint8_t *>(_screen_raw.data()), vconf.width, vconf.height, 0, 0);
     sf::Sprite sprite{_screen_tex};
-    sprite.setScale(_scale_x, _scale_y);
+    sprite.setScale(_scale);
     sprite.setPosition(0, 0);
 
     _render_tex.draw(sprite);
 
     if (vconf.sleffect != ui::SLEffect::NONE) {
-        sf::Sprite sprite{_scanline_tex};
+        sf::Sprite scanline_sprite{_scanline_tex};
 
         switch (vconf.sleffect) {
         case ui::SLEffect::HORIZONTAL:
-            sprite.setScale(_width, 1);
-            for (unsigned y = 0; y < _height; y += _scale_y) {
-                sprite.setPosition(0, y);
-                _render_tex.draw(sprite);
-                if (_scale_y == 1) {
+            scanline_sprite.setScale(_screen_size.x, 1.0f);
+            for (unsigned y = 0; y < _screen_size.y; y += _scale.y) {
+                scanline_sprite.setPosition(0, y);
+                _render_tex.draw(scanline_sprite);
+                if (_scale.y == 1.0f) {
                     ++y;
                 }
             }
             break;
 
         case ui::SLEffect::VERTICAL:
-            sprite.setScale(1, _height);
-            for (unsigned x = 0; x < _width; x += _scale_x) {
-                sprite.setPosition(x, 0);
-                _render_tex.draw(sprite);
-                if (_scale_x == 1) {
+            scanline_sprite.setScale(1.0f, _screen_size.y);
+            for (unsigned x = 0; x < _screen_size.x; x += _scale.x) {
+                scanline_sprite.setPosition(x, 0);
+                _render_tex.draw(scanline_sprite);
+                if (_scale.x == 1.0f) {
                     ++x;
                 }
             }
@@ -626,54 +268,53 @@ void UISfml::render_screen()
     }
 
     _render_tex.display();
+
+    return sf::Sprite{_render_tex.getTexture()};
 }
 
 void UISfml::render_window()
 {
-    render_screen();
-    sf::Sprite sprite{_render_tex.getTexture()};
-
-    auto [wx, wy] = _window.getSize();
-    auto cx = ((wx > _width) ? (wx - _width) / 2 : 0);
-    auto cy = ((wy > _height) ? (wy - _height) / 2 : 0);
-    sprite.setPosition(cx, cy);
-
     _window.clear();
-    _window.draw(sprite);
+
+    auto screen_sprite = render_screen();
+    screen_sprite.setPosition(0, 0);
+    _window.draw(screen_sprite);
+
+    if (_panel->is_visible()) {
+        auto panel_sprite = _panel->sprite();
+        panel_sprite.setPosition(0, _screen_size.y);
+        panel_sprite.setScale({1.0f, 1.0f});
+        _window.draw(panel_sprite);
+    }
+
     _window.display();
 }
 
 void UISfml::toggle_fullscreen()
 {
-    const auto &title = _conf.video.title;
-
     if (_is_fullscreen) {
-        _is_fullscreen = false;
+        _win_size = _saved_win_size;
 
-        _W = _saved_W;
-        _H = _saved_H;
+        _window.create(sf::VideoMode{_win_size.x, _win_size.y}, _conf.video.title,
+            sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
 
-        _window.create(sf::VideoMode{_W, _H}, title, sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
         _window.setMouseCursorVisible(true);
-        _window.setPosition(_saved_pos);
+        _window.setPosition(_saved_win_pos);
+
         if (_icon) {
             _window.setIcon(_icon.width, _icon.height, reinterpret_cast<const uint8_t *>(_icon.data.data()));
         }
 
-        resize_event(_W, _H);
+        _is_fullscreen = false;
 
     } else {
-        _is_fullscreen = true;
+        _saved_win_pos = _window.getPosition();
+        _saved_win_size = _win_size;
 
-        _saved_pos = _window.getPosition();
-        _saved_W   = _W;
-        _saved_H   = _H;
-
-        auto desktop_size = sf::VideoMode().getDesktopMode();
-        _window.create(desktop_size, title, sf::Style::Fullscreen);
+        _window.create(_desktop_mode, _conf.video.title, sf::Style::Fullscreen);
         _window.setMouseCursorVisible(false);
 
-        resize_event(desktop_size.width, desktop_size.height);
+        _is_fullscreen = true;
     }
 
     _window.setVerticalSyncEnabled(false);
@@ -681,36 +322,67 @@ void UISfml::toggle_fullscreen()
     _window.setKeyRepeatEnabled(false);
 }
 
-void UISfml::resize_event(unsigned w, unsigned h)
+void UISfml::toggle_panel_visibility()
+{
+    if (_is_fullscreen) {
+        _panel->visible(!_panel->is_visible());
+
+        auto wsize = _window.getSize();
+        resize_event(wsize.x, wsize.y);
+
+    } else {
+        auto wsize = _window.getSize();
+
+        if (_panel->is_visible()) {
+            wsize.y -= _panel->size().y;
+            _panel->visible(false);
+        } else {
+            _panel->visible(true);
+            wsize.y += _panel->size().y;
+        }
+
+        _window.setSize(wsize);
+    }
+}
+
+void UISfml::resize_event(unsigned rwidth, unsigned rheight)
 {
     const auto &vconf = _conf.video;
 
-    if (w < vconf.width) {
-        w = vconf.width;
+    auto min_size = UISfml::window_size(_panel->is_visible(), {vconf.width, vconf.height});
+    auto width = std::max(min_size.x, rwidth);
+    auto height = std::max(min_size.y, rheight);
+
+    width = std::min(width, _desktop_mode.width);
+    height = std::min(height, _desktop_mode.height);
+
+    if (_panel->is_visible() && height > _panel->size().y) {
+        height -= _panel->size().y;
     }
 
-    if (h < vconf.height) {
-        h = vconf.height;
-    }
-
-    _W = w;
-    _H = h;
-    unsigned H = w / _aratio;
-    float scale{};
-    if (H <= vconf.height) {
-        _width = w;
-        _height = H;
-        scale = static_cast<float>(w) / static_cast<float>(vconf.width);
+    unsigned sheight = width / _screen_ratio;
+    if (sheight <= vconf.height) {
+        _screen_size = {width, sheight};
     } else {
-        _width = h * _aratio;
-        _height = h;
-        scale = static_cast<float>(h) / static_cast<float>(vconf.height);
+        _screen_size= {static_cast<unsigned>(height * _screen_ratio), height};
     }
 
-    _scale_x = _scale_y = (vconf.smooth_resize ? scale : static_cast<unsigned>(std::ceil(scale)));
+    _scale.x = _scale.y = _screen_size.x / static_cast<float>(vconf.width);
+    if (!vconf.smooth_resize) {
+        _scale.x = _scale.y = std::ceil(_scale.x);
+    }
+
+    _win_size = UISfml::window_size(_panel->is_visible(), _screen_size);
+    _panel->resize(_screen_size.x);
+
+    _view.reset(sf::FloatRect{0.0f, 0.0f, static_cast<float>(rwidth), static_cast<float>(rheight)});
+
+    float cx = (static_cast<float>(rwidth) - static_cast<float>(_screen_size.x)) / 2.0f;
+    if (cx > 0.0f) {
+        _view.move(-cx, 0);
+    }
 
     _window.clear(sf::Color::Black);
-    _view.reset(sf::FloatRect{0.0f, 0.0f, static_cast<float>(_W), static_cast<float>(_H)});
     _window.setView(_view);
 }
 
@@ -741,7 +413,13 @@ void UISfml::kbd_event(const sf::Event &event)
                     break;
 
                 case sf::Keyboard::P:
+                    /* Pause emulator */
                     hotkey(Keyboard::KEY_PAUSE);
+                    break;
+
+                case sf::Keyboard::V:
+                    /* Toggle panel visibility */
+                    toggle_panel_visibility();
                     break;
 
                 default:;
@@ -866,7 +544,7 @@ bool UISfml::process_events()
     while (_window.pollEvent(event)) {
         switch (event.type) {
         case sf::Event::Closed:
-            audio_stop();       /* Avoid SFML segfault? */
+            audio_stop();
             _window.close();
             return false;
 
@@ -899,12 +577,12 @@ bool UISfml::process_events()
     return true;
 }
 
-
-std::shared_ptr<UI> create(const ui::Config &conf, const Image &icon)
+void UISfml::icon(const Image &img)
 {
-    auto ui = std::make_shared<UISfml>(conf);
-    ui->icon(icon);
-    return ui;
+    if (img) {
+        _icon = img;
+        _window.setIcon(img.width, img.height, reinterpret_cast<const uint8_t *>(img.data.data()));
+    }
 }
 
 }

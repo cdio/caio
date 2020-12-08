@@ -29,9 +29,11 @@
 #include "joystick.hpp"
 #include "keyboard.hpp"
 #include "rgb.hpp"
-#include "signal.hpp"
 #include "types.hpp"
+#include "signal.hpp"
+
 #include "ui_config.hpp"
+#include "ui_panel.hpp"
 
 
 namespace cemu {
@@ -44,7 +46,6 @@ namespace ui {
  */
 using AudioBuffer = DispatcherT<samples_i16>;
 
-
 /**
  * Scanline.
  * A Scanline represents a single line of an emulated screen;
@@ -53,7 +54,6 @@ using AudioBuffer = DispatcherT<samples_i16>;
  * to be rendered.
  */
 using Scanline = std::vector<Rgba>;
-
 
 /**
  * User Interface.
@@ -158,6 +158,13 @@ public:
     virtual std::string to_string() const = 0;
 
     /**
+     * @return The info panel.
+     * @exception UIError
+     * @see ui::Panel
+     */
+    virtual std::shared_ptr<Panel> panel() = 0;
+
+    /**
      * Set the emulated keyboard.
      * @param kbd Keyboard to set.
      */
@@ -245,7 +252,7 @@ public:
 protected:
     /**
      * Initialise this user interface.
-     * @param conf  Configuration parameters.
+     * @param conf Configuration parameters.
      * @exception UIError
      */
     UI(const Config &conf)

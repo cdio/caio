@@ -54,6 +54,8 @@ const std::vector<::option> CemuCmdline::lopts = {
     { "logfile",    required_argument,  nullptr, CemuCmdline::OPTION_LOGFILE    },
     { "loglevel",   required_argument,  nullptr, CemuCmdline::OPTION_LOGLEVEL   },
 
+    { "panel",      required_argument,  nullptr, CemuCmdline::OPTION_PANEL      },
+
     { "version",    no_argument,        nullptr, CemuCmdline::OPTION_VERSION    },
     { "help",       no_argument,        nullptr, CemuCmdline::OPTION_HELP       }
 };
@@ -108,6 +110,9 @@ void CemuCmdline::usage()
               << "                            I: Show info messages"                                    << std::endl
               << "                            D: Show debug messages"                                   << std::endl
               << "                        (default is " << std::quoted(Config::DEFAULT_LOGLEVEL) << ")" << std::endl
+              << " --panel <yes|no>       Panel visibility"                                             << std::endl
+              << "                        (default is " << (Config::DEFAULT_PANEL ? "yes" : "no") << ")"
+                                                                                                        << std::endl
               << " -v|--version           Show version information and exit"                            << std::endl
               << " -h|--help              Print this message and exit"                                  << std::endl;
 }
@@ -171,67 +176,71 @@ Confile CemuCmdline::parse(int argc, char *const *argv)
         }
 
         switch (c) {
-        case OPTION_ROMDIR:     /* ROM directory */
+        case OPTION_ROMDIR:         /* ROM directory */
             sec[conf.ROMDIR_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_CARTDIR:    /* Cartridge directory */
+        case OPTION_CARTDIR:        /* Cartridge directory */
             sec[conf.CARTDIR_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_PALETTEDIR: /* Palette directory */
+        case OPTION_PALETTEDIR:     /* Palette directory */
             sec[conf.PALETTEDIR_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_PALETTE:    /* Palette file */
+        case OPTION_PALETTE:        /* Palette file */
             sec[conf.PALETTE_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_KEYMAPSDIR: /* Keymaps directory */
+        case OPTION_KEYMAPSDIR:     /* Keymaps directory */
             sec[conf.KEYMAPSDIR_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_KEYMAPS:    /* Keymaps file */
+        case OPTION_KEYMAPS:        /* Keymaps file */
             sec[conf.KEYMAPS_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_FPS:        /* Frame rate */
+        case OPTION_FPS:            /* Frame rate */
             sec[conf.FPS_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_SCALE:      /* Scale factor */
+        case OPTION_SCALE:          /* Scale factor */
             sec[conf.SCALE_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_SCANLINES:  /* Scanlines effect */
+        case OPTION_SCANLINES:      /* Scanlines effect */
             sec[conf.SCANLINES_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_FULLSCREEN:  /* Fullscreen mode */
+        case OPTION_FULLSCREEN:     /* Fullscreen mode */
             sec[conf.FULLSCREEN_CONFIG_KEY] = "yes";
             break;
 
-        case OPTION_SRESIZE:  /* Smooth window resize */
+        case OPTION_SRESIZE:        /* Smooth window resize */
             sec[conf.SRESIZE_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_AUDIO:      /* Enable Audio */
+        case OPTION_AUDIO:          /* Enable Audio */
             sec[conf.AUDIO_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_DELAY:      /* Speed delay */
+        case OPTION_DELAY:          /* Speed delay */
             sec[conf.DELAY_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_MONITOR:    /* Monitor */
+        case OPTION_MONITOR:        /* Monitor */
             sec[conf.MONITOR_CONFIG_KEY] = "yes";
             break;
 
-        case OPTION_LOGFILE:    /* Logfile */
+        case OPTION_PANEL:          /* Panel position */
+            sec[conf.PANEL_CONFIG_KEY] = optarg;
+            break;
+
+        case OPTION_LOGFILE:        /* Logfile */
             sec[conf.LOGFILE_CONFIG_KEY] = optarg;
             break;
 
-        case OPTION_LOGLEVEL:   /* Loglevel */
+        case OPTION_LOGLEVEL:       /* Loglevel */
             sec[conf.LOGLEVEL_CONFIG_KEY] = optarg;
             break;
 

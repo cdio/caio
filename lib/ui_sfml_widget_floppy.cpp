@@ -16,31 +16,42 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_config.hpp"
-
-#include <sstream>
-
-#include "types.hpp"
-#include "utils.hpp"
+#include "ui_sfml_widget_floppy.hpp"
 
 
 namespace cemu {
 namespace ui {
+namespace sfml {
+namespace widget {
 
-SLEffect to_sleffect(const std::string &str)
+#include "icons/floppy64.hpp"
+
+
+void Floppy::load()
 {
-    if (str.empty()) {
-        return SLEffect::NONE;
-    }
+    WidgetSfml::load(floppy64_png);
+    _sprite.setTexture(texture());
 
-    if (str.size() == 1 && utils::tolow(str).find_first_of("nhv") != std::string::npos) {
-        return static_cast<SLEffect>(+str[0]);
-    }
+    constexpr float x = WIDTH / 2.0f;
+    constexpr float y = HEIGHT / 2.0f;
 
-    std::stringstream ss{};
-    ss << "Invalid scanline effect: " << std::quoted(str);
-    throw InvalidArgument{ss.str()};
+    _sprite.setOrigin(x, y);
+    _sprite.setPosition(x, y);
 }
 
+sf::Sprite Floppy::sprite()
+{
+    bool is_idle = static_cast<bool>(update());
+    if (is_idle) {
+        _sprite.setRotation(0);
+    } else {
+        _sprite.rotate(5);
+    }
+
+    return _sprite;
+}
+
+}
+}
 }
 }

@@ -88,7 +88,7 @@ This limitation can be workarounded by just editing (using a text editor)
 any of the layout files or adding a new one with new key combinations to
 reproduce those characters.
 
-Layouts files (with the exception of the default one) are stored in the
+Layouts files (with the exception of the default one) are located in the
 *keymapsdir* directory.
 
 Like the [VICE](https://en.wikipedia.org/wiki/VICE) emulator, the *RESTORE*
@@ -99,6 +99,7 @@ key is mapped as *Page-Up*, *RUN/STOP* as *ESC*, *CTRL* as *TAB* and
 ## Joysticks
 
 Up to two gamepads should work (tested using only one Logitech F710).
+The PS3 controller is known to work.
 
 
 ## Hot-Keys
@@ -113,6 +114,8 @@ Up to two gamepads should work (tested using only one Logitech F710).
 
 * *CTRL-C* on the terminal enters the CPU monitor (if the monitor is not
   active the emulation is terminated).
+
+* *ALT-V* toggless the visibility of the info panel.
 
 
 ## Disk Drive

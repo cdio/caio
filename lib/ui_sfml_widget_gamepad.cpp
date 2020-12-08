@@ -16,31 +16,35 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_config.hpp"
-
-#include <sstream>
-
-#include "types.hpp"
-#include "utils.hpp"
+#include "ui_sfml_widget_gamepad.hpp"
 
 
 namespace cemu {
 namespace ui {
+namespace sfml {
+namespace widget {
 
-SLEffect to_sleffect(const std::string &str)
+#include "icons/gamepad64x2.hpp"
+
+
+void Gamepad::load()
 {
-    if (str.empty()) {
-        return SLEffect::NONE;
-    }
-
-    if (str.size() == 1 && utils::tolow(str).find_first_of("nhv") != std::string::npos) {
-        return static_cast<SLEffect>(+str[0]);
-    }
-
-    std::stringstream ss{};
-    ss << "Invalid scanline effect: " << std::quoted(str);
-    throw InvalidArgument{ss.str()};
+    WidgetSfml::load(gamepad64x2_png);
+    _sprite = sf::Sprite(texture(), sf::IntRect{0, 0, 64, 64});
 }
 
+sf::Sprite Gamepad::sprite()
+{
+    bool is_swapped = static_cast<bool>(update());
+    if (is_swapped != _is_swapped) {
+        _sprite = sf::Sprite(texture(), (is_swapped ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64}));
+        _is_swapped = is_swapped;
+    }
+
+    return _sprite;
+}
+
+}
+}
 }
 }

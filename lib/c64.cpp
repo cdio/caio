@@ -22,11 +22,12 @@
 #include <sstream>
 #include <thread>
 
-#include "icon.hpp"
 #include "fs.hpp"
 #include "prg.hpp"
 #include "utils.hpp"
 #include "ui_sfml.hpp"
+#include "ui_sfml_widget_floppy.hpp"
+#include "ui_sfml_widget_gamepad.hpp"
 #include "version.hpp"
 
 #include "mos_6581.hpp"
@@ -208,16 +209,6 @@ void C64::reset()
     _clk->add(_cia2);
     _clk->add(_sid);
 
-    if (!_conf.unit8.empty()) {
-        _unit8 = c1541::create(_conf.unit8, 8, _bus);
-        _clk->add(_unit8);
-    }
-
-    if (!_conf.unit9.empty()) {
-        _unit9 = c1541::create(_conf.unit9, 9, _bus);
-        _clk->add(_unit9);
-    }
-
     ui::Config uiconf {
         .audio = {
             .enabled       = _conf.audio_enabled,
@@ -234,10 +225,27 @@ void C64::reset()
             .sleffect      = ui::to_sleffect(_conf.scanlines),
             .fullscreen    = _conf.fullscreen,
             .smooth_resize = _conf.smooth_resize,
-        }
+            .panel         = _conf.panel,
+        },
     };
 
-    _ui = ui::sfml::create(uiconf, icon32());
+    _ui = ui::sfml::UISfml::create(uiconf);
+
+    if (!_conf.unit8.empty()) {
+        _unit8 = c1541::create(_conf.unit8, 8, _bus);
+        _clk->add(_unit8);
+
+        auto floppy = ui::Widget::create<ui::sfml::widget::Floppy>([this](){return _unit8->is_idle();});
+        _ui->panel()->add(floppy);
+    }
+
+    if (!_conf.unit9.empty()) {
+        _unit9 = c1541::create(_conf.unit9, 9, _bus);
+        _clk->add(_unit9);
+
+        auto floppy = ui::Widget::create<ui::sfml::widget::Floppy>([this](){return _unit9->is_idle();});
+        _ui->panel()->add(floppy);
+    }
 
     auto trigger_irq = [this](bool active) {
         _cpu->trigger_irq(active);
@@ -316,7 +324,7 @@ void C64::reset()
         switch (key) {
         case Keyboard::KEY_ALT_J:
             /* Swap joysticks */
-            _conf.swapj ^= 1;
+            _conf.swapj ^= true;
             log.debug("Joysticks %sswapped\n", (_conf.swapj ? "" : "un"));
             break;
 
@@ -371,6 +379,10 @@ void C64::reset()
     _ui->keyboard(_kbd);
     _ui->joystick({_joy1, _joy2});
     _ui->hotkeys(hotkeys);
+
+    //XXX
+    auto gamepad = ui::Widget::create<ui::sfml::widget::Gamepad>([this](){return _conf.swapj;});
+    _ui->panel()->add(gamepad);
 }
 
 void C64::run()

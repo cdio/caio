@@ -19,6 +19,7 @@
 ROOT=		${abspath .}
 
 DIRS=		3rdparty \
+		icons \
 		lib \
 		bin \
 		bin/roms \

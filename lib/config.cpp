@@ -113,6 +113,12 @@ Config &Config::operator=(const Confile &conf)
             monitor = (str == "yes" || str == "ye" || str == "y");
         }
 
+        it = sec.find(CemuConfile::PANEL_CONFIG_KEY);
+        if (it != sec.end()) {
+            const std::string str = utils::tolow(it->second);
+            panel = (str == "yes" || str == "ye" || str == "y");
+        }
+
         it = sec.find(CemuConfile::LOGFILE_CONFIG_KEY);
         logfile = (it != sec.end() ? logfile = it->second : Logger::DEFAULT_LOGFILE);
 
@@ -142,6 +148,7 @@ std::string Config::to_string() const
        << "  Audio enabled:      " << (audio_enabled ? "yes" : "no") << std::endl
        << "  Speed Delay         " << delay << "x" << std::endl
        << "  CPU Monitor:        " << (monitor ? "yes" : "no") << std::endl
+       << "  Panel visible:      " << (panel ? "yes" : "no") << std::endl
        << "  Log file:           " << logfile << std::endl
        << "  Log level:          " << loglevel;
 

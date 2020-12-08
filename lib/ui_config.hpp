@@ -20,8 +20,6 @@
 
 #include <string>
 
-#include "image.hpp"
-
 
 namespace cemu {
 namespace ui {
@@ -30,17 +28,18 @@ namespace ui {
  * Scanline effects.
  */
 enum class SLEffect {
-    NONE,
-    HORIZONTAL,
-    VERTICAL
+    NONE        = +'n',
+    HORIZONTAL  = +'h',
+    VERTICAL    = +'v'
 };
 
 
 /**
- * Convert a scanlines effect string to SLEffect type.
+ * Convert a scanline effect string to SLEffect type.
  * @param str String to convert: "v", "h", "n" or "" (the last two meaning "no scanline effect").
  * @return SLEffect value.
- * @exception InvalidArgument if the string to convert is not valid.
+ * @exception InvalidArgument if the string to convert is invalid.
+ * @see SLEffect
  */
 SLEffect to_sleffect(const std::string &str);
 
@@ -52,11 +51,12 @@ struct VideoConfig {
     std::string title{};                    /**< Main window title.         */
     unsigned    width{};                    /**< Emulated screen width.     */
     unsigned    height{};                   /**< Emulated screen height.    */
-    unsigned    fps{};                      /**< Frames per seconds.        */
+    unsigned    fps{};                      /**< Frames per second.         */
     float       scale{1.0f};                /**< Screen scale factor.       */
     SLEffect    sleffect{SLEffect::NONE};   /**< Scanlines effect.          */
     bool        fullscreen{};               /**< Start in fullscreen mode.  */
     bool        smooth_resize{};            /**< Smooth window resize.      */
+    bool        panel{false};               /**< Panel visibility.          */
 };
 
 

@@ -81,6 +81,7 @@ public:
     constexpr static const char *AUDIO_CONFIG_KEY       = "audio";
     constexpr static const char *DELAY_CONFIG_KEY       = "delay";
     constexpr static const char *MONITOR_CONFIG_KEY     = "monitor";
+    constexpr static const char *PANEL_CONFIG_KEY       = "panel";
     constexpr static const char *LOGFILE_CONFIG_KEY     = "logfile";
     constexpr static const char *LOGLEVEL_CONFIG_KEY    = "loglevel";
 
@@ -112,6 +113,7 @@ struct Config {
     constexpr static const bool     DEFAULT_AUDIO_ENABLED    = true;
     constexpr static const float    DEFAULT_DELAY_FACTOR     = 1.0f;
     constexpr static const bool     DEFAULT_MONITOR_ACTIVE   = false;
+    constexpr static const bool     DEFAULT_PANEL            = true;
     constexpr static const char *   DEFAULT_LOGFILE          = Logger::DEFAULT_LOGFILE;
     constexpr static const char *   DEFAULT_LOGLEVEL         = Logger::DEFAULT_LOGLEVEL_STRING;
 
@@ -133,6 +135,7 @@ struct Config {
     bool        audio_enabled{DEFAULT_AUDIO_ENABLED};
     float       delay{DEFAULT_DELAY_FACTOR};
     bool        monitor{DEFAULT_MONITOR_ACTIVE};
+    bool        panel{DEFAULT_PANEL};
     std::string logfile{DEFAULT_LOGFILE};
     std::string loglevel{DEFAULT_LOGLEVEL};
 

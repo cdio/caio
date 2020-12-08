@@ -607,6 +607,14 @@ public:
      */
     virtual void write(uint8_t ch, const buf_t &buf) = 0;
 
+    /**
+     * Get the device activity status.
+     * @return true if the device is idle; false if the device is receiving or transmitting data.
+     */
+    bool is_idle() const {
+        return (_role == Role::PASSIVE);
+    }
+
 protected:
     /**
      * @see Clockable::tick()

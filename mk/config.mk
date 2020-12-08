@@ -25,7 +25,8 @@ INCDIR=			${abspath ${PREFIX}}/include
 CPPFLAGS=		-DD_VERSION='"${VERSION}"' \
 			-DD_PREFIX='"${PREFIX}"'
 
-CPPFLAGS+=		-I${ROOT}/3rdparty/GSL/include \
+CPPFLAGS+=		-I${ROOT} \
+			-I${ROOT}/3rdparty/GSL/include \
 			-I.
 
 CXXFLAGS=		-Wall \

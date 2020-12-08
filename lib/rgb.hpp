@@ -44,25 +44,25 @@ struct Rgba {
     };
 
     /**
-     * Initialise an RGBA from a 32 bits value.
-     * @param rgba A 32 bits RGBA value (default is black, no transparency).
-     */
-    Rgba(uint32_t rgba = 0x000000ff)
-        : u32{htobe32(rgba)} {
-    }
-
-    /**
      * Initialise this RGBA from its red, green, blue and alpha components.
      * @param red   Red component;
      * @param green Green component;
      * @param blue  Blue component;
      * @param alpha Alpha component (default is 255 -no transparency-).
      */
-    Rgba(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255)
+    constexpr Rgba(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255)
         : r{red},
           g{green},
           b{blue},
           a{alpha} {
+    }
+
+    /**
+     * Initialise an RGBA from a 32 bits value.
+     * @param rgba A 32 bits RGBA value (default is black, no transparency).
+     */
+    Rgba(uint32_t rgba = 0x000000ff)
+        : u32{htobe32(rgba)} {
     }
 
     /**

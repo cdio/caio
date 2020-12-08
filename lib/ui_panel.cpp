@@ -16,30 +16,25 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_config.hpp"
-
-#include <sstream>
-
-#include "types.hpp"
-#include "utils.hpp"
+#include "ui_panel.hpp"
 
 
 namespace cemu {
 namespace ui {
 
-SLEffect to_sleffect(const std::string &str)
+void Panel::add(const std::shared_ptr<Widget> &widget)
 {
-    if (str.empty()) {
-        return SLEffect::NONE;
+    if (find(widget) == _widgets.end()) {
+        _widgets.push_back(widget);
     }
+}
 
-    if (str.size() == 1 && utils::tolow(str).find_first_of("nhv") != std::string::npos) {
-        return static_cast<SLEffect>(+str[0]);
+void Panel::del(const std::shared_ptr<Widget> &widget)
+{
+    auto it = find(widget);
+    if (it != _widgets.end()) {
+        _widgets.erase(it);
     }
-
-    std::stringstream ss{};
-    ss << "Invalid scanline effect: " << std::quoted(str);
-    throw InvalidArgument{ss.str()};
 }
 
 }

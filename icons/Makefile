@@ -18,36 +18,27 @@
 #
 ROOT=		${abspath ..}
 
-IMAGES=		c64.gif \
-		compopicasso.png \
-		gyruss.gif \
-		q-bert.gif \
-		zauberwald.png
+ICONS_PNG=	floppy64.png \
+		gamepad64x2.png
 
-README=		${ROOT}/README.md
+ICONS_HPP=	${ICONS_PNG:%.png=%.hpp}
 
-DST_IMGDIR=	${DST_DATADIR}/images
+ALL=		${ICONS_HPP}
 
-DST_IMAGES=	${IMAGES:%=${DST_IMGDIR}/%}
+CONVERT=	./png2cpp.sh
 
-DST_README=	${DST_DATADIR}/${notdir ${README}}
-
-ALL=		${DST_IMAGES} \
-		${DST_README}
+.SUFFIXES=	.png .hpp
 
 include ${ROOT}/mk/config.mk
 
 .PHONY: all clean debug install
 
-all clean debug:
+all clean debug install:
 
-install: ${ALL}
+all: ${ALL}
 
-${DST_IMAGES}: ${DST_IMGDIR} ${notdir $@}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${notdir $@} $@
+%.hpp: %.png
+	${CONVERT} $< > $@
 
-${DST_README}: ${README}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} $< $@
-
-${DST_IMGDIR}:
-	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
+distclean:
+	${RM} ${ICONS_HPP}

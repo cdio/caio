@@ -16,31 +16,32 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_config.hpp"
-
-#include <sstream>
+#include "ui_widget_sfml.hpp"
 
 #include "types.hpp"
-#include "utils.hpp"
 
 
 namespace cemu {
 namespace ui {
+namespace sfml {
 
-SLEffect to_sleffect(const std::string &str)
+extern std::stringstream sfml_err;
+
+
+void WidgetSfml::load(const std::string &fname)
 {
-    if (str.empty()) {
-        return SLEffect::NONE;
+    if (!_texture.loadFromFile(fname)) {
+        throw UIError{"Can't load texture: " + fname + ": " + sfml_err.str()};
     }
-
-    if (str.size() == 1 && utils::tolow(str).find_first_of("nhv") != std::string::npos) {
-        return static_cast<SLEffect>(+str[0]);
-    }
-
-    std::stringstream ss{};
-    ss << "Invalid scanline effect: " << std::quoted(str);
-    throw InvalidArgument{ss.str()};
 }
 
+void WidgetSfml::load(const gsl::span<const uint8_t> &data)
+{
+    if (!_texture.loadFromMemory(data.data(), data.size())) {
+        throw UIError{"Can't load texture from data: " + sfml_err.str()};
+    }
+}
+
+}
 }
 }
