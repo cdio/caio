@@ -201,8 +201,8 @@ std::ostream &dump(std::ostream &os, const Iterator begin, const Iterator end, a
  * @param base Base address.
  * @return The output stream.
  */
-template <typename Container>
-std::ostream &dump(std::ostream &os, const Container &cont, addr_t base = 0)
+template<typename C, typename = std::enable_if<is_container<C>::value>>
+std::ostream &dump(std::ostream &os, const C &cont, addr_t base = 0)
 {
     return dump(os, cont.begin(), cont.end(), base);
 }
@@ -214,8 +214,8 @@ std::ostream &dump(std::ostream &os, const Container &cont, addr_t base = 0)
  * @param base Base address.
  * @return The string.
  */
-template <typename Container>
-std::string dump(const Container &cont, addr_t base = 0)
+template<typename C, typename = std::enable_if<is_container<C>::value>>
+std::string dump(const C &cont, addr_t base = 0)
 {
     std::ostringstream os{};
     dump(os, cont, base);
