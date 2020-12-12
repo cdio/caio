@@ -7,6 +7,7 @@ is emulated, under Linux.
 ![c64](/images/c64.gif "CEMU C64")
 ![gyruss](/images/gyruss.gif "Gyruss")
 ![q-bert](/images/q-bert.gif "Q*Bert")
+![uridium](/images/uridium.gif "Uridium")
 
 [![zauberwald](/images/zauberwald.png "Zauberwald")](https://csdb.dk/release/?id=188005)
 [![compopicasso](/images/compopicasso.png "Compopicasso")](https://csdb.dk/release/?id=185650)
