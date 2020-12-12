@@ -146,6 +146,11 @@ private:
     void attach_prg();
 
     /**
+     * Create the UI panel widgets.
+     */
+    void create_widgets();
+
+    /**
      * Reset this C64.
      * All devices are destroyed and recreated.
      */

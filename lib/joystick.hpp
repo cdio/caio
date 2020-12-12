@@ -33,7 +33,8 @@ namespace cemu {
  */
 class Joystick : public Name {
 public:
-    constexpr static const char *TYPE  = "JOY";
+    constexpr static const char *TYPE       = "JOY";
+    constexpr static unsigned JOYID_INVALID = static_cast<unsigned>(-1);
 
     enum JoyPosition {
         JOY_NONE  = 0x00,
@@ -58,7 +59,8 @@ public:
     /**
      * Reset this joystick.
      */
-    virtual void reset() {
+    virtual void reset(unsigned jid = JOYID_INVALID) {
+        _joyid = jid;
         _position = JOY_NONE;
     }
 
@@ -79,8 +81,16 @@ public:
         return _position;
     }
 
+    /**
+     * @return True if there is a real gamepad behind this joystick; false otherwise
+     */
+    bool is_connected() const {
+        return (_joyid != JOYID_INVALID);
+    }
+
 private:
-    uint8_t _position{JOY_NONE};
+    unsigned _joyid{JOYID_INVALID};
+    uint8_t  _position{JOY_NONE};
 };
 
 }

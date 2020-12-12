@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "rgb.hpp"
 #include "ui_widget_sfml.hpp"
 
 
@@ -28,6 +29,18 @@ namespace widget {
 
 class Floppy : public WidgetSfml {
 public:
+    constexpr static const Rgba DISK_ATTACHED_COLOR = { 255, 255, 255, 255 };   /* Color modulators */
+    constexpr static const Rgba DISK_MISSING_COLOR  = { 255, 255, 255, 64  };
+
+    using status_t = union {
+        struct {
+            uint64_t is_attached:1,
+                     is_idle:1;
+        };
+
+        uint64_t u64;
+    };
+
     using WidgetSfml::WidgetSfml;
 
     void load() override;

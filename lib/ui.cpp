@@ -59,5 +59,14 @@ void UI::run()
     std::signal(SIGINT, old_handler);
 }
 
+std::shared_ptr<Joystick> UI::joystick(unsigned jid)
+{
+    if (jid < _joys.size()) {
+        return _joys[jid];
+    }
+
+    return {};
+}
+
 }
 }

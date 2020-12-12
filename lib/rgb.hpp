@@ -92,6 +92,13 @@ struct Rgba {
     }
 
     /**
+     *  @return This RGBA color enconded as a 32 bits integer in host endian order.
+     */
+    uint32_t to_host_u32() const {
+        return be32toh(u32);
+    }
+
+    /**
      * Increment the elements of a colour.
      * The RGB components of a specified colour are incremented with a signed value;
      * the alpha component is left unchanged.

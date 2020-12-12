@@ -28,15 +28,23 @@ namespace widget {
 
 class Gamepad : public WidgetSfml {
 public:
+    constexpr static const Rgba GAMEPAD_MISSING_COLOR = { 255, 255, 255, 64  };    /* Color modulators */
+    constexpr static const Rgba GAMEPAD_PRESENT_COLOR = { 255, 255, 255, 255 };
+
+    using status_t = union {
+        struct {
+            uint64_t is_connected:1,
+                     is_swapped:1;
+        };
+
+        uint64_t u64;
+    };
+
     using WidgetSfml::WidgetSfml;
 
     void load() override;
 
     sf::Sprite sprite() override;
-
-private:
-    bool       _is_swapped{};
-    sf::Sprite _sprite{};
 };
 
 }

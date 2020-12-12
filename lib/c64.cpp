@@ -169,6 +169,60 @@ void C64::attach_prg()
     }
 }
 
+void C64::create_widgets()
+{
+    /*
+     * Floppy disks presence and idle status.
+     */
+    auto floppy8 = ui::Widget::create<ui::sfml::widget::Floppy>([this]() -> uint64_t {
+        ui::sfml::widget::Floppy::status_t st{};
+        if (_unit8) {
+            st.is_idle = _unit8->is_idle();
+            st.is_attached = true;
+        } else {
+            st.is_idle = true;
+            st.is_attached = false;
+        }
+
+        return st.u64;
+    });
+
+    auto floppy9 = ui::Widget::create<ui::sfml::widget::Floppy>([this]() -> uint64_t {
+        ui::sfml::widget::Floppy::status_t st{};
+        if (_unit9) {
+            st.is_idle = _unit9->is_idle();
+            st.is_attached = true;
+        } else {
+            st.is_idle = true;
+            st.is_attached = false;
+        }
+
+        return st.u64;
+    });
+
+    /*
+     * Joystick presence and swap status.
+     */
+    auto gamepad1 = ui::Widget::create<ui::sfml::widget::Gamepad>([this]() -> uint64_t {
+        ui::sfml::widget::Gamepad::status_t st{};
+        st.is_swapped = _conf.swapj;
+        st.is_connected = (_conf.swapj ? _joy2->is_connected() : _joy1->is_connected());
+        return st.u64;
+    });
+
+    auto gamepad2 = ui::Widget::create<ui::sfml::widget::Gamepad>([this]() -> uint64_t {
+        ui::sfml::widget::Gamepad::status_t st{};
+        st.is_swapped = _conf.swapj;
+        st.is_connected = (_conf.swapj ? _joy1->is_connected() : _joy2->is_connected());
+        return st.u64;
+    });
+
+    _ui->panel()->add(floppy8);
+    _ui->panel()->add(floppy9);
+    _ui->panel()->add(gamepad1);
+    _ui->panel()->add(gamepad2);
+}
+
 void C64::reset()
 {
     _ram     = std::make_shared<DeviceRAM>("SYSTEM RAM", 65536);
@@ -234,17 +288,11 @@ void C64::reset()
     if (!_conf.unit8.empty()) {
         _unit8 = c1541::create(_conf.unit8, 8, _bus);
         _clk->add(_unit8);
-
-        auto floppy = ui::Widget::create<ui::sfml::widget::Floppy>([this](){return _unit8->is_idle();});
-        _ui->panel()->add(floppy);
     }
 
     if (!_conf.unit9.empty()) {
         _unit9 = c1541::create(_conf.unit9, 9, _bus);
         _clk->add(_unit9);
-
-        auto floppy = ui::Widget::create<ui::sfml::widget::Floppy>([this](){return _unit9->is_idle();});
-        _ui->panel()->add(floppy);
     }
 
     auto trigger_irq = [this](bool active) {
@@ -380,9 +428,7 @@ void C64::reset()
     _ui->joystick({_joy1, _joy2});
     _ui->hotkeys(hotkeys);
 
-    //XXX
-    auto gamepad = ui::Widget::create<ui::sfml::widget::Gamepad>([this](){return _conf.swapj;});
-    _ui->panel()->add(gamepad);
+    create_widgets();
 }
 
 void C64::run()

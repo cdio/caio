@@ -482,10 +482,12 @@ void UISfml::joy_event(const sf::Event &event)
 
         switch (event.type) {
         case sf::Event::JoystickConnected:
+            log.debug("Joystick " + std::to_string(jid) + " connected\n");
+            joy->reset(jid);
+            break;
+
         case sf::Event::JoystickDisconnected:
-            log.debug("Joystick " + std::to_string(jid) +
-                ((event.type == sf::Event::JoystickConnected) ? " connected\n" : " disconnected\n"));
-            sf::Joystick::update();
+            log.debug("Joystick " + std::to_string(jid) + " disconnected\n");
             joy->reset();
             break;
 
@@ -582,6 +584,18 @@ void UISfml::icon(const Image &img)
     if (img) {
         _icon = img;
         _window.setIcon(img.width, img.height, reinterpret_cast<const uint8_t *>(img.data.data()));
+    }
+}
+
+void UISfml::joystick(const std::initializer_list<std::shared_ptr<Joystick>> &il)
+{
+    UI::joystick(il);
+    for (unsigned id = 0; id < _joys.size(); ++id) {
+        if (sf::Joystick::isConnected(id)) {
+            _joys[id]->reset(id);
+        } else {
+            _joys[id]->reset();
+        }
     }
 }
 

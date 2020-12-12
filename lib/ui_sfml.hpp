@@ -143,6 +143,20 @@ public:
     }
 
     /**
+     * Set the emulated joysticks and associate connected gamepads to them.
+     * @param il Joysticks to set.
+     * @see UI::joystick(const std::initializer_list<std::shared_ptr<Joystick>> &il)
+     */
+    void joystick(const std::initializer_list<std::shared_ptr<Joystick>> &il) override;
+
+    /**
+     * @see UI::joystick(unsigned jid)
+     */
+    std::shared_ptr<Joystick> joystick(unsigned jid) override {
+        return UI::joystick(jid);
+    }
+
+    /**
      * Create a SFML user interface.
      * @param conf Configuration parameters;
      * @param icon Icon image.

@@ -53,7 +53,8 @@ public:
     /**
      * @see Joystick::reset().
      */
-    void reset() override {
+    void reset(unsigned jid = Joystick::JOYID_INVALID) override {
+        Joystick::reset(jid);
         Joystick::position(~C64_JOY_NONE);
     }
 

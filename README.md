@@ -115,7 +115,7 @@ The PS3 controller is known to work.
 * *CTRL-C* on the terminal enters the CPU monitor (if the monitor is not
   active the emulation is terminated).
 
-* *ALT-V* toggless the visibility of the info panel.
+* *ALT-V* toggles the visibility of the info panel.
 
 
 ## Disk Drive

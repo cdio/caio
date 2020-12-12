@@ -176,7 +176,7 @@ public:
      * Set the emulated joysticks.
      * @param il Joysticks to set.
      */
-    void joystick(const std::initializer_list<std::shared_ptr<Joystick>> &il) {
+    virtual void joystick(const std::initializer_list<std::shared_ptr<Joystick>> &il) {
         _joys = il;
     }
 
@@ -205,13 +205,7 @@ public:
      * @param jid Joystick index.
      * @return The requested joystick on success; nullptr if the specified joystick does not exist.
      */
-    std::shared_ptr<Joystick> joystick(unsigned jid) {
-        if (jid < _joys.size()) {
-            return _joys[jid];
-        }
-
-        return {};
-    }
+    virtual std::shared_ptr<Joystick> joystick(unsigned jid);
 
     /**
      * Hot-key event handler.

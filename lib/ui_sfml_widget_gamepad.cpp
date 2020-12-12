@@ -30,18 +30,15 @@ namespace widget {
 void Gamepad::load()
 {
     WidgetSfml::load(gamepad64x2_png);
-    _sprite = sf::Sprite(texture(), sf::IntRect{0, 0, 64, 64});
 }
 
 sf::Sprite Gamepad::sprite()
 {
-    bool is_swapped = static_cast<bool>(update());
-    if (is_swapped != _is_swapped) {
-        _sprite = sf::Sprite(texture(), (is_swapped ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64}));
-        _is_swapped = is_swapped;
-    }
-
-    return _sprite;
+    status_t st{.u64 = update()};
+    const auto &color = (st.is_connected ? GAMEPAD_PRESENT_COLOR : GAMEPAD_MISSING_COLOR);
+    auto sprite = sf::Sprite(texture(), (st.is_swapped ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64}));
+    sprite.setColor(sf::Color{color.to_host_u32()});
+    return sprite;
 }
 
 }
