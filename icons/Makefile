@@ -18,8 +18,9 @@
 #
 ROOT=		${abspath ..}
 
-ICONS_PNG=	floppy64.png \
-		gamepad64x2.png
+ICONS_PNG=	floppy_64.png \
+		fullscreen_64x2.png \
+		gamepad_64x2.png
 
 ICONS_HPP=	${ICONS_PNG:%.png=%.hpp}
 

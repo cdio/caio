@@ -22,6 +22,7 @@
 
 #include "icon.hpp"
 #include "logger.hpp"
+#include "ui_sfml_widget_fullscreen.hpp"
 
 
 namespace cemu {
@@ -194,10 +195,7 @@ UISfml::UISfml(const Config &conf)
     Rgba slcolor{SCANLINE_COLOR};
     _scanline_tex.update(reinterpret_cast<const uint8_t *>(&slcolor));
 
-    _panel = std::make_shared<PanelSfml>(vconf.panel, _screen_size.x);
-    if (!_panel) {
-        throw UIError{"Can't instantiate SFML panel: " + Error::to_string()};
-    }
+    create_panel();
 
     _is_fullscreen = false;
     if (vconf.fullscreen) {
@@ -207,6 +205,20 @@ UISfml::UISfml(const Config &conf)
     if (aconf.enabled) {
         _audio_stream.reset(aconf);
     }
+}
+
+void UISfml::create_panel()
+{
+    _panel = std::make_shared<PanelSfml>(_conf.video.panel, _screen_size.x);
+    if (!_panel) {
+        throw UIError{"Can't instantiate SFML panel: " + Error::to_string()};
+    }
+
+    auto fullscreen = ui::Widget::create<ui::sfml::widget::Fullscreen>([this]() -> uint64_t {
+        return _is_fullscreen;
+    });
+
+    _panel->add(fullscreen, Panel::RIGHT_JUSTIFIED);
 }
 
 void UISfml::render_line(unsigned line, const Scanline &sline)

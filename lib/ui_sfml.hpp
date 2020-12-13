@@ -29,6 +29,7 @@
 #include "ui_audio_sfml.hpp"
 #include "ui_panel_sfml.hpp"
 
+
 #define UISFML_VERSION      "SFML-" CEMU_STR(SFML_VERSION_MAJOR) "." \
                                     CEMU_STR(SFML_VERSION_MINOR) "." \
                                     CEMU_STR(SFML_VERSION_PATCH)
@@ -166,6 +167,12 @@ public:
     static std::shared_ptr<UI> create(const ui::Config &conf);
 
 private:
+    /**
+     * Create the info panel.
+     * Create the info panel and add the ui widgets.
+     */
+    void create_panel();
+
     /**
      * Render and display the main window.
      * @see render_screen()

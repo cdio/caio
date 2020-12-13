@@ -22,10 +22,10 @@
 namespace cemu {
 namespace ui {
 
-void Panel::add(const std::shared_ptr<Widget> &widget)
+void Panel::add(const std::shared_ptr<Widget> &widget, bool right)
 {
     if (find(widget) == _widgets.end()) {
-        _widgets.push_back(widget);
+        _widgets.push_back({widget, right});
     }
 }
 

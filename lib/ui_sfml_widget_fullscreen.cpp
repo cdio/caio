@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_sfml_widget_gamepad.hpp"
+#include "ui_sfml_widget_fullscreen.hpp"
 
 
 namespace cemu {
@@ -24,21 +24,24 @@ namespace ui {
 namespace sfml {
 namespace widget {
 
-#include "icons/gamepad_64x2.hpp"
+#include "icons/fullscreen_64x2.hpp"
 
 
-void Gamepad::load()
+void Fullscreen::load()
 {
-    WidgetSfml::load(gamepad_64x2_png);
+    WidgetSfml::load(fullscreen_64x2_png);
+    _sprite = sf::Sprite{texture(), sf::IntRect{0, 0, 64, 64}};
 }
 
-sf::Sprite Gamepad::sprite()
+sf::Sprite Fullscreen::sprite()
 {
-    status_t st{.u64 = update()};
-    const auto &color = (st.is_connected ? GAMEPAD_PRESENT_COLOR : GAMEPAD_MISSING_COLOR);
-    auto sprite = sf::Sprite{texture(), (st.is_swapped ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64})};
-    sprite.setColor(sf::Color{color.to_host_u32()});
-    return sprite;
+    auto is_fullscreen = static_cast<bool>(update());
+    if (_is_fullscreen != is_fullscreen) {
+        _sprite = sf::Sprite{texture(), (is_fullscreen ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64})};
+        _is_fullscreen = is_fullscreen;
+    }
+
+    return _sprite;
 }
 
 }

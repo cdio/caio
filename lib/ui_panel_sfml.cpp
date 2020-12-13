@@ -65,13 +65,23 @@ sf::Sprite PanelSfml::sprite()
 
     _render_tex.clear();
 
-    unsigned x{};
-    for (const auto &w : widgets()) {
-        auto widget = std::dynamic_pointer_cast<WidgetSfml>(w);
+    unsigned left_x{};
+    unsigned right_x{_size.x};
+
+    for (const auto &pair : widgets()) {
+        auto widget = std::dynamic_pointer_cast<WidgetSfml>(pair.first);
+        bool just = pair.second;
         auto sprite = widget->sprite();
-        sprite.move(x, 0);
+
+        if (just == Panel::LEFT_JUSTIFIED) {
+            sprite.move(left_x, 0);
+            left_x += widget->WIDTH;
+        } else {
+            right_x -= widget->WIDTH;
+            sprite.move(right_x, 0);
+        }
+
         _render_tex.draw(sprite);
-        x += widget->WIDTH;
     }
 
     auto frame = sf::RectangleShape{sf::Vector2f{_size}};

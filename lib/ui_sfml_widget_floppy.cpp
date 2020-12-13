@@ -24,12 +24,12 @@ namespace ui {
 namespace sfml {
 namespace widget {
 
-#include "icons/floppy64.hpp"
+#include "icons/floppy_64.hpp"
 
 
 void Floppy::load()
 {
-    WidgetSfml::load(floppy64_png);
+    WidgetSfml::load(floppy_64_png);
     _sprite.setTexture(texture());
 
     constexpr float x = WIDTH / 2.0f;

@@ -37,9 +37,13 @@ namespace ui {
  */
 class Panel {
 public:
-    constexpr static const Rgba BACKGROUND_COLOR   = {0x00, 0x00, 0x00, 0x00};
-    constexpr static const Rgba FRAME_COLOR        = {0xFF, 0x00, 0x00, 0xFF};
+    constexpr static const Rgba BACKGROUND_COLOR   = { 0x00, 0x00, 0x00, 0x00 };
+    constexpr static const Rgba FRAME_COLOR        = { 0xFF, 0x00, 0x00, 0xFF };
     constexpr static const uint32_t FRAME_TICKNESS = 2; /* Pixels */
+    constexpr static const bool LEFT_JUSTIFIED     = false;
+    constexpr static const bool RIGHT_JUSTIFIED    = true;
+
+    using widget_pair_t = std::pair<std::shared_ptr<Widget>, bool>;
 
     /**
      * Create a panel.
@@ -69,9 +73,10 @@ public:
 
     /**
      * Add a widget into this panel.
-     * @param widget Widget to add.
+     * @param widget Widget to add;
+     * @param just   Position inside the panel (LEFT_JUSTIFIED or RIGHT_JUSTIFIED).
      */
-    void add(const std::shared_ptr<Widget> &widget);
+    void add(const std::shared_ptr<Widget> &widget, bool just = LEFT_JUSTIFIED);
 
     /**
      * Remove a widget from this panel.
@@ -82,17 +87,19 @@ public:
     /**
      * @return A constant reference to the widgets container.
      */
-    const std::vector<std::shared_ptr<Widget>> &widgets() const {
+    const std::vector<widget_pair_t> &widgets() const {
         return _widgets;
     }
 
 private:
-    std::vector<std::shared_ptr<Widget>>::const_iterator find(const std::shared_ptr<Widget> &widget) const {
-        return std::find(_widgets.begin(), _widgets.end(), widget);
+    std::vector<widget_pair_t>::const_iterator find(const std::shared_ptr<Widget> &widget) const {
+        return std::find_if(_widgets.begin(), _widgets.end(), [&widget](const widget_pair_t &pair) {
+            return (widget == pair.first);
+        });
     }
 
-    bool                                 _visible{};
-    std::vector<std::shared_ptr<Widget>> _widgets{};
+    bool                       _visible{};
+    std::vector<widget_pair_t> _widgets{};
 };
 
 }

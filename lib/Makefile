@@ -144,12 +144,14 @@ CXXSRCS+=	ui_audio_sfml.cpp \
 		ui_panel_sfml.cpp \
 		ui_sfml.cpp \
 		ui_sfml_widget_floppy.cpp \
+		ui_sfml_widget_fullscreen.cpp \
 		ui_sfml_widget_gamepad.cpp \
 		ui_widget_sfml.cpp
 
 INCS+=		ui_panel_sfml.hpp \
 		ui_sfml.hpp \
 		ui_sfml_widget_floppy.hpp \
+		ui_sfml_widget_fullscreen.hpp \
 		ui_sfml_widget_gamepad.hpp \
 		ui_widget_sfml.hpp
 
