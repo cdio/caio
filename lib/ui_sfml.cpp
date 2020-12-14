@@ -315,6 +315,9 @@ void UISfml::render_window()
 void UISfml::toggle_fullscreen()
 {
     if (_is_fullscreen) {
+        /*
+         * Leave fullscreen.
+         */
         _win_size = _saved_win_size;
 
         _window.create(sf::VideoMode{_win_size.x, _win_size.y}, _conf.video.title,
@@ -329,11 +332,14 @@ void UISfml::toggle_fullscreen()
         _is_fullscreen = false;
 
     } else {
+        /*
+         * Enter fulllscreen.
+         */
         _saved_win_pos = _window.getPosition();
         _saved_win_size = _win_size;
 
         _window.create(_desktop_mode, _conf.video.title, sf::Style::Fullscreen);
-        _window.setMouseCursorVisible(false);
+        _window.setMouseCursorVisible(_panel->is_visible());
 
         _is_fullscreen = true;
     }
@@ -350,6 +356,8 @@ void UISfml::toggle_panel_visibility()
 
         auto wsize = _window.getSize();
         resize_event(wsize.x, wsize.y);
+
+        _window.setMouseCursorVisible(_panel->is_visible());
 
     } else {
         auto wsize = _window.getSize();
