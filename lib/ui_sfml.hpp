@@ -18,21 +18,26 @@
  */
 #pragma once
 
+#include <atomic>
+#include <functional>
 #include <map>
 #include <memory>
 #include <sstream>
+#include <string>
+#include <vector>
 
 #include <SFML/Graphics.hpp>
 
+#include "image.hpp"
+#include "joystick.hpp"
+#include "keyboard.hpp"
+#include "rgb.hpp"
 #include "types.hpp"
-#include "ui.hpp"
-#include "ui_audio_sfml.hpp"
-#include "ui_panel_sfml.hpp"
 
+#include "ui_config.hpp"
+#include "ui_sfml_audio.hpp"
+#include "ui_sfml_panel.hpp"
 
-#define UISFML_VERSION      "SFML-" CEMU_STR(SFML_VERSION_MAJOR) "." \
-                                    CEMU_STR(SFML_VERSION_MINOR) "." \
-                                    CEMU_STR(SFML_VERSION_PATCH)
 
 namespace cemu {
 namespace ui {
@@ -43,63 +48,164 @@ namespace sfml {
  */
 extern std::stringstream sfml_err;
 
+
+/**
+ * @return The SFML library version.
+ */
+constexpr const char *sfml_version()
+{
+    return "SFML-" CEMU_STR(SFML_VERSION_MAJOR) "." \
+                   CEMU_STR(SFML_VERSION_MINOR) "." \
+                   CEMU_STR(SFML_VERSION_PATCH);
+}
+
+
+/**
+ * Scanline.
+ * A Scanline represents a single line of an emulated screen;
+ * it is filled by a video controller device with RGBa pixel data.
+ * When a scanline is fully filled it must be sent to the user interface
+ * to be rendered.
+ */
+using Scanline = std::vector<Rgba>;
+
+
 /**
  * SFML user interface.
  */
-class UISfml : public UI {
+class UISfml {
 public:
+    constexpr static const uint32_t CRT_COLOR      = 0x000000FF;
+    constexpr static const uint32_t SCANLINE_COLOR = 0x00000080;
+
+
     explicit UISfml(const Config &conf);
 
     virtual ~UISfml() {
+        stop();
     }
 
     /**
-     * @see UI::audio_play()
+     * Set the main window's title.
+     * @param title The new title.
+     * @exception UIError
      */
-    void audio_play() override {
+    void title(const std::string &title) {
+        _window.setTitle(title);
+    }
+
+    /**
+     * Set the emulated keyboard.
+     * @param kbd Keyboard to set.
+     */
+    void keyboard(std::shared_ptr<Keyboard> kbd) {
+        _kbd = kbd;
+    }
+
+    /**
+     * Set the emulated joysticks and associate connected gamepads to them.
+     * @param il Joysticks to set.
+     */
+    void joystick(const std::initializer_list<std::shared_ptr<Joystick>> &il);
+
+    /**
+     * Set the hot-keys callback.
+     * @param hotkey_cb Callback.
+     */
+    void hotkeys(const std::function<void(Keyboard::Key)> &hotkey_cb) {
+        _hotkey_cb = hotkey_cb;
+    }
+
+    /**
+     * @return The emulated keyboard.
+     * @exception UIError if the keyboard is not set.
+     */
+    std::shared_ptr<Keyboard> keyboard() {
+        if (!_kbd) {
+            throw UIError{"Keyboard not set"};
+        }
+        return _kbd;
+    }
+
+    /**
+     * Hot-key event handler.
+     * @param key The hot-key code.
+     */
+    void hotkey(Keyboard::Key key) {
+        if (_hotkey_cb) {
+            _hotkey_cb(key);
+        }
+    }
+
+    /**
+     * If audio is enabled, start the audio stream.
+     * @see Config
+     * @see audio_pause()
+     * @see audio_stop()
+     */
+    void audio_play() {
         if (audio_enabled()) {
             _audio_stream.play();
         }
     }
 
     /**
-     * @see UI::audio_pause()
+     * If audio is enabled, pause the audio stream.
+     * Once paused it can be resumed using audio_play().
+     * @see Config
+     * @see audio_play()
      */
-    void audio_pause() override {
+    void audio_pause() {
         if (audio_enabled()) {
             _audio_stream.pause();
         }
     }
 
     /**
-     * @see UI::audio_stop()
+     * If audio is enabled, stop the audio stream.
+     * Once stopped in can be restarted using audio_play().
+     * @see Config
+     * @see audio_play()
      */
-    void audio_stop() override {
+    void audio_stop() {
         if (audio_enabled()) {
             _audio_stream.stop();
         }
     }
 
     /**
-     * @see UI::audio_volume(float)
+     * If audio is enabled, set the volume.
+     * @param vol Volume value to set (between 0.0f and 1.0f).
+     * @see Config
+     * @see audio_volume()
      */
-    void audio_volume(float vol) override {
+    void audio_volume(float vol) {
         if (audio_enabled()) {
             _audio_stream.setVolume((vol > 1.0f) ? 100.0f : vol * 100.0f);
         }
     }
 
     /**
-     * @see UI::audio_volume()
+     * @return The current volume if audio is enabled; 0.0f otherwise.
+     * @see Config
+     * @see audio_volume(float)
      */
-    float audio_volume() const override {
+    float audio_volume() const {
         return (audio_enabled() ? _audio_stream.getVolume() / 100.0f : 0.0f);
     }
 
     /**
-     * @see UI::audio_buffer()
+     * Get an audio buffer.
+     * This method must be called by an emulated audio controller
+     * to get a buffer to be filled with generated audio samples;
+     * once the buffer is filled its dispatch() method must be
+     * called in order to deliver it to the sound streaming thread
+     * (if the dispatch method is not called the AudioBuffer's
+     * destructor will do it anyway).
+     * @return An audio buffer.
+     * @see AudioBuffer
      */
-    AudioBuffer audio_buffer() override {
+    AudioBuffer audio_buffer() {
         if (audio_enabled()) {
             return _audio_stream.buffer();
         }
@@ -108,65 +214,71 @@ public:
     }
 
     /**
-     * @see UI::render_line()
+     * @return true if audio is enabled; false otherwise.
      */
-    void render_line(unsigned line, const Scanline &sline) override;
-
-    /**
-     * @see UI::process_events()
-     */
-    bool process_events() override;
-
-    /**
-     * @see UI::title()
-     */
-    void title(const std::string &title) override {
-        _window.setTitle(title);
+    bool audio_enabled() const {
+        return _conf.audio.enabled;
     }
 
     /**
-     * @see UI::icon()
+     * Render a scanline.
+     * This method must be called by an emulated video controller to render a scanline.
+     * @param line  Number of scanline to render;
+     * @param sline Scanline pixel data.
      */
-    void icon(const Image &img) override;
+    void render_line(unsigned line, const Scanline &sline);
 
     /**
-     * @see UI::to_string()
+     * @return The info panel.
+     * @exception UIError
+     * @see ui::Panel
      */
-    std::string to_string() const override {
-        return UISFML_VERSION;
-    }
-
-    /**
-     * @see UI::panel()
-     */
-    std::shared_ptr<Panel> panel() override {
+    std::shared_ptr<PanelSfml> panel() {
         return _panel;
     }
 
     /**
-     * Set the emulated joysticks and associate connected gamepads to them.
-     * @param il Joysticks to set.
-     * @see UI::joystick(const std::initializer_list<std::shared_ptr<Joystick>> &il)
+     * Main loop.
+     * This method starts the UI and returns when the user closes the
+     * main window or when any other thread calls the stop() method.
+     * @exception UIError
+     * @see stop()
      */
-    void joystick(const std::initializer_list<std::shared_ptr<Joystick>> &il) override;
+    void run();
 
     /**
-     * @see UI::joystick(unsigned jid)
+     * Stop the main loop.
+     * This method returns immediatly, it does not wait
+     * for the main loop thread to leave the run() method.
+     * @see run()
      */
-    std::shared_ptr<Joystick> joystick(unsigned jid) override {
-        return UI::joystick(jid);
+    void stop() {
+        _stop = true;
     }
 
     /**
-     * Create a SFML user interface.
-     * @param conf Configuration parameters;
-     * @param icon Icon image.
-     * @return The user interface using SFML as backend.
-     * @exception UIError
+     * @return A human-readable string showing the libraries used by this user interface.
      */
-    static std::shared_ptr<UI> create(const ui::Config &conf);
+    std::string to_string() const {
+        return sfml_version();
+    }
 
 private:
+    /**
+     * Process windowing events.
+     * This method runs in an infinite loop and returns when
+     * the main window is closed or the stop() method is called.
+     * @see run()
+     */
+    void process_events();
+
+    /**
+     * Get an emulated joystick.
+     * @param jid Joystick index.
+     * @return The requested joystick on success; nullptr if the specified joystick does not exist.
+     */
+    std::shared_ptr<Joystick> joystick(unsigned jid);
+
     /**
      * Create the info panel.
      * Create the info panel and add the ui widgets.
@@ -217,6 +329,7 @@ private:
      */
     void joy_event(const sf::Event &event);
 
+
     /**
      * Convert a SFML key code to Keyboard::Key code.
      * @param key SFML Key code.
@@ -231,6 +344,32 @@ private:
      * @return The main window size.
      */
     static sf::Vector2u window_size(bool panel_visible, const sf::Vector2u &screen_size);
+
+
+    /**
+     * UI configuration.
+     */
+    Config _conf{};
+
+    /**
+     * True if the main loop must be stopped.
+     */
+    std::atomic_bool _stop{};
+
+    /**
+     * Emulated keyboard.
+     */
+    std::shared_ptr<Keyboard> _kbd{};
+
+    /**
+     * List of emulated joysticks.
+     */
+    std::vector<std::shared_ptr<Joystick>> _joys{};
+
+    /**
+     * User defined hot-keys callback.
+     */
+    std::function<void(Keyboard::Key)> _hotkey_cb{};
 
     /**
      * Video mode.
@@ -314,11 +453,6 @@ private:
      * Texture for the scanline effect.
      */
     sf::Texture _scanline_tex{};
-
-    /**
-     * Window icon.
-     */
-    Image _icon{};
 
     /**
      * Audio output stream.

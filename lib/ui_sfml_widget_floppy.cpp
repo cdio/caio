@@ -41,8 +41,12 @@ void Floppy::load()
 
 sf::Sprite Floppy::sprite()
 {
-    status_t st{.u64 = update()};
-    const auto &color = (st.is_attached ? DISK_ATTACHED_COLOR : DISK_MISSING_COLOR);
+    Status st{};
+    if (_update) {
+       st = _update();
+    }
+
+    const Rgba &color = (st.is_attached ? DISK_ATTACHED_COLOR : DISK_MISSING_COLOR);
     _sprite.setColor(sf::Color{color.to_host_u32()});
     if (st.is_idle) {
         _sprite.setRotation(0);

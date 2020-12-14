@@ -400,7 +400,7 @@ void Mos6569::paint_scanline(unsigned line)
          * Render the scanline.
          */
         unsigned sline = line - VISIBLE_Y_START;
-        _ui->render_line(sline, _scanline);
+        render_line(sline, _scanline);
 
         reset_collision_data();
         reset_collision_mib();

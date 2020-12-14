@@ -269,11 +269,12 @@ public:
     }
 
     /**
-     * Set the user interface.
-     * @param ui The user interface to set.
+     * Set the render line method.
+     * The render line method sends the video output to the user interface.
+     * @param rl The render line method.
      */
-    void ui(std::shared_ptr<UI> ui) {
-        _ui = ui;
+    void render_line(const std::function<void(unsigned, const ui::Scanline &)> &rl) {
+        _render_line = rl;
     }
 
     /**
@@ -362,6 +363,17 @@ private:
      * @see Clockable
      */
     size_t tick(const Clock &clk) override;
+
+    /**
+     * Render a scanline.
+     * @param line     Scanline number;
+     * @param scanline Scanline data.
+     */
+    void render_line(unsigned line, const ui::Scanline &scanline) {
+        if (_render_line) {
+            _render_line(line, scanline);
+        }
+    }
 
     /**
      * Set the status of the IRQ output pin.
@@ -951,9 +963,9 @@ private:
     std::function<void(size_t)> _vsync{};
 
     /**
-     * User interface (video driver).
+     * Render line method.
      */
-    std::shared_ptr<UI> _ui{};
+    std::function<void(unsigned, const ui::Scanline &)> _render_line{};
 
     /**
      * Colour palette.

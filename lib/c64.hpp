@@ -192,7 +192,7 @@ private:
     std::shared_ptr<Joystick>         _joy1{};
     std::shared_ptr<Joystick>         _joy2{};
 
-    std::shared_ptr<UI>               _ui{};
+    std::shared_ptr<ui::UI>           _ui{};
 };
 
 }

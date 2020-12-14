@@ -22,6 +22,7 @@
 #include <array>
 #include <atomic>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -101,11 +102,11 @@ public:
     }
 
     /**
-     * Set the user interface.
-     * @param ui User interface.
+     * Set the audio buffer provider.
+     * @param abuf Audio buffer provider.
      */
-    void ui(std::shared_ptr<UI> ui) {
-        _ui = ui;
+    void audio_buffer(const std::function<ui::AudioBuffer()> &abuf) {
+        _audio_buffer = abuf;
     }
 
     /**
@@ -132,9 +133,9 @@ protected:
           _samples_cycles{Clock::cycles(SAMPLES_TIME, clkf)} {
     }
 
-    std::shared_ptr<UI> _ui{};
-    unsigned            _clkf{};
-    size_t              _samples_cycles{};  /* SAMPLES_TIME as clock cycles */
+    std::function<ui::AudioBuffer()> _audio_buffer{};
+    unsigned                         _clkf{};
+    size_t                           _samples_cycles{};  /* SAMPLES_TIME as clock cycles */
 };
 
 }

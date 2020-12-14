@@ -25,9 +25,6 @@
 #include "fs.hpp"
 #include "prg.hpp"
 #include "utils.hpp"
-#include "ui_sfml.hpp"
-#include "ui_sfml_widget_floppy.hpp"
-#include "ui_sfml_widget_gamepad.hpp"
 #include "version.hpp"
 
 #include "mos_6581.hpp"
@@ -174,8 +171,8 @@ void C64::create_widgets()
     /*
      * Floppy disks presence and idle status.
      */
-    auto floppy8 = ui::Widget::create<ui::sfml::widget::Floppy>([this]() -> uint64_t {
-        ui::sfml::widget::Floppy::status_t st{};
+    auto floppy8 = ui::widget::create<ui::widget::Floppy>([this]() {
+        ui::widget::Floppy::Status st{};
         if (_unit8) {
             st.is_idle = _unit8->is_idle();
             st.is_attached = true;
@@ -184,11 +181,11 @@ void C64::create_widgets()
             st.is_attached = false;
         }
 
-        return st.u64;
+        return st;
     });
 
-    auto floppy9 = ui::Widget::create<ui::sfml::widget::Floppy>([this]() -> uint64_t {
-        ui::sfml::widget::Floppy::status_t st{};
+    auto floppy9 = ui::widget::create<ui::widget::Floppy>([this]() {
+        ui::widget::Floppy::Status st{};
         if (_unit9) {
             st.is_idle = _unit9->is_idle();
             st.is_attached = true;
@@ -197,30 +194,31 @@ void C64::create_widgets()
             st.is_attached = false;
         }
 
-        return st.u64;
+        return st;
     });
 
     /*
      * Joystick presence and swap status.
      */
-    auto gamepad1 = ui::Widget::create<ui::sfml::widget::Gamepad>([this]() -> uint64_t {
-        ui::sfml::widget::Gamepad::status_t st{};
+    auto gamepad1 = ui::widget::create<ui::widget::Gamepad>([this]() {
+        ui::widget::Gamepad::Status st{};
         st.is_swapped = _conf.swapj;
         st.is_connected = (_conf.swapj ? _joy2->is_connected() : _joy1->is_connected());
-        return st.u64;
+        return st;
     });
 
-    auto gamepad2 = ui::Widget::create<ui::sfml::widget::Gamepad>([this]() -> uint64_t {
-        ui::sfml::widget::Gamepad::status_t st{};
+    auto gamepad2 = ui::widget::create<ui::widget::Gamepad>([this]() {
+        ui::widget::Gamepad::Status st{};
         st.is_swapped = _conf.swapj;
         st.is_connected = (_conf.swapj ? _joy1->is_connected() : _joy2->is_connected());
-        return st.u64;
+        return st;
     });
 
-    _ui->panel()->add(floppy8);
-    _ui->panel()->add(floppy9);
-    _ui->panel()->add(gamepad1);
-    _ui->panel()->add(gamepad2);
+    auto panel = std::dynamic_pointer_cast<ui::Panel>(_ui->panel());
+    panel->add(floppy8);
+    panel->add(floppy9);
+    panel->add(gamepad1);
+    panel->add(gamepad2);
 }
 
 void C64::reset()
@@ -283,7 +281,7 @@ void C64::reset()
         },
     };
 
-    _ui = ui::sfml::UISfml::create(uiconf);
+    _ui = std::make_shared<ui::UI>(uiconf);
 
     if (!_conf.unit8.empty()) {
         _unit8 = c1541::create(_conf.unit8, 8, _bus);
@@ -324,12 +322,16 @@ void C64::reset()
         _vic2->palette(ppath);
     }
 
-    _vic2->ui(_ui);
+    _vic2->render_line([this](unsigned line, const ui::Scanline &scanline) {
+        _ui->render_line(line, scanline);
+    });
 
     _cia1->irq(trigger_irq);
     _cia2->irq(trigger_nmi);
 
-    _sid->ui(_ui);
+    _sid->audio_buffer([this]() {
+        return _ui->audio_buffer();
+    });
 
     /*
      * Keyboard and joysticks.

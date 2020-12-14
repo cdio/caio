@@ -19,6 +19,7 @@
 #include "ui_sfml.hpp"
 
 #include <algorithm>
+#include <csignal>
 
 #include "icon.hpp"
 #include "logger.hpp"
@@ -28,6 +29,20 @@
 namespace cemu {
 namespace ui {
 namespace sfml {
+
+static std::atomic<Keyboard::Key> signal_key{Keyboard::KEY_NONE};
+
+static void signal_handler(int signo)
+{
+    switch (signo) {
+    case SIGINT:
+        signal_key = Keyboard::KEY_CTRL_C;
+        break;
+
+    default:;
+    }
+}
+
 
 std::stringstream sfml_err{};
 
@@ -119,26 +134,21 @@ std::map<sf::Keyboard::Key, Keyboard::Key> UISfml::sfml_to_key{
 };
 
 
-std::shared_ptr<UI> UISfml::create(const ui::Config &conf)
-{
-    auto ui = std::make_shared<UISfml>(conf);
-    ui->icon(icon32());
-    return ui;
-}
-
 Keyboard::Key UISfml::to_key(const sf::Keyboard::Key &code)
 {
     auto it = sfml_to_key.find(code);
     return (it == sfml_to_key.end() ? Keyboard::KEY_NONE : it->second);
 }
 
+
 sf::Vector2u UISfml::window_size(bool panel_visible, const sf::Vector2u &screen_size)
 {
     return {screen_size.x, screen_size.y + PanelSfml::size(panel_visible, screen_size.x).y};
 }
 
+
 UISfml::UISfml(const Config &conf)
-    : UI{conf}
+    : _conf{conf}
 {
     sf::err().rdbuf(sfml_err.rdbuf());
 
@@ -214,11 +224,11 @@ void UISfml::create_panel()
         throw UIError{"Can't instantiate SFML panel: " + Error::to_string()};
     }
 
-    auto fullscreen = ui::Widget::create<ui::sfml::widget::Fullscreen>([this]() -> uint64_t {
+    auto fullscreen = widget::create<widget::Fullscreen>([this]() {
         return _is_fullscreen;
     });
 
-    _panel->add(fullscreen, Panel::RIGHT_JUSTIFIED);
+    _panel->add(fullscreen, PanelSfml::Just::RIGHT);
 }
 
 void UISfml::render_line(unsigned line, const Scanline &sline)
@@ -313,9 +323,8 @@ void UISfml::toggle_fullscreen()
         _window.setMouseCursorVisible(true);
         _window.setPosition(_saved_win_pos);
 
-        if (_icon) {
-            _window.setIcon(_icon.width, _icon.height, reinterpret_cast<const uint8_t *>(_icon.data.data()));
-        }
+        auto icon = icon32();
+        _window.setIcon(icon.width, icon.height, reinterpret_cast<const uint8_t *>(icon.data.data()));
 
         _is_fullscreen = false;
 
@@ -550,58 +559,10 @@ void UISfml::joy_event(const sf::Event &event)
     }
 }
 
-bool UISfml::process_events()
-{
-    _window.setActive(true);     //XXX
-
-    sf::Event event{};
-    while (_window.pollEvent(event)) {
-        switch (event.type) {
-        case sf::Event::Closed:
-            audio_stop();
-            _window.close();
-            return false;
-
-        case sf::Event::Resized:
-            resize_event(event.size.width, event.size.height);
-            break;
-
-        case sf::Event::KeyPressed:
-        case sf::Event::KeyReleased:
-        case sf::Event::TextEntered:
-            kbd_event(event);
-            break;
-
-        case sf::Event::JoystickConnected:
-        case sf::Event::JoystickDisconnected:
-        case sf::Event::JoystickButtonPressed:
-        case sf::Event::JoystickButtonReleased:
-        case sf::Event::JoystickMoved:
-            joy_event(event);
-            break;
-
-        default:;
-        }
-    }
-
-    if (_window.isOpen()) {
-       render_window();
-    }
-
-    return true;
-}
-
-void UISfml::icon(const Image &img)
-{
-    if (img) {
-        _icon = img;
-        _window.setIcon(img.width, img.height, reinterpret_cast<const uint8_t *>(img.data.data()));
-    }
-}
-
 void UISfml::joystick(const std::initializer_list<std::shared_ptr<Joystick>> &il)
 {
-    UI::joystick(il);
+    _joys = il;
+
     for (unsigned id = 0; id < _joys.size(); ++id) {
         if (sf::Joystick::isConnected(id)) {
             _joys[id]->reset(id);
@@ -609,6 +570,77 @@ void UISfml::joystick(const std::initializer_list<std::shared_ptr<Joystick>> &il
             _joys[id]->reset();
         }
     }
+}
+
+std::shared_ptr<Joystick> UISfml::joystick(unsigned jid)
+{
+    if (jid < _joys.size()) {
+        return _joys[jid];
+    }
+
+    return {};
+}
+
+void UISfml::process_events()
+{
+    while (!_stop) {
+        sf::Event event{};
+        while (_window.pollEvent(event)) {
+            switch (event.type) {
+            case sf::Event::Closed:
+                return;
+
+            case sf::Event::Resized:
+                resize_event(event.size.width, event.size.height);
+                break;
+
+            case sf::Event::KeyPressed:
+            case sf::Event::KeyReleased:
+            case sf::Event::TextEntered:
+                kbd_event(event);
+                break;
+
+            case sf::Event::JoystickConnected:
+            case sf::Event::JoystickDisconnected:
+            case sf::Event::JoystickButtonPressed:
+            case sf::Event::JoystickButtonReleased:
+            case sf::Event::JoystickMoved:
+                joy_event(event);
+                break;
+
+            default:;
+            }
+        }
+
+        if (_window.isOpen()) {
+        render_window();
+        }
+
+        if (signal_key != Keyboard::KEY_NONE) {
+            hotkey(signal_key);
+            signal_key = Keyboard::KEY_NONE;
+        }
+    }
+}
+
+void UISfml::run()
+{
+    auto old_handler = std::signal(SIGINT, signal_handler);
+    if (old_handler == SIG_ERR) {
+        throw UIError{"Can't set signal handler: " + Error::to_string()};
+    }
+
+    _window.setActive(true);
+
+    audio_play();
+
+    process_events();
+
+    audio_stop();
+
+    _window.close();
+
+    std::signal(SIGINT, old_handler);
 }
 
 }

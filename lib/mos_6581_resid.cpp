@@ -48,11 +48,13 @@ void Mos6581Resid::write(addr_t addr, uint8_t value)
 
 size_t Mos6581Resid::tick(const Clock &clk)
 {
-    auto v = _ui->audio_buffer();
-    if (v) {
-        auto dt = static_cast<cycle_count>(_samples_cycles);
-        _resid->clock(dt, &v[0], v.size(), 1);
-        v.dispatch();
+    if (_audio_buffer) {
+        auto v = _audio_buffer();
+        if (v) {
+            auto dt = static_cast<cycle_count>(_samples_cycles);
+            _resid->clock(dt, &v[0], v.size(), 1);
+            v.dispatch();
+        }
     }
 
     return _samples_cycles;

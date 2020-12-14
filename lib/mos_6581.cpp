@@ -440,32 +440,34 @@ void Mos6581::write(addr_t addr, uint8_t value)
 
 size_t Mos6581::tick(const Clock &clk)
 {
-    _v1[_sample_index] = _voice_1.tick();
-    _v2[_sample_index] = _voice_2.tick();
-    _v3[_sample_index] = _voice_3.tick();
+    if (_audio_buffer) {
+        _v1[_sample_index] = _voice_1.tick();
+        _v2[_sample_index] = _voice_2.tick();
+        _v3[_sample_index] = _voice_3.tick();
 
-    /*
-     * When a voice is filtered but the filter is disabled the sampled value is set to 0.
-     * This allows PWM using filter activation/deactivation.
-     */
-    if (_filter.is_disabled()) {
-        if (is_v1_filtered()) {
-            _v1[_sample_index] = 0.0f;
+        /*
+        * When a voice is filtered but the filter is disabled the sampled value is set to 0.
+        * This allows PWM using filter activation/deactivation.
+        */
+        if (_filter.is_disabled()) {
+            if (is_v1_filtered()) {
+                _v1[_sample_index] = 0.0f;
+            }
+
+            if (is_v2_filtered()) {
+                _v2[_sample_index] = 0.0f;
+            }
+
+            if (is_v3_filtered()) {
+                _v3[_sample_index] = 0.0f;
+            }
         }
 
-        if (is_v2_filtered()) {
-            _v2[_sample_index] = 0.0f;
+        ++_sample_index;
+        if (_sample_index == SAMPLES) {
+            _sample_index = 0;
+            play();
         }
-
-        if (is_v3_filtered()) {
-            _v3[_sample_index] = 0.0f;
-        }
-    }
-
-    ++_sample_index;
-    if (_sample_index == SAMPLES) {
-        _sample_index = 0;
-        play();
     }
 
     return _samples_cycles;
@@ -473,7 +475,7 @@ size_t Mos6581::tick(const Clock &clk)
 
 void Mos6581::play()
 {
-    auto v = _ui->audio_buffer();
+    auto v = _audio_buffer();
     if (v) {
         if (_filter.is_enabled()) {
             /* FIXME: optimise */

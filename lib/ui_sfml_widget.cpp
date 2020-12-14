@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_widget_sfml.hpp"
+#include "ui_sfml_widget.hpp"
 
 #include "types.hpp"
 

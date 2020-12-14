@@ -56,9 +56,7 @@ CXXSRCS=	aspace.cpp \
 		signal.cpp \
 		socket.cpp \
 		types.cpp \
-		ui.cpp \
 		ui_config.cpp \
-		ui_panel.cpp \
 		utils.cpp
 
 INCS=		aspace.hpp \
@@ -96,8 +94,6 @@ INCS=		aspace.hpp \
 		types.hpp \
 		ui.hpp \
 		ui_config.hpp \
-		ui_panel.hpp \
-		ui_widget.hpp \
 		utils.hpp \
 		version.hpp
 
@@ -140,19 +136,20 @@ INCS+=		c64.hpp \
 #
 # UI Drivers
 #
-CXXSRCS+=	ui_audio_sfml.cpp \
-		ui_panel_sfml.cpp \
-		ui_sfml.cpp \
+CXXSRCS+=	ui_sfml.cpp \
+		ui_sfml_audio.cpp \
+		ui_sfml_panel.cpp \
+		ui_sfml_widget.cpp \
 		ui_sfml_widget_floppy.cpp \
 		ui_sfml_widget_fullscreen.cpp \
-		ui_sfml_widget_gamepad.cpp \
-		ui_widget_sfml.cpp
+		ui_sfml_widget_gamepad.cpp
 
-INCS+=		ui_panel_sfml.hpp \
-		ui_sfml.hpp \
+INCS+=		ui_sfml.hpp \
+		ui_sfml_audio,hpp \
+		ui_sfml_panel.hpp \
+		ui_sfml_widget.hpp \
 		ui_sfml_widget_floppy.hpp \
 		ui_sfml_widget_fullscreen.hpp \
-		ui_sfml_widget_gamepad.hpp \
-		ui_widget_sfml.hpp
+		ui_sfml_widget_gamepad.hpp
 
 include ${ROOT}/mk/lib.mk

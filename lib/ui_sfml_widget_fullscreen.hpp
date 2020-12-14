@@ -18,8 +18,10 @@
  */
 #pragma once
 
+#include <functional>
+
 #include "rgb.hpp"
-#include "ui_widget_sfml.hpp"
+#include "ui_sfml_widget.hpp"
 
 
 namespace cemu {
@@ -29,15 +31,18 @@ namespace widget {
 
 class Fullscreen : public WidgetSfml {
 public:
-    using WidgetSfml::WidgetSfml;
+    Fullscreen(const std::function<bool()> &upd)
+        : _update{upd} {
+    }
 
     void load() override;
 
     sf::Sprite sprite() override;
 
 private:
-    bool       _is_fullscreen{};
-    sf::Sprite _sprite{};
+    std::function<bool()> _update;
+    bool                  _is_fullscreen{};
+    sf::Sprite            _sprite{};
 };
 
 }

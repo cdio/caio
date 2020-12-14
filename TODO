@@ -1,10 +1,9 @@
-- SID:      Fix white noise on some uridium hacks
+- UI:       SFML keyboard in/out focus problem
+- SID:      Fix noise on some uridium cracks
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
 - UI:       Accept CTRL-C (console) on pause mode
-- UI:       SFML keyboard in/out focus problem
-- UI:       Widget panel
 - misc:     Fix Giana timeout
 - VIC:      Fix vertical scroll
 - VIC:      Cycles emulation
@@ -14,6 +13,7 @@
 - config:   realpath(3) on user defined directories
 - misc:     Speed-up
 - misc:     Do not add the palette extension when it is set by the user
+- UI:       Pause and audio widgets
 - Apple2
 - BBC Micro
 - Daewoo DPC-200

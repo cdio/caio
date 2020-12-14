@@ -22,14 +22,23 @@
 
 #include <SFML/Audio.hpp>
 
+#include "dispatcher.hpp"
 #include "locked_queue.hpp"
-
-#include "ui.hpp"
+#include "signal.hpp"
+#include "ui_config.hpp"
 
 
 namespace cemu {
 namespace ui {
 namespace sfml {
+
+/**
+ * Audio Buffer.
+ * An audio buffer is a self-dispatchable object.
+ * @see DispatcherT
+ */
+using AudioBuffer = DispatcherT<samples_i16>;
+
 
 class AudioStream : public sf::SoundStream {
 public:

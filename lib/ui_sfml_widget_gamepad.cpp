@@ -34,8 +34,12 @@ void Gamepad::load()
 
 sf::Sprite Gamepad::sprite()
 {
-    status_t st{.u64 = update()};
-    const auto &color = (st.is_connected ? GAMEPAD_PRESENT_COLOR : GAMEPAD_MISSING_COLOR);
+    Status st{};
+    if (_update) {
+        st = _update();
+    }
+
+    const Rgba &color = (st.is_connected ? GAMEPAD_PRESENT_COLOR : GAMEPAD_MISSING_COLOR);
     auto sprite = sf::Sprite{texture(), (st.is_swapped ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64})};
     sprite.setColor(sf::Color{color.to_host_u32()});
     return sprite;

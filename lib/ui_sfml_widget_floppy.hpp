@@ -18,8 +18,10 @@
  */
 #pragma once
 
+#include <functional>
+
 #include "rgb.hpp"
-#include "ui_widget_sfml.hpp"
+#include "ui_sfml_widget.hpp"
 
 
 namespace cemu {
@@ -32,23 +34,22 @@ public:
     constexpr static const Rgba DISK_ATTACHED_COLOR = { 255, 255, 255, 255 };   /* Color modulators */
     constexpr static const Rgba DISK_MISSING_COLOR  = { 255, 255, 255, 64  };
 
-    using status_t = union {
-        struct {
-            uint64_t is_attached:1,
-                     is_idle:1;
-        };
-
-        uint64_t u64;
+    struct Status {
+        bool is_attached{};
+        bool is_idle{};
     };
 
-    using WidgetSfml::WidgetSfml;
+    Floppy(const std::function<Status()> &upd)
+        : _update{upd} {
+    }
 
     void load() override;
 
     sf::Sprite sprite() override;
 
 private:
-    sf::Sprite _sprite{};
+    std::function<Status()> _update;
+    sf::Sprite              _sprite{};
 };
 
 }

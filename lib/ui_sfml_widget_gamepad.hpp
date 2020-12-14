@@ -18,7 +18,9 @@
  */
 #pragma once
 
-#include "ui_widget_sfml.hpp"
+#include <functional>
+
+#include "ui_sfml_widget.hpp"
 
 
 namespace cemu {
@@ -31,20 +33,21 @@ public:
     constexpr static const Rgba GAMEPAD_MISSING_COLOR = { 255, 255, 255, 64  };    /* Color modulators */
     constexpr static const Rgba GAMEPAD_PRESENT_COLOR = { 255, 255, 255, 255 };
 
-    using status_t = union {
-        struct {
-            uint64_t is_connected:1,
-                     is_swapped:1;
-        };
-
-        uint64_t u64;
+    struct Status {
+        bool is_connected;
+        bool is_swapped;
     };
 
-    using WidgetSfml::WidgetSfml;
+    Gamepad(const std::function<Status()> &upd)
+        : _update{upd} {
+    }
 
     void load() override;
 
     sf::Sprite sprite() override;
+
+private:
+    std::function<Status()> _update;
 };
 
 }

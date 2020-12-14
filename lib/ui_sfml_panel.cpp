@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_panel_sfml.hpp"
+#include "ui_sfml_panel.hpp"
 
 #include <sstream>
 
-#include "ui_widget_sfml.hpp"
 #include "utils.hpp"
 
 
@@ -36,11 +35,13 @@ sf::Vector2u PanelSfml::size(bool is_visible, unsigned max_width)
     return (is_visible ? sf::Vector2u{max_width, HEIGHT} : sf::Vector2u{0, 0});
 }
 
+
 PanelSfml::PanelSfml(bool is_visible, unsigned max_width)
-    : ui::Panel{is_visible},
+    : _is_visible{is_visible},                          /* These two must be initialised before the others */
       _desktop_mode{sf::VideoMode::getDesktopMode()}
 {
     resize(max_width);
+
     if (!_render_tex.create(_desktop_mode.width, HEIGHT)) {
         throw UIError{"Can't create the panel texture: " + sfml_err.str()};
     }
@@ -48,7 +49,7 @@ PanelSfml::PanelSfml(bool is_visible, unsigned max_width)
 
 void PanelSfml::visible(bool is_visible)
 {
-    ui::Panel::visible(is_visible);
+    _is_visible = is_visible;
     resize(_size.x);
 }
 
@@ -65,15 +66,15 @@ sf::Sprite PanelSfml::sprite()
 
     _render_tex.clear();
 
-    unsigned left_x{};
-    unsigned right_x{_size.x};
+    unsigned left_x = 0;
+    unsigned right_x = _size.x;
 
     for (const auto &pair : widgets()) {
-        auto widget = std::dynamic_pointer_cast<WidgetSfml>(pair.first);
-        bool just = pair.second;
+        auto [widget, just] = pair;
+
         auto sprite = widget->sprite();
 
-        if (just == Panel::LEFT_JUSTIFIED) {
+        if (just == Just::LEFT) {
             sprite.move(left_x, 0);
             left_x += widget->WIDTH;
         } else {
@@ -86,13 +87,28 @@ sf::Sprite PanelSfml::sprite()
 
     auto frame = sf::RectangleShape{sf::Vector2f{_size}};
     frame.setOutlineThickness(-static_cast<float>(FRAME_TICKNESS));
-    frame.setOutlineColor(sf::Color{FRAME_COLOR.u32});
-    frame.setFillColor(sf::Color{BACKGROUND_COLOR.u32});
+    frame.setOutlineColor(sf::Color{FRAME_COLOR.to_host_u32()});
+    frame.setFillColor(sf::Color{BACKGROUND_COLOR.to_host_u32()});
     _render_tex.draw(frame);
 
     _render_tex.display();
 
     return sf::Sprite{_render_tex.getTexture(), {0, 0, static_cast<int>(_size.x), static_cast<int>(_size.y)}};
+}
+
+void PanelSfml::add(const std::shared_ptr<WidgetSfml> &widget, PanelSfml::Just just)
+{
+    if (find(widget) == _widgets.end()) {
+        _widgets.push_back({widget, just});
+    }
+}
+
+void PanelSfml::del(const std::shared_ptr<WidgetSfml> &widget)
+{
+    auto it = find(widget);
+    if (it != _widgets.end()) {
+        _widgets.erase(it);
+    }
 }
 
 }

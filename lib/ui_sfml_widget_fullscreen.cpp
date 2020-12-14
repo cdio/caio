@@ -35,7 +35,12 @@ void Fullscreen::load()
 
 sf::Sprite Fullscreen::sprite()
 {
-    auto is_fullscreen = static_cast<bool>(update());
+    bool is_fullscreen{};
+
+    if (_update) {
+        is_fullscreen = _update();
+    }
+
     if (_is_fullscreen != is_fullscreen) {
         _sprite = sf::Sprite{texture(), (is_fullscreen ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64})};
         _is_fullscreen = is_fullscreen;
