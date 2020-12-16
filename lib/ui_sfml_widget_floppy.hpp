@@ -39,15 +39,11 @@ public:
         bool is_idle{};
     };
 
-    Floppy(const std::function<Status()> &upd)
-        : _update{upd} {
-    }
-
-    void load() override;
-
-    sf::Sprite sprite() override;
+    Floppy(const std::function<Status()> &upd);
 
 private:
+    sf::Sprite make_sprite() override;
+
     std::function<Status()> _update;
     sf::Sprite              _sprite{};
 };

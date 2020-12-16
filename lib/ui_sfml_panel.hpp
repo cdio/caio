@@ -81,8 +81,8 @@ public:
     /**
      * @return A constant reference to the panel size.
      */
-    const sf::Vector2u &size() const {
-        return _size;
+    const sf::IntRect &area() const {
+        return _area;
     }
 
     /**
@@ -91,6 +91,19 @@ public:
     bool is_visible() const {
         return _is_visible;
     }
+
+    /**
+     * Set the position of this panel.
+     * @param x X position;
+     * @param y Y position.
+     */
+    void position(int x, int y);
+
+    /**
+     * Event received.
+     * @param ev Event data.
+     */
+    void event(const sf::Event &ev);
 
     /**
      * @return The panel sprite.
@@ -112,19 +125,12 @@ public:
     void del(const std::shared_ptr<WidgetSfml> &widget);
 
     /**
-     * @return A constant reference to the widgets container.
-     */
-    const std::vector<widget_just_t> &widgets() const {
-        return _widgets;
-    }
-
-    /**
-     * Get the size of a panel.
+     * Get the area covered by a panel.
      * @param is_visible Visibility flag (true if visible; false otherwise).
-     * @param max_width Maximum allowed panel width.
-     * @return The panel size.
+     * @param max_width  Maximum allowed width.
+     * @return The area a panel would cover.
      */
-    static sf::Vector2u size(bool is_visible, unsigned max_width);
+    static sf::IntRect area(bool is_visible, unsigned max_width);
 
 private:
     std::vector<widget_just_t>::const_iterator find(const std::shared_ptr<WidgetSfml> &widget) const {
@@ -135,8 +141,7 @@ private:
 
     bool                       _is_visible;
     sf::VideoMode              _desktop_mode;
-
-    sf::Vector2u               _size{};
+    sf::IntRect                _area{};
     sf::RenderTexture          _render_tex{};
     std::vector<widget_just_t> _widgets{};
 };

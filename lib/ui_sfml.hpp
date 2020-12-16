@@ -286,6 +286,14 @@ private:
     void create_panel();
 
     /**
+     * Detect a panel coordinates.
+     * @param x Coordinate x;
+     * @param y Coordinate y.
+     * @return True if the specified cooridnates belongs to the panel area; false otherwise.
+     */
+    bool is_panel_area(unsigned x, unsigned y);
+
+    /**
      * Render and display the main window.
      * @see render_screen()
      */
@@ -465,6 +473,7 @@ private:
      */
     bool _unknown_key_pressed{};
     Keyboard::Key _unknown_key{Keyboard::KEY_NONE};
+
 
     /**
      * Conversion map from SFML key code to Keyboard::Key code.

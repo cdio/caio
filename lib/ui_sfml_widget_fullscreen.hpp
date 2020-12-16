@@ -31,15 +31,11 @@ namespace widget {
 
 class Fullscreen : public WidgetSfml {
 public:
-    Fullscreen(const std::function<bool()> &upd)
-        : _update{upd} {
-    }
-
-    void load() override;
-
-    sf::Sprite sprite() override;
+    Fullscreen(const std::function<bool()> &upd);
 
 private:
+    sf::Sprite make_sprite() override;
+
     std::function<bool()> _update;
     bool                  _is_fullscreen{};
     sf::Sprite            _sprite{};

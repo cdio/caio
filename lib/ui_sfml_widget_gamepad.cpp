@@ -27,12 +27,13 @@ namespace widget {
 #include "icons/gamepad_64x2.hpp"
 
 
-void Gamepad::load()
+Gamepad::Gamepad(const std::function<Status()> &upd)
+    : _update{upd}
 {
     WidgetSfml::load(gamepad_64x2_png);
 }
 
-sf::Sprite Gamepad::sprite()
+sf::Sprite Gamepad::make_sprite()
 {
     Status st{};
     if (_update) {
@@ -40,7 +41,7 @@ sf::Sprite Gamepad::sprite()
     }
 
     const Rgba &color = (st.is_connected ? GAMEPAD_PRESENT_COLOR : GAMEPAD_MISSING_COLOR);
-    auto sprite = sf::Sprite{texture(), (st.is_swapped ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64})};
+    auto sprite = rect(st.is_swapped ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64});
     sprite.setColor(sf::Color{color.to_host_u32()});
     return sprite;
 }

@@ -46,6 +46,12 @@ static void signal_handler(int signo)
 
 std::stringstream sfml_err{};
 
+static struct Autostart {
+    Autostart() {
+        sf::err().rdbuf(sfml_err.rdbuf());
+    }
+} autostart{};
+
 
 std::map<sf::Keyboard::Key, Keyboard::Key> UISfml::sfml_to_key{
     { sf::Keyboard::Key::A,         Keyboard::KEY_A             },
@@ -143,15 +149,13 @@ Keyboard::Key UISfml::to_key(const sf::Keyboard::Key &code)
 
 sf::Vector2u UISfml::window_size(bool panel_visible, const sf::Vector2u &screen_size)
 {
-    return {screen_size.x, screen_size.y + PanelSfml::size(panel_visible, screen_size.x).y};
+    return {screen_size.x, screen_size.y + PanelSfml::area(panel_visible, screen_size.x).height};
 }
 
 
 UISfml::UISfml(const Config &conf)
     : _conf{conf}
 {
-    sf::err().rdbuf(sfml_err.rdbuf());
-
     const auto &vconf = conf.video;
     const auto &aconf = conf.audio;
 
@@ -224,8 +228,14 @@ void UISfml::create_panel()
         throw UIError{"Can't instantiate SFML panel: " + Error::to_string()};
     }
 
+    _panel->position(0, _screen_size.y);
+
     auto fullscreen = widget::create<widget::Fullscreen>([this]() {
         return _is_fullscreen;
+    });
+
+    fullscreen->action([this]() {
+        toggle_fullscreen();
     });
 
     _panel->add(fullscreen, PanelSfml::Just::RIGHT);
@@ -298,14 +308,19 @@ void UISfml::render_window()
 {
     _window.clear();
 
+    /*
+     * Render the emulated screen.
+     */
     auto screen_sprite = render_screen();
     screen_sprite.setPosition(0, 0);
     _window.draw(screen_sprite);
 
+    /*
+     * Render the info panel.
+     */
     if (_panel->is_visible()) {
         auto panel_sprite = _panel->sprite();
         panel_sprite.setPosition(0, _screen_size.y);
-        panel_sprite.setScale({1.0f, 1.0f});
         _window.draw(panel_sprite);
     }
 
@@ -329,6 +344,8 @@ void UISfml::toggle_fullscreen()
         auto icon = icon32();
         _window.setIcon(icon.width, icon.height, reinterpret_cast<const uint8_t *>(icon.data.data()));
 
+        _panel->position(0, _screen_size.y);
+
         _is_fullscreen = false;
 
     } else {
@@ -340,6 +357,8 @@ void UISfml::toggle_fullscreen()
 
         _window.create(_desktop_mode, _conf.video.title, sf::Style::Fullscreen);
         _window.setMouseCursorVisible(_panel->is_visible());
+
+        resize_event(_desktop_mode.width, _desktop_mode.height);
 
         _is_fullscreen = true;
     }
@@ -363,11 +382,11 @@ void UISfml::toggle_panel_visibility()
         auto wsize = _window.getSize();
 
         if (_panel->is_visible()) {
-            wsize.y -= _panel->size().y;
+            wsize.y -= _panel->area().height;
             _panel->visible(false);
         } else {
             _panel->visible(true);
-            wsize.y += _panel->size().y;
+            wsize.y += _panel->area().height;
         }
 
         _window.setSize(wsize);
@@ -385,8 +404,9 @@ void UISfml::resize_event(unsigned rwidth, unsigned rheight)
     width = std::min(width, _desktop_mode.width);
     height = std::min(height, _desktop_mode.height);
 
-    if (_panel->is_visible() && height > _panel->size().y) {
-        height -= _panel->size().y;
+    auto parea = _panel->area();
+    if (_panel->is_visible() && height > parea.height) {
+        height -= parea.height;
     }
 
     unsigned sheight = width / _screen_ratio;
@@ -409,6 +429,9 @@ void UISfml::resize_event(unsigned rwidth, unsigned rheight)
     float cx = (static_cast<float>(rwidth) - static_cast<float>(_screen_size.x)) / 2.0f;
     if (cx > 0.0f) {
         _view.move(-cx, 0);
+        _panel->position(static_cast<int>(cx), _screen_size.y);
+    } else {
+        _panel->position(0, _screen_size.y);
     }
 
     _window.clear(sf::Color::Black);
@@ -616,12 +639,27 @@ void UISfml::process_events()
                 joy_event(event);
                 break;
 
+            case sf::Event::MouseWheelMoved:
+            case sf::Event::MouseWheelScrolled:
+            case sf::Event::MouseButtonPressed:
+            case sf::Event::MouseButtonReleased:
+            case sf::Event::MouseMoved:
+            case sf::Event::MouseEntered:
+            case sf::Event::MouseLeft:
+                _panel->event(event);
+                break;
+
+            case sf::Event::LostFocus:
+            case sf::Event::GainedFocus:
+                //TODO Fix keyboard problem on lost/gain focus.
+                break;
+
             default:;
             }
         }
 
         if (_window.isOpen()) {
-        render_window();
+            render_window();
         }
 
         if (signal_key != Keyboard::KEY_NONE) {

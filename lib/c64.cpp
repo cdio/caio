@@ -214,7 +214,17 @@ void C64::create_widgets()
         return st;
     });
 
-    auto panel = std::dynamic_pointer_cast<ui::Panel>(_ui->panel());
+    auto swapj_action = [this]() {
+        /*
+         * Let the user swap joysticks by clicking one of the gamepad widgets.
+         */
+        _conf.swapj ^= true;
+    };
+
+    gamepad1->action(swapj_action);
+    gamepad2->action(swapj_action);
+
+    auto panel = _ui->panel();
     panel->add(floppy8);
     panel->add(floppy9);
     panel->add(gamepad1);

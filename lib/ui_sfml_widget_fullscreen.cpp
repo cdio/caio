@@ -27,13 +27,14 @@ namespace widget {
 #include "icons/fullscreen_64x2.hpp"
 
 
-void Fullscreen::load()
+Fullscreen::Fullscreen(const std::function<bool()> &upd)
+    : _update{upd}
 {
     WidgetSfml::load(fullscreen_64x2_png);
-    _sprite = sf::Sprite{texture(), sf::IntRect{0, 0, 64, 64}};
+    _sprite = rect({0, 0, 64, 64});
 }
 
-sf::Sprite Fullscreen::sprite()
+sf::Sprite Fullscreen::make_sprite()
 {
     bool is_fullscreen{};
 
@@ -42,7 +43,7 @@ sf::Sprite Fullscreen::sprite()
     }
 
     if (_is_fullscreen != is_fullscreen) {
-        _sprite = sf::Sprite{texture(), (is_fullscreen ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64})};
+        _sprite = rect(is_fullscreen ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64});
         _is_fullscreen = is_fullscreen;
     }
 

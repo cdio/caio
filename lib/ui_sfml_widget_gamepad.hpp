@@ -38,15 +38,11 @@ public:
         bool is_swapped;
     };
 
-    Gamepad(const std::function<Status()> &upd)
-        : _update{upd} {
-    }
-
-    void load() override;
-
-    sf::Sprite sprite() override;
+    Gamepad(const std::function<Status()> &upd);
 
 private:
+    sf::Sprite make_sprite() override;
+
     std::function<Status()> _update;
 };
 

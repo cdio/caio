@@ -27,19 +27,14 @@ namespace widget {
 #include "icons/floppy_64.hpp"
 
 
-void Floppy::load()
+Floppy::Floppy(const std::function<Status()> &upd)
+    : _update{upd}
 {
     WidgetSfml::load(floppy_64_png);
-    _sprite.setTexture(texture());
-
-    constexpr float x = WIDTH / 2.0f;
-    constexpr float y = HEIGHT / 2.0f;
-
-    _sprite.setOrigin(x, y);
-    _sprite.setPosition(x, y);
+    _sprite = rect({0, 0, 64, 64});
 }
 
-sf::Sprite Floppy::sprite()
+sf::Sprite Floppy::make_sprite()
 {
     Status st{};
     if (_update) {
