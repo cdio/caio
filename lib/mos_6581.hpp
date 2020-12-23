@@ -207,7 +207,6 @@ public:
         float _tadj;              /* Timing adjustment factor: 1MHz / system_clock_freq */
 
         float _attack_time{attack_times[0]};
-        float _attack_slope{};
         float _decay_time{decay_times[0]};
         float _sustain{};
         float _release_time{decay_times[0]};

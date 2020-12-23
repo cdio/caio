@@ -108,7 +108,6 @@ float Mos6581::Oscillator::tick()
 
         if (_type & WAVE_NOISE) {
             _A *= noise();
-
         }
     } else {
         _A = 0.0f;
@@ -125,27 +124,12 @@ float Mos6581::Oscillator::tick()
 
 void Mos6581::Envelope::gate(bool gb)
 {
-    _gate = gb;
-
-    /*
-     * The Mos6581::tick() method is called each SAMPLES_TIME seconds.
-     * When state changes are faster than that time (f.ex. sustain level 0)
-     * some programs change the gate so fast that this device does not get noticed.
-     * Placing the following initialisation here (instead of Envelope::tick()) this
-     * envelope generator will always be in the proper state.
-     */
-    if (_gate) {
-        _attack_slope = 1.0f / _attack_time;
-        if (_attack_time + _decay_time < SAMPLES_TIME) {
-            _A = 1.0f;
-        }
+    if (gb && !_gate) {
+        _t = _A * _attack_time;
         _cycle = CYCLE_ATTACK;
-    } else {
-        _release_A = _A;
-        _cycle = CYCLE_RELEASE;
     }
 
-    _t = 0.0f;
+    _gate = gb;
 }
 
 float Mos6581::Envelope::tick()
@@ -156,25 +140,28 @@ float Mos6581::Envelope::tick()
          */
         switch (_cycle) {
         case CYCLE_ATTACK:
-            if (_A < 1.0f) {
-                _A += _attack_slope * _t;
-                if (_A > 1.0f) {
-                    _A = 1.0f;
+            if (_t < _attack_time) {
+                _A += _t / _attack_time;
+                if (_A < 1.0f) {
+                    break;
                 }
-                break;
             }
 
             _t = 0.0f;
+            _A = 1.0f;
             _cycle = CYCLE_DECAY;
             /* PASSTHROUGH */
 
         case CYCLE_DECAY:
             if (_t < _decay_time) {
                 _A = signal::exp(_sustain, 1.0f - _sustain, _t, _decay_time / 4.0f);
-                break;
+                if (_A > _sustain) {
+                    break;
+                }
             }
 
             _t = 0.0f;
+            _A = _sustain;
             _cycle = CYCLE_SUSTAIN;
             /* PASSTHROUGH */
 
@@ -188,6 +175,14 @@ float Mos6581::Envelope::tick()
          * GATE is OFF: Release cycle.
          */
         switch (_cycle) {
+        case CYCLE_ATTACK:
+        case CYCLE_DECAY:
+        case CYCLE_SUSTAIN:
+            _t = 0.0f;
+            _release_A = _A;
+            _cycle = CYCLE_RELEASE;
+            /* PASSTHROUGH */
+
         case CYCLE_RELEASE:
             if (_t < _release_time) {
                 _A = signal::exp(0.0f, _release_A, _t, _release_time / 4.0f);
@@ -197,10 +192,10 @@ float Mos6581::Envelope::tick()
             _t = 0.0f;
             _A = 0.0f;
             _cycle = CYCLE_NONE;
-            break;
+            /* PASSTHROUGH */
 
         case CYCLE_NONE:
-        default:;
+            break;
         }
     }
 
@@ -443,12 +438,12 @@ size_t Mos6581::tick(const Clock &clk)
     if (_audio_buffer) {
         _v1[_sample_index] = _voice_1.tick();
         _v2[_sample_index] = _voice_2.tick();
-        _v3[_sample_index] = _voice_3.tick();
+        _v3[_sample_index] = (is_v3_active() ? _voice_3.tick() : 0.0f);
 
         /*
-        * When a voice is filtered but the filter is disabled the sampled value is set to 0.
-        * This allows PWM using filter activation/deactivation.
-        */
+         * When a voice is filtered but the filter is disabled the sampled value is set to 0.
+         * This behaviour toghether with the oscillator test mode allows the generation of PWM signals.
+         */
         if (_filter.is_disabled()) {
             if (is_v1_filtered()) {
                 _v1[_sample_index] = 0.0f;
@@ -493,7 +488,7 @@ void Mos6581::play()
         }
 
         for (size_t i = 0; i < v.size(); ++i) {
-            float value = _v1[i] + _v2[i] + (is_v3_active() ? _v3[i] : 0.0f) + _v4[i];
+            float value = _v1[i] + _v2[i] + _v3[i] + _v4[i];
             if (value > 1.0f) {
                 value = 1.0f;
             } else if (value < -1.0f) {
