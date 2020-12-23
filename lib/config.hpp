@@ -113,7 +113,7 @@ struct Config {
     constexpr static const bool     DEFAULT_AUDIO_ENABLED    = true;
     constexpr static const float    DEFAULT_DELAY_FACTOR     = 1.0f;
     constexpr static const bool     DEFAULT_MONITOR_ACTIVE   = false;
-    constexpr static const bool     DEFAULT_PANEL            = true;
+    constexpr static const bool     DEFAULT_PANEL            = false;
     constexpr static const char *   DEFAULT_LOGFILE          = Logger::DEFAULT_LOGFILE;
     constexpr static const char *   DEFAULT_LOGLEVEL         = Logger::DEFAULT_LOGLEVEL_STRING;
 
