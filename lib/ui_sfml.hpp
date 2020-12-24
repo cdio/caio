@@ -75,8 +75,10 @@ using Scanline = std::vector<Rgba>;
  */
 class UISfml {
 public:
-    constexpr static const uint32_t CRT_COLOR      = 0x000000FF;
-    constexpr static const uint32_t SCANLINE_COLOR = 0x00000080;
+    constexpr static const uint32_t CRT_COLOR           = 0x000000FF;
+    constexpr static const uint32_t SCANLINE_COLOR      = 0x00000080;
+
+    constexpr static const uint64_t MOUSE_INACTIVE_TIME = 2'000'000;    /* us */
 
 
     explicit UISfml(const Config &conf);
@@ -473,6 +475,14 @@ private:
      */
     bool _unknown_key_pressed{};
     Keyboard::Key _unknown_key{Keyboard::KEY_NONE};
+
+    /**
+     * Mouse activity time.
+     * If this time is greater than MOUSE_INACTIVE_TIME the mouse cursor is hidden.
+     * @see MOUSE_INACTIVE_TIME
+     */
+    uint64_t _mouse_active_time{};
+    bool _mouse_visible{true};
 
 
     /**

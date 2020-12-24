@@ -338,7 +338,6 @@ void UISfml::toggle_fullscreen()
         _window.create(sf::VideoMode{_win_size.x, _win_size.y}, _conf.video.title,
             sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
 
-        _window.setMouseCursorVisible(true);
         _window.setPosition(_saved_win_pos);
 
         auto icon = icon32();
@@ -356,7 +355,6 @@ void UISfml::toggle_fullscreen()
         _saved_win_size = _win_size;
 
         _window.create(_desktop_mode, _conf.video.title, sf::Style::Fullscreen);
-        _window.setMouseCursorVisible(_panel->is_visible());
 
         resize_event(_desktop_mode.width, _desktop_mode.height);
 
@@ -375,8 +373,6 @@ void UISfml::toggle_panel_visibility()
 
         auto wsize = _window.getSize();
         resize_event(wsize.x, wsize.y);
-
-        _window.setMouseCursorVisible(_panel->is_visible());
 
     } else {
         auto wsize = _window.getSize();
@@ -646,6 +642,11 @@ void UISfml::process_events()
             case sf::Event::MouseMoved:
             case sf::Event::MouseEntered:
             case sf::Event::MouseLeft:
+                if (!_mouse_visible) {
+                    _window.setMouseCursorVisible(true);
+                    _mouse_active_time = utils::now();
+                    _mouse_visible = true;
+                }
                 _panel->event(event);
                 break;
 
@@ -659,6 +660,11 @@ void UISfml::process_events()
         }
 
         if (_window.isOpen()) {
+            if (_mouse_visible && (utils::now() - _mouse_active_time) > MOUSE_INACTIVE_TIME) {
+                _mouse_visible = false;
+                _window.setMouseCursorVisible(false);
+            }
+
             render_window();
         }
 
