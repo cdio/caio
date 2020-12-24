@@ -18,6 +18,8 @@
  */
 #include "mos_6581.hpp"
 
+#include <algorithm>
+
 #include "logger.hpp"
 #include "ui.hpp"
 
@@ -438,7 +440,7 @@ size_t Mos6581::tick(const Clock &clk)
     if (_audio_buffer) {
         _v1[_sample_index] = _voice_1.tick();
         _v2[_sample_index] = _voice_2.tick();
-        _v3[_sample_index] = (is_v3_active() ? _voice_3.tick() : 0.0f);
+        _v3[_sample_index] = _voice_3.tick();
 
         /*
          * When a voice is filtered but the filter is disabled the sampled value is set to 0.
@@ -488,13 +490,8 @@ void Mos6581::play()
         }
 
         for (size_t i = 0; i < v.size(); ++i) {
-            float value = _v1[i] + _v2[i] + _v3[i] + _v4[i];
-            if (value > 1.0f) {
-                value = 1.0f;
-            } else if (value < -1.0f) {
-                value = -1.0f;
-            }
-
+            float value = _v1[i] + _v2[i] + (is_v3_active() ? _v3[i] : 0.0f) + _v4[i];
+            value = std::max(std::min(value, 1.0f), -1.0f);
             v[i] = signal::to_i16(value * _volume);
         }
 
