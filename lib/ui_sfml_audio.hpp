@@ -57,7 +57,6 @@ public:
 
     void stop() override {
         _stop = true;
-        sf::SoundStream::stop();
     }
 
     /**
