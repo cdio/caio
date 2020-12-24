@@ -1,19 +1,25 @@
+- C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
 - UI:       SFML keyboard in/out focus problem
-- SID:      Fix noise on some uridium cracks
+- UI:       Fix disk widget activity when C1541 is in error condition.
+- CPU;      Test suite
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
 - UI:       Accept CTRL-C (console) on pause mode
+- UI:       Pause and audio widgets
+- UI:       Couch Mode (control everything through the gamepad):
+            - Map some gamepad combination to enable couch mode
+            - Map some gamepad buttons to F1, F3, SPACE or other user defined
+            - d64/fs attached on-demand (+ host filesystem traversing)
+            - Support for directory/file traversal/selection (test Qt as ui)
+            - Virtual keyboard?
 - misc:     Fix Giana timeout
 - VIC:      Fix vertical scroll
 - VIC:      Cycles emulation
 - VIC:      Implement open-border bug
-- UI:       Map gamepad X, Y, A buttons to F1, F3, SPACE (config options)
-- signal:   Evaluate use of lookup tables
-- config:   realpath(3) on user defined directories
 - misc:     Speed-up
-- misc:     Do not add the palette extension when it is set by the user
-- UI:       Pause and audio widgets
+- misc:     Do not add the palette .plt extension when it is set by the user
+- config:   realpath(3) on user defined directories
 - Apple2
 - BBC Micro
 - Daewoo DPC-200
