@@ -63,7 +63,7 @@ if it is a PRG file:
 The keyboard layout can be set using the *keymaps* configuration option
 (the default is [US-ANSI](https://en.wikipedia.org/wiki/File:ANSI_Keyboard_Layout_Diagram_with_Form_Factor.svg)).
 
-For exapmple, to use the italian layout:
+For example, to use the italian layout:
 ```
     $ c64 --keymaps it
 ```
@@ -90,7 +90,7 @@ any of the layout files or adding a new one with new key combinations to
 reproduce those characters.
 
 Layouts files (with the exception of the default one) are located in the
-*keymapsdir* directory.
+*keymapsdir* directory (the default is *$PREFIX/share/cemu/keymaps*).
 
 Like the [VICE](https://en.wikipedia.org/wiki/VICE) emulator, the *RESTORE*
 key is mapped as *Page-Up*, *RUN/STOP* as *ESC*, *CTRL* as *TAB* and
