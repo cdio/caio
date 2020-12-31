@@ -398,7 +398,12 @@ void C64::reset()
         case Keyboard::KEY_CTRL_C:
             /* Enter monitor on the next clock tick */
             _cpu->ebreak();
-            break;
+            if (!_paused) {
+                break;
+            }
+
+            /* CTRL+C forces resume from pause */
+            /* PASSTHROUGH */
 
         case Keyboard::KEY_PAUSE:
             _paused ^= true;

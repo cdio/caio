@@ -4,13 +4,12 @@
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
-- UI:       Accept CTRL-C (console) on pause mode
 - UI:       Pause and audio widgets
 - UI:       Couch Mode (control everything through the gamepad):
             - Map some gamepad combination to enable couch mode
             - Map some gamepad buttons to F1, F3, SPACE or other user defined
             - d64/fs attached on-demand (+ host filesystem traversing)
-            - Support for directory/file traversal/selection (test Qt as ui)
+            - Support for directory/file traversal/selection (test ImGui)
             - Virtual keyboard?
 - misc:     Fix Giana timeout
 - VIC:      Fix vertical scroll
