@@ -152,6 +152,11 @@ public:
     }
 
     /**
+     * @see Keyboard::reset()
+     */
+    void reset() override;
+
+    /**
      * @see Keyboard::key_pressed()
      */
     void key_pressed(Key key) override;

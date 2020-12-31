@@ -159,6 +159,11 @@ public:
     void load(const std::string &fname);
 
     /**
+     * Reset the keyboard.
+     */
+    virtual void reset() = 0;
+
+    /**
      * Key pressed event.
      * This method must be called by the ui each time
      * a key press event is received from the user.

@@ -1,5 +1,4 @@
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
-- UI:       SFML keyboard in/out focus problem
 - UI:       Fix disk widget activity when C1541 is in error condition.
 - CPU;      Test suite
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)

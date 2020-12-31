@@ -652,7 +652,7 @@ void UISfml::process_events()
 
             case sf::Event::LostFocus:
             case sf::Event::GainedFocus:
-                //TODO Fix keyboard problem on lost/gain focus.
+                _kbd->reset();
                 break;
 
             default:;

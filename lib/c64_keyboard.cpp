@@ -280,6 +280,11 @@ C64Keyboard::MatrixKey C64Keyboard::to_c64(const std::string &name)
 }
 
 
+void C64Keyboard::reset()
+{
+    _matrix.fill(0);
+}
+
 void C64Keyboard::key_pressed(Keyboard::Key key)
 {
     std::lock_guard<std::mutex> lock{_matrix_mutex};
