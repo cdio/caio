@@ -20,8 +20,11 @@
 
 #include <execinfo.h>
 
+#include <climits>
 #include <array>
 #include <cstdlib>
+
+#include "utils.hpp"
 
 
 namespace cemu {
@@ -54,6 +57,25 @@ void stacktrace(std::ostream &os)
     if (symbols) {
         ::free(symbols);
     }
+}
+
+
+std::string Error::to_string(int err)
+{
+    char buf[LINE_MAX];
+
+#ifdef __linux__
+    return ::strerror_r(err, buf, sizeof(buf));
+#else
+    ::strerror_r(err, buf, sizeof(buf));
+    return buf;
+#endif
+}
+
+
+InvalidAddress::InvalidAddress(const std::string &elem, addr_t addr, bool read)
+    : Error{elem, "Invalid " + std::string{(read ? "read" : "write")} + " address: $" + utils::to_string(addr)}
+{
 }
 
 }

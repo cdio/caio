@@ -93,16 +93,7 @@ public:
     /**
      * @return A human readable string of the specified error code.
      */
-    static std::string to_string(int err) {
-//FIXME
-#if 0 /* unsurprisingly, gnu strerror_r() is broken */
-        char buf[128];
-        strerror_r(err, buf, sizeof(buf));
-        return buf;
-#else
-        return std::strerror(err);
-#endif
-    }
+    static std::string to_string(int err);
 
     /**
      * @return A human readable string of the current errno code.
@@ -121,6 +112,37 @@ private:
  */
 class InternalError : public Error {
     using Error::Error;
+};
+
+
+/**
+ * Invalid Address.
+ */
+class InvalidAddress : public Error {
+protected:
+    InvalidAddress(const std::string &elem, addr_t addr, bool read);
+};
+
+
+/**
+ * Invalid Read Address.
+ */
+class InvalidReadAddress : public InvalidAddress {
+public:
+    InvalidReadAddress(const std::string &elem, addr_t addr)
+        : InvalidAddress{elem, addr, true} {
+    }
+};
+
+
+/**
+ * Invalid Write Address.
+ */
+class InvalidWriteAddress : public InvalidAddress {
+public:
+    InvalidWriteAddress(const std::string &elem, addr_t addr)
+        : InvalidAddress{elem, addr, false} {
+    }
 };
 
 
