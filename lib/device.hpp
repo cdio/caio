@@ -52,7 +52,7 @@ public:
      * @param addr  Address to read from.
      * @param is_le true if the emulated architecture is little endian, false otherwise.
      * @return The address stored at the specified address.
-     * @exception InternalError if the specified address is not handled by this device.
+     * @exception InvalidReadAddress if the specified address is not handled by this device.
      */
     addr_t read_addr(size_t addr, bool is_le = true) const {
         return (is_le ? (static_cast<addr_t>(read(addr + 1)) << 8) | read(addr) :
@@ -64,7 +64,7 @@ public:
      * @param addr  Address to write;
      * @param data  Address value to write;
      * @param is_le true if the emulated architecture is little endian, false otherwise.
-     * @exception InternalError if the specified address is not handled by this device.
+     * @exception InvalidWriteAddress if the specified address is not handled by this device.
      */
     void write_addr(addr_t addr, addr_t data, bool is_le = true);
 
@@ -77,7 +77,7 @@ public:
      * Read from an address.
      * @param addr Address to read from.
      * @return The data stored at the specified address.
-     * @exception InternalError if the specified address is not handled by this device.
+     * @exception InvalidReadAddress if the specified address is not handled by this device.
      */
     virtual uint8_t read(addr_t addr) const = 0;
 
@@ -85,7 +85,7 @@ public:
      * Write into an address.
      * @param addr Address to write into;
      * @param data Data to write.
-     * @exception InternalError if the specified address is not handled by this device.
+     * @exception InvalidWriteAddress if the specified address is not handled by this device.
      */
     virtual void write(addr_t addr, uint8_t data) = 0;
 

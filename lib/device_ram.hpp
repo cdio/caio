@@ -85,7 +85,7 @@ public:
             return _data[addr];
         }
 
-        throw InternalError{*this, "Invalid address: $" + utils::to_string(addr)};
+        throw InvalidReadAddress{*this, addr};
     }
 
     /**
@@ -95,7 +95,7 @@ public:
         if (addr < _data.size()) {
             _data[addr] = data;
         } else {
-            throw InternalError{*this, "Invalid address: $" + utils::to_string(addr)};
+            throw InvalidWriteAddress{*this, addr};
         }
     }
 

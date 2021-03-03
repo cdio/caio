@@ -63,7 +63,7 @@ uint8_t DeviceROM::read(addr_t addr) const
         return _data[addr];
     }
 
-    throw InternalError{*this, "Invalid address: $" + utils::to_string(addr)};
+    throw InvalidReadAddress{*this, addr};
 }
 
 }
