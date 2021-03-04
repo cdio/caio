@@ -105,7 +105,7 @@ The PS3 controller is known to work.
 
 ## Hot-Keys
 
-* *F11* toggles between *windowed* and *fullscreen* modes.
+* *ALT-F* toggles between *windowed* and *fullscreen* modes.
 
 * *PAUSE* or *ALT-P* toggles between *pause* and *running* modes.
 

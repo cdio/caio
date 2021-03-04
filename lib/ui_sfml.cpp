@@ -438,50 +438,67 @@ void UISfml::kbd_event(const sf::Event &event)
 {
     switch (event.type) {
     case sf::Event::KeyPressed:
-        switch (event.key.code) {
-        case sf::Keyboard::Key::F11:
-            toggle_fullscreen();
-            break;
-
-        case sf::Keyboard::Key::Pause:
-            hotkey(Keyboard::KEY_PAUSE);
-            break;
-
-        default:
-            if (event.key.alt) {
-                switch (event.key.code) {
-                case sf::Keyboard::J:
-                    /* Joystick Swap */
-                    hotkey(Keyboard::KEY_ALT_J);
-                    break;
-
-                case sf::Keyboard::M:
-                    /* Enter Monitor */
-                    hotkey(Keyboard::KEY_ALT_M);
-                    break;
-
-                case sf::Keyboard::P:
-                    /* Pause emulator */
-                    hotkey(Keyboard::KEY_PAUSE);
-                    break;
-
-                case sf::Keyboard::V:
-                    /* Toggle panel visibility */
-                    toggle_panel_visibility();
-                    break;
-
-                default:;
-                }
-
-            } else if (event.key.code != sf::Keyboard::Unknown) {
-                keyboard()->key_pressed(to_key(event.key.code));
-
-            } else {
+        if (event.key.alt) {
+            /*
+             * Handle ALT-xx hotkeys.
+             */
+            switch (event.key.code) {
+            case sf::Keyboard::Key::F:
                 /*
-                 * Work-around for the keyboard handling deficiency of SFML.
+                 * Toggle Fullscreen mode.
                  */
-                _unknown_key_pressed = true;
+                toggle_fullscreen();
+                break;
+
+            case sf::Keyboard::J:
+                /*
+                 * Swap Joysticks.
+                 */
+                hotkey(Keyboard::KEY_ALT_J);
+                break;
+
+            case sf::Keyboard::M:
+                /*
+                 * Enter Monitor.
+                 */
+                hotkey(Keyboard::KEY_ALT_M);
+                break;
+
+            case sf::Keyboard::P:
+                /*
+                 * Toggle Pause mode.
+                 */
+                hotkey(Keyboard::KEY_PAUSE);
+                break;
+
+            case sf::Keyboard::V:
+                /*
+                 * Toggle Panel visibility.
+                 */
+                toggle_panel_visibility();
+                break;
+
+            default:;
             }
+
+        } else if (event.key.code == sf::Keyboard::Key::Pause) {
+            /*
+             * Toggle Pause mode.
+             */
+            hotkey(Keyboard::KEY_PAUSE);
+
+        } else if (event.key.code != sf::Keyboard::Unknown) {
+            /*
+             * Handle keyboard key.
+             */
+            keyboard()->key_pressed(to_key(event.key.code));
+
+        } else {
+            /*
+             * Work-around for the keyboard handling deficiency of SFML
+             * (Handle keys not recognised by SFML).
+             */
+            _unknown_key_pressed = true;
         }
         break;
 
@@ -490,7 +507,8 @@ void UISfml::kbd_event(const sf::Event &event)
             keyboard()->key_released(to_key(event.key.code));
         } else if (_unknown_key_pressed) {
             /*
-             * Work-around for the keyboard handling deficiency of SFML.
+             * Work-around for the keyboard handling deficiency of SFML
+             * (Handle keys not recognised by SFML).
              */
             keyboard()->key_released(_unknown_key);
             _unknown_key_pressed = false;
@@ -499,7 +517,8 @@ void UISfml::kbd_event(const sf::Event &event)
 
     case sf::Event::TextEntered:
         /*
-         * Work-around for the keyboard handling deficiency of SFML.
+         * Work-around for the keyboard handling deficiency of SFML
+         * (Handle keys not recognised by SFML).
          */
         if (_unknown_key_pressed) {
             switch (event.text.unicode) {
