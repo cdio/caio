@@ -11,7 +11,6 @@
             - d64/fs attached on-demand (+ host filesystem traversing)
             - Support for directory/file traversal/selection (test ImGui)
             - Virtual keyboard?
-- misc:     Fix Giana timeout
 - VIC:      Fix vertical scroll
 - VIC:      Cycles emulation
 - VIC:      Implement open-border bug
