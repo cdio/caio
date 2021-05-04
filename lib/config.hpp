@@ -159,18 +159,14 @@ struct Config {
      * @param palette Palette name.
      * @return The palette file name.
      */
-    virtual std::string palette_file(const std::string &palette) const {
-        return palette + PALETTEFILE_SUFFIX;
-    }
+    virtual std::string palette_file(const std::string &palette) const;
 
     /**
      * Get the keymaps file name given the country code.
      * @param cc Country code.
      * @return The keymaps file name.
      */
-    virtual std::string keymaps_file(const std::string &cc) const {
-        return cc + KEYMAPSFILE_SUFFIX;
-    }
+    virtual std::string keymaps_file(const std::string &cc) const;
 
     /**
      * @return A human readable string representation of this configuration.

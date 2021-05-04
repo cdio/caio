@@ -31,7 +31,7 @@ CPPFLAGS+=		-I${ROOT} \
 
 CXXFLAGS=		-Wall \
 			-Werror \
-			-std=c++17
+			-std=c++20
 
 ifeq (${DEBUG}, yes)
 CPPFLAGS+=		-DD_DEBUG
@@ -96,6 +96,6 @@ MODE_DATA?=		0644
 
 HOME:=			${shell echo ~}
 
-CLANG_MIN_VERSION:=	6
+CLANG_MIN_VERSION:=	10
 CLANG_VERSION:=		${shell ${CXX} --version | ${HEAD} -1 | ${SED} -e 's,.* \([0-9]*\)\.[0-9]*\.[0-9]*.*$$,\1,'}
 CLANG_CHECK_VERSION:=	${shell test ${CLANG_VERSION} -ge ${CLANG_MIN_VERSION} && echo OK || echo NOK}

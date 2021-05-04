@@ -15,7 +15,7 @@ is emulated, under Linux.
 
 ## Compile & Install
 
-CEMU requires [clang-6](https://clang.llvm.org) or later,
+CEMU requires [clang-10](https://clang.llvm.org) or later,
 [SFML](https://www.sfml-dev.org) 2.5.1 or later and
 [pkg-config](https://en.wikipedia.org/wiki/Pkg-config):
 

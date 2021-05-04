@@ -129,6 +129,16 @@ Config &Config::operator=(const Confile &conf)
     return *this;
 }
 
+std::string Config::palette_file(const std::string &palette) const
+{
+    return (palette.ends_with(PALETTEFILE_SUFFIX) ? palette : palette + PALETTEFILE_SUFFIX);
+}
+
+std::string Config::keymaps_file(const std::string &cc) const
+{
+    return (cc.ends_with(KEYMAPSFILE_SUFFIX) ? cc : cc + KEYMAPSFILE_SUFFIX);
+}
+
 std::string Config::to_string() const
 {
     std::ostringstream os{};

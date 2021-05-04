@@ -4,7 +4,7 @@
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
-- UI:       Pause and audio widgets
+- UI:       Pause, audio, hide widgets
 - UI:       Couch Mode (control everything through the gamepad):
             - Map some gamepad combination to enable couch mode
             - Map some gamepad buttons to F1, F3, SPACE or other user defined
@@ -15,8 +15,6 @@
 - VIC:      Cycles emulation
 - VIC:      Implement open-border bug
 - misc:     Speed-up
-- misc:     Do not add the palette .plt extension when it is set by the user
-- config:   realpath(3) on user defined directories
 - Apple2
 - BBC Micro
 - Daewoo DPC-200
