@@ -444,7 +444,7 @@ size_t Mos6581::tick(const Clock &clk)
 
         /*
          * When a voice is filtered but the filter is disabled the sampled value is set to 0.
-         * This behaviour toghether with the oscillator test mode allows the generation of PWM signals.
+         * This behaviour together with the oscillator test mode allows the generation of PWM signals.
          */
         if (_filter.is_disabled()) {
             if (is_v1_filtered()) {

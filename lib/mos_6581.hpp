@@ -25,7 +25,7 @@
 namespace cemu {
 
 /**
- * MOS6581 implemmentation from the specs.
+ * MOS6581 implementation from the specs.
  * The real 6581 chip does not respect its own specifications
  * consequently this implementation does not sound exactly like the real chip.
  *
