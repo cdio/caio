@@ -81,16 +81,10 @@ At the moment the following layouts are available (not all of them tested):
 * US-ANSI (default)
 * VICEKB (vice)
 
-One of the problems of these mappings (with the exception of VICEKB) is that
-some C64 "special characters" cannot be entered; for instance, *SHIFT-** or
-*SHIFT-@* on the C64 display characters that cannot be entered when using any
-of these layouts.
-This limitation can be workarounded by just editing (using a text editor)
-any of the layout files or adding a new one with new key combinations to
-reproduce those characters.
-
-Layouts files (with the exception of the default one) are located in the
-*keymapsdir* directory (the default is *$PREFIX/share/cemu/keymaps*).
+Keyboard layouts are simple text files, existing layouts can be modified using
+any text editor and new layouts can be added to the system by just placing the
+new file inside the *keymasdir* directory which defaults to
+*$PREFIX/share/cemu/keymaps*.
 
 Like the [VICE](https://en.wikipedia.org/wiki/VICE) emulator, the *RESTORE*
 key is mapped as *Page-Up*, *RUN/STOP* as *ESC*, *CTRL* as *TAB* and
@@ -109,7 +103,7 @@ The PS3 controller is known to work.
 
 * *PAUSE* or *ALT-P* toggles between *pause* and *running* modes.
 
-* *ALT-J* swap joysticks #1 and #2.
+* *ALT-J* swaps joysticks #1 and #2.
 
 * *ALT-M* enters the CPU monitor (if it is active).
 
@@ -127,7 +121,7 @@ used with care.
 
 D64 files are not supported yet.
 
-For more information please check the *--8* command line option.
+For more information please see the *--8* command line option.
 
 
 ## C64 SID Chip
