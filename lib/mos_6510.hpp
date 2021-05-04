@@ -506,109 +506,48 @@ private:
     }
 
     /**
-     * Signed arithmetic addition with carry helper.
+     * Signed arithmetic addition helper.
      */
-    uint8_t adc_bin(uint8_t v1, uint8_t v2) {
-        int8_t c = (test_C() ? 1 : 0);
-        int r = v1 + v2 + c;
-        int sr = static_cast<int8_t>(v1) + static_cast<int8_t>(v2) + c;
-        flag_V((sr > 127) || (sr < -128));
-        set_N(r);
-        set_Z(r);
-        flag_C(r > 255);
-        return (r & 255);
-    }
+    uint8_t adc_bin(uint8_t v1, uint8_t v2);
 
     /**
-     * Packed BCD arithmetic addition with carry helper.
+     * Packed BCD addition helper.
      * Flags: N V C Z
      * @param v1 Packed BCD;
      * @param v2 Packed BCD.
      * @return The result of the addition formatted as a packed BCD.
-     * TODO: Simplify
      */
-    uint8_t adc_bcd(uint8_t v1, uint8_t v2) {
-        uint8_t b1 = utils::bcd_to_bin(v1);
-        uint8_t b2 = utils::bcd_to_bin(v2);
-        uint8_t r = adc_bin(b1, b2);
-        if (r > 99) {
-            r -= 100;
-            flag_C(true);
-        } else {
-            flag_C(false);
-        }
-
-        r = utils::bin_to_bcd(r);
-
-        /*
-         * The 6502 sets the V flag when the (signed) upper nibble
-         * of the result is not in the range [-8; 7].
-         * See http://www.6502.org/tutorials/vflag.html
-         */
-        int8_t c = (((v1 & 0x0f) + (v2 & 0x0f) + test_C()) > 9);
-        int8_t sv1 = static_cast<int8_t>(v1 >> 4) | ((v1 & 0x80) ? 0xf0 : 0x00);
-        int8_t sv2 = static_cast<int8_t>(v2 >> 4) | ((v2 & 0x80) ? 0xf0 : 0x00);
-        int8_t sr = sv1 + sv2 + c;
-        flag_V(sr < -8 || sr > 7);
-        set_N(r);
-        set_Z(r);
-        return r;
-    }
+    uint8_t adc_bcd(uint8_t v1, uint8_t v2);
 
     /**
      * ADC helper.
-     * Perform a signed binary addition or a packed BCD addition depending on D flag.
+     * Depending on D flag, perform a signed binary addition or a packed BCD addition.
      * Flags: N V Z C
      * @return v1 + v2 + C
      */
-    uint8_t adc(uint8_t v1, uint8_t v2) {
-        return (test_D() ? adc_bcd(v1, v2) : adc_bin(v1, v2));
-    }
+    uint8_t adc(uint8_t v1, uint8_t v2);
 
     /**
-     * Signed binary substraction with borrow helper.
-     * Flags: N V Z C
-     * @return v1 - v2 - ~C
-     * TODO: Simplify
-     */
-    uint8_t sbc_bin(uint8_t v1, uint8_t v2) {
-        int b = (test_C() ? 0 : 1);
-        int r = v1 - v2 - b;
-        int sr = static_cast<int8_t>(v1) - static_cast<int8_t>(v2) - b;
-        flag_V((sr > 127) || (sr < -128));
-        set_N(r);
-        set_Z(r);
-        flag_C(static_cast<unsigned int>(r) <= 255);
-        return (r & 255);
-    }
-
-    /**
-     * Packet BCD substraction with borrow helper.
+     * Signed binary substraction helper.
      * Flags: N V Z C
      * @return v1 - v2 - ~C
      */
-    uint8_t sbc_bcd(uint8_t v1, uint8_t v2) {
-        uint8_t b1 = utils::bcd_to_bin(v1);
-        uint8_t b2 = utils::bcd_to_bin(v2);
-        uint8_t r = sbc_bin(b1, b2);
-        if (r > 99) {
-            r -= 100;
-            flag_C(true);
-        } else {
-            flag_C(false);
-        }
-        return utils::bin_to_bcd(r);
-    }
+    uint8_t sbc_bin(uint8_t v1, uint8_t v2);
+
+    /**
+     * BCD substraction helper.
+     * Flags: N V Z C
+     * @return v1 - v2 - ~C
+     */
+    uint8_t sbc_bcd(uint8_t v1, uint8_t v2);
 
     /**
      * SBC helper.
-     * Perform a signed binary substraction or a packed BCD substraction depending on D flag.
+     * Depending on D flag, permor a signed binary substraction or a packed BCD substraction.
      * Flags: N V Z C
-     * @return v1 - v2 - C
+     * @return v1 - v2 - ~C
      */
-    uint8_t sbc(uint8_t v1, uint8_t v2) {
-        return (test_D() ? sbc_bcd(v1, v2) : sbc_bin(v1, v2));
-    }
+    uint8_t sbc(uint8_t v1, uint8_t v2);
 
 
     /*

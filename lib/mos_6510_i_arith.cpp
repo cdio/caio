@@ -126,6 +126,61 @@ void Mos6510::i_EOR(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * ADC
  ********************************************************************************/
+uint8_t Mos6510::adc_bin(uint8_t v1, uint8_t v2)
+{
+    uint16_t c = (test_C() ? 1 : 0);
+    uint16_t r = v1 + v2 + c;
+
+    bool s1 = v1 & 0x80;
+    bool s2 = v2 & 0x80;
+    bool sr = r & 0x80;
+    flag_V((s1 & s2 & !sr) || (!s1 && !s2 && sr));
+    flag_C(r & 0x100);
+    set_N(r);
+    set_Z(r);
+
+    return (r & 255);
+}
+
+uint8_t Mos6510::adc_bcd(uint8_t v1, uint8_t v2)
+{
+    /*
+     * 1a. AL = (A & $0F) + (B & $0F) + C
+     * 1b. If AL >= $0A, then AL = ((AL + $06) & $0F) + $10
+     * 1c. A = (A & $F0) + (B & $F0) + AL
+     * 1d. Note that A can be >= $100 at this point
+     * 1e. If (A >= $A0), then A = A + $60
+     * 1f. The accumulator result is the lower 8 bits of A
+     * 1g. The carry result is 1 if A >= $100, and is 0 if A < $100
+     *
+     * See http://www.6502.org/tutorials/decimal_mode.html
+     */
+    uint8_t t = (v1 & 0x0F) + (v2 & 0x0F) + (test_C() ? 1 : 0);
+    if (t >= 0x0A) {
+        t = ((t + 0x06) & 0x0F) + 0x10;
+    }
+
+    int r = (v1 & 0xF0) + (v2 & 0xF0) + t;
+    if (r >= 0xA0) {
+        r += 0x60;
+    }
+
+    bool s1 = v1 & 0x80;
+    bool s2 = v2 & 0x80;
+    bool sr = r & 0x80;
+    flag_V((s1 & s2 & !sr) || (!s1 && !s2 && sr));
+    flag_C(r & 0x100);
+    set_N(r);
+    set_Z(r);
+
+    return (r & 0xFF);
+}
+
+uint8_t Mos6510::adc(uint8_t v1, uint8_t v2)
+{
+    return (test_D() ? adc_bcd(v1, v2) : adc_bin(v1, v2));
+}
+
 void Mos6510::i_ADC_imm(Mos6510 &self, addr_t value)
 {
     /*
@@ -153,6 +208,72 @@ void Mos6510::i_ADC(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * SBC
  ********************************************************************************/
+uint8_t Mos6510::sbc_bin(uint8_t v1, uint8_t v2)
+{
+#if 0
+    int b = (test_C() ? 0 : 1);
+    int r = v1 - v2 - b;
+    int sr = static_cast<int8_t>(v1) - static_cast<int8_t>(v2) - b;
+
+    flag_V((sr > 127) || (sr < -128));
+    set_N(r);
+    set_Z(r);
+    flag_C(static_cast<unsigned>(r) <= 255);
+
+    return (r & 255);
+#endif
+    uint16_t b = (test_C() ? 0x0000 : 0xFFFF);
+    uint16_t r = v1 - v2 + b;
+
+    bool s1 = v1 & 0x80;
+    bool s2 = v2 & 0x80;
+    bool sr = r & 0x80;
+    flag_V((s1 & !s2 & !sr) || (!s1 && s2 && sr));
+    flag_C(!(r & 0x100));
+    set_N(r);
+    set_Z(r);
+
+    return (r & 255);
+}
+
+uint8_t Mos6510::sbc_bcd(uint8_t v1, uint8_t v2)
+{
+    /*
+     * 3a. AL = (A & $0F) - (B & $0F) + C-1
+     * 3b. If AL < 0, then AL = ((AL - $06) & $0F) - $10
+     * 3c. A = (A & $F0) - (B & $F0) + AL
+     * 3d. If A < 0, then A = A - $60
+     * 3e. The accumulator result is the lower 8 bits of A
+     *
+     * See http://www.6502.org/tutorials/decimal_mode.html
+     */
+    int16_t b = (test_C() ? 0 : -1);
+    int16_t t = (v1 & 15) - (v2 & 15) + b;
+    if (t < 0) {
+        t = ((t - 6) & 15) - 0x10;
+    }
+
+    int16_t r = (v1 & 0xF0) - (v2 & 0xF0) + t;
+    if (r < 0) {
+        r -= 0x60;
+    }
+
+    bool s1 = v1 & 0x80;
+    bool s2 = v2 & 0x80;
+    bool sr = r & 0x80;
+    flag_V((s1 & !s2 & !sr) || (!s1 && s2 && sr));
+    flag_C(!(r & 0x100));
+    set_N(r);
+    set_Z(r);
+
+    return (r & 255);
+}
+
+uint8_t Mos6510::sbc(uint8_t v1, uint8_t v2)
+{
+    return (test_D() ? sbc_bcd(v1, v2) : sbc_bin(v1, v2));
+}
+
 void Mos6510::i_SBC_imm(Mos6510 &self, addr_t value)
 {
     /*
