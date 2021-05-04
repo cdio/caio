@@ -158,7 +158,7 @@ Confile CemuCmdline::parse(int argc, char *const *argv)
             /*
              * The user specified a configuration file name.
              */
-            conf.parse(cfile, {});
+            conf.parse(cfile, { CemuConfile::CWD });
         } catch (const std::exception &err) {
             std::cerr << _progname << ": " << err.what() << std::endl;
             std::exit(EXIT_FAILURE);

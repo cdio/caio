@@ -59,6 +59,7 @@ class CemuConfile : public Confile {
 public:
     constexpr static const char *SYSTEM_CONFDIR         = D_SYSCONFDIR;
     constexpr static const char *HOME_CONFDIR           = D_HOMECONFDIR;
+    constexpr static const char *CWD                    = ".";
     constexpr static const char *ROMDIR                 = D_ROMDIR;
     constexpr static const char *PALETTEDIR             = D_PALETTEDIR;
     constexpr static const char *KEYMAPSDIR             = D_KEYMAPSDIR;
@@ -95,7 +96,7 @@ public:
      * @see Confile::parse()
      */
     void parse(const std::string &fname = CEMU_CONFIG_FILE,
-        const std::initializer_list<std::string> &spaths = {HOME_CONFDIR, SYSTEM_CONFDIR}) override {
+        const std::initializer_list<std::string> &spaths = {CWD, HOME_CONFDIR, SYSTEM_CONFDIR}) override {
         Confile::parse(fname, spaths);
     }
 };
