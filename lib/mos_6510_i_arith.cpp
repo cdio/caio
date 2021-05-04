@@ -210,18 +210,6 @@ void Mos6510::i_ADC(Mos6510 &self, addr_t addr)
  ********************************************************************************/
 uint8_t Mos6510::sbc_bin(uint8_t v1, uint8_t v2)
 {
-#if 0
-    int b = (test_C() ? 0 : 1);
-    int r = v1 - v2 - b;
-    int sr = static_cast<int8_t>(v1) - static_cast<int8_t>(v2) - b;
-
-    flag_V((sr > 127) || (sr < -128));
-    set_N(r);
-    set_Z(r);
-    flag_C(static_cast<unsigned>(r) <= 255);
-
-    return (r & 255);
-#endif
     uint16_t b = (test_C() ? 0x0000 : 0xFFFF);
     uint16_t r = v1 - v2 + b;
 
