@@ -401,7 +401,7 @@ void UISfml::resize_event(unsigned rwidth, unsigned rheight)
     height = std::min(height, _desktop_mode.height);
 
     auto parea = _panel->area();
-    if (_panel->is_visible() && height > parea.height) {
+    if (_panel->is_visible() && static_cast<int>(height) > parea.height) {
         height -= parea.height;
     }
 

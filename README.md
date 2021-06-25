@@ -1,8 +1,9 @@
 # CEMU
 
 CEMU is an emulator of 8 bit Home Computers.
-The current status is **Work-in-Progress alpha** and only the Commodore 64
-is emulated, under Linux.
+
+CEMU is currently **Work-in-Progress** and at the moment only the Commodore 64 is
+emulated, under Linux.
 
 ![c64](/images/c64.gif "CEMU C64")
 ![gyruss](/images/gyruss.gif "Gyruss")
@@ -15,9 +16,14 @@ is emulated, under Linux.
 
 ## Compile & Install
 
-CEMU requires [clang-10](https://clang.llvm.org) or later,
-[SFML](https://www.sfml-dev.org) 2.5.1 or later and
-[pkg-config](https://en.wikipedia.org/wiki/Pkg-config):
+### Dependencies:
+* C++20 compiler: [clang-10.0](https://clang.llvm.org) or later or
+  [g++-9.3](https://en.wikipedia.org/wiki/GNU_Compiler_Collection) or later.
+
+* [SFML-2.5.1](https://www.sfml-dev.org) or later.
+
+* [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config)
+
 
 ```
     $ sudo apt install clang
@@ -26,9 +32,29 @@ CEMU requires [clang-10](https://clang.llvm.org) or later,
     ...
     $ sudo apt install pkg-config
     ...
+```
+
+### Compile:
+
+```
     $ make PREFIX=/usr/local
     ...
+```
+
+The default compiler is [clang++](https://clang.llvm.org) but the user is free to
+change it to [g++](https://en.wikipedia.org/wiki/GNU_Compiler_Collection) by
+setting the *CXX* environment variable:
+
+```
+    $ make CXX=g++ PREFIX=/usr/local
+    ...
+```
+
+### Install:
+
+```
     $ sudo make PREFIX=/usr/local install
+    ...
 ```
 
 The default *PREFIX* is */opt/cemu*.
@@ -46,12 +72,12 @@ or
 All the command line options can be specified in a
 [configuration file](/bin/cemu.conf).
 
-To launch a program built in a CRT file:
+To attach a cartridge (*.crt*) image:
 
 ```
     $ c64 --scanlines h --scale 4 --cart ./gyruss.crt
 ```
-if it is a PRG file:
+To launch a program (*.prg*) file as soon as the basic is started:
 
 ```
     $ c64 --prg ./rambo.prg
@@ -73,7 +99,7 @@ positional layout:
     $ c64 --keymaps vice
 ```
 
-At the moment the following layouts are available (not all of them tested):
+At the moment the following layouts are available (not all of them fully tested):
 * Italian (it)
 * German (de)
 * Swiss (ch)
@@ -82,7 +108,7 @@ At the moment the following layouts are available (not all of them tested):
 * VICEKB (vice)
 
 Keyboard layouts are simple text files, existing layouts can be modified using
-any text editor and new layouts can be added to the system by just placing the
+a text editor and new layouts can be added to the system by just placing the
 new file inside the *keymasdir* directory which defaults to
 *$PREFIX/share/cemu/keymaps*.
 

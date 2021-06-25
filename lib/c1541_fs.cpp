@@ -76,7 +76,7 @@ std::string C1541Fs::to_basic(addr_t &addr, const std::filesystem::path &fspath,
            << "\"" << std::setw(16) << std::left << disk_name << "\" FS 2A"
            << static_cast<uint8_t>(0);
 
-    } else if (fsize != static_cast<ssize_t>(-1)) {
+    } else if (fsize != static_cast<size_t>(-1)) {
         /*
          * Body: Directory entries.
          */

@@ -16,6 +16,19 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
+CXX=			clang++
+GIT?=			git
+HEAD?=			head
+ID?=			id
+INSTALL?=		install
+override LD=		${CXX}
+LN?=			ln
+override MKDEP=		${CXX}
+NPROC?=			nproc
+PERL?=			perl
+PKG_CONFIG?=		pkg-config
+SED?=			sed
+
 VERSION:=		${shell cat ${ROOT}/VERSION}
 
 LIBDIR=			${abspath ${PREFIX}}/lib
@@ -30,14 +43,21 @@ CPPFLAGS+=		-I${ROOT} \
 			-I.
 
 CXXFLAGS=		-Wall \
-			-Werror \
-			-std=c++20
+			-Werror
+
+ifeq (${CXX}, clang++)
+CXXFLAGS+=		-std=c++20
+else
+CXXFLAGS+=		-std=c++2a
+endif
 
 ifeq (${DEBUG}, yes)
 CPPFLAGS+=		-DD_DEBUG
 CXXFLAGS+=		-O0 \
-			-g \
-			-fstandalone-debug
+			-g
+ifeq (${CXX}, clang++)
+CXXFLAGS+=		-fstandalone-debug
+endif
 else
 CXXFLAGS+=		-O3
 LDFLAGS+=		-Wl,-s
@@ -53,19 +73,6 @@ MKDEP_FLAGS=		-MM \
 LN_FLAGS?=		-sf
 
 NPROC:=			${shell ${NPROC}}
-
-override CXX=		clang++
-GIT?=			git
-HEAD?=			head
-ID?=			id
-INSTALL?=		install
-override LD=		${CXX}
-LN?=			ln
-override MKDEP=		${CXX}
-NPROC?=			nproc
-PERL?=			perl
-PKG_CONFIG?=		pkg-config
-SED?=			sed
 
 PREFIX?=		/opt/cemu
 DST_BINDIR?=		${PREFIX}/bin
@@ -96,6 +103,12 @@ MODE_DATA?=		0644
 
 HOME:=			${shell echo ~}
 
-CLANG_MIN_VERSION:=	10
-CLANG_VERSION:=		${shell ${CXX} --version | ${HEAD} -1 | ${SED} -e 's,.* \([0-9]*\)\.[0-9]*\.[0-9]*.*$$,\1,'}
-CLANG_CHECK_VERSION:=	${shell test ${CLANG_VERSION} -ge ${CLANG_MIN_VERSION} && echo OK || echo NOK}
+CLANG_MIN_VERSION_MAJOR=10
+CLANG_MIN_VERSION_MINOR=0
+CLANG_VERSION_MAJOR=	${shell ${CXX} --version | ${HEAD} -1 | ${SED} -e 's,.* \([0-9]*\)\.[0-9]*\.[0-9]*.*$$,\1,'}
+CLANG_VERSION_MINOR=	${shell ${CXX} --version | ${HEAD} -1 | ${SED} -e 's,.* [0-9]*\.\([0-9]*\)\.[0-9]*.*$$,\1,'}
+
+GCC_MIN_VERSION_MAJOR=	9
+GCC_MIN_VERSION_MINOR=	3
+GCC_VERSION_MAJOR=	${shell ${CXX} --version | ${HEAD} -1 | ${SED} -e 's,.* \([0-9]*\)\.[0-9]*\.[0-9]*$$,\1,'}
+GCC_VERSION_MINOR=	${shell ${CXX} --version | ${HEAD} -1 | ${SED} -e 's,.* [0-9]*\.\([0-9]*\)\.[0-9]*$$,\1,'}

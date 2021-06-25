@@ -428,7 +428,8 @@ ReadByte C1541::StatusChannel::read()
         reset(Status::OK, 0, 0);
     }
 
-    return {static_cast<uint8_t>(_buf[_pos]), ++_pos == _size};
+    ++_pos;
+    return {static_cast<uint8_t>(_buf[_pos - 1]), _pos == _size};
 }
 
 void C1541::StatusChannel::push_back()

@@ -51,7 +51,7 @@ public:
         std::scoped_lock<std::mutex> _{_qlock};
         auto val = std::move(_queue.front());
         _queue.pop();
-        return std::move(val);
+        return val;
     }
 
     T & back() {

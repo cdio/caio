@@ -361,7 +361,7 @@ uint8_t C64Keyboard::read()
 
     uint8_t cols{0};
 
-    for (auto r = 0; r < _matrix.size(); ++r) {
+    for (size_t r = 0; r < _matrix.size(); ++r) {
         if ((_scanrow & (1 << r)) == 0) {
             cols |= _matrix[r];
         }
