@@ -16,9 +16,28 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-.PHONY: all clean debug distclean install
+ROOT=	${abspath ..}
 
-all clean debug distclean install:
-	for d in ${DIRS}; do \
-		${MAKE} -C $$d -j${NPROC} $@ || exit 1; \
-	done
+include ${ROOT}/mk/config.mk
+
+.PHONY: all debug bin-package deb-package
+
+all debug:
+
+ifdef RELEASE
+bin-package:
+	${MAKE} ${MAKEARGS} -f bintar.mk $@
+
+deb-package:
+	${MAKE} ${MAKEARGS} -f deb.mk $@
+
+else
+bin-package deb-package:
+	@echo
+	@echo "==> Please specify build RELEASE=<branch>"
+	@echo
+	@exit 1
+
+include ${ROOT}/mk/build.mk
+
+endif

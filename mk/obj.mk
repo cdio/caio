@@ -20,18 +20,18 @@ OBJS=		${CXXSRCS:%.cpp=%.o}
 
 HDEPS+=		${OBJS:%.o=%.d}
 
+CLEANFILES+=	${OBJS} \
+		${HDEPS}
+
 .SUFFIXES:	.cpp .o
 
-.PHONY: check clean
+.PHONY: check
 
 -include ${HDEPS}
 
 %.o: %.cpp
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o $@ $<
 	${MKDEP} ${MKDEP_FLAGS} ${CPPFLAGS} ${CXXFLAGS} $< > ${@:.o=.d}
-
-clean:
-	-rm -f ${OBJS} ${HDEPS} ${CLEANFILES}
 
 ifeq (${CXX}, clang++)
 _CXX_MIN_VERSION_MAJOR:=${CLANG_MIN_VERSION_MAJOR}
@@ -56,3 +56,5 @@ else
 	    echo "\n==> Minimum ${CXX} compiler version is ${_CXX_MIN_VERSION_MAJOR}.${_CXX_MIN_VERSION_MINOR}." \
 	         "Current version is ${_CXX_VERSION_MAJOR}.${_CXX_VERSION_MINOR}\n\n"
 endif
+
+include ${ROOT}/mk/clean.mk

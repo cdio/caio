@@ -17,6 +17,9 @@
 # with this program; if not, see http://www.gnu.org/licenses/
 #
 CXX=			clang++
+CUT?=			cut
+DPKG?=			dpkg
+DU?=			du
 GIT?=			git
 HEAD?=			head
 ID?=			id
@@ -27,22 +30,24 @@ override MKDEP=		${CXX}
 NPROC?=			nproc
 PERL?=			perl
 PKG_CONFIG?=		pkg-config
+RM?=			rm
 SED?=			sed
-
-VERSION:=		${shell cat ${ROOT}/VERSION}
+TAR?=			tar
+TOUCH?=			touch
+UNAME?=			uname
 
 LIBDIR=			${abspath ${PREFIX}}/lib
 
 INCDIR=			${abspath ${PREFIX}}/include
 
-CPPFLAGS=		-DD_VERSION='"${VERSION}"' \
+CPPFLAGS+=		-DD_VERSION='"${VERSION}"' \
 			-DD_PREFIX='"${PREFIX}"'
 
 CPPFLAGS+=		-I${ROOT} \
 			-I${ROOT}/3rdparty/GSL/include \
 			-I.
 
-CXXFLAGS=		-Wall \
+CXXFLAGS+=		-Wall \
 			-Werror
 
 ifeq (${CXX}, clang++)
@@ -73,6 +78,17 @@ MKDEP_FLAGS=		-MM \
 LN_FLAGS?=		-sf
 
 NPROC:=			${shell ${NPROC}}
+
+ARCH:=			${shell ${UNAME} -m}
+ifeq (${ARCH}, x86_64)
+ARCH:=			amd64
+endif
+
+ifdef RELEASE
+VERSION=		${RELEASE:v%=%}
+else
+VERSION=		0.0.0
+endif
 
 PREFIX?=		/opt/cemu
 DST_BINDIR?=		${PREFIX}/bin

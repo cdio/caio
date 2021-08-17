@@ -37,9 +37,9 @@ ALL=		${DST_IMAGES} \
 
 include ${ROOT}/mk/config.mk
 
-.PHONY: all clean debug install
+.PHONY: all clean debug distclean install
 
-all clean debug:
+all clean debug distclean:
 
 install: ${ALL}
 

@@ -34,9 +34,9 @@ LDADD+=		-lpthread
 
 LIB=		${ROOT}/lib/libcemu.a
 
-CLEANFILES=	${BIN} ${LN_BINS}
+CLEANFILES+=	${BIN} ${LN_BINS}
 
-.PHONY=		_all all check clean debug install
+.PHONY=		_all all check debug install
 
 all:
 	${MAKE} ${MAKEARGS} -j${NPROC} _all

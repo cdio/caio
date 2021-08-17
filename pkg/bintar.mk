@@ -16,9 +16,24 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-.PHONY: all clean debug distclean install
 
-all clean debug distclean install:
-	for d in ${DIRS}; do \
-		${MAKE} -C $$d -j${NPROC} $@ || exit 1; \
-	done
+#
+# RELEASE=	Required. Git branch or tag to build.
+#
+ROOT=		${abspath ..}
+
+include ${ROOT}/mk/config.mk
+
+BIN_PKGNAME=	cemu_${VERSION}_${ARCH}
+BIN_PKGFILE=	${BUILD_PREFIX}/${BIN_PKGNAME}.tgz
+BUILD_DIR=	${BUILD_PREFIX}/${BIN_PKGNAME}_tgz
+
+.PHONY: bin-package
+
+include ${ROOT}/mk/build.mk
+
+bin-package: ${BIN_PKGFILE}
+
+${BIN_PKGFILE}: ${BUILD_INSTALL_DONE}
+	${TAR} -zcf $@ -C ${BUILD_INSTALL_ROOT} .
+

@@ -28,7 +28,7 @@ DST_KEYSYMSDIR=	${DST_DATADIR}/keymaps
 
 DST_KEYSYMS=	${KEYSYMS:%=${DST_KEYSYMSDIR}/%}
 
-.PHONY: _all all clean debug install
+.PHONY: _all all clean debug distclean install
 
 include ${ROOT}/mk/config.mk
 
@@ -42,4 +42,4 @@ ${DST_KEYSYMS}: ${DST_KEYSYMSDIR} ${notdir $@}
 ${DST_KEYSYMSDIR}:
 	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
 
-clean:
+clean distclean:

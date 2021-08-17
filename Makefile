@@ -25,25 +25,15 @@ DIRS=		3rdparty \
 		bin/roms \
 		bin/palette \
 		bin/keymaps \
-		images
+		images \
+		pkg
 
-NAME=		cemu-v${VERSION}
-
-FMT=		tgz
-
-PKG=		${NAME}.${FMT}
-
-.PHONY: package
+.PHONY: all clean distclean package deb-package
 
 include ${ROOT}/mk/config.mk
+
 include ${ROOT}/mk/dir.mk
 
-package:
-ifndef RELEASE
-	@echo
-	@echo "==> Please specify RELEASE=<branch>"
-	@echo
-	@exit 1
-else
-	${GIT} archive --format=${FMT} --prefix=${NAME}/ ${RELEASE} > ${PKG}
-endif
+package deb-package:
+	${MAKE} ${MAKEARGS} -C pkg $@
+

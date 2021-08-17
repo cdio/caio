@@ -69,6 +69,9 @@ CXXFLAGS=	-Wall \
 
 SAMP2SRC=	${PERL} samp2src.pl
 
+CLEANFILES+=	${LIB} ${OBJS} ${HDEPS}
+#CLEANFILES+=	${LIB} ${OBJS} ${HDEPS} ${DATASRCS}
+
 .SUFFIXES:	.cc .h .dat
 
 .PHONY:		_all all debug clean install
@@ -90,7 +93,4 @@ ${LIB}: ${OBJS}
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o $@ $<
 	${MKDEP} ${MKDEP_FLAGS} ${CPPFLAGS} ${CXXFLAGS} $< > ${@:.o=.d}
 
-clean:
-	-rm -rf ${LIB} ${OBJS} ${HDEPS}
-#	rm -rf ${LIB} ${OBJS} ${HDEPS} ${DATASRCS}
-
+include ${ROOT}/mk/clean.mk

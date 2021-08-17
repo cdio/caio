@@ -16,9 +16,17 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-.PHONY: all clean debug distclean install
+CLEANFILES?=
+DISTCLEANFILES?=
 
-all clean debug distclean install:
-	for d in ${DIRS}; do \
-		${MAKE} -C $$d -j${NPROC} $@ || exit 1; \
-	done
+.PHONY: clean distclean
+
+clean:
+ifdef CLEANFILES
+	-${RM} -r ${CLEANFILES}
+endif
+
+distclean: clean
+ifdef DISTCLEANFILES
+	-${RM} -r ${DISTCLEANFILES}
+endif

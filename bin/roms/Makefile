@@ -30,7 +30,7 @@ DST_ROMS=	${ROMS:%=${DST_ROMDIR}/%}
 
 DST_README=	${DST_ROMDIR}/${README}
 
-.PHONY: _all all clean debug install
+.PHONY: _all all clean debug distclean install
 
 include ${ROOT}/mk/config.mk
 
@@ -40,7 +40,7 @@ install: ${DST_ROMS} ${DST_README}
 
 ${DST_ROMS}: ${DST_ROMDIR} ${notdir }/$@
 	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${notdir $@} $@
-	${LN} ${LN_FLAGS} $@ $$(echo $@ | ${SED} -e 's,\(^[^\.]*\).*$$,\1.rom,')
+#XXX REMOVE	${LN} ${LN_FLAGS} $@ $$(echo $@ | ${SED} -e 's,\(^[^\.]*\).*$$,\1.rom,')
 
 ${DST_ROMDIR}:
 	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
@@ -48,4 +48,4 @@ ${DST_ROMDIR}:
 ${DST_README}: ${README}
 	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} $< $@
 
-clean:
+clean distclean:

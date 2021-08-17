@@ -32,7 +32,7 @@ DST_PALETTEDIR=	${DST_DATADIR}/palette
 
 DST_PALETTES=	${PALETTES:%=${DST_PALETTEDIR}/%}
 
-.PHONY: _all all clean debug install
+.PHONY: _all all clean debug distclean install
 
 include ${ROOT}/mk/config.mk
 
@@ -46,4 +46,4 @@ ${DST_PALETTES}: ${DST_PALETTEDIR} ${notdir $@}
 ${DST_PALETTEDIR}:
 	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
 
-clean:
+clean distclean:

@@ -20,10 +20,10 @@ CXXFLAGS+=	-fPIC
 
 LDFLAGS+=	-shared
 
-CLEANFILES=	${LIB} \
+CLEANFILES+=	${LIB} \
 		${SOLIB}
 
-.PHONY=		_all all clean check debug
+.PHONY=		_all all check debug
 
 all:
 	${MAKE} ${MAKEARGS} -j${NPROC} _all
