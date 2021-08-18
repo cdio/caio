@@ -1,3 +1,5 @@
+- VIC:      FLD effect
+- VIC:      Cycles emulation
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
 - UI:       Fix disk widget activity when C1541 is in error condition.
 - CPU;      Test suite
@@ -11,10 +13,10 @@
             - d64/fs attached on-demand (+ host filesystem traversing)
             - Support for directory/file traversal/selection (test ImGui)
             - Virtual keyboard?
-- VIC:      Fix vertical scroll
-- VIC:      Cycles emulation
 - VIC:      Implement open-border bug
+- SID:      Fix/remake (dane ballad)
 - misc:     Speed-up
+- misc:     Remove gsl (when c++20 support is completed)
 - Apple2
 - BBC Micro
 - Daewoo DPC-200
