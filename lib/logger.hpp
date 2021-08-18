@@ -52,7 +52,7 @@ public:
         ALL   = (ERROR | WARN | INFO | DEBUG)
     };
 
-    constexpr static const char *DEFAULT_LOGFILE         = "/dev/tty";
+    constexpr static const char *DEFAULT_LOGFILE         = "/dev/null";
     constexpr static const char *DEFAULT_LOGLEVEL_STRING = "";
     constexpr static Level DEFAULT_LOGLEVEL              = Level::NONE;
 
