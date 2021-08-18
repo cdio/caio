@@ -42,7 +42,7 @@ include ${ROOT}/mk/bin.mk
 install: ${DST_LINKS} ${DST_CONFIG} ${DST_README}
 
 ${DST_LINKS}: ${DST_BIN}
-	${LN} ${LN_FLAGS} $< $@
+	${LN} ${LN_FLAGS} ${BIN} $@
 
 ${DST_BIN}: ${BIN}
 	[ -d ${dir $@} ] || ${INSTALL} -d -m ${MODE_BINDIR} -o ${OWNER_BINDIR} -g ${GROUP_BINDIR} ${dir $@}
