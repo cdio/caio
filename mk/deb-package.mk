@@ -56,6 +56,7 @@ ${DEB_CONTROL}: ${BUILD_INSTALL_DONE}
 	"Maintainer: CEMU Developers <>\n"\
 	"Installed-Size: ${DEB_SIZE}\n"\
 	"Depends: libsfml-graphics2.5 (>= 2.5.1), libsfml-audio2.5 (>= 2.5.1), libstdc++6 (>= 10.3.0)\n"\
+	"Replaces: cemu\n"\
 	"Homepage: http://github.com/cdio/CEMU\n"\
 	"Description: 8 bit Home Computers Emulator.\n" > $@
 
