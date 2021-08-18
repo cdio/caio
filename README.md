@@ -84,7 +84,7 @@ That creates a *.deb* binary file under the *pkg/build* directory.
 #### Generic binary package:
 
 ```
-    $ make deb-package RELEASE=<tag>
+    $ make bin-package RELEASE=<tag>
 ```
 
 That creates a *.tgz* (tarball) binary file under the *pkg/build* directory.
