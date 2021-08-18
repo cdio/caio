@@ -28,12 +28,12 @@ DIRS=		3rdparty \
 		images \
 		pkg
 
-.PHONY: all clean distclean package deb-package
+.PHONY: all clean distclean %-package
 
 include ${ROOT}/mk/config.mk
 
 include ${ROOT}/mk/dir.mk
 
-package deb-package:
+%-package:
 	${MAKE} ${MAKEARGS} -C pkg $@
 

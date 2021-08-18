@@ -20,6 +20,10 @@ OBJS=		${CXXSRCS:%.cpp=%.o}
 
 HDEPS+=		${OBJS:%.o=%.d}
 
+EXTRA_CPPFLAGS?=
+
+CPPFLAGS+=	${EXTRA_CPPFLAGS}
+
 CLEANFILES+=	${OBJS} \
 		${HDEPS}
 

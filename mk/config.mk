@@ -30,6 +30,7 @@ override MKDEP=		${CXX}
 NPROC?=			nproc
 PERL?=			perl
 PKG_CONFIG?=		pkg-config
+PRINTF?=		printf
 RM?=			rm
 SED?=			sed
 TAR?=			tar

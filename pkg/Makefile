@@ -20,24 +20,21 @@ ROOT=	${abspath ..}
 
 include ${ROOT}/mk/config.mk
 
-.PHONY: all debug bin-package deb-package
+.PHONY: all debug %-package
 
 all debug install:
 
 ifdef RELEASE
-bin-package:
-	${MAKE} ${MAKEARGS} -f bintar.mk $@
-
-deb-package:
-	${MAKE} ${MAKEARGS} -f deb.mk $@
+%-package: package
+	${MAKE} ${MAKEARGS} -f ${ROOT}/mk/$@.mk $@
 
 else
-bin-package deb-package:
+%-package:
 	@echo
 	@echo "==> Please specify build RELEASE=<branch>"
 	@echo
 	@exit 1
 
-include ${ROOT}/mk/build.mk
-
 endif
+
+include ${ROOT}/mk/build.mk

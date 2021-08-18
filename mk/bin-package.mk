@@ -26,6 +26,7 @@ include ${ROOT}/mk/config.mk
 
 BIN_PKGNAME=	cemu_${VERSION}_${ARCH}
 BIN_PKGFILE=	${BUILD_PREFIX}/${BIN_PKGNAME}.tgz
+
 BUILD_DIR=	${BUILD_PREFIX}/${BIN_PKGNAME}_tgz
 
 .PHONY: bin-package

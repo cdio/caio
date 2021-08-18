@@ -39,11 +39,11 @@ BUILD_INSTALL_DIR=	${BUILD_INSTALL_ROOT}/${PREFIX}
 
 DISTCLEANFILES+=	${BUILD_PREFIX}
 
-.PHONY: build package src-package
+.PHONY: build package
 
 build: ${BUILD_INSTALL_DONE}
 
-src-package package: ${SRC_PKGFILE}
+package: ${SRC_PKGFILE}
 
 ${BUILD_INSTALL_DONE}: ${BUILD_COMPILE_DONE}
 	${MAKE} ${MAKEARGS} -C ${BUILD_SRCDIR} PREFIX=${BUILD_INSTALL_DIR} install
