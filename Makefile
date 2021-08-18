@@ -18,15 +18,18 @@
 #
 ROOT=		${abspath .}
 
-DIRS=		3rdparty \
-		icons \
+DIRS=		3rdparty
+
+DIRS+=		icons \
 		lib \
-		bin \
-		bin/roms \
-		bin/palette \
-		bin/keymaps \
-		images \
-		pkg
+		bin
+
+DIRS+=		images \
+		keymaps \
+		palette \
+		roms
+
+DIRS+=		pkg
 
 .PHONY: all clean distclean %-package
 

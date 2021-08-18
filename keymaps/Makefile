@@ -16,19 +16,17 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ../..}
+ROOT=		${abspath ..}
 
-ROMS=		c64_basic.901226-01.bin \
-		c64_kernal.901227-03.bin \
-		c64_characters.901225-01.bin
+KEYSYMS=	c64_ch.kbd \
+		c64_de.kbd \
+		c64_it.kbd \
+		c64_gb.kbd \
+		c64_vice.kbd
 
-README=		README.md
+DST_KEYSYMSDIR=	${DST_DATADIR}/keymaps
 
-DST_ROMDIR=	${DST_DATADIR}/roms
-
-DST_ROMS=	${ROMS:%=${DST_ROMDIR}/%}
-
-DST_README=	${DST_ROMDIR}/${README}
+DST_KEYSYMS=	${KEYSYMS:%=${DST_KEYSYMSDIR}/%}
 
 .PHONY: _all all clean debug distclean install
 
@@ -36,15 +34,12 @@ include ${ROOT}/mk/config.mk
 
 _all all debug:
 
-install: ${DST_ROMS} ${DST_README}
+install: ${DST_KEYSYMS}
 
-${DST_ROMS}: ${DST_ROMDIR} ${notdir }/$@
+${DST_KEYSYMS}: ${DST_KEYSYMSDIR} ${notdir $@}
 	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${notdir $@} $@
 
-${DST_ROMDIR}:
+${DST_KEYSYMSDIR}:
 	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
-
-${DST_README}: ${README}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} $< $@
 
 clean distclean:
