@@ -461,7 +461,7 @@ void C64::run()
 
 void C64::start()
 {
-    log.info("Starting CEMU " + cemu::version() + " - C64\n" + to_string() + "\n");
+    log.info("Starting CEMU v" + cemu::version() + " - C64\n" + to_string() + "\n");
 
     /*
      * The emulator runs on its own thread.
