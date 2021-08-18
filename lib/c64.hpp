@@ -41,9 +41,9 @@
 namespace cemu {
 namespace c64 {
 
-constexpr static const char *KERNAL_FNAME         = "c64_kernal.rom";
-constexpr static const char *BASIC_FNAME          = "c64_basic.rom";
-constexpr static const char *CHARGEN_FNAME        = "c64_chargen.rom";
+constexpr static const char *KERNAL_FNAME         = "c64_kernal.901227-03.bin";
+constexpr static const char *BASIC_FNAME          = "c64_basic.901226-01.bin";
+constexpr static const char *CHARGEN_FNAME        = "c64_characters.901225-01.bin";
 
 constexpr static const size_t KERNAL_SIZE         = 8192;
 constexpr static const size_t BASIC_SIZE          = 8192;

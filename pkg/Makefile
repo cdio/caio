@@ -22,7 +22,7 @@ include ${ROOT}/mk/config.mk
 
 .PHONY: all debug bin-package deb-package
 
-all debug:
+all debug install:
 
 ifdef RELEASE
 bin-package:

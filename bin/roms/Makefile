@@ -20,7 +20,7 @@ ROOT=		${abspath ../..}
 
 ROMS=		c64_basic.901226-01.bin \
 		c64_kernal.901227-03.bin \
-		c64_chargen.901225-01.bin
+		c64_characters.901225-01.bin
 
 README=		README.md
 
@@ -40,7 +40,6 @@ install: ${DST_ROMS} ${DST_README}
 
 ${DST_ROMS}: ${DST_ROMDIR} ${notdir }/$@
 	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${notdir $@} $@
-#XXX REMOVE	${LN} ${LN_FLAGS} $@ $$(echo $@ | ${SED} -e 's,\(^[^\.]*\).*$$,\1.rom,')
 
 ${DST_ROMDIR}:
 	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
