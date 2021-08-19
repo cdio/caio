@@ -16,38 +16,23 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ..}
-
 include ${ROOT}/mk/config.mk
 
-IMAGES=		c64.gif \
-		compopicasso.png \
-		gyruss.gif \
-		q-bert.gif \
-		zauberwald.png
+.PHONY: all debug %-package
 
-README=		${ROOT}/README.md
+all debug install:
 
-DST_IMGDIR=	${DST_DATADIR}/images
+ifdef RELEASE
+%-package: package
+	${MAKE} ${MAKEARGS} -f ${ROOT}/mk/$@.mk $@
 
-DST_IMAGES=	${IMAGES:%=${DST_IMGDIR}/%}
+else
+%-package:
+	@echo
+	@echo "==> Please specify build RELEASE=<branch>"
+	@echo
+	@exit 1
 
-DST_README=	${DST_DATADIR}/${notdir ${README}}
+endif
 
-ALL=		${DST_IMAGES} \
-		${DST_README}
-
-.PHONY: all clean debug install
-
-all clean debug:
-
-install: ${ALL}
-
-${DST_IMAGES}: ${DST_IMGDIR} ${notdir $@}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${notdir $@} $@
-
-${DST_README}: ${README}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} $< $@
-
-${DST_IMGDIR}:
-	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
+include ${ROOT}/mk/build.mk

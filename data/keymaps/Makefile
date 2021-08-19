@@ -16,38 +16,31 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ..}
+ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
-IMAGES=		c64.gif \
-		compopicasso.png \
-		gyruss.gif \
-		q-bert.gif \
-		zauberwald.png
+KEYSYMS=	c64_ch.kbd \
+		c64_de.kbd \
+		c64_it.kbd \
+		c64_gb.kbd \
+		c64_vice.kbd
 
-README=		${ROOT}/README.md
+DST_KEYSYMSDIR=	${DST_DATADIR}/keymaps
 
-DST_IMGDIR=	${DST_DATADIR}/images
+DST_KEYSYMS=	${KEYSYMS:%=${DST_KEYSYMSDIR}/%}
 
-DST_IMAGES=	${IMAGES:%=${DST_IMGDIR}/%}
+.PHONY: _all all clean debug install
 
-DST_README=	${DST_DATADIR}/${notdir ${README}}
+_all all debug:
 
-ALL=		${DST_IMAGES} \
-		${DST_README}
+install: ${DST_KEYSYMS}
 
-.PHONY: all clean debug install
-
-all clean debug:
-
-install: ${ALL}
-
-${DST_IMAGES}: ${DST_IMGDIR} ${notdir $@}
+${DST_KEYSYMS}: ${DST_KEYSYMSDIR} ${notdir $@}
 	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${notdir $@} $@
 
-${DST_README}: ${README}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} $< $@
-
-${DST_IMGDIR}:
+${DST_KEYSYMSDIR}:
 	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
+
+clean:
+

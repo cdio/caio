@@ -16,25 +16,27 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=	${abspath ..}
+ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
-.PHONY: all debug %-package
+ICONS_PNG=	floppy_64.png \
+		fullscreen_64x2.png \
+		gamepad_64x2.png
 
-all debug install:
+ICONS_HPP=	${ICONS_PNG:%.png=%.hpp}
 
-ifdef RELEASE
-%-package: package
-	${MAKE} ${MAKEARGS} -f ${ROOT}/mk/$@.mk $@
+ALL=		${ICONS_HPP}
 
-else
-%-package:
-	@echo
-	@echo "==> Please specify build RELEASE=<branch>"
-	@echo
-	@exit 1
+CONVERT=	./png2cpp.sh
 
-endif
+.SUFFIXES=	.png .hpp
 
-include ${ROOT}/mk/build.mk
+.PHONY: all clean debug install
+
+all clean debug install:
+
+all: ${ALL}
+
+%.hpp: %.png
+	${CONVERT} $< > $@

@@ -16,9 +16,14 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-.PHONY: all clean debug distclean install
+.PHONY: all clean debug install ${DIRS}
 
-all clean debug distclean install:
-	for d in ${DIRS}; do \
-		${MAKE} -C $$d -j${NPROC} $@ || exit 1; \
+all debug: ${DIRS}
+
+${DIRS}:
+	${MAKE} -C $@ ${MAKEARGS}
+
+install clean:
+	for i in ${DIRS}; do \
+		${MAKE} -C $$i ${MAKEARGS} $@ || exit 1; \
 	done

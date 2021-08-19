@@ -19,7 +19,7 @@
 class SID;
 #include "mos_6581_resid.hpp"
 
-#include "../3rdparty/resid/sid.h"
+#include "3rdparty/resid/sid.h"
 
 #include "ui.hpp"
 #include "utils.hpp"

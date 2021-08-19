@@ -16,35 +16,35 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ..}
-
-ROMS=		c64_basic.901226-01.bin \
-		c64_kernal.901227-03.bin \
-		c64_characters.901225-01.bin
-
-README=		README.md
-
-DST_ROMDIR=	${DST_DATADIR}/roms
-
-DST_ROMS=	${ROMS:%=${DST_ROMDIR}/%}
-
-DST_README=	${DST_ROMDIR}/${README}
-
-.PHONY: _all all clean debug distclean install
+ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
+PALETTES=	vice-rgb.plt \
+		vice.plt \
+		rgb-pal.plt \
+		pepto.plt \
+		godot.plt \
+		frodo.plt \
+		colodore.plt \
+		c64-wiki.plt \
+		arne.plt
+
+DST_PALETTEDIR=	${DST_DATADIR}/palette
+
+DST_PALETTES=	${PALETTES:%=${DST_PALETTEDIR}/%}
+
+.PHONY: _all all clean debug install
+
 _all all debug:
 
-install: ${DST_ROMS} ${DST_README}
+install: ${DST_PALETTES}
 
-${DST_ROMS}: ${DST_ROMDIR} ${notdir }/$@
+${DST_PALETTES}: ${DST_PALETTEDIR} ${notdir $@}
 	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${notdir $@} $@
 
-${DST_ROMDIR}:
+${DST_PALETTEDIR}:
 	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
 
-${DST_README}: ${README}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} $< $@
+clean:
 
-clean distclean:

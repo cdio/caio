@@ -67,7 +67,7 @@ The default *PREFIX* is */opt/cemu*.
     $ make src-package RELEASE=<tag>
 ```
 
-That creates a *.tgz* tarball file under the *pkg/build* directory.
+That creates a *.tgz* tarball file under the *build/* directory.
 
 *tag* specifies the CEMU's git branch or tag to pack.
 
@@ -77,7 +77,7 @@ That creates a *.tgz* tarball file under the *pkg/build* directory.
     $ make deb-package RELEASE=<tag>
 ```
 
-That creates a *.deb* binary file under the *pkg/build* directory.
+That creates a *.deb* binary file under the *build/* directory.
 
 *tag* specifies the CEMU's git branch or tag to build.
 
@@ -87,7 +87,7 @@ That creates a *.deb* binary file under the *pkg/build* directory.
     $ make bin-package RELEASE=<tag>
 ```
 
-That creates a *.tgz* (tarball) binary file under the *pkg/build* directory.
+That creates a *.tgz* (tarball) binary file under the *build/* directory.
 
 *tag* specifies the CEMU's git branch or tag to build.
 
@@ -105,13 +105,15 @@ or
     $ c64 --help
 ```
 All the command line options can be specified in a
-[configuration file](/bin/cemu.conf).
+[configuration file](/src/main/cemu.conf).
 
-CEMU will search for the configuration as follows, stopping at the first match:
+CEMU will search for the configuration file as follows, stopping at the first match:
 1. Command line option               *--conf*
 2. Current working directory:        *./cemu.conf*
 3. User's configuration directory:   *$HOME/.config/cemu/cemu.conf*
 4. System's configuration directory: *$PREFIX/etc/cemu/cemu.conf*
+
+Command line options take precedence over those defined in the configuration file.
 
 
 ## Usage Examples

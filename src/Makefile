@@ -18,28 +18,7 @@
 #
 ROOT=		${abspath ..}
 
-ICONS_PNG=	floppy_64.png \
-		fullscreen_64x2.png \
-		gamepad_64x2.png
+DIRS=		lib \
+		main
 
-ICONS_HPP=	${ICONS_PNG:%.png=%.hpp}
-
-ALL=		${ICONS_HPP}
-
-CONVERT=	./png2cpp.sh
-
-.SUFFIXES=	.png .hpp
-
-include ${ROOT}/mk/config.mk
-
-.PHONY: all clean debug install
-
-all clean debug install:
-
-all: ${ALL}
-
-%.hpp: %.png
-	${CONVERT} $< > $@
-
-distclean:
-	${RM} ${ICONS_HPP}
+include ${ROOT}/mk/dir.mk

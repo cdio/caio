@@ -16,7 +16,9 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ..}
+ROOT=		${abspath ../..}
+
+include ${ROOT}/mk/config.mk
 
 BIN=		cemu
 
@@ -29,8 +31,6 @@ DST_BIN=	${DST_BINDIR}/${BIN}
 DST_LINKS=	${LN_BINS:%=${DST_BINDIR}/%}
 
 DST_CONFIG=	${DST_SYSCONFDIR}/${CONFIG}
-
-include ${ROOT}/mk/config.mk
 
 CXXSRCS=	cemu_cmdline.cpp \
 		c64_cmdline.cpp \

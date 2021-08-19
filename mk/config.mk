@@ -44,9 +44,11 @@ INCDIR=			${abspath ${PREFIX}}/include
 CPPFLAGS+=		-DD_VERSION='"${VERSION}"' \
 			-DD_PREFIX='"${PREFIX}"'
 
-CPPFLAGS+=		-I${ROOT} \
+CPPFLAGS+=		-I. \
+			-I${ROOT}/src \
+			-I${ROOT}/src/lib \
 			-I${ROOT}/3rdparty/GSL/include \
-			-I.
+			-I${ROOT}
 
 CXXFLAGS+=		-Wall \
 			-Werror

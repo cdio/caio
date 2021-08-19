@@ -16,17 +16,9 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-CLEANFILES?=
-DISTCLEANFILES?=
-
-.PHONY: clean distclean
+.PHONY: clean
 
 clean:
 ifdef CLEANFILES
 	-${RM} -r ${CLEANFILES}
-endif
-
-distclean: clean
-ifdef DISTCLEANFILES
-	-${RM} -r ${DISTCLEANFILES}
 endif

@@ -18,25 +18,18 @@
 #
 ROOT=		${abspath .}
 
-DIRS=		3rdparty
+DIRS=		3rdparty \
+		src \
+		data
 
-DIRS+=		icons \
-		lib \
-		bin
+DISTCLEANFILES=	build
 
-DIRS+=		images \
-		keymaps \
-		palette \
-		roms
-
-DIRS+=		pkg
-
-.PHONY: all clean distclean %-package
-
-include ${ROOT}/mk/config.mk
+.PHONY: distclean %-package
 
 include ${ROOT}/mk/dir.mk
 
 %-package:
-	${MAKE} ${MAKEARGS} -C pkg $@
+	${MAKE} ${MAKEARGS} ROOT=${ROOT} -f mk/package.mk $@
 
+distclean: clean
+	${RM} -r ${DISTCLEANFILES}

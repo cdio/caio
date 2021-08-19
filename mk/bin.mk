@@ -32,7 +32,7 @@ LDADD+=		${SFML_LDADD}
 
 LDADD+=		-lpthread
 
-LIB=		${ROOT}/lib/libcemu.a
+LIB=		${ROOT}/src/lib/libcemu.a
 
 CLEANFILES+=	${BIN} ${LN_BINS}
 
