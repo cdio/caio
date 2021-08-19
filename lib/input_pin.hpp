@@ -27,7 +27,8 @@ namespace cemu {
  */
 class InputPin {
 public:
-    InputPin() {
+    InputPin(bool active = true)
+        : _pin{active} {
     }
 
     ~InputPin() {
@@ -46,7 +47,7 @@ public:
     }
 
 private:
-    bool _pin{true};
+    bool _pin;
 };
 
 }
