@@ -57,7 +57,8 @@ CXXSRCS=	aspace.cpp \
 		socket.cpp \
 		types.cpp \
 		ui_config.cpp \
-		utils.cpp
+		utils.cpp \
+		version.cpp
 
 INCS=		aspace.hpp \
 		clock.hpp \

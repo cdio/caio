@@ -16,17 +16,16 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#pragma once
-
-#include <string>
-
-#ifndef D_VERSION
-#define D_VERSION   "0.0.0"
-#endif
+#include "version.hpp"
 
 
 namespace cemu {
 
-std::string version();
+static const char *VERSION = D_VERSION;
+
+std::string version()
+{
+    return VERSION;
+}
 
 }
