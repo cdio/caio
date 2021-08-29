@@ -18,12 +18,10 @@
 #
 .PHONY: all clean debug install ${DIRS}
 
-all debug: ${DIRS}
-
-${DIRS}:
-	${MAKE} -C $@ ${MAKEARGS}
-
-install clean:
+all debug install clean:
 	for i in ${DIRS}; do \
 		${MAKE} -C $$i ${MAKEARGS} $@ || exit 1; \
 	done
+
+${DIRS}:
+	${MAKE} -C $@ ${MAKEARGS}
