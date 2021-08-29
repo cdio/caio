@@ -91,7 +91,7 @@ public:
      * @param delay The speed delay (1.0f is normal speed).
      * @see delay(float)
      */
-    Clock(size_t freq, float delay = 1.0f)
+    explicit Clock(size_t freq, float delay = 1.0f)
         : Name{TYPE, {}},
           _freq{freq},
           _delay{delay} {
@@ -145,14 +145,14 @@ public:
      * @param clkb Clockable to register.
      * @see del()
      */
-    void add(std::shared_ptr<Clockable> clkb);
+    void add(const std::shared_ptr<Clockable> &clkb);
 
     /**
      * Remove a clockable from this clock.
      * @param clkb Clockable to de-register.
      * @see add()
      */
-    void del(std::shared_ptr<Clockable> clkb);
+    void del(const std::shared_ptr<Clockable> &clkb);
 
     /**
      * Execute a clock tick loop.

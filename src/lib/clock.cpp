@@ -31,7 +31,7 @@ namespace cemu {
 using namespace std::chrono_literals;
 
 
-void Clock::add(std::shared_ptr<Clockable> c)
+void Clock::add(const std::shared_ptr<Clockable> &c)
 {
     auto it = std::find_if(_clockables.begin(), _clockables.end(), [&c](const clockable_pair_t &pair) -> bool {
         return (pair.first.get() == c.get());
@@ -42,7 +42,7 @@ void Clock::add(std::shared_ptr<Clockable> c)
     }
 }
 
-void Clock::del(std::shared_ptr<Clockable> c)
+void Clock::del(const std::shared_ptr<Clockable> &c)
 {
     auto it = std::find_if(_clockables.begin(), _clockables.end(), [&c](const clockable_pair_t &pair) -> bool {
         return (pair.first.get() == c.get());
@@ -73,7 +73,7 @@ void Clock::run()
          *
          * The workaround used here lets the emulated system run at host speed for a number
          * of clock ticks, then it sleeps for some time until the correct emulated clock
-         * cycles has passed.
+         * cycles have passed.
          * This synchronisation is managed by a clockable device (like a video controller).
          */
         if (_sync_us != 0) {

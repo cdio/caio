@@ -126,7 +126,7 @@ protected:
      * @exception InternalError
      * @see reset()
      */
-    ASpace(addrmap_t &rmaps, addrmap_t &wmaps) {
+    ASpace(const addrmap_t &rmaps, const addrmap_t &wmaps) {
         reset(rmaps, wmaps);
     }
 
@@ -140,7 +140,7 @@ protected:
      * @param wmaps Address mappings for write operations;
      * @exception InternalError if one of the parameters is ill formed.
      */
-    void reset(addrmap_t rmaps, addrmap_t wmaps);
+    void reset(const addrmap_t &rmaps, const addrmap_t &wmaps);
 
 private:
     std::pair<addr_t, addr_t> decode(addr_t addr) const {

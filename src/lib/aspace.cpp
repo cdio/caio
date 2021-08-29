@@ -21,7 +21,7 @@
 
 namespace cemu {
 
-void ASpace::reset(addrmap_t rmaps, addrmap_t wmaps)
+void ASpace::reset(const addrmap_t &rmaps, const addrmap_t &wmaps)
 {
     auto banks = wmaps->size();
     if (!banks) {
