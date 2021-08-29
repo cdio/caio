@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <limits>
+#include <numeric>
 #include <random>
 #include <sstream>
 #include <string>
@@ -153,12 +154,7 @@ static inline float square(float t, float dc)
 template <typename C, typename = std::enable_if<utils::is_container<C>::value>>
 float mean(const C &samples)
 {
-    float sum = 0.0f;
-
-    for (const auto &sample : samples) {
-        sum += sample;
-    }
-
+    float sum = std::accumulate(samples.begin(), samples.end(), 0.0f);
     return (sum / samples.size());
 }
 
