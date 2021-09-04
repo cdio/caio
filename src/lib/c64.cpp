@@ -23,7 +23,8 @@
 #include <thread>
 
 #include "fs.hpp"
-#include "prg.hpp"
+#include "p00file.hpp"
+#include "prgfile.hpp"
 #include "utils.hpp"
 #include "version.hpp"
 
@@ -127,22 +128,33 @@ void C64::attach_prg()
 {
     if (!_conf.prgfile.empty()) {
         try {
-            auto *prog = new Prg{fs::fix_home(_conf.prgfile)};
+            PrgFile *prog;
+            log.debug("Preloading program: " + _conf.prgfile + "\n");
+            try {
+                prog = new P00File{fs::fix_home(_conf.prgfile)};
+                log.debug("Detected format: P00\n");
+            } catch (const IOError &) {
+                prog = new PrgFile{fs::fix_home(_conf.prgfile)};
+                log.debug("Detected format: PRG\n");
+            }
+
+            log.debug("Start address: $%04X, size=%d ($%04X)\n", prog->address(), prog->size(), prog->size());
+
             _conf.title += " - " + fs::basename(_conf.prgfile);
 
             _cpu->bpadd(BASIC_READY_ADDR, [this](Mos6510 &cpu, void *arg) {
                 /*
                  * Load PRG into memory.
                  */
-                auto *prog = static_cast<Prg *>(arg);
+                auto *prog = static_cast<PrgFile *>(arg);
                 for (size_t i = 0; i < prog->size(); ++i) {
-                    _mmap->write(prog->addr() + i, (*prog)[i]);
+                    _mmap->write(prog->address() + i, (*prog)[i]);
                 }
 
                 /*
                  * If it is visible from BASIC, run it.
                  */
-                if (prog->addr() == BASIC_PRG_START) {
+                if (prog->address() == BASIC_PRG_START) {
                     addr_t end = BASIC_PRG_START + prog->size();
                     _mmap->write_addr(BASIC_TXTTAB, BASIC_PRG_START);
                     _mmap->write_addr(BASIC_VARTAB, end);

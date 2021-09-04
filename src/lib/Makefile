@@ -51,7 +51,8 @@ CXXSRCS=	aspace.cpp \
 		mos_6581_i.cpp \
 		mos_6581_resid.cpp \
 		name.cpp \
-		prg.cpp \
+		p00file.cpp \
+		prgfile.cpp \
 		rgb.cpp \
 		signal.cpp \
 		socket.cpp \
@@ -88,7 +89,8 @@ INCS=		aspace.hpp \
 		mos_6581_resid.hpp \
 		name.hpp \
 		nibble_ram.hpp \
-		prg.hpp \
+		p00file.hpp \
+		prgfile.hpp \
 		rgb.hpp \
 		signal.hpp \
 		socket.hpp \

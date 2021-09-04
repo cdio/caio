@@ -28,7 +28,7 @@
 #include <sstream>
 
 #include "mos_6510.hpp"
-#include "prg.hpp"
+#include "prgfile.hpp"
 #include "utils.hpp"
 
 
@@ -652,20 +652,21 @@ bool Mos6510Monitor::load(Mos6510Monitor &self, const std::vector<std::string> &
      */
     try {
         if (args.size() > 1) {
-            addr_t addr{};
+            PrgFile prog{args[1]};
+            addr_t addr = prog.address();
+
             if (args.size() > 2) {
                 addr = utils::to_number<addr_t>(args[2]);
+                prog.address(addr);
             }
 
-            Prg prog{args[1], addr};
-            addr = prog.addr();
             for (auto c : prog) {
                 self._cpu._mmap->write(addr++, c);
             }
 
             addr_t size = prog.size();
 
-            self._os << "load: " << args[1] << " loaded at $" << utils::to_string(prog.addr())
+            self._os << "load: " << args[1] << " loaded at $" << utils::to_string(prog.address())
                 << ", size " << size << " ($" << utils::to_string(size) << ")" << std::endl;
         }
     } catch (const std::exception &e) {
@@ -693,7 +694,7 @@ bool Mos6510Monitor::save(Mos6510Monitor &self, const std::vector<std::string> &
             throw InvalidArgument{"End address smaller than start address"};
         }
 
-        Prg prog{};
+        PrgFile prog{};
         for (auto addr = start; addr <= end; ++addr) {
             uint8_t c = self._cpu._mmap->read(addr);
             prog.push_back(c);
