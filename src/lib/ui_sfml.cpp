@@ -172,6 +172,9 @@ UISfml::UISfml(const Config &conf)
     _window.create(sf::VideoMode{_win_size.x, _win_size.y}, vconf.title,
         sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
 
+    auto icon = icon32();
+    _window.setIcon(icon.width, icon.height, reinterpret_cast<const uint8_t *>(icon.data.data()));
+
     _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(vconf.fps);
     _window.setKeyRepeatEnabled(false);
