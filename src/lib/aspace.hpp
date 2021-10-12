@@ -22,7 +22,6 @@
 
 #include "device.hpp"
 #include "types.hpp"
-#include "utils.hpp"
 
 
 namespace cemu {
@@ -44,54 +43,22 @@ public:
     /**
      * @see Device::read()
      */
-    virtual uint8_t read(addr_t addr) const {
-        try {
-            const auto [bank, offset] = decode(addr);
-            auto &dev = _rmaps->at(bank);
-            return dev.first->read(dev.second + offset);
-        } catch (std::out_of_range &) {
-            throw InternalError{"Unmapped address: $" + utils::to_string(addr)};
-        }
-    }
+    virtual uint8_t read(addr_t addr) const;
 
     /**
      * @see Device::write()
      */
-    virtual void write(addr_t addr, uint8_t value) {
-        try {
-            const auto [bank, offset] = decode(addr);
-            auto &dev = _wmaps->at(bank);
-            dev.first->write(dev.second + offset, value);
-        } catch (std::out_of_range &) {
-            throw InternalError{"Unmapped address: $" + utils::to_string(addr)};
-        }
-    }
+    virtual void write(addr_t addr, uint8_t value);
 
     /**
      * @see Device::read_addr()
      */
-    virtual addr_t read_addr(addr_t addr) const {
-        try {
-            const auto [bank, offset] = decode(addr);
-            auto &dev = _rmaps->at(bank);
-            return dev.first->read_addr(dev.second + offset);
-        } catch (std::out_of_range &) {
-            throw InternalError{"Unmapped address: $" + utils::to_string(addr)};
-        }
-    }
+    virtual addr_t read_addr(addr_t addr) const;
 
     /**
      * @seee Device::write_addr()
      */
-    virtual void write_addr(addr_t addr, addr_t value) {
-        try {
-            const auto [bank, offset] = decode(addr);
-            auto &dev = _wmaps->at(bank);
-            dev.first->write_addr(dev.second + offset, value);
-        } catch (std::out_of_range &) {
-            throw InternalError{"Unmapped address: $" + utils::to_string(addr)};
-        }
-    }
+    virtual void write_addr(addr_t addr, addr_t value);
 
 protected:
     /**
@@ -123,7 +90,7 @@ protected:
      * Initialise this address space.
      * @param rmaps Address mappings for read operations (it must have the same size as the write map);
      * @param wmaps Address mappings for write operations (it must have the same size as the read map).
-     * @exception InternalError
+     * @exception InvalidArgument if one of the parameters is ill formed.
      * @see reset()
      */
     ASpace(const addrmap_t &rmaps, const addrmap_t &wmaps) {
@@ -138,16 +105,12 @@ protected:
      * - The size of a bank must be a power of 2.
      * @param rmaps Address mappings for read operations;
      * @param wmaps Address mappings for write operations;
-     * @exception InternalError if one of the parameters is ill formed.
+     * @exception InvalidArgument if one of the parameters is ill formed.
      */
     void reset(const addrmap_t &rmaps, const addrmap_t &wmaps);
 
 private:
-    std::pair<addr_t, addr_t> decode(addr_t addr) const {
-        addr_t bank = addr >> _bshift;
-        addr_t offset = addr & _bmask;
-        return {bank, offset};
-    }
+    std::pair<addr_t, addr_t> decode(addr_t addr) const;
 
     addr_t    _bsize{};
     addr_t    _bmask{};

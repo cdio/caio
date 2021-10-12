@@ -436,7 +436,7 @@ void C64ASpace::write(addr_t addr, uint8_t value)
         break;
     case Mos6510::PORT_1:
         _port1 = (value & _port0) | (_port1 & (GAME | EXROM));
-        remap();    /* Can remap() before ASpace::write() because addresses < 0x1000 are always in ram */
+        remap();    /* Can remap() before ASpace::write() because addresses < $1000 are always in ram */
         break;
     default:;
     }
@@ -452,6 +452,17 @@ void C64ASpace::write_addr(addr_t addr, addr_t value)
     } else {
         ASpace::write(addr, value);
     }
+}
+
+__attribute__((always_inline)) unsigned C64ASpace::getkey() const
+{
+    return ((_port1 & 0x07) | ((_port1 >> 5) & 0x18));
+}
+
+__attribute__((always_inline)) void C64ASpace::remap()
+{
+    auto key = getkey();
+    ASpace::reset(_rmodes[key], _wmodes[key]);
 }
 
 }

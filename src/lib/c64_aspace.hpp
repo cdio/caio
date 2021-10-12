@@ -55,7 +55,7 @@ public:
      * @param chargen Chargen ROM (4K);
      * @param io      IO device (VIC-II, colour RAM, CIA and SID) (4K);
      * @param cart    Cartridge ROM (8K or 16K) or null.
-     * @exception InternalError see reset()
+     * @exception InvalidWriteAddress see reset()
      * @see C64IO
      * @see reset()
      */
@@ -72,7 +72,7 @@ public:
      * Writes to processor's I/O ports are properly handled.
      * @param addr  Address to write to;
      * @param value Value to write.
-     * @exception InternalError see ASpace::write()
+     * @exception InvalidWriteAddress see ASpace::write()
      * @see ASpace::write()
      */
     void write(addr_t addr, uint8_t value) override;
@@ -82,7 +82,7 @@ public:
      * Writes to processor's I/O ports are properly handled.
      * @param addr  Address to write to;
      * @param value Value to write.
-     * @exception InternalError see ASpace::write_addr()
+     * @exception InvalidWriteAddress see ASpace::write_addr()
      * @see ASpace::write_addr()
      */
     void write_addr(addr_t addr, addr_t value) override;
@@ -97,7 +97,8 @@ private:
      * @param chargen Chargen ROM (4K);
      * @param io      IO device (handles VIC-II, colour RAM, CIA ports and SID) (4K);
      * @param cart    Cartridge ROM (8K or 16K) or null.
-     * @exception InternalError see ASpace::write()
+     * @exception InvalidWriteAddress see ASpace::write()
+     * @exception InvalidArgument     see ASpace::reset()
      * @see C64IO
      * @see DeviceRAM
      * @see DeviceROM
@@ -110,17 +111,13 @@ private:
      * CHARGEN, HIRAM and LORAM and it specifies a mapping mode.
      * @return The generated mode key.
      */
-    unsigned getkey() const {
-        return ((_port1 & 0x07) | ((_port1 >> 5) & 0x18));
-    }
+    unsigned getkey() const;
 
     /**
      * Re-map the address space based on the current value of the port register.
+     * @exception InvalidArgument see ASpace::reset()
      */
-    void remap() {
-        auto key = getkey();
-        ASpace::reset(_rmodes[key], _wmodes[key]);
-    }
+    void remap();
 
     std::array<addrmap_t, 32> _rmodes{};    /* There are 32 possible read mappings  */
     std::array<addrmap_t, 32> _wmodes{};    /* There are 32 possible write mappings */
