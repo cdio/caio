@@ -80,6 +80,38 @@ public:
     };
 
 
+    enum HardwareType {
+        HW_TYPE_NORMAL                  = 0,
+        HW_TYPE_ACTION_REPLAY           = 1,
+        HW_TYPE_KCS_POWER_CARTDRIDGE    = 2,
+        HW_TYPE_FINAL_CARTRIDGE_III     = 3,
+        HW_TYPE_SIMONS_BASIC            = 4,
+        HW_TYPE_OCEAN_TYPE_1            = 5,
+        HW_TYPE_EXPERT_CARTRIDGE        = 6,
+        HW_TYPE_FUN_PLAY                = 7,
+        HW_TYPE_SUPER_GAMES             = 8,
+        HW_TYPE_ATOMIC_POWER            = 9,
+        HW_TYPE_EPYX_FASTLOAD           = 10,
+        HW_TYPE_WESTERMANN_LEARNING     = 11,
+        HW_TYPE_REX_UTILITY             = 12,
+        HW_TYPE_FINAL_CARTRIDGE_I       = 13,
+        HW_TYPE_MAGIC_FORMEL            = 14,
+        HW_TYPE_C64_GAME_SYSTEM         = 15,
+        HW_TYPE_WARPSPEED               = 16,
+        HW_TYPE_DINAMIC                 = 17,
+        HW_TYPE_ZAXXON                  = 18,
+        HW_TYPE_MAGIC_DESK              = 19,
+        HW_TYPE_SUPER_SNAPSHOT_5        = 20,
+        HW_TYPE_COMAL_80                = 21,
+        HW_TYPE_STRUCTURED_BASIC        = 22,
+        HW_TYPE_ROSS                    = 23,
+        HW_TYPE_DELA_EP64               = 24,
+        HW_TYPE_DELA_EP7x8              = 25,
+        HW_TYPE_DELA_EP256              = 26,
+        HW_TYPE_REX_EP256               = 27
+    };
+
+
     Crt() {
     }
 
@@ -127,10 +159,7 @@ public:
     /**
      * @return The name of this CRT.
      */
-    std::string name() const {
-        return std::string{reinterpret_cast<const char *>(_hdr.name),
-            std::strlen(reinterpret_cast<const char *>(_hdr.name))};
-    }
+    std::string name() const;
 
     /**
      * Detect a CRT formatted file.

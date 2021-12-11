@@ -108,6 +108,12 @@ std::string Crt::to_string() const
     return ss.str();
 }
 
+std::string Crt::name() const
+{
+    return std::string{reinterpret_cast<const char *>(_hdr.name),
+        std::strlen(reinterpret_cast<const char *>(_hdr.name))};
+}
+
 bool Crt::is_crt(const std::string &fname)
 {
     try {
