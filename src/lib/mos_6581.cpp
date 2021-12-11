@@ -402,7 +402,7 @@ void Mos6581::write(addr_t addr, uint8_t value)
         break;
 
     case FILTER_MODE:
-        _volume = 0.5f * static_cast<float>(value & 15) / 15.0f;
+        _volume = static_cast<float>(value & 15) / 15.0f;
         _filter.lopass(value & 0x10);
         _filter.bandpass(value & 0x20);
         _filter.hipass(value & 0x40);
@@ -492,7 +492,7 @@ void Mos6581::play()
         for (size_t i = 0; i < v.size(); ++i) {
             float value = _v1[i] + _v2[i] + (is_v3_active() ? _v3[i] : 0.0f) + _v4[i];
             value = std::max(std::min(value, 1.0f), -1.0f);
-            v[i] = signal::to_i16(value * _volume);
+            v[i] = signal::to_i16(value * _volume * VOLUME);
         }
 
         std::fill(_v4.begin(), _v4.end(), 0.0f);

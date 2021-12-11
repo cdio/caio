@@ -40,6 +40,7 @@ public:
     constexpr static const float FC_MAX = 12000.0f;
     constexpr static const float FC_MIN = 30.0f;
     constexpr static const float BW     = FC_MAX - FC_MIN;
+    constexpr static const float VOLUME = 0.3f;
 
     class Oscillator {
     public:
