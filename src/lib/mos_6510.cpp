@@ -333,7 +333,7 @@ std::string Mos6510::Registers::to_string() const
 void Mos6510::init_monitor(std::istream &is, std::ostream &os)
 {
     if (!_mmap) {
-        throw InternalError{*this, "System mappings not defined"};
+        throw InvalidArgument{*this, "System mappings not defined"};
     }
 
     _monitor = std::make_unique<Mos6510Monitor>(is, os, *this);

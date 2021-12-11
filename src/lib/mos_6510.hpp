@@ -142,7 +142,7 @@ public:
      * the monitor takes control as soon as this CPU is started.
      * @param is Input stream used to receive commands from the user;
      * @param os Output stream used to send responses to the user.
-     * @exception InternalError if the system mappings are not set.
+     * @exception InvalidArgument if the system mappings are not set.
      * @see reset()
      */
     void init_monitor(std::istream &is, std::ostream &os);
