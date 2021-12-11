@@ -231,7 +231,7 @@ void C1541::open(uint8_t ch, const std::string &param)
     const std::string &type   = result.str(TYPE);
     const std::string &mode   = result.str(MODE);
 
-    if (fname.empty() && prefix.find("$") != 0) {
+    if (fname.empty() && prefix.starts_with("$")) {
         _statusch = Status::NO_FILE_GIVEN;
         log.debug("%s: Open: File name not detected: \"%s\"\n", name(ch).c_str(), param.c_str());
         return;
@@ -244,7 +244,7 @@ void C1541::open(uint8_t ch, const std::string &param)
          * If fname is defined it must be a matching expression.
          */
         omode = OpenMode::DIR;
-    } else if (!is_dir && (fname == "$" || fname == "$0")) {
+    } else if (fname == "$" || fname == "$0") {
         omode = OpenMode::DIR;
         fname = "";
     } else {

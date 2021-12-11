@@ -363,7 +363,7 @@ private:
 
     class StatusChannel {
     public:
-        StatusChannel(Status st, uint8_t track = 0, uint8_t sector = 0) {
+        explicit StatusChannel(Status st, uint8_t track = 0, uint8_t sector = 0) {
             reset(st, track, sector);
         }
 
