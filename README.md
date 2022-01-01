@@ -10,7 +10,6 @@ emulated, under Linux.
 ![q-bert](/images/q-bert.gif "Q*Bert")
 ![uridium](/images/uridium.gif "Uridium")
 ![giana](/images/giana.gif "Great Giana Sisters")
-
 [![zauberwald](/images/zauberwald.png "Zauberwald")](https://csdb.dk/release/?id=188005)
 
 
