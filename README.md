@@ -41,9 +41,9 @@ emulated, under Linux.
     ...
 ```
 
-The default compiler is [clang++](https://clang.llvm.org) but the user is free to
-change it to [g++](https://en.wikipedia.org/wiki/GNU_Compiler_Collection) by
-setting the *CXX* environment variable:
+The default compiler is [clang++](https://clang.llvm.org), it can be changed to
+[g++](https://en.wikipedia.org/wiki/GNU_Compiler_Collection) by setting the *CXX*
+environment variable:
 
 ```
     $ make CXX=g++ PREFIX=/usr/local
@@ -59,7 +59,7 @@ setting the *CXX* environment variable:
 
 The default *PREFIX* is */opt/cemu*.
 
-### Packages
+### Package:
 
 #### Source code package:
 
@@ -91,7 +91,7 @@ That creates a *.tgz* (tarball) binary file under the *build/* directory.
 
 *tag* specifies the CEMU's git branch or tag to build.
 
-Note that this file does not contain any runtime dependencies (libsfml, libstdc++, etc).
+Note that this tarball file does not contain any runtime dependencies (libsfml, libstdc++, etc).
 Those must be installed separately.
 
 
