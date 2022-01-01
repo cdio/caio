@@ -169,6 +169,7 @@ private:
     devptr_t                          _basic{};
     devptr_t                          _kernal{};
     devptr_t                          _chargen{};
+    devptr_t                          _vcolor{};
     devptr_t                          _io{};
     devptr_t                          _cart{};
 
@@ -176,7 +177,6 @@ private:
     std::shared_ptr<Mos6510>          _cpu{};
 
     std::shared_ptr<Mos6569>          _vic2{};
-    std::shared_ptr<NibbleRAM>        _vcolor{};
     std::shared_ptr<Mos6581I>         _sid{};
     std::shared_ptr<Mos6526>          _cia1{};
     std::shared_ptr<Mos6526>          _cia2{};

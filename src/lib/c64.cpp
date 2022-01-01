@@ -129,16 +129,20 @@ void C64::attach_prg()
     if (!_conf.prgfile.empty()) {
         try {
             PrgFile *prog;
+            const char *format;
+
             log.debug("Preloading program: " + _conf.prgfile + "\n");
+
             try {
                 prog = new P00File{fs::fix_home(_conf.prgfile)};
-                log.debug("Detected format: P00\n");
+                format = "P00";
             } catch (const IOError &) {
                 prog = new PrgFile{fs::fix_home(_conf.prgfile)};
-                log.debug("Detected format: PRG\n");
+                format = "PRG";
             }
 
-            log.debug("Start address: $%04X, size=%d ($%04X)\n", prog->address(), prog->size(), prog->size());
+            log.debug("Detected format: %s, start address: $%04X, size: %d ($%04X)\n", format, prog->address(),
+                prog->size(), prog->size());
 
             _conf.title += " - " + fs::basename(_conf.prgfile);
 
@@ -332,7 +336,7 @@ void C64::reset()
     };
 
     _vic2->irq(trigger_irq);
-    _vic2->aec(set_rdy);
+    _vic2->ba(set_rdy);
     _vic2->vsync(vsync);
 
     if (!_conf.palettefile.empty()) {

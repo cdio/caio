@@ -32,13 +32,12 @@
 #include "device.hpp"
 #include "rgb.hpp"
 #include "ui.hpp"
-#include "utils.hpp"
 
 
 namespace cemu {
 
 /**
- * MOS6569 (VIC-II) emulator.
+ * MOS6569 (VIC-II PAL) emulator.
  * @note In this implementation one scanline is refreshed at once so it is not
  *       possible to exploit some of the bugs of the real chip using timing tricks.
  * @see C64 Programmer's Reference Guide.pdf, Appendix N
@@ -92,7 +91,6 @@ public:
 
     constexpr static unsigned DISPLAY_WIDTH      = 320;
     constexpr static unsigned DISPLAY_HEIGHT     = 200;
-    constexpr static unsigned CYCLE_VISIBLE_START = 12;
 
     constexpr static unsigned UBORDER_Y_START    = VISIBLE_Y_START;
     constexpr static unsigned UBORDER_Y_END      = 51;
@@ -109,20 +107,17 @@ public:
     constexpr static unsigned PIXELS_PER_CYCLE   = 8;
     constexpr static unsigned SCANLINE_CYCLES    = FRAME_WIDTH / PIXELS_PER_CYCLE;
     constexpr static unsigned FRAME_CYCLES       = FRAME_HEIGHT * SCANLINE_CYCLES;
+    constexpr static unsigned BADLINE_CYCLES     = 40;
 
     constexpr static unsigned MIB_WIDTH          = 24;
     constexpr static unsigned MIB_HEIGHT         = 21;
 
-    constexpr static unsigned MIB_X_START        = 18;
     constexpr static unsigned MIB_Y_START        = 6;
 
+    constexpr static unsigned MIB_X_COORD_OFFSET = 18;
+    constexpr static unsigned MIB_Y_COORD_OFFSET = 1;
+
     constexpr static unsigned MIB_POINTER_OFFSET = 1016;
-
-    constexpr static size_t VIDEO_COLOR_RAM_SIZE = 1024;
-
-
-    using color2_t = std::array<const Rgba *, 2>;
-    using color4_t = std::array<const Rgba *, 4>;
 
 
     enum Color {
@@ -164,8 +159,8 @@ public:
         REG_MIB_6_Y            = 13,    /* 0D */
         REG_MIB_7_X            = 14,    /* 0E */
         REG_MIB_7_Y            = 15,    /* 0F */
-
         REG_MIBS_MSB_X         = 16,    /* 10 */
+
         REG_CONTROL_1          = 17,    /* 11 */
         REG_RASTER_COUNTER     = 18,    /* 12 */
         REG_LIGHT_PEN_X        = 19,    /* 13 */
@@ -177,7 +172,7 @@ public:
         REG_INTERRUPT          = 25,    /* 19 */
         REG_INTERRUPT_ENABLE   = 26,    /* 1A */
         REG_MIB_DATA_PRI       = 27,    /* 1B */
-        REG_MIB_MULTICOLOR     = 28,    /* 1C */
+        REG_MIB_MULTICOLOR_SEL = 28,    /* 1C */
         REG_MIB_X_EXPANSION    = 29,    /* 1D */
         REG_MIB_MIB_COLLISION  = 30,    /* 1E */
         REG_MIB_DATA_COLLISION = 31,    /* 1F */
@@ -206,26 +201,22 @@ public:
     constexpr static uint8_t REG_CONTROL_1_BMM         = 0x20;  /* Bitmap video mode                                */
     constexpr static uint8_t REG_CONTROL_1_DEN         = 0x10;  /* Display Enabled                                  */
 
-    constexpr static uint8_t REG_CONTROL_1_RSEL        = 0x08;  /* Number of rows: 1 => 25 rows, 0 => 24 rows       */
+    constexpr static uint8_t REG_CONTROL_1_RSEL        = 0x08;  /* Number of rows (0 = 24 rows, 1 = 25 rows)        */
     constexpr static uint8_t REG_CONTROL_1_YSCROLL     = 0x07;  /* Vertical scroll position                         */
 
+    constexpr static uint8_t REG_CONTROL_2_RES         = 0x20;  /* Reset                                            */
     constexpr static uint8_t REG_CONTROL_2_MCM         = 0x10;  /* Multicolor mode                                  */
-    constexpr static uint8_t REG_CONTROL_2_CSEL        = 0x08;  /* Number of columns: 1 => 40 cols, 0 => 38 cols    */
+    constexpr static uint8_t REG_CONTROL_2_CSEL        = 0x08;  /* Number of columns (0 = 38 cols, 1 = 40 cols)     */
     constexpr static uint8_t REG_CONTROL_2_XSCROLL     = 0x07;  /* Horizontal scroll position                       */
 
-    constexpr static uint8_t REG_INTERRUPT_IRQ         = 0x80;  /* Status of the output !IRQ pin                    */
-    constexpr static uint8_t REG_INTERRUPT_ILP         = 0x08;  /* First negative transition of Light Pen x frame   */
-    constexpr static uint8_t REG_INTERRUPT_IMMC        = 0x04;  /* MIB-MIB collision interrupt                      */
-    constexpr static uint8_t REG_INTERRUPT_IMDC        = 0x02;  /* MIB-DATA collision interrupt                     */
-    constexpr static uint8_t REG_INTERRUPT_IRST        = 0x01;  /* Raster count interrupt                           */
+    constexpr static uint8_t REG_INTERRUPT_IRQ         = 0x80;  /* Status of the output /IRQ pin                    */
+    constexpr static uint8_t REG_INTERRUPT_LP          = 0x08;  /* First negative transition of Light Pen x frame   */
+    constexpr static uint8_t REG_INTERRUPT_MMC         = 0x04;  /* MIB-MIB collision interrupt                      */
+    constexpr static uint8_t REG_INTERRUPT_MDC         = 0x02;  /* MIB-DATA collision interrupt                     */
+    constexpr static uint8_t REG_INTERRUPT_RST         = 0x01;  /* Raster counter interrupt                         */
 
-    constexpr static uint8_t REG_INTERRUPT_MASK        = REG_INTERRUPT_ILP | REG_INTERRUPT_IMMC |
-                                                         REG_INTERRUPT_IMDC | REG_INTERRUPT_IRST;
-
-    constexpr static uint8_t REG_INTERRUPT_ELP         = 0x08;  /* Enable LP x frame transition interrupt           */
-    constexpr static uint8_t REG_INTERRUPT_EMMC        = 0x04;  /* Enable MIB-MIB collision interrupt               */
-    constexpr static uint8_t REG_INTERRUPT_EMDC        = 0x02;  /* Enable MIB-DATA collision interrupt              */
-    constexpr static uint8_t REG_INTERRUPT_ERST        = 0x01;  /* Enable raster count interrupt                    */
+    constexpr static uint8_t REG_INTERRUPT_MASK        = REG_INTERRUPT_LP  | REG_INTERRUPT_MMC |
+                                                         REG_INTERRUPT_MDC | REG_INTERRUPT_RST;
 
     constexpr static uint8_t REG_MEMORY_POINTERS_VM13  = 0x80;  /* Bit 13 of Video Matrix address                   */
     constexpr static uint8_t REG_MEMORY_POINTERS_VM12  = 0x40;  /* Bit 12 of Video Matrix address                   */
@@ -244,38 +235,30 @@ public:
     constexpr static unsigned CHARMODE_COLUMNS         = 40;
     constexpr static unsigned CHARMODE_ROWS            = 25;
 
-    constexpr static unsigned COORDINATE_X_END         = 343; //XXX FIXME REMOVE
+    constexpr static uint8_t SCROLL_Y_MASK             = 0x07;
+    constexpr static uint8_t SCROLL_X_MASK             = 0x07;
 
     constexpr static const unsigned MIB_MAX_X_SIZE     = 3 * 8 * 2; /* 3 bytes x MIB + expansion */
 
 
     /**
      * Initialise this video controller.
-     * This instance is not usable until a video driver is specified (see ui()).
      * @param label  Label assigned to this device;
-     * @param mmap   Address space for to this device;
+     * @param mmap   Address space for this device (memory area that can
+     *               be seen by this video controller through its address lines);
      * @param vcolor Colour RAM (1K).
+     * @see render_line(const std::function<void(unsigned, const ui::Scanline &)> &);
      */
-    Mos6569(const std::string &label, std::shared_ptr<ASpace> mmap, devptr_t vcolor)
-        : Device{TYPE, label},
-          Clockable{},
-          _mmap{mmap},
-          _vcolor{vcolor},
-          _palette{builtin_palette},
-          _scanline(WIDTH) {
-    }
+    Mos6569(const std::string &label, const std::shared_ptr<ASpace> &mmap, const devptr_t &vcolor);
 
-    virtual ~Mos6569() {
-    }
+    virtual ~Mos6569();
 
     /**
-     * Set the render line method.
-     * The render line method sends the video output to the user interface.
-     * @param rl The render line method.
+     * Set the render line callback.
+     * The render line callback must send the video output to the user interface.
+     * @param rl The render line callback.
      */
-    void render_line(const std::function<void(unsigned, const ui::Scanline &)> &rl) {
-        _render_line = rl;
-    }
+    void render_line(const std::function<void(unsigned, const ui::Scanline &)> &rl);
 
     /**
      * Set a colour palette from disk.
@@ -283,54 +266,45 @@ public:
      * @exception IOError see RgbaTable::load().
      * @see palette(const RgbaTable &)
      */
-    void palette(const std::string &fname) {
-        if (!fname.empty()) {
-            _palette.load(fname);
-        }
-    }
+    void palette(const std::string &fname);
 
     /**
      * Set a colour palette from memory.
      * @param plt Colour palette to set.
      * @see RgbaTable
      */
-    void palette(const RgbaTable &plt) {
-        _palette = plt;
-    }
+    void palette(const RgbaTable &plt);
 
     /**
      * Set the vsync callback.
      * The vsync callback is called by this controller each time a full screen frame is rendered.
      * @param cb V-Sync callback.
      */
-    void vsync(std::function<void(unsigned)> cb) {
-        _vsync = cb;
-    }
+    void vsync(const std::function<void(unsigned)> &cb);
 
     /**
      * Set the IRQ pin callback.
      * The IRQ pin callback is called when the status of the IRQ output pin of this device is changed.
-     * @param trigger_irq IRQ pin callback.
+     * @param set_irq IRQ pin callback.
      */
-    void irq(std::function<void(bool)> trigger_irq) {
-        _trigger_irq = trigger_irq;
-    }
+    void irq(const std::function<void(bool)> &set_irq);
 
     /**
-     * Set the AEC pin callback.
-     * The AEC pin callback is called when the value of the AEC output pin of this device is changed.
-     * @param set_aec BA pin callback.
+     * Set the BA (Bus Available) pin callback.
+     * The BA pin callback is called when the value of the BA output pin of this device is changed.
+     * @param set_ba BA pin callback.
      */
-    void aec(std::function<void(bool)> set_aec) {
-        _set_aec = set_aec;
-    }
+    void ba(const std::function<void(bool)> &set_ba);
+
+    /**
+     * LP edge triggered input.
+     */
+    void trigger_lp();
 
     /**
      * @see Device::size()
      */
-    size_t size() const override {
-        return _regs.size();
-    }
+    size_t size() const override;
 
     /**
      * @see Device::read()
@@ -345,16 +319,21 @@ public:
     /**
      * @see Device::dump()
      */
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override {
-        return utils::dump(os, _regs, base);
-    }
-
-    /**
-     * LP edge triggered input.
-     */
-    void trigger_lp();
+    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
 
 private:
+    class Rgba4 {
+    public:
+        Rgba4(const Rgba &c1, const Rgba &c2, const Rgba &c3 = Rgba::transparent, const Rgba &c4 = Rgba::transparent);
+
+        ~Rgba4();
+
+        const Rgba &operator[](int index) const;
+
+    private:
+        std::array<Rgba, 4> _colors;
+    };
+
     /**
      * Clock tick interface (callback).
      * This method must be called by the system clock.
@@ -365,264 +344,57 @@ private:
     size_t tick(const Clock &clk) override;
 
     /**
-     * Render a scanline.
-     * @param line     Scanline number;
-     * @param scanline Scanline data.
+     * Paint the current raster line.
      */
-    void render_line(unsigned line, const ui::Scanline &scanline) {
-        if (_render_line) {
-            _render_line(line, scanline);
-        }
-    }
+    void paint_scanline();
+
+    /**
+     * Render the current scanline.
+     * TODO: DOC
+     */
+    void render_line(unsigned line);
 
     /**
      * Set the status of the IRQ output pin.
      * The IRQ bit in the REG_INTERRUPT register is properly
      * set and the IRQ trigger callback is called.
      * @param active true if the IRQ ouput pin must be activated; false otherwise.
-     * @see _trigger_irq
      */
     void irq_out(bool active);
 
     /**
-     * Set the AEC pin.
+     * Set the BA pin.
      * @param active true to activate; false to deactivate.
      */
-    void aec_out(bool active) {
-        if (_set_aec) {
-            _set_aec(active);
-        }
-    }
-
-    /**
-     * Update the interrupt flags and activate the IRQ output pin if necessary.
-     */
-    void update_interrupts();
-
-    /**
-     * @return The current raster line.
-     */
-    unsigned rasterline() const {
-        return _regs[REG_RASTER_COUNTER] + ((_regs[REG_CONTROL_1] & REG_CONTROL_1_RC8) ? 256 : 0);
-    }
-
-    /**
-     * Set the current raster line.
-     * @param line Line to set.
-     */
-    void rasterline(unsigned line) {
-        _regs[REG_RASTER_COUNTER] = line & 255;
-        if (line > 255) {
-            _regs[REG_CONTROL_1] |= REG_CONTROL_1_RC8;
-        } else {
-            _regs[REG_CONTROL_1] &= ~REG_CONTROL_1_RC8;
-        }
-    }
+    void ba_out(bool active);
 
     /**
      * Get the base address of a character data.
      * @param ch Character code.
      * @return The base address of the specified character data.
      */
-    addr_t char_base(uint8_t ch = 0) const {
-        addr_t addr = static_cast<addr_t>(_regs[REG_MEMORY_POINTERS] & REG_MEMORY_POINTERS_CHAR) << 10;
-        return addr + (static_cast<addr_t>(ch) << 3);
-    }
-
-    /**
-     * Get the base address of the video matrix.
-     * The video matrix is an area of 1000 bytes of memory. How
-     * this data is interpreted depends on the current video mode
-     * - Hi-Res character mode (default):
-     *   The video matrix contains the character codes displayed at each
-     *   position on the 40x25 screen, 16 colours.
-     *
-     * - Extended-colour character mode:
-     *   The video matrix contains 5 bits of the character codes displayed at
-     *   each position on the 40x25 screen plus two bits for the colour codes.
-     *
-     * - Multi-color character mode:
-     *   The video matrix contains the character codes displayed at each
-     *   position on the 40x25 screen, 8 colours.
-     *
-     * - Bitmap mode:
-     *   The video matrix contains the foreground and background colours
-     *   for each of the 8x8 squares on the screen.
-     *
-     * - Multi-color bitmap mode:
-     *   The video matrix contains two of the four available colours for
-     *   each of the 8x8 squares on the screen.
-     *
-     * @return The base address of the video matrix.
-     */
-    addr_t video_matrix() const {
-        addr_t addr = static_cast<addr_t>(_regs[REG_MEMORY_POINTERS] & REG_MEMORY_POINTERS_VIDEO) << 6;
-        return addr;
-    }
-
-    /**
-     * Get the base address of the video pixel data in bitmap mode.
-     * The video pixel data is an area of 8000 bytes of memory containing
-     * the information for each single pixel in the 320x200 (or 160x200) screen.
-     * How this data is interpreted depends on the current video mode.
-     * @return The base address of the video pixel data in bitmap mode.
-     */
-    addr_t bitmap_base() const {
-        addr_t addr = ((_regs[REG_MEMORY_POINTERS] & REG_MEMORY_POINTERS_CB13) ? (1 << 13) : 0);
-        return addr;
-    }
+    addr_t char_base(uint8_t ch) const;
 
     /**
      * Get the base address of a MIB data.
      * @param mib MIB (between 0 and 7).
      * @return The base address of the specified MIB data.
      */
-    addr_t mib_base(unsigned mib) const {
-        addr_t addr = static_cast<addr_t>(_mmap->read(video_matrix() + MIB_POINTER_OFFSET + mib)) << 6;
-        return addr;
-    }
+    addr_t mib_base(unsigned mib) const;
 
     /**
-     * Detect the current video mode.
-     * @return true if bitmap mode is active; false if character mode is active.
+     * Get the X coordinate of a MIB.
+     * @param mib MIB (bettwen 0 and 7).
+     * @return The X coordinate of the specified MIB.
      */
-    bool is_display_bitmap_mode() const {
-        return (_regs[REG_CONTROL_1] & REG_CONTROL_1_BMM);
-    }
+    unsigned mib_x(unsigned mib) const;
 
     /**
-     * @return true if extended colour mode is enabled; false otherwise.
+     * Get the Y coordinate of a MIB.
+     * @param mib MIB (bettwen 0 and 7).
+     * @return The Y coordinate of the specified MIB.
      */
-    bool is_display_extended_color() const {
-        return (_regs[REG_CONTROL_1] & REG_CONTROL_1_ECM);
-    }
-
-    /**
-     * @return true if multi colour mode is enabled; false otherwise.
-     */
-    bool is_display_multicolor() const {
-        return (_regs[REG_CONTROL_2] & REG_CONTROL_2_MCM);
-    }
-
-    /**
-     * Detect whether the display is enabled or not.
-     * When the display is not enabled (blanked)
-     * it is filled with the border color.
-     * @return true if the display in enabled; false otherwise.
-     */
-    bool is_display_enabled() const {
-        return (_regs[REG_CONTROL_1] & REG_CONTROL_1_DEN);
-    }
-
-    /**
-     * Detect whether the display has 24 or 25 rows.
-     * The rendering is always the same but the border covers
-     * part of the background in 24 rows mode.
-     * @return true on 24 rows mode; false on 25 rows mode.
-     */
-    bool is_display_24_rows() const {
-        return (!(_regs[REG_CONTROL_1] & REG_CONTROL_1_RSEL));
-    }
-
-    /**
-     * Detect whether the number of columns is 38 or 40.
-     * The rendering is always the same but the border covers
-     * part of the background in 38 columns mode.
-     * @return true on 38 columns mode; false on 40 columns mode.
-     */
-    bool is_display_38_columns() const {
-        return (!(_regs[REG_CONTROL_2] & REG_CONTROL_2_CSEL));
-    }
-
-    /**
-     * @return The horizontal scroll position.
-     */
-    uint8_t display_scroll_x() const {
-        return (_regs[REG_CONTROL_2] & REG_CONTROL_2_XSCROLL);
-    }
-
-    /**
-     * @return The vertical scroll position.
-     */
-    uint8_t display_scroll_y() const {
-        return (_regs[REG_CONTROL_1] & REG_CONTROL_1_YSCROLL);
-    }
-
-    /**
-     * Detect whether a sprite is enabled or disabled.
-     * @param sbit Sprite bit (1 << n, where n is the sprite number between 0 and 7).
-     * @return true if the specified sprite is enabled; false otherwise.
-     */
-    bool is_mib_enabled(uint8_t sbit) const {
-        return (_regs[REG_MIB_ENABLE] & sbit);
-    }
-
-    /**
-     * Detect the priority of a sprite against a background image.
-     * @param sbit Sprite bit (1 << n, where n is the sprite number between 0 and 7).
-     * @return true if the specified sprite is behind the background;
-     * false if the sprite is covers the background.
-     */
-    bool is_mib_behind_data(uint8_t sbit) const {
-        return (_regs[REG_MIB_DATA_PRI] & sbit);
-    }
-
-    /**
-     * Detect whether a sprite is multicolor.
-     * @param sbit Sprite bit (1 << n, where n is the sprite number between 0 and 7).
-     * @return true if the specified sprite is a multi-color one; false otherwise.
-     */
-    bool is_mib_multicolor(uint8_t sbit) const {
-        return (_regs[REG_MIB_MULTICOLOR] & sbit);
-    }
-
-    /**
-     * Detect whether a sprite is expanded in the horizontal direction.
-     * @param sbit Sprite bit (1 << n, where n is the sprite number between 0 and 7).
-     * @return true if the specified sprite is expanded; false otherwise.
-     */
-    bool is_mib_expanded_x(uint8_t sbit) const {
-        return (_regs[REG_MIB_X_EXPANSION] & sbit);
-    }
-
-    /**
-     * Detect whether a sprite is expanded in the vertical direction.
-     * @param sbit Sprite bit (1 << n, where n is the sprite number between 0 and 7).
-     * @return true if the specified sprite is expanded; false otherwise.
-     */
-    bool is_mib_expanded_y(uint8_t sbit) const {
-        return (_regs[REG_MIB_Y_EXPANSION] & sbit);
-    }
-
-    /**
-     * Get the vertical position of a sprite.
-     * @param mib Sprite number (between 0 and 7).
-     * @return The vertical position of the specified sprite.
-     */
-    unsigned mib_position_y(uint8_t mib) const {
-        return (1 + _regs[REG_MIB_0_Y + (mib << 1)]);
-    }
-
-    /**
-     * Get the horizontal position of a sprite.
-     * @param mib Sprite number (between 0 and 7).
-     * @return The horizontal position of the specified sprite.
-     */
-    unsigned mib_position_x(uint8_t mib) const {
-        return (MIB_X_START + (_regs[REG_MIB_0_X + (mib << 1)] +
-            ((_regs[REG_MIBS_MSB_X] & (1 << mib)) != 0 ? 0x100 : 0)));
-    }
-
-    /**
-     * Detect whether a sprite is visible in a scanline.
-     * @param line Raster line;
-     * @param mib  Sprite number (between 0 and 7).
-     * @return true if the sprite is enabled and visible in the specified line; false otherwise.
-     * @see mib_visibility_y()
-     */
-    bool is_mib_visible(unsigned line, uint8_t mib) {
-        return (std::get<0>(mib_visibility_y(line, mib)) != static_cast<unsigned>(-1));
-    }
+    unsigned mib_y(unsigned mib) const;
 
     /**
      * Retrieve a sprite configuration in a specified scanline.
@@ -631,70 +403,13 @@ private:
      * @return A tuple containing three elements:
      *   - The sprite Y position;
      *   - The sprite vertical size;
-     *   - A flag indicating whether the sprite is vertically expanded.
+     *   - A flag indicating whether the sprite is vertically expanded or not.
      * If the sprite is not enabled or not visible in the specified raster line the returned Y position is -1.
      */
     std::tuple<unsigned, unsigned, bool> mib_visibility_y(unsigned line, uint8_t mib);
 
-    /**
-     * @return true if at least one MIB-DATA collision was already detected and not yet acknowledged by the user.
-     */
-    bool is_mib_data_collision() const {
-        return (_regs[REG_MIB_DATA_COLLISION] != 0);
-    }
-
-    /**
-     * @return true if at least one MIB-MIB collision was already detected and not yet acknowledged by the user.
-     */
-    bool is_mib_mib_collision() const {
-        return (_regs[REG_MIB_MIB_COLLISION] != 0);
-    }
-
-    /**
-     * Set a MIB-DATA collision flag.
-     * @param sbit Sprite bit (1 << n, where n is the sprite number between 0 and 7).
-     * @see is_mib_data_collision()
-     */
-    void mib_data_collision(uint8_t sbit) {
-        _regs[REG_MIB_DATA_COLLISION] |= sbit;
-    }
-
-    /**
-     * Set a MIB-MIB collision flag.
-     * @param sbit1 Frist collided sprite bit (1 << n, where n is the sprite number between 0 and 7);
-     * @param sbit2 Second collided sprite bit (1 << n, where n is the sprite number between 0 and 7).
-     * @see is_mib_mib_collision()
-     */
-    void mib_mib_collision(uint8_t sbit1, uint8_t sbit2) {
-        _regs[REG_MIB_MIB_COLLISION] |= (sbit1 | sbit2);
-    }
-
-    /**
-     * Get a colour from a register.
-     * @param reg Register containing the colour codes.
-     * @return A constant reference to the RGBA colour assigned to the colour codes.
-     * @see Color
-     * @see Rgba
-     */
-    const Rgba &reg_color(int reg) const {
-        return _palette[_regs[reg] & Color::MASK];
-    }
-
-    /**
-     * @return The border colour.
-     */
-    const Rgba &border_color() const {
-        return reg_color(REG_BORDER_COLOR);
-    }
-
-    /**
-     * Get the background colour.
-     * @param bg Number of background (between 0 and 3).
-     * @return The specified background colour.
-     */
-    const Rgba &background_color(int bg) const {
-        return reg_color((bg & 3) + REG_BACKGROUND_COLOR_0);
-    }
+    //XXX FIXME
+    bool is_mib_visible(unsigned line, uint8_t mib);
 
     /**
      * Get the colour code from the colour RAM for a specific 40x25 display position.
@@ -703,36 +418,15 @@ private:
      * @return The colour code.
      * @see _vcolor
      */
-    Color video_color_code(unsigned x, unsigned y) const {
-        addr_t addr = static_cast<addr_t>(x + y * CHARMODE_COLUMNS);
-        return static_cast<Color>(_vcolor->read(addr) & Color::MASK);
-    }
-
-    /**
-     * Get the RGBA colour from the colour RAM for a specific 40x25 display position.
-     * @param x Horizontal coordinate (between 0 and 39);
-     * @param y Vertical coordinate (between 0 and 24).
-     * @return The RGBA colour.
-     */
-    const Rgba &video_color(unsigned x, unsigned y) const {
-        return _palette[video_color_code(x, y)];
-    }
+    Color video_color_code(unsigned x, unsigned y) const;
 
     /**
      * Paint a segment in the current scanline.
      * @param start Starting horizontal position;
-     * @param width Segment width in pixels (if, 0 the entire scanline from the starting position is painted);
+     * @param width Segment width in pixels (if 0, the entire scanline from the starting position is painted);
      * @param color RGBA colour to use.
      */
-    void paint(unsigned start, unsigned width, const Rgba &color) {
-        if (start < _scanline.size()) {
-            if (width == 0 || start + width > _scanline.size()) {
-                width = _scanline.size() - start;
-            }
-
-            std::fill_n(_scanline.begin() + start, width, color);
-        }
-    }
+    void paint(unsigned start, unsigned width, const Rgba &color);
 
     /**
      * Paint a byte bitmap (1 bit per pixel) in the current scanline.
@@ -740,65 +434,25 @@ private:
      * bits set to 0 are painted with the background colour.
      * @param start  Starting horizontal position;
      * @param bitmap Byte bitmap;
-     * @param colors Background and foreground colours;
+     * @param colors Background and foreground colours.
      */
-    void paint_byte(unsigned start, uint8_t bitmap, const color2_t &colors);
+    void paint_byte(unsigned start, uint8_t bitmap, const Rgba4 &colors);
 
     /**
-     * Paint a byte bitmap (1 bit per pixel) in the current scanline considering the horizontal scroll.
-     * Bits set to 1 are painted with the foreground colour,
-     * bits set to 0 are painted with the background colour.
-     * The coordinates to be painted are adjusted with the current display horizontal scroll position.
-     * @param start  Starting horizontal position;
-     * @param bitmap Byte bitmap;
-     * @param colors Background and foreground colours;
-     * @see paint_byte()
-     * @see display_scroll_x()
-     */
-    void paint_byte_scroll(unsigned start, uint8_t bitmap, const color2_t &colors) {
-        paint_byte(start + display_scroll_x(), bitmap, colors);
-    }
-
-    /**
-     * Paint a byte bitmap (2 bits per pixel) in the current scanline.
+     * Paint a multicolor byte bitmap (2 bits per pixel) in the current scanline.
      * 4 double sized pixels are painted (4 pairs of 2 pixels with the same colour).
      * The colour codes of each of the 4 pixels are encoded in two consecutive bits.
      * The specified byte represents a bitmap containing 4 pairs of pixels:
-     *   - 00: Two pixels painted using color[0];
-     *   - 01: Two pixels painted using color[1];
-     *   - 10: Two pixels painted using color[2];
-     *   - 11: Two pixels painted using color[3].
+     *   - 00: Two pixels painted using colors[0];
+     *   - 01: Two pixels painted using colors[1];
+     *   - 10: Two pixels painted using colors[2];
+     *   - 11: Two pixels painted using colors[3].
      * The pixel size is doubled but the visual effect is a reduction of the horizontal resolution from 320 to 160.
      * @param start  Starting horizontal position;
      * @param bitmap Byte bitmap containing the 4 pixels to paint;
-     * @param colors Table with pointers to the 4 colours;
+     * @param colors 4 colours.
      */
-    void paint_mcm_byte(unsigned start, uint8_t bitmap, const color4_t &colors);
-
-    /**
-     * Paint a byte bitmap (2 bits per pixel) in the current scanline.
-     * The coordinates to be painted are adjusted with the current display horizontal scroll position.
-     * 4 double sized pixels are painted (4 pairs of 2 pixels with the same colour).
-     * The colour codes each of the 4 pixels are encoded in two consecutive bits.
-     * The visual effect is a reduction of the horizontal resolution from 320 to 160 (pixel size doubled).
-     * @param start  Starting horizontal position;
-     * @param bitmap Byte bitmap containing the 4 pixels to paint;
-     * @param colors Table with pointers to the 4 colours;
-     * @see paint_mcm_byte()
-     * @see display_scroll_x()
-     */
-    void paint_mcm_byte_scroll(unsigned start, uint8_t bitmap, const color4_t &colors) {
-        paint_mcm_byte(start + display_scroll_x(), bitmap, colors);
-    }
-
-    /**
-     * Paint a segment in the current scanline using the border colour.
-     * @param start Starting horizontal position;
-     * @param width Segment width (if 0, the entire scanline from the starting position is painted).
-     */
-    void paint_border(unsigned start = 0, unsigned width = 0) {
-        paint(start, width, border_color());
-    }
+    void paint_mcm_byte(unsigned start, uint8_t bitmap, const Rgba4 &colors);
 
     /**
      * Paint a character mode display line.
@@ -815,27 +469,26 @@ private:
     /**
      * Paint a sprite bitmap line.
      * @param start  Starting horizontal position;
-     * @param bitmap The shaped sprite bitmap;
+     * @param bitmap The sprite bitmap (sprite line data);
      * @param colors Sprite background and foreground colours;
      * @param expand true if the bitmap contains an horizontally expanded sprite; false otherwise.
      */
-    void paint_sprite_line(unsigned start, uint64_t bitmap, const color2_t &colors, bool expand);
+    void paint_sprite_line(unsigned start, uint64_t bitmap, const Rgba4 &colors, bool expand);
 
     /**
      * Paint a multicolor sprite bitmap line.
      * @param start  Starting horizontal position;
-     * @param bitmap The shaped sprite bitmap;
-     * @param colors Sprite colours.
+     * @param bitmap The sprite bitmap (sprite line data);
+     * @param colors 4 colours for the spirte;
      * @param expand true if the bitmap contains an horizontally expanded sprite; false otherwise.
      */
-    void paint_sprite_line_mcm(unsigned start, uint64_t bitmap, const color4_t &colors, bool expand);
+    void paint_sprite_line_mcm(unsigned start, uint64_t bitmap, const Rgba4 &colors, bool expand);
 
     /**
      * Paint a sprite line.
      * The sprite line is painted only if it is enabled and visible in the specified raster line.
-     * @param line Raster line to paint.
+     * @param line Raster line to paint;
      * @param mib  Sprite number (between 0 and 7).
-     * @see is_mib_enabled()
      * @see mib_bitmap()
      * @see paint_sprite_line()
      * @see paint_sprite_line_mcm()
@@ -844,33 +497,21 @@ private:
 
     /**
      * Paint all the sprite lines.
-     * Only the lines of the visible sprites are painted in the specified raster line,
-     * in case of sprite superpositions the fixed sprite-sprite priority is followed.
-     * @param line The raster line to paint.
-     * @see paint_sprite()
+     * Only the lines of the visible sprites are painted in the current scan line,
+     * In case of sprite superpositions the fixed sprite-sprite priority is followed.
+     * @see paint_sprite(unsigned, uint8_t)
      */
-    void paint_sprites(unsigned line);
-
-    /**
-     * Paint a complete raster line.
-     * Paint borders, display area and sprites.
-     * @param line The raster line to paint.
-     */
-    void paint_scanline(unsigned line);
+    void paint_sprites();
 
     /**
      * Reset the collision background data array.
      */
-    void reset_collision_data() {
-        _collision_data.fill(0);
-    }
+    void reset_collision_data();
 
     /**
      * Reset the collision sprite bitmap data array.
      */
-    void reset_collision_mib() {
-        _mib_bitmaps.fill(0);
-    }
+    void reset_collision_mib();
 
     /**
      * Update the collision data for this scanline.
@@ -881,41 +522,18 @@ private:
     void update_collision_data(unsigned start, uint8_t bitmap);
 
     /**
-     * Update the collision data for this scanline.
-     * The coordinates to be updated are adjusted with the current display horizontal scroll position.
-     * The collision data is upated each time a character data or bitmap data is painted in the scanline.
-     * @param start  Starting horizontal coordinate;
-     * @param bitmap Byte bitmap painted.
-     * @see update_collision_data()
-     */
-    void update_collision_data_scroll(unsigned start, uint8_t bitmap) {
-        update_collision_data(start + display_scroll_x(), bitmap);
-    }
-
-    /**
      * Update the collision data for this scanline in multicolor mode.
      * The collision data is upated each time a character data or bitmap data is painted in the scanline.
      * @param start  Starting horizontal coordinate;
      * @param bitmap Byte bitmap encoded with 4 color codes.
-     * @see update_collision_data()
      */
     void update_collision_data_mcm(unsigned start, uint8_t bitmap);
 
     /**
-     * Update the collision data for this scanline in multicolor mode.
-     * The coordinates to be updated are adjusted with the current display horizontal scroll position.
-     * The collision data is upated each time a character data or bitmap data is painted in the scanline.
-     * @param start  Starting horizontal coordinate;
-     * @param bitmap Byte bitmap encoded with 4 color codes.
-     * @see update_collision_data_mcm()
-     */
-    void update_collision_data_mcm_scroll(unsigned start, uint8_t bitmap) {
-        update_collision_data_mcm(start + display_scroll_x(), bitmap);
-    }
-
-    /**
      * Generate the shapes of a sprite line and detect collisions with the background image.
-     * Generate two shapes of a sprite: The complete shape and the visible part (not obscured by the background image).
+     * Two sprite bitmap lines are generated:
+     *   - The complete sprite bitmap line;
+     *   - The visible sprite bitmap line (not obscured by the background image).
      * @param start    Starting horizontal position of the sprite;
      * @param byte1    Sprite line first data byte;
      * @param byte2    Sprite line second data byte;
@@ -923,116 +541,104 @@ private:
      * @param expand   true if the sprite must be expanded horizontally; false otherwise.
      * @param mcm      true if it is a multi-color sprite; false otherwise.
      * @param data_pri true if a background image has the visibility priority over the sprite; false otherwise.
-     * @return A tuple containing: The sprite-background (MIB-DATA) collision flag,
-     * the sprite data and the visible sprite data.
+     * @return A tuple containing:
+     *  - The sprite-background (MIB-DATA) collision flag;
+     *  - The sprite bitmap line;
+     *  - The visible sprite bitmap line.
      */
     std::tuple<bool, uint64_t, uint64_t>
     mib_bitmap(unsigned start, uint8_t byte1, uint8_t byte2, uint8_t byte3, bool expand, bool mcm, bool data_pri);
 
     /**
-     * Update a sprite collision mask and detect eventual collisions with other sprites.
-     * @param mib    The sprite number (between 0 and 7).
+     * Update a sprite collision mask and detect collisions with other sprites.
+     * @param mib    The sprite number (between 0 and 7);
      * @param start  Sprite horizontal position;
      * @param mcm    true if the sprite is multicolor; false otherwise;
-     * @param bitmap The complete bitmap of the sprite.
-     * @return A pair containing: A MIB-MIB collision flag (if there are no other MIB-MIB collisions detected)
-     * and the number of the other collided sprite (this value is valid only if the collision flag is active).
+     * @param bitmap The complete bitmap line of the sprite.
+     * @return The collided sprite bit if there are no previous collisions and a new collision is detected; otherwise 0.
      */
-    std::pair<bool, uint8_t> update_collision_mib(uint8_t mib, unsigned start, bool mcm, uint64_t bitmap);
+    uint8_t update_collision_mib(uint8_t mib, unsigned start, bool mcm, uint64_t bitmap);
 
-    /**
-     * Registers.
-     */
-    std::array<uint8_t, REGMAX> _regs{};
 
-    /**
-     * Address space mappings.
-     * These mappings define the devices that can be seen
-     * by this video controller through its address lines.
-     */
-    std::shared_ptr<ASpace> _mmap{};
+    std::function<void(unsigned, const ui::Scanline &)> _render_line{}; /* Line renderer callback                   */
+    std::function<void(size_t)> _vsync{};                       /* Vertical sync callback                           */
+    std::function<void(bool)>   _set_irq{};                     /* IRQ output pin callback                          */
+    std::function<void(bool)>   _set_ba{};                      /* BA output pin callback                           */
 
-    /**
-     * Video colour RAM.
-     */
-    devptr_t _vcolor{};
+    std::shared_ptr<ASpace> _mmap{};                            /* Address space mappings                           */
+    devptr_t                _vcolor{};                          /* Video colour RAM                                 */
+    RgbaTable               _palette{};                         /* Colour palette                                   */
+    ui::Scanline            _scanline{};                        /* Pixel data for the current visible raster line   */
 
-    /**
-     * V-Sync callback.
-     */
-    std::function<void(size_t)> _vsync{};
+    uint8_t                 _mib_enable{};                      /* MIB enable (visible) flags                       */
+    std::array<uint16_t, 8> _mib_coord_x{};                     /* MIB X coordinates                                */
+    std::array<uint8_t, 8>  _mib_coord_y{};                     /* MIB Y coordinates                                */
+    uint8_t                 _mib_expand_x{};                    /* MIB X expansion flags                            */
+    uint8_t                 _mib_expand_y{};                    /* MIB Y expansion flags                            */
+    uint8_t                 _mib_data_priority{};               /* MIB-DATA Priority flags                          */
+    uint8_t                 _mib_multicolor_sel{};              /* MIB multicolor selection flags                   */
+    uint8_t                 _mib_mib_collision{};               /* MIB-MIB collision flags                          */
+    uint8_t                 _mib_data_collision{};              /* MIB-DATA collision flags                         */
+    std::array<Color, 8>    _mib_color{};                       /* MIB colours                                      */
+    std::array<Color, 2>    _mib_multicolor{};                  /* MIB multicolour flags                            */
 
-    /**
-     * Render line method.
-     */
-    std::function<void(unsigned, const ui::Scanline &)> _render_line{};
+    uint16_t                _raster_counter{};                  /* Current raster line                              */
+    uint16_t                _stored_raster{};                   /* Interrupt raster line                            */
 
-    /**
-     * Colour palette.
-     * Translation table from colour codes RGBA colours.
-     */
-    RgbaTable _palette{};
+    bool                    _den{};                             /* Display Enabled flag                             */
+    bool                    _mcm_mode{};                        /* Multicolor mode flag                             */
+    bool                    _ecm_mode{};                        /* Extended color mode flag                         */
+    bool                    _bmm_mode{};                        /* Bitmap mode flag                                 */
+    bool                    _25_rows{};                         /* 25 rows flag                                     */
+    bool                    _40_columns{};                      /* 40 columns flag                                  */
 
-    /**
-     * IRQ ouput pin trigger.
-    */
-    std::function<void(bool)> _trigger_irq{};
+    uint8_t                 _scroll_x{};                        /* Scroll X position                                */
+    uint8_t                 _scroll_y{};                        /* Scroll Y position                                */
 
-    /**
-     * AEC (Address Enable Control) output pin trigger.
-     */
-    std::function<void(bool)> _set_aec{};
+    uint8_t                 _light_pen_x{};                     /* Latched light pen X position                     */
+    uint8_t                 _light_pen_y{};                     /* Latched light pen Y position                     */
+    bool                    _light_pen_latched{};               /* Light pen latched flag                           */
 
-    /**
-     * Scanline pixel data.
-     * Refreshed each SCANLINE_CYCLES clock cycles.
-     */
-    ui::Scanline _scanline{};
+    addr_t                  _char_base{};                       /* Base address of character memory                 */
+    addr_t                  _video_matrix{};                    /* Base address of video RAM                        */
+    addr_t                  _bitmap_base{};                     /* Base address of Bitmap mode video RAM            */
 
-    /**
-     * Stored raster line.
-     * Raster line written by the user; it is used to generate an interrupt when
-     * the current raster line register (REG_RASTER_COUNTER) matches this value.
-     * @see rasterline()
-     */
-    unsigned _stored_rasterline{};
+    Color                   _border_color{};                    /* Border colour                                    */
+    std::array<Color, 4>    _background_color{};                /* Background colours                               */
 
-    /**
-     * Whether the DEN bit is enabled.
-     * This value is updated on cycle 0 of raster line $30.
-     */
-    bool _is_den{};
+    uint8_t                 _irq_status{};                      /* IRQ status register                              */
+    uint8_t                 _irq_enable{};                      /* IRQ enable mask                                  */
 
-    /**
-     * Whether the LP was triggered on this frame.
-     */
-    bool _lp_triggered{};
+    bool                    _bl_den{};                          /* _den flag checked for a badline                  */
+    bool                    _bad_line{};                        /* Current raster line is a bad line                */
 
-    /**
-     * Whether the current raster line is a bad line.
-     */
-    bool _is_badline{};
+    bool                    _main_border{};                     /* Main border enabled flag                         */
+    bool                    _vertical_border{};                 /* Vertical borders enabled flag                    */
 
-    /**
-     * The current rasterline cycle.
-     */
-    unsigned _cycle{};
+    bool                    _idle_mode{};                       /* Idle vs Display mode                             */
+    unsigned                _video_counter{};                   /* XXX Higher part of the current display area line */
+    uint8_t                 _row_counter{};                     /* XXX Lower 3 bits of the current display area line    */
 
-    /**
+    /*
      * Bitmap scanline used to detect collisions between the background (data) and the sprites.
      */
     std::array<uint8_t, utils::align(static_cast<uint64_t>(utils::ceil(WIDTH / 8.0f) + 8))> _collision_data{};
 
-    /**
+    /*
      * Bitmap masks used to detect collisions between sprites.
      * The elements of the array contain the bitmap mask for each sprite in the current scanline.
      */
     std::array<uint64_t, 8> _mib_bitmaps{};
 
     /**
-     * Builtin (default) colour palette.
+     * The current rasterline cycle.
      */
-    static RgbaTable builtin_palette;
+//FIXME
+//    unsigned _cycles{};
+    unsigned _cycle{};
+    bool _vblank{};
+
+    static RgbaTable builtin_palette;                           /* Default colour palette                           */
 };
 
 }
