@@ -1,4 +1,6 @@
-- VIC:      FLD effect
+- UI:       Volume control
+- misc:     README formatting see vim-xcode-colors
+- misc:     RESET instead of termination on Illegal instructions (check what the cpu does)
 - VIC:      Cycles emulation
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
 - C1541Fs:  Support for P00 files
@@ -14,9 +16,7 @@
             - d64/fs attached on-demand (+ host filesystem traversing)
             - Support for directory/file traversal/selection (test ImGui)
             - Virtual keyboard?
-- VIC:      Implement open-border bug
 - SID:      Fix/remake (dane ballad)
-- misc:     Speed-up
 - misc:     Remove gsl (when c++20 support is completed)
 - Apple2
 - BBC Micro
