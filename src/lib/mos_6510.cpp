@@ -340,7 +340,7 @@ void Mos6510::init_monitor(std::istream &is, std::ostream &os)
     _monitor->add_breakpoint(_regs.PC);
 }
 
-void Mos6510::reset(std::shared_ptr<ASpace> mmap)
+void Mos6510::reset(const std::shared_ptr<ASpace> &mmap)
 {
     _mmap = mmap;
     flag(0);
@@ -462,9 +462,17 @@ size_t Mos6510::single_step()
     addr_t addr{};
     bool is_nmi{};
 
-    if (!_rdy.is_active()) {
+    if (!_rdy) {
         /*
-         * CPU freezed.
+         * CPU freezed on read operations.
+         * In the real CPU several clock cycles are needed to execute one single instruction,
+         * in this emulator, instructions are executed in one single_step() call, the number of
+         * cycles is returned back to the caller clock which will call this method again after
+         * those cycles are passed.
+         * This means that we are not able to discern between read and write cycles, so we assume
+         * the next operation will always be a read operation.
+         *
+         * For the reasons above, this pin acts as the AEC pin.
          */
         return 1;
     }

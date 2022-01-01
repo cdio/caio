@@ -34,16 +34,25 @@ public:
     ~InputPin() {
     }
 
+    bool operator=(bool value) {
+        _pin = value;
+        return _pin;
+    }
+
     void set(bool active = true) {
         _pin = active;
     }
 
     void unset() {
-        _pin = 0;
+        _pin = false;
     }
 
     bool is_active() const {
         return _pin;
+    }
+
+    operator bool() const {
+        return is_active();
     }
 
 private:

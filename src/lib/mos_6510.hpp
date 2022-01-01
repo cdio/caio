@@ -151,7 +151,7 @@ public:
      * Reinitialise this CPU.
      * @param mmap System mappings.
      */
-    void reset(std::shared_ptr<ASpace> mmap);
+    void reset(const std::shared_ptr<ASpace> &mmap);
 
     /**
      * Disassembler.
