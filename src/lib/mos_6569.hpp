@@ -350,7 +350,9 @@ private:
 
     /**
      * Render the current scanline.
-     * TODO: DOC
+     * @param line Line number assigned to the curent scanline.
+     * This method calls the render_line callback in order to render the specified line.
+     * @see render_line(const std::function<void(unsigned, const ui::Scanline &)> &rl)
      */
     void render_line(unsigned line);
 
@@ -616,8 +618,8 @@ private:
     bool                    _vertical_border{};                 /* Vertical borders enabled flag                    */
 
     bool                    _idle_mode{};                       /* Idle vs Display mode                             */
-    unsigned                _video_counter{};                   /* XXX Higher part of the current display area line */
-    uint8_t                 _row_counter{};                     /* XXX Lower 3 bits of the current display area line    */
+    unsigned                _video_counter{};                   /* Higher part of the current display area line     */
+    uint8_t                 _row_counter{};                     /* Lower 3 bits of the current display area line    */
 
     /*
      * Bitmap scanline used to detect collisions between the background (data) and the sprites.
@@ -633,8 +635,6 @@ private:
     /**
      * The current rasterline cycle.
      */
-//FIXME
-//    unsigned _cycles{};
     unsigned _cycle{};
     bool _vblank{};
 

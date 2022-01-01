@@ -164,7 +164,7 @@ uint8_t Mos6569::read(addr_t addr) const
         return _mib_coord_y[4];
 
     case REG_MIB_5_Y:
-        return _mib_coord_y[6];
+        return _mib_coord_y[5];
 
     case REG_MIB_6_Y:
         return _mib_coord_y[6];
