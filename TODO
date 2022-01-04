@@ -1,3 +1,4 @@
+- arch:     Refactor architecture in order to support all types of CRT files
 - UI:       Volume control
 - misc:     README formatting see vim-xcode-colors
 - misc:     RESET instead of termination on Illegal instructions (check what the cpu does)
