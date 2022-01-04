@@ -38,8 +38,6 @@ namespace cemu {
 
 /**
  * MOS6569 (VIC-II PAL) emulator.
- * @note In this implementation one scanline is refreshed at once so it is not
- *       possible to exploit some of the bugs of the real chip using timing tricks.
  * @see C64 Programmer's Reference Guide.pdf, Appendix N
  * @see mos_6567_vic_ii_preliminary.pdf
  * @see https://www.cebix.net/VIC-Article.txt
@@ -92,22 +90,24 @@ public:
     constexpr static unsigned DISPLAY_WIDTH      = 320;
     constexpr static unsigned DISPLAY_HEIGHT     = 200;
 
-    constexpr static unsigned UBORDER_Y_START    = VISIBLE_Y_START;
-    constexpr static unsigned UBORDER_Y_END      = 51;
-
-    constexpr static unsigned BBORDER_Y_START    = 251;
-    constexpr static unsigned BBORDER_Y_END      = VISIBLE_Y_END;
-
     constexpr static unsigned DISPLAY_Y_START    = 48;
     constexpr static unsigned DISPLAY_Y_END      = DISPLAY_Y_START + DISPLAY_HEIGHT;
 
     constexpr static unsigned DISPLAY_X_START    = 42;   /* (VISIBLE_WIDTH - DISPLAY_WIDTH) / 2 */
     constexpr static unsigned DISPLAY_X_END      = DISPLAY_X_START + DISPLAY_WIDTH;
 
+    constexpr static unsigned UBORDER_Y_START    = VISIBLE_Y_START;
+    constexpr static unsigned UBORDER_Y_END      = 51;
+
+    constexpr static unsigned BBORDER_Y_START    = 251;
+    constexpr static unsigned BBORDER_Y_END      = VISIBLE_Y_END;
+
+    constexpr static unsigned LBORDER_X_END      = DISPLAY_X_START;
+    constexpr static unsigned RBORDER_X_START    = DISPLAY_X_END;
+
     constexpr static unsigned PIXELS_PER_CYCLE   = 8;
     constexpr static unsigned SCANLINE_CYCLES    = FRAME_WIDTH / PIXELS_PER_CYCLE;
     constexpr static unsigned FRAME_CYCLES       = FRAME_HEIGHT * SCANLINE_CYCLES;
-    constexpr static unsigned BADLINE_CYCLES     = 40;
 
     constexpr static unsigned MIB_WIDTH          = 24;
     constexpr static unsigned MIB_HEIGHT         = 21;
@@ -344,9 +344,16 @@ private:
     size_t tick(const Clock &clk) override;
 
     /**
-     * Paint the current raster line.
+     * Paint a cycle of the display area in the current scanline.
+     * @param x Starting X coordinate (relative to the display area) to paint.
+     * @see PIXELS_PER_CYCLE
      */
-    void paint_scanline();
+    void paint_display_cycle(unsigned x);
+
+    /**
+     * Paint the borders (if they are enabled).
+     */
+    void paint_borders();
 
     /**
      * Render the current scanline.
@@ -406,11 +413,17 @@ private:
      *   - The sprite Y position;
      *   - The sprite vertical size;
      *   - A flag indicating whether the sprite is vertically expanded or not.
-     * If the sprite is not enabled or not visible in the specified raster line the returned Y position is -1.
+     * If the sprite is not enabled or not present in the specified raster line the returned Y position is -1.
      */
     std::tuple<unsigned, unsigned, bool> mib_visibility_y(unsigned line, uint8_t mib);
 
-    //XXX FIXME
+    /**
+     * Detect the presense of a sprite.
+     * @param line Raster line;
+     * @param mib  Sprite number (between 0 and 7).
+     * @return true if the sprite is enabled and present in the specified line; false otherwise.
+     * @see mib_visibility_y(unsigned line, uint8_t mib);
+     */
     bool is_mib_visible(unsigned line, uint8_t mib);
 
     /**
@@ -458,15 +471,17 @@ private:
 
     /**
      * Paint a character mode display line.
-     * @param line The raster line to paint (relative to the start of the display area).
+     * @param line The raster line to paint (relative to the start of the display area);
+     * @param x    X Coordinate of the character (relative to the display area).
      */
-    void paint_char_mode(unsigned line);
+    void paint_char_mode(unsigned line, unsigned x);
 
     /**
      * Paint a bitmap mode display line.
-     * @param line The raster line to paint (relative to the start of the display area).
+     * @param line The raster line to paint (relative to the start of the display area);
+     * @param x    X Coordinate of the character (relative to the display area).
      */
-    void paint_bitmap_mode(unsigned line);
+    void paint_bitmap_mode(unsigned line, unsigned x);
 
     /**
      * Paint a sprite bitmap line.
@@ -561,7 +576,6 @@ private:
      */
     uint8_t update_collision_mib(uint8_t mib, unsigned start, bool mcm, uint64_t bitmap);
 
-
     std::function<void(unsigned, const ui::Scanline &)> _render_line{}; /* Line renderer callback                   */
     std::function<void(size_t)> _vsync{};                       /* Vertical sync callback                           */
     std::function<void(bool)>   _set_irq{};                     /* IRQ output pin callback                          */
@@ -620,6 +634,13 @@ private:
     bool                    _idle_mode{};                       /* Idle vs Display mode                             */
     unsigned                _video_counter{};                   /* Higher part of the current display area line     */
     uint8_t                 _row_counter{};                     /* Lower 3 bits of the current display area line    */
+    unsigned                _uborder_end{UBORDER_Y_END};        /* Last line of upper border + 1                    */
+    unsigned                _bborder_start{BBORDER_Y_START};    /* First line of bottom border                      */
+    unsigned                _lborder_end{LBORDER_X_END};        /* Last line of left border + 1                     */
+    unsigned                _rborder_start{RBORDER_X_START};    /* First line of right border                       */
+
+    unsigned                _cycle{};                           /* Current horizontal cycle                         */
+    bool                    _vblank{};                          /* Vertical blanking flag                           */
 
     /*
      * Bitmap scanline used to detect collisions between the background (data) and the sprites.
@@ -631,12 +652,6 @@ private:
      * The elements of the array contain the bitmap mask for each sprite in the current scanline.
      */
     std::array<uint64_t, 8> _mib_bitmaps{};
-
-    /**
-     * The current rasterline cycle.
-     */
-    unsigned _cycle{};
-    bool _vblank{};
 
     static RgbaTable builtin_palette;                           /* Default colour palette                           */
 };

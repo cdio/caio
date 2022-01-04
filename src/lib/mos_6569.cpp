@@ -372,6 +372,15 @@ void Mos6569::write(addr_t addr, uint8_t data)
         _den           = (data & REG_CONTROL_1_DEN);
         _25_rows       = (data & REG_CONTROL_1_RSEL);
         _scroll_y      = data & REG_CONTROL_1_YSCROLL;
+
+        if (_25_rows) {
+            _uborder_end   = UBORDER_Y_END;
+            _bborder_start = BBORDER_Y_START;
+        } else {
+            _uborder_end   = UBORDER_Y_END + 4;
+            _bborder_start = BBORDER_Y_START - 4;
+        }
+
         break;
 
     case REG_RASTER_COUNTER:
@@ -393,6 +402,15 @@ void Mos6569::write(addr_t addr, uint8_t data)
         _mcm_mode   = (data & REG_CONTROL_2_MCM);
         _40_columns = (data & REG_CONTROL_2_CSEL);
         _scroll_x   = data & REG_CONTROL_2_XSCROLL;
+
+        if (_40_columns) {
+            _lborder_end   = LBORDER_X_END;
+            _rborder_start = RBORDER_X_START;
+        } else {
+            _lborder_end   = LBORDER_X_END + 8;
+            _rborder_start = RBORDER_X_START - 8;
+        }
+
         break;
 
     case REG_MIB_Y_EXPANSION:
@@ -539,7 +557,7 @@ inline Mos6569::Rgba4::~Rgba4()
 {
 }
 
-const Rgba &Mos6569::Rgba4::operator[](int index) const
+inline const Rgba &Mos6569::Rgba4::operator[](int index) const
 {
     if (index < 0 || index >= _colors.size()) {
         throw InvalidArgument{Mos6569::TYPE, "Rgba4: Invalid color index: " + std::to_string(index)};
@@ -570,8 +588,12 @@ size_t Mos6569::tick(const Clock &clk)
 
         _vblank = ((_raster_counter < VISIBLE_Y_START) || (_raster_counter >= VISIBLE_Y_END));
 
-        if (!_vblank) {
-#if 0 /* FIXME */
+        if (_vblank) {
+            _bad_line = false;
+            ba_out(true);
+
+        } else {
+#if 0
             if (_raster_counter == _stored_raster) {
                 _irq_status |= REG_INTERRUPT_RST;
                 if ((_irq_enable & REG_INTERRUPT_RST) != 0) {
@@ -592,11 +614,12 @@ size_t Mos6569::tick(const Clock &clk)
 
             ba_out(!is_mib_visible(_raster_counter, 3));
         }
+
         break;
 
     case 1:
-#if 0 /* FIXME */
-        if (_raster_counter == 0 && _raster_counter == _stored_raster) {
+#if 0
+        if (_raster_counter == 0 && _stored_raster == 0) {
             _irq_status |= REG_INTERRUPT_RST;
             if ((_irq_enable & REG_INTERRUPT_RST) != 0) {
                 irq_out(true);
@@ -642,6 +665,17 @@ size_t Mos6569::tick(const Clock &clk)
         break;
 
     case 10:
+#if 1
+        if (_raster_counter == _stored_raster) {    /* FIXME: This must be done on cycles 0 and 1 */
+            _irq_status |= REG_INTERRUPT_RST;
+            if ((_irq_enable & REG_INTERRUPT_RST) != 0) {
+                irq_out(true);
+            }
+        }
+#endif
+        break;
+
+    case 11:
         if (!_vblank) {
             ba_out(!_bad_line);
         }
@@ -657,16 +691,37 @@ size_t Mos6569::tick(const Clock &clk)
         break;
 
     case 14:
-        if (_raster_counter == _stored_raster) {    /* FIXME: This must be done on cycles 0 and 1 */
-            _irq_status |= REG_INTERRUPT_RST;
-            if ((_irq_enable & REG_INTERRUPT_RST) != 0) {
-                irq_out(true);
+        break;
+
+    case 15:
+        if (!_vblank && _40_columns) {
+            if (_raster_counter == _bborder_start) {
+                _vertical_border = true;
+            } else if (_raster_counter == _uborder_end && _bl_den) {
+                _vertical_border = false;
+            }
+
+            if (!_vertical_border) {
+                _main_border = false;
             }
         }
         break;
 
-    case 15:
     case 16:
+        if (!_vblank && !_40_columns) {
+            if (_raster_counter == _bborder_start) {
+                _vertical_border = true;
+            } else if (_raster_counter == _uborder_end && _bl_den) {
+                _vertical_border = false;
+            }
+
+            if (!_vertical_border) {
+                _main_border = false;
+            }
+        }
+
+        /* PASSTHROUGH */
+
     case 17:
     case 18:
     case 19:
@@ -705,16 +760,71 @@ size_t Mos6569::tick(const Clock &clk)
     case 52:
     case 53:
     case 54:
+        if (!_vblank) {
+            unsigned x = (_cycle - 16) << 3;
+            paint_display_cycle(x);
+        }
         break;
 
     case 55:
-        ba_out(true);
+        if (!_vblank) {
+            ba_out(true);
+            if (!_40_columns) {
+                _main_border = true;
+            }
+
+            unsigned x = (_cycle - 16) << 3;
+            paint_display_cycle(x);
+        }
         break;
 
     case 56:
-        /* TODO: paint 8 pixels per cycle */
-        if (_raster_counter >= VISIBLE_Y_START && _raster_counter < VISIBLE_Y_END) {
-            paint_scanline();
+        if (!_vblank) {
+            if (_40_columns) {
+                _main_border = true;
+            }
+
+            if (_row_counter == 7) {
+                _idle_mode = true;
+                _video_counter += 8;
+                _row_counter = 0;
+            }
+
+            if (!_idle_mode) {
+                ++_row_counter;
+            }
+        }
+        break;
+
+    case 57:
+        if (!_vblank) {
+            ba_out(!is_mib_visible(_raster_counter + 1, 0));
+        }
+        break;
+
+    case 58:
+        break;
+
+    case 59:
+        if (!_vblank) {
+            ba_out(!is_mib_visible(_raster_counter + 1, 1));
+        }
+        break;
+
+    case 60:
+        break;
+
+    case 61:
+        if (!_vblank) {
+            ba_out(!is_mib_visible(_raster_counter + 1, 2));
+        }
+        break;
+
+    case 62:
+        if (!_vblank) {
+            if (_raster_counter >= MIB_Y_START) {
+                paint_sprites();
+            }
 
             if ((_irq_status & REG_INTERRUPT_MDC) == 0 && _mib_data_collision != 0) {
                 _irq_status |= REG_INTERRUPT_MDC;
@@ -729,45 +839,21 @@ size_t Mos6569::tick(const Clock &clk)
                     irq_out(true);
                 }
             }
+
+            if (_raster_counter == _bborder_start) {
+                _vertical_border = true;
+            } else if (_bl_den && _raster_counter == _uborder_end) {
+                _vertical_border = false;
+            }
+
+            paint_borders();
+
+            render_line(_raster_counter - VISIBLE_Y_START);
+
+            reset_collision_data();
+            reset_collision_mib();
         }
 
-        if (_row_counter == 7) {
-            _idle_mode = true;
-            _video_counter += 8;
-            _row_counter = 0;
-        }
-
-        if (!_idle_mode) {
-            ++_row_counter;
-        }
-
-        break;
-
-    case 57:
-        if (!_vblank) {
-            ba_out(!is_mib_visible(_raster_counter + 1, 1));
-        }
-        break;
-
-    case 58:
-        break;
-
-    case 59:
-        if (!_vblank) {
-            ba_out(!is_mib_visible(_raster_counter + 1, 0));
-        }
-        break;
-
-    case 60:
-        break;
-
-    case 61:
-        if (!_vblank) {
-            ba_out(!is_mib_visible(_raster_counter + 1, 2));
-        }
-        break;
-
-    case 62:
         _cycle = 0;
         return 1;
     }
@@ -776,7 +862,27 @@ size_t Mos6569::tick(const Clock &clk)
     return 1;
 }
 
-void Mos6569::paint_scanline()
+void Mos6569::paint_borders()
+{
+    if (_main_border) {
+        /*
+         * Left and right borders.
+         */
+        paint(0, _lborder_end, _palette[_border_color]);
+        paint(_rborder_start, 0, _palette[_border_color]);
+    }
+
+    if (_vertical_border) {
+        /*
+         * Upper and bottom borders.
+         */
+        if (_raster_counter < _uborder_end || _raster_counter >= _bborder_start) {
+            paint(_lborder_end, _rborder_start - _lborder_end, _palette[_border_color]);
+        }
+    }
+}
+
+void Mos6569::paint_display_cycle(unsigned x)
 {
     if (_idle_mode) {
         paint(0, 0, {0, 0, 0});
@@ -785,7 +891,7 @@ void Mos6569::paint_scanline()
         /*
          * Display not enabled: Entire screen painted in border colour.
          */
-        paint(0, WIDTH, _palette[_border_color]);
+        paint(0, 0, _palette[_border_color]);
 
     } else {
         /*
@@ -798,7 +904,7 @@ void Mos6569::paint_scanline()
              * Text mode.
              */
             if (!(_ecm_mode && _mcm_mode)) {
-                paint_char_mode(dline);
+                paint_char_mode(dline, x);
 
             } else {
                 /*
@@ -812,7 +918,7 @@ void Mos6569::paint_scanline()
              * Bitmap mode.
              */
             if (!_ecm_mode) {
-                paint_bitmap_mode(dline);
+                paint_bitmap_mode(dline, x);
 
             } else {
                 /*
@@ -822,51 +928,6 @@ void Mos6569::paint_scanline()
             }
         }
     }
-
-    /*
-     * Sprites.
-     */
-    if (_raster_counter >= MIB_Y_START) {
-        paint_sprites();
-    }
-
-    /*
-     * Border generator.
-     * (See https://www.cebix.net/VIC-Article.txt, Section 3.9. The border unit).
-     */
-    _main_border = true;
-
-    if (_raster_counter == (_25_rows ? BBORDER_Y_START : BBORDER_Y_START - 4)) {
-        _vertical_border = true;
-
-    } else if (_den && _raster_counter == (_25_rows ? UBORDER_Y_END : UBORDER_Y_END + 4)) {
-        _vertical_border = false;
-    }
-
-    if (_vertical_border) {
-        paint(0, WIDTH, _palette[_border_color]);
-    }
-
-    if (_main_border) {
-        unsigned lwidth = DISPLAY_X_START;
-        unsigned rstart = DISPLAY_X_END;
-        if (!_40_columns) {
-            lwidth += 8;
-            rstart -= 8;
-        }
-
-        paint(0, lwidth, _palette[_border_color]);
-        paint(rstart, 0, _palette[_border_color]);
-    }
-
-    /*
-     * Render the scanline.
-     */
-    unsigned line = _raster_counter - VISIBLE_Y_START;
-    render_line(line);
-
-    reset_collision_data();
-    reset_collision_mib();
 }
 
 inline void Mos6569::render_line(unsigned line)
@@ -921,7 +982,6 @@ inline unsigned Mos6569::mib_y(unsigned mib) const
     return (_mib_coord_y[mib] + MIB_Y_COORD_OFFSET);
 }
 
-//XXX FIXME
 inline bool Mos6569::is_mib_visible(unsigned line, uint8_t mib)
 {
     return (std::get<0>(mib_visibility_y(line, mib)) != static_cast<unsigned>(-1));
@@ -994,89 +1054,83 @@ void Mos6569::paint_mcm_byte(unsigned start, uint8_t bitmap, const Rgba4 &colors
     }
 }
 
-void Mos6569::paint_char_mode(unsigned line)
+void Mos6569::paint_char_mode(unsigned line, unsigned x)
 {
-    unsigned row = (line >> 3);
-    addr_t ch_addr = _video_matrix + row * CHARMODE_COLUMNS;
+    unsigned row   = line >> 3;
+    unsigned col   = x >> 3;
+    addr_t ch_addr = _video_matrix + row * CHARMODE_COLUMNS + col;
+    Color fg_code  = video_color_code(col, row);
+    int bg         = 0;
+    addr_t ch      = _mmap->read(ch_addr);
 
-    for (unsigned col = 0; col < CHARMODE_COLUMNS; ++col) {
-        Color fg_code = video_color_code(col, row);
-        int bg = 0;
+    if (_ecm_mode) {
+        bg = ch >> 6;
+        ch &= 63;
+    }
 
-        addr_t ch = _mmap->read(ch_addr + col);
-        if (_ecm_mode) {
-            bg = ch >> 6;
-            ch &= 63;
-        }
+    uint8_t ch_row_data = _mmap->read(char_base(ch) + (line & 7));
+    unsigned start = DISPLAY_X_START + (col << 3);
 
-        uint8_t ch_row_data = _mmap->read(char_base(ch) + (line & 7));
+    if (_mcm_mode && fg_code > 7) {
+        /*
+         * Multi-color mode.
+         */
+        const Rgba4 colors = {
+            _palette[_background_color[0]],
+            _palette[_background_color[1]],
+            _palette[_background_color[2]],
+            _palette[fg_code & 7]
+        };
 
-        auto start = DISPLAY_X_START + (col << 3);
+        paint_mcm_byte(start + _scroll_x, ch_row_data, colors);
+        update_collision_data_mcm(start + _scroll_x, ch_row_data);
 
-        if (_mcm_mode && fg_code > 7) {
-            /*
-             * Multi-color mode.
-             */
-           const Rgba4 colors = {
-                _palette[_background_color[0]],
-                _palette[_background_color[1]],
-                _palette[_background_color[2]],
-                _palette[fg_code & 7]
-            };
+    } else {
+        /*
+         * Hi-Res or extended-background-color mode.
+         */
+        Rgba4 colors = {
+            _palette[_background_color[bg]],
+            _palette[fg_code]
+        };
 
-            paint_mcm_byte(start + _scroll_x, ch_row_data, colors);
-            update_collision_data_mcm(start + _scroll_x, ch_row_data);
-
-        } else {
-            /*
-             * Hi-Res or extended-background-color mode.
-             */
-            Rgba4 colors = {
-                _palette[_background_color[bg]],
-                _palette[fg_code]
-            };
-
-            paint_byte(DISPLAY_X_START + (col << 3) + _scroll_x, ch_row_data, colors);
-            update_collision_data(start + _scroll_x, ch_row_data);
-        }
+        paint_byte(DISPLAY_X_START + (col << 3) + _scroll_x, ch_row_data, colors);
+        update_collision_data(start + _scroll_x, ch_row_data);
     }
 }
 
-void Mos6569::paint_bitmap_mode(unsigned line)
+void Mos6569::paint_bitmap_mode(unsigned line, unsigned x)
 {
-    unsigned row = (line >> 3);
-    addr_t color_code_addr = _video_matrix + row * CHARMODE_COLUMNS;
+    unsigned row           = line >> 3;
+    unsigned col           = x >> 3;
+    addr_t color_code_addr = _video_matrix + row * CHARMODE_COLUMNS + col;
+    uint8_t color_code     = _mmap->read(color_code_addr);
+    const Rgba &fg_color   = _palette[color_code >> 4];
+    const Rgba &bg_color   = _palette[color_code & Color::MASK];
 
-    for (unsigned col = 0; col < CHARMODE_COLUMNS; ++col) {
-        uint8_t color_code = _mmap->read(color_code_addr + col);
-        const Rgba &fg_color = _palette[color_code >> 4];
-        const Rgba &bg_color = _palette[color_code & Color::MASK];
+    uint8_t byte = _mmap->read(_bitmap_base + row * DISPLAY_WIDTH + (col << 3) + (line & 7));
+    unsigned start = DISPLAY_X_START + (col << 3);
 
-        uint8_t byte = _mmap->read(_bitmap_base + row * DISPLAY_WIDTH + (col << 3) + (line & 7));
+    if (_mcm_mode) {
+        /*
+         * Multi-color bitmap mode.
+         */
+        const Rgba4 colors = {
+            _palette[_background_color[0]],
+            fg_color,
+            bg_color,
+            _palette[video_color_code(col, row)]
+        };
 
-        auto start = DISPLAY_X_START + (col << 3);
+        paint_mcm_byte(start + _scroll_x, byte, colors);
+        update_collision_data_mcm(start + _scroll_x, byte);
 
-        if (_mcm_mode) {
-            /*
-             * Multi-color bitmap mode.
-             */
-            const Rgba4 colors = {
-                _palette[_background_color[0]],
-                fg_color,
-                bg_color,
-                _palette[video_color_code(col, row)]
-            };
-
-            paint_mcm_byte(start + _scroll_x, byte, colors);
-            update_collision_data_mcm(start + _scroll_x, byte);
-
-        } else {
-            /*
-             * Hi-Res bitmap mode.
-             */
-            paint_byte(start + _scroll_x, byte, {bg_color, fg_color});
-            update_collision_data(start + _scroll_x, byte);
-        }
+    } else {
+        /*
+         * Hi-Res bitmap mode.
+         */
+        paint_byte(start + _scroll_x, byte, {bg_color, fg_color});
+        update_collision_data(start + _scroll_x, byte);
     }
 }
 
