@@ -21,6 +21,24 @@
 
 namespace cemu {
 
+Gpio::Gpio()
+{
+}
+
+Gpio::~Gpio()
+{
+}
+
+void Gpio::add_ior(const ior_t &ior, uint8_t mask)
+{
+    _iors.push_back({ior, mask});
+}
+
+void Gpio::add_iow(const iow_t &iow, uint8_t mask)
+{
+    _iows.push_back({iow, mask});
+}
+
 uint8_t Gpio::ior(uint8_t addr) const
 {
     uint8_t value{255};

@@ -21,6 +21,14 @@
 
 namespace cemu {
 
+Device::Device(const std::string &type, const std::string &label)
+    : Name{type, label} {
+}
+
+Device::~Device()
+{
+}
+
 std::string Device::to_string() const
 {
     std::ostringstream os{};
@@ -28,6 +36,12 @@ std::string Device::to_string() const
     os << Name::to_string() << ", size " << size();
 
     return os.str();
+}
+
+addr_t Device::read_addr(size_t addr, bool is_le) const
+{
+    return (is_le ? (static_cast<addr_t>(read(addr + 1)) << 8) | read(addr) :
+                    (static_cast<addr_t>(read(addr)) << 8) | read(addr + 1));
 }
 
 void Device::write_addr(addr_t addr, addr_t data, bool is_le)

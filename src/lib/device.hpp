@@ -39,8 +39,7 @@ using devptr_t = std::shared_ptr<class Device>;
  */
 class Device : public Name {
 public:
-    virtual ~Device() {
-    }
+    virtual ~Device();
 
     /**
      * @return A human readable string representing this device.
@@ -54,10 +53,7 @@ public:
      * @return The address stored at the specified address.
      * @exception InvalidReadAddress if the specified address is not handled by this device.
      */
-    addr_t read_addr(size_t addr, bool is_le = true) const {
-        return (is_le ? (static_cast<addr_t>(read(addr + 1)) << 8) | read(addr) :
-                        (static_cast<addr_t>(read(addr)) << 8) | read(addr + 1));
-    }
+    addr_t read_addr(size_t addr, bool is_le = true) const;
 
     /**
      * Write an address into an address.
@@ -67,11 +63,6 @@ public:
      * @exception InvalidWriteAddress if the specified address is not handled by this device.
      */
     void write_addr(addr_t addr, addr_t data, bool is_le = true);
-
-    /**
-     * @return The address range of this device.
-     */
-    virtual size_t size() const = 0;
 
     /**
      * Read from an address.
@@ -90,6 +81,11 @@ public:
     virtual void write(addr_t addr, uint8_t data) = 0;
 
     /**
+     * @return The address range of this device.
+     */
+    virtual size_t size() const = 0;
+
+    /**
      * Dump the content of this device to an output stream in a human readable form.
      * @param os   Output stream;
      * @param base Base address.
@@ -98,9 +94,7 @@ public:
     virtual std::ostream &dump(std::ostream &os, addr_t base = 0) const = 0;
 
 protected:
-    Device(const std::string &type, const std::string &label)
-        : Name{type, label} {
-    }
+    Device(const std::string &type, const std::string &label);
 };
 
 }

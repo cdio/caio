@@ -39,30 +39,23 @@ public:
     using ior_mask_t = std::pair<ior_t, uint8_t>;
     using iow_mask_t = std::pair<iow_t, uint8_t>;
 
+    explicit Gpio();
 
-    explicit Gpio() {
-    }
-
-    virtual ~Gpio() {
-    }
+    virtual ~Gpio();
 
     /**
      * Add an input callback.
      * @param ior  Input callback;
      * @param mask Bits to read.
      */
-    void add_ior(const ior_t &ior, uint8_t mask) {
-        _iors.push_back({ior, mask});
-    }
+    void add_ior(const ior_t &ior, uint8_t mask);
 
     /**
      * Add an ouput callback.
      * @param iow  Output callback;
      * @param mask Bits to write.
      */
-    void add_iow(const iow_t &iow, uint8_t mask) {
-        _iows.push_back({iow, mask});
-    }
+    void add_iow(const iow_t &iow, uint8_t mask);
 
     /**
      * Read from input pins.
