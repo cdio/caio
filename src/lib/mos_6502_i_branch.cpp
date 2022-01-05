@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "mos_6510.hpp"
+#include "mos_6502.hpp"
 
 
 namespace cemu {
@@ -24,7 +24,7 @@ namespace cemu {
 /********************************************************************************
  * BPL (Branch relative if positive)
  ********************************************************************************/
-void Mos6510::i_BPL(Mos6510 &self, addr_t rel)
+void Mos6502::i_BPL(Mos6502 &self, addr_t rel)
 {
     /*
      * BPL $r8
@@ -40,7 +40,7 @@ void Mos6510::i_BPL(Mos6510 &self, addr_t rel)
 /********************************************************************************
  * BMI (Branch relative if negative)
  ********************************************************************************/
-void Mos6510::i_BMI(Mos6510 &self, addr_t rel)
+void Mos6502::i_BMI(Mos6502 &self, addr_t rel)
 {
     /*
      * BMI $r8
@@ -56,7 +56,7 @@ void Mos6510::i_BMI(Mos6510 &self, addr_t rel)
 /********************************************************************************
  * BVC (Branch relative if not overflow)
  ********************************************************************************/
-void Mos6510::i_BVC(Mos6510 &self, addr_t rel)
+void Mos6502::i_BVC(Mos6502 &self, addr_t rel)
 {
     /*
      * BVC $r8
@@ -72,7 +72,7 @@ void Mos6510::i_BVC(Mos6510 &self, addr_t rel)
 /********************************************************************************
  * BVS (Branch relative if overflow)
  ********************************************************************************/
-void Mos6510::i_BVS(Mos6510 &self, addr_t rel)
+void Mos6502::i_BVS(Mos6502 &self, addr_t rel)
 {
     /*
      * BVS $r8
@@ -88,7 +88,7 @@ void Mos6510::i_BVS(Mos6510 &self, addr_t rel)
 /********************************************************************************
  * BCC (Branch relative if carry is not set)
  ********************************************************************************/
-void Mos6510::i_BCC(Mos6510 &self, addr_t rel)
+void Mos6502::i_BCC(Mos6502 &self, addr_t rel)
 {
     /*
      * BCC $r8
@@ -104,7 +104,7 @@ void Mos6510::i_BCC(Mos6510 &self, addr_t rel)
 /********************************************************************************
  * BCS (Branch relative if carry is set)
  ********************************************************************************/
-void Mos6510::i_BCS(Mos6510 &self, addr_t rel)
+void Mos6502::i_BCS(Mos6502 &self, addr_t rel)
 {
     /*
      * BCS $r8
@@ -120,7 +120,7 @@ void Mos6510::i_BCS(Mos6510 &self, addr_t rel)
 /********************************************************************************
  * BNE (Branch relative if not zero)
  ********************************************************************************/
-void Mos6510::i_BNE(Mos6510 &self, addr_t rel)
+void Mos6502::i_BNE(Mos6502 &self, addr_t rel)
 {
     /*
      * BNE $r8
@@ -136,7 +136,7 @@ void Mos6510::i_BNE(Mos6510 &self, addr_t rel)
 /********************************************************************************
  * BEQ (Branch relative if zero)
  ********************************************************************************/
-void Mos6510::i_BEQ(Mos6510 &self, addr_t rel)
+void Mos6502::i_BEQ(Mos6502 &self, addr_t rel)
 {
     /*
      * BEQ $r8
@@ -152,7 +152,7 @@ void Mos6510::i_BEQ(Mos6510 &self, addr_t rel)
 /********************************************************************************
  * BRK (Software interrupt)
  ********************************************************************************/
-void Mos6510::i_BRK(Mos6510 &self, addr_t _)
+void Mos6502::i_BRK(Mos6502 &self, addr_t _)
 {
     /*
      * BRK
@@ -178,7 +178,7 @@ void Mos6510::i_BRK(Mos6510 &self, addr_t _)
 /********************************************************************************
  * RTI (Return from Interrupt)
  ********************************************************************************/
-void Mos6510::i_RTI(Mos6510 &self, addr_t _)
+void Mos6502::i_RTI(Mos6502 &self, addr_t _)
 {
     /*
      * RTI
@@ -196,7 +196,7 @@ void Mos6510::i_RTI(Mos6510 &self, addr_t _)
 /********************************************************************************
  * JSR (Jump to Subroutine)
  ********************************************************************************/
-void Mos6510::i_JSR(Mos6510 &self, addr_t addr)
+void Mos6502::i_JSR(Mos6502 &self, addr_t addr)
 {
     /*
      * JSR $0000
@@ -212,7 +212,7 @@ void Mos6510::i_JSR(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * RTS (Return from Subroutine)
  ********************************************************************************/
-void Mos6510::i_RTS(Mos6510 &self, addr_t _)
+void Mos6502::i_RTS(Mos6502 &self, addr_t _)
 {
     /*
      * RTS
@@ -227,7 +227,7 @@ void Mos6510::i_RTS(Mos6510 &self, addr_t _)
 /********************************************************************************
  * JMP (Jump to absolute address)
  ********************************************************************************/
-void Mos6510::i_JMP(Mos6510 &self, addr_t addr)
+void Mos6502::i_JMP(Mos6502 &self, addr_t addr)
 {
     /*
      * JMP $0000
@@ -243,7 +243,7 @@ void Mos6510::i_JMP(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * NOP (No Operation: Jump to next instruction)
  ********************************************************************************/
-void Mos6510::i_NOP(Mos6510 &self, addr_t _)
+void Mos6502::i_NOP(Mos6502 &self, addr_t _)
 {
     /*
      * NOP

@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "mos_6510.hpp"
+#include "mos_6502.hpp"
 
 
 namespace cemu {
 
-void Mos6510::i_CLC(Mos6510 &self, addr_t _)
+void Mos6502::i_CLC(Mos6502 &self, addr_t _)
 {
     /*
      * CLC  - Clear Carry
@@ -31,7 +31,7 @@ void Mos6510::i_CLC(Mos6510 &self, addr_t _)
     self.flag_C(false);
 }
 
-void Mos6510::i_SEC(Mos6510 &self, addr_t _)
+void Mos6502::i_SEC(Mos6502 &self, addr_t _)
 {
     /*
      * SEC  - Set Carry
@@ -41,7 +41,7 @@ void Mos6510::i_SEC(Mos6510 &self, addr_t _)
     self.flag_C(true);
 }
 
-void Mos6510::i_CLI(Mos6510 &self, addr_t _)
+void Mos6502::i_CLI(Mos6502 &self, addr_t _)
 {
     /*
      * CLI  - Clear Interrupt flag
@@ -51,7 +51,7 @@ void Mos6510::i_CLI(Mos6510 &self, addr_t _)
     self.flag_I(false);
 }
 
-void Mos6510::i_SEI(Mos6510 &self, addr_t _)
+void Mos6502::i_SEI(Mos6502 &self, addr_t _)
 {
     /*
      * SEI  - Set Interrupt flag
@@ -61,7 +61,7 @@ void Mos6510::i_SEI(Mos6510 &self, addr_t _)
     self.flag_I(true);
 }
 
-void Mos6510::i_CLV(Mos6510 &self, addr_t _)
+void Mos6502::i_CLV(Mos6502 &self, addr_t _)
 {
     /*
      * CLV  - Clear Overflow flag
@@ -71,7 +71,7 @@ void Mos6510::i_CLV(Mos6510 &self, addr_t _)
     self.flag_V(false);
 }
 
-void Mos6510::i_CLD(Mos6510 &self, addr_t)
+void Mos6502::i_CLD(Mos6502 &self, addr_t)
 {
     /*
      * CLD  - Clear Decimal flag
@@ -81,7 +81,7 @@ void Mos6510::i_CLD(Mos6510 &self, addr_t)
     self.flag_D(false);
 }
 
-void Mos6510::i_SED(Mos6510 &self, addr_t)
+void Mos6502::i_SED(Mos6502 &self, addr_t)
 {
     /*
      * SED  - Set Decimal flag

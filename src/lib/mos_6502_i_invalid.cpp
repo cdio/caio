@@ -16,12 +16,12 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "mos_6510.hpp"
+#include "mos_6502.hpp"
 
 
 namespace cemu {
 
-void Mos6510::i_SLO(Mos6510 &self, addr_t addr)
+void Mos6502::i_SLO(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: SLO - Shift Left memory the OR with Accumulator
@@ -49,7 +49,7 @@ void Mos6510::i_SLO(Mos6510 &self, addr_t addr)
     self._regs.A = self.logic_or(self._regs.A, value);
 }
 
-void Mos6510::i_RLA(Mos6510 &self, addr_t addr)
+void Mos6502::i_RLA(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: RLA - Rotate left memory then AND with Accumulator
@@ -78,7 +78,7 @@ void Mos6510::i_RLA(Mos6510 &self, addr_t addr)
     self._regs.A = self.logic_and(self._regs.A, value);
 }
 
-void Mos6510::i_SRE(Mos6510 &self, addr_t addr)
+void Mos6502::i_SRE(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: SRE - Shift right memory then EOR with Accumulator
@@ -104,7 +104,7 @@ void Mos6510::i_SRE(Mos6510 &self, addr_t addr)
     self._regs.A = self.logic_eor(self._regs.A, value);
 }
 
-void Mos6510::i_RRA(Mos6510 &self, addr_t addr)
+void Mos6502::i_RRA(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: RRA - Rotate right memory then add with carry Accumulator.
@@ -130,7 +130,7 @@ void Mos6510::i_RRA(Mos6510 &self, addr_t addr)
     self._regs.A = self.adc(self._regs.A, value);
 }
 
-void Mos6510::i_SAX(Mos6510 &self, addr_t addr)
+void Mos6502::i_SAX(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: SAX - Store A AND X.
@@ -148,7 +148,7 @@ void Mos6510::i_SAX(Mos6510 &self, addr_t addr)
     self._mmap->write(addr, value);
 }
 
-void Mos6510::i_LAX_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_LAX_imm(Mos6502 &self, addr_t value)
 {
     /*
      * Illegal Instruction: LAX - Load A and X with same value.
@@ -166,7 +166,7 @@ void Mos6510::i_LAX_imm(Mos6510 &self, addr_t value)
     self.set_Z(self._regs.A);
 }
 
-void Mos6510::i_LAX(Mos6510 &self, addr_t addr)
+void Mos6502::i_LAX(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: LAX - Load A and X with same value.
@@ -179,7 +179,7 @@ void Mos6510::i_LAX(Mos6510 &self, addr_t addr)
     i_LAX_imm(self, value);
 }
 
-void Mos6510::i_DCP(Mos6510 &self, addr_t addr)
+void Mos6502::i_DCP(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: DCP - Decrement memory then compare.
@@ -196,7 +196,7 @@ void Mos6510::i_DCP(Mos6510 &self, addr_t addr)
     self.cmp(self._regs.A, value);
 }
 
-void Mos6510::i_ISC(Mos6510 &self, addr_t addr)
+void Mos6502::i_ISC(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: ISC - Increment memory then subtract accumulator.
@@ -214,7 +214,7 @@ void Mos6510::i_ISC(Mos6510 &self, addr_t addr)
     self._regs.A = self.sbc(self._regs.A, value);
 }
 
-void Mos6510::i_ANC_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_ANC_imm(Mos6502 &self, addr_t value)
 {
     /*
      * Illegal Instruction: ANC - AND immediate value put bit 7 on carry (?).
@@ -234,7 +234,7 @@ void Mos6510::i_ANC_imm(Mos6510 &self, addr_t value)
     self.flag_C(self._regs.A & 0x80);
 }
 
-void Mos6510::i_ALR_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_ALR_imm(Mos6502 &self, addr_t value)
 {
     /*
      * Illegal Instruction: ALR - AND immediate value then shift right.
@@ -251,7 +251,7 @@ void Mos6510::i_ALR_imm(Mos6510 &self, addr_t value)
     self.i_LSR(self, 0);
 }
 
-void Mos6510::i_ARR_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_ARR_imm(Mos6502 &self, addr_t value)
 {
     /*
      * Illegal Instruction: ARR - AND immediate value then rotate right.
@@ -266,7 +266,7 @@ void Mos6510::i_ARR_imm(Mos6510 &self, addr_t value)
     self.i_ROR(self, 0);
 }
 
-void Mos6510::i_XAA_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_XAA_imm(Mos6502 &self, addr_t value)
 {
     /*
      * Illegal Instruction: XAA - X AND immediate value then move into A.
@@ -282,7 +282,7 @@ void Mos6510::i_XAA_imm(Mos6510 &self, addr_t value)
     i_LDA_imm(self, self._regs.X & value);
 }
 
-void Mos6510::i_AXS_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_AXS_imm(Mos6502 &self, addr_t value)
 {
     /*
      * Illegal Instruction: AXS - A AND X then substract immediate, move result into X.
@@ -301,7 +301,7 @@ void Mos6510::i_AXS_imm(Mos6510 &self, addr_t value)
     self._regs.X = r - static_cast<uint8_t>(value);
 }
 
-void Mos6510::i_AHX(Mos6510 &self, addr_t addr)
+void Mos6502::i_AHX(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: AXH
@@ -314,7 +314,7 @@ void Mos6510::i_AHX(Mos6510 &self, addr_t addr)
     self._mmap->write(addr, value);
 }
 
-void Mos6510::i_SHY(Mos6510 &self, addr_t addr)
+void Mos6502::i_SHY(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: SHY
@@ -327,7 +327,7 @@ void Mos6510::i_SHY(Mos6510 &self, addr_t addr)
     self._mmap->write(addr, value);
 }
 
-void Mos6510::i_SHX(Mos6510 &self, addr_t addr)
+void Mos6502::i_SHX(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: SHX
@@ -340,7 +340,7 @@ void Mos6510::i_SHX(Mos6510 &self, addr_t addr)
     self._mmap->write(addr, value);
 }
 
-void Mos6510::i_TAS(Mos6510 &self, addr_t addr)
+void Mos6502::i_TAS(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: TAS
@@ -359,7 +359,7 @@ void Mos6510::i_TAS(Mos6510 &self, addr_t addr)
     self._mmap->write(addr, value);
 }
 
-void Mos6510::i_LAS(Mos6510 &self, addr_t addr)
+void Mos6502::i_LAS(Mos6502 &self, addr_t addr)
 {
     /*
      * Illegal Instruction: LAS
@@ -379,7 +379,7 @@ void Mos6510::i_LAS(Mos6510 &self, addr_t addr)
     self.set_Z(self._regs.A);
 }
 
-void Mos6510::i_KIL(Mos6510 &self, addr_t addr)
+void Mos6502::i_KIL(Mos6502 &self, addr_t addr)
 {
     log.debug("KIL instruction at $" + utils::to_string(self._regs.PC) + "\n");
 }

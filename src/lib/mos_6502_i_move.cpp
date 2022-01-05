@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "mos_6510.hpp"
+#include "mos_6502.hpp"
 
 
 namespace cemu {
@@ -24,7 +24,7 @@ namespace cemu {
 /********************************************************************************
  * LDA (load accumulator)
  ********************************************************************************/
-void Mos6510::i_LDA_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_LDA_imm(Mos6502 &self, addr_t value)
 {
     /*
      * LDA #$00
@@ -36,7 +36,7 @@ void Mos6510::i_LDA_imm(Mos6510 &self, addr_t value)
     self.set_Z(self._regs.A);
 }
 
-void Mos6510::i_LDA(Mos6510 &self, addr_t addr)
+void Mos6502::i_LDA(Mos6502 &self, addr_t addr)
 {
     /*
      * LDA $00
@@ -58,7 +58,7 @@ void Mos6510::i_LDA(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * LDX (load register X)
  ********************************************************************************/
-void Mos6510::i_LDX_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_LDX_imm(Mos6502 &self, addr_t value)
 {
     /*
      * LDX #$00
@@ -70,7 +70,7 @@ void Mos6510::i_LDX_imm(Mos6510 &self, addr_t value)
     self.set_Z(self._regs.X);
 }
 
-void Mos6510::i_LDX(Mos6510 &self, addr_t addr)
+void Mos6502::i_LDX(Mos6502 &self, addr_t addr)
 {
     /*
      * LDX $00
@@ -89,7 +89,7 @@ void Mos6510::i_LDX(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * LDY (load register Y)
  ********************************************************************************/
-void Mos6510::i_LDY_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_LDY_imm(Mos6502 &self, addr_t value)
 {
     /*
      * LDY #$00
@@ -101,7 +101,7 @@ void Mos6510::i_LDY_imm(Mos6510 &self, addr_t value)
     self.set_Z(self._regs.Y);
 }
 
-void Mos6510::i_LDY(Mos6510 &self, addr_t addr)
+void Mos6502::i_LDY(Mos6502 &self, addr_t addr)
 {
     /*
      * LDY $00
@@ -120,7 +120,7 @@ void Mos6510::i_LDY(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * STA (store accumulator)
  ********************************************************************************/
-void Mos6510::i_STA(Mos6510 &self, addr_t addr)
+void Mos6502::i_STA(Mos6502 &self, addr_t addr)
 {
     /*
      * STA $00
@@ -138,7 +138,7 @@ void Mos6510::i_STA(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * STX (store register X)
  ********************************************************************************/
-void Mos6510::i_STX(Mos6510 &self, addr_t addr)
+void Mos6502::i_STX(Mos6502 &self, addr_t addr)
 {
     /*
      * STX $00
@@ -152,7 +152,7 @@ void Mos6510::i_STX(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * STY (store register Y)
  ********************************************************************************/
-void Mos6510::i_STY(Mos6510 &self, addr_t addr)
+void Mos6502::i_STY(Mos6502 &self, addr_t addr)
 {
     /*
      * STY $00
@@ -166,7 +166,7 @@ void Mos6510::i_STY(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * TAX (X = A)
  ********************************************************************************/
-void Mos6510::i_TAX(Mos6510 &self, addr_t _)
+void Mos6502::i_TAX(Mos6502 &self, addr_t _)
 {
     /*
      * TAX
@@ -182,7 +182,7 @@ void Mos6510::i_TAX(Mos6510 &self, addr_t _)
 /********************************************************************************
  * TXA (A = X)
  ********************************************************************************/
-void Mos6510::i_TXA(Mos6510 &self, addr_t _)
+void Mos6502::i_TXA(Mos6502 &self, addr_t _)
 {
     /*
      * TXA
@@ -198,7 +198,7 @@ void Mos6510::i_TXA(Mos6510 &self, addr_t _)
 /********************************************************************************
  * TAY (Y = A)
  ********************************************************************************/
-void Mos6510::i_TAY(Mos6510 &self, addr_t _)
+void Mos6502::i_TAY(Mos6502 &self, addr_t _)
 {
     /*
      * TAY
@@ -214,7 +214,7 @@ void Mos6510::i_TAY(Mos6510 &self, addr_t _)
 /********************************************************************************
  * TYA (A = Y)
  ********************************************************************************/
-void Mos6510::i_TYA(Mos6510 &self, addr_t _)
+void Mos6502::i_TYA(Mos6502 &self, addr_t _)
 {
     /*
      * TYA
@@ -230,7 +230,7 @@ void Mos6510::i_TYA(Mos6510 &self, addr_t _)
 /********************************************************************************
  * TSX (X = S)
  ********************************************************************************/
-void Mos6510::i_TSX(Mos6510 &self, addr_t _)
+void Mos6502::i_TSX(Mos6502 &self, addr_t _)
 {
     /*
      * TSX
@@ -246,7 +246,7 @@ void Mos6510::i_TSX(Mos6510 &self, addr_t _)
 /********************************************************************************
  * TXS (S = X)
  ********************************************************************************/
-void Mos6510::i_TXS(Mos6510 &self, addr_t _)
+void Mos6502::i_TXS(Mos6502 &self, addr_t _)
 {
     /*
      * TXS
@@ -260,7 +260,7 @@ void Mos6510::i_TXS(Mos6510 &self, addr_t _)
 /********************************************************************************
  * PLA (Pop accumulator: A = pop())
  ********************************************************************************/
-void Mos6510::i_PLA(Mos6510 &self, addr_t)
+void Mos6502::i_PLA(Mos6502 &self, addr_t)
 {
     /*
      * PLA
@@ -276,7 +276,7 @@ void Mos6510::i_PLA(Mos6510 &self, addr_t)
 /********************************************************************************
  * PHA (Push accumulator: push(A))
  ********************************************************************************/
-void Mos6510::i_PHA(Mos6510 &self, addr_t)
+void Mos6502::i_PHA(Mos6502 &self, addr_t)
 {
     /*
      * PHA
@@ -288,7 +288,7 @@ void Mos6510::i_PHA(Mos6510 &self, addr_t)
 /********************************************************************************
  * PLP (Pop processor status: P = pop())
  ********************************************************************************/
-void Mos6510::i_PLP(Mos6510 &self, addr_t _)
+void Mos6502::i_PLP(Mos6502 &self, addr_t _)
 {
     /*
      * PLP
@@ -300,7 +300,7 @@ void Mos6510::i_PLP(Mos6510 &self, addr_t _)
 /********************************************************************************
  * PHP (Push processor status: push(P))
  ********************************************************************************/
-void Mos6510::i_PHP(Mos6510 &self, addr_t _)
+void Mos6502::i_PHP(Mos6502 &self, addr_t _)
 {
     /*
      * PHP

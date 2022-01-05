@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "mos_6510.hpp"
+#include "mos_6502.hpp"
 
 
 namespace cemu {
@@ -24,7 +24,7 @@ namespace cemu {
 /********************************************************************************
  * AND
  ********************************************************************************/
-void Mos6510::i_AND_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_AND_imm(Mos6502 &self, addr_t value)
 {
     /*
      * AND #$00
@@ -32,7 +32,7 @@ void Mos6510::i_AND_imm(Mos6510 &self, addr_t value)
     self._regs.A = self.logic_and(self._regs.A, static_cast<uint8_t>(value));
 }
 
-void Mos6510::i_AND(Mos6510 &self, addr_t addr)
+void Mos6502::i_AND(Mos6502 &self, addr_t addr)
 {
     /*
      * AND $00
@@ -51,7 +51,7 @@ void Mos6510::i_AND(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * BIT (AND Accumulator without store. Modify flags only)
  ********************************************************************************/
-void Mos6510::i_BIT(Mos6510 &self, addr_t addr)
+void Mos6502::i_BIT(Mos6502 &self, addr_t addr)
 {
     /*
      * BIT $00
@@ -72,7 +72,7 @@ void Mos6510::i_BIT(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * ORA
  ********************************************************************************/
-void Mos6510::i_ORA_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_ORA_imm(Mos6502 &self, addr_t value)
 {
     /*
      * ORA #$00
@@ -80,7 +80,7 @@ void Mos6510::i_ORA_imm(Mos6510 &self, addr_t value)
     self._regs.A = self.logic_or(self._regs.A, static_cast<uint8_t>(value));
 }
 
-void Mos6510::i_ORA(Mos6510 &self, addr_t addr)
+void Mos6502::i_ORA(Mos6502 &self, addr_t addr)
 {
     /*
      * ORA $00
@@ -99,7 +99,7 @@ void Mos6510::i_ORA(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * EOR
  ********************************************************************************/
-void Mos6510::i_EOR_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_EOR_imm(Mos6502 &self, addr_t value)
 {
     /*
      * EOR #$00
@@ -107,7 +107,7 @@ void Mos6510::i_EOR_imm(Mos6510 &self, addr_t value)
     self._regs.A = self.logic_eor(self._regs.A, static_cast<uint8_t>(value));
 }
 
-void Mos6510::i_EOR(Mos6510 &self, addr_t addr)
+void Mos6502::i_EOR(Mos6502 &self, addr_t addr)
 {
     /*
      * EOR $00
@@ -126,7 +126,7 @@ void Mos6510::i_EOR(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * ADC
  ********************************************************************************/
-uint8_t Mos6510::adc_bin(uint8_t v1, uint8_t v2)
+uint8_t Mos6502::adc_bin(uint8_t v1, uint8_t v2)
 {
     uint16_t c = (test_C() ? 1 : 0);
     uint16_t r = v1 + v2 + c;
@@ -142,7 +142,7 @@ uint8_t Mos6510::adc_bin(uint8_t v1, uint8_t v2)
     return (r & 255);
 }
 
-uint8_t Mos6510::adc_bcd(uint8_t v1, uint8_t v2)
+uint8_t Mos6502::adc_bcd(uint8_t v1, uint8_t v2)
 {
     /*
      * 1a. AL = (A & $0F) + (B & $0F) + C
@@ -176,12 +176,12 @@ uint8_t Mos6510::adc_bcd(uint8_t v1, uint8_t v2)
     return (r & 0xFF);
 }
 
-uint8_t Mos6510::adc(uint8_t v1, uint8_t v2)
+uint8_t Mos6502::adc(uint8_t v1, uint8_t v2)
 {
     return (test_D() ? adc_bcd(v1, v2) : adc_bin(v1, v2));
 }
 
-void Mos6510::i_ADC_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_ADC_imm(Mos6502 &self, addr_t value)
 {
     /*
      * ADC #$00
@@ -189,7 +189,7 @@ void Mos6510::i_ADC_imm(Mos6510 &self, addr_t value)
     self._regs.A = self.adc(self._regs.A, static_cast<uint8_t>(value));
 }
 
-void Mos6510::i_ADC(Mos6510 &self, addr_t addr)
+void Mos6502::i_ADC(Mos6502 &self, addr_t addr)
 {
     /*
      * ADC $00
@@ -208,7 +208,7 @@ void Mos6510::i_ADC(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * SBC
  ********************************************************************************/
-uint8_t Mos6510::sbc_bin(uint8_t v1, uint8_t v2)
+uint8_t Mos6502::sbc_bin(uint8_t v1, uint8_t v2)
 {
     uint16_t b = (test_C() ? 0x0000 : 0xFFFF);
     uint16_t r = v1 - v2 + b;
@@ -224,7 +224,7 @@ uint8_t Mos6510::sbc_bin(uint8_t v1, uint8_t v2)
     return (r & 255);
 }
 
-uint8_t Mos6510::sbc_bcd(uint8_t v1, uint8_t v2)
+uint8_t Mos6502::sbc_bcd(uint8_t v1, uint8_t v2)
 {
     /*
      * 3a. AL = (A & $0F) - (B & $0F) + C-1
@@ -257,12 +257,12 @@ uint8_t Mos6510::sbc_bcd(uint8_t v1, uint8_t v2)
     return (r & 255);
 }
 
-uint8_t Mos6510::sbc(uint8_t v1, uint8_t v2)
+uint8_t Mos6502::sbc(uint8_t v1, uint8_t v2)
 {
     return (test_D() ? sbc_bcd(v1, v2) : sbc_bin(v1, v2));
 }
 
-void Mos6510::i_SBC_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_SBC_imm(Mos6502 &self, addr_t value)
 {
     /*
      * SBC #$00
@@ -270,7 +270,7 @@ void Mos6510::i_SBC_imm(Mos6510 &self, addr_t value)
     self._regs.A = self.sbc(self._regs.A, static_cast<uint8_t>(value));
 }
 
-void Mos6510::i_SBC(Mos6510 &self, addr_t addr)
+void Mos6502::i_SBC(Mos6502 &self, addr_t addr)
 {
     /*
      * SBC $00
@@ -289,7 +289,7 @@ void Mos6510::i_SBC(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * CMP
  ********************************************************************************/
-void Mos6510::i_CMP_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_CMP_imm(Mos6502 &self, addr_t value)
 {
     /*
      * CMP #$00
@@ -297,7 +297,7 @@ void Mos6510::i_CMP_imm(Mos6510 &self, addr_t value)
     self.cmp(self._regs.A, static_cast<uint8_t>(value));
 }
 
-void Mos6510::i_CMP(Mos6510 &self, addr_t addr)
+void Mos6502::i_CMP(Mos6502 &self, addr_t addr)
 {
     /*
      * CMP $00
@@ -316,7 +316,7 @@ void Mos6510::i_CMP(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * CPX
  ********************************************************************************/
-void Mos6510::i_CPX_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_CPX_imm(Mos6502 &self, addr_t value)
 {
     /*
      * CPX #$00
@@ -324,7 +324,7 @@ void Mos6510::i_CPX_imm(Mos6510 &self, addr_t value)
     self.cmp(self._regs.X, static_cast<uint8_t>(value));
 }
 
-void Mos6510::i_CPX(Mos6510 &self, addr_t addr)
+void Mos6502::i_CPX(Mos6502 &self, addr_t addr)
 {
     /*
      * CPX $00
@@ -338,7 +338,7 @@ void Mos6510::i_CPX(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * CPY
  ********************************************************************************/
-void Mos6510::i_CPY_imm(Mos6510 &self, addr_t value)
+void Mos6502::i_CPY_imm(Mos6502 &self, addr_t value)
 {
     /*
      * CPY #$00
@@ -346,7 +346,7 @@ void Mos6510::i_CPY_imm(Mos6510 &self, addr_t value)
     self.cmp(self._regs.Y, static_cast<uint8_t>(value));
 }
 
-void Mos6510::i_CPY(Mos6510 &self, addr_t addr)
+void Mos6502::i_CPY(Mos6502 &self, addr_t addr)
 {
     /*
      * CPY $00
@@ -360,7 +360,7 @@ void Mos6510::i_CPY(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * DEC
  ********************************************************************************/
-void Mos6510::i_DEC(Mos6510 &self, addr_t addr)
+void Mos6502::i_DEC(Mos6502 &self, addr_t addr)
 {
     /*
      * DEC $00
@@ -382,7 +382,7 @@ void Mos6510::i_DEC(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * DEX
  ********************************************************************************/
-void Mos6510::i_DEX(Mos6510 &self, addr_t _)
+void Mos6502::i_DEX(Mos6502 &self, addr_t _)
 {
     /*
      * DEX
@@ -398,7 +398,7 @@ void Mos6510::i_DEX(Mos6510 &self, addr_t _)
 /********************************************************************************
  * DEY
  ********************************************************************************/
-void Mos6510::i_DEY(Mos6510 &self, addr_t _)
+void Mos6502::i_DEY(Mos6502 &self, addr_t _)
 {
     /*
      * DEY
@@ -414,7 +414,7 @@ void Mos6510::i_DEY(Mos6510 &self, addr_t _)
 /********************************************************************************
  * INC
  ********************************************************************************/
-void Mos6510::i_INC(Mos6510 &self, addr_t addr)
+void Mos6502::i_INC(Mos6502 &self, addr_t addr)
 {
     /*
      * INC $00
@@ -436,7 +436,7 @@ void Mos6510::i_INC(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * INX
  ********************************************************************************/
-void Mos6510::i_INX(Mos6510 &self, addr_t _)
+void Mos6502::i_INX(Mos6502 &self, addr_t _)
 {
     /*
      * INX
@@ -452,7 +452,7 @@ void Mos6510::i_INX(Mos6510 &self, addr_t _)
 /********************************************************************************
  * INY
  ********************************************************************************/
-void Mos6510::i_INY(Mos6510 &self, addr_t _)
+void Mos6502::i_INY(Mos6502 &self, addr_t _)
 {
     /*
      * INY
@@ -468,7 +468,7 @@ void Mos6510::i_INY(Mos6510 &self, addr_t _)
 /********************************************************************************
  * ASL (shift left 1 bit)
  ********************************************************************************/
-void Mos6510::i_ASL_acc(Mos6510 &self, addr_t _)
+void Mos6502::i_ASL_acc(Mos6502 &self, addr_t _)
 {
     /*
      * ASL
@@ -478,7 +478,7 @@ void Mos6510::i_ASL_acc(Mos6510 &self, addr_t _)
     self._regs.A = self.logic_shl(self._regs.A);
 }
 
-void Mos6510::i_ASL(Mos6510 &self, addr_t addr)
+void Mos6502::i_ASL(Mos6502 &self, addr_t addr)
 {
     /*
      * ASL $00
@@ -498,7 +498,7 @@ void Mos6510::i_ASL(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * ROL (rotate left 1 bit)
  ********************************************************************************/
-void Mos6510::i_ROL_acc(Mos6510 &self, addr_t _)
+void Mos6502::i_ROL_acc(Mos6502 &self, addr_t _)
 {
     /*
      * ROL $00
@@ -508,7 +508,7 @@ void Mos6510::i_ROL_acc(Mos6510 &self, addr_t _)
     self._regs.A = self.logic_rol(self._regs.A);
 }
 
-void Mos6510::i_ROL(Mos6510 &self, addr_t addr)
+void Mos6502::i_ROL(Mos6502 &self, addr_t addr)
 {
     /*
      * ROL $00
@@ -528,7 +528,7 @@ void Mos6510::i_ROL(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * LSR (shift right 1 bit)
  ********************************************************************************/
-void Mos6510::i_LSR_acc(Mos6510 &self, addr_t _)
+void Mos6502::i_LSR_acc(Mos6502 &self, addr_t _)
 {
     /*
      * LSR
@@ -538,7 +538,7 @@ void Mos6510::i_LSR_acc(Mos6510 &self, addr_t _)
     self._regs.A = self.logic_shr(self._regs.A);
 }
 
-void Mos6510::i_LSR(Mos6510 &self, addr_t addr)
+void Mos6502::i_LSR(Mos6502 &self, addr_t addr)
 {
     /*
      * LSR $00
@@ -558,7 +558,7 @@ void Mos6510::i_LSR(Mos6510 &self, addr_t addr)
 /********************************************************************************
  * ROR (rotate right 1 bit)
  ********************************************************************************/
-void Mos6510::i_ROR_acc(Mos6510 &self, addr_t _)
+void Mos6502::i_ROR_acc(Mos6502 &self, addr_t _)
 {
     /*
      * ROR
@@ -568,7 +568,7 @@ void Mos6510::i_ROR_acc(Mos6510 &self, addr_t _)
     self._regs.A = self.logic_ror(self._regs.A);
 }
 
-void Mos6510::i_ROR(Mos6510 &self, addr_t addr)
+void Mos6502::i_ROR(Mos6502 &self, addr_t addr)
 {
     /*
      * ROR $00

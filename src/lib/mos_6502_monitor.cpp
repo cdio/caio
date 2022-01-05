@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "mos_6510_monitor.hpp"
+#include "mos_6502_monitor.hpp"
 
 #include <endian.h>
 
@@ -27,81 +27,81 @@
 #include <iomanip>
 #include <sstream>
 
-#include "mos_6510.hpp"
+#include "mos_6502.hpp"
 #include "prgfile.hpp"
 #include "utils.hpp"
 
 
 namespace cemu {
 
-const std::vector<Mos6510Monitor::Command> Mos6510Monitor::commands{
-    { "assemble", "a",  ".|$addr",            "Assemble machine code from $addr",       Mos6510Monitor::assemble    },
-    { "disass",   "d",  ".|$addr [$n]",       "Disassemble $n instructions from $addr", Mos6510Monitor::disassemble },
-    { "dump",     "x",  ". [$n]",             "Dump $n bytes of memory from $addr",     Mos6510Monitor::dump        },
-    { "regs",     "r",  "",                   "Show registers",                         Mos6510Monitor::registers   },
-    { "bpadd",    "b",  "$addr",              "Add a breakpoint at $addr",              Mos6510Monitor::bp_add      },
-    { "bpadd",    "b",  "$addr <cond>",       "Add a conditional breakpoint at $addr",  Mos6510Monitor::bp_add      },
-    { "bpadd",    "b",  "help|h|?",           "Help about breakpoints",                 Mos6510Monitor::bp_add      },
-    { "bpdel",    "bd", "$addr",              "Delete breakpoint at $addr",             Mos6510Monitor::bp_del      },
-    { "bpclear",  "bc", "",                   "Clear all breakpoints",                  Mos6510Monitor::bp_clear    },
-    { "bplist",   "bl", "",                   "List breakpoints",                       Mos6510Monitor::bp_list     },
-    { "go",       "g",  ".|$addr",            "Run program at $addr",                   Mos6510Monitor::go          },
-    { "si",       "s",  "[.|$addr]",          "Execute single instruction",             Mos6510Monitor::step        },
-    { "load",     "l",  "<prog> [$addr]",     "Load a binary or PRG file",              Mos6510Monitor::load        },
-    { "save",     "s",  "<prog> $start $end", "Save a PRG file",                        Mos6510Monitor::save        },
-    { "loglevel", "lv", "<lv>",               "Set the CPU loglevel",                   Mos6510Monitor::loglevel    },
-    { "quit",     "q",  "",                   "Halt the CPU",                           Mos6510Monitor::quit        },
-    { "quit",     "q",  "<e>",                "Terminate the emulator with exit code",  Mos6510Monitor::quit        },
-    { "help",     "h",  "",                   "This help",                              Mos6510Monitor::help        },
-    { "help",     "?",  "",                   "",                                       Mos6510Monitor::help        }
+const std::vector<Mos6502Monitor::Command> Mos6502Monitor::commands{
+    { "assemble", "a",  ".|$addr",            "Assemble machine code from $addr",       Mos6502Monitor::assemble    },
+    { "disass",   "d",  ".|$addr [$n]",       "Disassemble $n instructions from $addr", Mos6502Monitor::disassemble },
+    { "dump",     "x",  ". [$n]",             "Dump $n bytes of memory from $addr",     Mos6502Monitor::dump        },
+    { "regs",     "r",  "",                   "Show registers",                         Mos6502Monitor::registers   },
+    { "bpadd",    "b",  "$addr",              "Add a breakpoint at $addr",              Mos6502Monitor::bp_add      },
+    { "bpadd",    "b",  "$addr <cond>",       "Add a conditional breakpoint at $addr",  Mos6502Monitor::bp_add      },
+    { "bpadd",    "b",  "help|h|?",           "Help about breakpoints",                 Mos6502Monitor::bp_add      },
+    { "bpdel",    "bd", "$addr",              "Delete breakpoint at $addr",             Mos6502Monitor::bp_del      },
+    { "bpclear",  "bc", "",                   "Clear all breakpoints",                  Mos6502Monitor::bp_clear    },
+    { "bplist",   "bl", "",                   "List breakpoints",                       Mos6502Monitor::bp_list     },
+    { "go",       "g",  ".|$addr",            "Run program at $addr",                   Mos6502Monitor::go          },
+    { "si",       "s",  "[.|$addr]",          "Execute single instruction",             Mos6502Monitor::step        },
+    { "load",     "l",  "<prog> [$addr]",     "Load a binary or PRG file",              Mos6502Monitor::load        },
+    { "save",     "s",  "<prog> $start $end", "Save a PRG file",                        Mos6502Monitor::save        },
+    { "loglevel", "lv", "<lv>",               "Set the CPU loglevel",                   Mos6502Monitor::loglevel    },
+    { "quit",     "q",  "",                   "Halt the CPU",                           Mos6502Monitor::quit        },
+    { "quit",     "q",  "<e>",                "Terminate the emulator with exit code",  Mos6502Monitor::quit        },
+    { "help",     "h",  "",                   "This help",                              Mos6502Monitor::help        },
+    { "help",     "?",  "",                   "",                                       Mos6502Monitor::help        }
 };
 
 
-const std::vector<std::pair<std::string, Mos6510Monitor::Expr::ex_t>> Mos6510Monitor::Expr::operators{
-    { "<=", [](const Mos6510 &cpu, const Mos6510Monitor::Expr::fn_t &a, const Mos6510Monitor::Expr::fn_t &b) {
+const std::vector<std::pair<std::string, Mos6502Monitor::Expr::ex_t>> Mos6502Monitor::Expr::operators{
+    { "<=", [](const Mos6502 &cpu, const Mos6502Monitor::Expr::fn_t &a, const Mos6502Monitor::Expr::fn_t &b) {
         return a(cpu) <= b(cpu);
     }},
-    { ">=", [](const Mos6510 &cpu, const Mos6510Monitor::Expr::fn_t &a, const Mos6510Monitor::Expr::fn_t &b) {
+    { ">=", [](const Mos6502 &cpu, const Mos6502Monitor::Expr::fn_t &a, const Mos6502Monitor::Expr::fn_t &b) {
         return a(cpu) >= b(cpu);
     }},
-    { "==", [](const Mos6510 &cpu, const Mos6510Monitor::Expr::fn_t &a, const Mos6510Monitor::Expr::fn_t &b) {
+    { "==", [](const Mos6502 &cpu, const Mos6502Monitor::Expr::fn_t &a, const Mos6502Monitor::Expr::fn_t &b) {
         return a(cpu) == b(cpu);
     }},
-    { "!=", [](const Mos6510 &cpu, const Mos6510Monitor::Expr::fn_t &a, const Mos6510Monitor::Expr::fn_t &b) {
+    { "!=", [](const Mos6502 &cpu, const Mos6502Monitor::Expr::fn_t &a, const Mos6502Monitor::Expr::fn_t &b) {
         return a(cpu) != b(cpu);
     }},
-    { "<", [](const Mos6510 &cpu, const Mos6510Monitor::Expr::fn_t &a, const Mos6510Monitor::Expr::fn_t &b) {
+    { "<", [](const Mos6502 &cpu, const Mos6502Monitor::Expr::fn_t &a, const Mos6502Monitor::Expr::fn_t &b) {
         return a(cpu) < b(cpu);
     }},
-    { ">", [](const Mos6510 &cpu, const Mos6510Monitor::Expr::fn_t &a, const Mos6510Monitor::Expr::fn_t &b) {
+    { ">", [](const Mos6502 &cpu, const Mos6502Monitor::Expr::fn_t &a, const Mos6502Monitor::Expr::fn_t &b) {
         return a(cpu) > b(cpu);
     }},
-    { "&", [](const Mos6510 &cpu, const Mos6510Monitor::Expr::fn_t &a, const Mos6510Monitor::Expr::fn_t &b) {
+    { "&", [](const Mos6502 &cpu, const Mos6502Monitor::Expr::fn_t &a, const Mos6502Monitor::Expr::fn_t &b) {
         return a(cpu) & b(cpu);
     }},
-    { "|", [](const Mos6510 &cpu, const Mos6510Monitor::Expr::fn_t &a, const Mos6510Monitor::Expr::fn_t &b) {
+    { "|", [](const Mos6502 &cpu, const Mos6502Monitor::Expr::fn_t &a, const Mos6502Monitor::Expr::fn_t &b) {
         return a(cpu) | b(cpu);
     }}
 };
 
 
-const std::vector<std::pair<std::string, Mos6510Monitor::Expr::fn_t>> Mos6510Monitor::Expr::registers{
-    { "ra",      [](const Mos6510 &cpu) { return cpu._regs.A;    }   },
-    { "rx",      [](const Mos6510 &cpu) { return cpu._regs.X;    }   },
-    { "ry",      [](const Mos6510 &cpu) { return cpu._regs.Y;    }   },
-    { "rs",      [](const Mos6510 &cpu) { return cpu._regs.S;    }   },
-    { "rp",      [](const Mos6510 &cpu) { return cpu._regs.P;    }   },
-    { "rp.n",    [](const Mos6510 &cpu) { return cpu.test_N();   }   },
-    { "rp.v",    [](const Mos6510 &cpu) { return cpu.test_V();   }   },
-    { "rp.b",    [](const Mos6510 &cpu) { return cpu.test_B();   }   },
-    { "rp.d",    [](const Mos6510 &cpu) { return cpu.test_D();   }   },
-    { "rp.i",    [](const Mos6510 &cpu) { return cpu.test_I();   }   },
-    { "rp.z",    [](const Mos6510 &cpu) { return cpu.test_Z();   }   },
-    { "rp.c",    [](const Mos6510 &cpu) { return cpu.test_C();   }   }
+const std::vector<std::pair<std::string, Mos6502Monitor::Expr::fn_t>> Mos6502Monitor::Expr::registers{
+    { "ra",      [](const Mos6502 &cpu) { return cpu._regs.A;    }   },
+    { "rx",      [](const Mos6502 &cpu) { return cpu._regs.X;    }   },
+    { "ry",      [](const Mos6502 &cpu) { return cpu._regs.Y;    }   },
+    { "rs",      [](const Mos6502 &cpu) { return cpu._regs.S;    }   },
+    { "rp",      [](const Mos6502 &cpu) { return cpu._regs.P;    }   },
+    { "rp.n",    [](const Mos6502 &cpu) { return cpu.test_N();   }   },
+    { "rp.v",    [](const Mos6502 &cpu) { return cpu.test_V();   }   },
+    { "rp.b",    [](const Mos6502 &cpu) { return cpu.test_B();   }   },
+    { "rp.d",    [](const Mos6502 &cpu) { return cpu.test_D();   }   },
+    { "rp.i",    [](const Mos6502 &cpu) { return cpu.test_I();   }   },
+    { "rp.z",    [](const Mos6502 &cpu) { return cpu.test_Z();   }   },
+    { "rp.c",    [](const Mos6502 &cpu) { return cpu.test_C();   }   }
 };
 
 
-Mos6510Monitor::Expr::fn_t Mos6510Monitor::Expr::compile_argument(const std::string &line)
+Mos6502Monitor::Expr::fn_t Mos6502Monitor::Expr::compile_argument(const std::string &line)
 {
     /*
      * <line> = "ra" | "rx" | "ry" | "rs" | "rp" | "rp.[nvbdizc]" | ["*"]["#"]["$"]<number>
@@ -153,7 +153,7 @@ Mos6510Monitor::Expr::fn_t Mos6510Monitor::Expr::compile_argument(const std::str
             /*
              * It is a literal value.
              */
-            return [isref, lit](const Mos6510 &cpu) -> int {
+            return [isref, lit](const Mos6502 &cpu) -> int {
                 uint16_t val = static_cast<uint16_t>(lit);
                 return (isref ? cpu._mmap->read(val) : val);
             };
@@ -168,7 +168,7 @@ Mos6510Monitor::Expr::fn_t Mos6510Monitor::Expr::compile_argument(const std::str
                  * It is a register value.
                  */
                 const auto &fn = elem.second;
-                return [isref, fn](const Mos6510 &cpu) -> int {
+                return [isref, fn](const Mos6502 &cpu) -> int {
                     uint16_t val = fn(cpu);
                     return (isref ? cpu._mmap->read(val) : val);
                 };
@@ -184,7 +184,7 @@ Mos6510Monitor::Expr::fn_t Mos6510Monitor::Expr::compile_argument(const std::str
     throw InvalidArgument(os.str());
 }
 
-std::pair<Mos6510Monitor::Expr::fn_t, std::exception> Mos6510Monitor::Expr::compile(const std::string &line)
+std::pair<Mos6502Monitor::Expr::fn_t, std::exception> Mos6502Monitor::Expr::compile(const std::string &line)
 {
     /*
      * <expr> = <val1> <op> <val2>
@@ -212,7 +212,7 @@ std::pair<Mos6510Monitor::Expr::fn_t, std::exception> Mos6510Monitor::Expr::comp
     }
 }
 
-size_t Mos6510Monitor::run()
+size_t Mos6502Monitor::run()
 {
     _is_running = true;
 
@@ -267,7 +267,7 @@ size_t Mos6510Monitor::run()
 }
 
 
-bool Mos6510Monitor::is_breakpoint(addr_t addr) const
+bool Mos6502Monitor::is_breakpoint(addr_t addr) const
 {
     const auto it = _breakpoints.find(addr);
     if (it != _breakpoints.end()) {
@@ -296,11 +296,11 @@ bool Mos6510Monitor::is_breakpoint(addr_t addr) const
     return false;
 }
 
-std::string Mos6510Monitor::prompt()
+std::string Mos6502Monitor::prompt()
 {
     std::ostringstream os{};
 
-    if (_prev_fn == Mos6510Monitor::step) {
+    if (_prev_fn == Mos6502Monitor::step) {
         _cpu.disass(os, _cpu._regs.PC, 10, true);
         os << _cpu._regs.to_string() << std::endl;
     }
@@ -310,12 +310,12 @@ std::string Mos6510Monitor::prompt()
     return os.str();
 }
 
-addr_t Mos6510Monitor::to_addr(const std::string &str, addr_t defval)
+addr_t Mos6502Monitor::to_addr(const std::string &str, addr_t defval)
 {
     return ((str == ".") ? defval : static_cast<addr_t>(to_count(str)));
 }
 
-size_t Mos6510Monitor::to_count(const std::string &str)
+size_t Mos6502Monitor::to_count(const std::string &str)
 {
     try {
         return utils::to_number<size_t>(str);
@@ -325,7 +325,7 @@ size_t Mos6510Monitor::to_count(const std::string &str)
     }
 }
 
-bool Mos6510Monitor::assemble(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::assemble(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * assemble [<addr>|.]
@@ -400,7 +400,7 @@ bool Mos6510Monitor::assemble(Mos6510Monitor &self, const std::vector<std::strin
     return false;
 }
 
-bool Mos6510Monitor::disassemble(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::disassemble(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * disass [<addr> [<count>]]
@@ -424,7 +424,7 @@ bool Mos6510Monitor::disassemble(Mos6510Monitor &self, const std::vector<std::st
     return false;
 }
 
-bool Mos6510Monitor::dump(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::dump(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * dump [<addr> [<count>]]
@@ -463,7 +463,7 @@ bool Mos6510Monitor::dump(Mos6510Monitor &self, const std::vector<std::string> &
     return false;
 }
 
-bool Mos6510Monitor::registers(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::registers(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * registers, r
@@ -472,7 +472,7 @@ bool Mos6510Monitor::registers(Mos6510Monitor &self, const std::vector<std::stri
     return false;
 }
 
-bool Mos6510Monitor::bp_add(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::bp_add(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * Add a breakpoint at a specified address:
@@ -550,7 +550,7 @@ bool Mos6510Monitor::bp_add(Mos6510Monitor &self, const std::vector<std::string>
     return false;
 }
 
-bool Mos6510Monitor::bp_del(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::bp_del(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * bpdel <addr>
@@ -569,7 +569,7 @@ bool Mos6510Monitor::bp_del(Mos6510Monitor &self, const std::vector<std::string>
     return false;
 }
 
-bool Mos6510Monitor::bp_clear(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::bp_clear(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * bpclear, bc
@@ -578,7 +578,7 @@ bool Mos6510Monitor::bp_clear(Mos6510Monitor &self, const std::vector<std::strin
     return false;
 }
 
-bool Mos6510Monitor::bp_list(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::bp_list(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * bplist, bl
@@ -601,7 +601,7 @@ bool Mos6510Monitor::bp_list(Mos6510Monitor &self, const std::vector<std::string
     return false;
 }
 
-bool Mos6510Monitor::go(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::go(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * go [<addr>|.]
@@ -623,7 +623,7 @@ bool Mos6510Monitor::go(Mos6510Monitor &self, const std::vector<std::string> &ar
     return false;
 }
 
-bool Mos6510Monitor::step(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::step(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * step [<addr>|.]
@@ -645,7 +645,7 @@ bool Mos6510Monitor::step(Mos6510Monitor &self, const std::vector<std::string> &
     return false;
 }
 
-bool Mos6510Monitor::load(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::load(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * load <filename> [$addr]
@@ -676,7 +676,7 @@ bool Mos6510Monitor::load(Mos6510Monitor &self, const std::vector<std::string> &
     return false;
 }
 
-bool Mos6510Monitor::save(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::save(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * save <filename> $start $end
@@ -709,7 +709,7 @@ bool Mos6510Monitor::save(Mos6510Monitor &self, const std::vector<std::string> &
     return false;
 }
 
-bool Mos6510Monitor::loglevel(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::loglevel(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * loglevel <lv>
@@ -730,7 +730,7 @@ bool Mos6510Monitor::loglevel(Mos6510Monitor &self, const std::vector<std::strin
     return false;
 }
 
-bool Mos6510Monitor::quit(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::quit(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * quit, q
@@ -745,7 +745,7 @@ bool Mos6510Monitor::quit(Mos6510Monitor &self, const std::vector<std::string> &
     return false;
 }
 
-bool Mos6510Monitor::help(Mos6510Monitor &self, const std::vector<std::string> &args)
+bool Mos6502Monitor::help(Mos6502Monitor &self, const std::vector<std::string> &args)
 {
     /*
      * help, h, ?
