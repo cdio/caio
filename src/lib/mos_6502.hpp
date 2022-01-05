@@ -44,14 +44,14 @@ namespace cemu {
  */
 class Mos6502 : public Clockable, public Name {
 public:
-    constexpr static const char *TYPE     = "MOS6502";
-    constexpr static const char *LABEL    = "CPU";
+    constexpr static const char *TYPE    = "MOS6502";
+    constexpr static const char *LABEL   = "CPU";
 
-    constexpr static const addr_t vNMI    = 0xFFFA;
-    constexpr static const addr_t vRESET  = 0xFFFC;
-    constexpr static const addr_t vIRQ    = 0xFFFE;
+    constexpr static const addr_t vNMI   = 0xFFFA;
+    constexpr static const addr_t vRESET = 0xFFFC;
+    constexpr static const addr_t vIRQ   = 0xFFFE;
 
-    constexpr static const addr_t S_base  = 0x0100;
+    constexpr static const addr_t S_base = 0x0100;
 
     enum AddressingMode {
         MODE_NONE,
@@ -138,6 +138,64 @@ public:
     void reset(const std::shared_ptr<ASpace> &mmap);
 
     /**
+     * Set the single-step log level.
+     * @param lvs Log level string to set.
+     * @see Logger::loglevel(const std::string &)
+     */
+    void loglevel(const std::string &lvs);
+
+    /**
+     * @return The current single-step log level.
+     */
+    Logger::Level loglevel() const;
+
+    /**
+     * Trigger an IRQ.
+     * This method must be called twice by external peripherals, the first time to activate
+     * the IRQ pin and a second time to de-activate it when the interrupt is served.
+     * @param active true to generate an interrupt; false to de-activate a previous interrupt request.
+     */
+    void trigger_irq(bool active);
+
+    /**
+     * Trigger an NMI interrupt.
+     * @param active true to generate an interrupt; false to de-activate.
+     */
+    void trigger_nmi(bool active);
+
+    /**
+     * Set the RDY line.
+     * @param active true to activate the RDY line; false otherwise.
+     * @see single_step()
+     */
+    void set_rdy(bool active);
+
+    /**
+     * External breakpoint.
+     * Force a return back to the monitor on the next clock tick,
+     * if the monitor is not active a system halt is requested.
+     */
+    void ebreak();
+
+    /**
+     * Add a breakpoint on a memory address.
+     * @param addr Address;
+     * @parma cb   Method to call when the breakpoint hits.
+     */
+    void bpadd(addr_t addr, const std::function<void(Mos6502 &, void *)> &cb, void *arg);
+
+    /**
+     * Delete a breakpoint on a memory address.
+     * @param addr Address.
+     */
+    void bpdel(addr_t addr);
+
+    /**
+     * @return The register values.
+     */
+    const Registers &regs() const;
+
+    /**
      * Disassembler.
      * @param os      Output stream;
      * @param addr    Start address with the machine code to disassemble;
@@ -146,65 +204,26 @@ public:
      */
     void disass(std::ostream &os, addr_t start, size_t count, bool show_pc = false);
 
+protected:
     /**
-     * Trigger an IRQ.
-     * This method must be called twice by external peripherals, the first time to activate
-     * the IRQ pin and a second time to de-activate it when the interrupt is served.
-     * @param active true to generate an interrupt; false to de-activate a previous interrupt request.
+     * @see ASpace::read_addr()
      */
-    void trigger_irq(bool active) {
-        _irq.trigger(active);
-    }
+    addr_t read_addr(size_t addr) const;
 
     /**
-     * Trigger an NMI interrupt.
-     * @param active true to generate an interrupt; false to de-activate.
+     * @see ASpace::write_addr()
      */
-    void trigger_nmi(bool active) {
-        _nmi.trigger(active);
-    }
+    void write_addr(addr_t addr, addr_t data);
 
     /**
-     * Set the RDY line.
-     * @param active true to activate the RDY line; false otherwise.
-     * @see single_step()
+     * @see ASpace::read()
      */
-    void set_rdy(bool active) {
-        _rdy.set(active);
-    }
+    virtual uint8_t read(addr_t addr) const;
 
     /**
-     * External breakpoint.
-     * Force a return back to the monitor on the next clock tick,
-     * if the monitor is not active a system halt is requested.
+     * @see ASpace::write()
      */
-    void ebreak() {
-        _break = true;
-    }
-
-    /**
-     * Add a breakpoint on a memory address.
-     * @param addr Address;
-     * @parma cb   Method to call when the breakpoint hits.
-     */
-    void bpadd(addr_t addr, const std::function<void(Mos6502 &, void *)> &cb, void *arg) {
-        _breakpoints[addr] = {cb, arg};
-    }
-
-    /**
-     * Delete a breakpoint on a memory address.
-     * @param addr Address.
-     */
-    void bpdel(addr_t addr) {
-        _breakpoints.erase(addr);
-    }
-
-    /**
-     * @return The register values.
-     */
-    const Registers &regs() const {
-        return _regs;
-    }
+    virtual void write(addr_t addr, uint8_t data);
 
 private:
     /**
@@ -230,22 +249,6 @@ private:
      * @return A string with the disassembled instruction.
      */
     std::string disass(addr_t &addr, bool show_pc = false);
-
-    /**
-     * Set the single-step log level.
-     * @param lvs Log level string to set.
-     * @see Logger::loglevel(const std::string &)
-     */
-    void loglevel(const std::string &lvs) {
-        _log.loglevel(lvs);
-    }
-
-    /**
-     * @return The current single-step log level.
-     */
-    Logger::Level loglevel() const {
-        return _log.loglevel();
-    }
 
     /**
      * Execute a single instruction located at the current PC address.

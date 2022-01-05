@@ -357,8 +357,53 @@ void Mos6502::init_monitor(std::istream &is, std::ostream &os)
 void Mos6502::reset(const std::shared_ptr<ASpace> &mmap)
 {
     _mmap = mmap;
+    _regs = { .PC = read_addr(vRESET) };
     flag(0);
-    _regs.PC = _mmap->read_addr(vRESET);
+}
+
+void Mos6502::loglevel(const std::string &lvs)
+{
+    _log.loglevel(lvs);
+}
+
+Logger::Level Mos6502::loglevel() const
+{
+    return _log.loglevel();
+}
+
+void Mos6502::trigger_irq(bool active)
+{
+    _irq.trigger(active);
+}
+
+void Mos6502::trigger_nmi(bool active)
+{
+    _nmi.trigger(active);
+}
+
+void Mos6502::set_rdy(bool active)
+{
+    _rdy.set(active);
+}
+
+void Mos6502::ebreak()
+{
+    _break = true;
+}
+
+void Mos6502::bpadd(addr_t addr, const std::function<void(Mos6502 &, void *)> &cb, void *arg)
+{
+    _breakpoints[addr] = {cb, arg};
+}
+
+void Mos6502::bpdel(addr_t addr)
+{
+    _breakpoints.erase(addr);
+}
+
+const Mos6502::Registers &Mos6502::regs() const
+{
+    return _regs;
 }
 
 void Mos6502::disass(std::ostream &os, addr_t start, size_t count, bool show_pc)
@@ -386,7 +431,7 @@ std::string Mos6502::disass(addr_t &addr, bool show_pc)
     /*
      * Get the opcode.
      */
-    uint8_t opcode = _mmap->read(addr);
+    uint8_t opcode = read(addr);
     auto &ins = instr_set[opcode];
 
     if (show_pc && addr != _regs.PC) {
@@ -429,7 +474,7 @@ std::string Mos6502::disass(addr_t &addr, bool show_pc)
         addr_t operand{};
         uint8_t ophi{}, oplo{};
 
-        oplo = _mmap->read(addr++);
+        oplo = read(addr++);
 
         hex << " " << utils::to_string(oplo);
 
@@ -441,7 +486,7 @@ std::string Mos6502::disass(addr_t &addr, bool show_pc)
 
         case '^':
             /* Operand is a 16 bit value, must be disassembled as $0000 */
-            ophi = _mmap->read(addr++);
+            ophi = read(addr++);
             operand = (static_cast<addr_t>(ophi) << 8) | oplo;
             hex << " " << utils::to_string(ophi);
             ops << utils::to_string(operand);
@@ -493,10 +538,10 @@ size_t Mos6502::single_step()
 
     if (_nmi.is_active()) {
         _nmi.reset();       /* TODO Implement edge triggered interrupts */
-        addr = _mmap->read_addr(vNMI);
+        addr = read_addr(vNMI);
         is_nmi = true;
     } else if (is_irq_enabled() && _irq.is_active()) {
-        addr = _mmap->read_addr(vIRQ);
+        addr = read_addr(vIRQ);
     }
 
     if (addr) {
@@ -514,7 +559,7 @@ size_t Mos6502::single_step()
         line = disass(addr);
     }
 
-    uint8_t opcode = _mmap->read(_regs.PC++);
+    uint8_t opcode = read(_regs.PC++);
     addr_t arg{};
     auto &ins = instr_set[opcode];
 
@@ -533,14 +578,14 @@ size_t Mos6502::single_step()
         case MODE_IND_X:
         case MODE_IND_Y:
         case MODE_REL:
-            arg = _mmap->read(_regs.PC);
+            arg = read(_regs.PC);
             break;
 
         case MODE_ABS:
         case MODE_ABS_X:
         case MODE_ABS_Y:
         case MODE_IND:
-            arg = _mmap->read_addr(_regs.PC);
+            arg = read_addr(_regs.PC);
             break;
         }
 
@@ -557,24 +602,24 @@ size_t Mos6502::single_step()
 
         case MODE_ZP_X:
         case MODE_ABS_X:
-            arg += _regs.X;                         /* XXX: Zero page index bug */
+            arg += _regs.X;                     /* XXX: Zero page index bug */
             break;
 
         case MODE_ZP_Y:
         case MODE_ABS_Y:
-            arg += _regs.Y;                         /* XXX: Zero page index bug */
+            arg += _regs.Y;                     /* XXX: Zero page index bug */
             break;
 
         case MODE_IND_X:
-            arg = _mmap->read_addr(arg + _regs.X);  /* XXX: Zero page index bug */
+            arg = read_addr(arg + _regs.X);     /* XXX: Zero page index bug */
             break;
 
         case MODE_IND_Y:
-            arg = _mmap->read_addr(arg) + _regs.Y;  /* XXX: Zero page index bug */
+            arg = read_addr(arg) + _regs.Y;     /* XXX: Zero page index bug */
             break;
 
         case MODE_IND:
-            arg = _mmap->read_addr(arg);
+            arg = read_addr(arg);
             break;
         }
 
@@ -625,6 +670,26 @@ size_t Mos6502::tick(const Clock &clk)
 
     size_t cycles = single_step();
     return (cycles == 0 ? Clockable::HALT : cycles);
+}
+
+inline addr_t Mos6502::read_addr(size_t addr) const
+{
+    return _mmap->read_addr(addr);
+}
+
+inline void Mos6502::write_addr(addr_t addr, addr_t data)
+{
+    _mmap->write_addr(addr, data);
+}
+
+inline uint8_t Mos6502::read(addr_t addr) const
+{
+    return _mmap->read(addr);
+}
+
+inline void Mos6502::write(addr_t addr, uint8_t data)
+{
+    _mmap->write(addr, data);
 }
 
 }
