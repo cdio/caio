@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "gpio.hpp"
 #include "mos_6502.hpp"
 
 
@@ -32,6 +33,9 @@ public:
 
     constexpr static const addr_t PORT_0  = 0x0000;
     constexpr static const addr_t PORT_1  = 0x0001;
+
+    using ior_t = Gpio::ior_t;
+    using iow_t = Gpio::iow_t;
 
     /**
      * Initialise this CPU connected to a set of other devices and peripherals.
@@ -53,9 +57,39 @@ public:
     virtual ~Mos6510();
 
     /**
+     * Add an input port callback.
+     * @param ior  Input port callback;
+     * @param mask Port bits associated to the callback.
+     * @see Gpio::add_ior()
+     */
+    void add_ior(const ior_t &ior, uint8_t mask);
+
+    /**
+     * Add an ouput port callback.
+     * @param iow  Output port callback;
+     * @param mask Port bits associated to the callback.
+     */
+    void add_iow(const iow_t &iow, uint8_t mask);
+
+    /**
+     * Add a breakpoint on a memory address.
      * @see Mos6502::bpadd()
      */
     void bpadd(addr_t addr, const std::function<void(Mos6510 &, void *)> &cb, void *arg);
+
+protected:
+    /**
+     * @see Mos6502::read()
+     */
+    uint8_t read(addr_t addr) const override;
+
+    /**
+     * @see Mos6502::write()
+     */
+    void write(addr_t addr, uint8_t data) override;
+
+private:
+    Gpio _ioports{};
 };
 
 }

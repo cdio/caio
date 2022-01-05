@@ -35,9 +35,33 @@ Mos6510::~Mos6510()
 {
 }
 
+void Mos6510::add_ior(const ior_t &ior, uint8_t mask)
+{
+   _ioports.add_ior(ior, mask);
+}
+
+void Mos6510::add_iow(const iow_t &iow, uint8_t mask)
+{
+    _ioports.add_iow(iow, mask);
+}
+
 void Mos6510::bpadd(addr_t addr, const std::function<void(Mos6510 &, void *)> &cb, void *arg)
 {
     Mos6502::bpadd(addr, *reinterpret_cast<const std::function<void(Mos6502 &, void *)> *>(&cb), arg);
+}
+
+uint8_t Mos6510::read(addr_t addr) const
+{
+    return (addr == PORT_1 ? _ioports.ior(addr) : Mos6502::read(addr));
+}
+
+void Mos6510::write(addr_t addr, uint8_t value)
+{
+    if (addr == PORT_1) {
+        _ioports.iow(addr, value);
+    } else {
+        Mos6502::write(addr, value);
+    }
 }
 
 }
