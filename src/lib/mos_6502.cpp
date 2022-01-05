@@ -672,22 +672,22 @@ size_t Mos6502::tick(const Clock &clk)
     return (cycles == 0 ? Clockable::HALT : cycles);
 }
 
-inline addr_t Mos6502::read_addr(size_t addr) const
+addr_t Mos6502::read_addr(size_t addr) const
 {
     return _mmap->read_addr(addr);
 }
 
-inline void Mos6502::write_addr(addr_t addr, addr_t data)
+void Mos6502::write_addr(addr_t addr, addr_t data)
 {
     _mmap->write_addr(addr, data);
 }
 
-inline uint8_t Mos6502::read(addr_t addr) const
+uint8_t Mos6502::read(addr_t addr) const
 {
     return _mmap->read(addr);
 }
 
-inline void Mos6502::write(addr_t addr, uint8_t data)
+void Mos6502::write(addr_t addr, uint8_t data)
 {
     _mmap->write(addr, data);
 }
