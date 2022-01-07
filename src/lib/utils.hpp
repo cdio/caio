@@ -55,18 +55,17 @@ template <typename... Ts> struct is_container<gsl::span<Ts...>> : std::true_type
  * @param val Value to align.
  * @return The aligned value.
  */
-template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
 constexpr static inline int align(T val)
 {
     return ((val + (sizeof(T) - 1)) & ~(sizeof(T) - 1));
 }
 
-
 /**
  * Ceil method as constant expression.
  * @see std::ceil()
  */
-template<typename T, typename = std::enable_if_t<std::is_floating_point<T>::value>>
+template<typename T, std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
 constexpr static inline int ceil(T fval)
 {
     int val = static_cast<int>(fval);
@@ -77,7 +76,6 @@ constexpr static inline int ceil(T fval)
 
     return val;
 }
-
 
 /**
  * Tolower a string.
@@ -95,7 +93,6 @@ static inline std::string tolow(const std::string &str)
     return lstr;
 }
 
-
 /**
  * Toupper a string.
  * @param str String to convert.
@@ -112,7 +109,6 @@ static inline std::string toup(const std::string &str)
     return ustr;
 }
 
-
 /**
  * Split a string.
  * @param str String to split;
@@ -121,7 +117,6 @@ static inline std::string toup(const std::string &str)
  */
 std::vector<std::string> split(const std::string &str, char sep);
 
-
 /**
  * Detect whether a number is a power of two.
  * @pararm n Number.
@@ -129,12 +124,11 @@ std::vector<std::string> split(const std::string &str, char sep);
  *
  * FIXME: this method exists in the standard library
  */
-template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
 bool is_power_of_two(T n)
 {
     return (n != 0 && (n & (n - 1)) == 0);
 }
-
 
 /**
  * Convert a byte buffer to string.
@@ -143,14 +137,13 @@ bool is_power_of_two(T n)
  */
 std::string to_string(const std::vector<uint8_t> &buf);
 
-
 /**
  * Convert an integer value to uppercase hexadecimal string.
  * The hexadecimal value is prefixed with '0's, depending on its size.
  * @param v Value to convert.
  * @return The generated string.
  */
-template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
 std::string to_string(T v)
 {
     std::stringstream ss{};
@@ -159,7 +152,6 @@ std::string to_string(T v)
 
     return ss.str();
 }
-
 
 /**
  * Dump a range of bytes to a stream.
@@ -193,7 +185,6 @@ std::ostream &dump(std::ostream &os, const Iterator begin, const Iterator end, a
     return os;
 }
 
-
 /**
  * Dump a byte buffer to a stream.
  * @param os   Output stream;
@@ -206,7 +197,6 @@ std::ostream &dump(std::ostream &os, const C &cont, addr_t base = 0)
 {
     return dump(os, cont.begin(), cont.end(), base);
 }
-
 
 /**
  * Dump a byte buffer to a string.
@@ -222,7 +212,6 @@ std::string dump(const C &cont, addr_t base = 0)
     return os.str();
 }
 
-
 /**
  * Convert a string to unsigned long long.
  * If the string is prefixed by '$' an hexadecimal number is considered, decimal numbers must be prefixed with '#'.
@@ -234,7 +223,6 @@ std::string dump(const C &cont, addr_t base = 0)
  */
 unsigned long long to_ulonglong(const std::string &str, size_t max);
 
-
 /**
  * Convert a string into an integer type.
  * If the string is prefixed by '$' an hexadecimal number is considered, decimal numbers must be prefixed with '#'.
@@ -244,12 +232,11 @@ unsigned long long to_ulonglong(const std::string &str, size_t max);
  * @return The converted number.
  * @exception InvalidNumber
  */
-template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
 T to_number(const std::string &str)
 {
     return static_cast<T>(to_ulonglong(str, std::numeric_limits<T>::max()));
 }
-
 
 /**
  * Convert a packed BCD to binary number.
@@ -261,7 +248,6 @@ constexpr static inline uint8_t bcd_to_bin(uint8_t bcd)
     return (((bcd >> 4) * 10) + (bcd & 15));
 }
 
-
 /**
  * Convert a binary number to packed BCD.
  * @param bin Binary number.
@@ -272,7 +258,6 @@ constexpr static inline uint8_t bin_to_bcd(uint8_t bin)
     uint8_t t = bin / 10;
     return ((t << 4) | (bin - t * 10));
 }
-
 
 /**
  * Expand a byte into a 2-bytes with each bit duplicated.
@@ -291,7 +276,6 @@ constexpr static inline uint16_t expand_bits(uint8_t byte)
            ((byte & 0x02) ? 0x000C : 0) |
            ((byte & 0x01) ? 0x0003 : 0);
 }
-
 
 /**
  * Expand a byte into a 2-bytes with each di-bit duplicated.
@@ -312,7 +296,6 @@ constexpr static inline uint16_t expand_dibits(uint8_t byte)
            (d4 << 2) | d4;
 }
 
-
 /**
  * Convert 01 di-bits into 00 and 10 di-bits into 11.
  * 01011001 becomes 00001100.
@@ -332,7 +315,6 @@ constexpr static inline uint8_t convert_01_10(uint8_t byte)
            ((d4 == 0x00 || d4 == 0x01) ? 0x00 : 0x03);
 }
 
-
 /**
  * Replace 01 di-bits with 00 and 10 di-bits with 11.
  * 01011001 becomes 00001100.
@@ -346,7 +328,6 @@ void convert_01_10(C &bytes)
         byte = convert_01_10(byte);
     }
 }
-
 
 /**
  * Replace 01 and 10 di-bits with 11.
@@ -363,7 +344,6 @@ constexpr static inline uint8_t convert_01_10_to_11(uint8_t byte)
            ((byte & 0x03) == 0x00 ? 0x00 : 0x03);
 }
 
-
 /**
  * Convert non null di-bits into 11.
  * 01011000 becomes 11111100.
@@ -378,7 +358,6 @@ void convert_01_10_to_11(C &bytes)
     }
 }
 
-
 /**
  * @return The current time in microseconds.
  */
@@ -387,7 +366,6 @@ static inline uint64_t now()
     auto now = std::chrono::steady_clock::now().time_since_epoch();
     return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(now).count());
 }
-
 
 }
 }
