@@ -50,16 +50,6 @@ public:
      */
     virtual void write(addr_t addr, uint8_t value);
 
-    /**
-     * @see Device::read_addr()
-     */
-    virtual addr_t read_addr(addr_t addr) const;
-
-    /**
-     * @seee Device::write_addr()
-     */
-    virtual void write_addr(addr_t addr, addr_t value);
-
 protected:
     /**
      * Device mappings type.

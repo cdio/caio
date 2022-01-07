@@ -45,28 +45,6 @@ void ASpace::write(addr_t addr, uint8_t value)
     }
 }
 
-addr_t ASpace::read_addr(addr_t addr) const
-{
-    try {
-        const auto [bank, offset] = decode(addr);
-        auto &dev = _rmaps->at(bank);
-        return dev.first->read_addr(dev.second + offset);
-    } catch (std::out_of_range &) {
-        throw InvalidReadAddress{"ASpace", addr};
-    }
-}
-
-void ASpace::write_addr(addr_t addr, addr_t value)
-{
-    try {
-        const auto [bank, offset] = decode(addr);
-        auto &dev = _wmaps->at(bank);
-        dev.first->write_addr(dev.second + offset, value);
-    } catch (std::out_of_range &) {
-        throw InvalidWriteAddress{"ASpace", addr};
-    }
-}
-
 void ASpace::reset(const addrmap_t &rmaps, const addrmap_t &wmaps)
 {
     auto banks = wmaps->size();

@@ -77,16 +77,6 @@ public:
      */
     void write(addr_t addr, uint8_t value) override;
 
-    /**
-     * Write an address into a memory address.
-     * Writes to processor's I/O ports are properly handled.
-     * @param addr  Address to write to;
-     * @param value Value to write.
-     * @exception InvalidWriteAddress see ASpace::write_addr()
-     * @see ASpace::write_addr()
-     */
-    void write_addr(addr_t addr, addr_t value) override;
-
 private:
     /**
      * Reset this address space with a new set of devices.

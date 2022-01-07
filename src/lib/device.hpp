@@ -47,24 +47,6 @@ public:
     std::string to_string() const override;
 
     /**
-     * Read an address from an address.
-     * @param addr  Address to read from.
-     * @param is_le true if the emulated architecture is little endian, false otherwise.
-     * @return The address stored at the specified address.
-     * @exception InvalidReadAddress if the specified address is not handled by this device.
-     */
-    addr_t read_addr(size_t addr, bool is_le = true) const;
-
-    /**
-     * Write an address into an address.
-     * @param addr  Address to write;
-     * @param data  Address value to write;
-     * @param is_le true if the emulated architecture is little endian, false otherwise.
-     * @exception InvalidWriteAddress if the specified address is not handled by this device.
-     */
-    void write_addr(addr_t addr, addr_t data, bool is_le = true);
-
-    /**
      * Read from an address.
      * @param addr Address to read from.
      * @return The data stored at the specified address.

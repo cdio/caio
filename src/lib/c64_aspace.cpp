@@ -444,16 +444,6 @@ void C64ASpace::write(addr_t addr, uint8_t value)
     ASpace::write(addr, value);
 }
 
-void C64ASpace::write_addr(addr_t addr, addr_t value)
-{
-    if (addr <= Mos6510::PORT_1) {
-        write(addr, value & 0xff);
-        write(addr + 1, (value >> 8));
-    } else {
-        ASpace::write(addr, value);
-    }
-}
-
 __attribute__((always_inline)) unsigned C64ASpace::getkey() const
 {
     return ((_port1 & 0x07) | ((_port1 >> 5) & 0x18));
