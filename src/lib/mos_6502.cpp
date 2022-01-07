@@ -674,12 +674,19 @@ size_t Mos6502::tick(const Clock &clk)
 
 addr_t Mos6502::read_addr(size_t addr) const
 {
-    return _mmap->read_addr(addr);
+    uint8_t lo = read(addr);
+    uint8_t hi = read(addr + 1);
+
+    return (static_cast<addr_t>(hi) << 8 | lo);
 }
 
 void Mos6502::write_addr(addr_t addr, addr_t data)
 {
-    _mmap->write_addr(addr, data);
+    uint8_t lo = static_cast<uint8_t>(data & 0xFF);
+    uint8_t hi = static_cast<uint8_t>(data >> 8);
+
+    write(addr, lo);
+    write(addr + 1, hi);
 }
 
 uint8_t Mos6502::read(addr_t addr) const

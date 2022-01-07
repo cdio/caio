@@ -42,10 +42,10 @@ void Mos6502::i_SLO(Mos6502 &self, addr_t addr)
      *
      * Flags: N Z C
      */
-    uint8_t value = self._mmap->read(addr);
-    self._mmap->write(addr, value); // Read-Write-Modify instruction.
+    uint8_t value = self.read(addr);
+    self.write(addr, value); // Read-Write-Modify instruction.
     value  = self.logic_shl(value);
-    self._mmap->write(addr, value);
+    self.write(addr, value);
     self._regs.A = self.logic_or(self._regs.A, value);
 }
 
@@ -71,10 +71,10 @@ void Mos6502::i_RLA(Mos6502 &self, addr_t addr)
      * Flags: N Z C
      *
      */
-    uint8_t value = self._mmap->read(addr);
-    self._mmap->write(addr, value); // Read-Write-Modify instruction.
+    uint8_t value = self.read(addr);
+    self.write(addr, value); // Read-Write-Modify instruction.
     value = self.logic_rol(value);
-    self._mmap->write(addr, value);
+    self.write(addr, value);
     self._regs.A = self.logic_and(self._regs.A, value);
 }
 
@@ -97,10 +97,10 @@ void Mos6502::i_SRE(Mos6502 &self, addr_t addr)
      * - Store value back on memory;
      * - OR the shifted value with the Accumulator.
      */
-    uint8_t value = self._mmap->read(addr);
-    self._mmap->write(addr, value); // Read-Write-Modify instruction.
+    uint8_t value = self.read(addr);
+    self.write(addr, value); // Read-Write-Modify instruction.
     value  = self.logic_shl(value);
-    self._mmap->write(addr, value);
+    self.write(addr, value);
     self._regs.A = self.logic_eor(self._regs.A, value);
 }
 
@@ -123,10 +123,10 @@ void Mos6502::i_RRA(Mos6502 &self, addr_t addr)
      * - Store value back on memory;
      * - ADC the shifted value with the Accumulator.
      */
-    uint8_t value = self._mmap->read(addr);
-    self._mmap->write(addr, value); // Read-Write-Modify instruction.
+    uint8_t value = self.read(addr);
+    self.write(addr, value); // Read-Write-Modify instruction.
     value  = self.logic_ror(value);
-    self._mmap->write(addr, value);
+    self.write(addr, value);
     self._regs.A = self.adc(self._regs.A, value);
 }
 
@@ -145,7 +145,7 @@ void Mos6502::i_SAX(Mos6502 &self, addr_t addr)
      * Flags: -
      */
     uint8_t value = self._regs.A & self._regs.X;
-    self._mmap->write(addr, value);
+    self.write(addr, value);
 }
 
 void Mos6502::i_LAX_imm(Mos6502 &self, addr_t value)
@@ -175,7 +175,7 @@ void Mos6502::i_LAX(Mos6502 &self, addr_t addr)
      *
      * Flags: N Z
      */
-    addr_t value = self._mmap->read(addr);
+    addr_t value = self.read(addr);
     i_LAX_imm(self, value);
 }
 
@@ -189,10 +189,10 @@ void Mos6502::i_DCP(Mos6502 &self, addr_t addr)
      *
      * Flags: N Z C
      */
-    uint8_t value = self._mmap->read(addr);
-    self._mmap->write(addr, value); // Read-Write-Modify instruction.
+    uint8_t value = self.read(addr);
+    self.write(addr, value); // Read-Write-Modify instruction.
     --value;
-    self._mmap->write(addr, value);
+    self.write(addr, value);
     self.cmp(self._regs.A, value);
 }
 
@@ -206,10 +206,10 @@ void Mos6502::i_ISC(Mos6502 &self, addr_t addr)
      *
      * Flags: N V Z C
      */
-    uint8_t value = self._mmap->read(addr);
-    self._mmap->write(addr, value); // Read-Write-Modify instruction.
+    uint8_t value = self.read(addr);
+    self.write(addr, value); // Read-Write-Modify instruction.
     ++value;
-    self._mmap->write(addr, value);
+    self.write(addr, value);
     //XXX self.flag_C(true);
     self._regs.A = self.sbc(self._regs.A, value);
 }
@@ -311,7 +311,7 @@ void Mos6502::i_AHX(Mos6502 &self, addr_t addr)
      * Unstable, does not work on some machines.
      */
     uint8_t value = (addr >> 8) & self._regs.A & self._regs.X;
-    self._mmap->write(addr, value);
+    self.write(addr, value);
 }
 
 void Mos6502::i_SHY(Mos6502 &self, addr_t addr)
@@ -324,7 +324,7 @@ void Mos6502::i_SHY(Mos6502 &self, addr_t addr)
      * Unstable, does not work on some machines.
      */
     uint8_t value = (addr >> 8) & self._regs.Y;
-    self._mmap->write(addr, value);
+    self.write(addr, value);
 }
 
 void Mos6502::i_SHX(Mos6502 &self, addr_t addr)
@@ -337,7 +337,7 @@ void Mos6502::i_SHX(Mos6502 &self, addr_t addr)
      * Unstable, does not work on some machines.
      */
     uint8_t value = (addr >> 8) & self._regs.X;
-    self._mmap->write(addr, value);
+    self.write(addr, value);
 }
 
 void Mos6502::i_TAS(Mos6502 &self, addr_t addr)
@@ -356,7 +356,7 @@ void Mos6502::i_TAS(Mos6502 &self, addr_t addr)
      */
     self._regs.S = self._regs.A & self._regs.X;
     uint8_t value = self._regs.S & (addr >> 8);
-    self._mmap->write(addr, value);
+    self.write(addr, value);
 }
 
 void Mos6502::i_LAS(Mos6502 &self, addr_t addr)
@@ -372,7 +372,7 @@ void Mos6502::i_LAS(Mos6502 &self, addr_t addr)
      *
      * 4 cycles (5 if page boundary is crossed)
      */
-    uint8_t value = self._mmap->read(addr);
+    uint8_t value = self.read(addr);
     self._regs.S &= value;
     self._regs.A = self._regs.X = self._regs.S;
     self.set_N(self._regs.A);

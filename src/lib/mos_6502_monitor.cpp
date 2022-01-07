@@ -155,7 +155,7 @@ Mos6502Monitor::Expr::fn_t Mos6502Monitor::Expr::compile_argument(const std::str
              */
             return [isref, lit](const Mos6502 &cpu) -> int {
                 uint16_t val = static_cast<uint16_t>(lit);
-                return (isref ? cpu._mmap->read(val) : val);
+                return (isref ? cpu.read(val) : val);
             };
         }
 
@@ -170,7 +170,7 @@ Mos6502Monitor::Expr::fn_t Mos6502Monitor::Expr::compile_argument(const std::str
                 const auto &fn = elem.second;
                 return [isref, fn](const Mos6502 &cpu) -> int {
                     uint16_t val = fn(cpu);
-                    return (isref ? cpu._mmap->read(val) : val);
+                    return (isref ? cpu.read(val) : val);
                 };
             }
         }
@@ -343,8 +343,6 @@ bool Mos6502Monitor::assemble(Mos6502Monitor &self, const std::vector<std::strin
 
     self._os << "Entering edit mode. To finish write '.' or an empty line" << std::endl;
 
-    auto mmap = self._cpu._mmap;
-
     while (true) {
         self._os << "$" << utils::to_string(addr) << ": " << std::flush;
 
@@ -386,7 +384,7 @@ bool Mos6502Monitor::assemble(Mos6502Monitor &self, const std::vector<std::strin
          */
         try {
             for (uint8_t u8 : program) {
-                mmap->write(addr++, u8);
+                self._cpu.write(addr++, u8);
             }
         } catch (const std::exception &err) {
             /*
@@ -455,7 +453,7 @@ bool Mos6502Monitor::dump(Mos6502Monitor &self, const std::vector<std::string> &
     std::vector<uint8_t> data(count);
 
     std::generate(data.begin(), data.end(), [&self, &ra]() -> uint8_t {
-        return self._cpu._mmap->read(ra++);
+        return self._cpu.read(ra++);
     });
 
     utils::dump(self._os, data, addr) << std::endl;
@@ -661,7 +659,7 @@ bool Mos6502Monitor::load(Mos6502Monitor &self, const std::vector<std::string> &
             }
 
             for (auto c : prog) {
-                self._cpu._mmap->write(addr++, c);
+                self._cpu.write(addr++, c);
             }
 
             addr_t size = prog.size();
@@ -696,7 +694,7 @@ bool Mos6502Monitor::save(Mos6502Monitor &self, const std::vector<std::string> &
 
         PrgFile prog{};
         for (auto addr = start; addr <= end; ++addr) {
-            uint8_t c = self._cpu._mmap->read(addr);
+            uint8_t c = self._cpu.read(addr);
             prog.push_back(c);
         }
 

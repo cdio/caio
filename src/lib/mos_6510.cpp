@@ -52,16 +52,24 @@ void Mos6510::bpadd(addr_t addr, const std::function<void(Mos6510 &, void *)> &c
 
 uint8_t Mos6510::read(addr_t addr) const
 {
+#if 0
     return (addr == PORT_1 ? _ioports.ior(addr) : Mos6502::read(addr));
+#else
+    return Mos6502::read(addr);
+#endif
 }
 
 void Mos6510::write(addr_t addr, uint8_t value)
 {
+#if 0
     if (addr == PORT_1) {
         _ioports.iow(addr, value);
     } else {
         Mos6502::write(addr, value);
     }
+#else
+    Mos6502::write(addr, value);
+#endif
 }
 
 }

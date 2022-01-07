@@ -204,14 +204,21 @@ public:
      */
     void disass(std::ostream &os, addr_t start, size_t count, bool show_pc = false);
 
-protected:
     /**
-     * @see ASpace::read_addr()
+     * Read an address from an address.
+     * @param addr Address to read from.
+     * @return The 16 bits value.
+     * @exception InvalidReadAddress
+     * @see read()
      */
     addr_t read_addr(size_t addr) const;
 
     /**
-     * @see ASpace::write_addr()
+     * Write an address into an address.
+     * @param addr  Address to write to;
+     * @param value 16 bits value to write.
+     * @exception InvalidWriteAddress
+     * @see write()
      */
     void write_addr(addr_t addr, addr_t data);
 
@@ -338,11 +345,11 @@ private:
     }
 
     void push(uint8_t value) {
-        _mmap->write(S_base + _regs.S--, value);
+        write(S_base + _regs.S--, value);
     }
 
     uint8_t pop() {
-        return _mmap->read(S_base + (++_regs.S));
+        return read(S_base + (++_regs.S));
     }
 
     void push_addr(addr_t value) {

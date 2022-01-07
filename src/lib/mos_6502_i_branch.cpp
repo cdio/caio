@@ -170,7 +170,7 @@ void Mos6502::i_BRK(Mos6502 &self, addr_t _)
     self.push_P();
     self.flag(Flags::I);
 
-    addr_t addr = self._mmap->read_addr(vIRQ);
+    addr_t addr = self.read_addr(vIRQ);
     self._regs.PC = addr;
 }
 
@@ -203,7 +203,7 @@ void Mos6502::i_JSR(Mos6502 &self, addr_t addr)
      *
      * 6 cycles
      */
-    addr = self._mmap->read_addr(self._regs.PC - 2);
+    addr = self.read_addr(self._regs.PC - 2);
     self.push_addr(self._regs.PC - 1); /* The pushed value is the last byte of the JSR instruction */
     self._regs.PC = addr;
 }

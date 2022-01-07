@@ -49,7 +49,7 @@ void Mos6502::i_LDA(Mos6502 &self, addr_t addr)
      *
      * Flags: N Z
      */
-    self._regs.A = self._mmap->read(addr);
+    self._regs.A = self.read(addr);
     self.set_N(self._regs.A);
     self.set_Z(self._regs.A);
 }
@@ -80,7 +80,7 @@ void Mos6502::i_LDX(Mos6502 &self, addr_t addr)
      *
      * Flags: N Z
      */
-    self._regs.X = self._mmap->read(addr);
+    self._regs.X = self.read(addr);
     self.set_N(self._regs.X);
     self.set_Z(self._regs.X);
 }
@@ -111,7 +111,7 @@ void Mos6502::i_LDY(Mos6502 &self, addr_t addr)
      *
      * Flags: N Z
      */
-    self._regs.Y = self._mmap->read(addr);
+    self._regs.Y = self.read(addr);
     self.set_N(self._regs.Y);
     self.set_Z(self._regs.Y);
 }
@@ -131,7 +131,7 @@ void Mos6502::i_STA(Mos6502 &self, addr_t addr)
      * STA ($00, X)
      * STA ($00), Y
      */
-    self._mmap->write(addr, self._regs.A);
+    self.write(addr, self._regs.A);
 }
 
 
@@ -145,7 +145,7 @@ void Mos6502::i_STX(Mos6502 &self, addr_t addr)
      * STX $00, Y
      * STX $0000
      */
-    self._mmap->write(addr, self._regs.X);
+    self.write(addr, self._regs.X);
 }
 
 
@@ -159,7 +159,7 @@ void Mos6502::i_STY(Mos6502 &self, addr_t addr)
      * STY $00, X
      * STY $0000
      */
-    self._mmap->write(addr, self._regs.Y);
+    self.write(addr, self._regs.Y);
 }
 
 

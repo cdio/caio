@@ -146,13 +146,13 @@ void C64::attach_prg()
 
             _conf.title += " - " + fs::basename(_conf.prgfile);
 
-            _cpu->bpadd(BASIC_READY_ADDR, [this](Mos6510 &cpu, void *arg) {
+            _cpu->bpadd(BASIC_READY_ADDR, [](Mos6510 &cpu, void *arg) {
                 /*
                  * Load PRG into memory.
                  */
                 auto *prog = static_cast<PrgFile *>(arg);
                 for (size_t i = 0; i < prog->size(); ++i) {
-                    _mmap->write(prog->address() + i, (*prog)[i]);
+                    cpu.write(prog->address() + i, (*prog)[i]);
                 }
 
                 /*
@@ -160,16 +160,16 @@ void C64::attach_prg()
                  */
                 if (prog->address() == BASIC_PRG_START) {
                     addr_t end = BASIC_PRG_START + prog->size();
-                    _mmap->write_addr(BASIC_TXTTAB, BASIC_PRG_START);
-                    _mmap->write_addr(BASIC_VARTAB, end);
-                    _mmap->write_addr(BASIC_ARYTAB, end);
-                    _mmap->write_addr(BASIC_STREND, end);
+                    cpu.write_addr(BASIC_TXTTAB, BASIC_PRG_START);
+                    cpu.write_addr(BASIC_VARTAB, end);
+                    cpu.write_addr(BASIC_ARYTAB, end);
+                    cpu.write_addr(BASIC_STREND, end);
 
-                    _mmap->write(BASIC_KEYB_BUFF + 0, 'R');
-                    _mmap->write(BASIC_KEYB_BUFF + 1, 'U');
-                    _mmap->write(BASIC_KEYB_BUFF + 2, 'N');
-                    _mmap->write(BASIC_KEYB_BUFF + 3, '\r');
-                    _mmap->write(BASIC_KEYB_BUFF_POS, 4);
+                    cpu.write(BASIC_KEYB_BUFF + 0, 'R');
+                    cpu.write(BASIC_KEYB_BUFF + 1, 'U');
+                    cpu.write(BASIC_KEYB_BUFF + 2, 'N');
+                    cpu.write(BASIC_KEYB_BUFF + 3, '\r');
+                    cpu.write(BASIC_KEYB_BUFF_POS, 4);
                 }
 
                 cpu.bpdel(BASIC_READY_ADDR);

@@ -29,10 +29,19 @@ namespace cemu {
  */
 class Mos6510 : public Mos6502 {
 public:
-    constexpr static const char *TYPE     = "MOS6510";
+    constexpr static const char *TYPE    = "MOS6510";
 
-    constexpr static const addr_t PORT_0  = 0x0000;
-    constexpr static const addr_t PORT_1  = 0x0001;
+    constexpr static const addr_t PORT_0 = 0x0000;
+    constexpr static const addr_t PORT_1 = 0x0001;
+
+    constexpr static const uint8_t P0    = 0x01;
+    constexpr static const uint8_t P1    = 0x02;
+    constexpr static const uint8_t P2    = 0x04;
+    constexpr static const uint8_t P3    = 0x08;
+    constexpr static const uint8_t P4    = 0x10;
+    constexpr static const uint8_t P5    = 0x20;
+    constexpr static const uint8_t P6    = 0x40;
+    constexpr static const uint8_t P7    = 0x80;
 
     using ior_t = Gpio::ior_t;
     using iow_t = Gpio::iow_t;
@@ -77,7 +86,6 @@ public:
      */
     void bpadd(addr_t addr, const std::function<void(Mos6510 &, void *)> &cb, void *arg);
 
-protected:
     /**
      * @see Mos6502::read()
      */
