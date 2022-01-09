@@ -37,23 +37,23 @@ Mos6510::~Mos6510()
 
 void Mos6510::add_ior(const ior_t &ior, uint8_t mask)
 {
-   _ioports.add_ior(ior, mask);
+   _ioport.add_ior(ior, mask);
 }
 
 void Mos6510::add_iow(const iow_t &iow, uint8_t mask)
 {
-    _ioports.add_iow(iow, mask);
+    _ioport.add_iow(iow, mask);
 }
 
-void Mos6510::bpadd(addr_t addr, const std::function<void(Mos6510 &, void *)> &cb, void *arg)
+void Mos6510::bpadd(addr_t addr, const breakpoint_cb_t &cb, void *arg)
 {
-    Mos6502::bpadd(addr, *reinterpret_cast<const std::function<void(Mos6502 &, void *)> *>(&cb), arg);
+    Mos6502::bpadd(addr, *reinterpret_cast<const Mos6502::breakpoint_cb_t *>(&cb), arg);
 }
 
 uint8_t Mos6510::read(addr_t addr) const
 {
 #if 0
-    return (addr == PORT_1 ? _ioports.ior(addr) : Mos6502::read(addr));
+    return (addr == PORT_1 ? _ioport.ior(addr) : Mos6502::read(addr));
 #else
     return Mos6502::read(addr);
 #endif
@@ -63,7 +63,7 @@ void Mos6510::write(addr_t addr, uint8_t value)
 {
 #if 0
     if (addr == PORT_1) {
-        _ioports.iow(addr, value);
+        _ioport.iow(addr, value);
     } else {
         Mos6502::write(addr, value);
     }

@@ -319,23 +319,23 @@ void C64::reset()
         _clk->add(_unit9);
     }
 
-    auto trigger_irq = [this](bool active) {
-        _cpu->trigger_irq(active);
+    auto set_irq = [this](bool active) {
+        _cpu->irq_pin() = active;
     };
 
-    auto trigger_nmi = [this](bool active) {
-        _cpu->trigger_nmi(active);
+    auto set_nmi = [this](bool active) {
+        _cpu->nmi_pin() = active;
     };
 
     auto set_rdy = [this](bool active) {
-        _cpu->set_rdy(active);
+        _cpu->rdy_pin() = active;
     };
 
     auto vsync = [this](unsigned wait_cycles) {
         _clk->sync(wait_cycles);
     };
 
-    _vic2->irq(trigger_irq);
+    _vic2->irq(set_irq);
     _vic2->ba(set_rdy);
     _vic2->vsync(vsync);
 
@@ -352,8 +352,8 @@ void C64::reset()
         _ui->render_line(line, scanline);
     });
 
-    _cia1->irq(trigger_irq);
-    _cia2->irq(trigger_nmi);
+    _cia1->irq(set_irq);
+    _cia2->irq(set_nmi);
 
     _sid->audio_buffer([this]() {
         return _ui->audio_buffer();
@@ -438,7 +438,7 @@ void C64::reset()
     };
 
     auto restore_key = [this]() {
-        _cpu->trigger_nmi(true);
+        _cpu->nmi_pin() = true;
     };
 
     _kbd  = std::make_shared<C64Keyboard>("C64 KBD", restore_key);

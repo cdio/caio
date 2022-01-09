@@ -34,7 +34,6 @@ CXXSRCS=	aspace.cpp \
 		device_none.cpp \
 		device_rom.cpp \
 		fs.cpp \
-		gpio.cpp \
 		icon.cpp \
 		keyboard.cpp \
 		logger.cpp \
@@ -75,10 +74,9 @@ INCS=		aspace.hpp \
 		gpio.hpp \
 		icon.hpp \
 		image.hpp \
-		input_pin.hpp \
-		irq_pin.hpp \
 		joystick.hpp \
 		keyboard.hpp \
+		latch.hpp \
 		locked_queue.hpp \
 		logger.hpp \
 		mos_6502.hpp \
@@ -94,6 +92,8 @@ INCS=		aspace.hpp \
 		nibble_ram.hpp \
 		p00file.hpp \
 		prgfile.hpp \
+		pin.hpp \
+		pullup.hpp \
 		rgb.hpp \
 		signal.hpp \
 		socket.hpp \

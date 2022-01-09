@@ -25,6 +25,7 @@
 #include "clock.hpp"
 #include "device.hpp"
 #include "gpio.hpp"
+#include "pin.hpp"
 
 
 namespace cemu {
@@ -36,7 +37,6 @@ namespace cemu {
 class Mos6526 : public Device, public Gpio, public Clockable {
 public:
     constexpr static const char *TYPE = "MOS6526";
-
 
     enum Registers {
         PRA         = 0,    /* Port A                       */
@@ -59,14 +59,12 @@ public:
         REGMAX
     };
 
-
     enum class TimerMode {
         PHI2        = 0,    /* CLK                          */
         CNT         = 1,    /* /CNT negative transition     */
         TA          = 2,    /* Timer A underflow            */
         TA_CNT      = 3     /* Timer A underflow + /CNT low */
     };
-
 
     constexpr static uint8_t ICR_TA        = 0x01;
     constexpr static uint8_t ICR_TB        = 0x02;
@@ -100,7 +98,6 @@ public:
 
     constexpr static uint8_t PB6           = P6;            /* Port B bit for timer A                       */
     constexpr static uint8_t PB7           = P7;            /* Port B bit for timer B                       */
-
 
     class Timer {
     public:
@@ -183,7 +180,6 @@ public:
         uint16_t _prescaler{0xFFFF};
         bool     _is_underflow{};
     };
-
 
     class Tod {
     public:
@@ -283,7 +279,6 @@ public:
         size_t           _cycles{};
     };
 
-
     /**
      * Initalise this CIA instance.
      * @param label Label assigned to this device.
@@ -322,10 +317,10 @@ public:
     /**
      * Set the IRQ pin callback.
      * The IRQ pin callback is called when the status of the IRQ output pin of this device is changed.
-     * @param trigger_irq IRQ pin callback.
+     * @param irq_out IRQ output pin callback.
      */
-    void irq(std::function<void(bool)> trigger_irq) {
-        _trigger_irq = trigger_irq;
+    void irq(const OutputPinCb &irq_out) {
+        _irq_out = irq_out;
     }
 
 private:
@@ -336,32 +331,24 @@ private:
 
     bool tick(Timer &timer, TimerMode mode);
 
-    TimerMode timer_A_mode() const {
-        return static_cast<TimerMode>((_timer_A.cr() & CRA_INMODE) >> 5);
-    }
+    TimerMode timer_A_mode() const;
 
-    TimerMode timer_B_mode() const {
-        return static_cast<TimerMode>((_timer_B.cr() & CRB_INMODE) >> 5);
-    }
+    TimerMode timer_B_mode() const;
 
-    void irq_out(bool active) {
-        if (_trigger_irq) {
-            _trigger_irq(active);
-        }
-    }
+    void irq_out(bool active);
 
-    std::function<void(bool)> _trigger_irq{};
+    OutputPinCb _irq_out{};
 
-    Timer   _timer_A;
-    Timer   _timer_B;
+    Timer       _timer_A;
+    Timer       _timer_B;
 
-    Tod     _tod{};
+    Tod         _tod{};
 
-    uint8_t _port_A_dir{};      /* 0 = Input; 1 = Output    */
-    uint8_t _port_B_dir{};      /* 0 = Input; 1 = Output    */
+    uint8_t     _port_A_dir{};  /* 0: Input, 1: Output  */
+    uint8_t     _port_B_dir{};  /* 0: Input, 1: Output  */
 
-    uint8_t _icr_data{};
-    uint8_t _icr_mask{};
+    uint8_t     _icr_data{};
+    uint8_t     _icr_mask{};
 };
 
 }

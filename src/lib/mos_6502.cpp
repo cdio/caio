@@ -371,19 +371,19 @@ Logger::Level Mos6502::loglevel() const
     return _log.loglevel();
 }
 
-void Mos6502::trigger_irq(bool active)
+IRQPin &Mos6502::irq_pin()
 {
-    _irq.trigger(active);
+    return _irq_pin;
 }
 
-void Mos6502::trigger_nmi(bool active)
+IRQPin &Mos6502::nmi_pin()
 {
-    _nmi.trigger(active);
+    return _nmi_pin;
 }
 
-void Mos6502::set_rdy(bool active)
+InputPin &Mos6502::rdy_pin()
 {
-    _rdy.set(active);
+    return _rdy_pin;
 }
 
 void Mos6502::ebreak()
@@ -391,7 +391,7 @@ void Mos6502::ebreak()
     _break = true;
 }
 
-void Mos6502::bpadd(addr_t addr, const std::function<void(Mos6502 &, void *)> &cb, void *arg)
+void Mos6502::bpadd(addr_t addr, const breakpoint_cb_t &cb, void *arg)
 {
     _breakpoints[addr] = {cb, arg};
 }
@@ -521,7 +521,7 @@ size_t Mos6502::single_step()
     addr_t addr{};
     bool is_nmi{};
 
-    if (!_rdy) {
+    if (!_rdy_pin) {
         /*
          * CPU freezed on read operations.
          * In the real CPU several clock cycles are needed to execute one single instruction,
@@ -536,11 +536,11 @@ size_t Mos6502::single_step()
         return 1;
     }
 
-    if (_nmi.is_active()) {
-        _nmi.reset();       /* TODO Implement edge triggered interrupts */
+    if (_nmi_pin) {
+        _nmi_pin.reset();   /* Reset the pin to simulate an edge triggered interrupt */
         addr = read_addr(vNMI);
         is_nmi = true;
-    } else if (is_irq_enabled() && _irq.is_active()) {
+    } else if (is_irq_enabled() && _irq_pin) {
         addr = read_addr(vIRQ);
     }
 

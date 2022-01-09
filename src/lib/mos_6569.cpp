@@ -85,14 +85,14 @@ void Mos6569::vsync(const std::function<void(unsigned)> &cb)
     _vsync = cb;
 }
 
-void Mos6569::irq(const std::function<void(bool)> &set_irq)
+void Mos6569::irq(const OutputPinCb &irq_out)
 {
-    _set_irq = set_irq;
+    _irq_out = irq_out;
 }
 
-void Mos6569::ba(const std::function<void(bool)> &set_ba)
+void Mos6569::ba(const OutputPinCb &ba_out)
 {
-    _set_ba = set_ba;
+    _ba_out = ba_out;
 }
 
 void Mos6569::trigger_lp()
@@ -948,16 +948,16 @@ void Mos6569::irq_out(bool active)
             _irq_status &= ~REG_INTERRUPT_IRQ;
         }
 
-        if (_set_irq) {
-            _set_irq(active);
+        if (_irq_out) {
+            _irq_out(active);
         }
     }
 }
 
 inline void Mos6569::ba_out(bool active)
 {
-    if (_set_ba) {
-        _set_ba(active);
+    if (_ba_out) {
+        _ba_out(active);
     }
 }
 

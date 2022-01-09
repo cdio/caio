@@ -10,6 +10,7 @@
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
+- CBMBUS:   Refactor using pullups
 - UI:       Pause, audio, hide widgets
 - UI:       Couch Mode (control everything through the gamepad):
             - Map some gamepad combination to enable couch mode

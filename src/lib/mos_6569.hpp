@@ -30,6 +30,7 @@
 #include "aspace.hpp"
 #include "clock.hpp"
 #include "device.hpp"
+#include "pin.hpp"
 #include "rgb.hpp"
 #include "ui.hpp"
 
@@ -285,16 +286,16 @@ public:
     /**
      * Set the IRQ pin callback.
      * The IRQ pin callback is called when the status of the IRQ output pin of this device is changed.
-     * @param set_irq IRQ pin callback.
+     * @param irq_out IRQ output pin callback.
      */
-    void irq(const std::function<void(bool)> &set_irq);
+    void irq(const OutputPinCb &irq_out);
 
     /**
      * Set the BA (Bus Available) pin callback.
      * The BA pin callback is called when the value of the BA output pin of this device is changed.
-     * @param set_ba BA pin callback.
+     * @param ba_out BA pin callback.
      */
-    void ba(const std::function<void(bool)> &set_ba);
+    void ba(const OutputPinCb &ba_out);
 
     /**
      * LP edge triggered input.
@@ -364,15 +365,15 @@ private:
     void render_line(unsigned line);
 
     /**
-     * Set the status of the IRQ output pin.
+     * Set/Unset an IRQ condition.
      * The IRQ bit in the REG_INTERRUPT register is properly
-     * set and the IRQ trigger callback is called.
-     * @param active true if the IRQ ouput pin must be activated; false otherwise.
+     * set and the IRQ output callback is called.
+     * @param active true if the IRQ pin must be activated; false otherwise.
      */
     void irq_out(bool active);
 
     /**
-     * Set the BA pin.
+     * Set the BA output pin callback.
      * @param active true to activate; false to deactivate.
      */
     void ba_out(bool active);
@@ -578,8 +579,9 @@ private:
 
     std::function<void(unsigned, const ui::Scanline &)> _render_line{}; /* Line renderer callback                   */
     std::function<void(size_t)> _vsync{};                       /* Vertical sync callback                           */
-    std::function<void(bool)>   _set_irq{};                     /* IRQ output pin callback                          */
-    std::function<void(bool)>   _set_ba{};                      /* BA output pin callback                           */
+
+    OutputPinCb             _irq_out{};                         /* IRQ output pin callback                          */
+    OutputPinCb             _ba_out{};                          /* BA output pin callback                           */
 
     std::shared_ptr<ASpace> _mmap{};                            /* Address space mappings                           */
     devptr_t                _vcolor{};                          /* Video colour RAM                                 */

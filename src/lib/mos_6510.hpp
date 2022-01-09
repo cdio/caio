@@ -31,8 +31,8 @@ class Mos6510 : public Mos6502 {
 public:
     constexpr static const char *TYPE    = "MOS6510";
 
-    constexpr static const addr_t PORT_0 = 0x0000;
-    constexpr static const addr_t PORT_1 = 0x0001;
+    constexpr static const addr_t PORT_0 = 0x0000;  /* Data direction register  */
+    constexpr static const addr_t PORT_1 = 0x0001;  /* I/O port                 */
 
     constexpr static const uint8_t P0    = 0x01;
     constexpr static const uint8_t P1    = 0x02;
@@ -42,6 +42,8 @@ public:
     constexpr static const uint8_t P5    = 0x20;
     constexpr static const uint8_t P6    = 0x40;
     constexpr static const uint8_t P7    = 0x80;
+
+    using breakpoint_cb_t = std::function<void(Mos6510 &, void *)>;
 
     using ior_t = Gpio::ior_t;
     using iow_t = Gpio::iow_t;
@@ -66,17 +68,18 @@ public:
     virtual ~Mos6510();
 
     /**
-     * Add an input port callback.
-     * @param ior  Input port callback;
-     * @param mask Port bits associated to the callback.
+     * Add an input callback.
+     * @param ior  Input callback;
+     * @param mask Bits used by the callback.
      * @see Gpio::add_ior()
      */
     void add_ior(const ior_t &ior, uint8_t mask);
 
     /**
-     * Add an ouput port callback.
-     * @param iow  Output port callback;
-     * @param mask Port bits associated to the callback.
+     * Add an ouput callback.
+     * @param iow  Output callback;
+     * @param mask Bits used by the callback.
+     * @see Gpio::add_iow()
      */
     void add_iow(const iow_t &iow, uint8_t mask);
 
@@ -84,7 +87,7 @@ public:
      * Add a breakpoint on a memory address.
      * @see Mos6502::bpadd()
      */
-    void bpadd(addr_t addr, const std::function<void(Mos6510 &, void *)> &cb, void *arg);
+    void bpadd(addr_t addr, const breakpoint_cb_t &cb, void *arg);
 
     /**
      * @see Mos6502::read()
@@ -97,7 +100,7 @@ public:
     void write(addr_t addr, uint8_t data) override;
 
 private:
-    Gpio _ioports{};
+    Gpio _ioport{};
 };
 
 }

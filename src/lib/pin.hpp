@@ -18,45 +18,35 @@
  */
 #pragma once
 
+#include <functional>
+
+#include "latch.hpp"
+#include "pullup.hpp"
+
 
 namespace cemu {
 
 /**
- * Input pin.
- * 1 bit GPIO pin.
+ * Input Pin.
+ * An Input pin is a 1 bit latch register.
  */
-class InputPin {
-public:
-    InputPin(bool active = true)
-        : _pin{active} {
-    }
+using InputPin = Latch;
 
-    ~InputPin() {
-    }
+/**
+ * IRQ input pin.
+ * An IRQ pin is a pull-up pin where several interrupt
+ * sources can drive the line low.
+ */
+using IRQPin = PullUp;
 
-    bool operator=(bool value) {
-        _pin = value;
-        return _pin;
-    }
-
-    void set(bool active = true) {
-        _pin = active;
-    }
-
-    void unset() {
-        _pin = false;
-    }
-
-    bool is_active() const {
-        return _pin;
-    }
-
-    operator bool() const {
-        return is_active();
-    }
-
-private:
-    bool _pin;
-};
+/**
+ * Output Pin Callback.
+ * An output pin is implemented as a callback function that
+ * connects that output pin to one or more input pins.
+ * In other words: When an output pin is "set" what is set
+ * are the input pins connected to that output, this is done
+ * by the callback.
+ */
+using OutputPinCb = std::function<void(bool)>;
 
 }

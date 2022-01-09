@@ -27,10 +27,9 @@
 
 #include "aspace.hpp"
 #include "clock.hpp"
-#include "input_pin.hpp"
-#include "irq_pin.hpp"
 #include "logger.hpp"
 #include "name.hpp"
+#include "pin.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 
@@ -52,6 +51,8 @@ public:
     constexpr static const addr_t vIRQ   = 0xFFFE;
 
     constexpr static const addr_t S_base = 0x0100;
+
+    using breakpoint_cb_t = std::function<void(Mos6502 &, void *)>;
 
     enum AddressingMode {
         MODE_NONE,
@@ -155,20 +156,20 @@ public:
      * the IRQ pin and a second time to de-activate it when the interrupt is served.
      * @param active true to generate an interrupt; false to de-activate a previous interrupt request.
      */
-    void trigger_irq(bool active);
+    IRQPin &irq_pin();
 
     /**
      * Trigger an NMI interrupt.
      * @param active true to generate an interrupt; false to de-activate.
      */
-    void trigger_nmi(bool active);
+    IRQPin &nmi_pin();
 
     /**
      * Set the RDY line.
      * @param active true to activate the RDY line; false otherwise.
      * @see single_step()
      */
-    void set_rdy(bool active);
+    InputPin &rdy_pin();
 
     /**
      * External breakpoint.
@@ -182,7 +183,7 @@ public:
      * @param addr Address;
      * @parma cb   Method to call when the breakpoint hits.
      */
-    void bpadd(addr_t addr, const std::function<void(Mos6502 &, void *)> &cb, void *arg);
+    void bpadd(addr_t addr, const breakpoint_cb_t &cb, void *arg);
 
     /**
      * Delete a breakpoint on a memory address.
@@ -378,12 +379,12 @@ private:
     std::unique_ptr<Mos6502Monitor> _monitor{};
     Registers                       _regs{};
     std::shared_ptr<ASpace>         _mmap{};
-    IRQPin                          _irq{};
-    IRQPin                          _nmi{};
-    InputPin                        _rdy{};
+    IRQPin                          _irq_pin{};
+    IRQPin                          _nmi_pin{};
+    InputPin                        _rdy_pin{};
 
     std::atomic_bool _break{};
-    std::map<addr_t, std::pair<std::function<void(Mos6502 &, void *)>, void *>> _breakpoints{};
+    std::map<addr_t, std::pair<breakpoint_cb_t, void *>> _breakpoints{};
 
     static const std::array<Instruction, 256> instr_set;
 

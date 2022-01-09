@@ -20,6 +20,8 @@
 
 #include <cstdint>
 #include <functional>
+#include <limits>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -27,53 +29,87 @@
 namespace cemu {
 
 /**
- * Generic GPIO.
- * A GPIO exposes an 8 bits address range where data can be written to or read from.
- * Read and write operations are done through user defined callbacks.
+ * GPIO template.
+ * A GPIO is a container of I/O Ports, each port has a fixed number of bits or pins.
+ * R/W access to the ports are handled by input/output callbacks.
+ * Each callback is associated to a port and to mask which specifies the pins of the
+ * port affected by the callback.
+ * Since each port can be associated to several input and output callbacks, the port
+ * pins are implemented as pull-ups.
  */
-class Gpio {
+template<typename ADDR, typename DATA,
+    std::enable_if_t<std::is_unsigned<ADDR>::value, bool> = true,
+    std::enable_if_t<std::is_unsigned<DATA>::value, bool> = true>
+class Gpio_ {
 public:
-    using ior_t = std::function<uint8_t(uint8_t)>;
-    using iow_t = std::function<void(uint8_t, uint8_t)>;
+    using ior_t = std::function<DATA(ADDR)>;
+    using iow_t = std::function<void(ADDR, DATA)>;
 
-    using ior_mask_t = std::pair<ior_t, uint8_t>;
-    using iow_mask_t = std::pair<iow_t, uint8_t>;
+    using ior_mask_t = std::pair<ior_t, DATA>;
+    using iow_mask_t = std::pair<iow_t, DATA>;
 
-    explicit Gpio();
+    explicit Gpio_() {
+    }
 
-    virtual ~Gpio();
+    virtual ~Gpio_() {
+    }
 
     /**
      * Add an input callback.
      * @param ior  Input callback;
-     * @param mask Bits to read.
+     * @param mask Bits used by the callback.
      */
-    void add_ior(const ior_t &ior, uint8_t mask);
+    void add_ior(const ior_t &ior, ADDR mask) {
+        _iors.push_back({ior, mask});
+    }
 
     /**
      * Add an ouput callback.
      * @param iow  Output callback;
-     * @param mask Bits to write.
+     * @param mask Bits used by the callback.
      */
-    void add_iow(const iow_t &iow, uint8_t mask);
+    void add_iow(const iow_t &iow, ADDR mask) {
+        _iows.push_back({iow, mask});
+    }
 
     /**
-     * Read from input pins.
-     * @param addr Address to read from.
-     * @return The input value.
+     * Read from an IO port.
+     * The input callbacks associated to the port are called
+     * and the combined result is returned.
+     * @param addr Port to read from.
+     * @return The port value.
      */
-    uint8_t ior(uint8_t addr) const;
+    DATA ior(ADDR addr) const {
+        DATA value{std::numeric_limits<DATA>::max()};   /* pull-up */
+        for (const auto &[ior, mask] : _iors) {
+            value &= (ior(addr) & mask) | ~mask;
+        }
+        return value;
+    }
 
     /**
      * Write to output pins.
+     * The output callbacks associated to the port are called,
+     * each callback will be receiving as argument the bitwise
+     * AND operation between the specified value and its mask.
      * @param addr  Address to write;
      * @param value Value to write.
      */
-    void iow(uint8_t addr, uint8_t value);
+    void iow(ADDR addr, DATA value) {
+        for (auto &[iow, mask] : _iows) {
+            iow(addr, value & mask);
+        }
+    }
 
 private:
     std::vector<ior_mask_t> _iors{};
     std::vector<iow_mask_t> _iows{};
 };
+
+/**
+ * Generic I/O ports.
+ * 256 I/O ports with 8 pins each.
+ */
+using Gpio = Gpio_<uint8_t, uint8_t>;
 
 }

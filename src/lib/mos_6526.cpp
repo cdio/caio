@@ -194,6 +194,29 @@ void Mos6526::write(addr_t addr, uint8_t data)
     }
 }
 
+std::ostream &Mos6526::dump(std::ostream &os, addr_t base) const
+{
+    std::array<uint8_t, REGMAX> regs{
+        read(PRA),
+        read(PRB),
+        read(DDRA),
+        read(DDRB),
+        read(TALO),
+        read(TAHI),
+        read(TBLO),
+        read(TBHI),
+        read(TOD_10THS),
+        read(TOD_SEC),
+        read(TOD_MIN),
+        read(TOD_HR),
+        read(SDR),
+        read(ICR),
+        read(CRA),
+        read(CRB)
+    };
+
+    return utils::dump(os, regs, base);
+}
 
 void Mos6526::Timer::cr(uint8_t data)
 {
@@ -230,7 +253,6 @@ void Mos6526::Timer::unsetpb()
         _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) & ~_pbit);
     }
 }
-
 
 Mos6526::Tod::TodData &Mos6526::Tod::TodData::operator=(const TodData &tod)
 {
@@ -292,7 +314,6 @@ bool Mos6526::Tod::tick(const Clock &clk)
 
     return false;
 }
-
 
 size_t Mos6526::tick(const Clock &clk)
 {
@@ -357,28 +378,21 @@ bool Mos6526::tick(Timer &timer, TimerMode mode)
     return false;
 }
 
-std::ostream &Mos6526::dump(std::ostream &os, addr_t base) const
+inline Mos6526::TimerMode Mos6526::timer_A_mode() const
 {
-    std::array<uint8_t, REGMAX> regs{
-        read(PRA),
-        read(PRB),
-        read(DDRA),
-        read(DDRB),
-        read(TALO),
-        read(TAHI),
-        read(TBLO),
-        read(TBHI),
-        read(TOD_10THS),
-        read(TOD_SEC),
-        read(TOD_MIN),
-        read(TOD_HR),
-        read(SDR),
-        read(ICR),
-        read(CRA),
-        read(CRB)
-    };
+    return static_cast<TimerMode>((_timer_A.cr() & CRA_INMODE) >> 5);
+}
 
-    return utils::dump(os, regs, base);
+inline Mos6526::TimerMode Mos6526::timer_B_mode() const
+{
+    return static_cast<TimerMode>((_timer_B.cr() & CRB_INMODE) >> 5);
+}
+
+inline void Mos6526::irq_out(bool active)
+{
+    if (_irq_out) {
+        _irq_out(active);
+    }
 }
 
 }
