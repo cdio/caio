@@ -19,6 +19,8 @@
 #include "logger.hpp"
 
 #include <climits>
+#include <iomanip>
+#include <regex>
 
 #include "utils.hpp"
 
@@ -27,15 +29,67 @@ namespace cemu {
 
 Logger log{};
 
+std::map<std::string, Logger::Level> Logger::loglevel_map = {
+    { ERROR_STR,    Logger::ERROR   },
+    { WARN_STR,     Logger::WARN    },
+    { INFO_STR,     Logger::INFO    },
+    { DEBUG_STR,    Logger::DEBUG   },
+    { ALL_STR,      Logger::ALL     }
+};
+
+
+Logger::Level Logger::to_loglevel(const std::string &level)
+{
+    if (level.empty()) {
+        return Level::NONE;
+    }
+
+    try {
+        return loglevel_map.at(level);
+    } catch (std::out_of_range &) {
+        return Level::INVALID;
+    }
+}
+
+Logger::Level Logger::parse_loglevel(const std::string &levels)
+{
+    static const std::regex re_loglevel("([^\\|]+)", std::regex::extended);
+    int loglevel = NONE;
+
+    for (auto it = std::sregex_iterator(levels.begin(), levels.end(), re_loglevel);
+        it != std::sregex_iterator(); ++it) {
+
+        const std::string &lstr = utils::trim(it->str());
+        Level l = Logger::to_loglevel(lstr);
+        if (l == Level::INVALID) {
+            /*
+             * Malformed levels string.
+             */
+            std::ostringstream ss{};
+            ss << "Invalid log level: " << std::quoted(lstr)
+               << ", complete log level specification: " << std::quoted(levels);
+            throw LoggerError{ss.str()};
+        }
+
+        loglevel |= l;
+    }
+
+    return static_cast<Level>(loglevel);
+}
+
+Logger::Logger()
+    : _lv{Logger::parse_loglevel(DEFAULT_LOGLEVEL)}
+{
+    _os.open(DEFAULT_LOGFILE);
+}
+
+Logger::~Logger()
+{
+}
 
 void Logger::loglevel(const std::string &lvs)
 {
-    auto llvs = utils::tolow(lvs);
-    _lv = static_cast<Level>(
-        (llvs.find("e") == std::string::npos ? 0 : ERROR) |
-        (llvs.find("w") == std::string::npos ? 0 : WARN)  |
-        (llvs.find("i") == std::string::npos ? 0 : INFO)  |
-        (llvs.find("d") == std::string::npos ? 0 : DEBUG));
+    _lv = Logger::parse_loglevel(lvs);
 }
 
 void Logger::logfile(const std::string &fname)
@@ -109,7 +163,7 @@ Logger &Logger::log(Level lv, const char *fmt, ...)
 
 Logger &Logger::error(const char *fmt, ...)
 {
-    if (is_level_error()) {
+    if (is_error()) {
         va_list ap;
 
         va_start(ap, fmt);
@@ -122,7 +176,7 @@ Logger &Logger::error(const char *fmt, ...)
 
 Logger &Logger::warn(const char *fmt, ...)
 {
-    if (is_level_warn()) {
+    if (is_warn()) {
         va_list ap;
 
         va_start(ap, fmt);
@@ -135,7 +189,7 @@ Logger &Logger::warn(const char *fmt, ...)
 
 Logger &Logger::info(const char *fmt, ...)
 {
-    if (is_level_info()) {
+    if (is_info()) {
         va_list ap;
 
         va_start(ap, fmt);
@@ -148,7 +202,7 @@ Logger &Logger::info(const char *fmt, ...)
 
 Logger &Logger::debug(const char *fmt, ...)
 {
-    if (is_level_debug()) {
+    if (is_debug()) {
         va_list ap;
 
         va_start(ap, fmt);

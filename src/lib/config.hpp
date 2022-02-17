@@ -116,7 +116,7 @@ struct Config {
     constexpr static const bool     DEFAULT_MONITOR_ACTIVE   = false;
     constexpr static const bool     DEFAULT_PANEL            = false;
     constexpr static const char *   DEFAULT_LOGFILE          = Logger::DEFAULT_LOGFILE;
-    constexpr static const char *   DEFAULT_LOGLEVEL         = Logger::DEFAULT_LOGLEVEL_STRING;
+    constexpr static const char *   DEFAULT_LOGLEVEL         = Logger::DEFAULT_LOGLEVEL;
 
     constexpr static const char *   PALETTEFILE_SUFFIX       = ".plt";
     constexpr static const char *   KEYMAPSFILE_SUFFIX       = ".kbd";

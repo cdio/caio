@@ -364,7 +364,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
 
     ++channel.pos;
 
-    if (log.is_level_debug()) {
+    if (log.is_debug()) {
         size_t part = channel.size / 10;
         if (part == 0 || (channel.pos % part) == 0 || is_last) {
             float perc = (100.0f * channel.pos) / channel.size;
@@ -374,7 +374,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
 
     if (channel.pos == channel.size) {
         channel.elapsed = utils::now() - channel.elapsed;
-        if (log.is_level_debug()) {
+        if (log.is_debug()) {
             if (channel.elapsed != 0) {
                 float speed = channel.size / (channel.elapsed / 1000000.0f);
                 log.debug("%s: Transmission rate %.01fBytes/s\n", name(ch).c_str(), speed);

@@ -104,15 +104,11 @@ void CemuCmdline::usage()
               << " --monitor              Activate the CPU monitor"                                     << std::endl
               << " --logfile <file>       Write log information into the specified file"                << std::endl
               << "                        (default is " << Config::DEFAULT_LOGFILE << ")"               << std::endl
-              << " --loglevel <lv>        Use the specified loglevel; a combination of:"                << std::endl
-              << "                            E: Show errors messages"                                  << std::endl
-              << "                            W: Show warning messages"                                 << std::endl
-              << "                            I: Show info messages"                                    << std::endl
-              << "                            D: Show debug messages"                                   << std::endl
+              << " --loglevel <lv>        Use the specified loglevel; a combination of: "               << std::endl
+              << "                        error|warn|info|debug|all"                                    << std::endl
               << "                        (default is " << std::quoted(Config::DEFAULT_LOGLEVEL) << ")" << std::endl
               << " --panel <yes|no>       Panel visibility"                                             << std::endl
               << "                        (default is " << (Config::DEFAULT_PANEL ? "yes" : "no") << ")"
-                                                                                                        << std::endl
               << " -v|--version           Show version information and exit"                            << std::endl
               << " -h|--help              Print this message and exit"                                  << std::endl;
 }

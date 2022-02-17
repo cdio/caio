@@ -120,10 +120,10 @@ Config &Config::operator=(const Confile &conf)
         }
 
         it = sec.find(CemuConfile::LOGFILE_CONFIG_KEY);
-        logfile = (it != sec.end() ? logfile = it->second : Logger::DEFAULT_LOGFILE);
+        logfile = (it != sec.end() ? logfile = it->second : DEFAULT_LOGFILE);
 
         it = sec.find(CemuConfile::LOGLEVEL_CONFIG_KEY);
-        loglevel = (it != sec.end() ? utils::tolow(it->second) : Logger::DEFAULT_LOGLEVEL_STRING);
+        loglevel = (it != sec.end() ? utils::tolow(it->second) : DEFAULT_LOGLEVEL);
     }
 
     return *this;

@@ -21,6 +21,7 @@
 #include <cstdarg>
 #include <cstdio>
 #include <fstream>
+#include <map>
 #include <string>
 
 #include "types.hpp"
@@ -32,59 +33,56 @@ class LoggerError : public Error {
     using Error::Error;
 };
 
-
 class Logger {
 public:
-    constexpr static const char *ANSI_FG     = "\x1b[38;2;";
-    constexpr static const char *ANSI_BG     = "\x1b[48;2;";
-    constexpr static const char *ANSI_WHITE  = "255;255;255;1m";
-    constexpr static const char *ANSI_RED    = "255;0;0m";
-    constexpr static const char *ANSI_GREEN  = "0;255;0m";
-    constexpr static const char *ANSI_YELLOW = "255;255;0m";
-    constexpr static const char *ANSI_RESET  = "\x1b[0m";
+    constexpr static const char *DEFAULT_LOGFILE  = "/dev/null";
+    constexpr static const char *DEFAULT_LOGLEVEL = "";
+
+    constexpr static const char *ERROR_STR        = "error";
+    constexpr static const char *WARN_STR         = "warning";
+    constexpr static const char *INFO_STR         = "info";
+    constexpr static const char *DEBUG_STR        = "debug";
+    constexpr static const char *ALL_STR          = "all";
+
+    constexpr static const char *ANSI_FG          = "\x1b[38;2;";
+    constexpr static const char *ANSI_BG          = "\x1b[48;2;";
+    constexpr static const char *ANSI_WHITE       = "255;255;255;1m";
+    constexpr static const char *ANSI_RED         = "255;0;0m";
+    constexpr static const char *ANSI_GREEN       = "0;255;0m";
+    constexpr static const char *ANSI_YELLOW      = "255;255;0m";
+    constexpr static const char *ANSI_RESET       = "\x1b[0m";
 
     enum Level {
-        NONE  = 0x0,
-        ERROR = 0x1,
-        WARN  = 0x2,
-        INFO  = 0x4,
-        DEBUG = 0x8,
-        ALL   = (ERROR | WARN | INFO | DEBUG)
+        NONE    = 0x0,
+        ERROR   = 0x1,
+        WARN    = 0x2,
+        INFO    = 0x4,
+        DEBUG   = 0x8,
+        ALL     = (ERROR | WARN | INFO | DEBUG),
+        INVALID = -1
     };
 
-    constexpr static const char *DEFAULT_LOGFILE         = "/dev/null";
-    constexpr static const char *DEFAULT_LOGLEVEL_STRING = "";
-    constexpr static Level DEFAULT_LOGLEVEL              = Level::NONE;
+    Logger();
 
-
-    Logger() {
-        _os.open(DEFAULT_LOGFILE);
-    }
-
-    explicit Logger(Level lv)
-        : _lv{lv} {
-    }
-
-    virtual ~Logger() {
-    }
+    virtual ~Logger();
 
     bool is_level(Level lv) const {
         return (_lv & lv);
     }
 
-    bool is_level_error() const {
+    bool is_error() const {
         return is_level(ERROR);
     }
 
-    bool is_level_warn() const {
+    bool is_warn() const {
         return is_level(WARN);
     }
 
-    bool is_level_info() const {
+    bool is_info() const {
         return is_level(INFO);
     }
 
-    bool is_level_debug() const {
+    bool is_debug() const {
         return is_level(DEBUG);
     }
 
@@ -150,12 +148,28 @@ public:
 
     Logger &debug(const char *fmt, ...);
 
-private:
-    Level         _lv{DEFAULT_LOGLEVEL};
-    std::string   _logfile{};
-    std::ofstream _os;
-};
+    /**
+     * Convert a string to a level type.
+     * @param level Log level string to convert.
+     * @return The log level.
+     */
+    static Level to_loglevel(const std::string &level);
 
+    /**
+     * Convert a string with several log level strings to a bitwise combination of levels.
+     * @param levels Log level string formatted as "level1|level2|..."
+     * @return The bitwise combination of log levels.
+     * @exception LoggerError If the specified string is malformed.
+     */
+    static Level parse_loglevel(const std::string &levels);
+
+private:
+    Level         _lv;
+    std::ofstream _os;
+    std::string   _logfile{};
+
+    static std::map<std::string, Level> loglevel_map;
+};
 
 extern Logger log;
 
