@@ -82,32 +82,14 @@ constexpr static inline int ceil(T fval)
  * @param str String to convert.
  * @return The converted line.
  */
-static inline std::string tolow(const std::string &str)
-{
-    std::string lstr{str};
-
-    std::transform(lstr.begin(), lstr.end(), lstr.begin(), [](char c) {
-        return std::tolower(c);
-    });
-
-    return lstr;
-}
+std::string tolow(const std::string &str);
 
 /**
  * Toupper a string.
  * @param str String to convert.
  * @return The converted string.
  */
-static inline std::string toup(const std::string &str)
-{
-    std::string ustr{str};
-
-    std::transform(ustr.begin(), ustr.end(), ustr.begin(), [](char c) {
-        return std::toupper(c);
-    });
-
-    return ustr;
-}
+std::string toup(const std::string &str);
 
 /**
  * Split a string.
@@ -116,6 +98,13 @@ static inline std::string toup(const std::string &str)
  * @return The splitted string without the separator.
  */
 std::vector<std::string> split(const std::string &str, char sep);
+
+/**
+ * Remove leading and trailing white spaces from a string.
+ * @param str The string to trim.
+ * @return The trimmed string.
+ */
+std::string trim(const std::string &str);
 
 /**
  * Detect whether a number is a power of two.

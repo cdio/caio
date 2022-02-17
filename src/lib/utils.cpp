@@ -22,6 +22,28 @@
 namespace cemu {
 namespace utils {
 
+std::string tolow(const std::string &str)
+{
+    std::string lstr{str};
+
+    std::transform(lstr.begin(), lstr.end(), lstr.begin(), [](char c) {
+        return std::tolower(c);
+    });
+
+    return lstr;
+}
+
+std::string toup(const std::string &str)
+{
+    std::string ustr{str};
+
+    std::transform(ustr.begin(), ustr.end(), ustr.begin(), [](char c) {
+        return std::toupper(c);
+    });
+
+    return ustr;
+}
+
 std::vector<std::string> split(const std::string &str, char sep)
 {
     std::vector<std::string> v{};
@@ -34,6 +56,25 @@ std::vector<std::string> split(const std::string &str, char sep)
     } while (pos != std::string::npos);
 
     return v;
+}
+
+std::string trim(const std::string &str)
+{
+    size_t len = str.length();
+    size_t begin = str.find_first_not_of(" \t");
+    size_t end = str.find_last_not_of(" \t");
+
+    if (begin == std::string::npos) {
+        begin = 0;
+    }
+
+    if (end == std::string::npos) {
+        end = len;
+    } else {
+        ++end;
+    }
+
+    return (str.substr(begin, end));
 }
 
 unsigned long long to_ulonglong(const std::string &str, size_t max)
