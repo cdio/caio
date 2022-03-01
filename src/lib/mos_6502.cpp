@@ -554,7 +554,7 @@ size_t Mos6502::single_step()
     }
 
     std::string line{};
-    if (_log.is_level_debug()) {
+    if (_log.is_debug()) {
         addr_t addr = _regs.PC;
         line = disass(addr);
     }
@@ -628,7 +628,7 @@ size_t Mos6502::single_step()
 
     ins.fn(*this, arg);
 
-    if (_log.is_level_debug()) {
+    if (_log.is_debug()) {
         std::ostringstream msg{};
         msg << std::setw(35) << std::left << line << _regs.to_string() << "  cycles=" << ins.cycles << std::endl;
         _log.debug(msg.str());

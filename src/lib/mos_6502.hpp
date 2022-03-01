@@ -104,7 +104,7 @@ public:
     /**
      * Initialise this CPU connected to a set of other devices and peripherals.
      * @param type  CPU type (usually the model name);
-     * @param label CPY label (usually an arbitrary instance name).
+     * @param label CPU label (usually an arbitrary instance name).
      * @see ASpace
      */
     Mos6502(const std::string &type = TYPE, const std::string &label = LABEL);
@@ -113,7 +113,7 @@ public:
      * Initialise this CPU connected to a set of other devices and peripherals.
      * @param mmap  System mappings;
      * @param type  CPU type (usually the model name);
-     * @param label CPY label (usually an arbitrary instance name).
+     * @param label CPU label (usually an arbitrary instance name).
      * @see ASpace
      */
     Mos6502(const std::shared_ptr<ASpace> &mmap, const std::string &type = TYPE, const std::string &label = LABEL);
