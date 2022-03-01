@@ -329,7 +329,7 @@ private:
 
         ~Rgba4();
 
-        const Rgba &operator[](int index) const;
+        const Rgba &operator[](size_t index) const;
 
     private:
         std::array<Rgba, 4> _colors;

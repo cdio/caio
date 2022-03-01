@@ -557,9 +557,9 @@ inline Mos6569::Rgba4::~Rgba4()
 {
 }
 
-inline const Rgba &Mos6569::Rgba4::operator[](int index) const
+inline const Rgba &Mos6569::Rgba4::operator[](size_t index) const
 {
-    if (index < 0 || index >= _colors.size()) {
+    if (index >= _colors.size()) {
         throw InvalidArgument{Mos6569::TYPE, "Rgba4: Invalid color index: " + std::to_string(index)};
     }
 
