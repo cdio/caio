@@ -37,8 +37,8 @@ namespace c64 {
  * $D800 - $DBFF -- $0800 - $0BFF   Color RAM (only low nibbles are settable)
  * $DC00 - $DCFF -- $0C00 - $0CFF   CIA #1 registers
  * $DD00 - $DDFF -- $0D00 - $0DFF   CIA #2 registers
- * $DE00 - $DEFF -- $0E00 - $0EFF   Reserved for future I/O expansion
- * $DF00 - $DFFF -- $0F00 - $0FFF   Reserved for future I/O expansion
+ * $DE00 - $DEFF -- $0E00 - $0EFF   I/O #1 expansion
+ * $DF00 - $DFFF -- $0F00 - $0FFF   I/O #2 expansion
  */
 class C64IO : public Device {
 public:
@@ -52,7 +52,7 @@ public:
     constexpr static const addr_t VCOLOR_ADDR   = 0x0800;
     constexpr static const addr_t CIA1_ADDR     = 0x0C00;
     constexpr static const addr_t CIA2_ADDR     = 0x0D00;
-    constexpr static const addr_t RESERVED_ADDR = 0x0E00;
+    constexpr static const addr_t IOEXP_ADDR    = 0x0E00;
 
     /**
      * Initialise this C64-IO device.
@@ -61,26 +61,18 @@ public:
      * @param sid    Audio controller device;
      * @param vcolor Video colour RAM;
      * @param cia1   CIA#1 device;
-     * @param cia2   CIA#2 device.
+     * @param cia2   CIA#2 device;
+     * @param ioexp  I/O expansion device.
      */
-    C64IO(devptr_t ram, devptr_t vic2, devptr_t sid, devptr_t vcolor, devptr_t cia1, devptr_t cia2)
-        : Device{TYPE, {}},
-          _vic2{vic2},
-          _sid{sid},
-          _vcolor{vcolor},
-          _cia1{cia1},
-          _cia2{cia2} {
-    }
+    C64IO(const devptr_t &ram, const devptr_t &vic2, const devptr_t &sid, const devptr_t &vcolor,
+        const devptr_t &cia1, const devptr_t &cia2, const devptr_t &ioexp);
 
-    virtual ~C64IO() {
-    }
+    virtual ~C64IO();
 
     /**
      * @see Device::size()
      */
-    size_t size() const override {
-        return SIZE;
-    }
+    size_t size() const override;
 
     /**
      * @see Device::read()
@@ -103,6 +95,7 @@ private:
     devptr_t _vcolor{};
     devptr_t _cia1{};
     devptr_t _cia2{};
+    devptr_t _ioexp{};
 };
 
 }

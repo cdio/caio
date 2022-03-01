@@ -24,6 +24,27 @@
 namespace cemu {
 namespace c64 {
 
+C64IO::C64IO(const devptr_t &ram, const devptr_t &vic2, const devptr_t &sid, const devptr_t &vcolor,
+    const devptr_t &cia1, const devptr_t &cia2, const devptr_t &ioexp)
+    : Device{TYPE, {}},
+      _vic2{vic2},
+      _sid{sid},
+      _vcolor{vcolor},
+      _cia1{cia1},
+      _cia2{cia2},
+      _ioexp{ioexp}
+{
+}
+
+C64IO::~C64IO()
+{
+}
+
+size_t C64IO::size() const
+{
+    return SIZE;
+}
+
 uint8_t C64IO::read(addr_t addr) const
 {
     if (addr < SID_ADDR) {
@@ -56,15 +77,21 @@ uint8_t C64IO::read(addr_t addr) const
         return _cia1->read((addr - CIA1_ADDR) % 0x10);
     }
 
-    if (addr < RESERVED_ADDR) {
+    if (addr < IOEXP_ADDR) {
         /*
          * CIA2.
          */
         return _cia2->read((addr - CIA2_ADDR) % 0x10);
     }
 
-    /* Reserved */
-    return 255;
+    if (addr < SIZE) {
+        /*
+         * I/O Expansion.
+         */
+        return _ioexp->read(addr - IOEXP_ADDR);
+    }
+
+    return 255; /* throw? */
 }
 
 void C64IO::write(addr_t addr, uint8_t value)
@@ -104,12 +131,19 @@ void C64IO::write(addr_t addr, uint8_t value)
         return;
     }
 
-    if (addr < RESERVED_ADDR) {
+    if (addr < IOEXP_ADDR) {
         /*
          * CIA2.
          */
         _cia2->write((addr - CIA2_ADDR) % 0x10, value);
         return;
+    }
+
+    if (addr < SIZE) {
+        /*
+         * I/O expansion.
+         */
+        _ioexp->write(addr - IOEXP_ADDR, value);
     }
 }
 
@@ -123,15 +157,19 @@ std::ostream &C64IO::dump(std::ostream &os, addr_t base) const
      * $D800 - $DBFF -- $0800 - $0BFF   Color RAM (only low nibbles are settable)
      * $DC00 - $DCFF -- $0C00 - $0CFF   CIA #1 registers
      * $DD00 - $DDFF -- $0D00 - $0DFF   CIA #2 registers
-     * $DE00 - $DEFF -- $0E00 - $0EFF   Reserved for future I/O expansion
-     * $DF00 - $DFFF -- $0F00 - $0FFF   Reserved for future I/O expansion
+     * $DE00 - $DEFF -- $0E00 - $0EFF   I/O #1 expansion
+     * $DF00 - $DFFF -- $0F00 - $0FFF   I/O #2 expansion
      */
-    constexpr static const addr_t ff_area_size = 0x40 - 0x2f;
-    static const std::array<uint8_t, SIZE - RESERVED_ADDR> reserved{255};
+    constexpr static const addr_t FF_SIZE = 0x40 - 0x2f;
+    static struct FF : std::array<uint8_t, FF_SIZE> {
+        FF() {
+            std::fill(begin(), end(), 255);
+        }
+    } ff;
 
     for (addr_t offset = VIC2_ADDR; offset < SID_ADDR; offset += 0x40) {
         _vic2->dump(os, base + offset);
-        utils::dump(os, reserved.begin(), reserved.begin() + ff_area_size, base + offset + _cia2->size());
+        utils::dump(os, ff.begin(), ff.end(), base + offset + _cia2->size());
     }
 
     for (addr_t offset = 0; offset < 1024; offset += 32) {
@@ -141,7 +179,7 @@ std::ostream &C64IO::dump(std::ostream &os, addr_t base) const
     _vcolor->dump(os, base + VCOLOR_ADDR);
     _cia1->dump(os, base + CIA1_ADDR);
     _cia2->dump(os, base + CIA2_ADDR);
-    utils::dump(os, reserved.begin(), reserved.end(), base + RESERVED_ADDR);
+    _ioexp->dump(os, base + IOEXP_ADDR);
 
     return os;
 }
