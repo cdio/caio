@@ -102,7 +102,7 @@ public:
     };
 
     /**
-     * Initialise this CPU connected to a set of other devices and peripherals.
+     * Initialise this CPU.
      * @param type  CPU type (usually the model name);
      * @param label CPU label (usually an arbitrary instance name).
      * @see ASpace
@@ -110,7 +110,7 @@ public:
     Mos6502(const std::string &type = TYPE, const std::string &label = LABEL);
 
     /**
-     * Initialise this CPU connected to a set of other devices and peripherals.
+     * Initialise this CPU.
      * @param mmap  System mappings;
      * @param type  CPU type (usually the model name);
      * @param label CPU label (usually an arbitrary instance name).
