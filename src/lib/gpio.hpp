@@ -32,9 +32,9 @@ namespace cemu {
  * GPIO template.
  * A GPIO is a container of I/O Ports, each port has a fixed number of bits or pins.
  * R/W access to the ports are handled by input/output callbacks.
- * Each callback is associated to a port and to mask which specifies the pins of the
+ * Each callback is associated to a port/mask pair which specifies the pins of the
  * port affected by the callback.
- * Since each port can be associated to several input and output callbacks, the port
+ * Each port can be associated to several input and output callbacks so the port
  * pins are implemented as pull-ups.
  */
 template<typename ADDR, typename DATA,
@@ -42,6 +42,9 @@ template<typename ADDR, typename DATA,
     std::enable_if_t<std::is_unsigned<DATA>::value, bool> = true>
 class Gpio_ {
 public:
+    const ADDR addr_type{};
+    const DATA data_type{};
+
     using ior_t = std::function<DATA(ADDR)>;
     using iow_t = std::function<void(ADDR, DATA)>;
 
@@ -57,29 +60,29 @@ public:
     /**
      * Add an input callback.
      * @param ior  Input callback;
-     * @param mask Bits used by the callback.
+     * @param mask Data bits used by the callback.
      */
-    void add_ior(const ior_t &ior, ADDR mask) {
+    virtual void add_ior(const ior_t &ior, DATA mask) {
         _iors.push_back({ior, mask});
     }
 
     /**
      * Add an ouput callback.
      * @param iow  Output callback;
-     * @param mask Bits used by the callback.
+     * @param mask Data bits used by the callback.
      */
-    void add_iow(const iow_t &iow, ADDR mask) {
+    virtual void add_iow(const iow_t &iow, DATA mask) {
         _iows.push_back({iow, mask});
     }
 
     /**
-     * Read from an IO port.
+     * Read from an input port.
      * The input callbacks associated to the port are called
-     * and the combined result is returned.
+     * and the combined result (bitwise AND) is returned.
      * @param addr Port to read from.
      * @return The port value.
      */
-    DATA ior(ADDR addr) const {
+    virtual DATA ior(ADDR addr) const {
         DATA value{std::numeric_limits<DATA>::max()};   /* pull-up */
         for (const auto &[ior, mask] : _iors) {
             value &= (ior(addr) & mask) | ~mask;
@@ -88,14 +91,14 @@ public:
     }
 
     /**
-     * Write to output pins.
+     * Write to an output port.
      * The output callbacks associated to the port are called,
      * each callback will be receiving as argument the bitwise
      * AND operation between the specified value and its mask.
      * @param addr  Address to write;
      * @param value Value to write.
      */
-    void iow(ADDR addr, DATA value) {
+    virtual void iow(ADDR addr, DATA value) {
         for (auto &[iow, mask] : _iows) {
             iow(addr, value & mask);
         }
