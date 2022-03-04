@@ -27,6 +27,19 @@
 namespace cemu {
 namespace c64 {
 
+Crt::Crt()
+{
+}
+
+Crt::Crt(const std::string &fname)
+{
+    open(fname);
+}
+
+Crt::~Crt()
+{
+}
+
 void Crt::open(const std::string &fname)
 {
     std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
@@ -64,7 +77,8 @@ void Crt::open(std::istream &is)
 
             switch (ch.type) {
             case CHIP_TYPE_ROM:
-            case CHIP_TYPE_FLASH: {
+            case CHIP_TYPE_FLASH:
+            case CHIP_TYPE_EEPROM: {
                 auto rom = load_rom(is, ch);
                 rom->label(name() + ", chip " + std::to_string(i + 1));
                 _roms.push_back(rom);
@@ -83,6 +97,11 @@ void Crt::open(std::istream &is)
     } catch (const std::exception &e) {
         throw InvalidCartridge{_fname, e.what()};
     }
+}
+
+size_t Crt::chips() const
+{
+    return _chips.size();
 }
 
 std::pair<const Crt::Chip &, devptr_t> Crt::operator[](size_t n) const
