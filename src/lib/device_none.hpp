@@ -70,6 +70,6 @@ public:
 };
 
 
-extern devptr_t none;
+extern devptr_t device_none;
 
 }

@@ -23,6 +23,6 @@
 
 namespace cemu {
 
-devptr_t none = std::make_shared<DeviceNone>();
+devptr_t device_none = std::make_shared<DeviceNone>();
 
 }
