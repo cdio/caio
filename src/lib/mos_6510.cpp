@@ -52,24 +52,35 @@ void Mos6510::bpadd(addr_t addr, const breakpoint_cb_t &cb, void *arg)
 
 uint8_t Mos6510::read(addr_t addr) const
 {
-#if 0
-    return (addr == PORT_1 ? _ioport.ior(addr) : Mos6502::read(addr));
-#else
+    switch (addr) {
+    case PORT_0:
+        return _iodir;
+
+    case PORT_1:
+        return _ioport.ior(0);
+
+    default:;
+    }
+
     return Mos6502::read(addr);
-#endif
 }
 
 void Mos6510::write(addr_t addr, uint8_t value)
 {
-#if 0
-    if (addr == PORT_1) {
-        _ioport.iow(addr, value);
-    } else {
-        Mos6502::write(addr, value);
+    switch (addr) {
+    case PORT_0:
+        _iodir = value;
+        break;
+
+    case PORT_1:
+        value = (value & _iodir) | (_ioport.ior(0) & ~_iodir);
+        _ioport.iow(0, value);
+        break;
+
+    default:;
     }
-#else
+
     Mos6502::write(addr, value);
-#endif
 }
 
 }
