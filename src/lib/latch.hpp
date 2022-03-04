@@ -23,7 +23,7 @@ namespace cemu {
 
 /**
  * Latch register template.
- * The type T defines the size of the register.
+ * The type T determines the size of the register.
  */
 template <typename T, std::enable_if_t<std::is_unsigned<T>::value, bool> = true>
 class Latch_ {
@@ -110,5 +110,10 @@ private:
  * One bit latch.
  */
 using Latch = Latch_<bool>;
+
+/**
+ * 8 bits latch register.
+ */
+using Latch8 = Latch_<uint8_t>;
 
 }
