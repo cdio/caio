@@ -18,6 +18,7 @@
  */
 #include "c64_pla.hpp"
 
+#include "logger.hpp"
 #include "device_none.hpp"
 
 
@@ -25,15 +26,15 @@ namespace cemu {
 namespace c64 {
 
 PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, const devptr_t &chargen,
-    const devptr_t &io, const devptr_t &cart)
+    const devptr_t &io)
 {
+    auto cart = device_none;
 
     /*
      * Fixed mappings to accelerate bank switching.
-     *
-     * Mappigns source: https://www.c64-wiki.com/wiki/Bank_Switching.
+     * See https://www.c64-wiki.com/wiki/Bank_Switching.
      */
-    auto mode_00 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_00 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -50,11 +51,11 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { ram,      0xD000 },
         { ram,      0xE000 },
         { ram,      0xF000 }
-    });
+    };
 
-    auto mode_01 = mode_00;
+    auto &mode_01 = mode_00;
 
-    auto mode_02 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_02 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -71,9 +72,9 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { chargen,  0x0000 },
         { kernal,   0x0000 },
         { kernal,   0x1000 },
-    });
+    };
 
-    auto mode_03 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_03 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -90,11 +91,11 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { chargen,  0x0000 },
         { kernal,   0x0000 },
         { kernal,   0x1000 },
-    });
+    };
 
-    auto mode_04 = mode_00;
+    auto &mode_04 = mode_00;
 
-    auto mode_05 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_05 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -111,9 +112,9 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { io,       0x0000 },
         { ram,      0xE000 },
         { ram,      0xF000 },
-    });
+    };
 
-    auto mode_06 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_06 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -130,9 +131,9 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { io,       0x0000 },
         { kernal,   0x0000 },
         { kernal,   0x1000 },
-    });
+    };
 
-    auto mode_07 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_07 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -149,11 +150,11 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { io,       0x0000 },
         { kernal,   0x0000 },
         { kernal,   0x1000 },
-    });
+    };
 
-    auto mode_08 = mode_00;
+    auto &mode_08 = mode_00;
 
-    auto mode_09 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_09 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -170,9 +171,9 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { chargen,  0x0000 },
         { ram,      0xE000 },
         { ram,      0xF000 },
-    });
+    };
 
-    auto mode_10 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_10 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -189,9 +190,9 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { chargen,  0x0000 },
         { kernal,   0x0000 },
         { kernal,   0x1000 },
-    });
+    };
 
-    auto mode_11 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_11 = addrmap_t{
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -208,12 +209,12 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { chargen,  0x0000 },
         { kernal,   0x0000 },
         { kernal,   0x1000 },
-    });
+    };
 
-    auto mode_12 = mode_00;
-    auto mode_13 = mode_05;
+    auto &mode_12 = mode_00;
+    auto &mode_13 = mode_05;
 
-    auto mode_14 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_14 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -230,9 +231,9 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { io,       0x0000 },
         { kernal,   0x0000 },
         { kernal,   0x1000 },
-    });
+    };
 
-    auto mode_15 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_15 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -249,9 +250,9 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { io,       0x0000 },
         { kernal,   0x0000 },
         { kernal,   0x1000 },
-    });
+    };
 
-    auto mode_16 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_16 = {
         { ram,          0x0000 },
         { ram,          0x1000 },
         { device_none,  0x0000 },
@@ -268,20 +269,20 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { io,           0x0000 },
         { cart,         0x2000 },
         { cart,         0x3000 },
-    });
+    };
 
-    auto mode_17 = mode_16;
-    auto mode_18 = mode_16;
-    auto mode_19 = mode_16;
-    auto mode_20 = mode_16;
-    auto mode_21 = mode_16;
-    auto mode_22 = mode_16;
-    auto mode_23 = mode_16;
-    auto mode_24 = mode_00;
-    auto mode_25 = mode_09;
-    auto mode_26 = mode_10;
+    auto &mode_17 = mode_16;
+    auto &mode_18 = mode_16;
+    auto &mode_19 = mode_16;
+    auto &mode_20 = mode_16;
+    auto &mode_21 = mode_16;
+    auto &mode_22 = mode_16;
+    auto &mode_23 = mode_16;
+    auto &mode_24 = mode_00;
+    auto &mode_25 = mode_09;
+    auto &mode_26 = mode_10;
 
-    auto mode_27 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_27 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -298,13 +299,13 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { chargen,  0x0000 },
         { kernal,   0x0000 },
         { kernal,   0x1000 },
-    });
+    };
 
-    auto mode_28 = mode_00;
-    auto mode_29 = mode_05;
-    auto mode_30 = mode_14;
+    auto &mode_28 = mode_00;
+    auto &mode_29 = mode_05;
+    auto &mode_30 = mode_14;
 
-    auto mode_31 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t mode_31 = {
         { ram,      0x0000 },
         { ram,      0x1000 },
         { ram,      0x2000 },
@@ -321,7 +322,7 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { io,       0x0000 },
         { kernal,   0x0000 },
         { kernal,   0x1000 },
-    });
+    };
 
     _rmodes = std::array<addrmap_t, 32>{
         mode_00, mode_01, mode_02, mode_03, mode_04, mode_05, mode_06, mode_07,
@@ -330,24 +331,24 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         mode_24, mode_25, mode_26, mode_27, mode_28, mode_29, mode_30, mode_31
     };
 
-    auto wmode_00 = mode_00;
-    auto wmode_01 = mode_00;
-    auto wmode_02 = mode_00;
-    auto wmode_03 = mode_00;
-    auto wmode_04 = mode_00;
-    auto wmode_05 = mode_13;
-    auto wmode_06 = mode_13;
-    auto wmode_07 = mode_13;
-    auto wmode_08 = mode_00;
-    auto wmode_09 = mode_00;
-    auto wmode_10 = mode_00;
-    auto wmode_11 = mode_00;
-    auto wmode_12 = mode_00;
-    auto wmode_13 = mode_13;
-    auto wmode_14 = mode_13;
-    auto wmode_15 = mode_13;
+    auto &wmode_00 = mode_00;
+    auto &wmode_01 = mode_00;
+    auto &wmode_02 = mode_00;
+    auto &wmode_03 = mode_00;
+    auto &wmode_04 = mode_00;
+    auto &wmode_05 = mode_13;
+    auto &wmode_06 = mode_13;
+    auto &wmode_07 = mode_13;
+    auto &wmode_08 = mode_00;
+    auto &wmode_09 = mode_00;
+    auto &wmode_10 = mode_00;
+    auto &wmode_11 = mode_00;
+    auto &wmode_12 = mode_00;
+    auto &wmode_13 = mode_13;
+    auto &wmode_14 = mode_13;
+    auto &wmode_15 = mode_13;
 
-    auto wmode_16 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t wmode_16 = {
         { ram,          0x0000 },
         { ram,          0x1000 },
         { device_none,  0x0000 },
@@ -364,23 +365,23 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { io,           0x0000 },
         { ram,          0xE000 },
         { ram,          0xF000 },
-    });
+    };
 
-    auto wmode_17 = wmode_16;
-    auto wmode_18 = wmode_16;
-    auto wmode_19 = wmode_16;
-    auto wmode_20 = wmode_16;
-    auto wmode_21 = wmode_16;
-    auto wmode_22 = wmode_16;
-    auto wmode_23 = wmode_16;
-    auto wmode_24 = mode_00;
-    auto wmode_25 = mode_00;
-    auto wmode_26 = mode_00;
-    auto wmode_27 = mode_00;
-    auto wmode_28 = mode_00;
-    auto wmode_29 = mode_13;
-    auto wmode_30 = mode_13;
-    auto wmode_31 = mode_13;
+    auto &wmode_17 = wmode_16;
+    auto &wmode_18 = wmode_16;
+    auto &wmode_19 = wmode_16;
+    auto &wmode_20 = wmode_16;
+    auto &wmode_21 = wmode_16;
+    auto &wmode_22 = wmode_16;
+    auto &wmode_23 = wmode_16;
+    auto &wmode_24 = mode_00;
+    auto &wmode_25 = mode_00;
+    auto &wmode_26 = mode_00;
+    auto &wmode_27 = mode_00;
+    auto &wmode_28 = mode_00;
+    auto &wmode_29 = mode_13;
+    auto &wmode_30 = mode_13;
+    auto &wmode_31 = mode_13;
 
     _wmodes = std::array<addrmap_t, 32>{
         wmode_00, wmode_01, wmode_02, wmode_03, wmode_04, wmode_05, wmode_06, wmode_07,
@@ -389,44 +390,25 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         wmode_24, wmode_25, wmode_26, wmode_27, wmode_28, wmode_29, wmode_30, wmode_31
     };
 
-#if 0
-    uint8_t m = LORAM | HIRAM | CHAREN | GAME | EXROM;
-
-    //TODO: Cartridge as a new device not ROM.
-    if (cart) {
-        /*
-         * ROM Cartridge configurations:
-         *
-         * 8K cartridge:  GAME = 1, EXROM = 0, ROML = 0, ROMH = 1: ROM-LO at $8000/$9FFF
-         * 16K cartridge: GAME = 0, EXROM = 0, ROML = 0, ROMH = 0: ROM-LO at $8000/$9FFF, ROM-HI at $A000/$BFFFF
-         *
-         * Ultimax Modes:
-         * 8K cartridge:  GAME = 0, EXROM = 1, ROML = 1, ROMH = 0: ROM-LO at $E000/$FFFF
-         * 16K cartridge: GAME = 0, EXROM = 1, ROML = 0, ROMH = 0: ROM-LO at $8000/$AFFF, ROM-HI at $E000/$FFFF
-         *
-         * Source: http://blog.worldofjani.com/?p=879
-         *
-         * This implementation does not support ultimax mode (ROMH and ROML expansion port lines are not considered),
-         * mappings for these modes (16 to 23) are defined, though.
-         */
-        switch (cart->size()) {
-        case 8192:
-            m &= ~EXROM;
-            break;
-        case 16384:
-            m &= ~(GAME | EXROM);
-            break;
-        default:;
-        }
-    }
-
-    mode(m);
-#endif
-    mode(LORAM | HIRAM | CHAREN | GAME | EXROM);
+    /*
+     * Default mappings.
+     */
+    _mode = LORAM | HIRAM | CHAREN | GAME | EXROM;
+    remap();
 }
 
 PLA::~PLA()
 {
+}
+
+void PLA::mode(uint8_t pins, uint8_t mask)
+{
+    uint8_t data = ((_mode & ~mask) | (pins & mask)) & MASK;
+    if (_mode != data || !_init) {
+        _init = true;
+        _mode = data;
+        remap();
+    }
 }
 
 uint8_t PLA::mode() const
@@ -434,54 +416,74 @@ uint8_t PLA::mode() const
     return _mode;
 }
 
-void PLA::mode(uint8_t value)
+void PLA::extmap(const extmap_cb_t &extmap)
 {
-    value &= MASK;
-    if (value != _mode) {
-        log.debug("new mode: %d, $%02x\n", value, value);
+    _extmap = extmap;
+}
 
-        /*
-         * New memory mappings.
-         */
-        _mode = value;
-        ASpace::reset(_rmodes[_mode], _wmodes[_mode]);
+inline bool PLA::romh(addr_t addr) const
+{
+    /*
+     * p21 <= n_hiram and a15 and not a14 and a13 and not n_aec and rd and not n_exrom and not n_game
+     * p22 <= a15 and a14 and a13 and not n_aec and n_exrom and not n_game
+     * See "The C64 PLA Dissected" from Thomas 'skoe' Giesel.
+     */
+    bool romh = ((_mode & (HIRAM | EXROM | GAME)) == HIRAM && (addr & (A15 | A14 | A13)) == (A15 | A13)) ||
+        ((_mode & (EXROM | GAME)) == EXROM && (addr & (A15 | A14 | A13)) == (A15 | A14 | A13));
 
-        /* TODO : FINISH */
+    return romh;
+}
 
-        /*
-         * Output lines.
-         */
-        uint8_t romhl =
-            (((_mode & (HIRAM | EXROM | GAME)) == (HIRAM | EXROM | GAME)) ||
-            ((_mode & (EXROM | GAME)) == (EXROM | GAME)) ? ROMH : 0x00);
+inline bool PLA::roml(addr_t addr) const
+{
+    /*
+     * p19 <= n_loram and n_hiram and a15 and not a14 and not a13 and not n_aec and rd and not n_exrom
+     * p20 <= a15 and not a14 and not a13 and not n_aec and n_exrom and not n_game
+     * See "The C64 PLA Dissected" from Thomas 'skoe' Giesel.
+     */
+    bool roml = ((_mode & (LORAM | HIRAM | EXROM)) == (LORAM | HIRAM) && (addr & (A15 | A14 | A13)) == A15) ||
+        ((_mode & (EXROM | GAME)) == EXROM && (addr & (A15 | A14 | A13)) == A15);
 
-        romhl |=
-            (((_mode & (LORAM | HIRAM | EXROM)) == (LORAM | HIRAM | EXROM)) ||
-            ((_mode & (EXROM | GAME)) == GAME) ? ROML : 0x00);
+    return roml;
+}
 
-        if (romhl != _romhl) {
-            /*
-             * Drive the input pins of all the connected devices.
-             */
-            _romhl = romhl;
-            _ioport.iow(0, _romhl);
+void PLA::remap()
+{
+    //TODO avoid vector
+    addrmap_t rmaps = _rmodes[_mode];
+    addrmap_t wmaps = _wmodes[_mode];
+
+    if (_extmap) {
+        for (size_t bank = 0; bank < rmaps.size(); ++bank) {
+            addr_t addr = static_cast<addr_t>(bank * 0x1000);
+            bool rh = romh(addr);
+            bool rl = roml(addr);
+            if (rh || rl) {
+                auto [rdevmap, wdevmap] = _extmap(addr, rh, rl);
+                if (rdevmap.first) {
+#if 0
+                    log.debug("PLA: New device for addr $%04X, offset $%04X, dev %s\n", addr, rdevmap.second,
+                        rdevmap.first->to_string().c_str());
+#endif
+                    rmaps[bank] = rdevmap;
+                }
+
+                if (wdevmap.first) {
+                    wmaps[bank] = wdevmap;
+                }
+            }
         }
     }
-}
 
-void PLA::cpu_pins(uint8_t value)
-{
-    mode((_mode & EXT_MASK) | (value & CPU_MASK));
-}
+#if 0
+    for (size_t bank = 0; bank < rmaps.size(); ++bank) {
+        auto &devmap = rmaps[bank];
+        log.debug("bank %d, device %s, addr $%04X, offset $%04X\n", bank, devmap.first->to_string().c_str(),
+            bank * 0x1000, devmap.second);
+    }
+#endif
 
-void PLA::ext_pins(uint8_t value)
-{
-    mode((_mode & CPU_MASK) | (value & EXT_MASK));
-}
-
-void PLA::add_iow(const Gpio::iow_t &iow, uint8_t mask)
-{
-    _ioport.add_iow(iow, mask);
+    ASpace::reset(std::move(rmaps), std::move(wmaps), ADDR_MASK);
 }
 
 }

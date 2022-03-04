@@ -19,77 +19,93 @@
 #pragma once
 
 #include <array>
+#include <functional>
+#include <utility>
 
 #include "aspace.hpp"
-#include "device.hpp"
-#include "gpio.hpp"
-#include "mos_6510.hpp"
+#include "types.hpp"
 
 
 namespace cemu {
 namespace c64 {
 
 /**
- * The PLA programmed for the C64.
+ * C64 PLA.
+ * This class is an hybrid, it implements some of the real PLA functions and uses
+ * those results to implement the decoding of the entire address space of the C64.
+ * @see ASpace
  */
 class PLA : public ASpace {
 public:
-    constexpr static const uint8_t LORAM    = Mos6510::P0;
-    constexpr static const uint8_t HIRAM    = Mos6510::P1;
-    constexpr static const uint8_t CHAREN   = Mos6510::P2;
+    constexpr static const uint8_t LORAM    = 0x01;
+    constexpr static const uint8_t HIRAM    = 0x02;
+    constexpr static const uint8_t CHAREN   = 0x04;
     constexpr static const uint8_t GAME     = 0x08;
     constexpr static const uint8_t EXROM    = 0x10;
-    constexpr static const uint8_t CPU_MASK = LORAM | HIRAM | CHAREN;
-    constexpr static const uint8_t EXT_MASK = GAME | EXROM;
-    constexpr static const uint8_t MASK     = CPU_MASK | EXT_MASK;
+    constexpr static const uint8_t MASK     = LORAM | HIRAM | CHAREN | GAME | EXROM;
 
-    constexpr static const uint8_t ROMH     = 0x01;
-    constexpr static const uint8_t ROML     = 0x02;
+    constexpr static const addr_t A15       = 1 << 15;
+    constexpr static const addr_t A14       = 1 << 14;
+    constexpr static const addr_t A13       = 1 << 13;
 
+    constexpr static const addr_t ADDR_MASK = 0xFFFF;
+
+    using extmap_cb_t = std::function<std::pair<devmap_t, devmap_t>(addr_t, bool, bool)>;
+
+    /**
+     * Initialise this PLA.
+     * The default memory map is created.
+     * @param ram     System RAM;
+     * @param basic   Basic ROM;
+     * @param kernel  Kernel ROM;
+     * @param chargen Character set ROM;
+     * @param io      I/O device (see C64IO)
+     * @see C64IO
+     */
     PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, const devptr_t &chargen,
-        const devptr_t &io, const devptr_t &cart);
+        const devptr_t &io);
 
     virtual ~PLA();
 
     /**
-     * @return The status of the input pins (bitwise OR combination of LORAM, HIRAM, CHAREN, GAME, EXROM).
+     * Set PLA input pins.
+     * @param pins Input pins to set o clear (based on mask);
+     * @param mask Mask of the input pins to set or clear.
+     */
+    void mode(uint8_t pins, uint8_t mask);
+
+    /**
+     * @return The status of the PLA input pins.
      */
     uint8_t mode() const;
 
     /**
-     * Set the input pins.
-     * @param value Value to set (bitwise OR of combination LORAM, HIRAM, CHAREN, GAME, EXROM).
+     * Set the I/O extension mappings callback.
+     * This callback is called each time the memory mappings are changed.
+     * The specified callback receives a memory address and the status of ROML and ROMH pins;
+     * the callback must respond with a pair of devptr_t values, the first one to process read
+     * operatons and the seocnd one to process write operations.
+     * @param extmap I/O extension mappings callback.
+     * @see ASpace::devptr_t
      */
-    void mode(uint8_t value);
-
-    /**
-     * Set the CPU input pins.
-     * @param value Value to set (bitwise OR of combination LORAM, HIRAM, CHAREN).
-     */
-    void cpu_pins(uint8_t value);
-
-    /**
-     * Set the EXTernal input pins.
-     * @param value Value to set (bitwise OR of combination GAME, EXROM).
-     */
-    void ext_pins(uint8_t value);
-
-    /**
-     * Add an ouput callback.
-     * Registered callbacks are called each time the status of the ROMH/ROML lines are chagned.
-     * @param iow  Output callback;
-     * @param mask Bits used by the callback.
-     * @see Gpio::add_iow()
-     */
-    void add_iow(const Gpio::iow_t &iow, uint8_t mask);
+    void extmap(const extmap_cb_t &extmap);
 
 private:
-    Gpio    _ioport{};                      /* Output ports         */
-    uint8_t _romhl{};                       /* ROMH and ROML lines  */
-    uint8_t _mode{};                        /* Current mapping mode */
+    /**
+     * Reset the address space mappings.
+     * This method is called when at least one input pin is changed.
+     */
+    void remap();
 
-    std::array<addrmap_t, 32> _rmodes{};    /* Read mapping modes   */
-    std::array<addrmap_t, 32> _wmodes{};    /* Write mapping modes  */
+    bool romh(addr_t addr) const;
+
+    bool roml(addr_t addr) const;
+
+    bool                      _init{};
+    uint8_t                   _mode{};      /* Bitwise combination of LORAM, HIRAM, CHAREN, GAME, and EXROM */
+    extmap_cb_t               _extmap{};    /* I/O Extension (cartridge) callback                           */
+    std::array<addrmap_t, 32> _rmodes{};    /* Default read mapping modes                                   */
+    std::array<addrmap_t, 32> _wmodes{};    /* Default write mapping modes                                  */
 };
 
 }
