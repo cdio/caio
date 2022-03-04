@@ -18,167 +18,66 @@
  */
 #include "c64_cartridge.hpp"
 
+#include <array>
+#include <sstream>
+
 #include "types.hpp"
-#include "logger.hpp"
 #include "utils.hpp"
 
-#include "device_rom.hpp"
+#include "c64_cartridge/cart_generic.hpp"
 
 
 namespace cemu {
 namespace c64 {
 
-//XXX move to proper files. c64/cart/...
-/*
- * Generic Cartridge.
- */
-class CartridgeGeneric : public Cartridge {
-public:
-    constexpr static const char *TYPE = "CART_GENERIC";
-
-    CartridgeGeneric(const std::shared_ptr<Crt> &crt, const std::shared_ptr<DeviceGpio> &ioexp)
-        : Cartridge{TYPE, crt, ioexp}
-    {
-        uint8_t port = (_crt->game() ? GAME : 0) | (_crt->exrom() ? EXROM : 0);
-        switch (port) {
-        case 0:
-            /*
-             * 16K generic cartridge.
-             */
-            _rom = (*_crt)[0].second;
-            break;
-
-        case GAME:
-            /*
-             * 8K generic cartridge.
-             */
-            _rom = (*_crt)[0].second;
-            break;
-
-        default:
-            /* TODO: ultimax support? */
-            throw InvalidCartridge{TYPE, "exrom/game combination not supported: " + _crt->to_string()};
-        }
-
-        /*
-         * Propagate the outout port (GAME and EXROM flags) to the connected devices (f.ex. PLA).
-         */
-        log.debug("cart: port=%02x\n", port);
-
-
-        iow(0, port); //<--- PLA not yet registered
-#if 1
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-        invece di fare tutto questo casino, guarda se le linee exrom/game rimangono fisse per
-        tutti i tipi di cartrige, se cosi fosse allora lo stesso pla puo chiedere all cartridge
-        le sue linee durante la sua inizializzazione e settare il modo giusto.
-
-        Guarda anche se sono necessarie i pin di output romh e roml, magari non servono e si semplifica
-        tutto.
-
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-#endif
-    }
-
-    virtual ~CartridgeGeneric()
-    {
-    }
-
-    uint8_t read(addr_t addr) const override
-    {
-        return _rom->read(addr);
-    }
-
-    void write(addr_t addr, uint8_t data) override
-    {
-        _rom->write(addr, data);
-    }
-
-    size_t size() const override
-    {
-        return _rom->size();
-    }
-
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override
-    {
-        return _rom->dump(os, base);
-    }
-
-private:
-    std::shared_ptr<Device> _rom{};
-};
-
-class CartridgeOceanType1 : public Cartridge {
-public:
-    constexpr static const char *TYPE = "CART_OCEAN_TYPE_1";
-
-    CartridgeOceanType1(const std::shared_ptr<Crt> &crt, const std::shared_ptr<DeviceGpio> &ioexp)
-        : Cartridge{TYPE, crt, ioexp}
-    {
-#if 0
-        /*
-         * OCEAN type 1 cartridge.
-         */
-        ioexp->add_iow([](uint8_t addr, uint8_t data) {
-            auto bank = data & 0x3F;
-            if (bank < 16) {
-                /*
-                 * Banks 0..15 loaded at roml, $8000..$9FFF
-                 */
-  //              _rom.roml(_crt[bank].second);
-            } else {
-                /*
-                 * Banks 16..63 loaded at romh, $A000..$BFFF
-                 */
-   //             _rom.romh(_crt[bank].second);
-            }
-        }, DE00_BANK, 255);
-#endif
-    }
-
-    virtual ~CartridgeOceanType1() {
-    }
-
-    uint8_t read(addr_t addr) const override { return 0; }
-
-    void write(addr_t addr, uint8_t data) override
-    {
-    }
-
-    size_t size() const override
-    {
-        return 0;
-    }
-
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override
-    {
-        return os;
-    }
-};
-
-
-std::shared_ptr<Cartridge> Cartridge::create(const std::shared_ptr<Crt> &crt, const std::shared_ptr<DeviceGpio> &ioexp)
+Cartridge::Cartridge(const std::string &type, const std::shared_ptr<Crt> &crt)
+    : Device{type, crt->name()},
+      _crt{crt}
 {
-    if (!crt || !ioexp) {
-        throw InvalidArgument{"Cartridge::create", ""};
+}
+
+Cartridge::~Cartridge()
+{
+}
+
+std::string Cartridge::name() const
+{
+    return _crt->name();
+}
+
+size_t Cartridge::size() const
+{
+    return IOEXP_SIZE;
+}
+
+std::ostream &Cartridge::dump(std::ostream &os, addr_t base) const
+{
+    std::array<uint8_t, IOEXP_SIZE> data{};
+
+    for (size_t i = 0; i < IOEXP_SIZE; ++i) {
+        data[i] = read(i);
     }
 
-    Crt::HardwareType type = crt->type();
+    return utils::dump(os, data, base);
+}
 
-    switch (type) {
+void Cartridge::add_ior(const Gpio::ior_t &ior, uint8_t mask)
+{
+    _ioport.add_ior(ior, mask);
+}
+
+void Cartridge::add_iow(const Gpio::iow_t &iow, uint8_t mask)
+{
+    _ioport.add_iow(iow, mask);
+}
+
+std::shared_ptr<Cartridge> Cartridge::create(const std::string &fname)
+{
+    auto crt = std::make_shared<Crt>(fname);
+
+    switch (crt->type()) {
     case Crt::HW_TYPE_GENERIC:
-        return std::make_shared<CartridgeGeneric>(crt, ioexp);
-
-    case Crt::HW_TYPE_OCEAN_TYPE_1:
-        return std::make_shared<CartridgeOceanType1>(crt, ioexp);
+        return std::make_shared<CartGeneric>(crt);
 
     case Crt::HW_TYPE_ACTION_REPLAY:
     case Crt::HW_TYPE_KCS_POWER_CARTRIDGE:
@@ -188,7 +87,6 @@ std::shared_ptr<Cartridge> Cartridge::create(const std::shared_ptr<Crt> &crt, co
     case Crt::HW_TYPE_FUN_PLAY:
     case Crt::HW_TYPE_SUPER_GAMES:
     case Crt::HW_TYPE_ATOMIC_POWER:
-
     case Crt::HW_TYPE_WESTERMANN_LEARNING:
     case Crt::HW_TYPE_REX_UTILITY:
     case Crt::HW_TYPE_FINAL_CARTRIDGE_I:
@@ -264,23 +162,8 @@ std::shared_ptr<Cartridge> Cartridge::create(const std::shared_ptr<Crt> &crt, co
     default:;
     }
 
-    throw InvalidCartridge{"Cartridge", "Hardware Type not supported: " + crt->to_string()};
-}
-
-Cartridge::Cartridge(const std::string &type, const std::shared_ptr<Crt> &crt, const std::shared_ptr<DeviceGpio> &ioexp)
-    : Device{type, crt->name()},
-      _crt{crt},
-      _ioexp{ioexp}
-{
-}
-
-Cartridge::~Cartridge()
-{
-}
-
-std::string Cartridge::name() const
-{
-    return _crt->name();
+    throw InvalidCartridge{crt->name(), "Hardware type not supported: " + std::to_string(crt->type()) + ", " +
+        crt->to_string()};
 }
 
 }

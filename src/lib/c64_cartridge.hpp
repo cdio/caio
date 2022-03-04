@@ -21,10 +21,9 @@
 #include <string>
 #include <memory>
 
-#include "device_gpio.hpp"
+#include "aspace.hpp"
+#include "gpio.hpp"
 #include "c64_crt.hpp"
-
-#include "logger.hpp"
 
 
 namespace cemu {
@@ -32,48 +31,90 @@ namespace c64 {
 
 /**
  * C64 Cartridge.
- * A C64 Cartridge implements the emulator part of a CRT file.
+ * A C64 Cartridge implements the I/O expansion device and it is associated to a CRT file.
+ * This class implements a device that handles the C64 addresses from $DE00 to $DFFF.
+ * It also controls the GAME and EXROM pins, devices that want to get noticed when those
+ * pins change must register themselves as GPIO callbacks.
+ * @see c64::C64IO
  * @see c64::Crt
- * TODO This class should implement the expansion port.
+ * @see Device
+ * @see Gpio
  */
-class Cartridge : public Device, public Gpio {
+class Cartridge : public Device {
 public:
-    constexpr static const addr_t DE00_BANK = 0;
-    constexpr static const addr_t DF00_BANK = 1;
-
-    constexpr static const uint8_t GAME     = 0x01;
-    constexpr static const uint8_t EXROM    = 0x02;
-    constexpr static const uint8_t ROMH     = 0x04;
-    constexpr static const uint8_t ROML     = 0x08;
+    constexpr static const char *TYPE        = "I/O-EXPANSION";
+    constexpr static const size_t IOEXP_SIZE = 512;
+    constexpr static const uint8_t GAME      = 0x01;
+    constexpr static const uint8_t EXROM     = 0x02;
 
     /**
-     * Instanciate a Cartridge from a CRT file.
-     * @param crt   Valid CRT file;
-     * @param ioexp C64 I/O expansion device.
-     * @exception InvalidArgument
+     * Instantiate a cartridge device from a CRT file.
+     * @param fname Name of the CRT file to load.
+     * @return A pointer to the new cartridge device.
      * @exception InvalidCartridge
+     * @see c64::Crt
      */
-    static std::shared_ptr<Cartridge> create(const std::shared_ptr<Crt> &crt, const std::shared_ptr<DeviceGpio> &ioexp);
+    static std::shared_ptr<Cartridge> create(const std::string &fname);
 
     virtual ~Cartridge();
 
     /**
      * @return The name of this cartridge.
+     * @see Crt::name()
      */
     std::string name() const;
 
-protected:
     /**
-     * Create a CRT instance.
-     * @param type  Cartridge type string;
-     * @param crt   Valid cartridge file;
-     * @param ioexp C64 I/O expansion device.
-     * @exceptions InvalidCartridge
+     * @see Device::size()
      */
-    Cartridge(const std::string &type, const std::shared_ptr<Crt> &crt, const std::shared_ptr<DeviceGpio> &ioexp);
+    size_t size() const override;
 
-    std::shared_ptr<Crt>        _crt{};
-    std::shared_ptr<DeviceGpio> _ioexp{};
+    /**
+     * @see Device::dump()
+     */
+    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
+
+    /**
+     * Add an input callback.
+     * @param ior  Input callback;
+     * @param mask Bits used by the callback.
+     * @see Gpio::add_ior()
+     */
+    void add_ior(const Gpio::ior_t &ior, uint8_t mask);
+
+    /**
+     * Add an ouput callback.
+     * @param iow  Output callback;
+     * @param mask Bits used by the callback.
+     * @see Gpio::add_iow()
+     */
+    void add_iow(const Gpio::iow_t &iow, uint8_t mask);
+
+    /**
+     * Retrieve the cartridge internal device that must handle a specific memory address.
+     * @param addr Memory bank starting address;
+     * @param romh Status of ROMH line;
+     * @param roml Status of ROML line.
+     * @return A pointer to the device or nullptr if the specified address is not handled by this cartridge.
+     */
+    virtual std::pair<ASpace::devmap_t, ASpace::devmap_t> getdev(addr_t addr, bool romh, bool roml) = 0;
+
+    /**
+     * @return The total size of this cartridge ROMs.
+     */
+    virtual size_t cartsize() const = 0;
+
+    /**
+     * Reset this cartridge.
+     * What this method does depends on the implementation.
+     */
+    virtual void reset() = 0;
+
+protected:
+    Cartridge(const std::string &type, const std::shared_ptr<Crt> &crt);
+
+    std::shared_ptr<Crt> _crt{};
+    Gpio                 _ioport{};
 };
 
 }

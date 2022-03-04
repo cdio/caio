@@ -18,8 +18,6 @@
  */
 #include "cart_generic.hpp"
 
-#include "device_rom.hpp"
-
 
 namespace cemu {
 namespace c64 {

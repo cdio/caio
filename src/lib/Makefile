@@ -120,23 +120,27 @@ INCS+=		cbm_bus.hpp \
 # C64 Specifics
 #
 CXXSRCS+=	c64.cpp \
-		c64_aspace.cpp \
 		c64_bus_controller.cpp \
+		c64_cartridge.cpp \
+		c64_cartridge/cart_generic.cpp \
 		c64_config.cpp \
 		c64_crt.cpp \
 		c64_io.cpp \
 		c64_joystick.cpp \
 		c64_keyboard.cpp \
+		c64_pla.cpp \
 		c64_vic2_aspace.cpp
 
 INCS+=		c64.hpp \
-		c64_aspace.hpp \
 		c64_bus_controller.hpp \
+		c64_cartridge.hpp \
+		c64_cartridge/cart_generic.hpp \
 		c64_config.hpp \
 		c64_crt.hpp \
 		c64_io.hpp \
 		c64_joystick.hpp \
 		c64_keyboard.hpp \
+		c64_pla.hpp \
 		c64_vic2_aspace.hpp
 
 #
