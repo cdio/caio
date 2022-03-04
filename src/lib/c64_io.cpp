@@ -24,8 +24,8 @@
 namespace cemu {
 namespace c64 {
 
-C64IO::C64IO(const devptr_t &ram, const devptr_t &vic2, const devptr_t &sid, const devptr_t &vcolor,
-    const devptr_t &cia1, const devptr_t &cia2, const devptr_t &ioexp)
+C64IO::C64IO(const devptr_t &vic2, const devptr_t &sid, const devptr_t &vcolor, const devptr_t &cia1,
+    const devptr_t &cia2, const devptr_t &ioexp)
     : Device{TYPE, {}},
       _vic2{vic2},
       _sid{sid},
@@ -84,14 +84,14 @@ uint8_t C64IO::read(addr_t addr) const
         return _cia2->read((addr - CIA2_ADDR) % 0x10);
     }
 
-    if (addr < SIZE) {
+    if (addr < SIZE && _ioexp) {
         /*
          * I/O Expansion.
          */
         return _ioexp->read(addr - IOEXP_ADDR);
     }
 
-    return 255; /* throw? */
+    return 255;
 }
 
 void C64IO::write(addr_t addr, uint8_t value)
@@ -139,7 +139,7 @@ void C64IO::write(addr_t addr, uint8_t value)
         return;
     }
 
-    if (addr < SIZE) {
+    if (addr < SIZE && _ioexp) {
         /*
          * I/O expansion.
          */

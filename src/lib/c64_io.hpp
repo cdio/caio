@@ -28,7 +28,7 @@ namespace c64 {
 /**
  * C64 I/O device.
  * This class implements a meta-device that embeds all the devices
- * connected to the C64 I/O space between addresses $D000 and $DFFF.
+ * connected to the C64 I/O space mapped from address $D000 to $DFFF.
  *
  * $D000 - $D02E -- $0000 - $002E   VIC2 registers
  * $D02F - $D03F -- $002F - $003F   Fixed #$FF
@@ -45,7 +45,7 @@ public:
     constexpr static const char *TYPE           = "I/O";
     constexpr static const addr_t START_ADDR    = 0xD000;
     constexpr static const addr_t END_ADDR      = 0xE000;
-    constexpr static const size_t SIZE          = 0x1000;
+    constexpr static const size_t SIZE          = END_ADDR - START_ADDR;
 
     constexpr static const addr_t VIC2_ADDR     = 0x0000;
     constexpr static const addr_t SID_ADDR      = 0x0400;
@@ -56,7 +56,6 @@ public:
 
     /**
      * Initialise this C64-IO device.
-     * @param ram    The C64 RAM (64K);
      * @param vic2   Video controller device;
      * @param sid    Audio controller device;
      * @param vcolor Video colour RAM;
@@ -64,8 +63,8 @@ public:
      * @param cia2   CIA#2 device;
      * @param ioexp  I/O expansion device.
      */
-    C64IO(const devptr_t &ram, const devptr_t &vic2, const devptr_t &sid, const devptr_t &vcolor,
-        const devptr_t &cia1, const devptr_t &cia2, const devptr_t &ioexp);
+    C64IO(const devptr_t &vic2, const devptr_t &sid, const devptr_t &vcolor, const devptr_t &cia1,
+        const devptr_t &cia2, const devptr_t &ioexp);
 
     virtual ~C64IO();
 
