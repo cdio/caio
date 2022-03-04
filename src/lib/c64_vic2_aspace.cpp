@@ -28,103 +28,34 @@ Vic2ASpace::Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, devptr_t &ram, devp
     /*
      * The 16K address space of a memory bank is subdivided into four 4K mappings.
      * This is done this way because the minimum device size here is 4K (the character ROM).
-     * (See addrmap_t documentation).
      */
-    auto bank_0 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t bank_0 = {
         { ram,      0x0000 },
         { chargen,  0x0000 },
         { ram,      0x2000 },
         { ram,      0x3000 },
+    };
 
-        /*
-         * The following entries are not seen by the VIC-II controller
-         * but we must add them because of the requirements of addrmap_t.
-         */
-        { ram,      0x0000 },
-        { chargen,  0x0000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x0000 },
-        { chargen,  0x0000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x0000 },
-        { chargen,  0x0000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 }
-    });
-
-    auto bank_1 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t bank_1 = {
         { ram,      0x4000 },
         { ram,      0x5000 },
         { ram,      0x6000 },
         { ram,      0x7000 },
+    };
 
-        /*
-         * The following entries are not seen by the VIC-II controller
-         * but we must add them because of the requirements of addrmap_t.
-         */
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 }
-    });
-
-    auto bank_2 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t bank_2 = {
         { ram,      0x8000 },
         { chargen,  0x0000 },
         { ram,      0xA000 },
         { ram,      0xB000 },
+    };
 
-        /*
-         * The following entries are not seen by the VIC-II controller
-         * but we must add them because of the requirements of addrmap_t.
-         */
-        { ram,      0x8000 },
-        { chargen,  0x0000 },
-        { ram,      0xA000 },
-        { ram,      0xB000 },
-        { ram,      0x8000 },
-        { chargen,  0x0000 },
-        { ram,      0xA000 },
-        { ram,      0xB000 },
-        { ram,      0x8000 },
-        { chargen,  0x0000 },
-        { ram,      0xA000 },
-        { ram,      0xB000 }
-    });
-
-    auto bank_3 = addrmap_t(new std::vector<devmap_t>{
+    addrmap_t bank_3 = {
         { ram,      0xC000 },
         { ram,      0xD000 },
         { ram,      0xE000 },
         { ram,      0xF000 },
-
-        /*
-         * The following entries are not seen by the VIC-II controller
-         * but we must add them because of the requirements of addrmap_t.
-         */
-        { ram,      0xC000 },
-        { ram,      0xD000 },
-        { ram,      0xE000 },
-        { ram,      0xF000 },
-        { ram,      0xC000 },
-        { ram,      0xD000 },
-        { ram,      0xE000 },
-        { ram,      0xF000 },
-        { ram,      0xC000 },
-        { ram,      0xD000 },
-        { ram,      0xE000 },
-        { ram,      0xF000 }
-    });
+    };
 
     _rbanks = {
         bank_3,
@@ -154,4 +85,3 @@ Vic2ASpace::Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, devptr_t &ram, devp
 
 }
 }
-

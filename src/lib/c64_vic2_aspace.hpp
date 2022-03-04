@@ -39,6 +39,7 @@ namespace c64 {
 class Vic2ASpace : public ASpace {
 public:
     constexpr static const size_t MEMORY_BANKS = 4;
+    constexpr static const addr_t ADDR_MASK    = 0x3FFF;
 
     /**
      * Initialise this VIC2 Address Space.
@@ -57,7 +58,7 @@ private:
      */
     void bank(size_t bank) {
         _bank = bank;
-        ASpace::reset(_rbanks[_bank], _wbanks[_bank]);
+        ASpace::reset(_rbanks[_bank], _wbanks[_bank], ADDR_MASK);
     }
 
     std::shared_ptr<Mos6526> _cia2{};
