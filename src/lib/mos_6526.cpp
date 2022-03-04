@@ -88,7 +88,7 @@ uint8_t Mos6526::read(addr_t addr) const
         return _timer_B.cr();
 
     default:
-        throw InternalError{*this, "Invalid read address: $" + utils::to_string(addr)};
+        throw InvalidReadAddress{*this, addr};
     }
 }
 
@@ -190,7 +190,7 @@ void Mos6526::write(addr_t addr, uint8_t data)
         break;
 
     default:
-        throw InternalError{*this, "Invalid write address: $" + utils::to_string(addr)};
+        throw InvalidWriteAddress{*this, addr};
     }
 }
 
