@@ -28,15 +28,39 @@ namespace cemu {
 
 /**
  * Address Space.
- * The Address Space is the interface used to access a system's address space;
- * the entire addr_t set of addresses is separated into a number of fixed sized
- * banks, each address range of a bank is handled by a single device.
+ * This class implements the interface used to access a system's memory mappings.
+ * The address space (addr_t) is separated into a number of fixed size banks,
+ * each range of addresses inside a bank must be handled by a single device.
  * There are two sets of address space mappings, one for reading and another for writing.
  * @see addr_t
  * @see Device
  */
 class ASpace {
 public:
+    /**
+     * Device mappings type.
+     * The device mappings type binds a device instance to a memory bank.
+     * The first element is a pointer to the device and the second element
+     * is the offset within the addr_t address space of the memory bank.
+     *
+     * The device must handle the entire set of addresses of a bank starting
+     * at the specified offset: offset + bank_size <= device.size().
+     *
+     * When a read or a write is delivered the device receives a relative
+     * address from the starting offset.
+     *
+     * @see devptr_t
+     */
+    using devmap_t = std::pair<devptr_t, addr_t>;
+
+    /**
+     * Address mappings type.
+     * The address mappings type defines the device mappings for an entire address space.
+     * It must not contain holes (unmapped addresses): The entire addr_t set must be mapped.
+     * TODO Don't use vector
+     */
+    using addrmap_t = std::vector<devmap_t>;
+
     virtual ~ASpace() {
     }
 
@@ -51,40 +75,19 @@ public:
     virtual void write(addr_t addr, uint8_t value);
 
 protected:
-    /**
-     * Device mappings type.
-     * The device mappings type binds a device instance to a bank.
-     * The first element is the device handling the bank addresses;
-     * the second element is the offset within the addr_t address space.
-     *
-     * Care must be taken when creating a mapping: The device must be able to handle the
-     * entire set of addresses of a bank starting at the specified offset:
-     * offset + bank_size <= device.size().
-     *
-     * When a read or a write is delivered the device receives a relative
-     * address from the starting offset.
-     */
-    using devmap_t = std::pair<devptr_t, addr_t>;
-
-    /**
-     * Address mappings type.
-     * The address mappings type defines the device mappings for an entire address space.
-     * It must not contain holes (unmapped addresses): The entire addr_t set must be mapped.
-     */
-    using addrmap_t = std::shared_ptr<std::vector<devmap_t>>;
-
     ASpace() {
     }
 
     /**
      * Initialise this address space.
      * @param rmaps Address mappings for read operations (it must have the same size as the write map);
-     * @param wmaps Address mappings for write operations (it must have the same size as the read map).
+     * @param wmaps Address mappings for write operations (it must have the same size as the read map);
+     * @param amask Address space mask (addresses are ANDed with this mask).
      * @exception InvalidArgument if one of the parameters is ill formed.
      * @see reset()
      */
-    ASpace(const addrmap_t &rmaps, const addrmap_t &wmaps) {
-        reset(rmaps, wmaps);
+    ASpace(const addrmap_t &rmaps, const addrmap_t &wmaps, addr_t amask) {
+        reset(rmaps, wmaps, amask);
     }
 
     /**
@@ -95,13 +98,15 @@ protected:
      * - The size of a bank must be a power of 2.
      * @param rmaps Address mappings for read operations;
      * @param wmaps Address mappings for write operations;
+     * @param amask Address space mask (addresses are ANDed with this mask).
      * @exception InvalidArgument if one of the parameters is ill formed.
      */
-    void reset(const addrmap_t &rmaps, const addrmap_t &wmaps);
+    void reset(const addrmap_t &rmaps, const addrmap_t &wmaps, addr_t amask);
 
 private:
     std::pair<addr_t, addr_t> decode(addr_t addr) const;
 
+    addr_t    _amask{};
     addr_t    _bsize{};
     addr_t    _bmask{};
     addr_t    _bshift{};
