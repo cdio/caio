@@ -50,7 +50,6 @@ using MatrixKey = C64Keyboard::MatrixKey;
 constexpr static const bool SHIFT = true;
 constexpr static const bool NONE = false;
 
-
 std::map<std::string, MatrixKey> C64Keyboard::name_to_c64{
     { "KEY_RUNSTOP",      MatrixKey::KEY_RUNSTOP      },
     { "KEY_Q",            MatrixKey::KEY_Q            },
@@ -124,7 +123,6 @@ std::map<std::string, MatrixKey> C64Keyboard::name_to_c64{
     { "KEY_RETURN",       MatrixKey::KEY_RETURN       },
     { "KEY_DELETE",       MatrixKey::KEY_DELETE       },
 };
-
 
 std::map<std::tuple<Keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> C64Keyboard::default_key_to_c64{
     {{ Keyboard::KEY_ESC,           NONE,   NONE    }, { MatrixKey::KEY_RUNSTOP,        NONE  }},
@@ -279,6 +277,22 @@ C64Keyboard::MatrixKey C64Keyboard::to_c64(const std::string &name)
     return (it == name_to_c64.end() ? MatrixKey::KEY_NONE : it->second);
 }
 
+C64Keyboard::C64Keyboard(const std::string &label, const std::function<void()> &restore_cb)
+    : Keyboard{label},
+    _restore_cb{restore_cb},
+    _key_to_c64{default_key_to_c64}
+{
+    _matrix.fill(0);
+}
+
+C64Keyboard::~C64Keyboard()
+{
+}
+
+void C64Keyboard::restore_key(const std::function<void()> &restore_cb)
+{
+    _restore_cb = restore_cb;
+}
 
 void C64Keyboard::reset()
 {
@@ -370,6 +384,11 @@ uint8_t C64Keyboard::read()
     return ~cols;
 }
 
+void C64Keyboard::write(uint8_t row)
+{
+    _scanrow = row;
+}
+
 void C64Keyboard::add_key_map(const std::string &key_name, bool key_shift, bool key_altgr, const std::string &impl_name,
     bool impl_shift)
 {
@@ -394,6 +413,11 @@ void C64Keyboard::add_key_map(const std::string &key_name, bool key_shift, bool 
         log.warn("C64Keyboard: key redefined: %s%s%s. Previous value has been replaced\n", key_name.c_str(),
             (key_shift ? " SHIFT" : ""), (key_altgr ? " ALTGR" : ""));
     }
+}
+
+void C64Keyboard::clear_key_map()
+{
+    _key_to_c64.clear();
 }
 
 void C64Keyboard::set_matrix(MatrixKey key, bool set)

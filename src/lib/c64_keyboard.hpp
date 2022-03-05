@@ -34,7 +34,9 @@
 namespace cemu {
 namespace c64 {
 
-/*
+/**
+ * C64 Keyboard.
+ * <pre>
  * +------------------------------------------------------------------------------+-------+
  * |                             CIA 1 Port B ($DC01)                             | Joy 2 |
  * +-------------+----------------------------------------------------------------+-------+
@@ -51,11 +53,8 @@ namespace c64 {
  * +-------------+----------------------------------------------------------------+-------+
  * | Joy 1       |                         Fire    Right   Left    Down    Up     |       |
  * +-------------+----------------------------------------------------------------+-------+
- *
- * Source: https://www.c64-wiki.com/wiki/Keyboard
- */
-/**
- * C64 Keyboard.
+ * </pre>
+ * @see <https://www.c64-wiki.com/wiki/Keyboard>
  */
 class C64Keyboard : public Keyboard {
 public:
@@ -135,21 +134,20 @@ public:
         KEY_NONE         = -1
     };
 
-
     /**
      * Initialise this C64 keyboard.
      * @param label      Label assigned to this keyboard;
      * @param restore_cb Callback to call when the RESTORE key is pressed.
      */
-    C64Keyboard(const std::string &label, const std::function<void()> &restore_cb)
-        : Keyboard{label},
-          _restore_cb{restore_cb},
-          _key_to_c64{default_key_to_c64} {
-        _matrix.fill(0);
-    }
+    C64Keyboard(const std::string &label, const std::function<void()> &restore_cb = {});
 
-    virtual ~C64Keyboard() {
-    }
+    virtual ~C64Keyboard();
+
+    /**
+     * Set the RESTORE key callback.
+     * @param restore_cb Callback to call when the RESTORE key is pressed.
+     */
+    void restore_key(const std::function<void()> &restore_cb);
 
     /**
      * @see Keyboard::reset()
@@ -174,9 +172,7 @@ public:
     /**
      * @see Keyboard::write()
      */
-    void write(uint8_t row) override {
-        _scanrow = row;
-    }
+    void write(uint8_t row) override;
 
     /**
      * @see Keyboard::add_key_map[()
@@ -187,9 +183,7 @@ public:
     /**
      * @see Keyboard::clear_key_map()
      */
-    void clear_key_map() override {
-        _key_to_c64.clear();
-    }
+    void clear_key_map() override;
 
     /**
      * Convert a string to a KeyMatrix.
