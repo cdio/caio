@@ -33,7 +33,6 @@ namespace cemu {
  */
 constexpr static const unsigned CLOCK_FREQ_PAL = 985248;
 
-
 /**
  * Clockable.
  * A clockable is implemented by any class that must be scheduled by a clock.
@@ -62,7 +61,6 @@ private:
     friend class Clock;
 };
 
-
 /**
  * Clock.
  */
@@ -79,11 +77,7 @@ public:
      * @param delay The speed delay (1.0f is normal speed).
      * @see delay(float)
      */
-    Clock(const std::string &label = {}, size_t freq = {}, float delay = 1.0f)
-        : Name{TYPE, label},
-          _freq{freq},
-          _delay{delay} {
-    }
+    Clock(const std::string &label = {}, size_t freq = {}, float delay = 1.0f);
 
     /**
      * Initialise this clock.
@@ -91,39 +85,28 @@ public:
      * @param delay The speed delay (1.0f is normal speed).
      * @see delay(float)
      */
-    explicit Clock(size_t freq, float delay = 1.0f)
-        : Name{TYPE, {}},
-          _freq{freq},
-          _delay{delay} {
-    }
+    explicit Clock(size_t freq, float delay = 1.0f);
 
-    virtual ~Clock() {
-    }
+    virtual ~Clock();
 
     /**
      * @return The frequency (in Hz) of this clock.
      * @see freq(size_t)
      */
-    size_t freq() const {
-        return _freq;
-    }
+    size_t freq() const;
 
     /**
      * Set the frequency of this clock.
      * @param freq Frequency (in Hz).
      * @see freq()
      */
-    void freq(size_t freq) {
-        _freq = freq;
-    }
+    void freq(size_t freq);
 
     /**
      * @return The speed delay for this clock (1.0 is normal speed, 2.0 is half the speed. etc.).
      * @see delay(float)
      */
-    float delay() const {
-        return _delay;
-    }
+    float delay() const;
 
     /**
      * Set the speed delay for this clock.
@@ -136,9 +119,7 @@ public:
      * @see delay()
      * @see freq(size_t)
      */
-    void delay(float delay) {
-        _delay = delay;
-    }
+    void delay(float delay);
 
     /**
      * Add a clockable to this clock.
@@ -177,9 +158,7 @@ public:
      * to return back from the run() method.
      * @see run()
      */
-    void stop() {
-        _stop = true;
-    }
+    void stop();
 
     /**
      * Suspend/Unsuspend this clock;
@@ -187,27 +166,21 @@ public:
      * @see is_suspended()
      * @see toggle_suspend()
      */
-    void suspend(bool susp = true) {
-        _suspend = susp;
-    }
+    void suspend(bool susp = true);
 
     /**
      * Toggle suspend status of this clock.
      * @see is_suspended()
      * @see suspend()
      */
-    void toggle_suspend() {
-        _suspend = (_suspend ? false : true);
-    }
+    void toggle_suspend();
 
     /**
      * @return true if this clock is suspended; false otherwise.
      * @see suspend()
      * @see toggle_suspend()
      */
-    bool is_suspended() const {
-        return _suspend;
-    }
+    bool is_suspended() const;
 
     /**
      * Synchronise this clock.
@@ -222,9 +195,7 @@ public:
      * (usually at a rate of 50Hz).
      * @param cycles Clock cycles to sleep before starting the next clock tick round.
      */
-    void sync(unsigned cycles) {
-        _sync_us = static_cast<int64_t>(cycles * 1000000.0 * _delay / static_cast<double>(_freq));
-    }
+    void sync(unsigned cycles);
 
     /**
      * @return A human readable string representation of this clock.
@@ -236,18 +207,14 @@ public:
      * @param secs Time interval (seconds).
      * @return The clock cycles corresponding to the specified time interval.
      */
-    size_t cycles(float secs) const {
-        return cycles(secs, _freq);
-    }
+    size_t cycles(float secs) const;
 
     /**
      * Get the time interval corresponding to a given number of clock cycles.
      * @param cycles Cycles.
      * @return The time interval corresponding to the specified clock cycles.
      */
-    float time(size_t cycles) const {
-        return time(cycles, _freq);
-    }
+    float time(size_t cycles) const;
 
     /**
      * Get the number of clock cycles correspoinding to a given time interval.

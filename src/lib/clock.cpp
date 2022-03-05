@@ -30,26 +30,67 @@ namespace cemu {
 
 using namespace std::chrono_literals;
 
+Clock::Clock(const std::string &label, size_t freq, float delay)
+    : Name{TYPE, label},
+      _freq{freq},
+      _delay{delay}
+{
+}
+
+Clock::Clock(size_t freq, float delay)
+    : Name{TYPE, {}},
+      _freq{freq},
+      _delay{delay}
+{
+}
+
+Clock::~Clock()
+{
+}
+
+size_t Clock::freq() const
+{
+    return _freq;
+}
+
+void Clock::freq(size_t freq)
+{
+    _freq = freq;
+}
+
+float Clock::delay() const
+{
+    return _delay;
+}
+
+void Clock::delay(float delay)
+{
+    _delay = delay;
+}
 
 void Clock::add(const std::shared_ptr<Clockable> &c)
 {
-    auto it = std::find_if(_clockables.begin(), _clockables.end(), [&c](const clockable_pair_t &pair) -> bool {
-        return (pair.first.get() == c.get());
-    });
+    if (c) {
+        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&c](const clockable_pair_t &pair) -> bool {
+            return (pair.first.get() == c.get());
+        });
 
-    if (it == _clockables.end()) {
-        _clockables.push_back({c, 0});
+        if (it == _clockables.end()) {
+            _clockables.push_back({c, 0});
+        }
     }
 }
 
 void Clock::del(const std::shared_ptr<Clockable> &c)
 {
-    auto it = std::find_if(_clockables.begin(), _clockables.end(), [&c](const clockable_pair_t &pair) -> bool {
-        return (pair.first.get() == c.get());
-    });
+    if (c) {
+        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&c](const clockable_pair_t &pair) -> bool {
+            return (pair.first.get() == c.get());
+        });
 
-    if (it != _clockables.end()) {
-        _clockables.erase(it);
+        if (it != _clockables.end()) {
+            _clockables.erase(it);
+        }
     }
 }
 
@@ -116,6 +157,31 @@ size_t Clock::tick()
     return ~Clockable::HALT;
 }
 
+void Clock::stop()
+{
+    _stop = true;
+}
+
+void Clock::suspend(bool susp)
+{
+    _suspend = susp;
+}
+
+void Clock::toggle_suspend()
+{
+    _suspend = (_suspend ? false : true);
+}
+
+bool Clock::is_suspended() const
+{
+    return _suspend;
+}
+
+void Clock::sync(unsigned cycles)
+{
+    _sync_us = static_cast<int64_t>(cycles * 1000000.0 * _delay / static_cast<double>(_freq));
+}
+
 std::string Clock::to_string() const
 {
     std::stringstream os{};
@@ -125,6 +191,16 @@ std::string Clock::to_string() const
        << ", delay " << std::setprecision(3) << _delay;
 
     return os.str();
+}
+
+size_t Clock::cycles(float secs) const
+{
+    return cycles(secs, _freq);
+}
+
+float Clock::time(size_t cycles) const
+{
+    return time(cycles, _freq);
 }
 
 }
