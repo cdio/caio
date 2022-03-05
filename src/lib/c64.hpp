@@ -30,11 +30,12 @@
 #include "mos_6569.hpp"
 #include "mos_6581_i.hpp"
 
-#include "c64_aspace.hpp"
 #include "c64_bus_controller.hpp"
+#include "c64_cartridge.hpp"
 #include "c64_config.hpp"
 #include "c64_joystick.hpp"
 #include "c64_keyboard.hpp"
+#include "c64_pla.hpp"
 #include "c64_vic2_aspace.hpp"
 
 
@@ -61,7 +62,6 @@ constexpr static const addr_t BASIC_STREND        = 0x0031;     /* Pointer to en
 constexpr static const addr_t BASIC_KEYB_BUFF     = 0x0277;     /* Keyboard buffer used by basic (10 bytes)     */
 constexpr static const addr_t BASIC_KEYB_BUFF_POS = 0x00C6;     /* Number of elements in the keyboard buffer    */
 
-
 /**
  * The C64 emulator.
  */
@@ -70,13 +70,11 @@ public:
     /**
      * Initialise this C64.
      * @param conf Configuration parameters.
+     * @see C64Config
      */
-    C64(const C64Config &conf)
-        : _conf{conf} {
-    }
+    C64(const C64Config &conf);
 
-    virtual ~C64() {
-    }
+    virtual ~C64();
 
     /**
      * Reset and start this C64.
@@ -122,33 +120,43 @@ private:
     std::string keymapspath(const std::string &fname) const;
 
     /**
-     * Check whether an attached ROM device has the right size.
-     * @param rom ROM device to check.
-     * @return true if the ROM can be used; false if the ROM size is not 8K or 16K.
+     * Attach a cartridge image file.
+     * Load a .crt image and associate it to an I/O expansion device.
+     * @return An I/O expansion device (Cartridge) attached to the specified image;
+     * nullptr if the cartridge is not specified in the configuration.
+     * @exception InvalidCartridge
+     * @see Cartridge
+     * @see Crt
      */
-    bool check_rom_size(const devptr_t &rom) const;
-
-    /**
-     * Attach a cartridge image.
-     * If a cartridge image is specified in the configuration, load it as a ROM device.
-     * RAW (ROM dump) and CRT formats are recognised, in both cases only a single 8K or 16K ROM chip is supported.
-     * @return A device ROM.
-     * @exception InvalidCartridge if the cartridge file cannot be loaded or the ROM size is not 8K or 16K.
-     * @see check_rom_size()
-     */
-    devptr_t attach_cartridge();
+    std::shared_ptr<Cartridge> attach_cartridge();
 
     /**
      * Attach A PRG file.
-     * If a PRG file is specified in the configuration, load it into memory and prepare the BASIC to run it.
+     * If a PRG file is specified in the configuration, load (inject)
+     * it into the system RAM and prepare the BASIC and the CPU to run it.
      * @exception IOError if the PRG file cannot be loaded.
      */
     void attach_prg();
 
     /**
-     * Create the UI panel widgets.
+     * Create (instantiate) the devices that emulate the C64 hardware.
      */
-    void create_widgets();
+    void create_devices();
+
+    /**
+     * Create the user interface based on configuration parameters.
+     */
+    void create_ui();
+
+    /**
+     * Create UI panel widgets and connect them to the associated devices.
+     */
+    void make_widgets();
+
+    /**
+     * Connect (wire) all the devices in order to build the C64 hardware.
+     */
+    void connect_devices();
 
     /**
      * Reset this C64.
@@ -162,36 +170,28 @@ private:
     void start();
 
     C64Config                         _conf{};
-
     bool                              _paused{};
-
     devptr_t                          _ram{};
     devptr_t                          _basic{};
     devptr_t                          _kernal{};
     devptr_t                          _chargen{};
     devptr_t                          _vcolor{};
     devptr_t                          _io{};
-    devptr_t                          _cart{};
-
-    std::shared_ptr<ASpace>           _mmap{};
+    std::shared_ptr<PLA>              _pla{};
     std::shared_ptr<Mos6510>          _cpu{};
-
     std::shared_ptr<Mos6569>          _vic2{};
     std::shared_ptr<Mos6581I>         _sid{};
     std::shared_ptr<Mos6526>          _cia1{};
     std::shared_ptr<Mos6526>          _cia2{};
-
+    std::shared_ptr<Cartridge>        _ioexp{};
     std::shared_ptr<cbm_bus::Bus>     _bus{};
     std::shared_ptr<C64BusController> _busdev{};
     std::shared_ptr<cbm_bus::Device>  _unit8{};
     std::shared_ptr<cbm_bus::Device>  _unit9{};
-
     std::shared_ptr<Clock>            _clk{};
-
     std::shared_ptr<Keyboard>         _kbd{};
     std::shared_ptr<Joystick>         _joy1{};
     std::shared_ptr<Joystick>         _joy2{};
-
     std::shared_ptr<ui::UI>           _ui{};
 };
 
