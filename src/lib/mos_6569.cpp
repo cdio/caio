@@ -894,37 +894,38 @@ void Mos6569::paint_display_cycle(unsigned x)
         paint(0, 0, _palette[_border_color]);
 
     } else {
-        /*
-         * Display mode.
-         */
         unsigned dline = _video_counter + _row_counter;
-
-        if (!_bmm_mode) {
+        if (dline < DISPLAY_HEIGHT) {
             /*
-             * Text mode.
+             * Display mode.
              */
-            if (!(_ecm_mode && _mcm_mode)) {
-                paint_char_mode(dline, x);
+            if (!_bmm_mode) {
+                /*
+                * Text mode.
+                */
+                if (!(_ecm_mode && _mcm_mode)) {
+                    paint_char_mode(dline, x);
+
+                } else {
+                    /*
+                    * Invalid text mode.
+                    */
+                    paint(0, 0, {0, 0, 0});
+                }
 
             } else {
                 /*
-                 * Invalid text mode.
-                 */
-                paint(0, 0, {0, 0, 0});
-            }
+                * Bitmap mode.
+                */
+                if (!_ecm_mode) {
+                    paint_bitmap_mode(dline, x);
 
-        } else {
-            /*
-             * Bitmap mode.
-             */
-            if (!_ecm_mode) {
-                paint_bitmap_mode(dline, x);
-
-            } else {
-                /*
-                 * Invalid bitmap mode.
-                 */
-                paint(0, 0, {0, 0, 0});
+                } else {
+                    /*
+                    * Invalid bitmap mode.
+                    */
+                    paint(0, 0, {0, 0, 0});
+                }
             }
         }
     }
