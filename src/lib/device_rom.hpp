@@ -39,18 +39,13 @@ public:
      * @param label Label assigned to this Device;
      * @param data  Buffer with ROM data.
      */
-    DeviceROM(const std::string &label, const std::vector<uint8_t> &data)
-        : Device{TYPE, label},
-          _data(data) {
-    }
+    DeviceROM(const std::string &label, const std::vector<uint8_t> &data);
 
     /**
      * Initialise this ROM Device.
      * @param data Buffer with ROM data.
      */
-    DeviceROM(const std::vector<uint8_t> &data)
-        : DeviceROM{{}, data} {
-    }
+    DeviceROM(const std::vector<uint8_t> &data);
 
     /**
      * Initialise this ROM Device with data from a file.
@@ -67,9 +62,7 @@ public:
      * @param size  If non-zero, the size that the ROM file must have.
      * @exception IOError if the specified file cannot be opened or its size is different from the expected one.
      */
-    DeviceROM(const std::string &fname, size_t size = 0)
-        : DeviceROM{fname, {}, size} {
-    }
+    DeviceROM(const std::string &fname, size_t size = 0);
 
     /**
      * Initialise this ROM Device with data from an input stream.
@@ -82,9 +75,7 @@ public:
     /**
      * @see Device::size()
      */
-    size_t size() const override {
-        return _data.size();
-    }
+    size_t size() const override;
 
     /**
      * @see Device::read()
@@ -94,15 +85,12 @@ public:
     /**
      * This method does nothing.
      */
-    void write(addr_t addr, uint8_t data) override {
-    }
+    void write(addr_t addr, uint8_t data) override;
 
     /**
      * @see Device::dump()
      */
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override {
-        return utils::dump(os, _data, base);
-    }
+    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
 
 private:
     std::vector<uint8_t> _data{};

@@ -23,6 +23,22 @@
 
 namespace cemu {
 
+DeviceROM::DeviceROM(const std::string &label, const std::vector<uint8_t> &data)
+    : Device{TYPE, label},
+      _data(data)
+{
+}
+
+DeviceROM::DeviceROM(const std::vector<uint8_t> &data)
+    : DeviceROM{{}, data}
+{
+}
+
+DeviceROM::DeviceROM(const std::string &fname, size_t size)
+    : DeviceROM{fname, {}, size}
+{
+}
+
 DeviceROM::DeviceROM(const std::string &fname, const std::string &label, size_t size)
     : Device{TYPE, label}
 {
@@ -57,6 +73,11 @@ DeviceROM::DeviceROM(std::istream &is, size_t size)
     }
 }
 
+size_t DeviceROM::size() const
+{
+    return _data.size();
+}
+
 uint8_t DeviceROM::read(addr_t addr) const
 {
     if (addr < _data.size()) {
@@ -64,6 +85,15 @@ uint8_t DeviceROM::read(addr_t addr) const
     }
 
     throw InvalidReadAddress{*this, addr};
+}
+
+void DeviceROM::write(addr_t addr, uint8_t data)
+{
+}
+
+std::ostream &DeviceROM::dump(std::ostream &os, addr_t base) const
+{
+    return utils::dump(os, _data, base);
 }
 
 }
