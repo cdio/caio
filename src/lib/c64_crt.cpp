@@ -20,6 +20,7 @@
 
 #include <endian.h>
 
+#include "device_ram.hpp"
 #include "device_rom.hpp"
 #include "utils.hpp"
 
@@ -86,8 +87,13 @@ void Crt::open(std::istream &is)
                 break;
             }
 
-            case CHIP_TYPE_RAM:
-                throw Error{"CHIP type RAM not supported"};
+            case CHIP_TYPE_RAM: {
+                auto ram = std::make_shared<DeviceRAM>(ch.rsiz);
+                ram->label(name() + ", chip " + std::to_string(i + 1));
+                _roms.push_back(ram);
+                _chips.push_back(ch);
+                break;
+            }
 
             default:
                 throw Error{"Invalid CHIP type: $" + utils::to_string(ch.type)};
