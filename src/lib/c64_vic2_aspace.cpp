@@ -27,7 +27,6 @@ Vic2ASpace::Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, devptr_t &ram, devp
 {
     /*
      * The 16K address space of a memory bank is subdivided into four 4K mappings.
-     * This is done this way because the minimum device size here is 4K (the character ROM).
      */
     addrmap_t bank_0 = {
         { ram,      0x0000 },
