@@ -356,7 +356,10 @@ void Mos6502::init_monitor(std::istream &is, std::ostream &os)
 
 void Mos6502::reset(const std::shared_ptr<ASpace> &mmap)
 {
-    _mmap = mmap;
+    if (mmap) {
+        _mmap = mmap;
+    }
+
     _regs = { .PC = read_addr(vRESET) };
     flag(0);
 }

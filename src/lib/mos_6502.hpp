@@ -136,7 +136,7 @@ public:
      * Reinitialise this CPU.
      * @param mmap System mappings.
      */
-    void reset(const std::shared_ptr<ASpace> &mmap);
+    void reset(const std::shared_ptr<ASpace> &mmap = {});
 
     /**
      * Set the single-step log level.
