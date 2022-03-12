@@ -42,6 +42,7 @@ public:
     constexpr static const uint8_t CHAREN   = 0x04;
     constexpr static const uint8_t GAME     = 0x08;
     constexpr static const uint8_t EXROM    = 0x10;
+    constexpr static const uint8_t INVALID  = 0xFF;
     constexpr static const uint8_t MASK     = LORAM | HIRAM | CHAREN | GAME | EXROM;
 
     constexpr static const addr_t A15       = 1 << 15;
@@ -69,10 +70,11 @@ public:
 
     /**
      * Set PLA input pins.
-     * @param pins Input pins to set o clear (based on mask);
-     * @param mask Mask of the input pins to set or clear.
+     * @param pins  Input pins to set o clear (based on mask);
+     * @param mask  Mask of the input pins to set or clear;
+     * @param force Force pin settings even if the current mode is the same.
      */
-    void mode(uint8_t pins, uint8_t mask);
+    void mode(uint8_t pins, uint8_t mask, bool force = false);
 
     /**
      * @return The status of the PLA input pins.
@@ -101,11 +103,10 @@ private:
 
     bool roml(addr_t addr) const;
 
-    bool                      _init{};
-    uint8_t                   _mode{};      /* Bitwise combination of LORAM, HIRAM, CHAREN, GAME, and EXROM */
-    extmap_cb_t               _extmap{};    /* I/O Extension (cartridge) callback                           */
-    std::array<addrmap_t, 32> _rmodes{};    /* Default read mapping modes                                   */
-    std::array<addrmap_t, 32> _wmodes{};    /* Default write mapping modes                                  */
+    uint8_t                   _mode{INVALID};   /* Bitwise combination of LORAM, HIRAM, CHAREN, GAME, and EXROM */
+    extmap_cb_t               _extmap{};        /* I/O Extension (cartridge) callback                           */
+    std::array<addrmap_t, 32> _rmodes{};        /* Default read mapping modes                                   */
+    std::array<addrmap_t, 32> _wmodes{};        /* Default write mapping modes                                  */
 };
 
 }

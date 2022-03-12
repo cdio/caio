@@ -21,10 +21,16 @@
 #include <array>
 #include <sstream>
 
+#include "logger.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 
 #include "c64_cartridge/cart_generic.hpp"
+#include "c64_cartridge/cart_easy_flash.hpp"
+#include "c64_cartridge/cart_simons_basic.hpp"
+#include "c64_cartridge/cart_ocean_type_1.hpp"
+#include "c64_cartridge/cart_magic_desk.hpp"
+#include "c64_cartridge/cart_c64_game_system_3.hpp"
 
 
 namespace cemu {
@@ -47,14 +53,14 @@ std::string Cartridge::name() const
 
 size_t Cartridge::size() const
 {
-    return IOEXP_SIZE;
+    return IO_SIZE;
 }
 
 std::ostream &Cartridge::dump(std::ostream &os, addr_t base) const
 {
-    std::array<uint8_t, IOEXP_SIZE> data{};
+    std::array<uint8_t, IO_SIZE> data{};
 
-    for (size_t i = 0; i < IOEXP_SIZE; ++i) {
+    for (size_t i = 0; i < IO_SIZE; ++i) {
         data[i] = read(i);
     }
 
@@ -71,6 +77,51 @@ void Cartridge::add_iow(const Gpio::iow_t &iow, uint8_t mask)
     _ioport.add_iow(iow, mask);
 }
 
+void Cartridge::propagate(bool force)
+{
+    _ioport.iow(0, _mode, force);
+}
+
+void Cartridge::reset()
+{
+    log.debug("%s: %s\n", type().c_str(), _crt->to_string().c_str());
+
+    _mode = static_cast<GameExromMode>((_crt->game() ? GAME : 0 ) | (_crt->exrom() ? EXROM : 0));
+}
+
+const Crt &Cartridge::crt() const
+{
+    return (*_crt);
+}
+
+Cartridge::GameExromMode Cartridge::mode() const
+{
+    return _mode;
+}
+
+void Cartridge::mode(Cartridge::GameExromMode mode)
+{
+    if (mode != _mode) {
+        _mode = mode;
+        propagate();
+    }
+}
+
+void Cartridge::throw_invalid_cartridge(const std::string &reason, ssize_t entry)
+{
+    std::ostringstream err{};
+
+    err << name();
+
+    if (entry >= 0) {
+        err << ": Chip entry " << entry;
+    }
+
+    err << ": " << reason << ". " << _crt->to_string();
+
+    throw InvalidCartridge{type(), err.str()};
+}
+
 std::shared_ptr<Cartridge> Cartridge::create(const std::string &fname)
 {
     auto crt = std::make_shared<Crt>(fname);
@@ -82,7 +133,14 @@ std::shared_ptr<Cartridge> Cartridge::create(const std::string &fname)
     case Crt::HW_TYPE_ACTION_REPLAY:
     case Crt::HW_TYPE_KCS_POWER_CARTRIDGE:
     case Crt::HW_TYPE_FINAL_CARTRIDGE_III:
+        break;
+
     case Crt::HW_TYPE_SIMONS_BASIC:
+        return std::make_shared<CartSimonsBasic>(crt);
+
+    case Crt::HW_TYPE_OCEAN_TYPE_1:
+        return std::make_shared<CartOceanType1>(crt);
+
     case Crt::HW_TYPE_EXPERT_CARTRIDGE:
     case Crt::HW_TYPE_FUN_PLAY:
     case Crt::HW_TYPE_SUPER_GAMES:
@@ -91,11 +149,18 @@ std::shared_ptr<Cartridge> Cartridge::create(const std::string &fname)
     case Crt::HW_TYPE_REX_UTILITY:
     case Crt::HW_TYPE_FINAL_CARTRIDGE_I:
     case Crt::HW_TYPE_MAGIC_FORMEL:
+        break;
+
     case Crt::HW_TYPE_C64_GAME_SYSTEM_3:
+        return std::make_shared<CartC64GameSystem3>(crt);
+
     case Crt::HW_TYPE_WARP_SPEED:
     case Crt::HW_TYPE_DINAMIC:
     case Crt::HW_TYPE_ZAXXON:
+        break;
+
     case Crt::HW_TYPE_MAGIC_DESK:
+        return std::make_shared<CartMagicDesk>(crt);
 
     case Crt::HW_TYPE_COMAL_80:
     case Crt::HW_TYPE_STRUCTURED_BASIC:
@@ -106,10 +171,13 @@ std::shared_ptr<Cartridge> Cartridge::create(const std::string &fname)
     case Crt::HW_TYPE_REX_EP256:
     case Crt::HW_TYPE_MIKRO_ASSEMBLER:
     case Crt::HW_TYPE_FINAL_CARTRIDGE_PLUS:
-
     case Crt::HW_TYPE_ACTION_REPLAY_4:
     case Crt::HW_TYPE_STARDOS:
+        break;
+
     case Crt::HW_TYPE_EASY_FLASH:
+        return std::make_shared<CartEasyFlash>(crt);
+
     case Crt::HW_TYPE_EASY_FLASH_XBANK:
     case Crt::HW_TYPE_CAPTURE:
     case Crt::HW_TYPE_ACTION_REPLAY_3:
@@ -162,7 +230,7 @@ std::shared_ptr<Cartridge> Cartridge::create(const std::string &fname)
     default:;
     }
 
-    throw InvalidCartridge{crt->name(), "Hardware type not supported: " + std::to_string(crt->type()) + ", " +
+    throw InvalidCartridge{Cartridge::TYPE, "Hardware type not supported: " + std::to_string(crt->type()) + ", " +
         crt->to_string()};
 }
 

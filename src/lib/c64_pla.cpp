@@ -28,228 +28,226 @@ namespace c64 {
 PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, const devptr_t &chargen,
     const devptr_t &io)
 {
-    auto cart = device_none;
-
     /*
      * Fixed mappings to accelerate bank switching.
      * See https://www.c64-wiki.com/wiki/Bank_Switching.
      */
     addrmap_t mode_00 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { ram,      0x8000 },
-        { ram,      0x9000 },
-        { ram,      0xA000 },
-        { ram,      0xB000 },
-        { ram,      0xC000 },
-        { ram,      0xD000 },
-        { ram,      0xE000 },
-        { ram,      0xF000 }
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { ram,          0x8000 },
+        { ram,          0x9000 },
+        { ram,          0xA000 },
+        { ram,          0xB000 },
+        { ram,          0xC000 },
+        { ram,          0xD000 },
+        { ram,          0xE000 },
+        { ram,          0xF000 }
     };
 
     auto &mode_01 = mode_00;
 
     addrmap_t mode_02 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { ram,      0x8000 },
-        { ram,      0x9000 },
-        { cart,     0x2000 },
-        { cart,     0x3000 },
-        { ram,      0xC000 },
-        { chargen,  0x0000 },
-        { kernal,   0x0000 },
-        { kernal,   0x1000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { ram,          0x8000 },
+        { ram,          0x9000 },
+        { device_none,  0x2000 },
+        { device_none,  0x3000 },
+        { ram,          0xC000 },
+        { chargen,      0x0000 },
+        { kernal,       0x0000 },
+        { kernal,       0x1000 },
     };
 
     addrmap_t mode_03 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { cart,     0x0000 },
-        { cart,     0x1000 },
-        { cart,     0x2000 },
-        { cart,     0x3000 },
-        { ram,      0xC000 },
-        { chargen,  0x0000 },
-        { kernal,   0x0000 },
-        { kernal,   0x1000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { device_none,  0x0000 },
+        { device_none,  0x1000 },
+        { device_none,  0x2000 },
+        { device_none,  0x3000 },
+        { ram,          0xC000 },
+        { chargen,      0x0000 },
+        { kernal,       0x0000 },
+        { kernal,       0x1000 },
     };
 
     auto &mode_04 = mode_00;
 
     addrmap_t mode_05 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { ram,      0x8000 },
-        { ram,      0x9000 },
-        { ram,      0xA000 },
-        { ram,      0xB000 },
-        { ram,      0xC000 },
-        { io,       0x0000 },
-        { ram,      0xE000 },
-        { ram,      0xF000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { ram,          0x8000 },
+        { ram,          0x9000 },
+        { ram,          0xA000 },
+        { ram,          0xB000 },
+        { ram,          0xC000 },
+        { io,           0x0000 },
+        { ram,          0xE000 },
+        { ram,          0xF000 },
     };
 
     addrmap_t mode_06 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { ram,      0x8000 },
-        { ram,      0x9000 },
-        { cart,     0x2000 },
-        { cart,     0x3000 },
-        { ram,      0xC000 },
-        { io,       0x0000 },
-        { kernal,   0x0000 },
-        { kernal,   0x1000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { ram,          0x8000 },
+        { ram,          0x9000 },
+        { device_none,  0x2000 },
+        { device_none,  0x3000 },
+        { ram,          0xC000 },
+        { io,           0x0000 },
+        { kernal,       0x0000 },
+        { kernal,       0x1000 },
     };
 
     addrmap_t mode_07 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { cart,     0x0000 },
-        { cart,     0x1000 },
-        { cart,     0x2000 },
-        { cart,     0x3000 },
-        { ram,      0xC000 },
-        { io,       0x0000 },
-        { kernal,   0x0000 },
-        { kernal,   0x1000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { device_none,  0x0000 },
+        { device_none,  0x1000 },
+        { device_none,  0x2000 },
+        { device_none,  0x3000 },
+        { ram,          0xC000 },
+        { io,           0x0000 },
+        { kernal,       0x0000 },
+        { kernal,       0x1000 },
     };
 
     auto &mode_08 = mode_00;
 
     addrmap_t mode_09 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { ram,      0x8000 },
-        { ram,      0x9000 },
-        { ram,      0xA000 },
-        { ram,      0xB000 },
-        { ram,      0xC000 },
-        { chargen,  0x0000 },
-        { ram,      0xE000 },
-        { ram,      0xF000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { ram,          0x8000 },
+        { ram,          0x9000 },
+        { ram,          0xA000 },
+        { ram,          0xB000 },
+        { ram,          0xC000 },
+        { chargen,      0x0000 },
+        { ram,          0xE000 },
+        { ram,          0xF000 },
     };
 
     addrmap_t mode_10 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { ram,      0x8000 },
-        { ram,      0x9000 },
-        { ram,      0xA000 },
-        { ram,      0xB000 },
-        { ram,      0xC000 },
-        { chargen,  0x0000 },
-        { kernal,   0x0000 },
-        { kernal,   0x1000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { ram,          0x8000 },
+        { ram,          0x9000 },
+        { ram,          0xA000 },
+        { ram,          0xB000 },
+        { ram,          0xC000 },
+        { chargen,      0x0000 },
+        { kernal,       0x0000 },
+        { kernal,       0x1000 },
     };
 
     addrmap_t mode_11 = addrmap_t{
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { cart,     0x0000 },
-        { cart,     0x1000 },
-        { basic,    0x0000 },
-        { basic,    0x1000 },
-        { ram,      0xC000 },
-        { chargen,  0x0000 },
-        { kernal,   0x0000 },
-        { kernal,   0x1000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { device_none,  0x0000 },
+        { device_none,  0x1000 },
+        { basic,        0x0000 },
+        { basic,        0x1000 },
+        { ram,          0xC000 },
+        { chargen,      0x0000 },
+        { kernal,       0x0000 },
+        { kernal,       0x1000 },
     };
 
     auto &mode_12 = mode_00;
     auto &mode_13 = mode_05;
 
     addrmap_t mode_14 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { ram,      0x8000 },
-        { ram,      0x9000 },
-        { ram,      0xA000 },
-        { ram,      0xB000 },
-        { ram,      0xC000 },
-        { io,       0x0000 },
-        { kernal,   0x0000 },
-        { kernal,   0x1000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { ram,          0x8000 },
+        { ram,          0x9000 },
+        { ram,          0xA000 },
+        { ram,          0xB000 },
+        { ram,          0xC000 },
+        { io,           0x0000 },
+        { kernal,       0x0000 },
+        { kernal,       0x1000 },
     };
 
     addrmap_t mode_15 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { cart,     0x0000 },
-        { cart,     0x1000 },
-        { basic,    0x0000 },
-        { basic,    0x1000 },
-        { ram,      0xC000 },
-        { io,       0x0000 },
-        { kernal,   0x0000 },
-        { kernal,   0x1000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { device_none,  0x0000 },
+        { device_none,  0x1000 },
+        { basic,        0x0000 },
+        { basic,        0x1000 },
+        { ram,          0xC000 },
+        { io,           0x0000 },
+        { kernal,       0x0000 },
+        { kernal,       0x1000 },
     };
 
     addrmap_t mode_16 = {
@@ -261,14 +259,14 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { device_none,  0x0000 },
         { device_none,  0x0000 },
         { device_none,  0x0000 },
-        { cart,         0x0000 },
-        { cart,         0x1000 },
+        { device_none,  0x0000 },
+        { device_none,  0x1000 },
         { device_none,  0x0000 },
         { device_none,  0x0000 },
         { device_none,  0x0000 },
         { io,           0x0000 },
-        { cart,         0x2000 },
-        { cart,         0x3000 },
+        { device_none,  0x2000 },
+        { device_none,  0x3000 },
     };
 
     auto &mode_17 = mode_16;
@@ -283,22 +281,22 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
     auto &mode_26 = mode_10;
 
     addrmap_t mode_27 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { ram,      0x8000 },
-        { ram,      0x9000 },
-        { basic,    0x0000 },
-        { basic,    0x1000 },
-        { ram,      0xC000 },
-        { chargen,  0x0000 },
-        { kernal,   0x0000 },
-        { kernal,   0x1000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { ram,          0x8000 },
+        { ram,          0x9000 },
+        { basic,        0x0000 },
+        { basic,        0x1000 },
+        { ram,          0xC000 },
+        { chargen,      0x0000 },
+        { kernal,       0x0000 },
+        { kernal,       0x1000 },
     };
 
     auto &mode_28 = mode_00;
@@ -306,22 +304,22 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
     auto &mode_30 = mode_14;
 
     addrmap_t mode_31 = {
-        { ram,      0x0000 },
-        { ram,      0x1000 },
-        { ram,      0x2000 },
-        { ram,      0x3000 },
-        { ram,      0x4000 },
-        { ram,      0x5000 },
-        { ram,      0x6000 },
-        { ram,      0x7000 },
-        { ram,      0x8000 },
-        { ram,      0x9000 },
-        { basic,    0x0000 },
-        { basic,    0x1000 },
-        { ram,      0xC000 },
-        { io,       0x0000 },
-        { kernal,   0x0000 },
-        { kernal,   0x1000 },
+        { ram,          0x0000 },
+        { ram,          0x1000 },
+        { ram,          0x2000 },
+        { ram,          0x3000 },
+        { ram,          0x4000 },
+        { ram,          0x5000 },
+        { ram,          0x6000 },
+        { ram,          0x7000 },
+        { ram,          0x8000 },
+        { ram,          0x9000 },
+        { basic,        0x0000 },
+        { basic,        0x1000 },
+        { ram,          0xC000 },
+        { io,           0x0000 },
+        { kernal,       0x0000 },
+        { kernal,       0x1000 },
     };
 
     _rmodes = std::array<addrmap_t, 32>{
@@ -401,11 +399,10 @@ PLA::~PLA()
 {
 }
 
-void PLA::mode(uint8_t pins, uint8_t mask)
+void PLA::mode(uint8_t pins, uint8_t mask, bool force)
 {
-    uint8_t data = ((_mode & ~mask) | (pins & mask)) & MASK;
-    if (_mode != data || !_init) {
-        _init = true;
+    uint8_t data = (_mode & ~(mask & MASK)) | (pins & (mask & MASK));
+    if (_mode != data || force) {
         _mode = data;
         remap();
     }
@@ -458,27 +455,26 @@ void PLA::remap()
             addr_t addr = static_cast<addr_t>(bank * 0x1000);
             bool rh = romh(addr);
             bool rl = roml(addr);
-            if (rh || rl) {
-                auto [rdevmap, wdevmap] = _extmap(addr, rh, rl);
-                if (rdevmap.first) {
+            auto [rdevmap, wdevmap] = _extmap(addr, rh, rl);
+            if (rdevmap.first) {
 #if 0
-                    log.debug("PLA: New device for addr $%04X, offset $%04X, dev %s\n", addr, rdevmap.second,
-                        rdevmap.first->to_string().c_str());
+                log.debug("PLA: Mode: %d, New device for addr $%04X, offset $%04X, dev %s\n", _mode, addr,
+                    rdevmap.second, rdevmap.first->to_string().c_str());
 #endif
-                    rmaps[bank] = rdevmap;
-                }
+                rmaps[bank] = rdevmap;
+            }
 
-                if (wdevmap.first) {
-                    wmaps[bank] = wdevmap;
-                }
+            if (wdevmap.first) {
+                wmaps[bank] = wdevmap;
             }
         }
     }
 
 #if 0
+    log.debug("PLA: Mappings for mode: %d (#$%02X)\n", _mode, _mode);
     for (size_t bank = 0; bank < rmaps.size(); ++bank) {
         auto &devmap = rmaps[bank];
-        log.debug("bank %d, device %s, addr $%04X, offset $%04X\n", bank, devmap.first->to_string().c_str(),
+        log.debug("  bank %d, device %s, addr $%04X, offset $%04X\n", bank, devmap.first->to_string().c_str(),
             bank * 0x1000, devmap.second);
     }
 #endif

@@ -122,7 +122,6 @@ INCS+=		cbm_bus.hpp \
 CXXSRCS+=	c64.cpp \
 		c64_bus_controller.cpp \
 		c64_cartridge.cpp \
-		c64_cartridge/cart_generic.cpp \
 		c64_config.cpp \
 		c64_crt.cpp \
 		c64_io.cpp \
@@ -134,7 +133,6 @@ CXXSRCS+=	c64.cpp \
 INCS+=		c64.hpp \
 		c64_bus_controller.hpp \
 		c64_cartridge.hpp \
-		c64_cartridge/cart_generic.hpp \
 		c64_config.hpp \
 		c64_crt.hpp \
 		c64_io.hpp \
@@ -142,6 +140,20 @@ INCS+=		c64.hpp \
 		c64_keyboard.hpp \
 		c64_pla.hpp \
 		c64_vic2_aspace.hpp
+
+CXXSRCS+=	c64_cartridge/cart_generic.cpp \
+		c64_cartridge/cart_simons_basic.cpp \
+		c64_cartridge/cart_ocean_type_1.cpp \
+		c64_cartridge/cart_easy_flash.cpp \
+		c64_cartridge/cart_magic_desk.cpp \
+		c64_cartridge/cart_c64_game_system_3.cpp
+
+INCS+=		c64_cartridge/cart_generic.hpp \
+		c64_cartridge/cart_simons_basic.hpp \
+		c64_cartridge/cart_ocean_type_1.hpp \
+		c64_cartridge/cart_easy_flash.hpp \
+		c64_cartridge/cart_magic_desk.hpp \
+		c64_cartridge/cart_c64_game_system_3.cpp
 
 #
 # UI Drivers

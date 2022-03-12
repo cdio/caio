@@ -31,10 +31,9 @@ namespace c64 {
 
 /**
  * C64 Cartridge.
- * A C64 Cartridge implements the I/O expansion device and it is associated to a CRT file.
- * This class implements a device that handles the C64 addresses from $DE00 to $DFFF.
- * It also controls the GAME and EXROM pins, devices that want to get noticed when those
- * pins change must register themselves as GPIO callbacks.
+ * A C64 Cartridge implements an I/O expansion device associated to a CRT file.
+ * The device part of this class handles the C64 addresses from $DE00 to $DFFF (see Device);
+ * The gpio part of this class handles the GAME and EXROM output pins through callbacks (see Gpio).
  * @see c64::C64IO
  * @see c64::Crt
  * @see Device
@@ -42,17 +41,31 @@ namespace c64 {
  */
 class Cartridge : public Device {
 public:
-    constexpr static const char *TYPE        = "I/O-EXPANSION";
-    constexpr static const size_t IOEXP_SIZE = 512;
-    constexpr static const uint8_t GAME      = 0x01;
-    constexpr static const uint8_t EXROM     = 0x02;
+    constexpr static const char *TYPE            = "I/O-EXPANSION";
+    constexpr static const size_t IO_SIZE        = 512;
+    constexpr static const size_t IO_ADDR_MASK   = 0x01FF;
+    constexpr static const uint8_t GAME          = 0x01;
+    constexpr static const uint8_t EXROM         = 0x02;
+    constexpr static const uint8_t GAME_EXROM_00 = 0x00;
+    constexpr static const uint8_t GAME_EXROM_01 = Cartridge::EXROM;
+    constexpr static const uint8_t GAME_EXROM_10 = Cartridge::GAME;
+    constexpr static const uint8_t GAME_EXROM_11 = Cartridge::GAME | Cartridge::EXROM;
+
+    enum GameExromMode {
+        MODE_8K        = GAME_EXROM_10,
+        MODE_16K       = GAME_EXROM_00,
+        MODE_ULTIMAX   = GAME_EXROM_01,
+        MODE_INVISIBLE = GAME_EXROM_11
+    };
 
     /**
-     * Instantiate a cartridge device from a CRT file.
-     * @param fname Name of the CRT file to load.
+     * Instantiate a cartridge device associated to a CRT file.
+     * The returned cartridge cannot be used until its reset() method is called.
+     * @param fname Name of the CRT file to associate.
      * @return A pointer to the new cartridge device.
      * @exception InvalidCartridge
      * @see c64::Crt
+     * @see reset()
      */
     static std::shared_ptr<Cartridge> create(const std::string &fname);
 
@@ -95,7 +108,8 @@ public:
      * @param addr Memory bank starting address;
      * @param romh Status of ROMH line;
      * @param roml Status of ROML line.
-     * @return A pointer to the device or nullptr if the specified address is not handled by this cartridge.
+     * @return A pair of read and write devices or an empty pair
+     * if the specified address is not handled by this cartridge.
      */
     virtual std::pair<ASpace::devmap_t, ASpace::devmap_t> getdev(addr_t addr, bool romh, bool roml) = 0;
 
@@ -106,15 +120,49 @@ public:
 
     /**
      * Reset this cartridge.
-     * What this method does depends on the implementation.
+     * Load the chips embedded inside the associated CRT
+     * file and set the GAME/EXROM lines accordingly.
+     * @exception InvalidCartridge
+     * @see Crt
      */
-    virtual void reset() = 0;
+    virtual void reset();
+
+    /**
+     * @return The current GAME/EXROM mode.
+     */
+    GameExromMode mode() const;
 
 protected:
     Cartridge(const std::string &type, const std::shared_ptr<Crt> &crt);
 
-    std::shared_ptr<Crt> _crt{};
+    /**
+     * Set a new GAME/EXROM mode.
+     * Set a new GAME/EXROM mode and propagate it.
+     * @param mode Mode to set.
+     * @see GameExromMode
+     * @see propagate()
+     */
+    void mode(GameExromMode mode);
+
+    /**
+     * Propagate the GAME/EXROM gpio lines.
+     * @param force Force propagation.
+     * @see Gpio::iow()
+     */
+    virtual void propagate(bool force = false);
+
+    /**
+     * @return A reference to the embedded CRT file.
+     * @see Crt
+     */
+    const Crt &crt() const;
+
+    virtual void throw_invalid_cartridge(const std::string &reason, ssize_t entry = -1);
+
+private:
+    std::shared_ptr<Crt> _crt;
     Gpio                 _ioport{};
+    GameExromMode        _mode{};
 };
 
 }

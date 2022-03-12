@@ -31,34 +31,36 @@ namespace c64 {
  * on the GAME/EXROM config.
  *
  * Type     Size    Game    EXROM   ROML    ROMH    LOAD ADDRESS
- * -------------------------------------------------------------
+ * ----------------------------------------------------------------------------
  * Normal   8K      1       0       $8000   -----   $8000-$9FFF
  * Normal   16K     0       0       $8000   $A000   $8000-$BFFF
+ * Ultimax  4K      0       1       $F000   -----   $F000-$F7FF
  * Ultimax  8K      0       1       -----   $E000   $E000-$FFFF
  * Ultimax  16K     0       1       $8000   $E000   $8000-$9FFF and $E000-$FFFF
- * Ultimax  4K      0       1       $F000   -----   $F000-$F7FF
  *
  * The ROMH and ROML lines are CPU-controlled status lines, used to bank in/out RAM, ROM or I/O,
  * depending on what is needed at the time.
  *
- * @see https://vice-emu.sourceforge.io/vice_17.html#SEC395
  * @see https://ist.uwaterloo.ca/~schepers/formats/CRT.TXT
+ * @see https://vice-emu.sourceforge.io/vice_17.html#SEC395
  */
 class CartGeneric : public Cartridge {
 public:
-    constexpr static const char *TYPE = "CART_GENERIC";
-    constexpr static const uint8_t GAME_EXROM_00 = 0x00;
-    constexpr static const uint8_t GAME_EXROM_01 = Cartridge::EXROM;
-    constexpr static const uint8_t GAME_EXROM_10 = Cartridge::GAME;
-    constexpr static const uint8_t GAME_EXROM_11 = Cartridge::GAME | Cartridge::EXROM;
+    constexpr static const char *TYPE                = "CART_GENERIC";
+    constexpr static const addr_t ROML_LOAD_ADDR     = 0x8000;
+    constexpr static const addr_t ROMH_LOAD_ADDR     = 0xA000;
+    constexpr static const addr_t U4_ROML_LOAD_ADDR  = 0xF000;
+    constexpr static const addr_t U8_ROML_LOAD_ADDR  = 0xE000;
+    constexpr static const addr_t U16_ROML_LOAD_ADDR = 0x8000;
+    constexpr static const addr_t U16_ROMH_LOAD_ADDR = 0xE000;
 
-    enum class Mode {
+    enum class GenericMode {
         NORMAL_8K,
         NORMAL_16K,
         ULTIMAX_4K,
         ULTIMAX_8K,
         ULTIMAX_16K,
-        NONE
+        INVISIBLE
     };
 
     CartGeneric(const std::shared_ptr<Crt> &crt);
@@ -91,15 +93,15 @@ public:
     size_t cartsize() const override;
 
     /**
-     * Reset this cartridge.
-     * Propagate the GAME/EXROM ouput lines to the connected devices.
+     * @see Cartridge::reset()
      */
     void reset() override;
 
 private:
-    Mode     _mode{Mode::NONE};
-    uint8_t  _game_exrom{};
-    devptr_t _rom{};
+    GenericMode _generic_mode{GenericMode::INVISIBLE};
+    devptr_t    _roml{};
+    devptr_t    _romh{};
+    addr_t      _romh_offset{};
 };
 
 }
