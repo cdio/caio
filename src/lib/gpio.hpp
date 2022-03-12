@@ -46,7 +46,7 @@ public:
     const DATA data_type{};
 
     using ior_t = std::function<DATA(ADDR)>;
-    using iow_t = std::function<void(ADDR, DATA)>;
+    using iow_t = std::function<void(ADDR, DATA, bool)>;
 
     using ior_mask_t = std::pair<ior_t, DATA>;
     using iow_mask_t = std::pair<iow_t, DATA>;
@@ -96,11 +96,12 @@ public:
      * each callback will be receiving as argument the bitwise
      * AND operation between the specified value and its mask.
      * @param addr  Address to write;
-     * @param value Value to write.
+     * @param value Value to write;
+     * @param force Force write.
      */
-    virtual void iow(ADDR addr, DATA value) {
+    virtual void iow(ADDR addr, DATA value, bool force = false) {
         for (auto &[iow, mask] : _iows) {
-            iow(addr, value & mask);
+            iow(addr, value & mask, force);
         }
     }
 
