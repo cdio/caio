@@ -48,7 +48,7 @@ const std::vector<Mos6502Monitor::Command> Mos6502Monitor::commands{
     { "go",       "g",  ".|$addr",            "Run program at $addr",                   Mos6502Monitor::go          },
     { "si",       "s",  "[.|$addr]",          "Execute single instruction",             Mos6502Monitor::step        },
     { "load",     "l",  "<prog> [$addr]",     "Load a binary or PRG file",              Mos6502Monitor::load        },
-    { "save",     "s",  "<prog> $start $end", "Save a PRG file",                        Mos6502Monitor::save        },
+    { "save",     "w",  "<prog> $start $end", "Save a PRG file",                        Mos6502Monitor::save        },
     { "loglevel", "lv", "<lv>",               "Set the CPU loglevel",                   Mos6502Monitor::loglevel    },
     { "quit",     "q",  "",                   "Halt the CPU",                           Mos6502Monitor::quit        },
     { "quit",     "q",  "<e>",                "Terminate the emulator with exit code",  Mos6502Monitor::quit        },
