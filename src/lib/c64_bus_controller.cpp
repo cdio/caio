@@ -30,7 +30,7 @@ C64BusController::C64BusController(const std::shared_ptr<cbm_bus::Bus> &bus, con
         return bus_read(addr);
     }, CBMBUS_READ_MASK | CBMBUS_WRITE_MASK);
 
-    _cia2->add_iow([this](uint8_t addr, uint8_t value) {
+    _cia2->add_iow([this](uint8_t addr, uint8_t value, bool) {
         bus_write(addr, value);
     }, CBMBUS_WRITE_MASK);
 }

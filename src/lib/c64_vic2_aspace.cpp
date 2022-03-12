@@ -68,7 +68,7 @@ Vic2ASpace::Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, devptr_t &ram, devp
     /*
      * Connect to Port pins PA0 and PA1 of CIA-2.
      */
-    auto iow = [this](uint8_t addr, uint8_t value) {
+    auto iow = [this](uint8_t addr, uint8_t value, bool) {
         if (addr == Mos6526::PRA) {
             bank(value);
         }

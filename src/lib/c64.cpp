@@ -209,11 +209,11 @@ void C64::connect_devices()
         return cpuval;
     };
 
-    auto cpu_port_write = [this](addr_t addr, uint8_t data) {
+    auto cpu_port_write = [this](addr_t addr, uint8_t data, bool force) {
         uint8_t plaval = ((data & Mos6510::P0) ? PLA::LORAM  : 0) |
                          ((data & Mos6510::P1) ? PLA::HIRAM  : 0) |
                          ((data & Mos6510::P2) ? PLA::CHAREN : 0);
-        _pla->mode(plaval, PLA::LORAM | PLA::HIRAM | PLA::CHAREN);
+        _pla->mode(plaval, PLA::LORAM | PLA::HIRAM | PLA::CHAREN, force);
     };
 
     _cpu->add_ior(cpu_port_read, Mos6510::P0 | Mos6510::P1 | Mos6510::P2);
@@ -233,14 +233,15 @@ void C64::connect_devices()
         /*
          * Connect cartridge output ports EXROM and GAME to the PLA.
          */
-        auto cart_port_write = [this](addr_t addr, uint8_t data) {
+        auto cart_port_write = [this](addr_t addr, uint8_t data, bool force) {
             uint8_t plaval = ((data & Cartridge::GAME)  ? PLA::GAME  : 0) |
                              ((data & Cartridge::EXROM) ? PLA::EXROM : 0);
-            _pla->mode(plaval, PLA::GAME | PLA::EXROM);
+            _pla->mode(plaval, PLA::GAME | PLA::EXROM, force);
         };
 
         _ioexp->add_iow(cart_port_write, Cartridge::GAME | Cartridge::EXROM);
         _ioexp->reset();
+        _cpu->reset();
     }
 
     /*
@@ -322,7 +323,7 @@ void C64::connect_devices()
         return 255; /* Pull-ups */
     };
 
-    auto kbd_write = [this](uint8_t addr, uint8_t value) {
+    auto kbd_write = [this](uint8_t addr, uint8_t value, bool _) {
         switch (addr) {
         case Mos6526::PRA:
             /* Keyboard matrix row to scan */
