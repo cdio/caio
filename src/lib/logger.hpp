@@ -35,7 +35,7 @@ class LoggerError : public Error {
 
 class Logger {
 public:
-    constexpr static const char *DEFAULT_LOGFILE  = "/dev/null";
+    constexpr static const char *DEFAULT_LOGFILE  = "/dev/tty";
     constexpr static const char *DEFAULT_LOGLEVEL = "";
 
     constexpr static const char *ERROR_STR        = "error";
@@ -43,6 +43,7 @@ public:
     constexpr static const char *INFO_STR         = "info";
     constexpr static const char *DEBUG_STR        = "debug";
     constexpr static const char *ALL_STR          = "all";
+    constexpr static const char *NONE_STR         = "none";
 
     constexpr static const char *ANSI_FG          = "\x1b[38;2;";
     constexpr static const char *ANSI_BG          = "\x1b[48;2;";

@@ -34,7 +34,8 @@ std::map<std::string, Logger::Level> Logger::loglevel_map = {
     { WARN_STR,     Logger::WARN    },
     { INFO_STR,     Logger::INFO    },
     { DEBUG_STR,    Logger::DEBUG   },
-    { ALL_STR,      Logger::ALL     }
+    { ALL_STR,      Logger::ALL     },
+    { NONE_STR,     Logger::NONE    }
 };
 
 
