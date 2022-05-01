@@ -68,7 +68,7 @@ int main(int argc, char * const *argv)
         return c64::main(argc, argv);
     }
 
-    std::cerr << "Unkown emulator: " << name << std::endl;
+    std::cerr << "Unknown emulator: " << name << std::endl;
 
     return EXIT_FAILURE;
 }
