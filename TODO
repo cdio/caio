@@ -1,8 +1,10 @@
-- arch:     Refactor architecture in order to support all types of CRT files
+- cart:     Fix Simons Basic
+- cart:     Fix EasyFlash
+- VICII:    Fix border colour during open-border mode
+- VICII:    Fix sprite position on some cartridge games
 - UI:       Volume control
 - misc:     README formatting see vim-xcode-colors
-- misc:     RESET instead of termination on Illegal instructions (check what the cpu does)
-- VIC:      Cycles emulation
+- misc:     Do not terminate on illegal instructions
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
 - C1541Fs:  Support for P00 files
 - UI:       Fix disk widget activity when C1541 is in error condition.
@@ -15,7 +17,7 @@
 - UI:       Couch Mode (control everything through the gamepad):
             - Map some gamepad combination to enable couch mode
             - Map some gamepad buttons to F1, F3, SPACE or other user defined
-            - d64/fs attached on-demand (+ host filesystem traversing)
+            - crt/d64/fs attached on-demand (+ host filesystem traversing)
             - Support for directory/file traversal/selection (test ImGui)
             - Virtual keyboard?
 - SID:      Fix/remake (dane ballad)
