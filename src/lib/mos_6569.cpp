@@ -886,46 +886,48 @@ void Mos6569::paint_display_cycle(unsigned x)
 {
     if (_idle_mode) {
         paint(0, 0, {0, 0, 0});
+        return;
+    }
 
-    } else if (!_bl_den) {
+    if (!_bl_den) {
         /*
          * Display not enabled: Entire screen painted in border colour.
          */
         paint(0, 0, _palette[_border_color]);
+        return;
+    }
 
-    } else {
-        unsigned dline = _video_counter + _row_counter;
-        if (dline < DISPLAY_HEIGHT) {
+    unsigned dline = _video_counter + _row_counter;
+    if (dline < DISPLAY_HEIGHT) {
+        /*
+         * Display mode.
+         */
+        if (!_bmm_mode) {
             /*
-             * Display mode.
+             * Text mode.
              */
-            if (!_bmm_mode) {
-                /*
-                * Text mode.
-                */
-                if (!(_ecm_mode && _mcm_mode)) {
-                    paint_char_mode(dline, x);
-
-                } else {
-                    /*
-                    * Invalid text mode.
-                    */
-                    paint(0, 0, {0, 0, 0});
-                }
+            if (!(_ecm_mode && _mcm_mode)) {
+                paint_char_mode(dline, x);
 
             } else {
                 /*
-                * Bitmap mode.
-                */
-                if (!_ecm_mode) {
-                    paint_bitmap_mode(dline, x);
+                 * Invalid text mode.
+                 */
+                paint(0, 0, {0, 0, 0});
+            }
 
-                } else {
-                    /*
-                    * Invalid bitmap mode.
-                    */
-                    paint(0, 0, {0, 0, 0});
-                }
+        } else {
+            /*
+             * Bitmap mode.
+             */
+            if (!_ecm_mode) {
+                paint_bitmap_mode(dline, x);
+
+            } else {
+                /*
+                 * Invalid bitmap mode.
+                 */
+                paint(0, 0, {0, 0, 0});
             }
         }
     }

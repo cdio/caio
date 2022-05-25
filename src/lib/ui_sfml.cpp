@@ -604,7 +604,7 @@ void UISfml::joy_event(const sf::Event &event)
         joy->position(pos);
 
     } else {
-        log.warn("Jostick " + std::to_string(jid) + " is not supported\n");
+        log.warn("Joystick " + std::to_string(jid) + " is not supported\n");
     }
 }
 
