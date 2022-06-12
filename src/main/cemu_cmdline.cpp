@@ -108,7 +108,7 @@ void CemuCmdline::usage()
               << "                        error|warn|info|debug|all"                                    << std::endl
               << "                        (default is " << std::quoted(Config::DEFAULT_LOGLEVEL) << ")" << std::endl
               << " --panel <yes|no>       Panel visibility"                                             << std::endl
-              << "                        (default is " << (Config::DEFAULT_PANEL ? "yes" : "no") << ")"
+              << "                        (default is " << (Config::DEFAULT_PANEL ? "yes" : "no") << ")"<< std::endl
               << " -v|--version           Show version information and exit"                            << std::endl
               << " -h|--help              Print this message and exit"                                  << std::endl;
 }
