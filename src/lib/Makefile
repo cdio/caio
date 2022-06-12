@@ -37,19 +37,6 @@ CXXSRCS=	aspace.cpp \
 		icon.cpp \
 		keyboard.cpp \
 		logger.cpp \
-		mos_6502.cpp \
-		mos_6502_i_arith.cpp \
-		mos_6502_i_branch.cpp \
-		mos_6502_i_flags.cpp \
-		mos_6502_i_invalid.cpp \
-		mos_6502_i_move.cpp \
-		mos_6502_monitor.cpp \
-		mos_6510.cpp \
-		mos_6526.cpp \
-		mos_6569.cpp \
-		mos_6581.cpp \
-		mos_6581_i.cpp \
-		mos_6581_resid.cpp \
 		name.cpp \
 		p00file.cpp \
 		prgfile.cpp \
@@ -79,15 +66,6 @@ INCS=		aspace.hpp \
 		latch.hpp \
 		locked_queue.hpp \
 		logger.hpp \
-		mos_6502.hpp \
-		mos_6502_monitor.hpp \
-		mos_6510.hpp \
-		mos_6510_monitor.hpp \
-		mos_6526.hpp \
-		mos_6569.hpp \
-		mos_6581.hpp \
-		mos_6581_i.hpp \
-		mos_6581_resid.hpp \
 		name.hpp \
 		nibble_ram.hpp \
 		p00file.hpp \
@@ -102,6 +80,30 @@ INCS=		aspace.hpp \
 		ui_config.hpp \
 		utils.hpp \
 		version.hpp
+
+CXXSRCS+=	mos_6502.cpp \
+		mos_6502_i_arith.cpp \
+		mos_6502_i_branch.cpp \
+		mos_6502_i_flags.cpp \
+		mos_6502_i_invalid.cpp \
+		mos_6502_i_move.cpp \
+		mos_6502_monitor.cpp \
+		mos_6510.cpp \
+		mos_6526.cpp \
+		mos_6569.cpp \
+		mos_6581.cpp \
+		mos_6581_i.cpp \
+		mos_6581_resid.cpp
+
+INCS+=		mos_6502.hpp \
+		mos_6502_monitor.hpp \
+		mos_6510.hpp \
+		mos_6510_monitor.hpp \
+		mos_6526.hpp \
+		mos_6569.hpp \
+		mos_6581.hpp \
+		mos_6581_i.hpp \
+		mos_6581_resid.hpp
 
 #
 # Commodore Specifics
