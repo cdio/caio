@@ -34,7 +34,6 @@ CXXSRCS=	envelope.cc \
 INCS=		envelope.h \
 		extfilt.h \
 		filter.h \
-		ltmain.sh \
 		pot.h \
 		siddefs.h \
 		sid.h \
