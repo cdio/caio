@@ -59,7 +59,6 @@ void stacktrace(std::ostream &os)
     }
 }
 
-
 std::string Error::to_string(int err)
 {
     char buf[LINE_MAX];
@@ -71,7 +70,6 @@ std::string Error::to_string(int err)
     return buf;
 #endif
 }
-
 
 InvalidAddress::InvalidAddress(const std::string &elem, addr_t addr, bool read)
     : Error{elem, "Invalid " + std::string{(read ? "read" : "write")} + " address: $" + utils::to_string(addr)}
