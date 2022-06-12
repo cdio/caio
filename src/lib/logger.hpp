@@ -109,6 +109,10 @@ public:
 
     Logger &log(Level lv, const char *fmt, ...);
 
+    [[noreturn]] void fatal(const char *fmt, va_list ap);
+
+    [[noreturn]] void fatal(const char *fmt, ...);
+
     Logger &error(const std::string &msg) {
         return log(ERROR, msg);
     }

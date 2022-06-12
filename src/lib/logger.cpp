@@ -162,6 +162,23 @@ Logger &Logger::log(Level lv, const char *fmt, ...)
     return *this;
 }
 
+[[noreturn]]
+void Logger::fatal(const char *fmt, va_list ap)
+{
+    error(fmt, ap);
+    std::terminate();
+}
+
+[[noreturn]]
+void Logger::fatal(const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    fatal(fmt, ap);
+    va_end(ap);
+}
+
 Logger &Logger::error(const char *fmt, ...)
 {
     if (is_error()) {
