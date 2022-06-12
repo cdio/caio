@@ -27,21 +27,21 @@
 
 using namespace cemu;
 
+static std::terminate_handler prev_terminate{};
 
-#ifndef D_DEBUG
+
 [[noreturn]]
 static void terminate()
 {
     stacktrace(std::cerr);
+    prev_terminate();
     ::exit(EXIT_FAILURE);
 }
-#endif
 
 int main(int argc, char * const *argv)
 {
-#ifndef D_DEBUG
+    prev_terminate = std::get_terminate();
     std::set_terminate(terminate);
-#endif
 
     auto progname = *argv;
     auto name = utils::tolow(fs::basename(*argv));
