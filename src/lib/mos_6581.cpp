@@ -217,25 +217,118 @@ void Mos6581::Voice::control(uint8_t value)
     _env.gate(value & 1);
 }
 
+Mos6581::Filter::Filter()
+{
+}
+
+Mos6581::Filter::~Filter()
+{
+}
+
+inline void Mos6581::Filter::freq_hi(uint8_t hi)
+{
+    _ufc = (_ufc & 7) | (static_cast<uint16_t>(hi) << 3);
+}
+
+inline void Mos6581::Filter::freq_lo(uint8_t lo) {
+    _ufc = (_ufc & 0xFFF8) | (lo & 7);
+}
+
+inline void Mos6581::Filter::resonance(uint8_t rs) {
+    _res = rs & 15;
+}
+
+inline void Mos6581::Filter::lopass(bool active) {
+    _lopass = active;
+}
+
+inline void Mos6581::Filter::hipass(bool active) {
+    _hipass = active;
+}
+
+inline void Mos6581::Filter::bandpass(bool active) {
+    _bandpass = active;
+}
+
+inline bool Mos6581::Filter::lopass() const {
+    return _lopass;
+}
+
+inline bool Mos6581::Filter::hipass() const {
+    return _hipass;
+}
+
+inline bool Mos6581::Filter::bandpass() const {
+    return _bandpass;
+}
+
+inline bool Mos6581::Filter::is_enabled() const {
+    return (_lopass || _hipass || _bandpass);
+}
+
+inline bool Mos6581::Filter::is_disabled() const {
+    return (!is_enabled());
+}
+
+inline float Mos6581::Filter::frequency() const
+{
+    /*
+     * MOS-6581 does not follow the specs, MOS-8580 does, kind of.
+     *
+     *     fc = FC_MIN + (FC_MAX - FC_MIN) * static_cast<float>(_ufc) / 2048.0f;
+     *
+     * I don't have a physical C64 here so I am approximating the
+     * frequencies (found by the reSID v0.16 author through reverse
+     * engineering) using a Sigmoid function (see doc/sid.md).
+     */
+    uint16_t m = 1024;
+    float s0{};
+    float sm{};
+    float b0{};
+    float b1{};
+
+    if (_ufc < 1024) {
+        s0 = 215.0f;
+        sm = 17000.0f;
+        b0 = -0.65f;
+        b1 = 0.0072f;
+    } else {
+        s0 = 1024.0f;
+        sm = 18200.0f;
+        b0 = -1.30f;
+        b1 = 0.0055f;
+    }
+
+    float fc = s0 + (sm - s0) / (1 + std::exp(-b0 - b1 * (_ufc - m)));
+    return fc;
+}
+
+inline float Mos6581::Filter::Q() const
+{
+    /*
+     * Q between 0.707 and 1.7 (see doc/sid.md).
+     */
+    float Q = 0.707f + (1.7f - 0.707f) * (static_cast<float>(_res) / 15.0f);
+    return Q;
+}
+
 void Mos6581::Filter::generate()
 {
-    if (!_generated) {
-        float fc = FC_MIN + BW * static_cast<float>(_ufc) / 2048.0f;
-        float rs = static_cast<float>(_resonance) / 15.0f;
+    if (_pufc != _ufc || _pres != _res) {
+        _pufc = _ufc;
+        _pres = _res;
 
-        /*
-         * These are almost ideal. Should we implement Chebyshev? Also to speed-up?
-         */
-        _klo = gsl::span{_klo_data.data(), _klo_data.size()};
-        _klo = signal::lopass(_klo, fc, SAMPLING_RATE, rs);
+        float fc = frequency();
+        float Q = Filter::Q();
 
-        _khi = gsl::span{_khi_data.data(), _khi_data.size()};
-        _khi = signal::hipass(_khi, fc, SAMPLING_RATE, rs);
+        _klo = samples_fp{_klo_data};
+        _klo = signal::lopass_40(_klo, fc, Q, SAMPLING_RATE);
 
-        _kbd = gsl::span{_kbd_data.data(), _kbd_data.size()};
-        _kbd = signal::bapass(_kbd, fc, fc, SAMPLING_RATE, rs);
+        _khi = samples_fp{_khi_data};
+        _khi = signal::hipass_40(_khi, fc, Q, SAMPLING_RATE);
 
-        _generated = true;
+        _kba = samples_fp{_kba_data};
+        _kba = signal::bapass_20(_kba, fc, SAMPLING_RATE);
     }
 }
 
@@ -244,15 +337,15 @@ void Mos6581::Filter::apply(samples_fp &v)
     generate();
 
     if (_lopass) {
-        signal::conv_kernel(v, _klo);
+        signal::conv(v, v, _klo, signal::ConvShape::Central);
     }
 
     if (_hipass) {
-        signal::conv_kernel(v, _khi);
+        signal::conv(v, v, _khi, signal::ConvShape::Central);
     }
 
     if (_bandpass) {
-        signal::conv_kernel(v, _kbd);
+        signal::conv(v, v, _kba, signal::ConvShape::Central);
     }
 }
 
@@ -260,11 +353,7 @@ Mos6581::Mos6581(const std::string &label, unsigned clkf)
     : Mos6581I{label, clkf},
       _voice_1{clkf, _voice_3},
       _voice_2{clkf, _voice_1},
-      _voice_3{clkf, _voice_2},
-      _v1(SAMPLES, 0.0f),
-      _v2(SAMPLES, 0.0f),
-      _v3(SAMPLES, 0.0f),
-      _v4(SAMPLES, 0.0f)
+      _voice_3{clkf, _voice_2}
 {
     _samples_cycles = Clock::cycles(DT, clkf);
 }
@@ -474,28 +563,49 @@ void Mos6581::play()
 {
     auto v = _audio_buffer();
     if (v) {
+        samples_fp v1{_v1};
+        samples_fp v2{_v2};
+        samples_fp v3{_v3};
+        samples_fp v4{_v4};
+
         if (_filter.is_enabled()) {
             /* FIXME: optimise */
             if (is_v1_filtered()) {
-                _filter.apply(_v1);
+                _filter.apply(v1);
             }
 
             if (is_v2_filtered()) {
-                _filter.apply(_v2);
+                _filter.apply(v2);
             }
 
             if (is_v3_filtered()) {
-                _filter.apply(_v3);
+                _filter.apply(v3);
             }
         }
 
+        auto it1 = v1.begin();
+        auto it2 = v2.begin();
+        auto it3 = v3.begin();
+
         for (size_t i = 0; i < v.size(); ++i) {
-            float value = _v1[i] + _v2[i] + (is_v3_active() ? _v3[i] : 0.0f) + _v4[i];
+            float value1 = *it1++;
+            float value2 = *it2++;
+            float value3 = (is_v3_active() ? *it3++ : 0.0f);
+
+            float value = value1 + value2 + value3 + _v4[i];
+
             value = std::max(std::min(value, 1.0f), -1.0f);
-            v[i] = signal::to_i16(value * _volume * VOLUME);
+
+            /*
+             * Audio output varies from 0.8 to 0.3 (typical values)
+             * depending on the active voices.
+             * (See MOS6581, Electrical characteristics, Audio Voltage Output).
+             * Here we just limit the volume using a fixed factor VOUT_MAX.
+             */
+            v[i] = signal::to_i16(value * _volume * VOUT_MAX);
         }
 
-        std::fill(_v4.begin(), _v4.end(), 0.0f);
+        _v4.fill(0.0f);
         v.dispatch();
     }
 }

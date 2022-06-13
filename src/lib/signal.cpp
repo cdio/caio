@@ -18,6 +18,9 @@
  */
 #include "signal.hpp"
 
+#include <fstream>
+#include <sstream>
+
 #include <gsl/span>
 
 
@@ -26,18 +29,6 @@ namespace signal {
 
 std::random_device rd{};
 std::uniform_real_distribution<float> uni_random{-1.0f, 1.0f};
-
-
-size_t kernel_size(float fc, float fs)
-{
-    size_t size = std::ceil(4.0f * fs / fc);
-
-    if ((size & 1) == 0) {
-        ++size;
-    }
-
-    return size;
-}
 
 
 float blackman(size_t pos, size_t N)
@@ -50,114 +41,259 @@ float blackman(size_t pos, size_t N)
     return (0.42f - 0.5f * std::cos(2.0f * M_PI * k) + 0.08f * std::cos(4.0f * M_PI * k));
 }
 
-
-gsl::span<float> &spectral_inversion(gsl::span<float> &v)
+void spectral_inversion(samples_fp &krn)
 {
-    for (auto &value : v) {
-        value *= -1.0f;
-    }
+    std::for_each(std::execution::par, krn.begin(), krn.end(), [](float &value) {
+        value = -value;
+    });
 
-    const size_t centre = v.size() >> 1;
-    v[centre] += 1.0f;
-
-    return v;
+    const size_t c = krn.size() >> 1;
+    krn[c] += 1.0f;
 }
 
+samples_fp conv(samples_fp &dst, const samples_fp &sig, const samples_fp &krn, enum ConvShape shape)
+{
+    const size_t Ns = sig.size();
+    const size_t Nk = krn.size();
+    const size_t Nc = Ns + Nk - 1;
+    const size_t Nf = (shape == ConvShape::Central ? Ns : Nc);
 
-gsl::span<float> lopass(gsl::span<float> &buf, float fc, float fs, float rs, bool osiz)
+    if (dst.size() < Nf) {
+        std::ostringstream os{};
+        os << "Required buffer size " << Nf << ", provided buffer size " << dst.size();
+        throw InvalidArgument{__FUNCTION__, os.str()};
+    }
+
+    float cdata[Nc];
+    samples_fp c{cdata, Nc};
+    std::fill_n(c.begin(), Nc, 0.0f);
+
+    //TODO optimise
+    for (size_t ix = 0; ix < Ns; ++ix) {
+        for (size_t iy = 0; iy < Nk; ++iy) {
+            c[ix + iy] += sig[ix] * krn[iy];
+        }
+    }
+
+    if (shape == ConvShape::Central) {
+        auto from = c.begin() + ((Nc - Ns) >> 1);
+        auto to = from + Ns;
+        std::copy(std::execution::par, from, to, dst.begin());
+    } else {
+        std::copy(std::execution::par, c.begin(), c.end(), dst.begin());
+    }
+
+    return samples_fp{dst.data(), Nf};
+}
+
+samples_fp lopass(samples_fp &krn, float fc, float fs, bool osiz)
 {
     size_t N;
     if (osiz) {
         N = kernel_size(fc, fs);
-        if (N > buf.size()) {
-            N = buf.size();
+        if (N > krn.size()) {
+            std::ostringstream os{};
+            os << "fc " << fc << ", fs " << fs << ", krn size " << krn.size() << ", required size " << N;
+            throw InvalidArgument{__FUNCTION__, os.str()};
         }
     } else {
-        N = buf.size();
+        N = krn.size();
     }
 
-    float sum = 0.0f;
     const float w = 2.0f * M_PI * fc;
-
     const float ts = 1.0f / fs;
-    float t = -ts * static_cast<float>(N >> 1);
 
-    /*
-     * The "resonance" that is artificially generated here is completely guessed
-     * and it probably does not alter the spectrum as the audiophiles expect.
-     */
-    rs -= 0.50f;
+    float t = -ts * static_cast<float>(N >> 1);
+    float sum = 0.0f;
+
+    //TODO optimise
     for (size_t k = 0; k < N; ++k, t += ts) {
-        float value = (sinc(w * t) + rs * std::sin(w * t)) * blackman(k, N);
-        buf[k] = value;
+        float value = sinc(w * t) * blackman(k, N);
+        krn[k] = value;
         sum += value;
     }
 
-    for (auto &value : buf) {
+    std::for_each(std::execution::par, krn.begin(), krn.end(), [&sum](float &value) {
         value /= sum;
-    }
+    });
 
-    return buf.subspan(0, N);
+    return krn.subspan(0, N);
 }
 
-
-gsl::span<float> stopband(gsl::span<float> &buf, float fcl, float fch, float fs, float rs, bool osiz)
+samples_fp hipass(samples_fp &krn, float fc, float fs, bool osiz)
 {
-    float lodata[buf.size()];
-    gsl::span lo{lodata, buf.size()};
-    lo = lopass(lo, fcl, fs, rs, osiz);
-
-    const size_t N = lo.size();
-
-    float hidata[buf.size()];
-    gsl::span hi{hidata, N};
-    hi = hipass(hi, fch, fs, rs, false);
-
-    for (size_t k = 0; k < N; ++k) {
-        buf[k] = lo[k] + hi[k];
-    }
-
-    return buf.subspan(0, N);
+    auto hi_krn = lopass(krn, fc, fs, osiz);
+    spectral_inversion(hi_krn);
+    return hi_krn;
 }
 
-
-samples_fp conv(const samples_fp &x, const samples_fp &y)
+samples_fp bapass(samples_fp &krn, float fcl, float fch, float fs, bool osiz)
 {
-    const size_t Nx = x.size();
-    const size_t Ny = y.size();
-    const size_t Nc = Nx + Ny - 1;
+    float fhi = std::min(fcl, fch);
+    float flo = std::max(fcl, fch);
 
-    samples_fp c(Nc, 0.0f);
+    size_t N = kernel_size(flo, fs);
+    float lodata[N];
+    samples_fp lo{lodata, N};
+    auto lo_krn = lopass(lo, flo, fs, false);
 
-    for (size_t ix = 0; ix < Nx; ++ix) {
-        for (size_t iy = 0; iy < Ny; ++iy) {
-            c[ix + iy] += x[ix] * y[iy];
+    N = kernel_size(fhi, fs);
+    float hidata[N];
+    samples_fp hi{hidata, N};
+    auto hi_krn = hipass(hi, fhi, fs, false);
+
+    auto ba_krn = conv(krn, lo_krn, hi_krn, ConvShape::Central);
+    return ba_krn;
+}
+
+samples_fp bastop(samples_fp &krn, float fcl, float fch, float fs, bool osiz)
+{
+    auto sb = bapass(krn, fcl, fch, fs, osiz);
+    spectral_inversion(sb);
+    return sb;
+}
+
+samples_fp lopass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz)
+{
+    size_t N;
+    if (osiz) {
+        N = kernel_size(f0, fs);
+        if (N > krn.size()) {
+            std::ostringstream os{};
+            os << "f0 " << f0 << ", fs " << fs << ", krn size " << krn.size() << ", required size " << N;
+            throw InvalidArgument{__FUNCTION__, os.str()};
         }
+    } else {
+        N = krn.size();
     }
 
-    return c;
+    auto hN = N >> 1;
+
+    /*
+     * FT = sqrt(1 - 1 / (4 * Q^2));
+     * w0 = 2 * pi * f0;
+     * w  = FT * w0;
+     * a  = w0 / (2 * Q);
+     * v  = (w0 / FT) * e.^(-a * t) .* sin(w .* t);
+     * v  ./= sum(v);
+     */
+    const float FT = std::sqrt(1.0f - 1.0f / (4.0f * Q * Q));
+    const float w0 = 2 * M_PI * f0;
+    const float w  = w0 * FT;
+    const float a  = w0 / (2.0f * Q);
+    const float A  = w0 / FT;
+
+    const float ts = 1.0f / fs;
+    float t        = 0.0f;
+    float sum      = 0.0f;
+
+    std::fill(krn.begin(), krn.end(), 0.0f);
+
+    //TODO optimise
+    for (size_t k = hN; k < N; ++k, t += ts) {
+        float value = A * std::exp(-a * t) * std::sin(w * t) * blackman(k, N);
+        krn[k] = value;
+        sum += value;
+    }
+
+    std::for_each(std::execution::par, krn.begin(), krn.end(), [&sum](float &value) {
+        value /= sum;
+    });
+
+    auto qp = krn.subspan(0, N);
+    return qp;
 }
 
-
-void conv_kernel(samples_fp &v, const gsl::span<float> &k)
+samples_fp hipass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz)
 {
-    const size_t Nv = v.size();
-    const size_t Nk = k.size();
-    const size_t Nc = Nv + Nk - 1;
+    auto iqp = lopass_40(krn, f0, Q, fs, osiz);
+    spectral_inversion(iqp);
+    return iqp;
+}
 
-    float buf[Nc];
-    gsl::span c{buf, Nc};
-    std::fill_n(c.begin(), Nc, 0.0f);
-
-    for (size_t iv = 0; iv < Nv; ++iv) {
-        for (size_t ik = 0; ik < Nk; ++ik) {
-            c[iv + ik] += v[iv] * k[ik];
+samples_fp lopass_20(samples_fp &krn, float f0, float fs, bool osiz)
+{
+    size_t N;
+    if (osiz) {
+        N = kernel_size(f0, fs);
+        if (N > krn.size()) {
+            std::ostringstream os{};
+            os << "f0 " << f0 << ", fs " << fs << ", krn size " << krn.size() << ", required size " << N;
+            throw InvalidArgument{__FUNCTION__, os.str()};
         }
+    } else {
+        N = krn.size();
     }
 
-    auto from = c.begin() + ((Nc - Nv) >> 1);
-    auto to = from + Nv;
-    std::copy(from, to, v.begin());
+    /*
+     * ts = 1 / fs;
+     * w0 = 2 * pi * f0;
+     * t  = [0 : ts : 1 - ts];
+     * v  = w0 * e.^(-w0 * t)
+     * v  ./= sum(v);
+     */
+    const float ts = 1.0f / fs;
+    const float w0 = 2 * M_PI * f0;
+    float t        = 0.0f;
+    float sum      = 0.0f;
+
+    auto hN = N >> 1;
+
+    std::fill(krn.begin(), krn.end(), 0.0f);
+
+    //TODO optimise
+    for (size_t k = hN; k < N; ++k, t += ts) {
+        float value = std::exp(-w0 * t) * blackman(k, N);
+        krn[k] = value;
+        sum += value;
+    }
+
+    std::for_each(std::execution::par, krn.begin(), krn.end(), [&sum](float &value) {
+        value /= sum;
+    });
+
+    auto lo20 = krn.subspan(0, N);
+    return lo20;
+}
+
+samples_fp hipass_20(samples_fp &krn, float f0, float fs, bool osiz)
+{
+    auto z = lopass_20(krn, f0, fs, osiz);
+    spectral_inversion(z);
+    return z;
+}
+
+samples_fp bapass_20(samples_fp &krn, float f0, float fs, bool osiz)
+{
+    size_t N = kernel_size(f0, fs);
+    float lodata[N];
+    samples_fp lo{lodata, N};
+    auto lo_krn = lopass_20(lo, f0, fs, false);
+
+    float hidata[N];
+    samples_fp hi{hidata, N};
+    auto hi_krn = hipass_20(hi, f0, fs, false);
+
+    auto tri_krn = conv(lo_krn, lo_krn, hi_krn, ConvShape::Central);
+    return tri_krn;
+}
+
+std::ostream &dump(std::ostream &os, const samples_fp &samples, const std::string &name, float fs,
+    float fc1, float fc2, float Q)
+{
+    os << name << " = struct('fs', "   << fs  << ", "
+               <<           "'fc1', "  << fc1 << ", "
+               <<           "'fc2', "  << fc2 << ", "
+               <<           "'Q', "    << Q   << ", "
+               <<           "'v', [ ";
+
+    std::for_each(samples.begin(), samples.end(), [&os](const float &value) {
+        os << value << " ";
+    });
+
+    os << " ]);\n";
+
+    return os;
 }
 
 }

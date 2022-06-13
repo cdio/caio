@@ -37,10 +37,8 @@ namespace cemu {
  */
 class Mos6581 : public Mos6581I {
 public:
-    constexpr static const float FC_MAX = 12000.0f;
-    constexpr static const float FC_MIN = 30.0f;
-    constexpr static const float BW     = FC_MAX - FC_MIN;
-    constexpr static const float VOLUME = 0.3f;
+    constexpr static const size_t MAX_KERNEL_SIZE = signal::kernel_size(30.0f, SAMPLING_RATE);
+    constexpr static const float VOUT_MAX         = 0.3f;
 
     class Oscillator {
     public:
@@ -280,84 +278,42 @@ public:
 
     class Filter {
     public:
-        Filter()
-            : _klo_data(SAMPLES, 0.0f),
-              _khi_data(SAMPLES, 0.0f),
-              _kbd_data(SAMPLES, 0.0f) {
-        }
+        Filter();
+        ~Filter();
 
-        ~Filter() {
-        }
-
-        void freq_hi(uint8_t hi) {
-            _ufc = (_ufc & 7) | (static_cast<uint16_t>(hi) << 3);
-            _generated = false;
-        }
-
-        void freq_lo(uint8_t lo) {
-            _ufc = (_ufc & 0xFFF8) | (lo & 7);
-            _generated = false;
-        }
-
-        void resonance(uint8_t rs) {
-            _resonance = rs & 15;
-            _generated = false;
-        }
-
-        void lopass(bool active) {
-            _lopass = active;
-            _generated = false;
-        }
-
-        void hipass(bool active) {
-            _hipass = active;
-            _generated = false;
-        }
-
-        void bandpass(bool active) {
-            _bandpass = active;
-            _generated = false;
-        }
-
-        bool lopass() const {
-            return _lopass;
-        }
-
-        bool hipass() const {
-            return _hipass;
-        }
-
-        bool bandpass() const {
-            return _bandpass;
-        }
-
-        bool is_enabled() const {
-            return (_lopass || _hipass || _bandpass);
-        }
-
-        bool is_disabled() const {
-            return (!is_enabled());
-        }
-
+        void freq_hi(uint8_t hi);
+        void freq_lo(uint8_t lo);
+        void resonance(uint8_t rs);
+        void lopass(bool active);
+        void hipass(bool active);
+        void bandpass(bool active);
+        bool lopass() const;
+        bool hipass() const;
+        bool bandpass() const;
+        bool is_enabled() const;
+        bool is_disabled() const;
+        float frequency() const;
+        float Q() const;
         void apply(samples_fp &v);
 
     private:
         void generate();
 
-        uint16_t         _ufc{};
-        uint8_t          _resonance{};
-        bool             _lopass{};
-        bool             _hipass{};
-        bool             _bandpass{};
-        bool             _generated{};
+        uint16_t   _ufc{};
+        float      _pufc{};
+        uint8_t    _res{};
+        float      _pres{};
+        bool       _lopass{};
+        bool       _hipass{};
+        bool       _bandpass{};
 
-        samples_fp       _klo_data;
-        samples_fp       _khi_data;
-        samples_fp       _kbd_data;
+        samples_fp _klo{};
+        samples_fp _khi{};
+        samples_fp _kba{};
 
-        gsl::span<float> _klo{};
-        gsl::span<float> _khi{};
-        gsl::span<float> _kbd{};
+        std::array<float, MAX_KERNEL_SIZE> _klo_data{};
+        std::array<float, MAX_KERNEL_SIZE> _khi_data{};
+        std::array<float, MAX_KERNEL_SIZE> _kba_data{};
     };
 
     /**
@@ -412,10 +368,10 @@ private:
     Voice      _voice_2;
     Voice      _voice_3;
 
-    samples_fp _v1;
-    samples_fp _v2;
-    samples_fp _v3;
-    samples_fp _v4;
+    std::array<float, SAMPLES> _v1{};
+    std::array<float, SAMPLES> _v2{};
+    std::array<float, SAMPLES> _v3{};
+    std::array<float, SAMPLES> _v4{};
 
     bool       _voice_1_filtered{};
     bool       _voice_2_filtered{};

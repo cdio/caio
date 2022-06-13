@@ -22,13 +22,17 @@
 #include <cstdint>
 #include <cstdlib>
 #include <ctime>
+#include <execution>
 #include <limits>
 #include <numeric>
+#include <ostream>
 #include <random>
 #include <sstream>
 #include <string>
 #include <type_traits>
 #include <vector>
+
+#include <gsl/span>
 
 #include "utils.hpp"
 
@@ -36,11 +40,33 @@
 namespace cemu {
 namespace signal {
 
-using samples_fp = std::vector<float>;
-using samples_i16 = std::vector<int16_t>;
-
 extern std::random_device rd;
 extern std::uniform_real_distribution<float> uni_random;
+
+using samples_fp = gsl::span<float>;
+using samples_i16 = std::vector<int16_t>;
+
+
+/**
+ * Convolution product shapes.
+ * @see conv()
+ */
+enum class ConvShape {
+    /**
+     * Full convolution size.
+     * If C = A * B, then the size of the returned buffer
+     * is C.size which equals to A.size + B.size - 1.
+     */
+    Full,
+
+    /**
+     * Central (useful) part.
+     * If C = A * B, then the size of the returned buffer
+     * is the central part of C with size A.size.
+     * Used when A contains the sampled data and B the kernel.
+     */
+    Central
+};
 
 
 /**
@@ -52,7 +78,6 @@ static inline float prand()
     return std::abs(rand());
 }
 
-
 /**
  * @return A random value between -1.0 and 1.0.
  */
@@ -61,7 +86,6 @@ static inline float rand()
 {
     return uni_random(rd);
 }
-
 
 /**
  * Sinc function.
@@ -73,7 +97,6 @@ static inline float sinc(float x)
 {
     return ((x == 0.0f) ? 1.0f : std::sin(x) / x);
 }
-
 
 /**
  * Get the value of an exponential signal.
@@ -89,7 +112,6 @@ static inline float exp(float A0, float A, float t, float T)
     return A0 + A * std::exp(-t / T);
 }
 
-
 /**
  * Get the value of a triangle signal.
  * @param t Time positon;
@@ -103,7 +125,6 @@ static inline float triangle(float t, float T)
     const float T50   = 0.5f * T;
     return (t < T50 ? slope * t - 1.0f : 1.0f - slope * (t - T50));
  }
-
 
 /**
  * Get the value of a sawtooth signal.
@@ -119,7 +140,6 @@ static inline float sawtooth(float t, float T)
     return (-1.0f + slope * (t < T50 ? t : t - T50));
 }
 
-
 /**
  * Generate a pulse signal value.
  * @param t  Time position;
@@ -131,7 +151,6 @@ static inline float pulse(float t, float dc)
 {
     return (t < dc ? 1.0f : 0.0f);
 }
-
 
 /**
  * Generate a square signal value.
@@ -145,26 +164,30 @@ static inline float square(float t, float dc)
     return (t < dc ? 1.0f : -1.0f);
 }
 
-
 /**
- * Calculate the mean of the floating point elements inside a container.
+ * Calculate the average of the floating point elements inside a container.
  * @param samples Container.
- * @return The mean value.
+ * @return The average value.
  */
 template <typename C, typename = std::enable_if<utils::is_container<C>::value>>
-float mean(const C &samples)
+float average(const C &samples)
 {
-    float sum = std::accumulate(samples.begin(), samples.end(), 0.0f);
+    float sum = std::accumulate(std::execution::par, samples.begin(), samples.end(), 0.0f);
     return (sum / samples.size());
 }
 
-
 /**
- * Calculate the size of a kernel.
+ * Calculate the (optimal) size of a kernel.
  * @return 4.0 * fs / fc.
  */
-size_t kernel_size(float fc, float fs);
-
+constexpr size_t kernel_size(float fc, float fs)
+{
+    size_t size = utils::ceil(4.0f * fs / fc);
+    if ((size & 1) == 0) {
+        ++size;
+    }
+    return size;
+}
 
 /**
  * Blackman window.
@@ -174,103 +197,153 @@ size_t kernel_size(float fc, float fs);
  */
 float blackman(size_t pos, size_t N);
 
-
 /**
- * Invert the frequency spectrum of a signal.
- * @param v Signal to invert.
- * @return v.
+ * Invert the frequency spectrum of a kernel.
+ * @param krn Kernel to invert.
  */
-gsl::span<float> &spectral_inversion(gsl::span<float> &v);
-
+void spectral_inversion(samples_fp &krn);
 
 /**
  * Convolution product.
- * @param x First samples buffer;
- * @param y Second samples buffer.
- * @return The convolution product of the two buffers.
+ * @param dst   Destination buffer;
+ * @param sig   Signal buffer;
+ * @param krn   Kernel buffer;
+ * @param shape Desired output shape (see ConvShape).
+ * @return A subspan of the destination buffer containing the convolution product, the size of this buffer
+ * depends on the specified shape.
+ * @exception InvalidArgument if the destination buffer does not have enough space.
+ * @see ConvShape
  */
-samples_fp conv(const samples_fp &x, const samples_fp &y);
-
-
-/**
- * Apply a filter kernel to a buffer.
- * @param v Samples buffer to filter;
- * @param k Filter kernel.
- */
-void conv_kernel(samples_fp &v, const gsl::span<float> &k);
-
+samples_fp conv(samples_fp &dst, const samples_fp &sig, const samples_fp &krn, enum ConvShape shape);
 
 /**
  * Generate a Low-pass filter kernel.
- * If the osiz parameter is true and the calculated size is bigger
- * than the received buffer, the size of the buffer is used.
- * @param buf  The buffer to fill with the generated kernel;
+ * @param krn  Destination buffer;
  * @param fc   Cutoff frequency;
  * @param fs   Sampling frequency;
- * @param rs   Aplitude of the resonance component;
- * @param osiz If true, calculate the optimal size of the kernel; otherwise use the buffer size.
- * @return A subspan of the buffer containing the actual kernel.
+ * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
+ * @return A subspan of the destination buffer containing the actual kernel.
+ * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
  * @see kernel_size()
+ * TODO: use bilinear transform
  */
-gsl::span<float> lopass(gsl::span<float> &buf, float fc, float fs, float rs, bool osize = true);
-
+samples_fp lopass(samples_fp &krn, float fc, float fs, bool osiz = true);
 
 /**
  * Generate a High-pass filter kernel.
- * If the osiz parameter is set and the calculated size is bigger
- * than the received buffer, the size of the buffer is used.
- * @param buf  The buffer to fill with the generated kernel;
+ * @param krn  Destination buffer;
  * @param fc   Cutoff frequency;
  * @param fs   Sampling frequency;
- * @param rs   Aplitude of the resonance component;
- * @param osiz If true, calculate the optimal size of the kernel; otherwise use the buffer size.
- * @return A subspan of the buffer containing the actual kernel.
+ * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
+ * @return A subspan of the destination buffer containing the actual kernel.
+ * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
  * @see kernel_size()
+ * TODO: use bilinear transform
  */
-__attribute__((always_inline))
-static inline gsl::span<float> hipass(gsl::span<float> &buf, float fc, float fs, float rs, bool osiz = true)
-{
-    auto hi = lopass(buf, fc, fs, rs, osiz);
-    return spectral_inversion(hi);
-}
-
-
-/**
- * Generate a Stop-band filter kernel.
- * If the osiz parameter is set and the calculated size is bigger
- * than the received buffer, the size of the buffer is used.
- * @param buf  The buffer to fill with the generated kernel;
- * @param fcl  Low cutoff frequency;
- * @param fch  High cutoff frequency;
- * @param fs   Sampling frequency;
- * @param rs   Aplitude of the resonance component;
- * @param osiz If true, calculate the optimal size of the kernel; otherwise use the buffer size.
- * @return A subspan of the buffer containing the actual kernel.
- * @see kernel_size()
- */
-gsl::span<float> stopband(gsl::span<float> &buf, float fcl, float fch, float fs, float rs, bool osiz = true);
-
+samples_fp hipass(samples_fp &buf, float fc, float fs, bool osiz = true);
 
 /**
  * Generate a Band-pass filter kernel.
- * If the osiz parameter is set and the calculated size is bigger
- * than the received buffer, the size of the buffer is used.
- * @param buf  The buffer to fill with the generated kernel;
+ * @param krn  Destination buffer;
  * @param fcl  Low cutoff frequency;
  * @param fch  High cutoff frequency;
  * @param fs   Sampling frequency;
- * @param rs   Aplitude of the resonance component;
- * @param osiz If true, calculate the optimal size of the kernel; otherwise use the buffer size.
- * @return A subspan of the buffer containing the actual kernel.
+ * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
+ * @return A subspan of the destination buffer containing the actual kernel.
+ * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
  * @see kernel_size()
+ * TODO: use bilinear transform
  */
-__attribute__((always_inline))
-static inline gsl::span<float> bapass(gsl::span<float> &buf, float fcl, float fch, float fs, float rs, bool osiz = true)
-{
-    auto bp = stopband(buf, fcl, fch, fs, osiz);
-    return spectral_inversion(bp);
-}
+samples_fp bapass(samples_fp &krn, float fcl, float fch, float fs, bool osiz = true);
 
+/**
+ * Generate a Band-stop filter kernel.
+ * If the osiz parameter is set and the calculated size is bigger
+ * than the received buffer, the size of the buffer is used.
+ * @param buf  Destination buffer;
+ * @param fcl  Low cutoff frequency;
+ * @param fch  High cutoff frequency;
+ * @param fs   Sampling frequency;
+ * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
+ * @return A subspan of the destination buffer containing the actual kernel.
+ * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @see kernel_size()
+ * TODO: use bilinear transform
+ */
+samples_fp bastop(samples_fp &krn, float fcl, float fch, float fs, bool osiz = true);
+
+/**
+ * Generate a Low-pass filter kernel using a second order pole.
+ * A second order pole forms a filter with an attenuation rate of 40dB/dec.
+ * @param krn  Destination buffer;
+ * @param f0   Resonance frequency;
+ * @param Q    Q factor;
+ * @param fs   Sampling frequency;
+ * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
+ * @return A subspan of the destination buffer containing the actual kernel.
+ * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @see kernel_size()
+ * TODO: use bilinear transform
+ */
+samples_fp lopass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz = true);
+
+/**
+ * Generate a High-pass filter kernel using an inverted second order pole.
+ * An inverted second order pole forms a filter with an attenuation rate of 40dB/dec.
+ * @param krn  Destination buffer;
+ * @param f0   Resonance frequency;
+ * @param Q    Q factor;
+ * @param fs   Sampling frequency;
+ * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
+ * @return A subspan of the destination buffer containing the actual kernel.
+ * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @see kernel_size()
+ * TODO: use bilinear transform
+ */
+samples_fp hipass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz = true);
+
+/**
+ * Generate a Low-pass filter kernel using a simple pole.
+ * An simple pole forms a filter with an attenuation rate of 20dB/dec.
+ * @param krn  Destination buffer;
+ * @param f0   Resonance frequency;
+ * @param fs   Sampling frequency;
+ * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
+ * @return A subspan of the destination buffer containing the actual kernel.
+ * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @see kernel_size()
+ * TODO: use bilinear transform
+ */
+samples_fp lopass_20(samples_fp &krn, float f0, float fs, bool osiz = true);
+
+/**
+ * Generate a Hi-pass filter kernel using an inverted pole.
+ * An inverted pole forms a filter with an attenuation rate of 20dB/dec.
+ * @param krn  Destination buffer;
+ * @param f0   Resonance frequency;
+ * @param fs   Sampling frequency;
+ * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
+ * @return A subspan of the destination buffer containing the actual kernel.
+ * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @see kernel_size()
+ * TODO: use bilinear transform
+ */
+samples_fp hipass_20(samples_fp &krn, float f0, float fs, bool osiz = true);
+
+/**
+ * Generate a "triangular" Band-pass filter kernel using a zero and a pole.
+ * The filter is based on a zero at the resonance frequency and two poles at the
+ * same frequency. The attenuation rate is 20dB/dec.
+ * @param krn  Destination buffer;
+ * @param f0   Resonance frequency;
+ * @param fs   Sampling frequency;
+ * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
+ * @return A subspan of the destination buffer containing the actual kernel.
+ * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @see kernel_size()
+ * TODO: use bilinear transform
+ */
+samples_fp bapass_20(samples_fp &krn, float f0, float fs, bool osiz = true);
 
 /**
  * Convert an integer value to floating point.
@@ -283,7 +356,6 @@ float to_fp(T value)
     return static_cast<float>(value) / static_cast<float>(std::numeric_limits<T>::max());
 }
 
-
 /**
  * Convert a floating point value to integer type.
  * @param value Floating point value to convert ([0.0, 1.0] if T is unsigned or [-1.0, 1.0] if T is signed).
@@ -294,7 +366,6 @@ T to_integer(float value)
 {
     return static_cast<T>(value * std::numeric_limits<T>::max());
 }
-
 
 /**
  * Convert a floating point value to signed 16 bits.
@@ -307,7 +378,6 @@ static inline int16_t to_i16(float value)
 {
     return to_integer<int16_t>(value);
 }
-
 
 /**
  * @return An octave compatible representation of a samples buffer.
@@ -327,6 +397,20 @@ std::string to_string(const T &samples)
 
     return os.str();
 }
+
+/**
+ * Send the content of a samples container to an output stream formatted as an octave structure.
+ * @param os      The output stream;
+ * @param name    Name for the structure;
+ * @param samples Samples;
+ * @param fs      Sampling rate;
+ * @param fc1     Cutoff frequency 1;
+ * @param fc2     Cutoff frequency 2 or 0;
+ * @param Q       Q factor or 0.
+ * @return os.
+ */
+std::ostream &dump(std::ostream &os, const samples_fp &samples, const std::string &name, float fs, float fc1,
+    float fc2, float Q);
 
 }
 
