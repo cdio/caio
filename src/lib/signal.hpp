@@ -22,7 +22,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <ctime>
-#include <execution>
 #include <limits>
 #include <numeric>
 #include <ostream>
@@ -172,7 +171,7 @@ static inline float square(float t, float dc)
 template <typename C, typename = std::enable_if<utils::is_container<C>::value>>
 float average(const C &samples)
 {
-    float sum = std::accumulate(std::execution::par, samples.begin(), samples.end(), 0.0f);
+    float sum = std::accumulate(samples.begin(), samples.end(), 0.0f);
     return (sum / samples.size());
 }
 

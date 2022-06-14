@@ -43,7 +43,7 @@ float blackman(size_t pos, size_t N)
 
 void spectral_inversion(samples_fp &krn)
 {
-    std::for_each(std::execution::par, krn.begin(), krn.end(), [](float &value) {
+    std::for_each(krn.begin(), krn.end(), [](float &value) {
         value = -value;
     });
 
@@ -78,9 +78,9 @@ samples_fp conv(samples_fp &dst, const samples_fp &sig, const samples_fp &krn, e
     if (shape == ConvShape::Central) {
         auto from = c.begin() + ((Nc - Ns) >> 1);
         auto to = from + Ns;
-        std::copy(std::execution::par, from, to, dst.begin());
+        std::copy(from, to, dst.begin());
     } else {
-        std::copy(std::execution::par, c.begin(), c.end(), dst.begin());
+        std::copy(c.begin(), c.end(), dst.begin());
     }
 
     return samples_fp{dst.data(), Nf};
@@ -113,7 +113,7 @@ samples_fp lopass(samples_fp &krn, float fc, float fs, bool osiz)
         sum += value;
     }
 
-    std::for_each(std::execution::par, krn.begin(), krn.end(), [&sum](float &value) {
+    std::for_each(krn.begin(), krn.end(), [&sum](float &value) {
         value /= sum;
     });
 
@@ -196,7 +196,7 @@ samples_fp lopass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz)
         sum += value;
     }
 
-    std::for_each(std::execution::par, krn.begin(), krn.end(), [&sum](float &value) {
+    std::for_each(krn.begin(), krn.end(), [&sum](float &value) {
         value /= sum;
     });
 
@@ -248,7 +248,7 @@ samples_fp lopass_20(samples_fp &krn, float f0, float fs, bool osiz)
         sum += value;
     }
 
-    std::for_each(std::execution::par, krn.begin(), krn.end(), [&sum](float &value) {
+    std::for_each(krn.begin(), krn.end(), [&sum](float &value) {
         value /= sum;
     });
 

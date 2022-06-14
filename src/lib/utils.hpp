@@ -22,7 +22,6 @@
 #include <cctype>
 #include <chrono>
 #include <cstdint>
-#include <execution>
 #include <iomanip>
 #include <limits>
 #include <ostream>
@@ -314,7 +313,7 @@ constexpr static inline uint8_t convert_01_10(uint8_t byte)
 template<typename C, typename = std::enable_if<is_container<C>::value>>
 void convert_01_10(C &bytes)
 {
-    std::for_each(std::execution::par, bytes.begin(), bytes.end(), [](uint8_t &byte) {
+    std::for_each(bytes.begin(), bytes.end(), [](uint8_t &byte) {
         byte = convert_01_10(byte);
     });
 }
@@ -343,7 +342,7 @@ constexpr static inline uint8_t convert_01_10_to_11(uint8_t byte)
 template<typename C, typename = std::enable_if<is_container<C>::value>>
 void convert_01_10_to_11(C &bytes)
 {
-    std::for_each(std::execution::par, bytes.begin(), bytes.end(), [](uint8_t &byte) {
+    std::for_each(bytes.begin(), bytes.end(), [](uint8_t &byte) {
         byte = convert_01_10_to_11(byte);
     });
 }

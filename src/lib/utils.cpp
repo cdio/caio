@@ -26,7 +26,7 @@ std::string tolow(const std::string &str)
 {
     std::string lstr{str};
 
-    std::transform(std::execution::par, lstr.begin(), lstr.end(), lstr.begin(), [](char c) {
+    std::transform(lstr.begin(), lstr.end(), lstr.begin(), [](char c) {
         return std::tolower(c);
     });
 
@@ -37,7 +37,7 @@ std::string toup(const std::string &str)
 {
     std::string ustr{str};
 
-    std::transform(std::execution::par, ustr.begin(), ustr.end(), ustr.begin(), [](char c) {
+    std::transform(ustr.begin(), ustr.end(), ustr.begin(), [](char c) {
         return std::toupper(c);
     });
 

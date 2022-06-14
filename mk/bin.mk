@@ -30,8 +30,7 @@ CXXFLAGS+=	${SFML_CXXFLAGS}
 
 LDADD+=		${SFML_LDADD}
 
-LDADD+=		-ltbb \
-		-lpthread
+LDADD+=		-lpthread
 
 LIB=		${ROOT}/src/lib/libcemu.a
 
