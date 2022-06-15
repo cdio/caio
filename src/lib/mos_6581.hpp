@@ -294,7 +294,7 @@ public:
         bool is_disabled() const;
         float frequency() const;
         float Q() const;
-        void apply(samples_fp &v);
+        samples_fp apply(samples_fp &v);
 
     private:
         void generate();

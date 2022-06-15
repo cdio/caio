@@ -332,21 +332,23 @@ void Mos6581::Filter::generate()
     }
 }
 
-void Mos6581::Filter::apply(samples_fp &v)
+samples_fp Mos6581::Filter::apply(samples_fp &v)
 {
     generate();
 
     if (_lopass) {
-        signal::conv(v, v, _klo, signal::ConvShape::Central);
+        v = signal::conv(v, v, _klo, signal::ConvShape::Central);
     }
 
     if (_hipass) {
-        signal::conv(v, v, _khi, signal::ConvShape::Central);
+        v = signal::conv(v, v, _khi, signal::ConvShape::Central);
     }
 
     if (_bandpass) {
-        signal::conv(v, v, _kba, signal::ConvShape::Central);
+        v = signal::conv(v, v, _kba, signal::ConvShape::Central);
     }
+
+    return v;
 }
 
 Mos6581::Mos6581(const std::string &label, unsigned clkf)
@@ -566,20 +568,19 @@ void Mos6581::play()
         samples_fp v1{_v1};
         samples_fp v2{_v2};
         samples_fp v3{_v3};
-        samples_fp v4{_v4};
 
         if (_filter.is_enabled()) {
             /* FIXME: optimise */
             if (is_v1_filtered()) {
-                _filter.apply(v1);
+                v1 = _filter.apply(v1);
             }
 
             if (is_v2_filtered()) {
-                _filter.apply(v2);
+                v2 = _filter.apply(v2);
             }
 
             if (is_v3_filtered()) {
-                _filter.apply(v3);
+                v3 = _filter.apply(v3);
             }
         }
 
