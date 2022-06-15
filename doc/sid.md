@@ -17,13 +17,13 @@ following formula:
 ```
 
 where _ufc_ is the 11-bits frequency value set by the user. Unfortunately,
-this formula is completely wrong. The relationship between the user defined
+this formula is not correct. The relationship between the user defined
 values and the actual filter frequency is non-linear and there is no SID
 chip out there that sounds like another.
 
 The author of the [reSID](https://en.wikipedia.org/wiki/ReSID) library did
 some reverse engineering work and came out with a lookup table used to
-to translate from the user defined values to the actual filter frequencies.
+translate from the user defined values to the actual filter frequencies.
 
 In cemu's implementation, this curve is approximated using a
 [sigmoid function](https://en.wikipedia.org/wiki/Sigmoid_function).
@@ -38,16 +38,15 @@ The resonance value is also translated to a quadratic response Q factor,
 again, the author of the reSID library found that its value varies from
 0.707 to 1.7.
 cemu's implementation uses the following formula to calculate the actual
-resonance of the quadratic response:
+Q factor:
 
 ```
   Q = 0.707 + (1.7 - 0.707) * res / 15
 
 ```
-where _res_ is the user specified 4-bits resonance value.
+where _res_ is the 4-bits resonance value specified by the user.
 
 ### other bugs:
 
 The volume "click" bug and others are implemented so programs like
 [SAM](https://en.wikipedia.org/wiki/Software_Automatic_Mouth) work.
-
