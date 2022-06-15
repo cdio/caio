@@ -9,6 +9,7 @@
 - C1541Fs:  Support for P00 files
 - UI:       Fix disk widget activity when C1541 is in error condition.
 - CPU;      Test suite
+- CPU;      Z80
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
@@ -20,7 +21,7 @@
             - crt/d64/fs attached on-demand (+ host filesystem traversing)
             - Support for directory/file traversal/selection (test ImGui)
             - Virtual keyboard?
-- SID:      Fix/remake (dane ballad)
+- SID:      Fork the coming reSID 1.0
 - misc:     Remove gsl (when c++20 support is completed)
 - Apple2
 - BBC Micro

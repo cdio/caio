@@ -18,7 +18,8 @@ cemu will search for the configuration file as follows, stopping at the first ma
 3. User's configuration directory:   *$HOME/.config/cemu/cemu.conf*
 4. System's configuration directory: *$PREFIX/etc/cemu/cemu.conf*
 
-Command line options take precedence over those defined in the configuration file.
+Command line options take the precedence over those defined in the
+configuration file.
 
 
 ## usage examples
@@ -100,5 +101,4 @@ it must be used with care.
 D64 files are not supported yet.
 
 For more information please see the *--8* command line option.
-
 
