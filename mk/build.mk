@@ -1,7 +1,7 @@
 #
-# Copyright (C) 2020 Claudio Castiglia
+# Copyright (C) 2020-2022 Claudio Castiglia
 #
-# This file is part of CEMU.
+# This file is part of CAIO.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 # RELEASE=	Required. Git branch or tag to build.
 # BUILD_DIR=	Required. Build directory: ${BUILD_PREFIX}/${BIN_PKGNAME}_<binary_type>
 #
-SRC_PKGNAME=		cemu-${RELEASE}
+SRC_PKGNAME=		caio-${RELEASE}
 SRC_PKGFILE=		${BUILD_PREFIX}/${SRC_PKGNAME}.${SRC_PKGFMT}
 
 SRC_PKGFMT=		tgz

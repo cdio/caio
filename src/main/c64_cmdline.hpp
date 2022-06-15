@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,16 +19,16 @@
 #pragma once
 
 #include "c64_config.hpp"
-#include "cemu_cmdline.hpp"
+#include "caio_cmdline.hpp"
 
 
-namespace cemu {
+namespace caio {
 namespace c64 {
 
 /**
  * Command line and configuration file C64 parser.
  */
-class C64Cmdline : public CemuCmdline {
+class C64Cmdline : public CaioCmdline {
 public:
     enum C64Options {
         C64_OPTION_CARTFILE = Options::OPTION_MAX,
@@ -42,14 +42,14 @@ public:
     };
 
     C64Cmdline()
-        : CemuCmdline{lopts} {
+        : CaioCmdline{lopts} {
     }
 
     virtual ~C64Cmdline() {
     }
 
     Confile parse(int argc, char *const *argv) override {
-        return CemuCmdline::parse(argc, argv);
+        return CaioCmdline::parse(argc, argv);
     }
 
 private:

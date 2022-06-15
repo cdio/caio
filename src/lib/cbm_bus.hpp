@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #include "utils.hpp"
 
 
-namespace cemu {
+namespace caio {
 namespace cbm_bus {
 
 using buf_t = std::vector<uint8_t>;

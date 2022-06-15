@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@
 #include "c1541_factory.hpp"
 
 
-namespace cemu {
+namespace caio {
 namespace c64 {
 
 C64::C64(const C64Config &conf)
@@ -522,7 +522,7 @@ void C64::run()
 
 void C64::start()
 {
-    log.info("Starting CEMU v" + cemu::version() + " - C64\n" + to_string() + "\n");
+    log.info("Starting CAIO v" + caio::version() + " - C64\n" + to_string() + "\n");
 
     /*
      * The emulator runs on its own thread.

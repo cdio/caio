@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,12 @@
 #include "config.hpp"
 
 
-namespace cemu {
+namespace caio {
 
 /**
  * Command line and configuration file parser.
  */
-class CemuCmdline {
+class CaioCmdline {
 public:
     enum Options {
         OPTION_CONF,
@@ -58,10 +58,10 @@ public:
         OPTION_MAX
     };
 
-    CemuCmdline() {
+    CaioCmdline() {
     }
 
-    virtual ~CemuCmdline() {
+    virtual ~CaioCmdline() {
     }
 
     /**
@@ -79,7 +79,7 @@ protected:
      * Command line and configuration file parser.
      * @param ext_lopts Extended long options.
      */
-    CemuCmdline(const std::vector<::option> &ext_lopts);
+    CaioCmdline(const std::vector<::option> &ext_lopts);
 
     /**
      * Print the command line options usage on standard error.

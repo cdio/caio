@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include "c64_config.hpp"
 
 
-namespace cemu {
+namespace caio {
 namespace c64 {
 
 const std::vector<::option> C64Cmdline::lopts = {
@@ -38,19 +38,19 @@ const std::vector<::option> C64Cmdline::lopts = {
 
 void C64Cmdline::usage()
 {
-    CemuCmdline::usage();
+    CaioCmdline::usage();
 
                // 0         1         2         3         4         5         6         7
                // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
     std::cerr << std::endl
-              << "C64 specific:"                                                                    << std::endl
-              << " --cart <cart>          Attach a ROM image (RAW or CRT formats, 8K or 16K only)"  << std::endl
-              << " --prg <prg>            Load a PRG file as soon as the basic is ready"            << std::endl
-              << " --8 <path>             Attach a disk drive unit 8"                               << std::endl
-              << " --9 <path>             Attach a disk drive unit 9"                               << std::endl
-              << " --resid <yes|no>       Use the MOS6581 reSID library"                            << std::endl
-              << "                        (default is no; cemu implementation is used)"             << std::endl
-              << " --swapj                Swap Joysticks"                                           << std::endl;
+              << "C64 specific:"                                                            << std::endl
+              << " --cart <cart>          Attach a cartridge (CRT format)"                  << std::endl
+              << " --prg <prg>            Load a PRG file as soon as the basic is ready"    << std::endl
+              << " --8 <path>             Attach a disk drive unit 8"                       << std::endl
+              << " --9 <path>             Attach a disk drive unit 9"                       << std::endl
+              << " --resid <yes|no>       Use the MOS6581 reSID library"                    << std::endl
+              << "                        (default is no; caio's implementation is used)"   << std::endl
+              << " --swapj                Swap Joysticks"                                   << std::endl;
 }
 
 bool C64Cmdline::parse(Confile &conf, int opt, const std::string &arg)

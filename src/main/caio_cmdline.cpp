@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "cemu_cmdline.hpp"
+#include "caio_cmdline.hpp"
 
 #include <iomanip>
 #include <cstdlib>
@@ -28,54 +28,54 @@
 #include "version.hpp"
 
 
-namespace cemu {
+namespace caio {
 
-const std::vector<::option> CemuCmdline::lopts = {
-    { "conf",       required_argument,  nullptr, CemuCmdline::OPTION_CONF       },
+const std::vector<::option> CaioCmdline::lopts = {
+    { "conf",       required_argument,  nullptr, CaioCmdline::OPTION_CONF       },
 
-    { "romdir",     required_argument,  nullptr, CemuCmdline::OPTION_ROMDIR     },
-    { "cartdir",    required_argument,  nullptr, CemuCmdline::OPTION_CARTDIR    },
-    { "palettedir", required_argument,  nullptr, CemuCmdline::OPTION_PALETTEDIR },
-    { "keymapsdir", required_argument,  nullptr, CemuCmdline::OPTION_KEYMAPSDIR },
+    { "romdir",     required_argument,  nullptr, CaioCmdline::OPTION_ROMDIR     },
+    { "cartdir",    required_argument,  nullptr, CaioCmdline::OPTION_CARTDIR    },
+    { "palettedir", required_argument,  nullptr, CaioCmdline::OPTION_PALETTEDIR },
+    { "keymapsdir", required_argument,  nullptr, CaioCmdline::OPTION_KEYMAPSDIR },
 
-    { "palette",    required_argument,  nullptr, CemuCmdline::OPTION_PALETTE    },
-    { "keymaps",    required_argument,  nullptr, CemuCmdline::OPTION_KEYMAPS    },
+    { "palette",    required_argument,  nullptr, CaioCmdline::OPTION_PALETTE    },
+    { "keymaps",    required_argument,  nullptr, CaioCmdline::OPTION_KEYMAPS    },
 
-    { "fps",        required_argument,  nullptr, CemuCmdline::OPTION_FPS        },
-    { "scale",      required_argument,  nullptr, CemuCmdline::OPTION_SCALE      },
-    { "scanlines",  required_argument,  nullptr, CemuCmdline::OPTION_SCANLINES  },
-    { "fullscreen", no_argument,        nullptr, CemuCmdline::OPTION_FULLSCREEN },
-    { "sresize",    required_argument,  nullptr, CemuCmdline::OPTION_SRESIZE    },
-    { "audio",      required_argument,  nullptr, CemuCmdline::OPTION_AUDIO      },
+    { "fps",        required_argument,  nullptr, CaioCmdline::OPTION_FPS        },
+    { "scale",      required_argument,  nullptr, CaioCmdline::OPTION_SCALE      },
+    { "scanlines",  required_argument,  nullptr, CaioCmdline::OPTION_SCANLINES  },
+    { "fullscreen", no_argument,        nullptr, CaioCmdline::OPTION_FULLSCREEN },
+    { "sresize",    required_argument,  nullptr, CaioCmdline::OPTION_SRESIZE    },
+    { "audio",      required_argument,  nullptr, CaioCmdline::OPTION_AUDIO      },
 
-    { "delay",      required_argument,  nullptr, CemuCmdline::OPTION_DELAY      },
-    { "monitor",    no_argument,        nullptr, CemuCmdline::OPTION_MONITOR    },
+    { "delay",      required_argument,  nullptr, CaioCmdline::OPTION_DELAY      },
+    { "monitor",    no_argument,        nullptr, CaioCmdline::OPTION_MONITOR    },
 
-    { "logfile",    required_argument,  nullptr, CemuCmdline::OPTION_LOGFILE    },
-    { "loglevel",   required_argument,  nullptr, CemuCmdline::OPTION_LOGLEVEL   },
+    { "logfile",    required_argument,  nullptr, CaioCmdline::OPTION_LOGFILE    },
+    { "loglevel",   required_argument,  nullptr, CaioCmdline::OPTION_LOGLEVEL   },
 
-    { "panel",      required_argument,  nullptr, CemuCmdline::OPTION_PANEL      },
+    { "panel",      required_argument,  nullptr, CaioCmdline::OPTION_PANEL      },
 
-    { "version",    no_argument,        nullptr, CemuCmdline::OPTION_VERSION    },
-    { "help",       no_argument,        nullptr, CemuCmdline::OPTION_HELP       }
+    { "version",    no_argument,        nullptr, CaioCmdline::OPTION_VERSION    },
+    { "help",       no_argument,        nullptr, CaioCmdline::OPTION_HELP       }
 };
 
 
-CemuCmdline::CemuCmdline(const std::vector<::option> &ext_lopts)
+CaioCmdline::CaioCmdline(const std::vector<::option> &ext_lopts)
     : _lopts{lopts.begin(), lopts.end()}
 {
     _lopts.insert(_lopts.end(), ext_lopts.begin(), ext_lopts.end());
     _lopts.push_back({nullptr, 0, nullptr, 0});
 }
 
-void CemuCmdline::usage()
+void CaioCmdline::usage()
 {
                // 0         1         2         3         4         5         6         7
                // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
     std::cerr << "usage: " << _progname << " <options>"                                                 << std::endl
               << "where <options> are:"                                                                 << std::endl
               << " --conf <confile>       Configuration file"                                           << std::endl
-              << "                        (default is " << CemuConfile::CEMU_CONFIG_FILE << ")"         << std::endl
+              << "                        (default is " << CaioConfile::CAIO_CONFIG_FILE << ")"         << std::endl
               << " --romdir <romdir>      ROMs directory"                                               << std::endl
               << " --cartdir <cdir>       Cartridge directory"                                          << std::endl
               << " --palettedir <pdir>    Colour palette directory"                                     << std::endl
@@ -113,11 +113,11 @@ void CemuCmdline::usage()
               << " -h|--help              Print this message and exit"                                  << std::endl;
 }
 
-Confile CemuCmdline::parse(int argc, char *const *argv)
+Confile CaioCmdline::parse(int argc, char *const *argv)
 {
     _progname = fs::basename(argv[0]);
 
-    CemuConfile conf{};
+    CaioConfile conf{};
     std::string cfile{};
     int c{};
 
@@ -129,7 +129,7 @@ Confile CemuCmdline::parse(int argc, char *const *argv)
 
         case 'v':
         case OPTION_VERSION:
-            std::cout << "CEMU v" << version() << std::endl;
+            std::cout << "CAIO v" << version() << std::endl;
             std::exit(EXIT_SUCCESS);
 
         case 'h':
@@ -154,14 +154,14 @@ Confile CemuCmdline::parse(int argc, char *const *argv)
             /*
              * The user specified a configuration file name.
              */
-            conf.parse(cfile, { CemuConfile::CWD });
+            conf.parse(cfile, { CaioConfile::CWD });
         } catch (const std::exception &err) {
             std::cerr << _progname << ": " << err.what() << std::endl;
             std::exit(EXIT_FAILURE);
         }
     }
 
-    auto &sec = conf[std::string{conf.CEMU_CONFIG_SECTION}];
+    auto &sec = conf[std::string{conf.CAIO_CONFIG_SECTION}];
     bool terminate{};
     optind = 0;
 

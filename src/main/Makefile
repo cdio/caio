@@ -1,7 +1,7 @@
 #
-# Copyright (C) 2020 Claudio Castiglia
+# Copyright (C) 2020-2022 Claudio Castiglia
 #
-# This file is part of CEMU.
+# This file is part of CAIO.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,11 +20,11 @@ ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
-BIN=		cemu
+BIN=		caio
 
 LN_BINS=	c64
 
-CONFIG=		cemu.conf
+CONFIG=		caio.conf
 
 DST_BIN=	${DST_BINDIR}/${BIN}
 
@@ -32,7 +32,7 @@ DST_LINKS=	${LN_BINS:%=${DST_BINDIR}/%}
 
 DST_CONFIG=	${DST_SYSCONFDIR}/${CONFIG}
 
-CXXSRCS=	cemu_cmdline.cpp \
+CXXSRCS=	caio_cmdline.cpp \
 		c64_cmdline.cpp \
 		c64_main.cpp \
 		main.cpp

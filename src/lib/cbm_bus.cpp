@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +23,10 @@
 #include "logger.hpp"
 
 
-//#define CEMU_CBMBUS_DEBUG
-//#define CEMU_CBMBUS_DEBUG_STATE
+//#define CAIO_CBMBUS_DEBUG
+//#define CAIO_CBMBUS_DEBUG_STATE
 
-#ifdef CEMU_CBMBUS_DEBUG
+#ifdef CAIO_CBMBUS_DEBUG
 #define CBMBUS_DEBUG(fmt, args...)              do {                                                        \
                                                     log.debug("%s: %s: " fmt,                               \
                                                         bus_name().c_str(), dev_name().c_str(), ## args);   \
@@ -35,7 +35,7 @@
 #define CBMBUS_DEBUG(...)
 #endif
 
-#ifdef CEMU_CBMBUS_DEBUG_STATE
+#ifdef CAIO_CBMBUS_DEBUG_STATE
 #define CBMBUS_DEBUG_STATE(fmt, args...)        do {                                                        \
                                                     log.debug("%s: %s: " fmt,                               \
                                                         bus_name().c_str(), dev_name().c_str(), ## args);   \
@@ -45,7 +45,7 @@
 #endif
 
 
-namespace cemu {
+namespace caio {
 namespace cbm_bus {
 
 std::string BusData::to_string() const

@@ -1,8 +1,9 @@
-# cemu - 8 bits home computers emulator
+# caio - 8 bits home computers emulator
 
 ## compile, install and packaging
 
 ### dependencies:
+
 * C++20 compiler: [clang-10.0](https://clang.llvm.org) or later or
   [g++-9.3](https://en.wikipedia.org/wiki/GNU_Compiler_Collection) or later.
 
@@ -29,7 +30,7 @@
 
 The default compiler is [clang++](https://clang.llvm.org), it can be changed
 to [g++](https://en.wikipedia.org/wiki/GNU_Compiler_Collection) by setting the
-*CXX* environment variable:
+`CXX` environment variable:
 
 ```
     $ make CXX=g++ PREFIX=/usr/local
@@ -43,7 +44,7 @@ to [g++](https://en.wikipedia.org/wiki/GNU_Compiler_Collection) by setting the
     ...
 ```
 
-The default *PREFIX* is */opt/cemu*.
+The default `PREFIX` is `/opt/caio`.
 
 ### packaging:
 
@@ -53,9 +54,9 @@ The default *PREFIX* is */opt/cemu*.
     $ make src-package RELEASE=<tag>
 ```
 
-That creates a *.tgz* tarball file under the *build/* directory.
-
-*tag* specifies the CEMU's git branch or tag to pack.
+The previous command creates a `.tgz` tarball source package containing the
+specified release. The tarball file is placed inside the `build/` directory.
+`tag` specifies the caio's git tag to build.
 
 #### debian binary package:
 
@@ -63,9 +64,8 @@ That creates a *.tgz* tarball file under the *build/* directory.
     $ make deb-package RELEASE=<tag>
 ```
 
-That creates a *.deb* binary file under the *build/* directory.
-
-*tag* specifies the CEMU's git branch or tag to build.
+The previous command creates a `.deb` binary package under the `build/`
+directory. `tag` specifies the caio's git tag to build.
 
 #### generic binary package:
 
@@ -73,11 +73,8 @@ That creates a *.deb* binary file under the *build/* directory.
     $ make bin-package RELEASE=<tag>
 ```
 
-That creates a *.tgz* (tarball) binary file under the *build/* directory.
-
-*tag* specifies the cemu's git branch or tag to build.
+The previous command creates a `.tgz` tarball binary package under the
+`build/` directory. `tag` specifies the caio's git branch or tag to build.
 
 Note that this tarball file does not contain any runtime dependencies
-(libsfml, libstdc++, etc).
-Those must be installed separately.
-
+(libsfml, libstdc++, etc). Those must be installed separately.

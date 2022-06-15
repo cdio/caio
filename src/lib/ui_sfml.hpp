@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@
 #include "ui_sfml_panel.hpp"
 
 
-namespace cemu {
+namespace caio {
 namespace ui {
 namespace sfml {
 
@@ -54,9 +54,9 @@ extern std::stringstream sfml_err;
  */
 constexpr const char *sfml_version()
 {
-    return "SFML-" CEMU_STR(SFML_VERSION_MAJOR) "." \
-                   CEMU_STR(SFML_VERSION_MINOR) "." \
-                   CEMU_STR(SFML_VERSION_PATCH);
+    return "SFML-" CAIO_STR(SFML_VERSION_MAJOR) "." \
+                   CAIO_STR(SFML_VERSION_MINOR) "." \
+                   CAIO_STR(SFML_VERSION_PATCH);
 }
 
 

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "rgb.hpp"
 
 
-namespace cemu {
+namespace caio {
 
 constexpr static const unsigned ICON_WIDTH  = 32;
 constexpr static const unsigned ICON_HEIGHT = 27;
@@ -144,13 +144,13 @@ std::array<Rgba, ICON_WIDTH * ICON_HEIGHT> icon32_data = {
 
 const Image &icon32()
 {
-    static const Image cemu_icon32 = {
+    static const Image caio_icon32 = {
         .width  = ICON_WIDTH,
         .height = ICON_HEIGHT,
         .data   = gsl::span{icon32_data.data(), icon32_data.size()}
     };
 
-    return cemu_icon32;
+    return caio_icon32;
 }
 
 }

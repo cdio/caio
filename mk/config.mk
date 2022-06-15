@@ -1,7 +1,7 @@
 #
-# Copyright (C) 2020 Claudio Castiglia
+# Copyright (C) 2020-2022 Claudio Castiglia
 #
-# This file is part of CEMU.
+# This file is part of CAIO.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -93,11 +93,11 @@ else
 VERSION=		0.0.0
 endif
 
-PREFIX?=		/opt/cemu
+PREFIX?=		/opt/caio
 DST_BINDIR?=		${PREFIX}/bin
-DST_DATADIR?=		${PREFIX}/share/cemu
-DST_SYSCONFDIR?=	${PREFIX}/etc/cemu
-DST_HOMECONFDIR?=	${HOME}/.config/cemu
+DST_DATADIR?=		${PREFIX}/share/caio
+DST_SYSCONFDIR?=	${PREFIX}/etc/caio
+DST_HOMECONFDIR?=	${HOME}/.config/caio
 
 OWNER:=			${shell ${ID} -u}
 GROUP:=			${shell ${ID} -g}

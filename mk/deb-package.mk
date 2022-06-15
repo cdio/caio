@@ -1,7 +1,7 @@
 #
-# Copyright (C) 2020 Claudio Castiglia
+# Copyright (C) 2020-2022 Claudio Castiglia
 #
-# This file is part of CEMU.
+# This file is part of CAIO.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ ROOT=		${abspath ..}
 
 include ${ROOT}/mk/config.mk
 
-DEB_PKGNAME=	cemu_${VERSION}_${ARCH}
+DEB_PKGNAME=	caio_${VERSION}_${ARCH}
 DEB_PKGFILE=	${BUILD_PREFIX}/${DEB_PKGNAME}.deb
 
 BUILD_DIR=	${BUILD_PREFIX}/${DEB_PKGNAME}_deb
@@ -38,8 +38,8 @@ DEB_SIZE=	${shell ${DU} --exclude ${DEB_CONTROL} -sk ${DEB_ROOT} | ${CUT} -f 1}
 include ${ROOT}/mk/build.mk
 
 deb-package: PREFIX=/usr
-deb-package: MAKEARGS+="DST_SYSCONFDIR=${DEB_ROOT}/etc/cemu"
-deb-package: MAKEARGS+="EXTRA_CPPFLAGS=-DD_SYSCONFDIR='\"/etc/cemu\"'"
+deb-package: MAKEARGS+="DST_SYSCONFDIR=${DEB_ROOT}/etc/caio"
+deb-package: MAKEARGS+="EXTRA_CPPFLAGS=-DD_SYSCONFDIR='\"/etc/caio\"'"
 deb-package: ${DEB_PKGFILE}
 
 ${DEB_PKGFILE}: ${DEB_CONTROL}
@@ -48,15 +48,15 @@ ${DEB_PKGFILE}: ${DEB_CONTROL}
 ${DEB_CONTROL}: ${BUILD_INSTALL_DONE}
 	[ -d ${dir $@} ] || ${INSTALL} -d ${dir $@}
 	${PRINTF} \
-	"Package: cemu\n"\
+	"Package: caio\n"\
 	"Version: ${VERSION}\n"\
 	"Architecture: ${ARCH}\n"\
 	"Priority: optional\n"\
 	"Essential: no\n"\
-	"Maintainer: CEMU Developers <>\n"\
+	"Maintainer: CAIO Developers <>\n"\
 	"Installed-Size: ${DEB_SIZE}\n"\
 	"Depends: libsfml-graphics2.5 (>= 2.5.1), libsfml-audio2.5 (>= 2.5.1), libstdc++6 (>= 10.3.0)\n"\
-	"Replaces: cemu\n"\
-	"Homepage: http://github.com/cdio/CEMU\n"\
+	"Replaces: caio\n"\
+	"Homepage: http://github.com/cdio/CAIO\n"\
 	"Description: 8 bit Home Computers Emulator.\n" > $@
 

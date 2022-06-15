@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,19 +22,19 @@
 #include "logger.hpp"
 
 #ifndef D_PREFIX
-#define D_PREFIX            "/opt/cemu"
+#define D_PREFIX            "/opt/caio"
 #endif
 
 #ifndef D_SYSCONFDIR
-#define D_SYSCONFDIR        D_PREFIX "/etc/cemu"
+#define D_SYSCONFDIR        D_PREFIX "/etc/caio"
 #endif
 
 #ifndef D_HOMECONFDIR
-#define D_HOMECONFDIR       "~/.config/cemu"
+#define D_HOMECONFDIR       "~/.config/caio"
 #endif
 
 #ifndef D_DATADIR
-#define D_DATADIR           D_PREFIX "/share/cemu"
+#define D_DATADIR           D_PREFIX "/share/caio"
 #endif
 
 #ifndef D_ROMDIR
@@ -50,12 +50,12 @@
 #endif
 
 
-namespace cemu {
+namespace caio {
 
 /**
- * CEMU base configuation file.
+ * CAIO base configuation file.
  */
-class CemuConfile : public Confile {
+class CaioConfile : public Confile {
 public:
     constexpr static const char *SYSTEM_CONFDIR         = D_SYSCONFDIR;
     constexpr static const char *HOME_CONFDIR           = D_HOMECONFDIR;
@@ -64,9 +64,9 @@ public:
     constexpr static const char *PALETTEDIR             = D_PALETTEDIR;
     constexpr static const char *KEYMAPSDIR             = D_KEYMAPSDIR;
 
-    constexpr static const char *CEMU_CONFIG_FILE       = "cemu.conf";
+    constexpr static const char *CAIO_CONFIG_FILE       = "caio.conf";
 
-    constexpr static const char *CEMU_CONFIG_SECTION    = "cemu";
+    constexpr static const char *CAIO_CONFIG_SECTION    = "caio";
 
     constexpr static const char *ROMDIR_CONFIG_KEY      = "romdir";
     constexpr static const char *PALETTEDIR_CONFIG_KEY  = "palettedir";
@@ -86,16 +86,16 @@ public:
     constexpr static const char *LOGFILE_CONFIG_KEY     = "logfile";
     constexpr static const char *LOGLEVEL_CONFIG_KEY    = "loglevel";
 
-    CemuConfile() {
+    CaioConfile() {
     }
 
-    virtual ~CemuConfile() {
+    virtual ~CaioConfile() {
     }
 
     /**
      * @see Confile::parse()
      */
-    void parse(const std::string &fname = CEMU_CONFIG_FILE,
+    void parse(const std::string &fname = CAIO_CONFIG_FILE,
         const std::initializer_list<std::string> &spaths = {CWD, HOME_CONFDIR, SYSTEM_CONFDIR}) override {
         Confile::parse(fname, spaths);
     }

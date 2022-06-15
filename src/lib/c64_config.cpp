@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "utils.hpp"
 
 
-namespace cemu {
+namespace caio {
 namespace c64 {
 
 C64Config &C64Config::operator=(const Confile &conf)
@@ -63,8 +63,8 @@ C64Config &C64Config::operator=(const Confile &conf)
             }
         }
 
-        /* Palette entry in the c64 section, overrides any palette set in the cemu section */
-        it = sec.find(CemuConfile::PALETTE_CONFIG_KEY);
+        /* Palette entry in the c64 section, overrides any palette set in the caio section */
+        it = sec.find(CaioConfile::PALETTE_CONFIG_KEY);
         if (it != sec.end()) {
             Config::palettefile = palette_file(it->second);
         }

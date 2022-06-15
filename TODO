@@ -1,3 +1,4 @@
+- misc:     Add reset to devices
 - cart:     Fix Simons Basic
 - cart:     Fix EasyFlash
 - VICII:    Fix border colour during open-border mode

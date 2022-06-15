@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2020 Claudio Castiglia
+ * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CEMU.
+ * This file is part of CAIO.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include "joystick.hpp"
 
 
-namespace cemu {
+namespace caio {
 namespace c64 {
 
 /**
@@ -60,7 +60,7 @@ public:
 
     /**
      * Set the current joystick position.
-     * This method converts the CEMU's joystick position coding into C64's joystick coding.
+     * This method converts the CAIO's joystick position coding into C64's joystick coding.
      * Receives a JoystickPosition and translates it into a C64JoystickPosition.
      * @param pos A bitwise combination of the positions to set (see JoystickPosition).
      * @see C64JoystickPosition
