@@ -76,5 +76,5 @@ directory. `tag` specifies the caio's git tag to build.
 The previous command creates a `.tgz` tarball binary package under the
 `build/` directory. `tag` specifies the caio's git branch or tag to build.
 
-Note that this tarball file does not contain any runtime dependencies
+Note that this package does not contain any runtime dependencies
 (libsfml, libstdc++, etc). Those must be installed separately.

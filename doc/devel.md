@@ -11,33 +11,31 @@ that implementation did not sound 100% like the original chip.
 
 The current version of this device evolved a lot since its first incarnations
 reaching better levels of emulation accuracy.
-Still, it is  is far for being *really good* so another implementation based
-on the [reSID](https://en.wikipedia.org/wiki/ReSID) library is also provided.
+Still, it is far for being *really good* so another implementation based on the
+[reSID](https://en.wikipedia.org/wiki/ReSID) library is also provided.
 
 ### filters:
 
-The specifications say that actual filter frequencies are defined by the
-following formula:
+The specifications say that filter frequencies are defined by the following
+formula:
 
 ```
   fc = FC_MIN + (FC_MAX - FC_MIN) * ufc / 2048
 ```
 
-where `ufc` is the 11-bits frequency value set by the user. Unfortunately,
+where `ufc` is the 11 bits frequency value set by the user. Unfortunately,
 this formula is not correct. The relationship between the user defined
 values and the actual filter frequency is non-linear and every single SID
-chip out there sounds different from another.
+chip out there sounds different from the other.
 
-It seems that the author of [reSID](https://en.wikipedia.org/wiki/ReSID) did
-some reverse engineering work and came out with a lookup table used to
-translate from the user defined values to the actual filter frequencies.
-
-In caio's implementation, this curve is approximated using two
+Thanks to a lot of reverse engineering work, the author of
+[reSID](https://en.wikipedia.org/wiki/ReSID) came out with a lookup table
+that is used to translate from the user defined values to the actual filter
+frequencies. In caio's implementation, this curve is approximated using two
 [sigmoid functions](https://en.wikipedia.org/wiki/Sigmoid_function).
 
-The plot below shows the lookup table used by the reSID, the approximated
-function used by caio, and the formula described in the SID's technical
-specifications:
+The plot below shows the lookup table used by reSID, the sigmoid approximation
+used by caio, and the formula described in the SID's technical specifications:
 
 <img src="filter.png" width="640"/>
 
@@ -51,7 +49,7 @@ Q factor:
   Q = 0.707 + (1.7 - 0.707) * res / 15
 
 ```
-where `res` is the 4-bits resonance value specified by the user.
+where `res` is the 4 bits resonance value specified by the user.
 
 ### other bugs:
 

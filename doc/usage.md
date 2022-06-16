@@ -74,19 +74,19 @@ configuration file.
 Examples:
 
 The following command activates the horizontal scanlines visual effect, scales
-the emulated screen resolution 4 times (that is, a 320x200 screen is scaled to
-1280x800), loads and launches the cartridge named *ghostngobblins*:
+up the emulated screen resolution 3 times (that is, a 320x200 screen is scaled
+to 960x600), loads and launches the cartridge named *ghostngobblins*:
 
 ```
-    $ c64 --scanlines h --scale 4 --cart /games/c64/ghostngobblins.crt
+    $ caio c64 --scanlines h --scale 3 --cart /games/c64/ghostngobblins.crt
 ```
 
 The next command instructs caio to build a
 [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64) using the
 [reSID](https://en.wikipedia.org/wiki/ReSID) implementation of the
 [MOS 6581](https://en.wikipedia.org/wiki/MOS_Technology_6581) chip,
-it then injects a program (`.prg`) into memory and launches it as soon
-as the basic is started:
+it then injects a `PRG` program into memory and launches it as soon as the
+basic is started:
 
 ```
     $ c64 --prg /sid/fanatics/music.prg --resid yes
@@ -168,6 +168,6 @@ There is a [C1541](https://en.wikipedia.org/wiki/Commodore_1541) implementation
 that access the host filesystem. Host directories are recursively traversed so
 it must be used with care.
 
-D64 files are not supported yet.
+`D64` files are not supported yet.
 
 For more information see the `--8` command line option.
