@@ -54,7 +54,7 @@ CXXFLAGS+=		-Wall \
 			-Werror
 
 ifeq (${CXX}, clang++)
-CXXFLAGS+=		-std=c++20
+CXXFLAGS+=		-std=c++2a
 else
 CXXFLAGS+=		-std=c++2a
 endif
