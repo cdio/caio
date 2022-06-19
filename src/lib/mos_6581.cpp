@@ -91,6 +91,9 @@ float Mos6581::Oscillator::tick()
 
     if (_sync) {
         _t = _syncos.time();
+        if (_t >= _T) {
+            _t = std::abs(std::remainder(_t, _T));
+        }
     }
 
     if (_type != WAVE_NONE) {
@@ -502,7 +505,7 @@ void Mos6581::write(addr_t addr, uint8_t value)
         /* Volume bug or "fourth voice" */
         if (_prev_volume != _volume) {
             _prev_volume = _volume;
-            float value = _volume * 4.0f - 1.0f;
+            float value = _volume * 2.0f - 1.0f;
             if (_prev_index < _sample_index) {
                 std::fill_n(_v4.begin() + _prev_index, _sample_index - _prev_index, value);
             } else {
