@@ -20,7 +20,6 @@
 
 #include "mos_6581_i.hpp"
 
-
 namespace caio {
 
 /**
@@ -45,6 +44,11 @@ public:
      */
     void write(addr_t addr, uint8_t value) override;
 
+    /**
+     * @return The reSID library version.
+     */
+    static const std::string version();
+
 private:
     /**
      * Generate and play an audio signal.
@@ -55,7 +59,7 @@ private:
      */
     size_t tick(const Clock &clk) override;
 
-    std::shared_ptr<class SID> _resid{};
+    std::shared_ptr<class Resid> _resid{};
 };
 
 }

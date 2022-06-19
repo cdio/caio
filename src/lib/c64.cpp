@@ -161,7 +161,7 @@ void C64::create_devices()
     _vcolor = std::make_shared<NibbleRAM>("COLOR RAM", VCOLOR_SIZE);
 
     if (_conf.resid) {
-        _sid = std::make_shared<Mos6581Resid>("reSID", CLOCK_FREQ_PAL);
+        _sid = std::make_shared<Mos6581Resid>(Mos6581Resid::version(), CLOCK_FREQ_PAL);
     } else {
         _sid = std::make_shared<Mos6581>("SID", CLOCK_FREQ_PAL);
     }
