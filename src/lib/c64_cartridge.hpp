@@ -78,6 +78,16 @@ public:
     std::string name() const;
 
     /**
+     * Reset this cartridge.
+     * Load the chips embedded inside the associated CRT
+     * file and set the GAME/EXROM lines accordingly.
+     * @exception InvalidCartridge
+     * @see Crt
+     * @see Device::reset()
+     */
+    void reset() override;
+
+    /**
      * @see Device::size()
      */
     size_t size() const override;
@@ -117,15 +127,6 @@ public:
      * @return The total size of this cartridge ROMs.
      */
     virtual size_t cartsize() const = 0;
-
-    /**
-     * Reset this cartridge.
-     * Load the chips embedded inside the associated CRT
-     * file and set the GAME/EXROM lines accordingly.
-     * @exception InvalidCartridge
-     * @see Crt
-     */
-    virtual void reset();
 
     /**
      * @return The current GAME/EXROM mode.

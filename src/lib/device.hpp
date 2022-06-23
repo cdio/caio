@@ -47,6 +47,11 @@ public:
     std::string to_string() const override;
 
     /**
+     * Reset this device.
+     */
+    virtual void reset() = 0;
+
+    /**
      * Read from an address.
      * @param addr Address to read from.
      * @return The data stored at the specified address.

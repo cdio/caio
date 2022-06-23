@@ -50,7 +50,6 @@ public:
 
     constexpr static const size_t CHANNELS        = 1;
 
-
     enum Registers {
         VOICE_1_FREQ_LO         = 0x00,
         VOICE_1_FREQ_HI         = 0x01,
@@ -97,24 +96,23 @@ public:
 
     constexpr static const addr_t SIZE = Registers::REGMAX;
 
-
-    virtual ~Mos6581I() {
-    }
+    virtual ~Mos6581I();
 
     /**
      * Set the audio buffer provider.
      * @param abuf Audio buffer provider.
      */
-    void audio_buffer(const std::function<ui::AudioBuffer()> &abuf) {
-        _audio_buffer = abuf;
-    }
+    void audio_buffer(const std::function<ui::AudioBuffer()> &abuf);
+
+    /**
+     * @see Device::reset()
+     */
+    void reset() override;
 
     /**
      * @see Device::size()
      */
-    size_t size() const override {
-        return SIZE;
-    }
+    size_t size() const override;
 
     /**
      * @see Device::dump()
@@ -127,11 +125,7 @@ protected:
      * @param label Label assigned to this instance;
      * @param clkf  System clock frequency.
      */
-    Mos6581I(const std::string &label, unsigned clkf)
-        : Device{TYPE, label},
-          _clkf{clkf},
-          _samples_cycles{Clock::cycles(SAMPLES_TIME, clkf)} {
-    }
+    Mos6581I(const std::string &label, unsigned clkf);
 
     std::function<ui::AudioBuffer()> _audio_buffer{};
     unsigned                         _clkf{};

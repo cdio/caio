@@ -51,6 +51,13 @@ std::string Cartridge::name() const
     return _crt->name();
 }
 
+void Cartridge::reset()
+{
+    log.debug("%s: %s\n", type().c_str(), _crt->to_string().c_str());
+
+    _mode = static_cast<GameExromMode>((_crt->game() ? GAME : 0 ) | (_crt->exrom() ? EXROM : 0));
+}
+
 size_t Cartridge::size() const
 {
     return IO_SIZE;
@@ -80,13 +87,6 @@ void Cartridge::add_iow(const Gpio::iow_t &iow, uint8_t mask)
 void Cartridge::propagate(bool force)
 {
     _ioport.iow(0, _mode, force);
-}
-
-void Cartridge::reset()
-{
-    log.debug("%s: %s\n", type().c_str(), _crt->to_string().c_str());
-
-    _mode = static_cast<GameExromMode>((_crt->game() ? GAME : 0 ) | (_crt->exrom() ? EXROM : 0));
 }
 
 const Crt &Cartridge::crt() const

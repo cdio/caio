@@ -114,6 +114,10 @@ void Mos6569::trigger_lp()
     }
 }
 
+void Mos6569::reset()
+{
+}
+
 size_t Mos6569::size() const
 {
     return Registers::REGMAX;
@@ -526,8 +530,8 @@ std::ostream &Mos6569::dump(std::ostream &os, addr_t base) const
         read(REG_MIB_DATA_PRI),
         read(REG_MIB_MULTICOLOR_SEL),
         read(REG_MIB_X_EXPANSION),
-        read(REG_MIB_MIB_COLLISION),
-        read(REG_MIB_DATA_COLLISION),
+        _mib_mib_collision,                 /* Cleared after read() */
+        _mib_data_collision,                /* Cleared after read() */
         read(REG_BORDER_COLOR),
         read(REG_BACKGROUND_COLOR_0),
         read(REG_BACKGROUND_COLOR_1),

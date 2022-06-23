@@ -21,8 +21,6 @@
 #include <vector>
 
 #include "device.hpp"
-#include "types.hpp"
-#include "utils.hpp"
 
 
 namespace caio {
@@ -39,72 +37,53 @@ public:
      * @param label Label assigned to this Device;
      * @param size  Size of this RAM.
      */
-    DeviceRAM(const std::string &label, size_t size)
-        : Device{TYPE, label},
-          _data(size) {
-    }
+    DeviceRAM(const std::string &label, size_t size);
 
     /**
      * Initialise a RAM Device.
      * @param size Size of this RAM.
      */
-    DeviceRAM(size_t size)
-        : DeviceRAM{{}, size} {
-    }
+    DeviceRAM(size_t size);
 
     /**
      * Initialise a RAM Device with predefined values.
      * @param label Label assigned to this Device;
      * @param data  Buffer with data values.
      */
-    DeviceRAM(const std::string &label, const std::vector<uint8_t> &data)
-        : Device{TYPE, label},
-          _data(data) {
-    }
+    DeviceRAM(const std::string &label, const std::vector<uint8_t> &data);
 
     /**
      * Initialise a RAM Device with predefined values.
      * @param data Buffer with predefined values.
      */
-    DeviceRAM(const std::vector<uint8_t> &data)
-        : DeviceRAM{{}, data} {
-    }
+    DeviceRAM(const std::vector<uint8_t> &data);
+
+    virtual ~DeviceRAM();
+
+    /**
+     * @see Device::reset()
+     */
+    void reset() override;
 
     /**
      * @see Device::size()
      */
-    size_t size() const override {
-        return _data.size();
-    }
+    size_t size() const override;
 
     /**
      * @see Device::read()
      */
-    uint8_t read(addr_t addr) const override {
-        if (addr < _data.size()) {
-            return _data[addr];
-        }
-
-        throw InvalidReadAddress{*this, addr};
-    }
+    uint8_t read(addr_t addr) const override;
 
     /**
      * @see Device::write()
      */
-    void write(addr_t addr, uint8_t data) override {
-        if (addr < _data.size()) {
-            _data[addr] = data;
-        } else {
-            throw InvalidWriteAddress{*this, addr};
-        }
-    }
+    void write(addr_t addr, uint8_t data) override;
 
     /**
      * @see Device::dump()
      */
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override {
-        return utils::dump(os, _data, base);
-    }
+    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
 
 private:
     std::vector<uint8_t> _data{};

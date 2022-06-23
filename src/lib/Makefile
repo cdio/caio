@@ -32,6 +32,7 @@ CXXSRCS=	aspace.cpp \
 		confile.cpp \
 		device.cpp \
 		device_none.cpp \
+		device_ram.cpp \
 		device_rom.cpp \
 		fs.cpp \
 		icon.cpp \

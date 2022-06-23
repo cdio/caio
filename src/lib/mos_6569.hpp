@@ -120,7 +120,6 @@ public:
 
     constexpr static unsigned MIB_POINTER_OFFSET = 1016;
 
-
     enum Color {
         BLACK                  = 0,
         WHITE                  = 1,
@@ -141,7 +140,6 @@ public:
 
         MASK                   = 15
     };
-
 
     enum Registers {
         REG_MIB_0_X            = 0,     /* 00 */
@@ -241,7 +239,6 @@ public:
 
     constexpr static const unsigned MIB_MAX_X_SIZE     = 3 * 8 * 2; /* 3 bytes x MIB + expansion */
 
-
     /**
      * Initialise this video controller.
      * @param label  Label assigned to this device;
@@ -306,6 +303,11 @@ public:
      * @see Device::size()
      */
     size_t size() const override;
+
+    /**
+     * @see Device::reset()
+     */
+    void reset() override;
 
     /**
      * @see Device::read()

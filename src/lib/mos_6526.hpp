@@ -101,84 +101,35 @@ public:
 
     class Timer {
     public:
-        Timer(Mos6526 &dev, uint8_t pbit)
-            : _dev{dev},
-              _pbit{pbit} {
-        }
+        Timer(Mos6526 &dev, uint8_t pbit);
 
-        uint8_t counter_hi() const {
-            return (_counter >> 8);
-        }
-
-        uint8_t counter_lo() const {
-            return (_counter & 0x00FF);
-        }
-
-        uint16_t counter() const {
-            return _counter;
-        }
-
-        void reload() {
-            _counter = _prescaler;
-        }
-
-        void prescaler_hi(uint8_t prehi) {
-            _prescaler = (_prescaler & 0x00FF) | (static_cast<uint16_t>(prehi) << 8);
-            if (!is_started()) {
-                _counter = _prescaler;
-            }
-        }
-
-        void prescaler_lo(uint8_t prelo) {
-            _prescaler = (_prescaler & 0xFF00) | prelo;
-        }
-
-        bool is_started() const {
-            return (_cr & CRx_START);
-        }
-
-        bool is_oneshot() const {
-            return (_cr & CRx_ONESHOT);
-        }
-
-        bool is_pbon() const {
-            return (_cr & CRx_PBON);
-        }
-
-        bool is_pbtoggle() const {
-            return (_cr & CRx_PBTOGGLE);
-        }
-
-        bool is_underflow() const {
-            return _is_underflow;
-        }
-
-        uint8_t cr() const {
-            return _cr;
-        }
-
-        void cr(uint8_t data);
-
-        void stop() {
-            _cr &= ~CRx_START;
-        }
-
-        void tick() {
-            _is_underflow = (--_counter == 0xFFFF);
-        }
-
-        void setpb();
-
-        void unsetpb();
+        void     reset();
+        uint8_t  counter_hi() const;
+        uint8_t  counter_lo() const;
+        uint16_t counter() const;
+        void     reload();
+        void     prescaler_hi(uint8_t prehi);
+        void     prescaler_lo(uint8_t prelo);
+        bool     is_started() const;
+        bool     is_oneshot() const;
+        bool     is_pbon() const;
+        bool     is_pbtoggle() const;
+        bool     is_underflow() const;
+        uint8_t  cr() const;
+        void     cr(uint8_t data);
+        void     stop();
+        void     tick();
+        void     setpb();
+        void     unsetpb();
 
     private:
         Mos6526 &_dev;
         uint8_t  _pbit;
 
-        uint8_t  _cr{};
-        uint16_t _counter{0xFFFF};
-        uint16_t _prescaler{0xFFFF};
-        bool     _is_underflow{};
+        uint8_t  _cr;
+        uint16_t _counter;
+        uint16_t _prescaler;
+        bool     _is_underflow;
     };
 
     class Tod {
@@ -197,79 +148,28 @@ public:
             uint8_t sec{};
             uint8_t tth{};
 
-            bool operator==(const TodData &tod) const {
-                return (tth == tod.tth && sec == tod.sec && min == tod.min && hour == tod.hour);
-            }
-
+            bool     operator==(const TodData &tod) const;
             TodData &operator=(const TodData &tod);
-
             TodData &operator++();
         };
 
+        Tod();
 
-        Tod() {
-        }
-
-        void tod_hour(uint8_t hour) {
-            stop();
-            _tod.hour = (hour & TodData::HOUR_MASK) | (hour & TodData::PM_BIT);
-        }
-
-        void tod_min(uint8_t min) {
-            _tod.min = min & TodData::MIN_MASK;
-        }
-
-        void tod_sec(uint8_t sec) {
-            _tod.sec = sec & TodData::SEC_MASK;
-        }
-
-        void tod_tth(uint8_t tth) {
-            _tod.tth = tth & TodData::TTH_MASK;
-            start();
-        }
-
-        uint8_t tod_hour() const {
-            _latch = _tod;
-            return _latch.hour;
-        }
-
-        uint8_t tod_min() const {
-            return _latch.min;
-        }
-
-        uint8_t tod_sec() const {
-            return _latch.sec;
-        }
-
-        uint8_t tod_tth() const {
-            return _latch.tth;
-        }
-
-        void alarm_hour(uint8_t hour) {
-            _alarm.hour = (hour & TodData::HOUR_MASK) | (hour & TodData::PM_BIT);
-        }
-
-        void alarm_min(uint8_t min) {
-            _alarm.min = min & TodData::MIN_MASK;
-        }
-
-        void alarm_sec(uint8_t sec) {
-            _alarm.sec = sec & TodData::SEC_MASK;
-        }
-
-        void alarm_tth(uint8_t tth) {
-            _alarm.tth = tth & TodData::TTH_MASK;
-        }
-
-        void start() {
-            _is_running = true;
-        }
-
-        void stop() {
-            _is_running = false;
-        }
-
-        bool tick(const Clock &clk);
+        void    tod_hour(uint8_t hour);
+        void    tod_min(uint8_t min);
+        void    tod_sec(uint8_t sec);
+        void    tod_tth(uint8_t tth);
+        uint8_t tod_hour() const;
+        uint8_t tod_min() const;
+        uint8_t tod_sec() const;
+        uint8_t tod_tth() const;
+        void    alarm_hour(uint8_t hour);
+        void    alarm_min(uint8_t min);
+        void    alarm_sec(uint8_t sec);
+        void    alarm_tth(uint8_t tth);
+        void    start();
+        void    stop();
+        bool    tick(const Clock &clk);
 
     private:
         bool             _is_running{};
@@ -283,21 +183,19 @@ public:
      * Initalise this CIA instance.
      * @param label Label assigned to this device.
      */
-    explicit Mos6526(const std::string &label = {})
-        : Device{TYPE, label},
-          _timer_A{*this, PB6},
-          _timer_B{*this, PB7} {
-    }
+    explicit Mos6526(const std::string &label = {});
 
-    virtual ~Mos6526() {
-    }
+    virtual ~Mos6526();
+
+    /**
+     * @see Device::reset()
+     */
+    void reset() override;
 
     /**
      * @see Device::size()
      */
-    size_t size() const override {
-        return REGMAX;
-    }
+    size_t size() const override;
 
     /**
      * @see Device::read()
@@ -319,9 +217,7 @@ public:
      * The IRQ pin callback is called when the status of the IRQ output pin of this device is changed.
      * @param irq_out IRQ output pin callback.
      */
-    void irq(const OutputPinCb &irq_out) {
-        _irq_out = irq_out;
-    }
+    void irq(const OutputPinCb &irq_out);
 
 private:
     /**

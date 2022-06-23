@@ -20,6 +20,8 @@
 
 #include <fstream>
 
+#include "logger.hpp"
+
 
 namespace caio {
 
@@ -73,6 +75,10 @@ DeviceROM::DeviceROM(std::istream &is, size_t size)
     }
 }
 
+void DeviceROM::reset()
+{
+}
+
 size_t DeviceROM::size() const
 {
     return _data.size();
@@ -89,6 +95,8 @@ uint8_t DeviceROM::read(addr_t addr) const
 
 void DeviceROM::write(addr_t addr, uint8_t data)
 {
+    log.warn("%s(%s): Write attempt, address $%04x, data $%02x\n",
+        type().c_str(), label().c_str(), addr, data);
 }
 
 std::ostream &DeviceROM::dump(std::ostream &os, addr_t base) const

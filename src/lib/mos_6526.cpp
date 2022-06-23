@@ -26,6 +26,301 @@
 
 namespace caio {
 
+Mos6526::Timer::Timer(Mos6526 &dev, uint8_t pbit)
+    : _dev{dev},
+      _pbit{pbit}
+{
+    reset();
+}
+
+void Mos6526::Timer::reset()
+{
+    _cr = 0;
+    _counter = 0xFFFF;
+    _prescaler = 0xFFFF;
+    _is_underflow = false;
+}
+
+inline uint8_t Mos6526::Timer::counter_hi() const
+{
+    return (_counter >> 8);
+}
+
+inline uint8_t Mos6526::Timer::counter_lo() const
+{
+    return (_counter & 0x00FF);
+}
+
+inline uint16_t Mos6526::Timer::counter() const
+{
+    return _counter;
+}
+
+inline void Mos6526::Timer::reload()
+{
+    _counter = _prescaler;
+}
+
+inline void Mos6526::Timer::prescaler_hi(uint8_t prehi)
+{
+    _prescaler = (_prescaler & 0x00FF) | (static_cast<uint16_t>(prehi) << 8);
+    if (!is_started()) {
+        _counter = _prescaler;
+    }
+}
+
+inline void Mos6526::Timer::prescaler_lo(uint8_t prelo)
+{
+    _prescaler = (_prescaler & 0xFF00) | prelo;
+}
+
+inline bool Mos6526::Timer::is_started() const
+{
+    return (_cr & CRx_START);
+}
+
+inline bool Mos6526::Timer::is_oneshot() const
+{
+    return (_cr & CRx_ONESHOT);
+}
+
+inline bool Mos6526::Timer::is_pbon() const
+{
+    return (_cr & CRx_PBON);
+}
+
+inline bool Mos6526::Timer::is_pbtoggle() const
+{
+    return (_cr & CRx_PBTOGGLE);
+}
+
+inline bool Mos6526::Timer::is_underflow() const
+{
+    return _is_underflow;
+}
+
+inline uint8_t Mos6526::Timer::cr() const
+{
+    return _cr;
+}
+
+void Mos6526::Timer::cr(uint8_t data)
+{
+    if (data & CRx_FORCELOAD) {
+        reload();
+        data &= ~CRx_FORCELOAD;
+    }
+
+    if (!is_started() && (data & (CRx_START | CRx_PBON | CRx_PBTOGGLE)) == (CRx_START | CRx_PBON | CRx_PBTOGGLE)) {
+        /* Toggle mode, port-B bit is set when it starts */
+        _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) | _pbit);
+    }
+
+    _cr = data;
+}
+
+inline void Mos6526::Timer::stop()
+{
+    _cr &= ~CRx_START;
+}
+
+inline void Mos6526::Timer::tick()
+{
+    _is_underflow = (--_counter == 0xFFFF);
+}
+
+void Mos6526::Timer::setpb()
+{
+    if (is_pbon()) {
+        if (is_pbtoggle()) {
+            /* Toggle port-B bit */
+            _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) ^ _pbit);
+        } else {
+            /* Set port-B bit active for one clock cycle. See unsetpb() */
+            _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) | _pbit);
+        }
+    }
+}
+
+void Mos6526::Timer::unsetpb()
+{
+    /* This must be called one clock cycle after setpb() */
+    if (is_pbon() && !is_pbtoggle()) {
+        _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) & ~_pbit);
+    }
+}
+
+inline bool Mos6526::Tod::TodData::operator==(const TodData &tod) const
+{
+    return (tth == tod.tth && sec == tod.sec && min == tod.min && hour == tod.hour);
+}
+
+Mos6526::Tod::TodData &Mos6526::Tod::TodData::operator=(const TodData &tod)
+{
+    tth  = tod.tth;
+    sec  = tod.sec;
+    min  = tod.min;
+    hour = tod.hour;
+
+    return *this;
+}
+
+Mos6526::Tod::TodData &Mos6526::Tod::TodData::operator++()
+{
+    ++tth;
+
+    if (tth == 10) {
+        tth = 0;
+        auto bsec = utils::bcd_to_bin(sec) + 1;
+
+        if (bsec == 60) {
+            bsec = 0;
+            auto bmin = utils::bcd_to_bin(min) + 1;
+
+            if (bmin == 60) {
+                bmin = 0;
+                auto pm = ((hour & PM_BIT) ? 12 : 0);
+                auto bhour = utils::bcd_to_bin(hour & HOUR_MASK) + pm + 1;
+
+                if (bhour == 24) {
+                    bhour = 0;
+                    pm = 0;
+                } else if (bhour == 12) {
+                    pm = 12;
+                }
+
+                hour = utils::bin_to_bcd(bhour - pm) | (pm == 0 ? 0 : PM_BIT);
+            }
+
+            min = utils::bin_to_bcd(bmin);
+        }
+
+        sec = utils::bin_to_bcd(bsec);
+    }
+
+    return *this;
+}
+
+Mos6526::Tod::Tod()
+{
+}
+
+inline void Mos6526::Tod::tod_hour(uint8_t hour)
+{
+    stop();
+    _tod.hour = (hour & TodData::HOUR_MASK) | (hour & TodData::PM_BIT);
+}
+
+inline void Mos6526::Tod::tod_min(uint8_t min)
+{
+    _tod.min = min & TodData::MIN_MASK;
+}
+
+inline void Mos6526::Tod::tod_sec(uint8_t sec)
+{
+    _tod.sec = sec & TodData::SEC_MASK;
+}
+
+inline void Mos6526::Tod::tod_tth(uint8_t tth)
+{
+    _tod.tth = tth & TodData::TTH_MASK;
+    start();
+}
+
+inline uint8_t Mos6526::Tod::tod_hour() const
+{
+    _latch = _tod;
+    return _latch.hour;
+}
+
+inline uint8_t Mos6526::Tod::tod_min() const
+{
+    return _latch.min;
+}
+
+inline uint8_t Mos6526::Tod::tod_sec() const
+{
+    return _latch.sec;
+}
+
+inline uint8_t Mos6526::Tod::tod_tth() const
+{
+    return _latch.tth;
+}
+
+inline void Mos6526::Tod::alarm_hour(uint8_t hour)
+{
+    _alarm.hour = (hour & TodData::HOUR_MASK) | (hour & TodData::PM_BIT);
+}
+
+inline void Mos6526::Tod::alarm_min(uint8_t min)
+{
+    _alarm.min = min & TodData::MIN_MASK;
+}
+
+inline void Mos6526::Tod::alarm_sec(uint8_t sec)
+{
+    _alarm.sec = sec & TodData::SEC_MASK;
+}
+
+inline void Mos6526::Tod::alarm_tth(uint8_t tth)
+{
+    _alarm.tth = tth & TodData::TTH_MASK;
+}
+
+inline void Mos6526::Tod::start()
+{
+    _is_running = true;
+}
+
+inline void Mos6526::Tod::stop()
+{
+    _is_running = false;
+}
+
+bool Mos6526::Tod::tick(const Clock &clk)
+{
+    if (_is_running) {
+        if (_cycles == 0) {
+            ++_tod;
+            _cycles = static_cast<size_t>(clk.freq() * TICK_INTERVAL);
+            return (_tod == _alarm);
+        }
+
+        --_cycles;
+    }
+
+    return false;
+}
+
+Mos6526::Mos6526(const std::string &label)
+    : Device{TYPE, label},
+      _timer_A{*this, PB6},
+      _timer_B{*this, PB7}
+{
+}
+
+Mos6526::~Mos6526()
+{
+}
+
+void Mos6526::reset()
+{
+    irq_out(false);
+    _timer_A.reset();
+    _timer_B.reset();
+    _tod = {};
+    _port_A_dir = 0;
+    _port_B_dir = 0;
+    _icr_data = 0;
+    _icr_mask = 0;
+}
+
+size_t Mos6526::size() const
+{
+    return REGMAX;
+}
+
 uint8_t Mos6526::read(addr_t addr) const
 {
     switch (addr) {
@@ -210,7 +505,7 @@ std::ostream &Mos6526::dump(std::ostream &os, addr_t base) const
         read(TOD_MIN),
         read(TOD_HR),
         read(SDR),
-        read(ICR),
+        _icr_data,      /* Cleared after read */
         read(CRA),
         read(CRB)
     };
@@ -218,101 +513,9 @@ std::ostream &Mos6526::dump(std::ostream &os, addr_t base) const
     return utils::dump(os, regs, base);
 }
 
-void Mos6526::Timer::cr(uint8_t data)
+void Mos6526::irq(const OutputPinCb &irq_out)
 {
-    if (data & CRx_FORCELOAD) {
-        reload();
-        data &= ~CRx_FORCELOAD;
-    }
-
-    if (!is_started() && (data & (CRx_START | CRx_PBON | CRx_PBTOGGLE)) == (CRx_START | CRx_PBON | CRx_PBTOGGLE)) {
-        /* Toggle mode, port-B bit is set when it starts */
-        _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) | _pbit);
-    }
-
-    _cr = data;
-}
-
-void Mos6526::Timer::setpb()
-{
-    if (is_pbon()) {
-        if (is_pbtoggle()) {
-            /* Toggle port-B bit */
-            _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) ^ _pbit);
-        } else {
-            /* Set port-B bit active for one clock cycle. See unsetpb() */
-            _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) | _pbit);
-        }
-    }
-}
-
-void Mos6526::Timer::unsetpb()
-{
-    /* This must be called one clock cycle after setpb() */
-    if (is_pbon() && !is_pbtoggle()) {
-        _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) & ~_pbit);
-    }
-}
-
-Mos6526::Tod::TodData &Mos6526::Tod::TodData::operator=(const TodData &tod)
-{
-    tth  = tod.tth;
-    sec  = tod.sec;
-    min  = tod.min;
-    hour = tod.hour;
-
-    return *this;
-}
-
-Mos6526::Tod::TodData &Mos6526::Tod::TodData::operator++()
-{
-    ++tth;
-
-    if (tth == 10) {
-        tth = 0;
-        auto bsec = utils::bcd_to_bin(sec) + 1;
-
-        if (bsec == 60) {
-            bsec = 0;
-            auto bmin = utils::bcd_to_bin(min) + 1;
-
-            if (bmin == 60) {
-                bmin = 0;
-                auto pm = ((hour & PM_BIT) ? 12 : 0);
-                auto bhour = utils::bcd_to_bin(hour & HOUR_MASK) + pm + 1;
-
-                if (bhour == 24) {
-                    bhour = 0;
-                    pm = 0;
-                } else if (bhour == 12) {
-                    pm = 12;
-                }
-
-                hour = utils::bin_to_bcd(bhour - pm) | (pm == 0 ? 0 : PM_BIT);
-            }
-
-            min = utils::bin_to_bcd(bmin);
-        }
-
-        sec = utils::bin_to_bcd(bsec);
-    }
-
-    return *this;
-}
-
-bool Mos6526::Tod::tick(const Clock &clk)
-{
-    if (_is_running) {
-        if (_cycles == 0) {
-            ++_tod;
-            _cycles = static_cast<size_t>(clk.freq() * TICK_INTERVAL);
-            return (_tod == _alarm);
-        }
-
-        --_cycles;
-    }
-
-    return false;
+    _irq_out = irq_out;
 }
 
 size_t Mos6526::tick(const Clock &clk)

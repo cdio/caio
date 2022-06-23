@@ -73,6 +73,11 @@ public:
     DeviceROM(std::istream &is, size_t size);
 
     /**
+     * @see Device::reset()
+     */
+    void reset() override;
+
+    /**
      * @see Device::size()
      */
     size_t size() const override;

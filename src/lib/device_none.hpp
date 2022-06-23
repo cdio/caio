@@ -24,7 +24,7 @@
 namespace caio {
 
 /**
- * The none Device does nothing.
+ * The none device does nothing.
  */
 class DeviceNone : public Device {
 public:
@@ -34,39 +34,37 @@ public:
      * Initialise None Device.
      * @param label Label assigned to this Device;
      */
-    DeviceNone(const std::string &label = {})
-        : Device{TYPE, label} {
-    }
+    DeviceNone(const std::string &label = {});
+
+    ~DeviceNone();
+
+    /**
+     * @see Device::reset()
+     */
+    void reset() override;
 
     /**
      * @return 0.
      */
-    size_t size() const override {
-        return 0;
-    }
+    size_t size() const override;
 
     /**
      * This method does nothing.
      * @return 0.
      */
-    uint8_t read(addr_t) const override {
-        return 0;
-    }
+    uint8_t read(addr_t) const override;
 
     /**
      * This method does nothing.
      */
-    void write(addr_t, uint8_t) override {
-    }
+    void write(addr_t, uint8_t) override;
 
     /**
      * This method does nothing.
      * @param os Output stream.
      * @return The output stream.
      */
-    std::ostream &dump(std::ostream &os, addr_t = 0) const override {
-        return os;
-    }
+    std::ostream &dump(std::ostream &os, addr_t = 0) const override;
 };
 
 

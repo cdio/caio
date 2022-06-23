@@ -69,6 +69,13 @@ public:
     virtual ~C64IO();
 
     /**
+     * Reset this device.
+     * The reset method of all the embedded devices are called.
+     * @see Device::reset()
+     */
+    void reset() override;
+
+    /**
      * @see Device::size()
      */
     size_t size() const override;

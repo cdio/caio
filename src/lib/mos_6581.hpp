@@ -53,112 +53,54 @@ public:
             WAVE_NOISE    = 0x08
         };
 
-        Oscillator(unsigned clkf, Oscillator &syncos)
-            : _clkf{static_cast<float>(clkf)},
-              _syncos{syncos} {
-        }
+        Oscillator(unsigned clkf, Oscillator &syncos);
+        ~Oscillator();
 
-        ~Oscillator() {
-        }
-
-        void freq_hi(uint8_t fh) {
-            _ufreq = (_ufreq & 0x00FF) | (static_cast<uint16_t>(fh) << 8);
-            setfreq();
-        }
-
-        void freq_lo(uint8_t fl) {
-            _ufreq = (_ufreq & 0xFF00) | fl;
-            setfreq();
-        }
-
-        float freq() const {
-            return _freq;
-        }
-
-        void width_hi(uint8_t wh) {
-            _uwidth = (_uwidth & 0x00FF) | (static_cast<uint16_t>(wh & 15) << 8);
-            setwidth();
-        }
-
-        void width_lo(uint8_t wl) {
-            _uwidth = (_uwidth & 0x0F00) | wl;
-            setwidth();
-        }
-
-        float width() const {
-            return _width;
-        }
-
-        void type(unsigned wt) {
-            _type = static_cast<WaveType>(wt);
-        }
-
-        void ring(bool rb) {
-            _ring = rb;
-        }
-
-        void test(bool tb) {
-            _test = tb;
-        }
-
-        void sync(bool sb) {
-            _sync = sb;
-        }
-
-        bool is_test() const {
-            return _test;
-        }
-
-        float amplitude() const {
-            return _A;
-        }
-
-        float time() const {
-            return _t;
-        }
-
-        void rand_reset() {
-            _rreg = RANDOM_IV;
-        }
-
+        void  reset();
+        void  freq_hi(uint8_t fh);
+        void  freq_lo(uint8_t fl);
+        float freq() const;
+        void  width_hi(uint8_t wh);
+        void  width_lo(uint8_t wl);
+        float width() const;
+        void  type(unsigned wt);
+        void  ring(bool rb);
+        void  test(bool tb);
+        void  sync(bool sb);
+        bool  is_test() const;
+        float amplitude() const;
+        float time() const;
+        void  rand_reset();
         float tick();
 
     private:
-        void setfreq() {
-            _freq = static_cast<float>(_ufreq) * _clkf / 16777216.0f;
-            _T = 1.0f / _freq;
-        }
-
-        void setwidth() {
-            _width = ((_uwidth == 0) ? 1.0f : static_cast<float>(_uwidth) / 4095.0f);
-        }
-
+        void    setfreq();
+        void    setwidth();
         uint8_t rand();
-
-        float noise();
+        float   noise();
 
         float       _clkf;
         Oscillator &_syncos;
 
-        WaveType    _type{};
+        WaveType    _type;
 
-        bool        _ring{};
-        bool        _test{};
-        bool        _sync{};
+        bool        _ring;
+        bool        _test;
+        bool        _sync;
 
-        uint16_t    _ufreq{};
-        float       _freq{};
-        float       _T{};
+        uint16_t    _ufreq;
+        float       _freq;
+        float       _T;
 
-        uint16_t    _uwidth{};
-        float       _width{};
+        uint16_t    _uwidth;
+        float       _width;
 
-        uint32_t    _rreg{RANDOM_IV};
-        int         _ndelay{};
-        float       _nvalue{};
+        uint32_t    _rreg;
+        int         _ndelay;
+        float       _nvalue;
 
-        float       _A{};
-        float       _t{};
+        float       _A;
+        float       _t;
     };
 
     class Envelope {
@@ -171,51 +113,32 @@ public:
             CYCLE_RELEASE
         };
 
-        Envelope(unsigned clkf)
-            : _tadj{1000000.0f / static_cast<float>(clkf)} {
-        }
+        Envelope(unsigned clkf);
+        ~Envelope();
 
-        ~Envelope() {
-        }
-
-        void attack(uint8_t value) {
-            _attack_time = attack_times[value] * _tadj;
-        }
-
-        void decay(uint8_t value) {
-            _decay_time = decay_times[value] * _tadj;
-        }
-
-        void sustain(uint8_t value) {
-            _sustain = static_cast<float>(value) / 15.0f;
-        }
-
-        void release(uint8_t value) {
-            _release_time = decay_times[value] * _tadj;
-        }
-
-        void gate(bool gb);
-
-        float amplitude() const {
-            return _A;
-        }
-
+        void  reset();
+        void  attack(uint8_t value);
+        void  decay(uint8_t value);
+        void  sustain(uint8_t value);
+        void  release(uint8_t value);
+        void  gate(bool gb);
+        float amplitude() const;
         float tick();
 
     private:
         float _tadj;              /* Timing adjustment factor: 1MHz / system_clock_freq */
 
-        float _attack_time{attack_times[0]};
-        float _decay_time{decay_times[0]};
-        float _sustain{};
-        float _release_time{decay_times[0]};
-        float _release_A{};
+        float _attack_time;
+        float _decay_time;
+        float _sustain;
+        float _release_time;
+        float _release_A;
 
-        float _t{};
-        float _A{};
+        float _t;
+        float _A;
 
-        bool  _gate{};
-        Cycle _cycle{CYCLE_NONE};
+        bool  _gate;
+        Cycle _cycle;
 
         static const std::array<float, 16> attack_times;
         static const std::array<float, 16> decay_times;
@@ -223,57 +146,27 @@ public:
 
     class Voice {
     public:
-        Voice(unsigned clkf, Voice &svoice)
-            : _osc{clkf, svoice._osc},
-              _env{clkf} {
-        }
+        Voice(unsigned clkf, Voice &svoice);
+        ~Voice();
 
-        ~Voice() {
-        }
-
-        void freq_hi(uint8_t fh) {
-            _osc.freq_hi(fh);
-        }
-
-        void freq_lo(uint8_t fl) {
-            _osc.freq_lo(fl);
-        }
-
-        void width_hi(uint8_t pwh) {
-            _osc.width_hi(pwh);
-        }
-
-        void width_lo(uint8_t pwl) {
-            _osc.width_lo(pwl);
-        }
-
-        void attack(uint8_t value) {
-            _env.attack(value);
-        }
-
-        void decay(uint8_t value) {
-            _env.decay(value);
-        }
-
-        void sustain(uint8_t value) {
-            _env.sustain(value);
-        }
-
-        void release(uint8_t value) {
-            _env.release(value);
-        }
-
-        void control(uint8_t value);
-
-        float tick() {
-            return _osc.tick() * _env.tick() * 0.50f;
-        }
+        void  reset();
+        void  freq_hi(uint8_t fh);
+        void  freq_lo(uint8_t fl);
+        void  width_hi(uint8_t pwh);
+        void  width_lo(uint8_t pwl);
+        void  attack(uint8_t value);
+        void  decay(uint8_t value);
+        void  sustain(uint8_t value);
+        void  release(uint8_t value);
+        void  control(uint8_t value);
+        float tick();
+        Oscillator &osc();
+        const Oscillator &osc() const;
+        const Envelope &env() const;
 
     private:
         Oscillator _osc;
         Envelope   _env;
-
-        friend class Mos6581;
     };
 
     class Filter {
@@ -281,19 +174,20 @@ public:
         Filter();
         ~Filter();
 
-        void freq_hi(uint8_t hi);
-        void freq_lo(uint8_t lo);
-        void resonance(uint8_t rs);
-        void lopass(bool active);
-        void hipass(bool active);
-        void bandpass(bool active);
-        bool lopass() const;
-        bool hipass() const;
-        bool bandpass() const;
-        bool is_enabled() const;
-        bool is_disabled() const;
-        float frequency() const;
-        float Q() const;
+        void       reset();
+        void       freq_hi(uint8_t hi);
+        void       freq_lo(uint8_t lo);
+        void       resonance(uint8_t rs);
+        void       lopass(bool active);
+        void       hipass(bool active);
+        void       bandpass(bool active);
+        bool       lopass() const;
+        bool       hipass() const;
+        bool       bandpass() const;
+        bool       is_enabled() const;
+        bool       is_disabled() const;
+        float      frequency() const;
+        float      Q() const;
         samples_fp apply(samples_fp &v);
 
     private:
@@ -327,6 +221,11 @@ public:
     }
 
     /**
+     * @see Mos6581I::reset()
+     */
+    void reset() override;
+
+    /**
      * @see Mos6581I::read()
      */
     uint8_t read(addr_t addr) const override;
@@ -348,21 +247,13 @@ private:
 
     void play();
 
-    bool is_v1_filtered() const {
-        return _voice_1_filtered;
-    }
+    bool is_v1_filtered() const;
 
-    bool is_v2_filtered() const {
-        return _voice_2_filtered;
-    }
+    bool is_v2_filtered() const;
 
-    bool is_v3_filtered() const {
-        return _voice_3_filtered;
-    }
+    bool is_v3_filtered() const;
 
-    bool is_v3_active() const {
-        return (_voice_3_filtered || !_voice_3_off);
-    }
+    bool is_v3_active() const;
 
     Voice      _voice_1;
     Voice      _voice_2;

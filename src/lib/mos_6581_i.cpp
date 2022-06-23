@@ -25,6 +25,31 @@
 
 namespace caio {
 
+Mos6581I::Mos6581I(const std::string &label, unsigned clkf)
+    : Device{TYPE, label},
+      _clkf{clkf},
+      _samples_cycles{Clock::cycles(SAMPLES_TIME, clkf)}
+{
+}
+
+Mos6581I::~Mos6581I()
+{
+}
+
+void Mos6581I::reset()
+{
+}
+
+void Mos6581I::audio_buffer(const std::function<ui::AudioBuffer()> &abuf)
+{
+    _audio_buffer = abuf;
+}
+
+size_t Mos6581I::size() const
+{
+    return SIZE;
+}
+
 std::ostream &Mos6581I::dump(std::ostream &os, addr_t base) const
 {
     std::array<uint8_t, SIZE> regs{};
