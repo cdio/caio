@@ -25,8 +25,8 @@ namespace caio {
 
 devptr_t device_none = std::make_shared<DeviceNone>();
 
-DeviceNone::DeviceNone(const std::string &label)
-    : Device{TYPE, label}
+DeviceNone::DeviceNone()
+    : Device{TYPE, TYPE}
 {
 }
 

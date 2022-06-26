@@ -74,4 +74,35 @@ inline std::pair<addr_t, addr_t> ASpace::decode(addr_t addr) const
     return {bank, offset};
 }
 
+std::ostream &ASpace::dump(std::ostream &os) const
+{
+    os.setf(std::ios::left, std::ios::adjustfield);
+
+    unsigned amax = _amask + 1;
+
+    for (unsigned addr = 0; addr < amax; addr += _bsize) {
+        auto [bank, _] = decode(addr);
+        const auto &rdev = _rmaps[bank];
+        const auto &wdev = _wmaps[bank];
+        const addr_t astart = static_cast<addr_t>(addr);
+        const addr_t aend = addr + _bsize - 1;
+        const addr_t rstart = rdev.second;
+        const addr_t wstart = wdev.second;
+        const addr_t rend = rstart + _bsize - 1;
+        const addr_t wend = wstart + _bsize - 1;
+
+        os << utils::to_string(astart) << "-" << utils::to_string(aend) << "    ";
+
+        os << utils::to_string(rstart) << "-" << utils::to_string(rend) << " ";
+        os.width(25);
+        os << rdev.first->label() << "  ";
+
+        os << utils::to_string(wstart) << "-" << utils::to_string(wend) << " ";
+        os.width(25);
+        os << wdev.first->label() << "\n";
+    }
+
+    return os;
+}
+
 }

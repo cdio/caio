@@ -26,7 +26,7 @@ namespace c64 {
 
 C64IO::C64IO(const devptr_t &vic2, const devptr_t &sid, const devptr_t &vcolor, const devptr_t &cia1,
     const devptr_t &cia2, const devptr_t &ioexp)
-    : Device{TYPE, {}},
+    : Device{TYPE, TYPE},
       _vic2{vic2},
       _sid{sid},
       _vcolor{vcolor},

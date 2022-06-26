@@ -39,6 +39,7 @@ const std::vector<Mos6502Monitor::Command> Mos6502Monitor::commands{
     { "disass",   "d",  ".|$addr [$n]",       "Disassemble $n instructions from $addr", Mos6502Monitor::disassemble },
     { "dump",     "x",  ". [$n]",             "Dump $n bytes of memory from $addr",     Mos6502Monitor::dump        },
     { "regs",     "r",  "",                   "Show registers",                         Mos6502Monitor::registers   },
+    { "mmap",     "m",  "",                   "Show memory map",                        Mos6502Monitor::mmap        },
     { "bpadd",    "b",  "$addr",              "Add a breakpoint at $addr",              Mos6502Monitor::bp_add      },
     { "bpadd",    "b",  "$addr <cond>",       "Add a conditional breakpoint at $addr",  Mos6502Monitor::bp_add      },
     { "bpadd",    "b",  "help|h|?",           "Help about breakpoints",                 Mos6502Monitor::bp_add      },
@@ -467,6 +468,15 @@ bool Mos6502Monitor::registers(Mos6502Monitor &self, const std::vector<std::stri
      * registers, r
      */
     self._os << self._cpu._regs.to_string() << std::endl;
+    return false;
+}
+
+bool Mos6502Monitor::mmap(Mos6502Monitor &self, const std::vector<std::string> &args)
+{
+    /*
+     * mmap, m
+     */
+    self._cpu._mmap->dump(self._os) << std::endl;
     return false;
 }
 

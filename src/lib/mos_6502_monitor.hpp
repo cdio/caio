@@ -190,6 +190,7 @@ private:
     static bool disassemble (Mos6502Monitor &self, const std::vector<std::string> &args);
     static bool dump        (Mos6502Monitor &self, const std::vector<std::string> &args);
     static bool registers   (Mos6502Monitor &self, const std::vector<std::string> &args);
+    static bool mmap        (Mos6502Monitor &self, const std::vector<std::string> &args);
 
     static bool bp_add      (Mos6502Monitor &self, const std::vector<std::string> &args);
     static bool bp_del      (Mos6502Monitor &self, const std::vector<std::string> &args);

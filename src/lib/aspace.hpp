@@ -74,6 +74,12 @@ public:
      */
     virtual void write(addr_t addr, uint8_t value);
 
+    /**
+     * Dump the contents of the read and write mappings as human readable strings.
+     * @param os Stream to dump to;
+     */
+    std::ostream &dump(std::ostream &os) const;
+
 protected:
     ASpace() {
     }

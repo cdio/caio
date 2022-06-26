@@ -32,9 +32,8 @@ public:
 
     /**
      * Initialise None Device.
-     * @param label Label assigned to this Device;
      */
-    DeviceNone(const std::string &label = {});
+    DeviceNone();
 
     ~DeviceNone();
 
