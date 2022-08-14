@@ -1,7 +1,7 @@
 #
 # Copyright (C) 2020-2022 Claudio Castiglia
 #
-# This file is part of CAIO.
+# This file is part of caio.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -53,10 +53,10 @@ ${DEB_CONTROL}: ${BUILD_INSTALL_DONE}
 	"Architecture: ${ARCH}\n"\
 	"Priority: optional\n"\
 	"Essential: no\n"\
-	"Maintainer: CAIO Developers <>\n"\
+	"Maintainer: caio developers <>\n"\
 	"Installed-Size: ${DEB_SIZE}\n"\
 	"Depends: libsfml-graphics2.5 (>= 2.5.1), libsfml-audio2.5 (>= 2.5.1), libstdc++6 (>= 10.3.0)\n"\
 	"Replaces: caio\n"\
-	"Homepage: http://github.com/cdio/CAIO\n"\
+	"Homepage: http://github.com/cdio/caio\n"\
 	"Description: 8 bit Home Computers Emulator.\n" > $@
 

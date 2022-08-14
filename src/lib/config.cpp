@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2020-2022 Claudio Castiglia
  *
- * This file is part of CAIO.
+ * This file is part of caio.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ namespace caio {
 
 Config &Config::operator=(const Confile &conf)
 {
-    title = "CAIO";
+    title = "caio";
 
     const auto secit = conf.find(CaioConfile::CAIO_CONFIG_SECTION);
     if (secit != conf.end()) {
