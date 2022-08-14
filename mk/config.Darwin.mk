@@ -16,12 +16,15 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ../}
+NPROC:=			${shell sysctl -n hw.ncpu}
 
-include ${ROOT}/mk/config.mk
+EXTRA_3RDPARTY_DIRS+=
 
-DIRS=		resid
+SYSDEP_CPPFLAGS+=	-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
 
-DIRS+=		${EXTRA_3RDPARTY_DIRS}
+# OpenAL 3D-Audio framework (required by SFML) provided by MACOS
+#SFML_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sfml-graphics sfml-audio}
+SFML_CXXFLAGS+=		-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/OpenAL.framework/Headers/
+SFML_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sfml-graphics}
 
-include ${ROOT}/mk/dir.mk
+SFML_LDADD?=		${shell ${PKG_CONFIG} --libs sfml-graphics sfml-audio}

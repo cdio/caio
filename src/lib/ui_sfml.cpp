@@ -172,8 +172,8 @@ UISfml::UISfml(const Config &conf)
     _window.create(sf::VideoMode{_win_size.x, _win_size.y}, vconf.title,
         sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize);
 
-    auto icon = icon32();
-    _window.setIcon(icon.width, icon.height, reinterpret_cast<const uint8_t *>(icon.data.data()));
+    auto ico = icon();
+    _window.setIcon(ico.width, ico.height, reinterpret_cast<const uint8_t *>(ico.data.data()));
 
     _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(vconf.fps);
@@ -343,10 +343,13 @@ void UISfml::toggle_fullscreen()
 
         _window.setPosition(_saved_win_pos);
 
-        auto icon = icon32();
-        _window.setIcon(icon.width, icon.height, reinterpret_cast<const uint8_t *>(icon.data.data()));
+        auto ico = icon();
+        _window.setIcon(ico.width, ico.height, reinterpret_cast<const uint8_t *>(ico.data.data()));
 
         _panel->position(0, _screen_size.y);
+
+        /* MacOS windowding system does not send a resize event when a window is created */
+        resize_event(_win_size.x, _win_size.y);
 
         _is_fullscreen = false;
 
@@ -389,6 +392,9 @@ void UISfml::toggle_panel_visibility()
         }
 
         _window.setSize(wsize);
+
+        /* MacOS windowding system does not send a resize event when a window is self-resized */
+        resize_event(wsize.x, wsize.y);
     }
 }
 

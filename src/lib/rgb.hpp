@@ -18,12 +18,11 @@
  */
 #pragma once
 
-#include <endian.h>
-
 #include <initializer_list>
 #include <string>
 #include <vector>
 
+#include "endian.hpp"
 #include "types.hpp"
 
 

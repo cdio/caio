@@ -522,7 +522,7 @@ void C64::run()
 
 void C64::start()
 {
-    log.info("Starting CAIO v" + caio::version() + " - C64\n" + to_string() + "\n");
+    log.info("Starting caio v" + caio::version() + " - C64\n" + to_string() + "\n");
 
     /*
      * The emulator runs on its own thread.

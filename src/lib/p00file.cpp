@@ -18,9 +18,9 @@
  */
 #include "p00file.hpp"
 
-#include <endian.h>
-
 #include <fstream>
+
+#include "endian.hpp"
 
 
 namespace caio {

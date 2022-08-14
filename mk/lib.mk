@@ -33,7 +33,7 @@ debug:
 
 install: all
 
-_all: check ${LIB}
+_all: ${LIB}
 
 include ${ROOT}/mk/obj.mk
 

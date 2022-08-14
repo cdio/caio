@@ -24,6 +24,7 @@ IMAGES=		c64.gif \
 		compopicasso.png \
 		gyruss.gif \
 		q-bert.gif \
+		C64keyboard.gif \
 		zauberwald.png
 
 README=		${ROOT}/README.md

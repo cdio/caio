@@ -96,7 +96,7 @@ public:
      * @see Confile::parse()
      */
     void parse(const std::string &fname = CAIO_CONFIG_FILE,
-        const std::initializer_list<std::string> &spaths = {CWD, HOME_CONFDIR, SYSTEM_CONFDIR}) override {
+        const std::initializer_list<std::string> &spaths = {HOME_CONFDIR, SYSTEM_CONFDIR}) override {
         Confile::parse(fname, spaths);
     }
 };

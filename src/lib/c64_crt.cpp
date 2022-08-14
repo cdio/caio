@@ -18,10 +18,10 @@
  */
 #include "c64_crt.hpp"
 
-#include <endian.h>
 
 #include "device_ram.hpp"
 #include "device_rom.hpp"
+#include "endian.hpp"
 #include "utils.hpp"
 
 

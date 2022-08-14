@@ -24,6 +24,7 @@
 #include <thread>
 
 #include "logger.hpp"
+#include "utils.hpp"
 
 
 namespace caio {
@@ -96,12 +97,15 @@ void Clock::del(const std::shared_ptr<Clockable> &c)
 
 void Clock::run()
 {
-    auto start = std::chrono::steady_clock::now();
+    auto start = utils::now();
 
     while (!_stop)  {
         while (_suspend && !_stop) {
+            /*
+             * The emulated system is paused, wait for 200ms and check again.
+             */
             std::this_thread::sleep_for(200ms);
-            start = std::chrono::steady_clock::now();
+            start = utils::now();
         }
 
         if (tick() == Clockable::HALT) {
@@ -109,30 +113,21 @@ void Clock::run()
         }
 
         /*
-         * An emulated clock should be running at the specified frequency,
-         * unfortunatelly the clock granularity of the host system does not allow this.
-         *
-         * The workaround used here lets the emulated system run at host speed for a number
-         * of clock ticks, then it sleeps for some time until the correct emulated clock
-         * cycles have passed.
-         * This synchronisation is managed by a clockable device (like a video controller).
+         * Synchronise the speed of the emulated system with the speed of the host processor.
          */
-        if (_sync_us != 0) {
-            auto end = std::chrono::steady_clock::now();
-            auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-            auto diff = std::chrono::microseconds(_sync_us - elapsed);
+        if (_sync_us > 0) {
+            auto end = utils::now();
+            auto elapsed = end - start;
+            auto diff = _sync_us - elapsed;
+            if (diff >= MIN_SLEEP_TIME) {
+                std::this_thread::sleep_for(std::chrono::microseconds{diff});
 
-            if (diff > 0ms) {
-                std::this_thread::sleep_for(diff);
-#if 0
-            } else if (diff < -1ms) {
-                log.warn("%s(%s): Host system too slow: Delay of %lldus\n", type().c_str(), label().c_str(),
-                    -diff.count());
-#endif
+            } else if (diff < 0) {
+                log.warn("%s(%s): Host system too slow: Delay of %lldus\n", type().c_str(), label().c_str(), -diff);
             }
 
             _sync_us = 0;
-            start = std::chrono::steady_clock::now();
+            start = utils::now();
         }
     }
 }
@@ -179,7 +174,7 @@ bool Clock::is_suspended() const
 
 void Clock::sync(unsigned cycles)
 {
-    _sync_us = static_cast<int64_t>(cycles * 1000000.0 * _delay / static_cast<double>(_freq));
+    _sync_us += static_cast<int64_t>(cycles * 1000000.0 * _delay / static_cast<double>(_freq));
 }
 
 std::string Clock::to_string() const

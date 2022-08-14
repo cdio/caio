@@ -30,7 +30,7 @@ static const std::array<uint8_t, ${SIZE}> ${NAME}{
 END
 
 printf "    "
-hexdump -e '16/1 "0x%02x, " "\n    "' ${PNG} | sed -e 's/, 0x  //g' -e 's/    $//'
+hexdump -ve '16/1 "0x%02x, " "\n    "' ${PNG} | sed -e 's/, 0x  //g' -e 's/    $//'
 
 cat <<-END
 };

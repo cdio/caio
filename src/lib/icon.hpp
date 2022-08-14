@@ -23,6 +23,6 @@
 
 namespace caio {
 
-const Image &icon32();
+const Image &icon();
 
 }

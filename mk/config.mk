@@ -16,8 +16,20 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
+MKDIR:=			${abspath ${dir ${lastword ${MAKEFILE_LIST}}}}
+OS:=			${shell uname -s}
+ARCH:=			${shell uname -m}
+ifeq (${ARCH}, x86_64)
+ARCH:=			amd64
+endif
+
+SYSDEP_MK:=		${MKDIR}/config.${OS}.mk
+
+include ${SYSDEP_MK}
+
 CXX=			clang++
 CUT?=			cut
+CMAKE=			cmake
 DPKG?=			dpkg
 DU?=			du
 GIT?=			git
@@ -27,7 +39,6 @@ INSTALL?=		install
 override LD=		${CXX}
 LN?=			ln
 override MKDEP=		${CXX}
-NPROC?=			nproc
 PERL?=			perl
 PKG_CONFIG?=		pkg-config
 PRINTF?=		printf
@@ -41,14 +52,18 @@ LIBDIR=			${abspath ${PREFIX}}/lib
 
 INCDIR=			${abspath ${PREFIX}}/include
 
+CPPFLAGS+=		${SYSDEP_CPPFLAGS}
+
 CPPFLAGS+=		-DD_VERSION='"${VERSION}"' \
 			-DD_PREFIX='"${PREFIX}"'
 
 CPPFLAGS+=		-I. \
+			-I${ROOT} \
 			-I${ROOT}/src \
 			-I${ROOT}/src/lib \
-			-I${ROOT}/3rdparty/GSL/include \
-			-I${ROOT}
+			-I${ROOT}/3rdparty/GSL/include
+
+CXXFLAGS+=		${SYSDEP_CXXFLAGS}
 
 CXXFLAGS+=		-Wall \
 			-Werror
@@ -71,6 +86,8 @@ CXXFLAGS+=		-O3
 LDFLAGS+=		-Wl,-s
 endif
 
+CXXFLAGS+=		${SFML_CXXFLAGS}
+
 ARFLAGS=		crs
 
 LDFLAGS?=
@@ -79,13 +96,6 @@ MKDEP_FLAGS=		-MM \
 			-MG
 
 LN_FLAGS?=		-sf
-
-NPROC:=			${shell ${NPROC}}
-
-ARCH:=			${shell ${UNAME} -m}
-ifeq (${ARCH}, x86_64)
-ARCH:=			amd64
-endif
 
 ifdef RELEASE
 VERSION=		${RELEASE:v%=%}
@@ -121,13 +131,3 @@ MODE_BIN?=		0755
 MODE_DATA?=		0644
 
 HOME:=			${shell echo ~}
-
-CLANG_MIN_VERSION_MAJOR=10
-CLANG_MIN_VERSION_MINOR=0
-CLANG_VERSION_MAJOR=	${shell ${CXX} --version | ${HEAD} -1 | ${SED} -e 's,.* \([0-9]*\)\.[0-9]*\.[0-9]*.*$$,\1,'}
-CLANG_VERSION_MINOR=	${shell ${CXX} --version | ${HEAD} -1 | ${SED} -e 's,.* [0-9]*\.\([0-9]*\)\.[0-9]*.*$$,\1,'}
-
-GCC_MIN_VERSION_MAJOR=	9
-GCC_MIN_VERSION_MINOR=	3
-GCC_VERSION_MAJOR=	${shell ${CXX} --version | ${HEAD} -1 | ${SED} -e 's,.* \([0-9]*\)\.[0-9]*\.[0-9]*$$,\1,'}
-GCC_VERSION_MINOR=	${shell ${CXX} --version | ${HEAD} -1 | ${SED} -e 's,.* [0-9]*\.\([0-9]*\)\.[0-9]*$$,\1,'}

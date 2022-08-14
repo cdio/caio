@@ -18,8 +18,7 @@
  */
 #include "mos_6569.hpp"
 
-#include <endian.h>
-
+#include "endian.hpp"
 #include "logger.hpp"
 #include "utils.hpp"
 

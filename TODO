@@ -1,4 +1,4 @@
-- misc:     Add reset to devices
+- c64:      s/reset/init, then do a real reset
 - cart:     Fix Simons Basic
 - cart:     Fix EasyFlash
 - VICII:    Fix border colour during open-border mode
@@ -24,6 +24,7 @@
             - Virtual keyboard?
 - SID:      Fork the coming reSID 1.0
 - misc:     Remove gsl (when c++20 support is completed)
+- misc:     brew package for macos
 - Apple2
 - BBC Micro
 - Daewoo DPC-200

@@ -67,6 +67,7 @@ private:
 class Clock : public Name {
 public:
     constexpr static const char *TYPE = "CLK";
+    constexpr static const int64_t MIN_SLEEP_TIME = 20000;  /* us */
 
     using clockable_pair_t = std::pair<std::shared_ptr<Clockable>, size_t>;
 
@@ -184,16 +185,11 @@ public:
 
     /**
      * Synchronise this clock.
-     * This method must be called by one of the clockables in order to delay
-     * the speed of the emulated system which is running at host processor's speed.
-     * When this value is set and a clock tick round is ended this clock is put
-     * to sleep for the specified amount of time. After that, this clock restarts its
-     * tick round again. In order to achieve synchronisation this method must be called
-     * continuously by the clockable.
-     * Usually, the video controller device is the clockable in charge of calling this
-     * method to synchronise the system clock with the emulated vertical screen refresh
-     * (usually at a rate of 50Hz).
-     * @param cycles Clock cycles to sleep before starting the next clock tick round.
+     * This method must be called periodically by one of the clockables in order to
+     * synchronise the speed of the emulated system with the speed of the host processor.
+     * Usually, a video controller device is the clockable in charge of calling this
+     * method every time a vertical screen refresh is performed (at a rate of approx 50Hz).
+     * @param cycles Emulated clock cycles that have been passed since the last call to this method.
      */
     void sync(unsigned cycles);
 
@@ -239,7 +235,7 @@ public:
 private:
     size_t                        _freq{};
     float                         _delay{};
-    uint64_t                      _sync_us{};
+    int64_t                       _sync_us{};
     std::atomic_bool              _stop{};
     std::atomic_bool              _suspend{};
     std::vector<clockable_pair_t> _clockables{};

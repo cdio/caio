@@ -18,8 +18,6 @@
  */
 #include "mos_6502_monitor.hpp"
 
-#include <endian.h>
-
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
@@ -27,6 +25,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include "endian.hpp"
 #include "mos_6502.hpp"
 #include "prgfile.hpp"
 #include "utils.hpp"

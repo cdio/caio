@@ -58,6 +58,7 @@ INCS=		aspace.hpp \
 		device_ram.hpp \
 		device_rom.hpp \
 		dispatcher.hpp \
+		endian.hpp \
 		fs.hpp \
 		gpio.hpp \
 		icon.hpp \

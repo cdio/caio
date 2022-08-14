@@ -64,11 +64,10 @@ caio will search for the configuration file as follows, stopping at the first
 match:
 
 1. Command line option               `--conf`
-2. Current working directory:        `./caio.conf`
-3. User's configuration directory:   `$HOME/.config/caio/caio.conf`
-4. System's configuration directory: `$PREFIX/etc/caio/caio.conf`
+2. User's configuration directory:   `$HOME/.config/caio/caio.conf`
+3. System's configuration directory: `$PREFIX/etc/caio/caio.conf`
 
-Command line options take the precedence over those defined in the
+Command line options take precedence over those defined in the
 configuration file.
 
 Examples:
@@ -96,9 +95,9 @@ Since the program is injected directly into RAM before the actual emulator
 is started, the previous command won't work for advanced or big files that are
 expected to overwrite memory areas not configured as RAM.
 
-caio can be launched from a GUI (like a file manager) only if it is not
-configured to send log messages to the terminal (because there won't be one)
-if that happens the emulator is silently terminated (see the `logfile`
+Under linux, caio can be launched from a GUI (like a file manager) only if it
+is not configured to send log messages to the terminal (because there won't
+be one) if that happens the emulator is silently terminated (see the `logfile`
 configuration file option).
 
 
@@ -113,7 +112,7 @@ For example, to use the italian layout:
     $ c64 --keymaps it
 ```
 
-to use the [VICEKB](https://vice-emu.pokefinder.org/index.php/File:C64keyboard.gif)
+to use the [VICEKB](../images/C64keyboard.gif)
 positional layout:
 
 ```
@@ -131,8 +130,8 @@ tested):
 * VICEKB (vice)
 
 Keyboard layouts are simple text files, existing layouts can be modified using
-a text editor and new layouts can be added to the system by just placing the
-new file inside the `keymasdir` directory which defaults to
+a text editor and new layouts can be added to the system by placing the new
+file inside the `keymasdir` directory which defaults to
 `$PREFIX/share/caio/keymaps`.
 
 Like the [VICE](https://en.wikipedia.org/wiki/VICE) emulator, the `RESTORE`

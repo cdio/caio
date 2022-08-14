@@ -47,6 +47,12 @@ void AudioStream::reset(const ui::AudioConfig &aconf)
     sf::SoundStream::initialize(aconf.channels, aconf.srate);
 }
 
+void AudioStream::stop()
+{
+    _stop = true;
+    sf::SoundStream::stop();
+}
+
 AudioBuffer AudioStream::buffer()
 {
     static auto dispatcher = [this](samples_i16 &&buf) {
@@ -78,6 +84,10 @@ AudioBuffer AudioStream::buffer()
 
 bool AudioStream::onGetData(sf::SoundStream::Chunk &chk)
 {
+    if (_stop) {
+        return false;
+    }
+
     while (_playing_queue.size() == 0) {
         if (sf::SoundStream::getStatus() == sf::SoundSource::Status::Stopped) {
             return false;

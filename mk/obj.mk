@@ -16,49 +16,23 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-OBJS=		${CXXSRCS:%.cpp=%.o}
+OBJS=			${CXXSRCS:%.cpp=%.o}
 
-HDEPS+=		${OBJS:%.o=%.d}
+HDEPS+=			${OBJS:%.o=%.d}
 
 EXTRA_CPPFLAGS?=
 
-CPPFLAGS+=	${EXTRA_CPPFLAGS}
+CPPFLAGS+=		${EXTRA_CPPFLAGS}
 
-CLEANFILES+=	${OBJS} \
-		${HDEPS}
+CLEANFILES+=		${OBJS} \
+			${HDEPS}
 
-.SUFFIXES:	.cpp .o
-
-.PHONY: check
+.SUFFIXES:		.cpp .o
 
 -include ${HDEPS}
 
 %.o: %.cpp
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o $@ $<
 	${MKDEP} ${MKDEP_FLAGS} ${CPPFLAGS} ${CXXFLAGS} $< > ${@:.o=.d}
-
-ifeq (${CXX}, clang++)
-_CXX_MIN_VERSION_MAJOR:=${CLANG_MIN_VERSION_MAJOR}
-_CXX_MIN_VERSION_MINOR:=${CLANG_MIN_VERSION_MINOR}
-_CXX_VERSION_MAJOR:=	${CLANG_VERSION_MAJOR}
-_CXX_VERSION_MINOR:=	${CLANG_VERSION_MINOR}
-else
-ifeq (${CXX}, g++)
-_CXX_MIN_VERSION_MAJOR:=${GCC_MIN_VERSION_MAJOR}
-_CXX_MIN_VERSION_MINOR:=${GCC_MIN_VERSION_MINOR}
-_CXX_VERSION_MAJOR:=	${GCC_VERSION_MAJOR}
-_CXX_VERSION_MINOR:=	${GCC_VERSION_MINOR}
-endif
-endif
-
-check:
-ifndef _CXX_VERSION_MAJOR
-	@echo "\n==> Compiler not recognised. Bypassing version check...\n\n"
-else
-	@test \( ${_CXX_VERSION_MAJOR} -gt ${_CXX_MIN_VERSION_MAJOR} \) -o \
-	      \( ${_CXX_VERSION_MAJOR} -eq ${_CXX_MIN_VERSION_MAJOR} -a ${_CXX_VERSION_MINOR} -ge ${_CXX_MIN_VERSION_MINOR} \) || \
-	    echo "\n==> Minimum ${CXX} compiler version is ${_CXX_MIN_VERSION_MAJOR}.${_CXX_MIN_VERSION_MINOR}." \
-	         "Current version is ${_CXX_VERSION_MAJOR}.${_CXX_VERSION_MINOR}\n\n"
-endif
 
 include ${ROOT}/mk/clean.mk

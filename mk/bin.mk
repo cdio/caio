@@ -22,10 +22,6 @@ LIBRESID=	${ROOT}/3rdparty/resid/libresid.a
 
 LDADD+=		${LIBRESID}
 
-SFML_CXXFLAGS?=	${shell ${PKG_CONFIG} --cflags sfml-graphics sfml-audio}
-
-SFML_LDADD?=	${shell ${PKG_CONFIG} --libs sfml-graphics sfml-audio}
-
 CXXFLAGS+=	${SFML_CXXFLAGS}
 
 LDADD+=		${SFML_LDADD}
@@ -50,7 +46,7 @@ ${LIB}: ${LIBRESID}
 ${LIBRESID}:
 	${MAKE} ${MAKEARGS} -j${NPROC} -C${ROOT}/3rdparty
 
-_all: check ${LN_BINS}
+_all: ${LN_BINS}
 
 ${LN_BINS}: ${BIN}
 	${LN} -fs ${BIN} $@

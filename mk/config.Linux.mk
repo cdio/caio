@@ -16,12 +16,12 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ../}
+NPROC:=			${shell nproc}
 
-include ${ROOT}/mk/config.mk
+EXTRA_3RDPARTY_DIRS+=
 
-DIRS=		resid
+SYSDEP_CPPFLAGS+=
 
-DIRS+=		${EXTRA_3RDPARTY_DIRS}
+SFML_CXXFLAGS?=		${shell ${PKG_CONFIG} --cflags sfml-graphics sfml-audio}
 
-include ${ROOT}/mk/dir.mk
+SFML_LDADD?=		${shell ${PKG_CONFIG} --libs sfml-graphics sfml-audio}

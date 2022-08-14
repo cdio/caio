@@ -55,9 +55,7 @@ public:
      */
     void reset(const ui::AudioConfig &aconf);
 
-    void stop() override {
-        _stop = true;
-    }
+    void stop() override;
 
     /**
      * Get a free audio buffer.
