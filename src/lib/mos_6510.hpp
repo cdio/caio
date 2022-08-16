@@ -42,6 +42,7 @@ public:
     constexpr static const uint8_t P5    = 0x20;
     constexpr static const uint8_t P6    = 0x40;
     constexpr static const uint8_t P7    = 0x80;
+    constexpr static const uint8_t PALL  = 0xFF;
 
     using breakpoint_cb_t = std::function<void(Mos6510 &, void *)>;
 

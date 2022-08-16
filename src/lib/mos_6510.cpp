@@ -70,12 +70,12 @@ void Mos6510::write(addr_t addr, uint8_t value)
     switch (addr) {
     case PORT_0:
         _iodir = value;
-        break;
+        return;
 
     case PORT_1:
         value = (value & _iodir) | (_ioport.ior(0) & ~_iodir);
         _ioport.iow(0, value);
-        break;
+        return;
 
     default:;
     }
