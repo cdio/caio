@@ -348,7 +348,7 @@ void UISfml::toggle_fullscreen()
 
         _panel->position(0, _screen_size.y);
 
-        /* MacOS windowding system does not send a resize event when a window is created */
+        /* MacOS windowing system does not send a resize event when a window is created */
         resize_event(_win_size.x, _win_size.y);
 
         _is_fullscreen = false;
@@ -393,7 +393,7 @@ void UISfml::toggle_panel_visibility()
 
         _window.setSize(wsize);
 
-        /* MacOS windowding system does not send a resize event when a window is self-resized */
+        /* MacOS windowing system does not send a resize event when a window is created */
         resize_event(wsize.x, wsize.y);
     }
 }
