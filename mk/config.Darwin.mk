@@ -27,4 +27,4 @@ SYSDEP_CPPFLAGS+=	-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/incl
 SFML_CXXFLAGS+=		-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/OpenAL.framework/Headers/
 SFML_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sfml-graphics}
 
-SFML_LDADD?=		${shell ${PKG_CONFIG} --libs sfml-graphics sfml-audio}
+SFML_LDADD+=		${shell ${PKG_CONFIG} --libs sfml-graphics sfml-audio}
