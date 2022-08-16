@@ -32,7 +32,7 @@ LIB=		${ROOT}/src/lib/libcaio.a
 
 CLEANFILES+=	${BIN} ${LN_BINS}
 
-.PHONY=		_all all check debug install
+.PHONY=		_all all debug install
 
 all:
 	${MAKE} ${MAKEARGS} -j${NPROC} _all

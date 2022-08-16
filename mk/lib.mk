@@ -23,7 +23,7 @@ LDFLAGS+=	-shared
 CLEANFILES+=	${LIB} \
 		${SOLIB}
 
-.PHONY=		_all all check debug
+.PHONY=		_all all debug
 
 all:
 	${MAKE} ${MAKEARGS} -j${NPROC} _all
