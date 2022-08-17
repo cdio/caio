@@ -44,12 +44,6 @@ namespace ui {
 namespace sfml {
 
 /**
- * SFML error stream.
- */
-extern std::stringstream sfml_err;
-
-
-/**
  * @return The SFML library version.
  */
 constexpr const char *sfml_version()
@@ -58,7 +52,6 @@ constexpr const char *sfml_version()
                    CAIO_STR(SFML_VERSION_MINOR) "." \
                    CAIO_STR(SFML_VERSION_PATCH);
 }
-
 
 /**
  * Scanline.
@@ -69,7 +62,6 @@ constexpr const char *sfml_version()
  */
 using Scanline = std::vector<Rgba>;
 
-
 /**
  * SFML user interface.
  */
@@ -79,7 +71,6 @@ public:
     constexpr static const uint32_t SCANLINE_COLOR      = 0x00000080;
 
     constexpr static const uint64_t MOUSE_INACTIVE_TIME = 2'000'000;    /* us */
-
 
     explicit UISfml(const Config &conf);
 
@@ -339,7 +330,6 @@ private:
      */
     void joy_event(const sf::Event &event);
 
-
     /**
      * Convert a SFML key code to Keyboard::Key code.
      * @param key SFML Key code.
@@ -355,6 +345,14 @@ private:
      */
     static sf::Vector2u window_size(bool panel_visible, const sf::Vector2u &screen_size);
 
+    /**
+     * Get the biggest of two video modes.
+     * The biggest video mode is the one that consumes more pixel space.
+     * @param a First video mode to compare;
+     * @param b Second video mode to compare.
+     * @return The biggest video mode.
+     */
+    static const sf::VideoMode &biggest_video_mode(const sf::VideoMode &a, const sf::VideoMode &b);
 
     /**
      * UI configuration.
@@ -382,9 +380,14 @@ private:
     std::function<void(Keyboard::Key)> _hotkey_cb{};
 
     /**
-     * Video mode.
+     * Desktop resolution.
      */
     sf::VideoMode _desktop_mode{};
+
+    /**
+     * Fullscreen resolution.
+     */
+    sf::VideoMode _fullscreen_mode{};
 
     /**
      * Main window size.
@@ -483,7 +486,6 @@ private:
      */
     uint64_t _mouse_active_time{};
     bool _mouse_visible{true};
-
 
     /**
      * Conversion map from SFML key code to Keyboard::Key code.

@@ -30,6 +30,11 @@ namespace caio {
 namespace ui {
 namespace sfml {
 
+/**
+ * SFML error stream.
+ */
+extern std::stringstream sfml_err;
+
 static std::atomic<Keyboard::Key> signal_key{Keyboard::KEY_NONE};
 
 static void signal_handler(int signo)
@@ -43,7 +48,6 @@ static void signal_handler(int signo)
     }
 }
 
-
 std::stringstream sfml_err{};
 
 static struct Autostart {
@@ -51,7 +55,6 @@ static struct Autostart {
         sf::err().rdbuf(sfml_err.rdbuf());
     }
 } autostart{};
-
 
 std::map<sf::Keyboard::Key, Keyboard::Key> UISfml::sfml_to_key{
     { sf::Keyboard::Key::A,         Keyboard::KEY_A             },
@@ -139,19 +142,23 @@ std::map<sf::Keyboard::Key, Keyboard::Key> UISfml::sfml_to_key{
     /* KEY_LT missing on SFML; see _unknown_key_pressed */
 };
 
-
 Keyboard::Key UISfml::to_key(const sf::Keyboard::Key &code)
 {
     auto it = sfml_to_key.find(code);
     return (it == sfml_to_key.end() ? Keyboard::KEY_NONE : it->second);
 }
 
-
 sf::Vector2u UISfml::window_size(bool panel_visible, const sf::Vector2u &screen_size)
 {
     return {screen_size.x, screen_size.y + PanelSfml::area(panel_visible, screen_size.x).height};
 }
 
+const sf::VideoMode &UISfml::biggest_video_mode(const sf::VideoMode &a, const sf::VideoMode &b)
+{
+    size_t asiz = a.width * a.height;
+    size_t bsiz = b.width * b.height;
+    return ((asiz > bsiz) ? a : b);
+}
 
 UISfml::UISfml(const Config &conf)
     : _conf{conf}
@@ -189,9 +196,17 @@ UISfml::UISfml(const Config &conf)
     _saved_win_pos = _window.getPosition();
     _saved_win_size = _win_size;
 
+    /*
+     * Fullscreen modes are not necessarily the same current dekstop mode.
+     * and in some cases fullscreen mode is not supported.
+     */
+    auto fmodes = sf::VideoMode::getFullscreenModes();
+    _fullscreen_mode = (fmodes.size() == 0 ? sf::VideoMode{} : fmodes[0]);
     _desktop_mode = sf::VideoMode::getDesktopMode();
 
-    if (!_render_tex.create(_desktop_mode.width, _desktop_mode.height)) {
+    auto render_video_mode = biggest_video_mode(_fullscreen_mode, _desktop_mode);
+
+    if (!_render_tex.create(render_video_mode.width, render_video_mode.height)) {
         throw UIError{"Can't create the render texture: SFML: " + sfml_err.str()};
     }
 
@@ -355,16 +370,21 @@ void UISfml::toggle_fullscreen()
 
     } else {
         /*
-         * Enter fulllscreen.
+         * Enter fullscreen.
          */
-        _saved_win_pos = _window.getPosition();
-        _saved_win_size = _win_size;
+        if (_fullscreen_mode.isValid()) {
+            _saved_win_pos = _window.getPosition();
+            _saved_win_size = _win_size;
 
-        _window.create(_desktop_mode, _conf.video.title, sf::Style::Fullscreen);
+            _window.create(_desktop_mode, _conf.video.title, sf::Style::Fullscreen);
 
-        resize_event(_desktop_mode.width, _desktop_mode.height);
+            resize_event(_desktop_mode.width, _desktop_mode.height);
 
-        _is_fullscreen = true;
+            _is_fullscreen = true;
+
+        } else {
+            log.error("Fullscreen mode not supported on this monitor\n");
+        }
     }
 
     _window.setVerticalSyncEnabled(false);
