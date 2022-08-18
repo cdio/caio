@@ -197,7 +197,7 @@ UISfml::UISfml(const Config &conf)
     _saved_win_size = _win_size;
 
     /*
-     * Fullscreen modes are not necessarily the same current dekstop mode.
+     * Fullscreen modes are not necessarily the same current desktop mode
      * and in some cases fullscreen mode is not supported.
      */
     auto fmodes = sf::VideoMode::getFullscreenModes();
