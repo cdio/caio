@@ -70,6 +70,9 @@ void CartSimonsBasic::reset()
      *
      * @see https://ist.uwaterloo.ca/~schepers/formats/CRT.TXT
      * @see https://vice-emu.sourceforge.io/vice_17.html#SEC399
+     *
+     * The bank switching mechanism described above is not correct.
+     * Reading from $DE00 sets the 8K mode while writing to $DE00 sets the 16K mode.
      */
     Cartridge::reset();
 
@@ -120,6 +123,13 @@ void CartSimonsBasic::reset()
 
 uint8_t CartSimonsBasic::read(addr_t addr) const
 {
+    if (addr == 0x0000) {
+        /*
+         * Reading from $DE00 sets the 8K mode.
+         */
+        const_cast<CartSimonsBasic *>(this)->mode(MODE_8K);
+    }
+
     return 0;
 }
 
@@ -127,20 +137,9 @@ void CartSimonsBasic::write(addr_t addr, uint8_t data)
 {
     if (addr == 0x0000) {
         /*
-         * Bank switching register at address $DE00:
-         * The upper area ($A000-$BFFF) may be disabled so Simons' BASIC may use it as additional RAM.
-         * Writing a value of $01 to address location $DE00 banks in ROM, $00 disables ROM and enables RAM.
+         * Writing to $DE00 sets the 16K mode.
          */
-        if (data != _reg) {
-            DEBUG("%s(\"%s\"): Bank switching, prev value $%02X, new value $%02X, prev game/exrom $%02X, new game/exrom $%02X\n",
-                type().c_str(), name().c_str(), _reg, data, mode(), ((data & 1) == 1 ? MODE_16K : MODE_8K));
-            _reg = data;
-            if ((_reg & 1) == 0) {
-                mode(MODE_8K);
-            } else if ((_reg & 1) == 1) {
-                mode(MODE_16K);
-            }
-        }
+        mode(MODE_16K);
     }
 }
 

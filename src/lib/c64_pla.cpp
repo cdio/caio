@@ -401,7 +401,8 @@ PLA::~PLA()
 
 void PLA::mode(uint8_t pins, uint8_t mask, bool force)
 {
-    uint8_t data = (_mode & ~(mask & MASK)) | (pins & (mask & MASK));
+    mask &= MASK;
+    uint8_t data = (_mode & ~mask) | (pins & mask);
     if (_mode != data || force) {
         _mode = data;
         remap();
@@ -456,22 +457,39 @@ void PLA::remap()
             bool rh = romh(addr);
             bool rl = roml(addr);
             auto [rdevmap, wdevmap] = _extmap(addr, rh, rl);
+
             if (rdevmap.first) {
 #if 0
-                log.debug("PLA: Mode: %d, New device for addr $%04X, offset $%04X, dev %s\n", _mode, addr,
-                    rdevmap.second, rdevmap.first->to_string().c_str());
+                log.debug("PLA: Mode: %d ($%02X), New read device for addr $%04X, offset $%04X, dev %s\n",
+                    _mode,
+                    _mode,
+                    addr,
+                    rdevmap.second,
+                    rdevmap.first->to_string().c_str());
 #endif
+
                 rmaps[bank] = rdevmap;
+            } else {
+//                log.debug("PLA: Mode: %d, addr $%04X not mapped for read\n", _mode, addr);
             }
 
             if (wdevmap.first) {
+                log.debug("PLA: Mode: %d ($%02X), New write device for addr $%04X, offset $%04X, dev %s\n",
+                    _mode,
+                    _mode,
+                    addr,
+                    wdevmap.second,
+                    wdevmap.first->to_string().c_str());
+
                 wmaps[bank] = wdevmap;
+            } else {
+//                log.debug("PLA: Mode: %d, addr $%04X not mapped for write\n", _mode, addr);
             }
         }
     }
 
 #if 0
-    log.debug("PLA: Mappings for mode: %d (#$%02X)\n", _mode, _mode);
+    log.debug("PLA: Mappings for mode: %d ($%02X)\n", _mode, _mode);
     for (size_t bank = 0; bank < rmaps.size(); ++bank) {
         auto &devmap = rmaps[bank];
         log.debug("  bank %d, device %s, addr $%04X, offset $%04X\n", bank, devmap.first->to_string().c_str(),

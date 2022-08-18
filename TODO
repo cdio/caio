@@ -1,5 +1,4 @@
 - c64:      s/reset/init, then do a real reset
-- cart:     Fix Simons Basic
 - cart:     Fix EasyFlash
 - VICII:    Fix border colour during open-border mode
 - VICII:    Fix sprite position on some cartridge games

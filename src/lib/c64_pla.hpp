@@ -85,8 +85,8 @@ public:
      * Set the I/O extension mappings callback.
      * This callback is called each time the memory mappings are changed.
      * The specified callback receives a memory address and the status of ROML and ROMH pins;
-     * the callback must respond with a pair of devptr_t values, the first one to process read
-     * operatons and the seocnd one to process write operations.
+     * the callback must respond with a pair of devices (devptr_t), the first one to process
+     * read operatons and the second one to process write operations.
      * @param extmap I/O extension mappings callback.
      * @see ASpace::devptr_t
      */
