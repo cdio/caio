@@ -360,7 +360,11 @@ void Mos6502::reset(const std::shared_ptr<ASpace> &mmap)
         _mmap = mmap;
     }
 
-    _regs = { .PC = read_addr(vRESET) };
+    _regs = {
+        .PC = read_addr(vRESET),
+        .S  = S_init
+    };
+
     flag(0);
 }
 
@@ -604,13 +608,21 @@ size_t Mos6502::single_step()
             break;
 
         case MODE_ZP_X:
+            arg += _regs.X;
+            arg %= 0x0100;                      /* Zero page index bug */
+            break;
+
         case MODE_ABS_X:
-            arg += _regs.X;                     /* XXX: Zero page index bug */
+            arg += _regs.X;
             break;
 
         case MODE_ZP_Y:
+            arg += _regs.Y;
+            arg %= 0x0100;                     /* Zero page index bug */
+            break;
+
         case MODE_ABS_Y:
-            arg += _regs.Y;                     /* XXX: Zero page index bug */
+            arg += _regs.Y;
             break;
 
         case MODE_IND_X:

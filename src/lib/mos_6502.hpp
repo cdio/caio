@@ -43,14 +43,15 @@ namespace caio {
  */
 class Mos6502 : public Clockable, public Name {
 public:
-    constexpr static const char *TYPE    = "MOS6502";
-    constexpr static const char *LABEL   = "CPU";
+    constexpr static const char *TYPE     = "MOS6502";
+    constexpr static const char *LABEL    = "CPU";
 
-    constexpr static const addr_t vNMI   = 0xFFFA;
-    constexpr static const addr_t vRESET = 0xFFFC;
-    constexpr static const addr_t vIRQ   = 0xFFFE;
+    constexpr static const addr_t vNMI    = 0xFFFA;
+    constexpr static const addr_t vRESET  = 0xFFFC;
+    constexpr static const addr_t vIRQ    = 0xFFFE;
 
-    constexpr static const addr_t S_base = 0x0100;
+    constexpr static const addr_t S_base  = 0x0100;
+    constexpr static const uint8_t S_init = 0xFF;
 
     using breakpoint_cb_t = std::function<void(Mos6502 &, void *)>;
 
