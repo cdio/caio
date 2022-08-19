@@ -145,8 +145,8 @@ std::string to_string(T v)
 /**
  * Dump a range of bytes to a stream.
  * Output format:
- *      0000: 00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F
- *      0010: 10 11 12 13 14 15 16 17  18 19 1A 1B 1C 1D 1E 1F
+ *      0000: 00 01 02 03  04 05 06 07  08 09 0A 0B  0C 0D 0E 0F   ................
+ *      0010: 10 11 12 13  14 15 16 17  18 19 1A 1B  1C 1D 1E 1F   ................
  *      ...
  * @param os    Output stream;
  * @param begin First position to dump;
@@ -157,18 +157,31 @@ std::string to_string(T v)
 template <typename Iterator>
 std::ostream &dump(std::ostream &os, const Iterator begin, const Iterator end, addr_t base = 0)
 {
+    constexpr static size_t WIDTH = 6 + 11 * 4 + 8;
     constexpr static size_t ELEMS_PER_LINE = 16;
-    constexpr static size_t ELEMS_HALF = ELEMS_PER_LINE >> 1;
+    constexpr static size_t ELEMS_QRT = ELEMS_PER_LINE >> 2;
+
+    std::ostringstream hex{}, str{};
 
     size_t count = 0;
 
     for (Iterator it = begin; it != end; ++it, ++count) {
         if (count % ELEMS_PER_LINE == 0) {
-            os << to_string(static_cast<addr_t>(base + count)) << ": ";
+            hex << to_string(static_cast<addr_t>(base + count)) << ": ";
         }
 
-        os << to_string(*it) << (((count + 1) % ELEMS_HALF == 0) ? " " : "")
-           << (((count + 1) % ELEMS_PER_LINE == 0) ? "\n" : " ");
+        hex << to_string(*it) << (((count + 1) % ELEMS_QRT) == 0 ? "  " : " ");
+        str << (std::isprint(*it) ? static_cast<char>(*it) : '.');
+
+        if ((count + 1) % ELEMS_PER_LINE == 0) {
+            os << hex.str() << " " << str.str() << std::endl;
+            hex = {};
+            str = {};
+        }
+    }
+
+    if (count % ELEMS_PER_LINE) {
+        os << std::setfill(' ') << std::setw(WIDTH) << std::left << hex.str() << " " << str.str() << std::endl;
     }
 
     return os;
