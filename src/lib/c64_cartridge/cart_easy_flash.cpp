@@ -92,13 +92,15 @@ void CartEasyFlash::reset()
         switch (chip.type) {
         case Crt::CHIP_TYPE_ROM:
         case Crt::CHIP_TYPE_FLASH:
-        case Crt::CHIP_TYPE_EEPROM:
             add_rom(entry, chip, dev);
             break;
 
         case Crt::CHIP_TYPE_RAM:
             add_ram(entry, chip, dev);
             break;
+
+        case Crt::CHIP_TYPE_EEPROM:     /* TODO: File on user's config directory */
+            throw_invalid_cartridge("type EEPROM", entry);
 
         default:
             throw_invalid_cartridge("Unrecognised chip type " + std::to_string(chip.type), entry);
@@ -311,6 +313,12 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartEasyFlash::getdev(addr_t addr,
             /*
              * ROML mapped at $8000-$9FFF.
              */
+#if 1
+            DEBUG("%s:(\"%s\"): 8K ROML: %s\n",
+                type().c_str(),
+                name().c_str(),
+                _roms_hi[_bank]->to_string().c_str());
+#endif
             return {{_roms_lo[_bank], addr - ROML_LOAD_ADDR}, {}};
         }
         break;
@@ -320,12 +328,24 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartEasyFlash::getdev(addr_t addr,
             /*
              * ROML mapped at $8000-$9FFF.
              */
+#if 1
+            DEBUG("%s(\"%s\"): 16K ROML: %s\n",
+                type().c_str(),
+                name().c_str(),
+                _roms_hi[_bank]->to_string().c_str());
+#endif
             return {{_roms_lo[_bank], addr - ROML_LOAD_ADDR}, {}};
         }
         if (romh) {
             /*
              * ROMH mapped at $A000-$BFFF.
              */
+#if 1
+            DEBUG("%s(\"%s\"): 16K ROMH: %s\n",
+                type().c_str(),
+                name().c_str(),
+                _roms_hi[_bank]->to_string().c_str());
+#endif
             return {{_roms_hi[_bank], addr - ROMH_LOAD_ADDR_1}, {}};
         }
         break;

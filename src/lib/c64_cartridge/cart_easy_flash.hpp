@@ -35,7 +35,8 @@ namespace c64 {
  *          1024K   0       1       $8000   $A000   $8000-$9FFF and $A000-$BFFF
  *                                  $8000   $E000   $8000-$9FFF and $E000-$FFFF
  *
- * EasyFlash is a 1M flash memory plus 256 bytes of RAM (mapped into the I/O-2 range).
+ * EasyFlash is a 1M or 2x512K flash memory (one called ROML and the other ROMH)
+ * plus 256 bytes of RAM (mapped into the I/O-2 range).
  * Control register 1 ($DE00): Bank switching.
  * Control register 2 ($DE02): EasyFlash control:
  *      Bit     Name    Content
