@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cinttypes>
 #include <sstream>
 #include <thread>
 
@@ -97,7 +98,9 @@ void Clock::del(const std::shared_ptr<Clockable> &c)
 
 void Clock::run()
 {
-    auto start = utils::now();
+    ssize_t sched_cycle = 0;
+    ssize_t sync_cycles = cycles(SYNC_TIME / 1000000.0f);
+    int64_t start = utils::now();
 
     while (!_stop)  {
         while (_suspend && !_stop) {
@@ -112,22 +115,46 @@ void Clock::run()
             return;
         }
 
-        /*
-         * Synchronise the speed of the emulated system with the speed of the host processor.
-         */
-        if (_sync_us > 0) {
-            auto end = utils::now();
-            auto elapsed = end - start;
-            auto diff = _sync_us - elapsed;
-            if (diff >= MIN_SLEEP_TIME) {
-                std::this_thread::sleep_for(std::chrono::microseconds{diff});
+        ++sched_cycle;
 
-            } else if (diff < 0) {
-                log.warn("%s(%s): Host system too slow: Delay of %lldus\n", type().c_str(), label().c_str(), -diff);
+        if (sched_cycle == sync_cycles) {
+            /*
+             * Calculate the time required to the host system
+             * to execute sync_cycles emulated clock cycles.
+             */
+            int64_t end = utils::now();
+            int64_t elapsed = end - start;
+            int64_t wait_time = SYNC_TIME - elapsed;
+            if (wait_time < 0) {
+                /*
+                 * Slow host system.
+                 */
+#if 0
+                log.warn("%s: Slow host system, delayed of %" PRIu64 "us\n",
+                    Name::to_string().c_str(),
+                    -wait_time);
+#endif
+                sched_cycle = 0;
+                start = utils::now();
+                continue;
             }
 
-            _sync_us = 0;
+            /*
+             * Suspend the execution of this clock until the
+             * time expected by the emulated system is reached.
+             */
+            std::this_thread::sleep_for(std::chrono::microseconds{static_cast<int64_t>(wait_time * _delay)});
+
+            /*
+             * Don't expect the operating system's scheduler to be real-time,
+             * this thread probably slept far more than requested.
+             * Adjust for this condition.
+             */
             start = utils::now();
+            ssize_t delayed_cycles = cycles((start - end) / (_delay * 1000000.0f));
+            ssize_t wait_cycles = cycles(wait_time / 1000000.0f);
+            ssize_t extra_cycles = delayed_cycles - wait_cycles;
+            sched_cycle = -extra_cycles;
         }
     }
 }
@@ -170,11 +197,6 @@ void Clock::toggle_suspend()
 bool Clock::is_suspended() const
 {
     return _suspend;
-}
-
-void Clock::sync(unsigned cycles)
-{
-    _sync_us += static_cast<int64_t>(cycles * 1000000.0 * _delay / static_cast<double>(_freq));
 }
 
 std::string Clock::to_string() const

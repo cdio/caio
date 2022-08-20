@@ -579,7 +579,7 @@ size_t Mos6569::tick(const Clock &clk)
             _raster_counter = 0;
             if (_vsync) {
                 /*
-                 * Synchronise the clock with the screen frame (~50Hz).
+                 * Vertical sync started.
                  */
                 _vsync(FRAME_CYCLES);
             }

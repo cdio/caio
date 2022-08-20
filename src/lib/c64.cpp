@@ -270,13 +270,8 @@ void C64::connect_devices()
         _cpu->rdy_pin() = active;
     };
 
-    auto vsync = [this](unsigned wait_cycles) {
-        _clk->sync(wait_cycles);
-    };
-
     _vic2->irq(set_irq);
     _vic2->ba(set_rdy);
-    _vic2->vsync(vsync);
 
     if (!_conf.palettefile.empty()) {
         const auto ppath = palettepath(_conf.palettefile);
