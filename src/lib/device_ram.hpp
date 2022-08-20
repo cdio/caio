@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <functional>
 #include <vector>
 
 #include "device.hpp"
@@ -32,18 +33,24 @@ class DeviceRAM : public Device {
 public:
     constexpr static const char *TYPE = "RAM";
 
-    /**
-     * Initialise a RAM Device.
-     * @param label Label assigned to this Device;
-     * @param size  Size of this RAM.
-     */
-    DeviceRAM(const std::string &label, size_t size);
+    using init_cb_t = std::function<void(std::vector<uint8_t> &)>;
 
     /**
      * Initialise a RAM Device.
-     * @param size Size of this RAM.
+     * @param label  Label assigned to this Device;
+     * @param size   Size of this RAM;
+     * @param initcb Initialisation callback (if this parameter is not set
+     * the memory is initialised with zeros).
      */
-    DeviceRAM(size_t size);
+    DeviceRAM(const std::string &label, size_t size, const init_cb_t &initcb = {});
+
+    /**
+     * Initialise a RAM Device.
+     * @param size   Size of this RAM;
+     * @param initcb Initialisation callback (if this parameter is not set
+     * the memory is initialised with zeros).
+     */
+    DeviceRAM(size_t size, const init_cb_t &initcb = {});
 
     /**
      * Initialise a RAM Device with predefined values.
@@ -87,6 +94,7 @@ public:
 
 private:
     std::vector<uint8_t> _data{};
+    init_cb_t            _initcb{};
 };
 
 }

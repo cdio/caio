@@ -24,14 +24,18 @@
 
 namespace caio {
 
-DeviceRAM::DeviceRAM(const std::string &label, size_t size)
+DeviceRAM::DeviceRAM(const std::string &label, size_t size, const init_cb_t &initcb)
     : Device{TYPE, label},
-      _data(size)
+      _data(size),
+      _initcb{initcb}
 {
+    if (_initcb) {
+        _initcb(_data);
+    }
 }
 
-DeviceRAM::DeviceRAM(size_t size)
-    : DeviceRAM{{}, size}
+DeviceRAM::DeviceRAM(size_t size, const init_cb_t &initcb)
+    : DeviceRAM{{}, size, initcb}
 {
 }
 

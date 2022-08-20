@@ -18,6 +18,7 @@
  */
 #include "c64.hpp"
 
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 #include <thread>
@@ -154,7 +155,28 @@ void C64::attach_prg()
 
 void C64::create_devices()
 {
-    _ram = std::make_shared<DeviceRAM>("SYSTEM RAM", 65536);
+    auto ram_init = [](std::vector<uint8_t> &data) {
+        /*
+         * The ram is initialised with a kind of FF 00 pattern,
+         * see the comments here: https://csdb.dk/forums/?roomid=11&topicid=116800&showallposts=1
+         */
+        uint64_t *val = reinterpret_cast<uint64_t *>(data.data());
+        //uint64_t pattern = 0xFFFFFFFF00000000ULL;
+        //uint64_t pattern = 0x0000FFFFFFFF0000ULL;
+        uint64_t pattern = 0x00FF00FF00FF00FFULL;   // This is what I remmeber (breadbin)
+
+        for (size_t i = 0; i < 8192; ++i) {
+            val[i] = pattern;
+            pattern ^= static_cast<uint64_t>(-1);
+
+            /* Put some random values */
+            if (std::rand() % 100 < 20) {
+                reinterpret_cast<uint8_t *>(val + i)[std::rand() % 8] = std::rand() % 256;
+            }
+        }
+    };
+
+    _ram = std::make_shared<DeviceRAM>("SYSTEM RAM", 65536, ram_init);
     _basic = std::make_shared<DeviceROM>(rompath(BASIC_FNAME), "BASIC", BASIC_SIZE);
     _kernal = std::make_shared<DeviceROM>(rompath(KERNAL_FNAME), "KERNAL", KERNAL_SIZE);
     _chargen = std::make_shared<DeviceROM>(rompath(CHARGEN_FNAME), "CHARGEN", CHARGEN_SIZE);
