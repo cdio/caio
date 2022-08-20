@@ -228,6 +228,13 @@ void C64::connect_devices()
         uint8_t cpuval = ((data & PLA::LORAM)  ? Mos6510::P0 : 0) |
                          ((data & PLA::HIRAM)  ? Mos6510::P1 : 0) |
                          ((data & PLA::CHAREN) ? Mos6510::P2 : 0);
+
+        /* Cassette input pins not implemented */
+        cpuval |= (Mos6510::P4 | Mos6510::P5);  /* pull-ups */
+
+        /* P6 and P7 not connected */
+        cpuval &= ~(Mos6510::P7 | Mos6510::P6);
+
         return cpuval;
     };
 
@@ -235,11 +242,14 @@ void C64::connect_devices()
         uint8_t plaval = ((data & Mos6510::P0) ? PLA::LORAM  : 0) |
                          ((data & Mos6510::P1) ? PLA::HIRAM  : 0) |
                          ((data & Mos6510::P2) ? PLA::CHAREN : 0);
+
         _pla->mode(plaval, PLA::LORAM | PLA::HIRAM | PLA::CHAREN, force);
+
+        /* Cassette output pin P3 not implemented */
     };
 
-    _cpu->add_ior(cpu_port_read, Mos6510::P0 | Mos6510::P1 | Mos6510::P2);
-    _cpu->add_iow(cpu_port_write, Mos6510::P0 | Mos6510::P1 | Mos6510::P2);
+    _cpu->add_ior(cpu_port_read, Mos6510::PALL);
+    _cpu->add_iow(cpu_port_write, Mos6510::P0 | Mos6510::P1 | Mos6510::P2 | Mos6510::P3);
 
     /*
      * Connect the Cartridge to the PLA.
