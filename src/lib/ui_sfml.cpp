@@ -603,7 +603,7 @@ void UISfml::joy_event(const sf::Event &event)
         if (uipos == 0.0f) {
             uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::X);
             if (uipos > -38.0f && uipos < 38.0f) {
-                uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::U);
+                uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::Z);
             }
         }
 
@@ -617,7 +617,7 @@ void UISfml::joy_event(const sf::Event &event)
         if (uipos == 0.0f) {
             uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::Y);
             if (uipos > -38.0f && uipos < 38.0f) {
-                uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::V);
+                uipos = sf::Joystick::getAxisPosition(jid, sf::Joystick::Axis::R);
             }
         }
 
