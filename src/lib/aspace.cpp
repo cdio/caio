@@ -23,6 +23,15 @@
 
 namespace caio {
 
+ASpace::ASpace()
+{
+}
+
+ASpace::ASpace(const addrmap_t &rmaps, const addrmap_t &wmaps, addr_t amask)
+{
+    reset(rmaps, wmaps, amask);
+}
+
 uint8_t ASpace::read(addr_t addr) const
 {
     try {
@@ -43,6 +52,10 @@ void ASpace::write(addr_t addr, uint8_t value)
     } catch (std::out_of_range &) {
         throw InvalidWriteAddress{"ASpace", addr};
     }
+}
+
+void ASpace::reset()
+{
 }
 
 void ASpace::reset(const addrmap_t &rmaps, const addrmap_t &wmaps, addr_t amask)

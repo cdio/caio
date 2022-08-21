@@ -75,14 +75,18 @@ public:
     virtual void write(addr_t addr, uint8_t value);
 
     /**
+     * Reset this address space.
+     */
+    virtual void reset();
+
+    /**
      * Dump the contents of the read and write mappings as human readable strings.
      * @param os Stream to dump to;
      */
     std::ostream &dump(std::ostream &os) const;
 
 protected:
-    ASpace() {
-    }
+    ASpace();
 
     /**
      * Initialise this address space.
@@ -92,9 +96,7 @@ protected:
      * @exception InvalidArgument if one of the parameters is ill formed.
      * @see reset()
      */
-    ASpace(const addrmap_t &rmaps, const addrmap_t &wmaps, addr_t amask) {
-        reset(rmaps, wmaps, amask);
-    }
+    ASpace(const addrmap_t &rmaps, const addrmap_t &wmaps, addr_t amask);
 
     /**
      * Reset this address space with a new set of mappings.
