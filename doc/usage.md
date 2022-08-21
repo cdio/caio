@@ -112,7 +112,7 @@ For example, to use the italian layout:
     $ c64 --keymaps it
 ```
 
-to use the [VICEKB](../images/C64keyboard.gif)
+to use the [VICEKB](https://vice-emu.pokefinder.org/images/b/b8/C64keyboard.gif)
 positional layout:
 
 ```
