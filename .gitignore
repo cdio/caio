@@ -2,3 +2,6 @@
 *.swp
 *.kdev*
 cscope.*
+GPATH
+GRTAGS
+GTAGS
