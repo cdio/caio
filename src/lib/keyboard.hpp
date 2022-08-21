@@ -36,7 +36,7 @@ public:
     constexpr static const char *TYPE = "KBD";
 
     /**
-     * CAIO Key codes.
+     * caio Key codes.
      * (US ANSI layout + something else).
      */
     enum Key {
@@ -123,7 +123,24 @@ public:
         KEY_CURSOR_LEFT     = 0x004A,
         KEY_CURSOR_RIGHT    = 0x004B,
 
-        KEY_LT              = 0x004D,   /* Missing in US-ANSI */
+        KEY_LT              = 0x004D,   /* Missing in US-ANSI (Present on ISO keyboards) */
+
+        KEY_NUMPAD_SLASH    = 0x0050,
+        KEY_NUMPAD_ASTERISK = 0x0051,
+        KEY_NUMPAD_MINUS    = 0x0052,
+        KEY_NUMPAD_PLUS     = 0x0053,
+        KEY_NUMPAD_ENTER    = 0x0054,
+        KEY_NUMPAD_DOT      = 0x0055,
+        KEY_NUMPAD_1        = 0x0056,
+        KEY_NUMPAD_2        = 0x0057,
+        KEY_NUMPAD_3        = 0x0058,
+        KEY_NUMPAD_4        = 0x0059,
+        KEY_NUMPAD_5        = 0x005A,
+        KEY_NUMPAD_6        = 0x005B,
+        KEY_NUMPAD_7        = 0x005C,
+        KEY_NUMPAD_8        = 0x005D,
+        KEY_NUMPAD_9        = 0x005E,
+        KEY_NUMPAD_0        = 0x005F,
 
         KEY_LEFT_SHIFT      = 0x8000,
         KEY_RIGHT_SHIFT     = 0x4000,
@@ -142,11 +159,9 @@ public:
     };
 
 
-    Keyboard() {
-    }
+    Keyboard();
 
-    virtual ~Keyboard() {
-    }
+    virtual ~Keyboard();
 
     /**
      * Load a key mapping table from a file.
@@ -219,9 +234,7 @@ public:
     static Key to_key(const std::string &name);
 
 protected:
-    Keyboard(const std::string &label = {})
-        : Name{TYPE, label} {
-    }
+    Keyboard(const std::string &label = {});
 
 private:
     static std::map<std::string, Key> name_to_key;
