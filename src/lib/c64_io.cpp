@@ -47,7 +47,10 @@ void C64IO::reset()
     _vcolor->reset();
     _cia1->reset();
     _cia2->reset();
-    _ioexp->reset();
+
+    if (_ioexp) {
+        _ioexp->reset();
+    }
 }
 
 size_t C64IO::size() const
