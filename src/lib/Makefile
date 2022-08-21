@@ -36,6 +36,7 @@ CXXSRCS=	aspace.cpp \
 		device_rom.cpp \
 		fs.cpp \
 		icon.cpp \
+		joystick.cpp \
 		keyboard.cpp \
 		logger.cpp \
 		name.cpp \

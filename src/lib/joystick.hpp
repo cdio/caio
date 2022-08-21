@@ -49,44 +49,32 @@ public:
      * Initialise this joystick.
      * @param label Label assigned to this joystick.
      */
-    Joystick(const std::string &label = {})
-        : Name{TYPE, label} {
-    }
+    Joystick(const std::string &label = {});
 
-    virtual ~Joystick() {
-    }
+    virtual ~Joystick();
 
     /**
      * Reset this joystick.
      */
-    virtual void reset(unsigned jid = JOYID_INVALID) {
-        _joyid = jid;
-        _position = JOY_NONE;
-    }
+    virtual void reset(unsigned jid = JOYID_INVALID);
 
     /**
      * Set the current joystick position.
      * @param pos A bitwise combination of the joystick positions.
      * @see JoyPosition
      */
-    virtual void position(uint8_t pos) {
-        _position = pos;
-    }
+    virtual void position(uint8_t pos);
 
     /**
      * @return A bitwise combination of the current joystick positions.
      * @see JoyPosition
      */
-    virtual uint8_t position() const {
-        return _position;
-    }
+    virtual uint8_t position() const;
 
     /**
      * @return True if there is a real gamepad behind this joystick; false otherwise
      */
-    bool is_connected() const {
-        return (_joyid != JOYID_INVALID);
-    }
+    bool is_connected() const;
 
 private:
     unsigned _joyid{JOYID_INVALID};

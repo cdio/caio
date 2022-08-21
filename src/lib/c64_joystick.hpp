@@ -42,21 +42,14 @@ public:
      * Initialise this C64 Joystick.
      * @param label Label assigned to this joystick.
      */
-    C64Joystick(const std::string &label = {})
-        : Joystick{label} {
-        C64Joystick::reset();
-    }
+    C64Joystick(const std::string &label = {});
 
-    virtual ~C64Joystick() {
-    }
+    virtual ~C64Joystick();
 
     /**
      * @see Joystick::reset().
      */
-    void reset(unsigned jid = Joystick::JOYID_INVALID) override {
-        Joystick::reset(jid);
-        Joystick::position(~C64_JOY_NONE);
-    }
+    void reset(unsigned jid = Joystick::JOYID_INVALID) override;
 
     /**
      * Set the current joystick position.

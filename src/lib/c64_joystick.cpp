@@ -42,6 +42,22 @@ namespace c64 {
  *
  * Source: https://www.c64-wiki.com/wiki/Keyboard
  */
+C64Joystick::C64Joystick(const std::string &label)
+    : Joystick{label}
+{
+    C64Joystick::reset();
+}
+
+C64Joystick::~C64Joystick()
+{
+}
+
+void C64Joystick::reset(unsigned jid)
+{
+    Joystick::reset(jid);
+    Joystick::position(~C64_JOY_NONE);
+}
+
 void C64Joystick::position(uint8_t pos)
 {
     uint8_t position = C64_JOY_NONE;
