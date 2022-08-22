@@ -21,6 +21,13 @@
 #include <algorithm>
 #include <csignal>
 
+/* FIXME: Get rid of SFML */
+#ifdef __APPLE__
+#include <chrono>
+#include <thread>
+using namespace std::chrono_literals;
+#endif
+
 #include "icon.hpp"
 #include "logger.hpp"
 #include "ui_sfml_widget_fullscreen.hpp"
@@ -479,6 +486,30 @@ void UISfml::resize_event(unsigned rwidth, unsigned rheight)
 
 void UISfml::kbd_event(const sf::Event &event)
 {
+/* FIXME: Move to SDL */
+#ifdef __APPLE__
+    if (_unknown_key_pressed && _unknown_key == Keyboard::KEY_MINUS) {
+        /* On MACOS, SFML does not recognise the '-' key neither it generates the key pressed/release events */
+        _unknown_key_pressed = false;
+        keyboard()->key_released(Keyboard::KEY_MINUS);
+        std::this_thread::sleep_for(30ms);    /* Give the emulator thread time to recognise this key release */
+    }
+
+    if (event.type == sf::Event::TextEntered && event.text.unicode == '-') {
+        /* On MACOS, SFML does not recognise the '-' key */
+        _unknown_key_pressed = true;
+        _unknown_key = Keyboard::KEY_MINUS;
+        keyboard()->key_pressed(Keyboard::KEY_MINUS);
+        return;
+    }
+
+    if ((event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased) &&
+        event.key.code == sf::Keyboard::Hyphen) {
+        /* On MACOS, SFML tries tilde '~' as minus '-' */
+        const_cast<sf::Event &>(event).key.code = sf::Keyboard::Tilde;
+    }
+#endif
+
     switch (event.type) {
     case sf::Event::KeyPressed:
         if (event.key.alt) {

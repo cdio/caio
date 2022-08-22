@@ -1,15 +1,13 @@
-- c64:      s/reset/init, then do a real reset
-- cart:     Fix EasyFlash
-- VICII:    Fix border colour during open-border mode
-- VICII:    Fix sprite position on some cartridge games
+- UI:       Move to SDL
+- c64:      Hard reset
+- CPU:      Z80
 - UI:       Volume control
 - misc:     README formatting see vim-xcode-colors
 - misc:     Do not terminate on illegal instructions
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
 - C1541Fs:  Support for P00 files
 - UI:       Fix disk widget activity when C1541 is in error condition.
-- CPU;      Test suite
-- CPU;      Z80
+- CPU:      Test suite
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
@@ -22,8 +20,12 @@
             - Support for directory/file traversal/selection (test ImGui)
             - Virtual keyboard?
 - SID:      Fork the coming reSID 1.0
-- misc:     Remove gsl (when c++20 support is completed)
+- VICII:    Fix border colour during open-border mode
+- VICII:    Fix sprite position on some cartridge games
 - misc:     brew package for macos
+- misc:     Virtual joystick
+- cart:     C64 EasyFlash: when an eeprom is written, write to file
+- misc:     Remove gsl (when c++20 support is completed)
 - Apple2
 - BBC Micro
 - Daewoo DPC-200
