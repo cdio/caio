@@ -33,6 +33,7 @@
 #include "pin.hpp"
 #include "rgb.hpp"
 #include "ui.hpp"
+#include "utils.hpp"
 
 
 namespace caio {

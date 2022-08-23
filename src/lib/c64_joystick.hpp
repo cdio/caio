@@ -19,6 +19,7 @@
 #pragma once
 
 #include "joystick.hpp"
+#include "mos_6526.hpp"
 
 
 namespace caio {
@@ -29,14 +30,32 @@ namespace c64 {
  */
 class C64Joystick : public Joystick {
 public:
-    enum C64JoystickPosition {
-        C64_JOY_NONE  = 0x00,
-        C64_JOY_UP    = 0x01,
-        C64_JOY_DOWN  = 0x02,
-        C64_JOY_LEFT  = 0x04,
-        C64_JOY_RIGHT = 0x08,
-        C64_JOY_FIRE  = 0x10
-    };
+    /*
+     * +------------------------------------------------------------------------------+-------+
+     * |                             CIA 1 Port B ($DC01)                             | Joy 2 |
+     * +-------------+----------------------------------------------------------------+-------+
+     * |             | PB7     PB6     PB5     PB4     PB3     PB2     PB1     PB0    |       |
+     * +-------------+----------------------------------------------------------------+-------+
+     * | CIA1    PA7 | STOP    Q       C=      SPACE   2       CTRL    <-      1      |       |
+     * | Port A  PA6 | /       ^       =       RSHIFT  HOME    ;       *       £      |       |
+     * | ($DC00) PA5 | ,       @       :       .       -       L       P       +      |       |
+     * |         PA4 | N       O       K       M       0       J       I       9      | Fire  |
+     * |         PA3 | V       U       H       B       8       G       Y       7      | Right |
+     * |         PA2 | X       T       F       C       6       D       R       5      | Left  |
+     * |         PA1 | LSHIFT  E       S       Z       4       A       W       3      | Down  |
+     * |         PA0 | CRSR DN F5      F3      F1      F7      CRSR RT RETURN  DELETE | Up    |
+     * +-------------+----------------------------------------------------------------+-------+
+     * | Joy 1       |                         Fire    Right   Left    Down    Up     |       |
+     * +-------------+----------------------------------------------------------------+-------+
+     *
+     * Source: https://www.c64-wiki.com/wiki/Keyboard
+     */
+    constexpr static const uint8_t JOY_PORT_PULLUP = 255;
+    constexpr static const uint8_t JOY_PORT_UP     = Mos6526::P0;
+    constexpr static const uint8_t JOY_PORT_DOWN   = Mos6526::P1;
+    constexpr static const uint8_t JOY_PORT_LEFT   = Mos6526::P2;
+    constexpr static const uint8_t JOY_PORT_RIGHT  = Mos6526::P3;
+    constexpr static const uint8_t JOY_PORT_FIRE   = Mos6526::P4;
 
     /**
      * Initialise this C64 Joystick.
@@ -52,16 +71,22 @@ public:
     void reset(unsigned jid = Joystick::JOYID_INVALID) override;
 
     /**
-     * Set the current joystick position.
-     * This method converts the caio's joystick position coding into C64's joystick coding.
-     * Receives a JoystickPosition and translates it into a C64JoystickPosition.
-     * @param pos A bitwise combination of the positions to set (see JoystickPosition).
-     * @see C64JoystickPosition
-     * @see JoystickPosition
+     * Set the current joystick position and port status.
+     * Set the specified joystick position and translate it to a port value.
+     * @param pos Bitwise combination of Joystick::JoyPosition values.
+     * @see Joystick::JoyPosition
      * @see Joystick::position(uint8_t)
-     * @see Joystick::position()
+     * @see Joystick::port()
      */
     void position(uint8_t pos) override;
+
+    /**
+     * @return The status of this C64 joystick port.
+     */
+    uint8_t port() const;
+
+private:
+    uint8_t _port{JOY_PORT_PULLUP};
 };
 
 }

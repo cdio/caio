@@ -1,24 +1,20 @@
 # caio - 8 bits home computers emulator
 
-## compile, install and packaging
+## Compile, install and packaging
 
-### linux
+### Linux
 
 Required dependencies:
 
 * C++20 compiler: [clang-10.0](https://clang.llvm.org) or later or
   [g++-9.3](https://en.wikipedia.org/wiki/GNU_Compiler_Collection) or later.
 
-* [SFML-2.5.1](https://www.sfml-dev.org) or later.
+* [SDL2](https://libsdl.org).
 
 * [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config).
 
 ```
-    $ sudo apt install clang
-    ...
-    $ sudo apt install libsfml-dev
-    ...
-    $ sudo apt install pkg-config
+    $ sudo apt install clang pkg-config libsdl2-dev libsdl2-image-dev
     ...
 ```
 
@@ -43,7 +39,7 @@ the `CXX` environment variable:
 
 The default `PREFIX` is `/opt/caio`.
 
-### macos
+### MacOS
 
 Required dependencies:
 
@@ -53,7 +49,7 @@ Required dependencies:
 
 * [brew](https://brew.sh).
 
-* [SFML-2.5.1](https://www.sfml-dev.org) or later.
+* [SDL2](https://libsdl.org).
 
 * [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config).
 
@@ -63,9 +59,7 @@ To install xcode and brew follow the instructions
 ```
    $ xcode-select --install
    ...
-   $ brew install sfml
-   ...
-   $ brew install pkg-config
+   $ brew install pkg-config sdl2 sdl2_image
    ...
 ```
 
@@ -81,9 +75,9 @@ To install xcode and brew follow the instructions
 
 The default `PREFIX` is `/opt/caio`.
 
-### packaging
+### Packaging
 
-#### source code package:
+#### Source code package:
 
 ```
     $ make src-package RELEASE=<tag>
@@ -93,7 +87,7 @@ The previous command creates a `.tgz` tarball source package containing the
 specified release. The tarball file is placed inside the `build/` directory.
 `tag` specifies the caio's git tag to build.
 
-#### debian binary package:
+#### Debian binary package:
 
 ```
     $ make deb-package RELEASE=<tag>
@@ -102,7 +96,7 @@ specified release. The tarball file is placed inside the `build/` directory.
 The previous command creates a `.deb` binary package under the `build/`
 directory. `tag` specifies the caio's git tag to build.
 
-#### generic binary package:
+#### Generic binary package:
 
 ```
     $ make bin-package RELEASE=<tag>
@@ -112,5 +106,5 @@ The previous command creates a `.tgz` tarball binary package under the
 `build/` directory. `tag` specifies the caio's git branch or tag to build.
 
 Note that this package does not contain any runtime dependencies
-(libsfml, libstdc++, etc). Those must be installed separately.
+(libSDL2, libstdc++, etc). Those must be installed separately.
 

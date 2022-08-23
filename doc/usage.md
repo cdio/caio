@@ -1,6 +1,6 @@
 # caio - 8 bits home computers emulator
 
-## usage & configuration
+## Usage & Configuration
 
 ```
 $ caio --help
@@ -101,7 +101,7 @@ be one) if that happens the emulator is silently terminated (see the `logfile`
 configuration file option).
 
 
-## keyboard
+## Keyboard
 
 The keyboard layout can be set using the `keymaps` configuration option
 (the default is [US-ANSI](https://en.wikipedia.org/wiki/File:ANSI_Keyboard_Layout_Diagram_with_Form_Factor.svg)).
@@ -139,13 +139,13 @@ key is mapped as `Page-Up`, `RUN/STOP` as `ESC`, `CTRL` as `TAB` and
 `CBM` as `LEFT-CTRL`.
 
 
-## joysticks
+## Joysticks
 
 Up to two gamepads should work (tested using only one Logitech F710).
 The PS3 controller is known to work.
 
 
-## hot-keys
+## Hot-Keys
 
 * `ALT-F` toggles between *windowed* and *fullscreen* modes.
 
@@ -161,7 +161,7 @@ The PS3 controller is known to work.
 * `ALT-V` toggles the visibility of the info panel.
 
 
-## disk drive
+## Disk drive
 
 There is a [C1541](https://en.wikipedia.org/wiki/Commodore_1541) implementation
 that access the host filesystem. Host directories are recursively traversed so
@@ -170,3 +170,4 @@ it must be used with care.
 `D64` files are not supported yet.
 
 For more information see the `--8` command line option.
+

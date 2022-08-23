@@ -162,26 +162,26 @@ public:
     void stop();
 
     /**
-     * Suspend/Unsuspend this clock;
-     * @param susp true to suspend this clock; false to unsuspend it.
-     * @see is_suspended()
-     * @see toggle_suspend()
+     * Pause/Unpause this clock;
+     * @param susp true to pause; false to unpause it.
+     * @see paused()
+     * @see toggle_pause()
      */
-    void suspend(bool susp = true);
+    void pause(bool susp = true);
 
     /**
      * Toggle suspend status of this clock.
      * @see is_suspended()
      * @see suspend()
      */
-    void toggle_suspend();
+    void toggle_pause();
 
     /**
      * @return true if this clock is suspended; false otherwise.
-     * @see suspend()
-     * @see toggle_suspend()
+     * @see pause()
+     * @see toggle_pause()
      */
-    bool is_suspended() const;
+    bool paused() const;
 
     /**
      * @return A human readable string representation of this clock.

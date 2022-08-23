@@ -11,7 +11,7 @@ For more information about caio refer to the
 [development documentation](doc/devel.md).
 
 
-## status
+## Status
 
 caio is currently in alpha state, it is **work-in-progress** and at the
 moment only the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
@@ -32,34 +32,28 @@ See the [releases](#releases) section below.
 [![zauberwald](images/zauberwald.png "Zauberwald")](https://csdb.dk/release/?id=188005)
 
 
-## compile, install and packaging
+## Compile, install and packaging
 
-### dependencies
+### Dependencies
 
-#### linux:
+#### Linux:
 
 ```
-    $ sudo apt install clang
-    ...
-    $ sudo apt install libsfml-dev
-    ...
-    $ sudo apt install pkg-config
+    $ sudo apt install clang pkg-config libsdl2-dev libsdl2-image-dev
     ...
 ```
 
-#### macos:
+#### MacOS:
 
 [xcode](https://developer.apple.com/xcode), xcode command line tools, and
 [brew](https://brew.sh) must be installed.
 
 ```
-   $ brew install sfml
-   ...
-   $ brew install pkg-config
+   $ brew install pkg-config sdl2 sdl2_image
    ...
 ```
 
-### compile
+### Compile
 
 ```
     $ make PREFIX=/usr/local all
@@ -74,7 +68,7 @@ For more information read the
 [compile, install and packaging documentation](doc/compile.md).
 
 
-## usage & configuration
+## Usage & Configuration
 
 There are three ways to launch the emulator, two of them from the console:
 
@@ -119,7 +113,7 @@ For more information about usage, keyboard mappings, joysticks, etc. read the
 [usage documentation](doc/usage.md).
 
 
-## releases
+## Releases
 
 The first beta release will contain the following emulators:
 
@@ -141,7 +135,7 @@ It is desired for future releases to provide emulation for:
 * [Sinclair ZX Spectrum](https://en.wikipedia.org/wiki/ZX_Spectrum)
 
 
-## old hardware
+## Old hardware
 
 If you have some old home computer and want to donate it, I will gladly accept
 it even if it is not working. Please let me know.

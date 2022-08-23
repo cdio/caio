@@ -33,7 +33,6 @@ enum class SLEffect {
     VERTICAL    = +'v'
 };
 
-
 /**
  * Convert a scanline effect string to SLEffect type.
  * @param str String to convert: "v", "h", "n" or "" (the last two meaning "no scanline effect").
@@ -42,7 +41,6 @@ enum class SLEffect {
  * @see SLEffect
  */
 SLEffect to_sleffect(const std::string &str);
-
 
 /**
  * Video configuration.
@@ -59,7 +57,6 @@ struct VideoConfig {
     bool        panel{false};               /**< Panel visibility.          */
 };
 
-
 /**
  * Audio configuration.
  */
@@ -69,7 +66,6 @@ struct AudioConfig {
     unsigned channels{};                    /**< Audio channels.            */
     unsigned samples{};                     /**< No. of samples x buffer.   */
 };
-
 
 /**
  * UI Configuration.

@@ -41,7 +41,6 @@ std::string Rgba::to_string() const
     return os.str();
 }
 
-
 Rgba operator+(const Rgba &color, int value)
 {
     auto r = color.r + value;
@@ -74,6 +73,19 @@ Rgba operator+(const Rgba &color, int value)
     };
 }
 
+RgbaTable::RgbaTable(const std::initializer_list<Rgba> &il)
+    : std::vector<Rgba>(il)
+{
+}
+
+RgbaTable::RgbaTable(const std::string &fname)
+{
+    load(fname);
+}
+
+RgbaTable::~RgbaTable()
+{
+}
 
 void RgbaTable::load(const std::string &fname)
 {

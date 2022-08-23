@@ -171,6 +171,7 @@ private:
 
     C64Config                         _conf{};
     bool                              _paused{};
+    bool                              _pause_allowed{true};
     devptr_t                          _ram{};
     devptr_t                          _basic{};
     devptr_t                          _kernal{};
@@ -189,9 +190,9 @@ private:
     std::shared_ptr<cbm_bus::Device>  _unit8{};
     std::shared_ptr<cbm_bus::Device>  _unit9{};
     std::shared_ptr<Clock>            _clk{};
-    std::shared_ptr<Keyboard>         _kbd{};
-    std::shared_ptr<Joystick>         _joy1{};
-    std::shared_ptr<Joystick>         _joy2{};
+    std::shared_ptr<C64Keyboard>      _kbd{};
+    std::shared_ptr<C64Joystick>      _joy1{};
+    std::shared_ptr<C64Joystick>      _joy2{};
     std::shared_ptr<ui::UI>           _ui{};
 };
 

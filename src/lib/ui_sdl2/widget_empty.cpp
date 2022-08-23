@@ -16,35 +16,31 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#pragma once
-
-#include <functional>
-
-#include "ui_sfml_widget.hpp"
+#include "ui_sdl2/widget_empty.hpp"
 
 
 namespace caio {
 namespace ui {
-namespace sfml {
+namespace sdl2 {
 namespace widget {
 
-class Gamepad : public WidgetSfml {
-public:
-    constexpr static const Rgba GAMEPAD_MISSING_COLOR = { 255, 255, 255, 64  };    /* Color modulators */
-    constexpr static const Rgba GAMEPAD_PRESENT_COLOR = { 255, 255, 255, 255 };
+Empty::Empty(SDL_Renderer *renderer)
+    : Widget{renderer}
+{
+}
 
-    struct Status {
-        bool is_connected;
-        bool is_swapped;
-    };
+Empty::~Empty()
+{
+}
 
-    Gamepad(const std::function<Status()> &upd);
+bool Empty::enabled() const
+{
+    return false;
+}
 
-private:
-    sf::Sprite make_sprite() override;
-
-    std::function<Status()> _update;
-};
+void Empty::render(const SDL_Rect &dstrect)
+{
+}
 
 }
 }

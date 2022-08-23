@@ -47,7 +47,7 @@ struct Rgba {
      * @param red   Red component;
      * @param green Green component;
      * @param blue  Blue component;
-     * @param alpha Alpha component (default is 255 -no transparency-).
+     * @param alpha Alpha component (default is 255, no transparency).
      */
     constexpr Rgba(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255)
         : r{red},
@@ -124,24 +124,19 @@ public:
      * Initialise this RGBA table with values from memory.
      * @param il RGBA values.
      */
-    RgbaTable(const std::initializer_list<Rgba> &il)
-        : std::vector<Rgba>(il) {
-    }
+    RgbaTable(const std::initializer_list<Rgba> &il);
 
     /**
      * Initialise this RGBA table with values from disk.
      * @param fname Name of the file containing the colour table.
      * @exception IOError
      */
-    explicit RgbaTable(const std::string &fname) {
-        load(fname);
-    }
+    explicit RgbaTable(const std::string &fname);
 
     /**
      * Release this RGBA table.
      */
-    virtual ~RgbaTable() {
-    }
+    virtual ~RgbaTable();
 
     /**
      * (Re-)Initialise this RGBA table with values from disk.

@@ -16,43 +16,45 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#pragma once
-
-#include <memory>
-
-#include "ui_sdl2/ui.hpp"
-#include "ui_sdl2/widget.hpp"
-#include "ui_sdl2/widget_empty.hpp"
-#include "ui_sdl2/widget_floppy.hpp"
-#include "ui_sdl2/widget_fullscreen.hpp"
 #include "ui_sdl2/widget_gamepad.hpp"
-#include "ui_sdl2/widget_volume.hpp"
 
 
 namespace caio {
 namespace ui {
+namespace sdl2 {
+namespace widget {
 
-using AudioBuffer = sdl2::AudioBuffer;
-using Scanline    = sdl2::Scanline;
-
-using UI          = sdl2::UI;
-using Panel       = sdl2::Panel;
-using Widget      = sdl2::Widget;
-
-namespace widget  = sdl2::widget;
+#include "icons/gamepad_128x3.hpp"
 
 
-template<typename W, class... A>
-std::shared_ptr<W> make_widget(UI &ui, const A&... args)
+Gamepad::Gamepad(SDL_Renderer *renderer, const std::function<Status()> &upd)
+    : Widget{renderer},
+      _update{upd}
 {
-    return std::make_shared<W>(ui.renderer(), args...);
+    Widget::load(gamepad_128x3_png);
 }
 
-template<typename W, class... A>
-std::shared_ptr<W> make_widget(const std::shared_ptr<UI> &ui, const A&... args)
+Gamepad::~Gamepad()
 {
-    return make_widget<W>(*ui, args...);
 }
 
+void Gamepad::render(const SDL_Rect &dstrect)
+{
+    static const SDL_Rect normal_rect{0, 0, 128, 128};
+    static const SDL_Rect swapped_0_rect{128, 0, 128, 128};
+    static const SDL_Rect swapped_1_rect{256, 0, 128, 128};
+
+    Status st{};
+    if (_update) {
+        st = _update();
+    }
+
+    const Rgba &colour = (st.is_connected ? GAMEPAD_PRESENT_COLOR : GAMEPAD_MISSING_COLOR);
+    const auto &rect = (!st.is_swapped ? normal_rect : ((st.id % 2) == 0 ? swapped_0_rect : swapped_1_rect));
+    Widget::render(rect, dstrect, colour);
+}
+
+}
+}
 }
 }

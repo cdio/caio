@@ -1,6 +1,6 @@
 # caio - 8 bits home computers emulator
 
-## architecture
+## Architecture
 
 The core of the emulator is a library that provides generic methods (signal
 processing, keyboard translators, joystick support, etc.) and a set of
@@ -42,7 +42,7 @@ author.
 For more information about caio's internal structure read the source
 code, it is fully documented.
 
-## random notes done during development
+## Random notes done during development
 
 ### MOS 6581
 
@@ -58,7 +58,7 @@ incarnations reaching better levels of emulation accuracy.
 Still, it is far from being *really good* so another implementation that uses
 the [reSID](https://github.com/daglem/reSID) library is also provided.
 
-#### filters:
+#### Filters:
 
 The specifications say that filter frequencies are defined by the following
 formula:
@@ -99,7 +99,7 @@ calculate the actual Q factor:
 where `res` is the 4 bits resonance value specified by the user.
 This formula is not correct and it will change in a near future.
 
-#### other bugs:
+#### Other bugs:
 
 The volume *click* bug and others are implemented so programs like
 [SAM](https://en.wikipedia.org/wiki/Software_Automatic_Mouth) work.

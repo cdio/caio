@@ -16,41 +16,36 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_sfml_widget_floppy.hpp"
+#pragma once
+
+#include "ui_sdl2/widget.hpp"
 
 
 namespace caio {
 namespace ui {
-namespace sfml {
+namespace sdl2 {
 namespace widget {
 
-#include "icons/floppy_64.hpp"
+class Gamepad : public Widget {
+public:
+    constexpr static const Rgba GAMEPAD_MISSING_COLOR = { 255, 255, 255, 64  };
+    constexpr static const Rgba GAMEPAD_PRESENT_COLOR = { 255, 255, 255, 255 };
 
+    struct Status {
+        int  id;
+        bool is_connected;
+        bool is_swapped;
+    };
 
-Floppy::Floppy(const std::function<Status()> &upd)
-    : _update{upd}
-{
-    WidgetSfml::load(floppy_64_png);
-    _sprite = rect({0, 0, 64, 64});
-}
+    Gamepad(SDL_Renderer *renderer, const std::function<Status()> &upd);
 
-sf::Sprite Floppy::make_sprite()
-{
-    Status st{};
-    if (_update) {
-       st = _update();
-    }
+    virtual ~Gamepad();
 
-    const Rgba &color = (st.is_attached ? DISK_ATTACHED_COLOR : DISK_MISSING_COLOR);
-    _sprite.setColor(sf::Color{color.to_host_u32()});
-    if (st.is_idle) {
-        _sprite.setRotation(0);
-    } else {
-        _sprite.rotate(5);
-    }
+    void render(const SDL_Rect &dstrect) override;
 
-    return _sprite;
-}
+private:
+    std::function<Status()> _update;
+};
 
 }
 }

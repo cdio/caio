@@ -339,10 +339,10 @@ void C64::connect_devices()
     auto kbd_read = [this](uint8_t addr) -> uint8_t {
         switch (addr) {
         case Mos6526::PRA:
-            return (_conf.swapj ? _joy1->position() : _joy2->position());
+            return (_conf.swapj ? _joy1->port() : _joy2->port());
 
         case Mos6526::PRB:
-            return (_kbd->read() & (_conf.swapj ? _joy2->position() : _joy1->position()));
+            return (_kbd->read() & (_conf.swapj ? _joy2->port() : _joy1->port()));
 
         default:;
         }
@@ -415,14 +415,16 @@ void C64::connect_devices()
             /* PASSTHROUGH */
 
         case Keyboard::KEY_PAUSE:
-            _paused ^= true;
-            _clk->toggle_suspend();
-            if (_paused) {
-                _ui->audio_pause();
-                _ui->title(_conf.title + " (PAUSED)");
-            } else {
-                _ui->audio_play();
-                _ui->title(_conf.title);
+            if (_pause_allowed) {
+                _paused ^= true;
+                _clk->toggle_pause();
+                if (_paused) {
+                    _ui->audio_pause();
+                    _ui->title(_conf.title + " (PAUSED)");
+                } else {
+                    _ui->audio_play();
+                    _ui->title(_conf.title);
+                }
             }
             break;
 
@@ -458,6 +460,19 @@ void C64::create_ui()
     };
 
     _ui = std::make_shared<ui::UI>(uiconf);
+
+    auto do_pause = [this](bool susp) {
+        if (!_paused) {
+            _clk->pause(susp);
+        }
+        _pause_allowed = !susp;
+    };
+
+    auto is_paused = [this]() {
+        return _clk->paused();
+    };
+
+    _ui->pause(do_pause, is_paused);
 }
 
 void C64::make_widgets()
@@ -465,8 +480,8 @@ void C64::make_widgets()
     /*
      * Floppy disks presence and idle status.
      */
-    auto floppy8 = ui::widget::create<ui::widget::Floppy>([this]() {
-        ui::widget::Floppy::Status st{};
+    auto floppy8 = ui::make_widget<ui::widget::Floppy>(_ui, [this]() {
+        struct ui::widget::Floppy::Status st{};
         if (_unit8) {
             st.is_idle = _unit8->is_idle();
             st.is_attached = true;
@@ -478,8 +493,8 @@ void C64::make_widgets()
         return st;
     });
 
-    auto floppy9 = ui::widget::create<ui::widget::Floppy>([this]() {
-        ui::widget::Floppy::Status st{};
+    auto floppy9 = ui::make_widget<ui::widget::Floppy>(_ui, [this]() {
+        struct ui::widget::Floppy::Status st{};
         if (_unit9) {
             st.is_idle = _unit9->is_idle();
             st.is_attached = true;
@@ -494,17 +509,21 @@ void C64::make_widgets()
     /*
      * Joystick presence and swap status.
      */
-    auto gamepad1 = ui::widget::create<ui::widget::Gamepad>([this]() {
-        ui::widget::Gamepad::Status st{};
-        st.is_swapped = _conf.swapj;
-        st.is_connected = (_conf.swapj ? _joy2->is_connected() : _joy1->is_connected());
+    auto gamepad1 = ui::make_widget<ui::widget::Gamepad>(_ui, [this]() {
+        ui::widget::Gamepad::Status st{
+            .id = 0,
+            .is_connected = (_conf.swapj ? _joy2->is_connected() : _joy1->is_connected()),
+            .is_swapped = _conf.swapj
+        };
         return st;
     });
 
-    auto gamepad2 = ui::widget::create<ui::widget::Gamepad>([this]() {
-        ui::widget::Gamepad::Status st{};
-        st.is_swapped = _conf.swapj;
-        st.is_connected = (_conf.swapj ? _joy1->is_connected() : _joy2->is_connected());
+    auto gamepad2 = ui::make_widget<ui::widget::Gamepad>(_ui, [this]() {
+        ui::widget::Gamepad::Status st{
+            .id = 1,
+            .is_connected = (_conf.swapj ? _joy1->is_connected() : _joy2->is_connected()),
+            .is_swapped = _conf.swapj
+        };
         return st;
     });
 

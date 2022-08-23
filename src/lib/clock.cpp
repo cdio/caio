@@ -148,7 +148,7 @@ void Clock::run()
             /*
              * Don't expect the operating system's scheduler to be real-time,
              * this thread probably slept far more than requested.
-             * Adjust for this condition.
+             * Adjust for this situation.
              */
             start = utils::now();
             ssize_t delayed_cycles = cycles((start - end) / (_delay * 1000000.0f));
@@ -184,17 +184,17 @@ void Clock::stop()
     _stop = true;
 }
 
-void Clock::suspend(bool susp)
+void Clock::pause(bool susp)
 {
     _suspend = susp;
 }
 
-void Clock::toggle_suspend()
+void Clock::toggle_pause()
 {
     _suspend = (_suspend ? false : true);
 }
 
-bool Clock::is_suspended() const
+bool Clock::paused() const
 {
     return _suspend;
 }

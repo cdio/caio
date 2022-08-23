@@ -18,6 +18,8 @@
  */
 #include "utils.hpp"
 
+#include <thread>
+
 
 namespace caio {
 namespace utils {
@@ -113,6 +115,13 @@ std::string to_string(const std::vector<uint8_t> &buf)
     }
 
     return str;
+}
+
+uint64_t sleep(uint64_t delay)
+{
+    uint64_t start = now();
+    std::this_thread::sleep_for(std::chrono::microseconds{delay});
+    return (now() - start);
 }
 
 }

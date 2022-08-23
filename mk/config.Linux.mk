@@ -22,6 +22,6 @@ EXTRA_3RDPARTY_DIRS+=
 
 SYSDEP_CPPFLAGS+=
 
-SFML_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sfml-graphics sfml-audio}
+UI_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sdl2 SDL2_image}
 
-SFML_LDADD+=		${shell ${PKG_CONFIG} --libs sfml-graphics sfml-audio}
+UI_LDADD+=		${shell ${PKG_CONFIG} --libs sdl2 SDL2_image}

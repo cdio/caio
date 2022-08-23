@@ -16,35 +16,29 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_sfml_widget_gamepad.hpp"
+#pragma once
+
+#include "ui_sdl2/widget.hpp"
 
 
 namespace caio {
 namespace ui {
-namespace sfml {
+namespace sdl2 {
 namespace widget {
 
-#include "icons/gamepad_64x2.hpp"
+class Fullscreen : public Widget {
+public:
+    Fullscreen(SDL_Renderer *_renderer, const std::function<bool()> &upd);
 
+    virtual ~Fullscreen();
 
-Gamepad::Gamepad(const std::function<Status()> &upd)
-    : _update{upd}
-{
-    WidgetSfml::load(gamepad_64x2_png);
-}
+    void render(const SDL_Rect &dstrect) override;
 
-sf::Sprite Gamepad::make_sprite()
-{
-    Status st{};
-    if (_update) {
-        st = _update();
-    }
-
-    const Rgba &color = (st.is_connected ? GAMEPAD_PRESENT_COLOR : GAMEPAD_MISSING_COLOR);
-    auto sprite = rect(st.is_swapped ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64});
-    sprite.setColor(sf::Color{color.to_host_u32()});
-    return sprite;
-}
+private:
+    std::function<bool()> _update;
+    bool                  _is_fullscreen{};
+    SDL_Rect              _rect{-1, -1, -1, -1};
+};
 
 }
 }

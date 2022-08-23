@@ -55,7 +55,7 @@ ${DEB_CONTROL}: ${BUILD_INSTALL_DONE}
 	"Essential: no\n"\
 	"Maintainer: caio developers <>\n"\
 	"Installed-Size: ${DEB_SIZE}\n"\
-	"Depends: libsfml-graphics2.5 (>= 2.5.1), libsfml-audio2.5 (>= 2.5.1), libstdc++6 (>= 10.3.0)\n"\
+	"Depends: libsdl2-2.0-0 (>= 2.0.0), libsdl2-image-2.0-0 (>= 2.0.0), libstdc++6 (>= 10.3.0)\n"\
 	"Replaces: caio\n"\
 	"Homepage: http://github.com/cdio/caio\n"\
 	"Description: 8 bit Home Computers Emulator.\n" > $@

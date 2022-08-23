@@ -16,39 +16,40 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_sfml_widget_fullscreen.hpp"
+#pragma once
+
+#include "ui_sdl2/widget.hpp"
 
 
 namespace caio {
 namespace ui {
-namespace sfml {
+namespace sdl2 {
 namespace widget {
 
-#include "icons/fullscreen_64x2.hpp"
+class Floppy : public Widget {
+public:
+    constexpr static const Rgba DISK_ATTACHED_COLOR = { 255, 255, 255, 255 };
+    constexpr static const Rgba DISK_MISSING_COLOR  = { 255, 255, 255, 64  };
 
+    struct Status {
+        bool is_attached{};
+        bool is_idle{};
 
-Fullscreen::Fullscreen(const std::function<bool()> &upd)
-    : _update{upd}
-{
-    WidgetSfml::load(fullscreen_64x2_png);
-    _sprite = rect({0, 0, 64, 64});
-}
+        Status() {}
+    };
 
-sf::Sprite Fullscreen::make_sprite()
-{
-    bool is_fullscreen{};
+    Floppy(SDL_Renderer *renderer, const std::function<Status()> &upd);
 
-    if (_update) {
-        is_fullscreen = _update();
-    }
+    virtual ~Floppy();
 
-    if (_is_fullscreen != is_fullscreen) {
-        _sprite = rect(is_fullscreen ? sf::IntRect{64, 0, 128, 64} : sf::IntRect{0, 0, 64, 64});
-        _is_fullscreen = is_fullscreen;
-    }
+    void render(const SDL_Rect &dstrect) override;
 
-    return _sprite;
-}
+private:
+    std::function<Status()> _update;
+    int64_t                 _start{};
+    int64_t                 _elapsed{};
+    bool                    _prev_idle{};
+};
 
 }
 }

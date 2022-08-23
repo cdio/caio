@@ -22,9 +22,6 @@ EXTRA_3RDPARTY_DIRS+=
 
 SYSDEP_CPPFLAGS+=	-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
 
-# OpenAL 3D-Audio framework (required by SFML) provided by MACOS
-#SFML_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sfml-graphics sfml-audio}
-SFML_CXXFLAGS+=		-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks/OpenAL.framework/Headers/
-SFML_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sfml-graphics}
+UI_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sdl2 sdl2_image}
 
-SFML_LDADD+=		${shell ${PKG_CONFIG} --libs sfml-graphics sfml-audio}
+UI_LDADD+=		${shell ${PKG_CONFIG} --libs sdl2 sdl2_image}

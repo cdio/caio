@@ -18,27 +18,23 @@
  */
 #pragma once
 
-#include <functional>
-
-#include "rgb.hpp"
-#include "ui_sfml_widget.hpp"
+#include "ui_sdl2/widget.hpp"
 
 
 namespace caio {
 namespace ui {
-namespace sfml {
+namespace sdl2 {
 namespace widget {
 
-class Fullscreen : public WidgetSfml {
+class Empty : public Widget {
 public:
-    Fullscreen(const std::function<bool()> &upd);
+    Empty(SDL_Renderer *_renderer);
 
-private:
-    sf::Sprite make_sprite() override;
+    virtual ~Empty();
 
-    std::function<bool()> _update;
-    bool                  _is_fullscreen{};
-    sf::Sprite            _sprite{};
+    bool enabled() const override;
+
+    void render(const SDL_Rect &dstrect) override;
 };
 
 }

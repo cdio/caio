@@ -29,7 +29,7 @@ namespace caio {
 /**
  * Emulated joystick.
  * This class implements the basics of a joystick and
- * it must be derived by the specific emulated joystick.
+ * it should be derived by a specific emulated joystick.
  */
 class Joystick : public Name {
 public:
@@ -55,6 +55,9 @@ public:
 
     /**
      * Reset this joystick.
+     * This method must be called by the UI to associate
+     * this joystick to a real game controller.
+     * @param jid Identifier assigned to this joystick.
      */
     virtual void reset(unsigned jid = JOYID_INVALID);
 
@@ -72,7 +75,7 @@ public:
     virtual uint8_t position() const;
 
     /**
-     * @return True if there is a real gamepad behind this joystick; false otherwise
+     * @return True if there is a real game controller behind this joystick; false otherwise
      */
     bool is_connected() const;
 

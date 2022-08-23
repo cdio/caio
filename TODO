@@ -1,30 +1,23 @@
-- UI:       Move to SDL
 - c64:      Hard reset
 - CPU:      Z80
-- UI:       Volume control
-- misc:     README formatting see vim-xcode-colors
-- misc:     Do not terminate on illegal instructions
+- CPU:      Do not terminate on illegal instructions
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
 - C1541Fs:  Support for P00 files
 - UI:       Fix disk widget activity when C1541 is in error condition.
+- UI:       Floppy widget: Disk progress
 - CPU:      Test suite
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
 - CBMBUS:   Refactor using pullups
-- UI:       Pause, audio, hide widgets
-- UI:       Couch Mode (control everything through the gamepad):
-            - Map some gamepad combination to enable couch mode
-            - Map some gamepad buttons to F1, F3, SPACE or other user defined
-            - crt/d64/fs attached on-demand (+ host filesystem traversing)
-            - Support for directory/file traversal/selection (test ImGui)
-            - Virtual keyboard?
+- UI:       Pause widget
 - SID:      Fork the coming reSID 1.0
 - VICII:    Fix border colour during open-border mode
 - VICII:    Fix sprite position on some cartridge games
-- misc:     brew package for macos
-- misc:     Virtual joystick
+- misc:     Brew package for macos
+- misc:     Virtual joystick (keypad)
 - cart:     C64 EasyFlash: when an eeprom is written, write to file
+- misc:     README formatting see vim-xcode-colors
 - misc:     Remove gsl (when c++20 support is completed)
 - Apple2
 - BBC Micro

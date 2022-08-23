@@ -86,7 +86,7 @@ CXXFLAGS+=		-O3
 LDFLAGS+=		-Wl,-s
 endif
 
-CXXFLAGS+=		${SFML_CXXFLAGS}
+CXXFLAGS+=		${UI_CXXFLAGS}
 
 ARFLAGS=		crs
 

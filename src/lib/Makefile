@@ -163,20 +163,26 @@ INCS+=		c64_cartridge/cart_generic.hpp \
 #
 # UI Drivers
 #
-CXXSRCS+=	ui_sfml.cpp \
-		ui_sfml_audio.cpp \
-		ui_sfml_panel.cpp \
-		ui_sfml_widget.cpp \
-		ui_sfml_widget_floppy.cpp \
-		ui_sfml_widget_fullscreen.cpp \
-		ui_sfml_widget_gamepad.cpp
+CXXSRCS+=	ui_sdl2/sdl2.cpp \
+		ui_sdl2/ui.cpp \
+		ui_sdl2/audio.cpp \
+		ui_sdl2/panel.cpp \
+		ui_sdl2/widget.cpp \
+		ui_sdl2/widget_empty.cpp \
+		ui_sdl2/widget_floppy.cpp \
+		ui_sdl2/widget_fullscreen.cpp \
+		ui_sdl2/widget_gamepad.cpp \
+		ui_sdl2/widget_volume.cpp
 
-INCS+=		ui_sfml.hpp \
-		ui_sfml_audio,hpp \
-		ui_sfml_panel.hpp \
-		ui_sfml_widget.hpp \
-		ui_sfml_widget_floppy.hpp \
-		ui_sfml_widget_fullscreen.hpp \
-		ui_sfml_widget_gamepad.hpp
+INCS+=		ui_sdl2/sdl2.hpp \
+		ui_sdl2/ui.hpp \
+		ui_sdl2/audio.hpp \
+		ui_sdl2/panel.hpp \
+		ui_sdl2/widget.hpp \
+		ui_sdl2/widget_empty.hpp \
+		ui_sdl2/widget_floppy.hpp \
+		ui_sdl2/widget_fullscreen.hpp \
+		ui_sdl2/widget_gamepad.hpp \
+		ui_sdl2/widget_volume.hpp
 
 include ${ROOT}/mk/lib.mk

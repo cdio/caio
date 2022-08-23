@@ -22,9 +22,9 @@ LIBRESID=	${ROOT}/3rdparty/resid/libresid.a
 
 LDADD+=		${LIBRESID}
 
-CXXFLAGS+=	${SFML_CXXFLAGS}
+CXXFLAGS+=	${UI_CXXFLAGS}
 
-LDADD+=		${SFML_LDADD}
+LDADD+=		${UI_LDADD}
 
 LDADD+=		-lpthread
 

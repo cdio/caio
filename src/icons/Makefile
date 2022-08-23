@@ -20,9 +20,10 @@ ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
-ICONS_PNG=	floppy_64.png \
-		fullscreen_64x2.png \
-		gamepad_64x2.png
+ICONS_PNG=	floppy_128x2.png \
+		fullscreen_128x2.png \
+		gamepad_128x3.png \
+		volume_128x11.png
 
 ICONS_HPP=	${ICONS_PNG:%.png=%.hpp}
 

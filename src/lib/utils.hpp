@@ -369,5 +369,14 @@ static inline uint64_t now()
     return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(now).count());
 }
 
+/**
+ * Delay the called thread by sleeping for an amount of time.
+ * The actual sleep time depends on the scheduling mechanism
+ * used by the runninig operating system.
+ * @param delay Time to sleep (microseconds).
+ * @return The actual time this thread slept (microseconds).
+ */
+uint64_t sleep(uint64_t delay);
+
 }
 }

@@ -22,26 +22,6 @@
 namespace caio {
 namespace c64 {
 
-/*
- * +------------------------------------------------------------------------------+-------+
- * |                             CIA 1 Port B ($DC01)                             | Joy 2 |
- * +-------------+----------------------------------------------------------------+-------+
- * |             | PB7     PB6     PB5     PB4     PB3     PB2     PB1     PB0    |       |
- * +-------------+----------------------------------------------------------------+-------+
- * | CIA1    PA7 | STOP    Q       C=      SPACE   2       CTRL    <-      1      |       |
- * | Port A  PA6 | /       ^       =       RSHIFT  HOME    ;       *       £      |       |
- * | ($DC00) PA5 | ,       @       :       .       -       L       P       +      |       |
- * |         PA4 | N       O       K       M       0       J       I       9      | Fire  |
- * |         PA3 | V       U       H       B       8       G       Y       7      | Right |
- * |         PA2 | X       T       F       C       6       D       R       5      | Left  |
- * |         PA1 | LSHIFT  E       S       Z       4       A       W       3      | Down  |
- * |         PA0 | CRSR DN F5      F3      F1      F7      CRSR RT RETURN  DELETE | Up    |
- * +-------------+----------------------------------------------------------------+-------+
- * | Joy 1       |                         Fire    Right   Left    Down    Up     |       |
- * +-------------+----------------------------------------------------------------+-------+
- *
- * Source: https://www.c64-wiki.com/wiki/Keyboard
- */
 C64Joystick::C64Joystick(const std::string &label)
     : Joystick{label}
 {
@@ -55,34 +35,41 @@ C64Joystick::~C64Joystick()
 void C64Joystick::reset(unsigned jid)
 {
     Joystick::reset(jid);
-    Joystick::position(~C64_JOY_NONE);
+    _port = JOY_PORT_PULLUP;
 }
 
 void C64Joystick::position(uint8_t pos)
 {
-    uint8_t position = C64_JOY_NONE;
+    Joystick::position(pos);
+
+    uint8_t port = JOY_PORT_PULLUP;
 
     if (pos & JOY_UP) {
-        position |= C64_JOY_UP;
+        port &= ~JOY_PORT_UP;
     }
 
     if (pos & JOY_DOWN) {
-        position |= C64_JOY_DOWN;
+        port &= ~JOY_PORT_DOWN;
     }
 
     if (pos & JOY_LEFT) {
-        position |= C64_JOY_LEFT;
+        port &= ~JOY_PORT_LEFT;
     }
 
     if (pos & JOY_RIGHT) {
-        position |= C64_JOY_RIGHT;
+        port &= ~JOY_PORT_RIGHT;
     }
 
     if (pos & JOY_FIRE) {
-        position |= C64_JOY_FIRE;
+        port &= ~JOY_PORT_FIRE;
     }
 
-    Joystick::position(~position);
+    _port = port;
+}
+
+uint8_t C64Joystick::port() const
+{
+    return _port;
 }
 
 }
