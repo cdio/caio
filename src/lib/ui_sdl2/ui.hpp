@@ -310,7 +310,7 @@ private:
     int                         _win_height{};          /* Height of the main window                          */
     int                         _screen_width{};        /* Width of the emulated screen (scaled)              */
     int                         _screen_height{};       /* Height of the emulated screen (scaled)             */
-    float                       _screen_ratio{};        /* Aspect ration of the emulated screen               */
+    float                       _screen_ratio{};        /* Aspect ratio of the emulated screen                */
     bool                        _is_fullscreen{};       /* Fullscreen mode                                    */
     std::atomic_bool            _stop{};                /* True if the main loop must be stopped              */
     uint64_t                    _mouse_active_time{};   /* Inactivity time until the cursor becomes invisible */
