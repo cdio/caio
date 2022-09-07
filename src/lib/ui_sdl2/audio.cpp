@@ -22,14 +22,12 @@
 #include <sstream>
 
 #include "logger.hpp"
+#include "ui_sdl2/sdl2.hpp"
 
 
 namespace caio {
 namespace ui {
 namespace sdl2 {
-
-extern void throw_sdl_uierror(const std::string &reason);
-
 
 AudioStream::AudioStream()
 {
