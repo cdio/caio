@@ -410,7 +410,7 @@ void UI::event_loop()
         }
 
         delay = _fps_time - utils::now() + start;
-        start = (delay > 0 ? utils::sleep(delay) : 0);
+        start = (delay > 0 ? utils::sleep(delay) - delay: 0);
     }
 }
 
