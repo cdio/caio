@@ -370,9 +370,9 @@ static inline uint64_t now()
 }
 
 /**
- * Delay the called thread by sleeping for an amount of time.
+ * Delay the called thread by sleeping for a specified amount of time.
  * The actual sleep time depends on the scheduling mechanism
- * used by the runninig operating system.
+ * used by the running operating system.
  * @param delay Time to sleep (microseconds).
  * @return The actual time this thread slept (microseconds).
  */

@@ -79,8 +79,7 @@ void AudioStream::reset(const ui::AudioConfig &aconf)
            << ": srate: "    << obtained.freq
            << ", format: "   << obtained.format
            << ", channels: " << obtained.channels
-           << ", samples: "  << obtained.samples
-           << std::endl;
+           << ", samples: "  << obtained.samples;
 
         throw_sdl_uierror(os.str());
     }
