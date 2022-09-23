@@ -26,6 +26,8 @@
 #include "ui_sdl2/widget_floppy.hpp"
 #include "ui_sdl2/widget_fullscreen.hpp"
 #include "ui_sdl2/widget_gamepad.hpp"
+#include "ui_sdl2/widget_pause.hpp"
+#include "ui_sdl2/widget_reset.hpp"
 #include "ui_sdl2/widget_volume.hpp"
 
 

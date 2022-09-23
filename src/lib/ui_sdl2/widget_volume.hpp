@@ -28,6 +28,8 @@ namespace widget {
 
 class Volume : public Widget {
 public:
+    constexpr static int LEVELS = 20;
+
     /**
      * Initialise this widget.
      * @param renderer SDL renderer;

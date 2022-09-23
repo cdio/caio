@@ -23,7 +23,9 @@ include ${ROOT}/mk/config.mk
 ICONS_PNG=	floppy_128x2.png \
 		fullscreen_128x2.png \
 		gamepad_128x3.png \
-		volume_128x11.png
+		pause_128x2.png \
+		reset_128.png \
+		volume_128x21.png
 
 ICONS_HPP=	${ICONS_PNG:%.png=%.hpp}
 

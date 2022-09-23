@@ -106,12 +106,18 @@ public:
     void pause(const std::function<void(bool)> &pause_cb, const std::function<bool()> &ispause_cb);
 
     /**
+     * Set the reset callback.
+     * @param reset_cb Called when the user requests a reset.
+     */
+    void reset(const std::function<void()> &reset_cb);
+
+    /**
      * Suspend/Resume emulator.
      * This only works if the pause callbacks are set.
-     * @param pause true to suspend, false to resume.
-     * @see pause()
+     * @param suspend true to suspend, false to resume.
+     * @see pause(const std::function<void(bool)> &, const std::function<bool()> &)
      */
-    void suspend(bool pause);
+    void pause(bool suspend);
 
     /**
      * Get the suspend status of the emulator.
@@ -119,7 +125,7 @@ public:
      * @return true if suspended, false if running.
      * @see pause()
      */
-    bool suspended() const;
+    bool paused() const;
 
     /**
      * @return true if audio is enabled; false otherwise.
@@ -268,13 +274,13 @@ private:
     void kbd_event(const SDL_Event &event);
 
     /**
-     * Game controller event handler.
+     * Process joystick/game controller events.
      * @param event SDL event.
      */
     void joy_event(const SDL_Event &event);
 
     /**
-     * Mouse event handler.
+     * Process mouse events.
      * @param event SDL event.
      */
     void mouse_event(const SDL_Event &event);
@@ -303,8 +309,9 @@ private:
     keyboard_ptr_t              _kbd{};                 /* Emulated keyboard                                  */
     std::vector<joystick_ptr_t> _joys{};                /* List of emulated joysticks                         */
     hotkeys_cb_t                _hotkeys_cb{};          /* User defined hot-keys callback                     */
-    std::function<void(bool)>   _pause_cb;              /* Pause callback                                     */
-    std::function<bool()>       _ispause_cb;            /* Pause status callback                              */
+    std::function<void(bool)>   _pause_cb{};            /* Pause callback                                     */
+    std::function<bool()>       _ispause_cb{};          /* Pause status callback                              */
+    std::function<void()>       _reset_cb{};            /* Reset callback                                     */
 
     int                         _win_width{};           /* Width of the main window                           */
     int                         _win_height{};          /* Height of the main window                          */

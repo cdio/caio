@@ -172,6 +172,8 @@ CXXSRCS+=	ui_sdl2/sdl2.cpp \
 		ui_sdl2/widget_floppy.cpp \
 		ui_sdl2/widget_fullscreen.cpp \
 		ui_sdl2/widget_gamepad.cpp \
+		ui_sdl2/widget_pause.cpp \
+		ui_sdl2/widget_reset.cpp \
 		ui_sdl2/widget_volume.cpp
 
 INCS+=		ui_sdl2/sdl2.hpp \
@@ -183,6 +185,8 @@ INCS+=		ui_sdl2/sdl2.hpp \
 		ui_sdl2/widget_floppy.hpp \
 		ui_sdl2/widget_fullscreen.hpp \
 		ui_sdl2/widget_gamepad.hpp \
+		ui_sdl2/widget_pause.hpp \
+		ui_sdl2/widget_reset.hpp \
 		ui_sdl2/widget_volume.hpp
 
 include ${ROOT}/mk/lib.mk

@@ -24,7 +24,7 @@ namespace ui {
 namespace sdl2 {
 namespace widget {
 
-#include "icons/volume_128x11.hpp"
+#include "icons/volume_128x21.hpp"
 
 
 Volume::Volume(SDL_Renderer *renderer, const std::function<float()> &getvol, const std::function<void(float)> &setvol)
@@ -32,7 +32,7 @@ Volume::Volume(SDL_Renderer *renderer, const std::function<float()> &getvol, con
       _getvol{getvol},
       _setvol{setvol}
 {
-    Widget::load(volume_128x11_png);
+    Widget::load(volume_128x21_png);
 }
 
 Volume::~Volume()
@@ -79,9 +79,9 @@ void Volume::volume(int incr)
 {
     if (enabled()) {
         float vol = _getvol();
-        int ivol = std::max(0, std::min(10, static_cast<int>(vol * 10.0f)));
-        _volidx = std::max(0, std::min(10, ivol + incr));
-        _setvol(_volidx / 10.0f);
+        int ivol = std::max(0, std::min(LEVELS, static_cast<int>(vol * LEVELS)));
+        _volidx = std::max(0, std::min(LEVELS, ivol + incr));
+        _setvol(_volidx / static_cast<float>(LEVELS));
         _rect.x = 128 * _volidx;
     }
 }

@@ -26,27 +26,18 @@ namespace ui {
 namespace sdl2 {
 namespace widget {
 
-class Floppy : public Widget {
+class Pause : public Widget {
 public:
-    constexpr static const Rgba DISK_ATTACHED_COLOR = { 255, 255, 255, 255 };
-    constexpr static const Rgba DISK_MISSING_COLOR  = { 255, 255, 255, 64  };
+    Pause(SDL_Renderer *_renderer, const std::function<bool()> &upd = {});
 
-    struct Status {
-        bool is_attached{};
-        bool is_idle{};
-    };
-
-    Floppy(SDL_Renderer *renderer, const std::function<Status()> &upd);
-
-    virtual ~Floppy();
+    virtual ~Pause();
 
     void render(const SDL_Rect &dstrect) override;
 
 private:
-    std::function<Status()> _update;
-    int64_t                 _start{};
-    int64_t                 _elapsed{};
-    bool                    _prev_idle{};
+    std::function<bool()> _update;
+    bool                  _is_paused{};
+    SDL_Rect              _rect{-1, -1, -1, -1};
 };
 
 }

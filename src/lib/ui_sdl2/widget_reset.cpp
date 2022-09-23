@@ -16,9 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#pragma once
-
-#include "ui_sdl2/widget.hpp"
+#include "ui_sdl2/widget_reset.hpp"
 
 
 namespace caio {
@@ -26,28 +24,24 @@ namespace ui {
 namespace sdl2 {
 namespace widget {
 
-class Floppy : public Widget {
-public:
-    constexpr static const Rgba DISK_ATTACHED_COLOR = { 255, 255, 255, 255 };
-    constexpr static const Rgba DISK_MISSING_COLOR  = { 255, 255, 255, 64  };
+#include "icons/reset_128.hpp"
 
-    struct Status {
-        bool is_attached{};
-        bool is_idle{};
-    };
 
-    Floppy(SDL_Renderer *renderer, const std::function<Status()> &upd);
+Reset::Reset(SDL_Renderer *renderer)
+    : Widget{renderer}
+{
+    Widget::load(reset_128_png);
+}
 
-    virtual ~Floppy();
+Reset::~Reset()
+{
+}
 
-    void render(const SDL_Rect &dstrect) override;
-
-private:
-    std::function<Status()> _update;
-    int64_t                 _start{};
-    int64_t                 _elapsed{};
-    bool                    _prev_idle{};
-};
+void Reset::render(const SDL_Rect &dstrect)
+{
+    static const SDL_Rect rect{0, 0, 128, 128};
+    Widget::render(rect, dstrect);
+}
 
 }
 }

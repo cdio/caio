@@ -16,9 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#pragma once
-
-#include "ui_sdl2/widget.hpp"
+#include "ui_sdl2/widget_pause.hpp"
 
 
 namespace caio {
@@ -26,28 +24,35 @@ namespace ui {
 namespace sdl2 {
 namespace widget {
 
-class Floppy : public Widget {
-public:
-    constexpr static const Rgba DISK_ATTACHED_COLOR = { 255, 255, 255, 255 };
-    constexpr static const Rgba DISK_MISSING_COLOR  = { 255, 255, 255, 64  };
+#include "icons/pause_128x2.hpp"
 
-    struct Status {
-        bool is_attached{};
-        bool is_idle{};
-    };
 
-    Floppy(SDL_Renderer *renderer, const std::function<Status()> &upd);
+Pause::Pause(SDL_Renderer *renderer, const std::function<bool()> &upd)
+    : Widget{renderer},
+      _update{upd}
+{
+    Widget::load(pause_128x2_png);
+}
 
-    virtual ~Floppy();
+Pause::~Pause()
+{
+}
 
-    void render(const SDL_Rect &dstrect) override;
+void Pause::render(const SDL_Rect &dstrect)
+{
+    bool is_paused{};
 
-private:
-    std::function<Status()> _update;
-    int64_t                 _start{};
-    int64_t                 _elapsed{};
-    bool                    _prev_idle{};
-};
+    if (_update) {
+        is_paused = _update();
+    }
+
+    if (_rect.x == -1 || _is_paused != is_paused) {
+        _rect = (is_paused ? SDL_Rect{128, 0, 128, 128} : SDL_Rect{0, 0, 128, 128});
+        _is_paused = is_paused;
+    }
+
+    Widget::render(_rect, dstrect);
+}
 
 }
 }

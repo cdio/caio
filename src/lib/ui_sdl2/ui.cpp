@@ -32,6 +32,8 @@
 #include "ui_sdl2/sdl2.hpp"
 #include "ui_sdl2/widget_empty.hpp"
 #include "ui_sdl2/widget_fullscreen.hpp"
+#include "ui_sdl2/widget_pause.hpp"
+#include "ui_sdl2/widget_reset.hpp"
 #include "ui_sdl2/widget_volume.hpp"
 
 
@@ -188,20 +190,26 @@ void UI::pause(const std::function<void(bool)> &pause_cb, const std::function<bo
     _ispause_cb = ispause_cb;
 }
 
-void UI::suspend(bool pause)
+void UI::pause(bool suspend)
 {
     if (_pause_cb) {
-        _pause_cb(pause);
+        _pause_cb(suspend);
+        title(_conf.video.title + (suspend ? " (PAUSED)" : ""));
     }
 }
 
-bool UI::suspended() const
+bool UI::paused() const
 {
     if (_ispause_cb) {
         return _ispause_cb();
     }
 
     return false;
+}
+
+void UI::reset(const std::function<void()> &reset_cb)
+{
+    _reset_cb = reset_cb;
 }
 
 bool UI::audio_enabled() const
@@ -295,11 +303,27 @@ SDL_Renderer *UI::renderer()
 
 void UI::create_panel()
 {
+    /*
+     * Default panel widgets (from right to left):
+     * Fullscreen, Reset, Pause, Volume.
+     */
     _panel = std::make_shared<Panel>(_renderer);
 
     auto fullscreen = std::make_shared<widget::Fullscreen>(_renderer, [this]() { return _is_fullscreen; });
     fullscreen->action([this]() {
         toggle_fullscreen();
+    });
+
+    auto reset = std::make_shared<widget::Reset>(_renderer);
+    reset->action([this]() {
+        if (_reset_cb) {
+            _reset_cb();
+        }
+    });
+
+    auto pause = std::make_shared<widget::Pause>(_renderer, [this]() { return paused(); });
+    pause->action([this]() {
+        this->pause(paused() ^ true);
     });
 
     auto volume = std::make_shared<widget::Volume>(_renderer,
@@ -315,6 +339,8 @@ void UI::create_panel()
     auto empty = std::make_shared<widget::Empty>(_renderer);
 
     _panel->add(fullscreen, Panel::Just::RIGHT);
+    _panel->add(reset, Panel::Just::RIGHT);
+    _panel->add(pause, Panel::Just::RIGHT);
     _panel->add(volume, Panel::Just::RIGHT);
     _panel->add(empty, Panel::Just::RIGHT);
     _panel->add(empty, Panel::Just::RIGHT);
