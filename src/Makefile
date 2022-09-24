@@ -18,7 +18,8 @@
 #
 ROOT=		${abspath ..}
 
-DIRS=		lib \
+DIRS=		icons \
+		lib \
 		main
 
 include ${ROOT}/mk/dir.mk

@@ -391,12 +391,20 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
     /*
      * Default mappings.
      */
-    _mode = LORAM | HIRAM | CHAREN | GAME | EXROM;
-    remap();
+    PLA::reset();
 }
 
 PLA::~PLA()
 {
+}
+
+void PLA::reset()
+{
+    /*
+     * Default mappings.
+     */
+    _mode = LORAM | HIRAM | CHAREN | GAME | EXROM;
+    remap();
 }
 
 void PLA::mode(uint8_t pins, uint8_t mask, bool force)

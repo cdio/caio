@@ -337,7 +337,7 @@ Mos6502::Mos6502(const std::string &type, const std::string &label)
 Mos6502::Mos6502(const std::shared_ptr<ASpace> &mmap, const std::string &type, const std::string &label)
     : Name{type, (label.empty() ? LABEL : label)}
 {
-    reset(mmap);
+    init(mmap);
 }
 
 Mos6502::~Mos6502()
@@ -354,18 +354,13 @@ void Mos6502::init_monitor(std::istream &is, std::ostream &os)
     _monitor->add_breakpoint(_regs.PC);
 }
 
-void Mos6502::reset(const std::shared_ptr<ASpace> &mmap)
+void Mos6502::init(const std::shared_ptr<ASpace> &mmap)
 {
     if (mmap) {
         _mmap = mmap;
     }
 
-    _regs = {
-        .PC = read_addr(vRESET),
-        .S  = S_init
-    };
-
-    flag(0);
+    reset();
 }
 
 void Mos6502::loglevel(const std::string &lvs)
@@ -378,18 +373,31 @@ Logger::Level Mos6502::loglevel() const
     return _log.loglevel();
 }
 
-IRQPin &Mos6502::irq_pin()
+void Mos6502::reset()
 {
+    _regs = {
+        .PC = read_addr(vRESET),
+        .S  = S_init
+    };
+
+    flag(0);
+}
+
+bool Mos6502::irq_pin(bool active)
+{
+    _irq_pin = active;
     return _irq_pin;
 }
 
-IRQPin &Mos6502::nmi_pin()
+bool Mos6502::nmi_pin(bool active)
 {
+    _nmi_pin = active;
     return _nmi_pin;
 }
 
-InputPin &Mos6502::rdy_pin()
+bool Mos6502::rdy_pin(bool active)
 {
+    _rdy_pin = active;
     return _rdy_pin;
 }
 

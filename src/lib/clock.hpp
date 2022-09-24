@@ -153,26 +153,46 @@ public:
     size_t tick();
 
     /**
+     * Reset this clock.
+     * Before calling this method the clock must be paused otherwise it does nothing.
+     * @see pause()
+     */
+    void reset();
+
+    /**
      * Stop this clock.
-     * Instruct the clock to stop and return immediably;
-     * this method does not wait for a running clock thread
+     * Instruct the clock to stop and return immediably.
+     * This method does not wait for a running clock thread
      * to return back from the run() method.
      * @see run()
      */
     void stop();
 
     /**
-     * Pause/Unpause this clock;
-     * @param susp true to pause; false to unpause it.
+     * Pause/Unpause this clock.
+     * Instruct the clock to pause/unpause and return immediately.
+     * This method does not wait for the clock thread to actually pause/resume.
+     * @param susp true to pause; false to unpause.
      * @see paused()
      * @see toggle_pause()
      */
     void pause(bool susp = true);
 
     /**
-     * Toggle suspend status of this clock.
-     * @see is_suspended()
-     * @see suspend()
+     * Pause/Unpause this clock and wait until it takes effect.
+     * Instruct the clock to pause/unpause and wait for it to actually do the change.
+     * This method must be called by another thread that is not running this clock.
+     * @param susp true to pause; false to unpause.
+     * @see paused()
+     */
+    void pause_wait(bool susp = true);
+
+    /**
+     * Toggle the pause/unpause status of this clock.
+     * Instruct the clock to toggle its running status and return immediately.
+     * This method does not wait for the clock thread to actually pause/resume.
+     * @see pause()
+     * @see paused()
      */
     void toggle_pause();
 
@@ -223,8 +243,9 @@ public:
     }
 
 private:
-    size_t                        _freq{};
-    float                         _delay{};
+    size_t                        _freq;
+    float                         _delay;
+
     std::atomic_bool              _stop{};
     std::atomic_bool              _suspend{};
     std::vector<clockable_pair_t> _clockables{};

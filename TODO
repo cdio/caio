@@ -1,6 +1,11 @@
-- c64:      Hard reset
+- UI:       Better scanlines effects
 - CPU:      Z80
 - CPU:      Do not terminate on illegal instructions
+- VICII:    Fix sprite position (batman, turrican)
+- VICII:    Fix border colour during open-border mode
+- SID:      Fix saturation (ballad/pantheon_toggle)
+- SID:      Update reSID
+- UI:       Windowed pseudo-terminals (logs and monitor)
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
 - C1541Fs:  Support for P00 files
 - UI:       Fix disk widget activity when C1541 is in error condition.
@@ -10,10 +15,6 @@
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
 - CBMBUS:   Refactor using pullups
-- UI:       Pause widget
-- SID:      Fork the coming reSID 1.0
-- VICII:    Fix border colour during open-border mode
-- VICII:    Fix sprite position on some cartridge games
 - misc:     Brew package for macos
 - misc:     Virtual joystick (keypad)
 - cart:     C64 EasyFlash: when an eeprom is written, write to file

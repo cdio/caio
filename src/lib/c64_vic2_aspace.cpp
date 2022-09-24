@@ -82,5 +82,9 @@ Vic2ASpace::Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, devptr_t &ram, devp
     bank(3);
 }
 
+Vic2ASpace::~Vic2ASpace()
+{
+}
+
 }
 }

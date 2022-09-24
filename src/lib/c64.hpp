@@ -67,28 +67,84 @@ constexpr static const addr_t BASIC_KEYB_BUFF_POS = 0x00C6;     /* Number of ele
  */
 class C64 {
 public:
+    /*
+     * RAM initialisation patterns.
+     * See the comments here: https://csdb.dk/forums/?roomid=11&topicid=116800&showallposts=1
+     */
+    constexpr static const uint64_t RAM_INIT_PATTERN1 = 0x00FF00FF00FF00FFULL;
+    constexpr static const uint64_t RAM_INIT_PATTERN2 = 0xFFFFFFFF00000000ULL;
+    constexpr static const uint64_t RAM_INIT_PATTERN3 = 0x0000FFFFFFFF0000ULL;
+
     /**
-     * Initialise this C64.
+     * Instantiate this C64.
+     * This method only sets the specified configuration parameters.
+     * Call the run() method to build and start the actual C64 emulator.
      * @param conf Configuration parameters.
      * @see C64Config
+     * @see run()
      */
     C64(const C64Config &conf);
 
     virtual ~C64();
 
     /**
-     * Reset and start this C64.
-     * @see reset()
+     * Build a C64 emulator and start it.
+     * This method returns on error or when the user terminates the emulator through the UI.
      * @see start()
      */
     void run();
 
     /**
-     * @return A human-readable string representation of this instance.
+     * @return A human-readable string representation of this C64.
      */
     std::string to_string() const;
 
 private:
+    /**
+     * Start this C64.
+     * - Instantiate the UI and run it in the context of the calling thread.
+     * - Build a C64 and run it on its own thread.
+     * This method returns on error or when the user terminates the emulator through the UI.
+     */
+    void start();
+
+    /**
+     * Restart this C64.
+     * This method is called by the UI when the user clicks on the reset widget
+     * (it runs in the context of the UI thread).
+     * If the emulator is paused this method does nothing.
+     */
+    void reset();
+
+    /**
+     * Instantiate the devices needed by a C64.
+     */
+    void create_devices();
+
+    /**
+     * Connect the devices and build a C64.
+     * @see create_devices()
+     */
+    void connect_devices();
+
+    /**
+     * Create the user interface.
+     */
+    void create_ui();
+
+    /**
+     * Create the user interface widgets used by the C64.
+     */
+    void make_widgets();
+
+    /**
+     * Connect the user interface to the C64.
+     * @see create_ui()
+     * @see create_devices()
+     * @see make_widgets()
+     */
+    void connect_ui();
+
     /**
      * Get the full pathname for a ROM file.
      * @param fname ROM file name.
@@ -120,6 +176,13 @@ private:
     std::string keymapspath(const std::string &fname) const;
 
     /**
+     * Initialise RAM memory using a specific pattern.
+     * @param pattern Initialisation patter;
+     * @param data    RAM to initialise.
+     */
+    void ram_init(uint64_t pattern, std::vector<uint64_t> &data);
+
+    /**
      * Attach a cartridge image file.
      * Load a .crt image and associate it to an I/O expansion device.
      * @return An I/O expansion device (Cartridge) attached to the specified image;
@@ -139,39 +202,12 @@ private:
     void attach_prg();
 
     /**
-     * Create (instantiate) the devices that emulate the C64 hardware.
+     * Process hot-keys.
+     * This method is indirectly called by the user interface.
      */
-    void create_devices();
-
-    /**
-     * Create the user interface based on configuration parameters.
-     */
-    void create_ui();
-
-    /**
-     * Create UI panel widgets and connect them to the associated devices.
-     */
-    void make_widgets();
-
-    /**
-     * Connect (wire) all the devices in order to build the C64 hardware.
-     */
-    void connect_devices();
-
-    /**
-     * Reset this C64.
-     * All devices are destroyed and recreated.
-     */
-    void reset();
-
-    /**
-     * Start this C64.
-     */
-    void start();
+    void hotkeys(Keyboard::Key key);
 
     C64Config                         _conf{};
-    bool                              _paused{};
-    bool                              _pause_allowed{true};
     devptr_t                          _ram{};
     devptr_t                          _basic{};
     devptr_t                          _kernal{};
@@ -194,6 +230,10 @@ private:
     std::shared_ptr<C64Joystick>      _joy1{};
     std::shared_ptr<C64Joystick>      _joy2{};
     std::shared_ptr<ui::UI>           _ui{};
+    std::shared_ptr<ui::Widget>       _wfloppy8{};
+    std::shared_ptr<ui::Widget>       _wfloppy9{};
+    std::shared_ptr<ui::Widget>       _wgamepad1{};
+    std::shared_ptr<ui::Widget>       _wgamepad2{};
 };
 
 }

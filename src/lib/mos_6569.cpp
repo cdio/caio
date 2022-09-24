@@ -115,6 +115,8 @@ void Mos6569::trigger_lp()
 
 void Mos6569::reset()
 {
+    irq_out(false);
+    ba_out(true);
 }
 
 size_t Mos6569::size() const

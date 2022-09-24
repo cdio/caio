@@ -70,24 +70,24 @@ void Clock::delay(float delay)
     _delay = delay;
 }
 
-void Clock::add(const std::shared_ptr<Clockable> &c)
+void Clock::add(const std::shared_ptr<Clockable> &clkb)
 {
-    if (c) {
-        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&c](const clockable_pair_t &pair) -> bool {
-            return (pair.first.get() == c.get());
+    if (clkb) {
+        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&clkb](const clockable_pair_t &pair) -> bool {
+            return (pair.first.get() == clkb.get());
         });
 
         if (it == _clockables.end()) {
-            _clockables.push_back({c, 0});
+            _clockables.push_back({clkb, 0});
         }
     }
 }
 
-void Clock::del(const std::shared_ptr<Clockable> &c)
+void Clock::del(const std::shared_ptr<Clockable> &clkb)
 {
-    if (c) {
-        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&c](const clockable_pair_t &pair) -> bool {
-            return (pair.first.get() == c.get());
+    if (clkb) {
+        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&clkb](const clockable_pair_t &pair) -> bool {
+            return (pair.first.get() == clkb.get());
         });
 
         if (it != _clockables.end()) {
@@ -179,6 +179,16 @@ size_t Clock::tick()
     return ~Clockable::HALT;
 }
 
+void Clock::reset()
+{
+    if (paused()) {
+        for (auto &pair : _clockables) {
+            auto &cycles = pair.second;
+            cycles = 0;
+        }
+    }
+}
+
 void Clock::stop()
 {
     _stop = true;
@@ -187,6 +197,16 @@ void Clock::stop()
 void Clock::pause(bool susp)
 {
     _suspend = susp;
+}
+
+void Clock::pause_wait(bool susp)
+{
+    if (susp != paused()) {
+        pause(susp);
+        while (paused() != susp) {
+            std::this_thread::yield();
+        }
+    }
 }
 
 void Clock::toggle_pause()

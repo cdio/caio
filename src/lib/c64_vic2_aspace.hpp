@@ -49,8 +49,7 @@ public:
      */
     Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, devptr_t &ram, devptr_t &chargen);
 
-    virtual ~Vic2ASpace() {
-    }
+    virtual ~Vic2ASpace();
 
 private:
     /**

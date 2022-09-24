@@ -69,6 +69,13 @@ public:
     virtual ~PLA();
 
     /**
+     * Reset this PLA.
+     * Reinitialise this PLA and set the default mappings.
+     * (This is more like a re-init rather than a reset).
+     */
+    void reset();
+
+    /**
      * Set PLA input pins.
      * @param pins  Input pins to set o clear (based on mask);
      * @param mask  Mask of the input pins to set or clear;

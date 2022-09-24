@@ -306,7 +306,9 @@ Mos6526::~Mos6526()
 
 void Mos6526::reset()
 {
-    irq_out(false);
+    if (_icr_data & ICR_IR) {
+        irq_out(false);
+    }
     _timer_A.reset();
     _timer_B.reset();
     _tod = {};

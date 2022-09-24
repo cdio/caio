@@ -134,10 +134,10 @@ public:
     void init_monitor(std::istream &is, std::ostream &os);
 
     /**
-     * Reinitialise this CPU.
+     * Initialise this CPU.
      * @param mmap System mappings.
      */
-    void reset(const std::shared_ptr<ASpace> &mmap = {});
+    void init(const std::shared_ptr<ASpace> &mmap = {});
 
     /**
      * Set the single-step log level.
@@ -152,25 +152,33 @@ public:
     Logger::Level loglevel() const;
 
     /**
+     * Restart this CPU.
+     */
+    void reset();
+
+    /**
      * Trigger an IRQ.
      * This method must be called twice by external peripherals, the first time to activate
      * the IRQ pin and a second time to de-activate it when the interrupt is served.
      * @param active true to generate an interrupt; false to de-activate a previous interrupt request.
+     * @return The status of the IRQ pin after this call.
      */
-    IRQPin &irq_pin();
+    bool irq_pin(bool active);
 
     /**
      * Trigger an NMI interrupt.
      * @param active true to generate an interrupt; false to de-activate.
+     * @return The status of the NMI pin after this call.
      */
-    IRQPin &nmi_pin();
+    bool nmi_pin(bool active);
 
     /**
      * Set the RDY line.
      * @param active true to activate the RDY line; false otherwise.
+     * @return The status of the RDY pin after this call.
      * @see single_step()
      */
-    InputPin &rdy_pin();
+    bool rdy_pin(bool active);
 
     /**
      * External breakpoint.

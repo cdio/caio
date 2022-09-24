@@ -50,6 +50,106 @@ C64::~C64()
 {
 }
 
+void C64::run()
+{
+    create_ui();
+    make_widgets();
+
+    create_devices();
+    connect_devices();
+    attach_prg();
+
+    connect_ui();
+
+    if (_conf.monitor) {
+        _cpu->init_monitor(std::cin, std::cout);
+    }
+
+    start();
+}
+
+void C64::start()
+{
+    log.info("Starting caio v" + caio::version() + " - C64\n" + to_string() + "\n");
+
+    /*
+     * The emulator runs on its own thread.
+     */
+    std::thread th{[this]() {
+        /*
+         * System clock loop.
+         */
+        _clk->run();
+
+        /*
+         * The clock was self-terminated: Stop the user interface and exit this thread.
+         */
+        _ui->stop();
+    }};
+
+    if (!th.joinable()) {
+        log.error("Can't start the clock thread: " + Error::to_string() + "\n");
+        return;
+    }
+
+    /*
+     * The UI main loop runs in the main thread.
+     */
+    _ui->run();
+
+    _clk->stop();
+
+    th.join();
+
+    log.info("Terminating " + _conf.title + "\n");
+}
+
+void C64::reset()
+{
+    if (!_clk->paused()) {
+        /*
+         * Pause the clock and wait until it is actually paused
+         * (this method runs in the context of the UI thread; see connect_ui()).
+         */
+        _clk->pause_wait(true);
+
+        /*
+         * This method does not emulate a real hardware reset,
+         * it re-launches the C64 emulator instead.
+         */
+        _ram->reset();
+        _basic->reset();
+        _kernal->reset();
+        _chargen->reset();
+
+//        _bus->reset();
+//        _busdev->reset();
+
+        _cpu->write(0, 0);  /* Not necessary, PLA already sets the default mode */
+        _cpu->write(1, 0);
+        _pla->reset();
+
+        _io->reset();       /* Resets: VIC2, SID, VCOLOR, CIA1, CIA2 and Cartridge */
+
+        _cpu->reset();      /* CPU is reset after IO and PLA otherwise it could take the wrong reset vector */
+
+        _kbd->reset();
+
+        if (_unit8) {
+            _unit8->reset();
+        }
+
+        if (_unit9) {
+            _unit9->reset();
+        }
+
+        attach_prg();
+
+        _clk->reset();
+        _clk->pause(false);
+    }
+}
+
 std::string C64::rompath(const std::string &fname) const
 {
     auto path = fs::search(fname, {_conf.romdir});
@@ -85,10 +185,6 @@ std::shared_ptr<Cartridge> C64::attach_cartridge()
     if (!_conf.cartfile.empty()) {
         std::string fpath{cartpath(_conf.cartfile)};
         auto cart = Cartridge::create(fpath);
-        if (cart) {
-            _conf.title += " - " + cart->name();
-        }
-
         return cart;
     }
 
@@ -114,8 +210,6 @@ void C64::attach_prg()
 
             log.debug("Detected format: %s, start address: $%04X, size: %d ($%04X)\n", format, prog->address(),
                 prog->size(), prog->size());
-
-            _conf.title += " - " + fs::basename(_conf.prgfile);
 
             _cpu->bpadd(BASIC_READY_ADDR, [](Mos6510 &cpu, void *arg) {
                 /*
@@ -153,34 +247,31 @@ void C64::attach_prg()
     }
 }
 
+void C64::ram_init(uint64_t pattern, std::vector<uint64_t> &data)
+{
+    std::for_each(data.begin(), data.end(), [&pattern](uint64_t &value) {
+        value = pattern;
+        pattern ^= static_cast<uint64_t>(-1);
+
+        /* Put some random values */
+        if (std::rand() % 100 < 20) {
+            reinterpret_cast<uint8_t *>(&value)[std::rand() % 8] = std::rand() % 256;
+        }
+    });
+}
+
 void C64::create_devices()
 {
-    auto ram_init = [](std::vector<uint8_t> &data) {
-        /*
-         * The ram is initialised with a kind of FF 00 pattern,
-         * see the comments here: https://csdb.dk/forums/?roomid=11&topicid=116800&showallposts=1
-         */
-        uint64_t *val = reinterpret_cast<uint64_t *>(data.data());
-        //uint64_t pattern = 0xFFFFFFFF00000000ULL;
-        //uint64_t pattern = 0x0000FFFFFFFF0000ULL;
-        uint64_t pattern = 0x00FF00FF00FF00FFULL;   // This is what I remmeber (breadbin)
-
-        for (size_t i = 0; i < 8192; ++i) {
-            val[i] = pattern;
-            pattern ^= static_cast<uint64_t>(-1);
-
-            /* Put some random values */
-            if (std::rand() % 100 < 20) {
-                reinterpret_cast<uint8_t *>(val + i)[std::rand() % 8] = std::rand() % 256;
-            }
-        }
+    auto ram_init = [this](std::vector<uint8_t> &data) {
+        auto &data64 = reinterpret_cast<std::vector<uint64_t>&>(data);
+        this->ram_init(RAM_INIT_PATTERN1, data64);
     };
 
-    _ram = std::make_shared<DeviceRAM>("SYSTEM RAM", 65536, ram_init);
+    _ram = std::make_shared<DeviceRAM>("RAM", 65536, ram_init);
     _basic = std::make_shared<DeviceROM>(rompath(BASIC_FNAME), "BASIC", BASIC_SIZE);
     _kernal = std::make_shared<DeviceROM>(rompath(KERNAL_FNAME), "KERNAL", KERNAL_SIZE);
     _chargen = std::make_shared<DeviceROM>(rompath(CHARGEN_FNAME), "CHARGEN", CHARGEN_SIZE);
-    _vcolor = std::make_shared<NibbleRAM>("COLOR RAM", VCOLOR_SIZE);
+    _vcolor = std::make_shared<NibbleRAM>("COLOR-RAM", VCOLOR_SIZE);
 
     if (_conf.resid) {
         _sid = std::make_shared<Mos6581Resid>(Mos6581Resid::version(), CLOCK_FREQ_PAL);
@@ -191,11 +282,11 @@ void C64::create_devices()
     _cia1 = std::make_shared<Mos6526>("CIA1");
     _cia2 = std::make_shared<Mos6526>("CIA2");
 
-    _bus = std::make_shared<cbm_bus::Bus>("C64 BUS");
+    _bus = std::make_shared<cbm_bus::Bus>("BUS");
     _busdev = std::make_shared<C64BusController>(_bus, _cia2);
 
     auto vic2_mmap = std::make_shared<Vic2ASpace>(_cia2, _ram, _chargen);
-    _vic2 = std::make_shared<Mos6569>("VIC-II", vic2_mmap, _vcolor);
+    _vic2 = std::make_shared<Mos6569>("VIC2", vic2_mmap, _vcolor);
 
     _ioexp = attach_cartridge();
     _io = std::make_shared<C64IO>(_vic2, _sid, _vcolor, _cia1, _cia2, _ioexp);
@@ -203,7 +294,7 @@ void C64::create_devices()
     _pla = std::make_shared<PLA>(_ram, _basic, _kernal, _chargen, _io);
     _cpu = std::make_shared<Mos6510>(_pla);
 
-    _clk = std::make_shared<Clock>("SYSTEM CLOCK", CLOCK_FREQ_PAL, _conf.delay);
+    _clk = std::make_shared<Clock>("CLK", CLOCK_FREQ_PAL, _conf.delay);
 
     if (!_conf.unit8.empty()) {
         _unit8 = c1541::create(_conf.unit8, 8, _bus);
@@ -213,9 +304,9 @@ void C64::create_devices()
         _unit9 = c1541::create(_conf.unit9, 9, _bus);
     }
 
-    _kbd  = std::make_shared<C64Keyboard>("C64 KBD");
-    _joy1 = std::make_shared<C64Joystick>("C64 JOY1");
-    _joy2 = std::make_shared<C64Joystick>("C64 JOY2");
+    _kbd  = std::make_shared<C64Keyboard>("KBD");
+    _joy1 = std::make_shared<C64Joystick>("JOY1");
+    _joy2 = std::make_shared<C64Joystick>("JOY2");
 }
 
 void C64::connect_devices()
@@ -252,7 +343,7 @@ void C64::connect_devices()
     _cpu->add_iow(cpu_port_write, Mos6510::P0 | Mos6510::P1 | Mos6510::P2 | Mos6510::P3);
 
     /*
-     * Connect the Cartridge to the PLA.
+     * Connect the Expansion port (Cartridge) to the PLA.
      */
     if (_ioexp) {
         /*
@@ -268,6 +359,7 @@ void C64::connect_devices()
         auto cart_port_write = [this](addr_t addr, uint8_t data, bool force) {
             uint8_t plaval = ((data & Cartridge::GAME)  ? PLA::GAME  : 0) |
                              ((data & Cartridge::EXROM) ? PLA::EXROM : 0);
+
             _pla->mode(plaval, PLA::GAME | PLA::EXROM, force);
         };
 
@@ -277,34 +369,32 @@ void C64::connect_devices()
     }
 
     /*
-     * Connect clockable devices to the system clock.
-     */
-    _clk->add(_vic2);
-    _clk->add(_cpu);
-    _clk->add(_cia1);
-    _clk->add(_cia2);
-    _clk->add(_sid);
-    _clk->add(_unit8);
-    _clk->add(_unit9);
-
-    /*
-     * Configure the VIC2 video controller.
+     * Connect CPU's irq and nmi pins to CIA1, CIA2 and VIC2 irq outputs.
      */
     auto set_irq = [this](bool active) {
-        _cpu->irq_pin() = active;
+        _cpu->irq_pin(active);
     };
 
     auto set_nmi = [this](bool active) {
-        _cpu->nmi_pin() = active;
+        _cpu->nmi_pin(active);
     };
 
-    auto set_rdy = [this](bool active) {
-        _cpu->rdy_pin() = active;
-    };
-
+    _cia1->irq(set_irq);
+    _cia2->irq(set_nmi);
     _vic2->irq(set_irq);
+
+    /*
+     * Connect CPU's rdy pin to the VIC2's ba pin.
+     */
+    auto set_rdy = [this](bool active) {
+        _cpu->rdy_pin(active);
+    };
+
     _vic2->ba(set_rdy);
 
+    /*
+     * Load the VIC2 colour palette.
+     */
     if (!_conf.palettefile.empty()) {
         const auto ppath = palettepath(_conf.palettefile);
         if (ppath.empty()) {
@@ -314,25 +404,8 @@ void C64::connect_devices()
         _vic2->palette(ppath);
     }
 
-    _vic2->render_line([this](unsigned line, const ui::Scanline &scanline) {
-        _ui->render_line(line, scanline);
-    });
-
     /*
-     * Connect CIA 1/2 IRQ output pins to the CPU IRQ and NMI input pins.
-     */
-    _cia1->irq(set_irq);
-    _cia2->irq(set_nmi);
-
-    /*
-     * Configure the audio chip.
-     */
-    _sid->audio_buffer([this]() {
-        return _ui->audio_buffer();
-    });
-
-    /*
-     * Configure keyboard and joysticks and connect them to CIA1.
+     * Connect keyboard and joysticks to the proper CIA1 ports.
      */
     constexpr uint8_t KBD_MASK = 255;
 
@@ -371,6 +444,18 @@ void C64::connect_devices()
     _cia1->add_ior(kbd_read, KBD_MASK);
     _cia1->add_iow(kbd_write, KBD_MASK);
 
+    /*
+     * Connect the RESTORE key to the CPU's nmi pin.
+     */
+    auto restore_key = [this]() {
+        _cpu->nmi_pin(true);
+    };
+
+    _kbd->restore_key(restore_key);
+
+    /*
+     * Load the keyboard mappings.
+     */
     if (!_conf.keymapsfile.empty()) {
         const auto kpath = keymapspath(_conf.keymapsfile);
         if (kpath.empty()) {
@@ -380,65 +465,27 @@ void C64::connect_devices()
         _kbd->load(kpath);
     }
 
-    auto restore_key = [this]() {
-        _cpu->nmi_pin() = true;
-    };
-
-    static_pointer_cast<C64Keyboard>(_kbd)->restore_key(restore_key);
-
     /*
-     * Connect the keyboard and joysticks to the UI.
+     * Connect clockable devices to the system clock.
      */
-    auto hotkeys = [this](Keyboard::Key key) {
-        switch (key) {
-        case Keyboard::KEY_ALT_J:
-            /* Swap joysticks */
-            _conf.swapj ^= true;
-            log.debug("Joysticks %sswapped\n", (_conf.swapj ? "" : "un"));
-            break;
-
-        case Keyboard::KEY_ALT_M:
-            /* Enter monitor on the next clock tick only if it is active */
-            if (!_conf.monitor) {
-                break;
-            }
-            /* PASSTHROUGH */
-
-        case Keyboard::KEY_CTRL_C:
-            /* Enter monitor on the next clock tick */
-            _cpu->ebreak();
-            if (!_paused) {
-                break;
-            }
-
-            /* CTRL+C forces resume from pause */
-            /* PASSTHROUGH */
-
-        case Keyboard::KEY_PAUSE:
-            if (_pause_allowed) {
-                _paused ^= true;
-                _clk->toggle_pause();
-                if (_paused) {
-                    _ui->audio_pause();
-                    _ui->title(_conf.title + " (PAUSED)");
-                } else {
-                    _ui->audio_play();
-                    _ui->title(_conf.title);
-                }
-            }
-            break;
-
-        default:;
-        }
-    };
-
-    _ui->keyboard(_kbd);
-    _ui->joystick({_joy1, _joy2});
-    _ui->hotkeys(hotkeys);
+    _clk->add(_vic2);
+    _clk->add(_cpu);
+    _clk->add(_cia1);
+    _clk->add(_cia2);
+    _clk->add(_sid);
+    _clk->add(_unit8);
+    _clk->add(_unit9);
 }
 
 void C64::create_ui()
 {
+    std::string title{_conf.title};
+    if (_ioexp) {
+        title += " - " + _ioexp->name();
+    } else if (!_conf.prgfile.empty()) {
+        title += " - " + fs::basename(_conf.prgfile);
+    }
+
     ui::Config uiconf {
         .audio = {
             .enabled       = _conf.audio_enabled,
@@ -447,7 +494,7 @@ void C64::create_ui()
             .samples       = Mos6581::SAMPLES
         },
         .video = {
-            .title         = _conf.title,
+            .title         = title,
             .width         = Mos6569::WIDTH,
             .height        = Mos6569::HEIGHT,
             .fps           = _conf.fps,
@@ -460,19 +507,6 @@ void C64::create_ui()
     };
 
     _ui = std::make_shared<ui::UI>(uiconf);
-
-    auto do_pause = [this](bool susp) {
-        if (!_paused) {
-            _clk->pause(susp);
-        }
-        _pause_allowed = !susp;
-    };
-
-    auto is_paused = [this]() {
-        return _clk->paused();
-    };
-
-    _ui->pause(do_pause, is_paused);
 }
 
 void C64::make_widgets()
@@ -481,29 +515,15 @@ void C64::make_widgets()
      * Floppy disks presence and idle status.
      */
     auto floppy8 = ui::make_widget<ui::widget::Floppy>(_ui, [this]() {
-        struct ui::widget::Floppy::Status st{};
-        if (_unit8) {
-            st.is_idle = _unit8->is_idle();
-            st.is_attached = true;
-        } else {
-            st.is_idle = true;
-            st.is_attached = false;
-        }
-
-        return st;
+        using Status = ui::widget::Floppy::Status;
+        return (_unit8 ? Status{.is_attached = true, .is_idle = _unit8->is_idle()} :
+                         Status{.is_attached = false, .is_idle = true});
     });
 
     auto floppy9 = ui::make_widget<ui::widget::Floppy>(_ui, [this]() {
-        struct ui::widget::Floppy::Status st{};
-        if (_unit9) {
-            st.is_idle = _unit9->is_idle();
-            st.is_attached = true;
-        } else {
-            st.is_idle = true;
-            st.is_attached = false;
-        }
-
-        return st;
+        using Status = ui::widget::Floppy::Status;
+        return (_unit9 ? Status{.is_attached = true, .is_idle = _unit9->is_idle()} :
+                         Status{.is_attached = false, .is_idle = true});
     });
 
     /*
@@ -529,9 +549,9 @@ void C64::make_widgets()
 
     auto swapj_action = [this]() {
         /*
-         * Let the user swap joysticks by clicking one of the gamepad widgets.
+         * Click on a gamepad widget swaps joysticks.
          */
-        _conf.swapj ^= true;
+        hotkeys(Keyboard::KEY_ALT_J);
     };
 
     gamepad1->action(swapj_action);
@@ -544,62 +564,96 @@ void C64::make_widgets()
     panel->add(gamepad2);
 }
 
-void C64::reset()
+void C64::connect_ui()
 {
-    create_devices();
-    create_ui();
+    /*
+     * Connect Pause and Reset widgets.
+     */
+    auto do_pause = [this](bool suspend) {
+        hotkeys(Keyboard::KEY_PAUSE);
+    };
 
-    connect_devices();
-    make_widgets();
+    auto is_paused = [this]() {
+        return _clk->paused();
+    };
 
-    attach_prg();
-}
+    auto do_reset = [this]() {
+        reset();
+    };
 
-void C64::run()
-{
-    reset();
-
-    if (_conf.monitor) {
-        _cpu->init_monitor(std::cin, std::cout);
-    }
-
-    start();
-}
-
-void C64::start()
-{
-    log.info("Starting caio v" + caio::version() + " - C64\n" + to_string() + "\n");
+    _ui->pause(do_pause, is_paused);
+    _ui->reset(do_reset);
 
     /*
-     * The emulator runs on its own thread.
+     * Connect the audio output.
      */
-    std::thread th{[this]() {
-        /*
-         * System clock loop.
-         */
-        _clk->run();
-
-        /*
-         * The clock was self-terminated.
-         */
-        _ui->stop();
-    }};
-
-    if (!th.joinable()) {
-        log.error("Can't start the clock thread: " + Error::to_string() + "\n");
-        return;
-    }
+    _sid->audio_buffer([this]() {
+        return _ui->audio_buffer();
+    });
 
     /*
-     * The UI main loop runs in the main thread.
+     * Connect the video output.
      */
-    _ui->run();
+    _vic2->render_line([this](unsigned line, const ui::Scanline &scanline) {
+        _ui->render_line(line, scanline);
+    });
 
-    _clk->stop();
+    /*
+     * Connect keyboard and joysticks.
+     */
+    auto hotkeys = [this](Keyboard::Key key) {
+        this->hotkeys(key);
+    };
 
-    th.join();
+    _ui->hotkeys(hotkeys);
+    _ui->keyboard(_kbd);
+    _ui->joystick({_joy1, _joy2});
+}
 
-    log.info("Terminating " + _conf.title + "\n");
+void C64::hotkeys(Keyboard::Key key)
+{
+    /*
+     * This methods is called in the context of the UI thread
+     * (see connect_ui()).
+     */
+    switch (key) {
+    case Keyboard::KEY_ALT_J:
+        /*
+         * Swap joysticks.
+         */
+        _conf.swapj ^= true;
+        log.debug("Joysticks %sswapped\n", (_conf.swapj ? "" : "un"));
+        break;
+
+    case Keyboard::KEY_ALT_M:
+        /*
+         * Enter monitor on the next clock tick only if it is active.
+         */
+        if (!_conf.monitor) {
+            break;
+        }
+
+        /* PASSTHROUGH */
+
+    case Keyboard::KEY_CTRL_C:
+        /*
+         * Enter monitor on the next clock tick.
+         * CTRL-C forces resume from pause.
+         */
+        _cpu->ebreak();
+        if (!_clk->paused()) {
+            break;
+        }
+
+        /* PASSTHROUGH */
+
+    case Keyboard::KEY_PAUSE:
+        log.debug("System %spaused\n", (_ui->paused() ? "un" : ""));
+        _clk->pause(_clk->paused() ^ true);
+        break;
+
+    default:;
+    }
 }
 
 std::string C64::to_string() const
