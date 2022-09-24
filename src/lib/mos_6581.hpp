@@ -37,7 +37,7 @@ namespace caio {
  */
 class Mos6581 : public Mos6581I {
 public:
-    constexpr static const size_t MAX_KERNEL_SIZE = signal::kernel_size(30.0f, SAMPLING_RATE);
+    constexpr static const size_t MAX_KERNEL_SIZE = signal::kernel_size(200.0f, SAMPLING_RATE);
     constexpr static const float VOUT_MAX         = 0.3f;
 
     class Oscillator {

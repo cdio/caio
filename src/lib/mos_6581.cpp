@@ -573,10 +573,21 @@ inline float Mos6581::Filter::frequency() const
 inline float Mos6581::Filter::Q() const
 {
     /*
-     * Q between 0.707 and 1.7.
-     * FIXME: These values do not seem to be correct.
+     * From reSID:
+     * "In the MOS 6581, 1/Q is controlled linearly by res. From die photographs
+     *  of the resonance "resistor" ladder it follows that 1/Q ~ ~res/8
+     *  (assuming an ideal op-amp and ideal "resistors"). This implies that Q
+     *  ranges from 0.533 (res = 0) to 8 (res = E). For res = F, Q is actually
+     *  theoretically unlimited, which is quite unheard of in a filter
+     *  circuit."
      */
-    float Q = 0.707f + (1.7f - 0.707f) * (static_cast<float>(_res) / 15.0f);
+    auto nres = (~_res) & 15;
+    if (nres == 15) {
+        --nres;
+    }
+
+    float Q = 8.0f / nres;
+
     return Q;
 }
 
