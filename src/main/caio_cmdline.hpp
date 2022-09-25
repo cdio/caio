@@ -51,7 +51,6 @@ public:
         OPTION_MONITOR,
         OPTION_LOGFILE,
         OPTION_LOGLEVEL,
-        OPTION_PANEL,
         OPTION_VERSION,
         OPTION_HELP,
 

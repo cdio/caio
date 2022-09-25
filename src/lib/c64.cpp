@@ -502,7 +502,6 @@ void C64::create_ui()
             .sleffect      = ui::to_sleffect(_conf.scanlines),
             .fullscreen    = _conf.fullscreen,
             .smooth_resize = _conf.smooth_resize,
-            .panel         = _conf.panel,
         },
     };
 

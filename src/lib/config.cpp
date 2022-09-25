@@ -73,6 +73,9 @@ Config &Config::operator=(const Confile &conf)
             const std::string &str = it->second;
             if (!str.empty()) {
                 scale = std::atof(str.c_str());
+                if (scale < 1.0f) {
+                    scale = 1.0f;
+                }
             }
         }
 
@@ -111,12 +114,6 @@ Config &Config::operator=(const Confile &conf)
         if (it != sec.end()) {
             const std::string str = utils::tolow(it->second);
             monitor = (str == "yes" || str == "ye" || str == "y");
-        }
-
-        it = sec.find(CaioConfile::PANEL_CONFIG_KEY);
-        if (it != sec.end()) {
-            const std::string str = utils::tolow(it->second);
-            panel = (str == "yes" || str == "ye" || str == "y");
         }
 
         it = sec.find(CaioConfile::LOGFILE_CONFIG_KEY);
@@ -158,7 +155,6 @@ std::string Config::to_string() const
        << "  Audio enabled:      " << (audio_enabled ? "yes" : "no") << std::endl
        << "  Speed Delay         " << delay << "x" << std::endl
        << "  CPU Monitor:        " << (monitor ? "yes" : "no") << std::endl
-       << "  Panel visible:      " << (panel ? "yes" : "no") << std::endl
        << "  Log file:           " << logfile << std::endl
        << "  Log level:          " << loglevel;
 

@@ -54,8 +54,6 @@ const std::vector<::option> CaioCmdline::lopts = {
     { "logfile",    required_argument,  nullptr, CaioCmdline::OPTION_LOGFILE    },
     { "loglevel",   required_argument,  nullptr, CaioCmdline::OPTION_LOGLEVEL   },
 
-    { "panel",      required_argument,  nullptr, CaioCmdline::OPTION_PANEL      },
-
     { "version",    no_argument,        nullptr, CaioCmdline::OPTION_VERSION    },
     { "help",       no_argument,        nullptr, CaioCmdline::OPTION_HELP       }
 };
@@ -107,8 +105,6 @@ void CaioCmdline::usage()
               << " --loglevel <lv>        Use the specified loglevel; a combination of: "               << std::endl
               << "                        error|warn|info|debug|all"                                    << std::endl
               << "                        (default is " << std::quoted(Config::DEFAULT_LOGLEVEL) << ")" << std::endl
-              << " --panel <yes|no>       Panel visibility"                                             << std::endl
-              << "                        (default is " << (Config::DEFAULT_PANEL ? "yes" : "no") << ")"<< std::endl
               << " -v|--version           Show version information and exit"                            << std::endl
               << " -h|--help              Print this message and exit"                                  << std::endl;
 }
@@ -226,10 +222,6 @@ Confile CaioCmdline::parse(int argc, char *const *argv)
 
         case OPTION_MONITOR:        /* Monitor */
             sec[conf.MONITOR_CONFIG_KEY] = "yes";
-            break;
-
-        case OPTION_PANEL:          /* Panel position */
-            sec[conf.PANEL_CONFIG_KEY] = optarg;
             break;
 
         case OPTION_LOGFILE:        /* Logfile */

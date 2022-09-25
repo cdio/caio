@@ -41,8 +41,6 @@ where <options> are:
  --loglevel <lv>        Use the specified loglevel; a combination of:
                         error|warn|info|debug|all
                         (default is "")
- --panel <yes|no>       Panel visibility
-                        (default is no)
  -v|--version           Show version information and exit
  -h|--help              Print this message and exit
 

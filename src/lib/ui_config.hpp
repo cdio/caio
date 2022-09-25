@@ -54,7 +54,6 @@ struct VideoConfig {
     SLEffect    sleffect{SLEffect::NONE};   /**< Scanlines effect.          */
     bool        fullscreen{};               /**< Start in fullscreen mode.  */
     bool        smooth_resize{};            /**< Smooth window resize.      */
-    bool        panel{false};               /**< Panel visibility.          */
 };
 
 /**
