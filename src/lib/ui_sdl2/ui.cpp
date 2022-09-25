@@ -845,15 +845,20 @@ void UI::render_screen()
             log.error("ui: Can't set render draw color: %s\n", sdl_error().c_str());
 
         } else {
+            int scale = static_cast<int>(_conf.video.scale);
+            if (scale == 1) {
+                ++scale;
+            }
+
             switch (sleffect) {
             case ui::SLEffect::HORIZONTAL:
-                for (int y = 0; y < height; y += 2) {
+                for (int y = 0; y < height; y += scale) {
                     SDL_RenderDrawLine(_renderer, 0, y, width, y);
                 }
                 break;
 
             case ui::SLEffect::VERTICAL:
-                for (int x = 0; x < width; x += 2) {
+                for (int x = 0; x < width; x += scale) {
                     SDL_RenderDrawLine(_renderer, x, 0, x, height);
                 }
                 break;
