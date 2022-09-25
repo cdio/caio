@@ -49,7 +49,7 @@ void Gamepad::render(const SDL_Rect &dstrect)
         st = _update();
     }
 
-    const Rgba &colour = (st.is_connected ? GAMEPAD_PRESENT_COLOR : GAMEPAD_MISSING_COLOR);
+    const Rgba &colour = (st.is_connected ? ENABLED_COLOR : DISABLED_COLOR);
     const auto &rect = (!st.is_swapped ? normal_rect : ((st.id % 2) == 0 ? swapped_0_rect : swapped_1_rect));
     Widget::render(rect, dstrect, colour);
 }

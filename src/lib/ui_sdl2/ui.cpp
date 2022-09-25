@@ -314,14 +314,18 @@ void UI::create_panel()
         toggle_fullscreen();
     });
 
-    auto reset = std::make_shared<widget::Reset>(_renderer);
+    auto paused_cb = [this]() {
+        return paused();
+    };
+
+    auto reset = std::make_shared<widget::Reset>(_renderer, paused_cb);
     reset->action([this]() {
         if (_reset_cb) {
             _reset_cb();
         }
     });
 
-    auto pause = std::make_shared<widget::Pause>(_renderer, [this]() { return paused(); });
+    auto pause = std::make_shared<widget::Pause>(_renderer, paused_cb);
     pause->action([this]() {
         this->pause(paused() ^ true);
     });

@@ -27,8 +27,9 @@ namespace widget {
 #include "icons/reset_128.hpp"
 
 
-Reset::Reset(SDL_Renderer *renderer)
-    : Widget{renderer}
+Reset::Reset(SDL_Renderer *renderer, const std::function<bool()> &is_paused)
+    : Widget{renderer},
+      _is_paused{is_paused}
 {
     Widget::load(reset_128_png);
 }
@@ -40,7 +41,8 @@ Reset::~Reset()
 void Reset::render(const SDL_Rect &dstrect)
 {
     static const SDL_Rect rect{0, 0, 128, 128};
-    Widget::render(rect, dstrect);
+    const auto &colour = (_is_paused() ? DISABLED_COLOR : ENABLED_COLOR);
+    Widget::render(rect, dstrect, colour);
 }
 
 }

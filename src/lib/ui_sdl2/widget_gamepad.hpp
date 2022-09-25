@@ -28,9 +28,6 @@ namespace widget {
 
 class Gamepad : public Widget {
 public:
-    constexpr static const Rgba GAMEPAD_MISSING_COLOR = { 255, 255, 255, 64  };
-    constexpr static const Rgba GAMEPAD_PRESENT_COLOR = { 255, 255, 255, 255 };
-
     struct Status {
         int  id;
         bool is_connected;

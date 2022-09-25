@@ -42,6 +42,8 @@ public:
     constexpr static const unsigned HEIGHT        = 128;
     constexpr static const float    RATIO         = static_cast<float>(WIDTH) / HEIGHT;
     constexpr static const uint8_t  ACTION_BUTTON = SDL_BUTTON_LEFT;
+    constexpr static const Rgba DISABLED_COLOR    = { 255, 255, 255, 64  };     /* Color modulators */
+    constexpr static const Rgba ENABLED_COLOR     = { 255, 255, 255, 255 };
 
     Widget(SDL_Renderer *renderer = nullptr);
 

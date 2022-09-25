@@ -28,9 +28,6 @@ namespace widget {
 
 class Floppy : public Widget {
 public:
-    constexpr static const Rgba DISK_ATTACHED_COLOR = { 255, 255, 255, 255 };
-    constexpr static const Rgba DISK_MISSING_COLOR  = { 255, 255, 255, 64  };
-
     struct Status {
         bool is_attached{};
         bool is_idle{};
