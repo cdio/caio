@@ -134,12 +134,6 @@ public:
     void init_monitor(std::istream &is, std::ostream &os);
 
     /**
-     * Initialise this CPU.
-     * @param mmap System mappings.
-     */
-    void init(const std::shared_ptr<ASpace> &mmap = {});
-
-    /**
      * Set the single-step log level.
      * @param lvs Log level string to set.
      * @see Logger::loglevel(const std::string &)
@@ -243,6 +237,12 @@ public:
     virtual void write(addr_t addr, uint8_t data);
 
 private:
+    /**
+     * Initialise this CPU.
+     * @param mmap System mappings.
+     */
+    void init(const std::shared_ptr<ASpace> &mmap = {});
+
     /**
      * Tick event method.
      * This method is called by the clock and executes a single CPU instruction.
