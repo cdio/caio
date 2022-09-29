@@ -20,173 +20,32 @@ ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
+OBJDIRS=	core \
+		ui_sdl2 \
+		c64
+
+OBJTXTS=	${OBJDIRS:%=%/objs.txt}
+
+OBJS=		${shell ${CAT} ${OBJTXTS}}
+
 LIB=		libcaio.a
-SOLIB=		${LIB:%.a=%.so}
 
-#
-# Core
-#
-CXXSRCS=	aspace.cpp \
-		clock.cpp \
-		config.cpp \
-		confile.cpp \
-		device.cpp \
-		device_none.cpp \
-		device_ram.cpp \
-		device_rom.cpp \
-		fs.cpp \
-		icon.cpp \
-		joystick.cpp \
-		keyboard.cpp \
-		logger.cpp \
-		name.cpp \
-		p00file.cpp \
-		prgfile.cpp \
-		rgb.cpp \
-		signal.cpp \
-		socket.cpp \
-		types.cpp \
-		ui_config.cpp \
-		utils.cpp \
-		version.cpp
+CLEANFILES+=	${LIB}
 
-INCS=		aspace.hpp \
-		clock.hpp \
-		config.hpp \
-		confile.hpp \
-		device.hpp \
-		device_none.hpp \
-		device_ram.hpp \
-		device_rom.hpp \
-		dispatcher.hpp \
-		endian.hpp \
-		fs.hpp \
-		gpio.hpp \
-		icon.hpp \
-		image.hpp \
-		joystick.hpp \
-		keyboard.hpp \
-		latch.hpp \
-		locked_queue.hpp \
-		logger.hpp \
-		name.hpp \
-		nibble_ram.hpp \
-		p00file.hpp \
-		prgfile.hpp \
-		pin.hpp \
-		pullup.hpp \
-		rgb.hpp \
-		signal.hpp \
-		socket.hpp \
-		types.hpp \
-		ui.hpp \
-		ui_config.hpp \
-		utils.hpp \
-		version.hpp
+CLEANDIRS+=	${OBJDIRS}
 
-CXXSRCS+=	mos_6502.cpp \
-		mos_6502_i_arith.cpp \
-		mos_6502_i_branch.cpp \
-		mos_6502_i_flags.cpp \
-		mos_6502_i_invalid.cpp \
-		mos_6502_i_move.cpp \
-		mos_6502_monitor.cpp \
-		mos_6510.cpp \
-		mos_6526.cpp \
-		mos_6569.cpp \
-		mos_6581.cpp \
-		mos_6581_i.cpp \
-		mos_6581_resid.cpp
+.PHONY=		_all all debug clean
 
-INCS+=		mos_6502.hpp \
-		mos_6502_monitor.hpp \
-		mos_6510.hpp \
-		mos_6510_monitor.hpp \
-		mos_6526.hpp \
-		mos_6569.hpp \
-		mos_6581.hpp \
-		mos_6581_i.hpp \
-		mos_6581_resid.hpp
+all: TARGET=all
+all: ${LIB}
 
-#
-# Commodore Specifics
-#
-CXXSRCS+=	cbm_bus.cpp \
-		c1541.cpp \
-		c1541_factory.cpp \
-		c1541_fs.cpp
+debug: TARGET=debug
+debug: ${LIB}
 
-INCS+=		cbm_bus.hpp \
-		c1541.hpp \
-		c1541_factory.hpp \
-		c1541_fs.hpp
+${LIB}: ${OBJTXTS}
+	${AR} ${ARFLAGS} $@ ${OBJS}
 
-#
-# C64 Specifics
-#
-CXXSRCS+=	c64.cpp \
-		c64_bus_controller.cpp \
-		c64_cartridge.cpp \
-		c64_config.cpp \
-		c64_crt.cpp \
-		c64_io.cpp \
-		c64_joystick.cpp \
-		c64_keyboard.cpp \
-		c64_pla.cpp \
-		c64_vic2_aspace.cpp
+${OBJTXTS}:
+	${MAKE} ${MAKEARGS} -j${NPROC} -C${dir $@} ${TARGET}
 
-INCS+=		c64.hpp \
-		c64_bus_controller.hpp \
-		c64_cartridge.hpp \
-		c64_config.hpp \
-		c64_crt.hpp \
-		c64_io.hpp \
-		c64_joystick.hpp \
-		c64_keyboard.hpp \
-		c64_pla.hpp \
-		c64_vic2_aspace.hpp
-
-CXXSRCS+=	c64_cartridge/cart_generic.cpp \
-		c64_cartridge/cart_simons_basic.cpp \
-		c64_cartridge/cart_ocean_type_1.cpp \
-		c64_cartridge/cart_easy_flash.cpp \
-		c64_cartridge/cart_magic_desk.cpp \
-		c64_cartridge/cart_c64_game_system_3.cpp
-
-INCS+=		c64_cartridge/cart_generic.hpp \
-		c64_cartridge/cart_simons_basic.hpp \
-		c64_cartridge/cart_ocean_type_1.hpp \
-		c64_cartridge/cart_easy_flash.hpp \
-		c64_cartridge/cart_magic_desk.hpp \
-		c64_cartridge/cart_c64_game_system_3.cpp
-
-#
-# UI Drivers
-#
-CXXSRCS+=	ui_sdl2/sdl2.cpp \
-		ui_sdl2/ui.cpp \
-		ui_sdl2/audio.cpp \
-		ui_sdl2/panel.cpp \
-		ui_sdl2/widget.cpp \
-		ui_sdl2/widget_empty.cpp \
-		ui_sdl2/widget_floppy.cpp \
-		ui_sdl2/widget_fullscreen.cpp \
-		ui_sdl2/widget_gamepad.cpp \
-		ui_sdl2/widget_pause.cpp \
-		ui_sdl2/widget_reset.cpp \
-		ui_sdl2/widget_volume.cpp
-
-INCS+=		ui_sdl2/sdl2.hpp \
-		ui_sdl2/ui.hpp \
-		ui_sdl2/audio.hpp \
-		ui_sdl2/panel.hpp \
-		ui_sdl2/widget.hpp \
-		ui_sdl2/widget_empty.hpp \
-		ui_sdl2/widget_floppy.hpp \
-		ui_sdl2/widget_fullscreen.hpp \
-		ui_sdl2/widget_gamepad.hpp \
-		ui_sdl2/widget_pause.hpp \
-		ui_sdl2/widget_reset.hpp \
-		ui_sdl2/widget_volume.hpp
-
-include ${ROOT}/mk/lib.mk
+include ${ROOT}/mk/clean.mk

@@ -16,25 +16,21 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-_CXXSRCS=		${abspath ${CXXSRCS}}
+CLEANFILES+=	${OBJTXT}
 
-OBJS=			${_CXXSRCS:%.cpp=%.o}
+.PHONY=		_all all debug
 
-HDEPS+=			${OBJS:%.o=%.d}
+all:
+	${MAKE} ${MAKEARGS} -j${NPROC} _all
 
-EXTRA_CPPFLAGS?=
+debug:
+	${MAKE} ${MAKEARGS} -j${NPROC} DEBUG=yes _all
 
-CPPFLAGS+=		${EXTRA_CPPFLAGS}
+install: all
 
-CLEANFILES+=		${OBJS} \
-			${HDEPS}
+_all: ${OBJTXT}
 
-.SUFFIXES:		.cpp .o
+include ${ROOT}/mk/obj.mk
 
--include ${HDEPS}
-
-%.o: %.cpp
-	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o $@ $<
-	${MKDEP} ${MKDEP_FLAGS} ${CPPFLAGS} ${CXXFLAGS} $< > ${@:.o=.d}
-
-include ${ROOT}/mk/clean.mk
+${OBJTXT}: ${OBJS}
+	${ECHO} $^ > $@

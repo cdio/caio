@@ -16,25 +16,38 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-_CXXSRCS=		${abspath ${CXXSRCS}}
+ROOT=		${abspath ../../..}
 
-OBJS=			${_CXXSRCS:%.cpp=%.o}
+include ${ROOT}/mk/config.mk
 
-HDEPS+=			${OBJS:%.o=%.d}
+OBJTXT=		objs.txt
 
-EXTRA_CPPFLAGS?=
+CPPFLAGS+=	-I../core
 
-CPPFLAGS+=		${EXTRA_CPPFLAGS}
+CXXSRCS+=	sdl2.cpp \
+		ui.cpp \
+		audio.cpp \
+		panel.cpp \
+		widget.cpp \
+		widget_empty.cpp \
+		widget_floppy.cpp \
+		widget_fullscreen.cpp \
+		widget_gamepad.cpp \
+		widget_pause.cpp \
+		widget_reset.cpp \
+		widget_volume.cpp
 
-CLEANFILES+=		${OBJS} \
-			${HDEPS}
+INCS+=		sdl2.hpp \
+		ui.hpp \
+		audio.hpp \
+		panel.hpp \
+		widget.hpp \
+		widget_empty.hpp \
+		widget_floppy.hpp \
+		widget_fullscreen.hpp \
+		widget_gamepad.hpp \
+		widget_pause.hpp \
+		widget_reset.hpp \
+		widget_volume.hpp
 
-.SUFFIXES:		.cpp .o
-
--include ${HDEPS}
-
-%.o: %.cpp
-	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o $@ $<
-	${MKDEP} ${MKDEP_FLAGS} ${CPPFLAGS} ${CXXFLAGS} $< > ${@:.o=.d}
-
-include ${ROOT}/mk/clean.mk
+include ${ROOT}/mk/objtxt.mk

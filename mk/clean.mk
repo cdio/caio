@@ -22,3 +22,6 @@ clean:
 ifdef CLEANFILES
 	-${RM} -r ${CLEANFILES}
 endif
+ifdef CLEANDIRS
+	for d in ${CLEANDIRS}; do ${MAKE} ${MAKEARGS} -C$$d clean; done
+endif

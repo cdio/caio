@@ -27,12 +27,16 @@ SYSDEP_MK:=		${MKDIR}/config.${OS}.mk
 
 include ${SYSDEP_MK}
 
+CAT?=			cat
 CXX=			clang++
 CUT?=			cut
-CMAKE=			cmake
+CMAKE?=			cmake
+DIRNAME?=		dirname
 DPKG?=			dpkg
 DU?=			du
+ECHO?=			echo
 GIT?=			git
+GREP?=			grep
 HEAD?=			head
 ID?=			id
 INSTALL?=		install
@@ -61,6 +65,7 @@ CPPFLAGS+=		-I. \
 			-I${ROOT} \
 			-I${ROOT}/src \
 			-I${ROOT}/src/lib \
+			-I${ROOT}/src/lib/core \
 			-I${ROOT}/3rdparty/GSL/include
 
 CXXFLAGS+=		${SYSDEP_CXXFLAGS}

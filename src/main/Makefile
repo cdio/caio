@@ -37,6 +37,8 @@ CXXSRCS=	caio_cmdline.cpp \
 		c64_main.cpp \
 		main.cpp
 
+CPPFLAGS+=	-I${ROOT}/src/lib/c64
+
 include ${ROOT}/mk/bin.mk
 
 install: ${DST_LINKS} ${DST_CONFIG} ${DST_README}
