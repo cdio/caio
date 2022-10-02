@@ -21,19 +21,20 @@
 #include <array>
 #include <atomic>
 #include <functional>
+#include <iostream>
 #include <map>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "aspace.hpp"
 #include "clock.hpp"
 #include "logger.hpp"
+#include "monitor.hpp"
 #include "name.hpp"
 #include "pin.hpp"
 #include "types.hpp"
 #include "utils.hpp"
-
-#include "mos_6502_monitor.hpp"
 
 
 namespace caio {
@@ -83,7 +84,7 @@ public:
 
     struct Instruction {
         const char *format;                 /* Mnemonic format string (*=00, ^=0000, +=rel) */
-        void (*fn)(Mos6502 &, addr_t arg);  /* Instruction callback                         */
+        void (*fn)(Mos6502 &, addr_t);      /* Instruction callback                         */
         AddressingMode mode;                /* Addressing mode                              */
         size_t cycles;                      /* Clock cycles consumed by this instruction    */
         size_t size;                        /* Size of the instruction (in bytes)           */
@@ -104,17 +105,16 @@ public:
 
     /**
      * Initialise this CPU.
-     * @param type  CPU type (usually the model name);
-     * @param label CPU label (usually an arbitrary instance name).
-     * @see ASpace
+     * @param type  CPU type;
+     * @param label CPU label.
      */
     Mos6502(const std::string &type = TYPE, const std::string &label = LABEL);
 
     /**
      * Initialise this CPU.
      * @param mmap  System mappings;
-     * @param type  CPU type (usually the model name);
-     * @param label CPU label (usually an arbitrary instance name).
+     * @param type  CPU type;
+     * @param label CPU label.
      * @see ASpace
      */
     Mos6502(const std::shared_ptr<ASpace> &mmap, const std::string &type = TYPE, const std::string &label = LABEL);
@@ -126,8 +126,8 @@ public:
      * This CPU must be properly initialised (system mappings set) before this method can be called.
      * The CPU monitor is initialised and a breakpoint is added at the reset address (vRESET),
      * the monitor takes control as soon as this CPU is started.
-     * @param is Input stream used to receive commands from the user;
-     * @param os Output stream used to send responses to the user.
+     * @param is Input stream used to communicate with the user;
+     * @param os Output stream used to communicate with the user.
      * @exception InvalidArgument if the system mappings are not set.
      * @see reset()
      */
@@ -253,7 +253,7 @@ private:
      * @return The number of clock cycles consumed by the executed instruction;
      *         Clockable::HALT if the halt instruction was executed.
      * @see single_step()
-     * @see Mos6502Monitor::run()
+     * @see Monitor::run()
      */
     size_t tick(const Clock &clk) override;
 
@@ -384,13 +384,13 @@ private:
         _regs.P = pop() | Flags::_;
     }
 
-    Logger                          _log{};
-    std::unique_ptr<Mos6502Monitor> _monitor{};
-    Registers                       _regs{};
-    std::shared_ptr<ASpace>         _mmap{};
-    IRQPin                          _irq_pin{};
-    IRQPin                          _nmi_pin{};
-    InputPin                        _rdy_pin{};
+    Logger                   _log{};
+    std::unique_ptr<Monitor> _monitor{};
+    Registers                _regs{};
+    std::shared_ptr<ASpace>  _mmap{};
+    IRQPin                   _irq_pin{};
+    IRQPin                   _nmi_pin{};
+    InputPin                 _rdy_pin{};
 
     std::atomic_bool _break{};
     std::map<addr_t, std::pair<breakpoint_cb_t, void *>> _breakpoints{};
@@ -693,8 +693,6 @@ private:
     static void i_LAS       (Mos6502 &, addr_t);
 
     static void i_KIL       (Mos6502 &, addr_t);
-
-    friend class Mos6502Monitor;
 };
 
 }

@@ -35,6 +35,7 @@ CXXSRCS=	aspace.cpp \
 		joystick.cpp \
 		keyboard.cpp \
 		logger.cpp \
+		monitor.cpp \
 		name.cpp \
 		p00file.cpp \
 		prgfile.cpp \
@@ -65,6 +66,7 @@ INCS=		aspace.hpp \
 		latch.hpp \
 		locked_queue.hpp \
 		logger.hpp \
+		monitor.hpp \
 		name.hpp \
 		nibble_ram.hpp \
 		p00file.hpp \
@@ -86,7 +88,6 @@ CXXSRCS+=	mos_6502.cpp \
 		mos_6502_i_flags.cpp \
 		mos_6502_i_invalid.cpp \
 		mos_6502_i_move.cpp \
-		mos_6502_monitor.cpp \
 		mos_6510.cpp \
 		mos_6526.cpp \
 		mos_6569.cpp \
@@ -95,7 +96,6 @@ CXXSRCS+=	mos_6502.cpp \
 		mos_6581_resid.cpp
 
 INCS+=		mos_6502.hpp \
-		mos_6502_monitor.hpp \
 		mos_6510.hpp \
 		mos_6510_monitor.hpp \
 		mos_6526.hpp \
