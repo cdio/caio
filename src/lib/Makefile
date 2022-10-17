@@ -20,32 +20,18 @@ ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
-OBJDIRS=	core \
-		ui_sdl2 \
-		c64
+3RDPARTY_LIBS=	${ROOT}/3rdparty/resid/libresid.a
 
-OBJTXTS=	${OBJDIRS:%=%/objs.txt}
+CAIO_LIBS=	core/libcaio_core.a \
+		ui_sdl2/libcaio_ui_sdl2.a \
+		c64/libcaio_c64.a \
+		zx80/libcaio_zx80.a
 
-OBJS=		${shell ${CAT} ${OBJTXTS}}
+LIBS=		${CAIO_LIBS} \
+		${3RDPARTY_LIBS}
 
-LIB=		libcaio.a
+CLEANDIRS=	${dir ${LIBS}}
 
-CLEANFILES+=	${LIB}
+SHLIB=		libcaio.${SHLIB_EXT}
 
-CLEANDIRS+=	${OBJDIRS}
-
-.PHONY=		_all all debug clean
-
-all: TARGET=all
-all: ${LIB}
-
-debug: TARGET=debug
-debug: ${LIB}
-
-${LIB}: ${OBJTXTS}
-	${AR} ${ARFLAGS} $@ ${OBJS}
-
-${OBJTXTS}:
-	${MAKE} ${MAKEARGS} -j${NPROC} -C${dir $@} ${TARGET}
-
-include ${ROOT}/mk/clean.mk
+include ${ROOT}/mk/shlib.mk

@@ -47,7 +47,7 @@ public:
      * @param ram     RAM (64K);
      * @param chargen Chargen ROM (4K).
      */
-    Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, devptr_t &ram, devptr_t &chargen);
+    Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, const devptr_t &ram, const devptr_t &chargen);
 
     virtual ~Vic2ASpace();
 

@@ -573,13 +573,12 @@ inline float Mos6581::Filter::frequency() const
 inline float Mos6581::Filter::Q() const
 {
     /*
-     * From reSID:
+     * From reSID v1.0-pre:
      * "In the MOS 6581, 1/Q is controlled linearly by res. From die photographs
      *  of the resonance "resistor" ladder it follows that 1/Q ~ ~res/8
      *  (assuming an ideal op-amp and ideal "resistors"). This implies that Q
      *  ranges from 0.533 (res = 0) to 8 (res = E). For res = F, Q is actually
-     *  theoretically unlimited, which is quite unheard of in a filter
-     *  circuit."
+     *  theoretically unlimited, which is quite unheard of in a filter circuit."
      */
     auto nres = (~_res) & 15;
     if (nres == 15) {
@@ -920,9 +919,10 @@ void Mos6581::play()
             v[i] = signal::to_i16(value * _volume * VOUT_MAX);
         }
 
-        _v4.fill(0.0f);
         v.dispatch();
     }
+
+    _v4.fill(0.0f);
 }
 
 inline bool Mos6581::is_v1_filtered() const

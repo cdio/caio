@@ -23,6 +23,7 @@
 #include "utils.hpp"
 
 #include "c64_main.hpp"
+#include "zx80_main.hpp"
 
 
 using namespace caio;
@@ -58,6 +59,7 @@ int main(int argc, char * const *argv)
             std::cerr << "usage: " << progname << " <arch> [--help]" << std::endl
                       << "where arch is one of: "                    << std::endl
                       << "c64"                                       << std::endl
+                      << "zx80"                                      << std::endl
                       << std::endl;
 
             return EXIT_FAILURE;
@@ -65,7 +67,9 @@ int main(int argc, char * const *argv)
     }
 
     if (name == "c64") {
-        return c64::main(argc, argv);
+        c64::main(argc, argv);
+    } else if (name == "zx80") {
+        zx80::main(argc, argv);
     }
 
     std::cerr << "Unknown emulator: " << name << std::endl;

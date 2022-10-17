@@ -20,7 +20,7 @@ _CXXSRCS=		${abspath ${CXXSRCS}}
 
 OBJS=			${_CXXSRCS:%.cpp=%.o}
 
-HDEPS+=			${OBJS:%.o=%.d}
+HDEPS+=			${_CXXSRCS:%.cpp=%.d}
 
 EXTRA_CPPFLAGS?=
 
@@ -29,12 +29,12 @@ CPPFLAGS+=		${EXTRA_CPPFLAGS}
 CLEANFILES+=		${OBJS} \
 			${HDEPS}
 
-.SUFFIXES:		.cpp .o
-
--include ${HDEPS}
+.SUFFIXES:		.cpp .d .o
 
 %.o: %.cpp
+	${MKDEP} ${CPPFLAGS} ${CXXFLAGS} ${MKDEP_FLAGS} $< > ${@:.o=.d}
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o $@ $<
-	${MKDEP} ${MKDEP_FLAGS} ${CPPFLAGS} ${CXXFLAGS} $< > ${@:.o=.d}
+
+-include ${HDEPS}
 
 include ${ROOT}/mk/clean.mk

@@ -20,9 +20,7 @@ ROOT=		${abspath ../../..}
 
 include ${ROOT}/mk/config.mk
 
-OBJTXT=		objs.txt
-
-CPPFLAGS+=	-I../core
+LIB=		libcaio_c64.a
 
 #
 # Commodore Specifics
@@ -76,4 +74,4 @@ INCS+=		c64_cartridge/cart_generic.hpp \
 		c64_cartridge/cart_magic_desk.hpp \
 		c64_cartridge/cart_c64_game_system_3.cpp
 
-include ${ROOT}/mk/objtxt.mk
+include ${ROOT}/mk/lib.mk

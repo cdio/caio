@@ -18,21 +18,19 @@
 #
 CXXFLAGS+=	-I${ROOT}/lib
 
-LIBRESID=	${ROOT}/3rdparty/resid/libresid.a
-
-LDADD+=		${LIBRESID}
-
 CXXFLAGS+=	${UI_CXXFLAGS}
+
+LDADD+=		-L${ROOT}/src/lib \
+		-lcaio
 
 LDADD+=		${UI_LDADD}
 
 LDADD+=		-lpthread
 
-LIB=		${ROOT}/src/lib/libcaio.a
+CLEANFILES+=	${BIN} \
+		${LN_BINS}
 
-CLEANFILES+=	${BIN} ${LN_BINS}
-
-.PHONY=		_all all debug install
+.PHONY:		_all all debug install
 
 all:
 	${MAKE} ${MAKEARGS} -j${NPROC} _all

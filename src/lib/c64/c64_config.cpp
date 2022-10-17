@@ -27,6 +27,38 @@
 namespace caio {
 namespace c64 {
 
+C64Confile::C64Confile()
+{
+}
+
+C64Confile::C64Confile(Confile &&other)
+{
+    *this = std::move(other);
+}
+
+C64Confile::~C64Confile()
+{
+}
+
+C64Confile &C64Confile::operator=(Confile &&other)
+{
+    static_cast<Confile &>(*this) = std::move(other);
+    return *this;
+}
+
+C64Config::C64Config()
+{
+}
+
+C64Config::C64Config(const Confile &conf)
+{
+    *this = conf;
+}
+
+C64Config::~C64Config()
+{
+}
+
 C64Config &C64Config::operator=(const Confile &conf)
 {
     Config::operator=(conf);
@@ -81,6 +113,11 @@ C64Config &C64Config::operator=(const Confile &conf)
     }
 
     return *this;
+}
+
+std::string C64Config::keymaps_file(const std::string &cc) const
+{
+    return "c64_" + Config::keymaps_file(cc);
 }
 
 std::string C64Config::to_string() const

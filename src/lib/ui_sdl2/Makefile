@@ -20,9 +20,7 @@ ROOT=		${abspath ../../..}
 
 include ${ROOT}/mk/config.mk
 
-OBJTXT=		objs.txt
-
-CPPFLAGS+=	-I../core
+LIB=		libcaio_ui_sdl2.a
 
 CXXSRCS+=	sdl2.cpp \
 		ui.cpp \
@@ -50,4 +48,4 @@ INCS+=		sdl2.hpp \
 		widget_reset.hpp \
 		widget_volume.hpp
 
-include ${ROOT}/mk/objtxt.mk
+include ${ROOT}/mk/lib.mk

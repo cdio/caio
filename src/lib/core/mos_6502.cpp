@@ -349,94 +349,105 @@ Mos6502::~Mos6502()
 
 void Mos6502::init_monitor(std::istream &is, std::ostream &os)
 {
+    static std::map<std::string, std::function<int(const Mos6502 &)>> regvals{
+        { "ra",   [](const Mos6502 &cpu) { return cpu._regs.A;  }},
+        { "rx",   [](const Mos6502 &cpu) { return cpu._regs.X;  }},
+        { "ry",   [](const Mos6502 &cpu) { return cpu._regs.Y;  }},
+        { "rs",   [](const Mos6502 &cpu) { return cpu._regs.S;  }},
+        { "rp",   [](const Mos6502 &cpu) { return cpu._regs.P;  }},
+        { "rp.n", [](const Mos6502 &cpu) { return cpu.test_N(); }},
+        { "rp.v", [](const Mos6502 &cpu) { return cpu.test_V(); }},
+        { "rp.b", [](const Mos6502 &cpu) { return cpu.test_B(); }},
+        { "rp.d", [](const Mos6502 &cpu) { return cpu.test_D(); }},
+        { "rp.i", [](const Mos6502 &cpu) { return cpu.test_I(); }},
+        { "rp.z", [](const Mos6502 &cpu) { return cpu.test_Z(); }},
+        { "rp.c", [](const Mos6502 &cpu) { return cpu.test_C(); }}
+    };
+
     if (!_mmap) {
         throw InvalidArgument{*this, "System mappings not defined"};
     }
 
-    MonitoredCpu monitor_funcs{
-        .regs = [this](std::ostream &os) {
-            os << this->_regs.to_string();
-        },
+    auto regs = [this](std::ostream &os) {
+        os << this->_regs.to_string();
+    };
 
-        .pc = [this]() -> addr_t & {
-            return this->_regs.PC;
-        },
+    auto pc = [this]() -> addr_t & {
+        return this->_regs.PC;
+    };
 
-        .read = [this](addr_t addr) {
-            return this->read(addr);
-        },
+    auto read = [this](addr_t addr) {
+        return this->read(addr);
+    };
 
-        .write = [this](addr_t addr, uint8_t data) {
-            this->write(addr, data);
-        },
+    auto write = [this](addr_t addr, uint8_t data) {
+        this->write(addr, data);
+    };
 
-        .disass = [this](std::ostream &os, addr_t start, addr_t count, bool show_pc) {
-            this->disass(os, start, count, show_pc);
-        },
+    auto disass = [this](std::ostream &os, addr_t start, addr_t count, bool show_pc) {
+        this->disass(os, start, count, show_pc);
+    };
 
-        .mmap = [this]() {
-            return this->_mmap;
-        },
+    auto mmap = [this]() {
+        return this->_mmap;
+    };
 
-        .ebreak = [this]() {
-            this->ebreak();
-        },
+    auto ebreak = [this]() {
+        this->ebreak();
+    };
 
-        .load = [this](const std::string &fname, addr_t &start) {
-            PrgFile prog{fname};      /* FIXME PRG format the same for all platforms using 6502? */
-            addr_t addr = prog.address();
+    auto load = [this](const std::string &fname, addr_t &start) {
+        PrgFile prog{fname};      /* FIXME PRG format the same for all platforms using 6502? */
+        addr_t addr = prog.address();
 
-            if (start != 0) {
-                addr = start;
-                prog.address(start);
-            }
-
-            for (auto c : prog) {
-                this->write(addr++, c);
-            }
-
-            return static_cast<addr_t>(prog.size());
-        },
-
-        .save = [this](const std::string &fname, addr_t start, addr_t end) {
-            PrgFile prog{};
-            for (auto addr = start; addr <= end; ++addr) {
-                uint8_t c = this->read(addr);
-                prog.push_back(c);
-            }
-            prog.save(fname, start);
-        },
-
-        .loglevel = [this](const std::string &lv) {
-            if (!empty(lv)) {
-                this->loglevel(lv);
-            }
-            return this->loglevel();
-        },
-
-        .regvalue = [this](const std::string &rname) -> uint16_t {
-            static std::map<std::string, std::function<int(const Mos6502 &cpu)>> regvals{
-                { "ra",   [](const Mos6502 &cpu) { return cpu._regs.A;  }},
-                { "rx",   [](const Mos6502 &cpu) { return cpu._regs.X;  }},
-                { "ry",   [](const Mos6502 &cpu) { return cpu._regs.Y;  }},
-                { "rs",   [](const Mos6502 &cpu) { return cpu._regs.S;  }},
-                { "rp",   [](const Mos6502 &cpu) { return cpu._regs.P;  }},
-                { "rp.n", [](const Mos6502 &cpu) { return cpu.test_N(); }},
-                { "rp.v", [](const Mos6502 &cpu) { return cpu.test_V(); }},
-                { "rp.b", [](const Mos6502 &cpu) { return cpu.test_B(); }},
-                { "rp.d", [](const Mos6502 &cpu) { return cpu.test_D(); }},
-                { "rp.i", [](const Mos6502 &cpu) { return cpu.test_I(); }},
-                { "rp.z", [](const Mos6502 &cpu) { return cpu.test_Z(); }},
-                { "rp.c", [](const Mos6502 &cpu) { return cpu.test_C(); }}
-            };
-
-            auto it = regvals.find(rname);
-            if (it == regvals.end()) {
-                throw InvalidArgument{};
-            }
-
-            return it->second(*this);
+        if (start != 0) {
+            addr = start;
+            prog.address(start);
         }
+
+        for (auto c : prog) {
+            this->write(addr++, c);
+        }
+
+        return static_cast<addr_t>(prog.size());
+    };
+
+    auto save = [this](const std::string &fname, addr_t start, addr_t end) {
+        PrgFile prog{};
+        for (auto addr = start; addr <= end; ++addr) {
+            uint8_t c = this->read(addr);
+            prog.push_back(c);
+        }
+        prog.save(fname, start);
+    };
+
+    auto loglevel = [this](const std::string &lv) {
+        if (!empty(lv)) {
+            this->loglevel(lv);
+        }
+        return this->loglevel();
+    };
+
+    auto regvalue = [this](const std::string &rname) -> uint16_t {
+        auto it = regvals.find(rname);
+        if (it == regvals.end()) {
+            throw InvalidArgument{};
+        }
+        return it->second(*this);
+    };
+
+    MonitoredCpu monitor_funcs{
+        .regs     = regs,
+        .pc       = pc,
+        .read     = read,
+        .write    = write,
+        .disass   = disass,
+        .mmap     = mmap,
+        .ebreak   = ebreak,
+        .load     = load,
+        .save     = save,
+        .loglevel = loglevel,
+        .regvalue = regvalue
     };
 
     _monitor = std::make_unique<Monitor>(is, os, std::move(monitor_funcs));
@@ -764,7 +775,7 @@ size_t Mos6502::tick(const Clock &clk)
          * Break hot-key and monitor active or monitor breakpoint.
          */
         _break = false;
-        if (_monitor->run() == Clockable::HALT) {
+        if (!_monitor->run()) {
             log.debug("System halt requested from monitor\n");
             return Clockable::HALT;
         }

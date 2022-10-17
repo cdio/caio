@@ -20,7 +20,7 @@ ROOT=		${abspath ../../..}
 
 include ${ROOT}/mk/config.mk
 
-OBJTXT=		objs.txt
+LIB=		libcaio_core.a
 
 CXXSRCS=	aspace.cpp \
 		clock.cpp \
@@ -104,4 +104,21 @@ INCS+=		mos_6502.hpp \
 		mos_6581_i.hpp \
 		mos_6581_resid.hpp
 
-include ${ROOT}/mk/objtxt.mk
+CXXSRCS+=	zilog_z80.cpp \
+		zilog_z80_i_arith.cpp \
+		zilog_z80_i_bit.cpp \
+		zilog_z80_i_branch.cpp \
+		zilog_z80_i_ex.cpp \
+		zilog_z80_i_flags.cpp \
+		zilog_z80_i_ix.cpp \
+		zilog_z80_i_ix_bit.cpp \
+		zilog_z80_i_iy.cpp \
+		zilog_z80_i_iy_bit.cpp \
+		zilog_z80_i_mi.cpp \
+		zilog_z80_i_port.cpp \
+		zilog_z80_i_shift.cpp \
+		zilog_z80_i_move.cpp
+
+INCS+=		zilog_z80.hpp
+
+include ${ROOT}/mk/lib.mk

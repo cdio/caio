@@ -37,22 +37,14 @@ public:
     constexpr static const char *C64_UNIT_8_CONFIG_KEY   = "unit8";
     constexpr static const char *C64_UNIT_9_CONFIG_KEY   = "unit9";
 
-    C64Confile() {
-    }
+    C64Confile();
 
-    explicit C64Confile(Confile &&other) {
-        *this = std::move(other);
-    }
+    explicit C64Confile(Confile &&other);
 
-    virtual ~C64Confile() {
-    }
+    virtual ~C64Confile();
 
-    C64Confile &operator=(Confile &&other) {
-        static_cast<Confile &>(*this) = std::move(other);
-        return *this;
-    }
+    C64Confile &operator=(Confile &&other);
 };
-
 
 /**
  *  C64 configuration.
@@ -65,15 +57,11 @@ struct C64Config : public Config {
     std::string unit8{};
     std::string unit9{};
 
-    C64Config() {
-    }
+    C64Config();
 
-    explicit C64Config(const Confile &conf) {
-        *this = conf;
-    }
+    explicit C64Config(const Confile &conf);
 
-    virtual ~C64Config() {
-    }
+    virtual ~C64Config();
 
     /**
      * @see Config::operator=(const Confile &)
@@ -83,9 +71,7 @@ struct C64Config : public Config {
     /**
      * @see Config::keymaps_file()
      */
-    std::string keymaps_file(const std::string &cc) const override {
-        return "c64_" + Config::keymaps_file(cc);
-    }
+    std::string keymaps_file(const std::string &cc) const override;
 
     /**
      * @see Config::to_string()

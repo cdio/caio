@@ -22,7 +22,8 @@ include ${ROOT}/mk/config.mk
 
 BIN=		caio
 
-LN_BINS=	c64
+LN_BINS=	c64 \
+		zx80
 
 CONFIG=		caio.conf
 
@@ -34,10 +35,11 @@ DST_CONFIG=	${DST_SYSCONFDIR}/${CONFIG}
 
 CXXSRCS=	caio_cmdline.cpp \
 		c64_cmdline.cpp \
-		c64_main.cpp \
+		zx80_cmdline.cpp \
 		main.cpp
 
-CPPFLAGS+=	-I${ROOT}/src/lib/c64
+CPPFLAGS+=	-I${ROOT}/src/lib/c64 \
+		-I${ROOT}/src/lib/zx80
 
 include ${ROOT}/mk/bin.mk
 

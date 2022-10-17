@@ -25,3 +25,8 @@ SYSDEP_CPPFLAGS+=	-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/incl
 UI_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sdl2 sdl2_image}
 
 UI_LDADD+=		${shell ${PKG_CONFIG} --libs sdl2 sdl2_image}
+
+SHLIB_EXT=		dylib
+
+LIB_INCLUDE_BEGIN=	-Wl,-all_load
+LIB_INCLUDE_END=

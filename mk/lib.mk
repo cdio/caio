@@ -18,12 +18,9 @@
 #
 CXXFLAGS+=	-fPIC
 
-LDFLAGS+=	-shared
+CLEANFILES+=	${LIB}
 
-CLEANFILES+=	${LIB} \
-		${SOLIB}
-
-.PHONY=		_all all debug
+.PHONY:		_all all debug
 
 all:
 	${MAKE} ${MAKEARGS} -j${NPROC} _all
@@ -39,3 +36,4 @@ include ${ROOT}/mk/obj.mk
 
 ${LIB}: ${OBJS}
 	${AR} ${ARFLAGS} $@ $^
+

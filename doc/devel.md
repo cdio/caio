@@ -87,17 +87,15 @@ used by caio, and the formula described in the technical specifications:
 
 The resonance value is also translated to a quadratic response Q factor, but
 it is not mentioned in the documentation how this factor is obtained.
-The author of reSID-v0.16 found that this value varies from 0.707 to 1.7,
-but it seems that neither that is correct.
-At the moment, caio's implementation uses the following linear formula to
-calculate the actual Q factor:
+The author of reSID v1.0-pre found that this factor can be obtained by
+applying the following formula:
 
 ```
-  Q = 0.707 + (1.7 - 0.707) * res / 15
+  Q = 8 / (~res & 15)
 
 ```
 where `res` is the 4 bits resonance value specified by the user.
-This formula is not correct and it will change in a near future.
+Caio's limits the Q value to a maximum of 8.
 
 #### Other bugs:
 

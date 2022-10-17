@@ -279,8 +279,8 @@ C64Keyboard::MatrixKey C64Keyboard::to_c64(const std::string &name)
 
 C64Keyboard::C64Keyboard(const std::string &label, const std::function<void()> &restore_cb)
     : Keyboard{label},
-    _restore_cb{restore_cb},
-    _key_to_c64{default_key_to_c64}
+      _restore_cb{restore_cb},
+      _key_to_c64{default_key_to_c64}
 {
     _matrix.fill(0);
 }

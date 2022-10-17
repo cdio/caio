@@ -57,11 +57,9 @@ public:
         OPTION_MAX
     };
 
-    CaioCmdline() {
-    }
+    CaioCmdline();
 
-    virtual ~CaioCmdline() {
-    }
+    virtual ~CaioCmdline();
 
     /**
      * Parse the command line options and load the configuration file.
@@ -90,11 +88,9 @@ protected:
      * @param conf Configuration file to update;
      * @param opt  Long option index;
      * @param arg  Command line argument.
-     * @return True if the option was recoginised; false otherwise.
+     * @return true if the option was recoginised; false otherwise.
      */
-    virtual bool parse(Confile &conf, int opt, const std::string &arg) {
-        return false;
-    }
+    virtual bool parse(Confile &conf, int opt, const std::string &arg);
 
     std::string           _progname;
     std::vector<::option> _lopts{};

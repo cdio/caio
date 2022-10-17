@@ -99,6 +99,11 @@ public:
      */
     std::string to_string() const;
 
+    /**
+     * @return The name of this platform.
+     */
+    static std::string name();
+
 private:
     /**
      * Start this C64.

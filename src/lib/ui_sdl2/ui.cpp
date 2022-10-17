@@ -69,6 +69,7 @@ UI::UI(const Config &conf)
     _screen_width = static_cast<int>(vconf.width * vconf.scale);
     _screen_height = static_cast<int>(vconf.height * vconf.scale);
     _screen_ratio = static_cast<float>(vconf.width) / static_cast<float>(vconf.height);
+    _screen_scale = vconf.scale;
 
     _screen_rect = {
         .x = 0,
@@ -799,6 +800,8 @@ void UI::resize(int width, int height)
         .w = w,
         .h = h
     };
+
+    _screen_scale = h / static_cast<float>(_conf.video.height);
 }
 
 void UI::render_screen()
@@ -845,20 +848,20 @@ void UI::render_screen()
             log.error("ui: Can't set render draw color: %s\n", sdl_error().c_str());
 
         } else {
-            int scale = static_cast<int>(_conf.video.scale);
-            if (scale == 1) {
-                ++scale;
+            int skip = std::ceil(_screen_scale);
+            if (skip < 2) {
+                skip = 2;
             }
 
             switch (sleffect) {
             case ui::SLEffect::HORIZONTAL:
-                for (int y = 0; y < height; y += scale) {
+                for (int y = 0; y < height; y += skip) {
                     SDL_RenderDrawLine(_renderer, 0, y, width, y);
                 }
                 break;
 
             case ui::SLEffect::VERTICAL:
-                for (int x = 0; x < width; x += scale) {
+                for (int x = 0; x < width; x += skip) {
                     SDL_RenderDrawLine(_renderer, x, 0, x, height);
                 }
                 break;

@@ -16,21 +16,23 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-CLEANFILES+=	${OBJTXT}
+ROOT=		${abspath ../../..}
 
-.PHONY=		_all all debug
+include ${ROOT}/mk/config.mk
 
-all:
-	${MAKE} ${MAKEARGS} -j${NPROC} _all
+LIB=		libcaio_zx80.a
 
-debug:
-	${MAKE} ${MAKEARGS} -j${NPROC} DEBUG=yes _all
+#
+# Sinclair ZX-80 Specifics
+#
+CXXSRCS+=	zx80.cpp \
+		zx80_aspace.cpp \
+		zx80_config.cpp \
+		zx80_keyboard.cpp
 
-install: all
+INCS+=		zx80.hpp \
+		zx80_aspace.hpp \
+		zx80_config.hpp \
+		zx80_keyboard.hpp
 
-_all: ${OBJTXT}
-
-include ${ROOT}/mk/obj.mk
-
-${OBJTXT}: ${OBJS}
-	${ECHO} $^ > $@
+include ${ROOT}/mk/lib.mk

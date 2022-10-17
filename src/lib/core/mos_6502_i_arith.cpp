@@ -134,7 +134,7 @@ uint8_t Mos6502::adc_bin(uint8_t v1, uint8_t v2)
     bool s1 = v1 & 0x80;
     bool s2 = v2 & 0x80;
     bool sr = r & 0x80;
-    flag_V((s1 & s2 & !sr) || (!s1 && !s2 && sr));
+    flag_V((s1 && s2 && !sr) || (!s1 && !s2 && sr));
     flag_C(r & 0x100);
     set_N(r);
     set_Z(r);
@@ -168,7 +168,7 @@ uint8_t Mos6502::adc_bcd(uint8_t v1, uint8_t v2)
     bool s1 = v1 & 0x80;
     bool s2 = v2 & 0x80;
     bool sr = r & 0x80;
-    flag_V((s1 & s2 & !sr) || (!s1 && !s2 && sr));
+    flag_V((s1 && s2 && !sr) || (!s1 && !s2 && sr));
     flag_C(r & 0x100);
     set_N(r);
     set_Z(r);
@@ -216,7 +216,7 @@ uint8_t Mos6502::sbc_bin(uint8_t v1, uint8_t v2)
     bool s1 = v1 & 0x80;
     bool s2 = v2 & 0x80;
     bool sr = r & 0x80;
-    flag_V((s1 & !s2 & !sr) || (!s1 && s2 && sr));
+    flag_V((s1 && !s2 && !sr) || (!s1 && s2 && sr));
     flag_C(!(r & 0x100));
     set_N(r);
     set_Z(r);
@@ -249,7 +249,7 @@ uint8_t Mos6502::sbc_bcd(uint8_t v1, uint8_t v2)
     bool s1 = v1 & 0x80;
     bool s2 = v2 & 0x80;
     bool sr = r & 0x80;
-    flag_V((s1 & !s2 & !sr) || (!s1 && s2 && sr));
+    flag_V((s1 && !s2 && !sr) || (!s1 && s2 && sr));
     flag_C(!(r & 0x100));
     set_N(r);
     set_Z(r);

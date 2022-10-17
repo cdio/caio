@@ -1,9 +1,11 @@
-- UI:       Better scanlines effects
+- mk:       Fix bin.mk and shlib.mk mess
+- UI:       Disbale audio widget when audio not enabled
 - CPU:      Z80
+- UI:       Better scanlines effects
+- SID:      Fix saturation (ballad/pantheon_toggle)
 - CPU:      Do not terminate on illegal instructions
 - VICII:    Fix sprite position (batman, turrican)
 - VICII:    Fix border colour during open-border mode
-- SID:      Fix saturation (ballad/pantheon_toggle)
 - SID:      Update reSID
 - UI:       Windowed pseudo-terminals (logs and monitor)
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"

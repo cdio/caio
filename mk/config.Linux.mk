@@ -25,3 +25,8 @@ SYSDEP_CPPFLAGS+=
 UI_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sdl2 SDL2_image}
 
 UI_LDADD+=		${shell ${PKG_CONFIG} --libs sdl2 SDL2_image}
+
+SHLIB_EXT=		so
+
+LIB_INCLUDE_BEGIN=	-Wl,--whole-archive
+LIB_INCLUDE_END=	-Wl,--no-whole-archive

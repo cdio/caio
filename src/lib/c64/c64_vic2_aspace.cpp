@@ -22,7 +22,7 @@
 namespace caio {
 namespace c64 {
 
-Vic2ASpace::Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, devptr_t &ram, devptr_t &chargen)
+Vic2ASpace::Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, const devptr_t &ram, const devptr_t &chargen)
     : _cia2{cia2}
 {
     /*

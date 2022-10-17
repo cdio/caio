@@ -35,6 +35,19 @@ const std::vector<::option> C64Cmdline::lopts = {
     { "9",      required_argument,  nullptr,    C64Cmdline::C64_OPTION_UNIT_9   }
 };
 
+C64Cmdline::C64Cmdline()
+    : CaioCmdline{lopts}
+{
+}
+
+C64Cmdline::~C64Cmdline()
+{
+}
+
+Confile C64Cmdline::parse(int argc, char *const *argv)
+{
+    return CaioCmdline::parse(argc, argv);
+}
 
 void C64Cmdline::usage()
 {

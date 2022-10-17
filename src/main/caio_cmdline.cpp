@@ -58,6 +58,13 @@ const std::vector<::option> CaioCmdline::lopts = {
     { "help",       no_argument,        nullptr, CaioCmdline::OPTION_HELP       }
 };
 
+CaioCmdline::CaioCmdline()
+{
+}
+
+CaioCmdline::~CaioCmdline()
+{
+}
 
 CaioCmdline::CaioCmdline(const std::vector<::option> &ext_lopts)
     : _lopts{lopts.begin(), lopts.end()}
@@ -107,6 +114,11 @@ void CaioCmdline::usage()
               << "                        (default is " << std::quoted(Config::DEFAULT_LOGLEVEL) << ")" << std::endl
               << " -v|--version           Show version information and exit"                            << std::endl
               << " -h|--help              Print this message and exit"                                  << std::endl;
+}
+
+bool CaioCmdline::parse(Confile &conf, int opt, const std::string &arg)
+{
+    return false;
 }
 
 Confile CaioCmdline::parse(int argc, char *const *argv)

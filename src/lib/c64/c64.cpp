@@ -689,5 +689,10 @@ std::string C64::to_string() const
     return os.str();
 }
 
+std::string C64::name()
+{
+    return "C64";
+}
+
 }
 }

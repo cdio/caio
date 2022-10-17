@@ -41,16 +41,11 @@ public:
         C64_OPTION_MAX
     };
 
-    C64Cmdline()
-        : CaioCmdline{lopts} {
-    }
+    C64Cmdline();
 
-    virtual ~C64Cmdline() {
-    }
+    virtual ~C64Cmdline();
 
-    Confile parse(int argc, char *const *argv) override {
-        return CaioCmdline::parse(argc, argv);
-    }
+    Confile parse(int argc, char *const *argv) override;
 
 private:
     void usage() override;
