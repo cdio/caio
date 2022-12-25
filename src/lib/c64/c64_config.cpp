@@ -115,6 +115,11 @@ C64Config &C64Config::operator=(const Confile &conf)
     return *this;
 }
 
+std::string C64Config::palette_file(const std::string &palette) const
+{
+    return "c64_" + Config::palette_file(palette);
+}
+
 std::string C64Config::keymaps_file(const std::string &cc) const
 {
     return "c64_" + Config::keymaps_file(cc);

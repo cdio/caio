@@ -1,5 +1,7 @@
-# GoDot palette
-# https://godot64.de/german/hpalet.htm
+#
+# caio emulator - C64 Wiki colour table
+# https://www.c64-wiki.com/wiki/Color
+#
 000000FF
 FFFFFFFF
 880000FF

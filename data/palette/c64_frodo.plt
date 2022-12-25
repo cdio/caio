@@ -1,4 +1,6 @@
-# Frodo colours.
+#
+# caio emulator - C64 Frodo colour table
+#
 000000FF
 FFFFFFFF
 CC0000FF

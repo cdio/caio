@@ -1,6 +1,8 @@
-# Pepto colours
+#
+# caio emulator - C64 Pepto colour table
 # http://unusedino.de/ec64/technical/misc/vic656x/colors/index.html
 # https://www.pepto.de/projects/colorvic/2001/
+#
 000000FF
 FFFFFFFF
 68372BFF

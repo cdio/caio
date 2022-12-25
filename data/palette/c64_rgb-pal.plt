@@ -1,4 +1,6 @@
-# RBG-PAL
+#
+# caio emulator - C64 RGB-PAL colour table
+#
 000000FF
 FFFFFFFF
 AB3126FF

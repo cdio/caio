@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -67,55 +67,37 @@ ZX80Config &ZX80Config::operator=(const Confile &conf)
 
     const auto secit = conf.find(ZX80Confile::ZX80_CONFIG_SECTION);
     if (secit != conf.end()) {
-//XXX FIXME
-#if 0
         const auto &sec = secit->second;
 
-        auto it = sec.find(ZX80Confile::ZX80_CARTFILE_CONFIG_KEY);
-        if (it != sec.end()) {
-            cartfile = it->second;
-        }
-
-        it = sec.find(ZX80Confile::ZX80_PRGFILE_CONFIG_KEY);
-        if (it != sec.end()) {
-            prgfile = it->second;
-        }
-
-        it = sec.find(ZX80Confile::ZX80_RESID_CONFIG_KEY);
+        auto it = sec.find(ZX80Confile::ZX80_16K_RAM_CONFIG_KEY);
         if (it != sec.end()) {
             std::string str = utils::tolow(it->second);
             if (!str.empty()) {
-                resid = (str == "yes" || str == "ye" || str == "y");
+                ram16 = (str == "yes" || str == "ye" || str == "y");
             }
         }
 
-        it = sec.find(ZX80Confile::ZX80_SWAPJOY_CONFIG_KEY);
+        it = sec.find(ZX80Confile::ZX80_8K_ROM_CONFIG_KEY);
         if (it != sec.end()) {
             std::string str = utils::tolow(it->second);
             if (!str.empty()) {
-                swapj = (str == "yes" || str == "ye" || str == "y");
+                rom8 = (str == "yes" || str == "ye" || str == "y");
             }
         }
 
-        /* Palette entry in the c64 section, overrides any palette set in the caio section */
+        /* Palette entry in the zx80 section, overrides any palette set in the caio section */
         it = sec.find(CaioConfile::PALETTE_CONFIG_KEY);
         if (it != sec.end()) {
             Config::palettefile = palette_file(it->second);
         }
-
-        it = sec.find(ZX80Confile::ZX80_UNIT_8_CONFIG_KEY);
-        if (it != sec.end()) {
-            unit8 = it->second;
-        }
-
-        it = sec.find(ZX80Confile::ZX80_UNIT_9_CONFIG_KEY);
-        if (it != sec.end()) {
-            unit9 = it->second;
-        }
-#endif
     }
 
     return *this;
+}
+
+std::string ZX80Config::palette_file(const std::string &palette) const
+{
+    return "zx80_" + Config::palette_file(palette);
 }
 
 std::string ZX80Config::keymaps_file(const std::string &cc) const
@@ -127,7 +109,9 @@ std::string ZX80Config::to_string() const
 {
     std::ostringstream os{};
 
-    os << Config::to_string() << std::endl;
+    os << Config::to_string() << std::endl
+       << "  Attach 16K RAM   :  " << (ram16 ? "yes" : "no") << std::endl
+       << "  Use 8K ROM:         " << (rom8  ? "yes" : "no");
 
     return os.str();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -29,7 +29,9 @@ namespace zx80 {
  */
 class ZX80Confile : public CaioConfile {
 public:
-    constexpr static const char *ZX80_CONFIG_SECTION = "zx80";
+    constexpr static const char *ZX80_CONFIG_SECTION     = "zx80";
+    constexpr static const char *ZX80_16K_RAM_CONFIG_KEY = "ram16";
+    constexpr static const char *ZX80_8K_ROM_CONFIG_KEY  = "rom8";
 
     ZX80Confile();
 
@@ -44,7 +46,8 @@ public:
  *  ZX80 configuration.
  */
 struct ZX80Config : public Config {
-    std::string cartfile{};
+    bool ram16{};
+    bool rom8{};
 
     ZX80Config();
 
@@ -56,6 +59,11 @@ struct ZX80Config : public Config {
      * @see Config::operator=(const Confile &)
      */
     ZX80Config &operator=(const Confile &conf);
+
+    /**
+     * @see Config::palette_file()
+     */
+    std::string palette_file(const std::string &palette) const override;
 
     /**
      * @see Config::keymaps_file()

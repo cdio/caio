@@ -1,5 +1,7 @@
-# ARNE
+#
+# caio emulator - C64 ARNE colour table
 # https://androidarts.com/palette/16pal.htm
+#
 000000FF
 FFFFFFFF
 BE2633FF

@@ -1,5 +1,7 @@
-# Colodore
+#
+# caio emulator - C64 Colodore colour table
 # https://www.colodore.com/
+#
 000000FF
 FFFFFFFF
 813338FF

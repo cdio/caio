@@ -1,4 +1,6 @@
-# VICE RGB colours
+#
+# caio emulator - C64 VICE-RGB colour table
+#
 000000FF
 FFFFFFFF
 FF0000FF

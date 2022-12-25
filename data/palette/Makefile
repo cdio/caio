@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2022 Claudio Castiglia
+# Copyright (C) 2020 Claudio Castiglia
 #
 # This file is part of caio.
 #
@@ -20,15 +20,19 @@ ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
-PALETTES=	vice-rgb.plt \
-		vice.plt \
-		rgb-pal.plt \
-		pepto.plt \
-		godot.plt \
-		frodo.plt \
-		colodore.plt \
-		c64-wiki.plt \
-		arne.plt
+PALETTES=	c64_vice-rgb.plt \
+		c64_vice.plt \
+		c64_rgb-pal.plt \
+		c64_pepto.plt \
+		c64_godot.plt \
+		c64_frodo.plt \
+		c64_colodore.plt \
+		c64_c64-wiki.plt \
+		c64_arne.plt
+
+PALETTES+=	zx80_2green.plt \
+		zx80_bw.plt \
+		zx80_green.plt
 
 DST_PALETTEDIR=	${DST_DATADIR}/palette
 

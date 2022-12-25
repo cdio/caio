@@ -69,6 +69,11 @@ struct C64Config : public Config {
     C64Config &operator=(const Confile &conf);
 
     /**
+     * @see Config::palette_file()
+     */
+    std::string palette_file(const std::string &palette) const override;
+
+    /**
      * @see Config::keymaps_file()
      */
     std::string keymaps_file(const std::string &cc) const override;
