@@ -26,6 +26,8 @@ KEYSYMS=	c64_ch.kbd \
 		c64_gb.kbd \
 		c64_vice.kbd
 
+KEYSYMS+=	zx80_default.kbd
+
 DST_KEYSYMSDIR=	${DST_DATADIR}/keymaps
 
 DST_KEYSYMS=	${KEYSYMS:%=${DST_KEYSYMSDIR}/%}

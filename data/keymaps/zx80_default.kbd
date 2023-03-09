@@ -1,0 +1,93 @@
+#
+# caio emulator keyboard mappings: ZX-80 default (positional) layout
+#
+# The PC key names use the US-ANSI layout as reference.
+#
+# Format:
+#   <pc-key> [<pc-shift>] [<pc-altgr>]  <c64-key> [<c64-shift>]
+#
+###############################################################
+# PC-KEY-NAME       SHIFT   ALTGR   ZX80-KEY-NAME       SHIFT
+###############################################################
+  KEY_1                             KEY_1
+  KEY_2                             KEY_2
+  KEY_3                             KEY_3
+  KEY_4                             KEY_4
+  KEY_5                             KEY_5
+  KEY_6                             KEY_6
+  KEY_7                             KEY_7
+  KEY_8                             KEY_8
+  KEY_9                             KEY_9
+  KEY_0                             KEY_0
+  KEY_1             SHIFT           KEY_1               SHIFT
+  KEY_2             SHIFT           KEY_2               SHIFT
+  KEY_3             SHIFT           KEY_3               SHIFT
+  KEY_4             SHIFT           KEY_4               SHIFT
+  KEY_5             SHIFT           KEY_5               SHIFT
+  KEY_6             SHIFT           KEY_6               SHIFT
+  KEY_7             SHIFT           KEY_7               SHIFT
+  KEY_8             SHIFT           KEY_8               SHIFT
+  KEY_9             SHIFT           KEY_9               SHIFT
+  KEY_0             SHIFT           KEY_0               SHIFT
+
+  KEY_Q                             KEY_Q
+  KEY_W                             KEY_W
+  KEY_E                             KEY_E
+  KEY_R                             KEY_R
+  KEY_T                             KEY_T
+  KEY_Y                             KEY_Y
+  KEY_U                             KEY_U
+  KEY_I                             KEY_I
+  KEY_O                             KEY_O
+  KEY_P                             KEY_P
+  KEY_Q             SHIFT           KEY_Q               SHIFT
+  KEY_W             SHIFT           KEY_W               SHIFT
+  KEY_E             SHIFT           KEY_E               SHIFT
+  KEY_R             SHIFT           KEY_R               SHIFT
+  KEY_T             SHIFT           KEY_T               SHIFT
+  KEY_Y             SHIFT           KEY_Y               SHIFT
+  KEY_U             SHIFT           KEY_U               SHIFT
+  KEY_I             SHIFT           KEY_I               SHIFT
+  KEY_O             SHIFT           KEY_O               SHIFT
+  KEY_P             SHIFT           KEY_P               SHIFT
+
+  KEY_A                             KEY_A
+  KEY_S                             KEY_S
+  KEY_D                             KEY_D
+  KEY_F                             KEY_F
+  KEY_G                             KEY_G
+  KEY_H                             KEY_H
+  KEY_J                             KEY_J
+  KEY_K                             KEY_K
+  KEY_L                             KEY_L
+  KEY_ENTER                         KEY_NEWLINE
+  KEY_A             SHIFT           KEY_A               SHIFT
+  KEY_S             SHIFT           KEY_S               SHIFT
+  KEY_D             SHIFT           KEY_D               SHIFT
+  KEY_F             SHIFT           KEY_F               SHIFT
+  KEY_G             SHIFT           KEY_G               SHIFT
+  KEY_H             SHIFT           KEY_H               SHIFT
+  KEY_J             SHIFT           KEY_J               SHIFT
+  KEY_K             SHIFT           KEY_K               SHIFT
+  KEY_L             SHIFT           KEY_L               SHIFT
+  KEY_ENTER         SHIFT           KEY_NEWLINE         SHIFT
+
+  KEY_LEFT_SHIFT                    KEY_SHIFT
+  KEY_Z                             KEY_Z
+  KEY_X                             KEY_X
+  KEY_C                             KEY_C
+  KEY_V                             KEY_V
+  KEY_B                             KEY_B
+  KEY_N                             KEY_N
+  KEY_M                             KEY_M
+  KEY_DOT                           KEY_DOT
+  KEY_SPACE                         KEY_SPACE
+  KEY_Z             SHIFT           KEY_Z               SHIFT
+  KEY_X             SHIFT           KEY_X               SHIFT
+  KEY_C             SHIFT           KEY_C               SHIFT
+  KEY_V             SHIFT           KEY_V               SHIFT
+  KEY_B             SHIFT           KEY_B               SHIFT
+  KEY_N             SHIFT           KEY_N               SHIFT
+  KEY_M             SHIFT           KEY_M               SHIFT
+  KEY_DOT           SHIFT           KEY_DOT             SHIFT
+  KEY_SPACE         SHIFT           KEY_SPACE           SHIFT
