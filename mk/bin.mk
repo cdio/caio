@@ -32,20 +32,20 @@ CLEANFILES+=	${BIN} \
 .PHONY:		_all all debug install
 
 all:
-	${MAKE} ${MAKEARGS} -j${NPROC} _all
+	${MAKE} ${MAKEARGS} -j _all
 
 debug:
-	${MAKE} ${MAKEARGS} -j${NPROC} DEBUG=yes _all
+	${MAKE} ${MAKEARGS} -j DEBUG=yes _all
 
 ${LIB}: ${LIBRESID}
-	${MAKE} ${MAKEARGS} -j${NPROC} -C${dir $@} ${notdir $@}
+	${MAKE} ${MAKEARGS} -j -C${dir $@} ${notdir $@}
 
 ${LIBRESID}:
-	${MAKE} ${MAKEARGS} -j${NPROC} -C${ROOT}/3rdparty
+	${MAKE} ${MAKEARGS} -j -C${ROOT}/3rdparty
 
 #XXX debug targets
 ${EXTRA_DEPS}:
-	${MAKE} ${MAKEARGS} -j${NPROC} -C${dir $@} ${notdir $@}
+	${MAKE} ${MAKEARGS} -j -C${dir $@} ${notdir $@}
 
 _all: ${LN_BINS}
 

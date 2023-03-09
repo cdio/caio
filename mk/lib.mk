@@ -23,10 +23,10 @@ CLEANFILES+=	${LIB}
 .PHONY:		_all all debug
 
 all:
-	${MAKE} ${MAKEARGS} -j${NPROC} _all
+	${MAKE} ${MAKEARGS} -j _all
 
 debug:
-	${MAKE} ${MAKEARGS} -j${NPROC} DEBUG=yes _all
+	${MAKE} ${MAKEARGS} -j DEBUG=yes _all
 
 install: all
 
