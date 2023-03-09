@@ -116,4 +116,9 @@ using Latch = Latch_<bool>;
  */
 using Latch8 = Latch_<uint8_t>;
 
+/**
+ * 16 bits latch register.
+ */
+using Latch16 = Latch_<uint16_t>;
+
 }

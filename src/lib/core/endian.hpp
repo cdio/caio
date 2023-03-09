@@ -1,5 +1,5 @@
 /*
- * Apple macros copied from
+ * Apple macros borrowed from
  * https://gist.github.com/dendisuhubdy/19482135d26da86cdcf442b3724e0728
  */
 /** compatibility header for endian.h

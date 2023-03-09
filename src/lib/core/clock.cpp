@@ -119,7 +119,7 @@ void Clock::run()
 
         if (sched_cycle == sync_cycles) {
             /*
-             * Calculate the time required to the host system
+             * Calculate the time required for the host system
              * to execute sync_cycles emulated clock cycles.
              */
             int64_t end = utils::now();

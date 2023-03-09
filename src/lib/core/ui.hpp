@@ -43,7 +43,6 @@ using Widget      = sdl2::Widget;
 
 namespace widget  = sdl2::widget;
 
-
 template<typename W, class... A>
 std::shared_ptr<W> make_widget(UI &ui, const A&... args)
 {
