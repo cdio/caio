@@ -73,7 +73,7 @@ public:
      * Reinitialise this PLA and set the default mappings.
      * (This is more like a re-init rather than a reset).
      */
-    void reset();
+    void reset() override;
 
     /**
      * Set PLA input pins.
