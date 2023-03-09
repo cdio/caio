@@ -22,7 +22,9 @@ include ${ROOT}/mk/config.mk
 
 ROMS=		c64_basic.901226-01.bin \
 		c64_kernal.901227-03.bin \
-		c64_characters.901225-01.bin
+		c64_characters.901225-01.bin \
+		zx80_rom.bin \
+		zx81_rom.bin
 
 README=		README.md
 
