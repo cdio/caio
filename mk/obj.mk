@@ -24,12 +24,16 @@ HDEPS+=			${_CXXSRCS:%.cpp=%.d}
 
 EXTRA_CPPFLAGS?=
 
+EXTRA_DEPS?=
+
 CPPFLAGS+=		${EXTRA_CPPFLAGS}
 
 CLEANFILES+=		${OBJS} \
 			${HDEPS}
 
 .SUFFIXES:		.cpp .d .o
+
+${_CXXSRCS}: ${EXTRA_DEPS}
 
 %.o: %.cpp
 	${MKDEP} ${CPPFLAGS} ${CXXFLAGS} ${MKDEP_FLAGS} $< > ${@:.o=.d}
