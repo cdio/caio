@@ -553,24 +553,6 @@ std::ostream &Mos6569::dump(std::ostream &os, addr_t base) const
     return utils::dump(os, regs, base);
 }
 
-inline Mos6569::Rgba4::Rgba4(const Rgba &c1, const Rgba &c2, const Rgba &c3, const Rgba &c4)
-    : _colors{c1, c2, c3, c4}
-{
-}
-
-inline Mos6569::Rgba4::~Rgba4()
-{
-}
-
-inline const Rgba &Mos6569::Rgba4::operator[](size_t index) const
-{
-    if (index >= _colors.size()) {
-        throw InvalidArgument{Mos6569::TYPE, "Rgba4: Invalid color index: " + std::to_string(index)};
-    }
-
-    return _colors[index];
-}
-
 size_t Mos6569::tick(const Clock &clk)
 {
     switch (_cycle) {

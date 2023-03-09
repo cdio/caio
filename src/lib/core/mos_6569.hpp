@@ -326,18 +326,6 @@ public:
     std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
 
 private:
-    class Rgba4 {
-    public:
-        Rgba4(const Rgba &c1, const Rgba &c2, const Rgba &c3 = Rgba::transparent, const Rgba &c4 = Rgba::transparent);
-
-        ~Rgba4();
-
-        const Rgba &operator[](size_t index) const;
-
-    private:
-        std::array<Rgba, 4> _colors;
-    };
-
     /**
      * Clock tick interface (callback).
      * This method must be called by the system clock.

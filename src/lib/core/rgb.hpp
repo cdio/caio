@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <array>
 #include <initializer_list>
 #include <string>
 #include <vector>
@@ -113,7 +114,6 @@ struct Rgba {
     static Rgba transparent;
 };
 
-
 /**
  * RGBA Table.
  * The RGBA table associates colour indexes to RGBA values.
@@ -152,5 +152,30 @@ public:
      */
     void save(const std::string &fname);
 };
+
+/**
+ * Container for a fixed number of colours.
+ */
+template<size_t N>
+class RgbaN_ {
+public:
+    template<typename... Ts>
+    RgbaN_(const Ts &... colors)
+        : _colors{{colors...}} {
+    }
+
+    ~RgbaN_() {
+    }
+
+    const Rgba &operator[](size_t index) const {
+        return _colors[index];
+    }
+
+private:
+    std::array<Rgba, N> _colors;
+};
+
+using Rgba2 = RgbaN_<2>;
+using Rgba4 = RgbaN_<4>;
 
 }
