@@ -30,7 +30,7 @@ namespace caio {
 const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
     { "BRK",            Mos6502::i_BRK,         MODE_NONE,  7,  1   },  /* 00 */
     { "ORA ($*, X)",    Mos6502::i_ORA,         MODE_IND_X, 6,  2   },  /* 01 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* 02 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* 02 */
     { "SLO ($*, X)",    Mos6502::i_SLO,         MODE_IND_X, 8,  2   },  /* 03 */
     { "NOP $*",         Mos6502::i_NOP,         MODE_ZP,    3,  2   },  /* 04 */
     { "ORA $*",         Mos6502::i_ORA,         MODE_ZP,    3,  2   },  /* 05 */
@@ -47,7 +47,7 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
 
     { "BPL $+",         Mos6502::i_BPL,         MODE_REL,   2,  2   },  /* 10 */
     { "ORA ($*), Y",    Mos6502::i_ORA,         MODE_IND_Y, 5,  2   },  /* 11 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* 12 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* 12 */
     { "SLO ($*), Y",    Mos6502::i_SLO,         MODE_IND_Y, 8,  2   },  /* 13 */
     { "NOP $*, X",      Mos6502::i_NOP,         MODE_ZP_X,  4,  2   },  /* 14 */
     { "ORA $*, X",      Mos6502::i_ORA,         MODE_ZP_X,  4,  2   },  /* 15 */
@@ -64,7 +64,7 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
 
     { "JSR $^",         Mos6502::i_JSR,         MODE_ABS,   6,  3   },  /* 20 */
     { "AND ($*, X)",    Mos6502::i_AND,         MODE_IND_X, 6,  2   },  /* 21 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* 22 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* 22 */
     { "RLA ($*, X)",    Mos6502::i_RLA,         MODE_IND_X, 8,  2   },  /* 23 */
     { "BIT $*",         Mos6502::i_BIT,         MODE_ZP,    3,  2   },  /* 24 */
     { "AND $*",         Mos6502::i_AND,         MODE_ZP,    3,  2   },  /* 25 */
@@ -81,7 +81,7 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
 
     { "BMI $+",         Mos6502::i_BMI,         MODE_REL,   2,  2   },  /* 30 */
     { "AND ($*), Y",    Mos6502::i_AND,         MODE_IND_Y, 5,  2   },  /* 31 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* 32 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* 32 */
     { "RLA ($*), Y",    Mos6502::i_RLA,         MODE_IND_Y, 8,  2   },  /* 33 */
     { "NOP $*, X",      Mos6502::i_NOP,         MODE_ZP_X,  4,  2   },  /* 34 */
     { "AND $*, X",      Mos6502::i_AND,         MODE_ZP_X,  4,  2   },  /* 35 */
@@ -98,7 +98,7 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
 
     { "RTI",            Mos6502::i_RTI,         MODE_NONE,  6,  1   },  /* 40 */
     { "EOR ($*, X)",    Mos6502::i_EOR,         MODE_IND_X, 6,  2   },  /* 41 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* 42 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* 42 */
     { "SRE ($*, X)",    Mos6502::i_SRE,         MODE_IND_X, 8,  2   },  /* 43 */
     { "NOP $*",         Mos6502::i_NOP,         MODE_ZP,    3,  2   },  /* 44 */
     { "EOR $*",         Mos6502::i_EOR,         MODE_ZP,    3,  2   },  /* 45 */
@@ -115,7 +115,7 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
 
     { "BVC $+",         Mos6502::i_BVC,         MODE_REL,   2,  2   },  /* 50 */
     { "EOR ($*), Y",    Mos6502::i_EOR,         MODE_IND_Y, 5,  2   },  /* 51 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* 52 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* 52 */
     { "SRE ($*), Y",    Mos6502::i_SRE,         MODE_IND_Y, 8,  2   },  /* 53 */
     { "NOP $*, X",      Mos6502::i_NOP,         MODE_ZP_X,  4,  2   },  /* 54 */
     { "EOR $*, X",      Mos6502::i_EOR,         MODE_ZP_X,  4,  2   },  /* 55 */
@@ -132,7 +132,7 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
 
     { "RTS",            Mos6502::i_RTS,         MODE_NONE,  6,  1   },  /* 60 */
     { "ADC ($*, X)",    Mos6502::i_ADC,         MODE_IND_X, 6,  2   },  /* 61 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* 62 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* 62 */
     { "RRA ($*, X)",    Mos6502::i_RRA,         MODE_IND_X, 8,  2   },  /* 63 */
     { "NOP $*",         Mos6502::i_NOP,         MODE_ZP,    3,  2   },  /* 64 */
     { "ADC $*",         Mos6502::i_ADC,         MODE_ZP,    3,  2   },  /* 65 */
@@ -149,7 +149,7 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
 
     { "BVS $+",         Mos6502::i_BVS,         MODE_REL,   2,  2   },  /* 70 */
     { "ADC ($*), Y",    Mos6502::i_ADC,         MODE_IND_Y, 5,  2   },  /* 71 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* 72 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* 72 */
     { "RRA ($*), Y",    Mos6502::i_RRA,         MODE_IND_Y, 8,  2   },  /* 73 */
     { "NOP $*, X",      Mos6502::i_NOP,         MODE_ZP_X,  4,  2   },  /* 74 */
     { "ADC $*, X",      Mos6502::i_ADC,         MODE_ZP_X,  4,  2   },  /* 75 */
@@ -183,8 +183,8 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
 
     { "BCC $+",         Mos6502::i_BCC,         MODE_REL,   2,  2   },  /* 90 */
     { "STA ($*), Y",    Mos6502::i_STA,         MODE_IND_Y, 6,  2   },  /* 91 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* 92 */
-    { "AHX ($*), Y",    Mos6502::i_AHX,         MODE_IND_Y, 6,  2   },  /* 93 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* 92 */
+    { "SHA ($*), Y",    Mos6502::i_SHA_zp,      MODE_ZP,    6,  2   },  /* 93 */ /* It is not MODE_ZP_Y */
     { "STY $*, X",      Mos6502::i_STY,         MODE_ZP_X,  4,  2   },  /* 94 */
     { "STA $*, X",      Mos6502::i_STA,         MODE_ZP_X,  4,  2   },  /* 95 */
     { "STX $*, Y",      Mos6502::i_STX,         MODE_ZP_Y,  4,  2   },  /* 96 */
@@ -192,11 +192,11 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
     { "TYA",            Mos6502::i_TYA,         MODE_NONE,  2,  1   },  /* 98 */
     { "STA $^, Y",      Mos6502::i_STA,         MODE_ABS_Y, 4,  3   },  /* 99 */
     { "TXS",            Mos6502::i_TXS,         MODE_NONE,  2,  1   },  /* 9A */
-    { "TAS $^, Y",      Mos6502::i_TAS,         MODE_ABS_Y, 5,  3   },  /* 9B */
-    { "SHY $^, X",      Mos6502::i_SHY,         MODE_ABS_X, 5,  3   },  /* 9C */
+    { "SHS $^, Y",      Mos6502::i_SHS,         MODE_ABS,   5,  3   },  /* 9B */ /* It is not MODE_ABS_Y */
+    { "SHY $^, X",      Mos6502::i_SHY,         MODE_ABS,   5,  3   },  /* 9C */ /* It is not MODE_ABS_X */
     { "STA $^, X",      Mos6502::i_STA,         MODE_ABS_X, 5,  3   },  /* 9D */
-    { "SHX $^, Y",      Mos6502::i_SHX,         MODE_ABS_Y, 5,  3   },  /* 9E */
-    { "AHX $^, Y",      Mos6502::i_AHX,         MODE_ABS_Y, 5,  3   },  /* 9F */
+    { "SHX $^, Y",      Mos6502::i_SHX,         MODE_ABS,   5,  3   },  /* 9E */ /* It is not MODE_ABS_Y */
+    { "SHA $^, Y",      Mos6502::i_SHA,         MODE_ABS,   5,  3   },  /* 9F */ /* It is not MODE_ABS_Y */
 
     { "LDY #$*",        Mos6502::i_LDY_imm,     MODE_IMM,   2,  2   },  /* A0 */
     { "LDA ($*, X)",    Mos6502::i_LDA,         MODE_IND_X, 6,  2   },  /* A1 */
@@ -217,7 +217,7 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
 
     { "BCS $+",         Mos6502::i_BCS,         MODE_REL,   2,  2   },  /* B0 */
     { "LDA ($*), Y",    Mos6502::i_LDA,         MODE_IND_Y, 5,  2   },  /* B1 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* B2 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* B2 */
     { "LAX ($*), Y",    Mos6502::i_LAX,         MODE_IND_Y, 5,  2   },  /* B3 */
     { "LDY $*, X",      Mos6502::i_LDY,         MODE_ZP_X,  4,  2   },  /* B4 */
     { "LDA $*, X",      Mos6502::i_LDA,         MODE_ZP_X,  4,  2   },  /* B5 */
@@ -243,7 +243,7 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
     { "INY",            Mos6502::i_INY,         MODE_NONE,  2,  1   },  /* C8 */
     { "CMP #$*",        Mos6502::i_CMP_imm,     MODE_IMM,   2,  2   },  /* C9 */
     { "DEX",            Mos6502::i_DEX,         MODE_NONE,  2,  1   },  /* CA */
-    { "AXS #$*",        Mos6502::i_AXS_imm,     MODE_IMM,   2,  2   },  /* CB */
+    { "SBX #$*",        Mos6502::i_SBX_imm,     MODE_IMM,   2,  2   },  /* CB */
     { "CPY $^",         Mos6502::i_CPY,         MODE_ABS,   4,  3   },  /* CC */
     { "CMP $^",         Mos6502::i_CMP,         MODE_ABS,   4,  3   },  /* CD */
     { "DEC $^",         Mos6502::i_DEC,         MODE_ABS,   6,  3   },  /* CE */
@@ -251,12 +251,12 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
 
     { "BNE $+",         Mos6502::i_BNE,         MODE_REL,   2,  2   },  /* D0 */
     { "CMP ($*), Y",    Mos6502::i_CMP,         MODE_IND_Y, 5,  2   },  /* D1 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* D2 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* D2 */
     { "DCP ($*), Y",    Mos6502::i_DCP,         MODE_IND_Y, 8,  2   },  /* D3 */
     { "NOP $*, X",      Mos6502::i_NOP,         MODE_ZP_X,  4,  2   },  /* D4 */
     { "CMP $*, X",      Mos6502::i_CMP,         MODE_ZP_X,  4,  2   },  /* D5 */
     { "DEC $*, X",      Mos6502::i_DEC,         MODE_ZP_X,  4,  2   },  /* D6 */
-    { "DCP $*, X",      Mos6502::i_DCP,         MODE_ZP_X,  4,  2   },  /* D7 */
+    { "DCP $*, X",      Mos6502::i_DCP,         MODE_ZP_X,  6,  2   },  /* D7 */
     { "CLD",            Mos6502::i_CLD,         MODE_NONE,  2,  1   },  /* D8 */
     { "CMP $^, Y",      Mos6502::i_CMP,         MODE_ABS_Y, 4,  3   },  /* D9 */
     { "NOP",            Mos6502::i_NOP,         MODE_NONE,  2,  1   },  /* DA */
@@ -285,12 +285,12 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
 
     { "BEQ $+",         Mos6502::i_BEQ,         MODE_REL,   2,  2   },  /* F0 */
     { "SBC ($*), Y",    Mos6502::i_SBC,         MODE_IND_Y, 5,  2   },  /* F1 */
-    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  0,  1   },  /* F2 */
+    { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* F2 */
     { "ISC ($*), Y",    Mos6502::i_ISC,         MODE_IND_Y, 8,  2   },  /* F3 */
     { "NOP $*, X",      Mos6502::i_NOP,         MODE_ZP_X,  4,  2   },  /* F4 */
     { "SBC $*, X",      Mos6502::i_SBC,         MODE_ZP_X,  4,  2   },  /* F5 */
     { "INC $*, X",      Mos6502::i_INC,         MODE_ZP_X,  4,  2   },  /* F6 */
-    { "ISC $*, X",      Mos6502::i_ISC,         MODE_ZP_X,  4,  2   },  /* F7 */
+    { "ISC $*, X",      Mos6502::i_ISC,         MODE_ZP_X,  6,  2   },  /* F7 */
     { "SED",            Mos6502::i_SED,         MODE_NONE,  2,  1   },  /* F8 */
     { "SBC $^, Y",      Mos6502::i_SBC,         MODE_ABS_Y, 4,  3   },  /* F9 */
     { "NOP",            Mos6502::i_NOP,         MODE_NONE,  2,  1   },  /* FA */
@@ -480,6 +480,8 @@ void Mos6502::reset()
         .S  = S_init
     };
 
+    _halted = false;
+
     flag(0);
 }
 
@@ -636,6 +638,13 @@ size_t Mos6502::single_step()
     addr_t addr{};
     bool is_nmi{};
 
+    if (_halted) {
+        /*
+         * CPU is halted, the only way to exit this condition is by doing a RESET.
+         */
+        return 1;
+    }
+
     if (!_rdy_pin) {
         /*
          * CPU freezed on read operations.
@@ -749,7 +758,7 @@ size_t Mos6502::single_step()
         _regs.PC += (ins.size - 1);
     }
 
-    ins.fn(*this, arg);
+    auto cycles = ins.fn(*this, arg);
 
     if (_log.is_debug()) {
         std::ostringstream msg{};
@@ -757,7 +766,7 @@ size_t Mos6502::single_step()
         _log.debug(msg.str());
     }
 
-    return ins.cycles;
+    return (cycles == 0 ? ins.cycles : cycles);
 }
 
 size_t Mos6502::tick(const Clock &clk)

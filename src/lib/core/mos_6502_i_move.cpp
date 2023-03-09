@@ -24,7 +24,7 @@ namespace caio {
 /********************************************************************************
  * LDA (load accumulator)
  ********************************************************************************/
-void Mos6502::i_LDA_imm(Mos6502 &self, addr_t value)
+int Mos6502::i_LDA_imm(Mos6502 &self, addr_t value)
 {
     /*
      * LDA #$00
@@ -34,9 +34,10 @@ void Mos6502::i_LDA_imm(Mos6502 &self, addr_t value)
     self._regs.A = static_cast<uint8_t>(value);
     self.set_N(self._regs.A);
     self.set_Z(self._regs.A);
+    return 0;
 }
 
-void Mos6502::i_LDA(Mos6502 &self, addr_t addr)
+int Mos6502::i_LDA(Mos6502 &self, addr_t addr)
 {
     /*
      * LDA $00
@@ -52,13 +53,14 @@ void Mos6502::i_LDA(Mos6502 &self, addr_t addr)
     self._regs.A = self.read(addr);
     self.set_N(self._regs.A);
     self.set_Z(self._regs.A);
+    return 0;
 }
 
 
 /********************************************************************************
  * LDX (load register X)
  ********************************************************************************/
-void Mos6502::i_LDX_imm(Mos6502 &self, addr_t value)
+int Mos6502::i_LDX_imm(Mos6502 &self, addr_t value)
 {
     /*
      * LDX #$00
@@ -68,9 +70,10 @@ void Mos6502::i_LDX_imm(Mos6502 &self, addr_t value)
     self._regs.X = static_cast<uint8_t>(value);
     self.set_N(self._regs.X);
     self.set_Z(self._regs.X);
+    return 0;
 }
 
-void Mos6502::i_LDX(Mos6502 &self, addr_t addr)
+int Mos6502::i_LDX(Mos6502 &self, addr_t addr)
 {
     /*
      * LDX $00
@@ -83,13 +86,14 @@ void Mos6502::i_LDX(Mos6502 &self, addr_t addr)
     self._regs.X = self.read(addr);
     self.set_N(self._regs.X);
     self.set_Z(self._regs.X);
+    return 0;
 }
 
 
 /********************************************************************************
  * LDY (load register Y)
  ********************************************************************************/
-void Mos6502::i_LDY_imm(Mos6502 &self, addr_t value)
+int Mos6502::i_LDY_imm(Mos6502 &self, addr_t value)
 {
     /*
      * LDY #$00
@@ -99,9 +103,10 @@ void Mos6502::i_LDY_imm(Mos6502 &self, addr_t value)
     self._regs.Y = static_cast<uint8_t>(value);
     self.set_N(self._regs.Y);
     self.set_Z(self._regs.Y);
+    return 0;
 }
 
-void Mos6502::i_LDY(Mos6502 &self, addr_t addr)
+int Mos6502::i_LDY(Mos6502 &self, addr_t addr)
 {
     /*
      * LDY $00
@@ -114,13 +119,14 @@ void Mos6502::i_LDY(Mos6502 &self, addr_t addr)
     self._regs.Y = self.read(addr);
     self.set_N(self._regs.Y);
     self.set_Z(self._regs.Y);
+    return 0;
 }
 
 
 /********************************************************************************
  * STA (store accumulator)
  ********************************************************************************/
-void Mos6502::i_STA(Mos6502 &self, addr_t addr)
+int Mos6502::i_STA(Mos6502 &self, addr_t addr)
 {
     /*
      * STA $00
@@ -132,13 +138,14 @@ void Mos6502::i_STA(Mos6502 &self, addr_t addr)
      * STA ($00), Y
      */
     self.write(addr, self._regs.A);
+    return 0;
 }
 
 
 /********************************************************************************
  * STX (store register X)
  ********************************************************************************/
-void Mos6502::i_STX(Mos6502 &self, addr_t addr)
+int Mos6502::i_STX(Mos6502 &self, addr_t addr)
 {
     /*
      * STX $00
@@ -146,13 +153,14 @@ void Mos6502::i_STX(Mos6502 &self, addr_t addr)
      * STX $0000
      */
     self.write(addr, self._regs.X);
+    return 0;
 }
 
 
 /********************************************************************************
  * STY (store register Y)
  ********************************************************************************/
-void Mos6502::i_STY(Mos6502 &self, addr_t addr)
+int Mos6502::i_STY(Mos6502 &self, addr_t addr)
 {
     /*
      * STY $00
@@ -160,13 +168,14 @@ void Mos6502::i_STY(Mos6502 &self, addr_t addr)
      * STY $0000
      */
     self.write(addr, self._regs.Y);
+    return 0;
 }
 
 
 /********************************************************************************
  * TAX (X = A)
  ********************************************************************************/
-void Mos6502::i_TAX(Mos6502 &self, addr_t _)
+int Mos6502::i_TAX(Mos6502 &self, addr_t _)
 {
     /*
      * TAX
@@ -176,13 +185,14 @@ void Mos6502::i_TAX(Mos6502 &self, addr_t _)
     self._regs.X = self._regs.A;
     self.set_Z(self._regs.X);
     self.set_N(self._regs.X);
+    return 0;
 }
 
 
 /********************************************************************************
  * TXA (A = X)
  ********************************************************************************/
-void Mos6502::i_TXA(Mos6502 &self, addr_t _)
+int Mos6502::i_TXA(Mos6502 &self, addr_t _)
 {
     /*
      * TXA
@@ -192,13 +202,14 @@ void Mos6502::i_TXA(Mos6502 &self, addr_t _)
     self._regs.A = self._regs.X;
     self.set_Z(self._regs.A);
     self.set_N(self._regs.A);
+    return 0;
 }
 
 
 /********************************************************************************
  * TAY (Y = A)
  ********************************************************************************/
-void Mos6502::i_TAY(Mos6502 &self, addr_t _)
+int Mos6502::i_TAY(Mos6502 &self, addr_t _)
 {
     /*
      * TAY
@@ -208,13 +219,14 @@ void Mos6502::i_TAY(Mos6502 &self, addr_t _)
     self._regs.Y = self._regs.A;
     self.set_N(self._regs.Y);
     self.set_Z(self._regs.Y);
+    return 0;
 }
 
 
 /********************************************************************************
  * TYA (A = Y)
  ********************************************************************************/
-void Mos6502::i_TYA(Mos6502 &self, addr_t _)
+int Mos6502::i_TYA(Mos6502 &self, addr_t _)
 {
     /*
      * TYA
@@ -224,13 +236,14 @@ void Mos6502::i_TYA(Mos6502 &self, addr_t _)
     self._regs.A = self._regs.Y;
     self.set_N(self._regs.A);
     self.set_Z(self._regs.A);
+    return 0;
 }
 
 
 /********************************************************************************
  * TSX (X = S)
  ********************************************************************************/
-void Mos6502::i_TSX(Mos6502 &self, addr_t _)
+int Mos6502::i_TSX(Mos6502 &self, addr_t _)
 {
     /*
      * TSX
@@ -240,13 +253,14 @@ void Mos6502::i_TSX(Mos6502 &self, addr_t _)
     self._regs.X = self._regs.S;
     self.set_Z(self._regs.X);
     self.set_N(self._regs.X);
+    return 0;
 }
 
 
 /********************************************************************************
  * TXS (S = X)
  ********************************************************************************/
-void Mos6502::i_TXS(Mos6502 &self, addr_t _)
+int Mos6502::i_TXS(Mos6502 &self, addr_t _)
 {
     /*
      * TXS
@@ -254,13 +268,14 @@ void Mos6502::i_TXS(Mos6502 &self, addr_t _)
      * Flags: -
      */
     self._regs.S = self._regs.X;
+    return 0;
 }
 
 
 /********************************************************************************
  * PLA (Pop accumulator: A = pop())
  ********************************************************************************/
-void Mos6502::i_PLA(Mos6502 &self, addr_t)
+int Mos6502::i_PLA(Mos6502 &self, addr_t)
 {
     /*
      * PLA
@@ -270,42 +285,46 @@ void Mos6502::i_PLA(Mos6502 &self, addr_t)
     self._regs.A = self.pop();
     self.set_N(self._regs.A);
     self.set_Z(self._regs.A);
+    return 0;
 }
 
 
 /********************************************************************************
  * PHA (Push accumulator: push(A))
  ********************************************************************************/
-void Mos6502::i_PHA(Mos6502 &self, addr_t)
+int Mos6502::i_PHA(Mos6502 &self, addr_t)
 {
     /*
      * PHA
      */
     self.push(self._regs.A);
+    return 0;
 }
 
 
 /********************************************************************************
  * PLP (Pop processor status: P = pop())
  ********************************************************************************/
-void Mos6502::i_PLP(Mos6502 &self, addr_t _)
+int Mos6502::i_PLP(Mos6502 &self, addr_t _)
 {
     /*
      * PLP
      */
     self.pop_P();
+    return 0;
 }
 
 
 /********************************************************************************
  * PHP (Push processor status: push(P))
  ********************************************************************************/
-void Mos6502::i_PHP(Mos6502 &self, addr_t _)
+int Mos6502::i_PHP(Mos6502 &self, addr_t _)
 {
     /*
      * PHP
      */
     self.push_P();
+    return 0;
 }
 
 }

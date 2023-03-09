@@ -84,7 +84,7 @@ public:
 
     struct Instruction {
         const char *format;                 /* Mnemonic format string (*=00, ^=0000, +=rel) */
-        void (*fn)(Mos6502 &, addr_t);      /* Instruction callback                         */
+        int (*fn)(Mos6502 &, addr_t);       /* Instruction callback                         */
         AddressingMode mode;                /* Addressing mode                              */
         size_t cycles;                      /* Clock cycles consumed by this instruction    */
         size_t size;                        /* Size of the instruction (in bytes)           */
@@ -250,8 +250,8 @@ private:
      * If the monitor is running and a monitor-breakpoint is set on the current PC address
      * the monitor's run method is called instead.
      * @param clk The caller clock.
-     * @return The number of clock cycles consumed by the executed instruction;
-     *         Clockable::HALT if the halt instruction was executed.
+     * @return The number of clock cycles consumed (the clock will call this method again after
+     * this number of cycles have passed); Clockable::HALT if the clock must be terminated.
      * @see single_step()
      * @see Monitor::run()
      */
@@ -391,6 +391,7 @@ private:
     IRQPin                   _irq_pin{};
     IRQPin                   _nmi_pin{};
     InputPin                 _rdy_pin{};
+    bool                     _halted{};
 
     std::atomic_bool _break{};
     std::map<addr_t, std::pair<breakpoint_cb_t, void *>> _breakpoints{};
@@ -554,145 +555,146 @@ private:
     /*
      * Instruction callbacks: Logical and Arithmetic operations.
      */
-    static void i_AND_imm   (Mos6502 &, addr_t);
-    static void i_AND       (Mos6502 &, addr_t);
+    static int i_AND_imm   (Mos6502 &, addr_t);
+    static int i_AND       (Mos6502 &, addr_t);
 
-    static void i_BIT       (Mos6502 &, addr_t);
+    static int i_BIT       (Mos6502 &, addr_t);
 
-    static void i_ORA_imm   (Mos6502 &, addr_t);
-    static void i_ORA       (Mos6502 &, addr_t);
+    static int i_ORA_imm   (Mos6502 &, addr_t);
+    static int i_ORA       (Mos6502 &, addr_t);
 
-    static void i_EOR_imm   (Mos6502 &, addr_t);
-    static void i_EOR       (Mos6502 &, addr_t);
+    static int i_EOR_imm   (Mos6502 &, addr_t);
+    static int i_EOR       (Mos6502 &, addr_t);
 
-    static void i_ADC_imm   (Mos6502 &, addr_t);
-    static void i_ADC       (Mos6502 &, addr_t);
+    static int i_ADC_imm   (Mos6502 &, addr_t);
+    static int i_ADC       (Mos6502 &, addr_t);
 
-    static void i_SBC_imm   (Mos6502 &, addr_t);
-    static void i_SBC       (Mos6502 &, addr_t);
+    static int i_SBC_imm   (Mos6502 &, addr_t);
+    static int i_SBC       (Mos6502 &, addr_t);
 
-    static void i_CMP_imm   (Mos6502 &, addr_t);
-    static void i_CMP       (Mos6502 &, addr_t);
+    static int i_CMP_imm   (Mos6502 &, addr_t);
+    static int i_CMP       (Mos6502 &, addr_t);
 
-    static void i_CPX_imm   (Mos6502 &, addr_t);
-    static void i_CPX       (Mos6502 &, addr_t);
+    static int i_CPX_imm   (Mos6502 &, addr_t);
+    static int i_CPX       (Mos6502 &, addr_t);
 
-    static void i_CPY_imm   (Mos6502 &, addr_t);
-    static void i_CPY       (Mos6502 &, addr_t);
+    static int i_CPY_imm   (Mos6502 &, addr_t);
+    static int i_CPY       (Mos6502 &, addr_t);
 
-    static void i_DEC       (Mos6502 &, addr_t);
-    static void i_DEX       (Mos6502 &, addr_t);
-    static void i_DEY       (Mos6502 &, addr_t);
+    static int i_DEC       (Mos6502 &, addr_t);
+    static int i_DEX       (Mos6502 &, addr_t);
+    static int i_DEY       (Mos6502 &, addr_t);
 
-    static void i_INC       (Mos6502 &, addr_t);
-    static void i_INX       (Mos6502 &, addr_t);
-    static void i_INY       (Mos6502 &, addr_t);
+    static int i_INC       (Mos6502 &, addr_t);
+    static int i_INX       (Mos6502 &, addr_t);
+    static int i_INY       (Mos6502 &, addr_t);
 
-    static void i_ASL_acc   (Mos6502 &, addr_t);
-    static void i_ASL       (Mos6502 &, addr_t);
+    static int i_ASL_acc   (Mos6502 &, addr_t);
+    static int i_ASL       (Mos6502 &, addr_t);
 
-    static void i_ROL_acc   (Mos6502 &, addr_t);
-    static void i_ROL       (Mos6502 &, addr_t);
+    static int i_ROL_acc   (Mos6502 &, addr_t);
+    static int i_ROL       (Mos6502 &, addr_t);
 
-    static void i_LSR_acc   (Mos6502 &, addr_t);
-    static void i_LSR       (Mos6502 &, addr_t);
+    static int i_LSR_acc   (Mos6502 &, addr_t);
+    static int i_LSR       (Mos6502 &, addr_t);
 
-    static void i_ROR_acc   (Mos6502 &, addr_t);
-    static void i_ROR       (Mos6502 &, addr_t);
+    static int i_ROR_acc   (Mos6502 &, addr_t);
+    static int i_ROR       (Mos6502 &, addr_t);
 
     /*
      * Instruction callbacks: Move operations.
      */
-    static void i_LDA_imm   (Mos6502 &, addr_t);
-    static void i_LDA       (Mos6502 &, addr_t);
+    static int i_LDA_imm   (Mos6502 &, addr_t);
+    static int i_LDA       (Mos6502 &, addr_t);
 
-    static void i_LDX_imm   (Mos6502 &, addr_t);
-    static void i_LDX       (Mos6502 &, addr_t);
+    static int i_LDX_imm   (Mos6502 &, addr_t);
+    static int i_LDX       (Mos6502 &, addr_t);
 
-    static void i_LDY_imm   (Mos6502 &, addr_t);
-    static void i_LDY       (Mos6502 &, addr_t);
+    static int i_LDY_imm   (Mos6502 &, addr_t);
+    static int i_LDY       (Mos6502 &, addr_t);
 
-    static void i_STA       (Mos6502 &, addr_t);
-    static void i_STX       (Mos6502 &, addr_t);
-    static void i_STY       (Mos6502 &, addr_t);
+    static int i_STA       (Mos6502 &, addr_t);
+    static int i_STX       (Mos6502 &, addr_t);
+    static int i_STY       (Mos6502 &, addr_t);
 
-    static void i_TAX       (Mos6502 &, addr_t);
-    static void i_TXA       (Mos6502 &, addr_t);
-    static void i_TAY       (Mos6502 &, addr_t);
-    static void i_TYA       (Mos6502 &, addr_t);
+    static int i_TAX       (Mos6502 &, addr_t);
+    static int i_TXA       (Mos6502 &, addr_t);
+    static int i_TAY       (Mos6502 &, addr_t);
+    static int i_TYA       (Mos6502 &, addr_t);
 
-    static void i_TSX       (Mos6502 &, addr_t);
-    static void i_TXS       (Mos6502 &, addr_t);
+    static int i_TSX       (Mos6502 &, addr_t);
+    static int i_TXS       (Mos6502 &, addr_t);
 
-    static void i_PLA       (Mos6502 &, addr_t);
-    static void i_PHA       (Mos6502 &, addr_t);
+    static int i_PLA       (Mos6502 &, addr_t);
+    static int i_PHA       (Mos6502 &, addr_t);
 
-    static void i_PLP       (Mos6502 &, addr_t);
-    static void i_PHP       (Mos6502 &, addr_t);
+    static int i_PLP       (Mos6502 &, addr_t);
+    static int i_PHP       (Mos6502 &, addr_t);
 
     /*
      * Instruction callbacks: Branch/Jump.
      */
-    static void i_BPL       (Mos6502 &, addr_t);
-    static void i_BMI       (Mos6502 &, addr_t);
+    static int i_BPL       (Mos6502 &, addr_t);
+    static int i_BMI       (Mos6502 &, addr_t);
 
-    static void i_BVC       (Mos6502 &, addr_t);
-    static void i_BVS       (Mos6502 &, addr_t);
+    static int i_BVC       (Mos6502 &, addr_t);
+    static int i_BVS       (Mos6502 &, addr_t);
 
-    static void i_BCC       (Mos6502 &, addr_t);
-    static void i_BCS       (Mos6502 &, addr_t);
+    static int i_BCC       (Mos6502 &, addr_t);
+    static int i_BCS       (Mos6502 &, addr_t);
 
-    static void i_BNE       (Mos6502 &, addr_t);
-    static void i_BEQ       (Mos6502 &, addr_t);
+    static int i_BNE       (Mos6502 &, addr_t);
+    static int i_BEQ       (Mos6502 &, addr_t);
 
-    static void i_BRK       (Mos6502 &, addr_t);
-    static void i_RTI       (Mos6502 &, addr_t);
+    static int i_BRK       (Mos6502 &, addr_t);
+    static int i_RTI       (Mos6502 &, addr_t);
 
-    static void i_JSR       (Mos6502 &, addr_t);
-    static void i_RTS       (Mos6502 &, addr_t);
+    static int i_JSR       (Mos6502 &, addr_t);
+    static int i_RTS       (Mos6502 &, addr_t);
 
-    static void i_JMP       (Mos6502 &, addr_t);
+    static int i_JMP       (Mos6502 &, addr_t);
 
-    static void i_NOP       (Mos6502 &, addr_t);
+    static int i_NOP       (Mos6502 &, addr_t);
 
     /*
      * Instruction callbacks: Flags.
      */
-    static void i_CLC       (Mos6502 &, addr_t);
-    static void i_SEC       (Mos6502 &, addr_t);
+    static int i_CLC       (Mos6502 &, addr_t);
+    static int i_SEC       (Mos6502 &, addr_t);
 
-    static void i_CLI       (Mos6502 &, addr_t);
-    static void i_SEI       (Mos6502 &, addr_t);
+    static int i_CLI       (Mos6502 &, addr_t);
+    static int i_SEI       (Mos6502 &, addr_t);
 
-    static void i_CLV       (Mos6502 &, addr_t);
+    static int i_CLV       (Mos6502 &, addr_t);
 
-    static void i_CLD       (Mos6502 &, addr_t);
-    static void i_SED       (Mos6502 &, addr_t);
+    static int i_CLD       (Mos6502 &, addr_t);
+    static int i_SED       (Mos6502 &, addr_t);
 
     /*
      * Instruction callbacks: Illegal Instructions.
      */
-    static void i_SLO       (Mos6502 &, addr_t);
-    static void i_RLA       (Mos6502 &, addr_t);
-    static void i_SRE       (Mos6502 &, addr_t);
-    static void i_RRA       (Mos6502 &, addr_t);
-    static void i_SAX       (Mos6502 &, addr_t);
-    static void i_LAX_imm   (Mos6502 &, addr_t);
-    static void i_LAX       (Mos6502 &, addr_t);
-    static void i_DCP       (Mos6502 &, addr_t);
-    static void i_ISC       (Mos6502 &, addr_t);
-    static void i_ANC_imm   (Mos6502 &, addr_t);
-    static void i_ALR_imm   (Mos6502 &, addr_t);
-    static void i_ARR_imm   (Mos6502 &, addr_t);
-    static void i_XAA_imm   (Mos6502 &, addr_t);
-    static void i_AXS_imm   (Mos6502 &, addr_t);
-    static void i_AHX       (Mos6502 &, addr_t);
-    static void i_SHY       (Mos6502 &, addr_t);
-    static void i_SHX       (Mos6502 &, addr_t);
-    static void i_TAS       (Mos6502 &, addr_t);
-    static void i_LAS       (Mos6502 &, addr_t);
+    static int i_SLO       (Mos6502 &, addr_t);
+    static int i_RLA       (Mos6502 &, addr_t);
+    static int i_SRE       (Mos6502 &, addr_t);
+    static int i_RRA       (Mos6502 &, addr_t);
+    static int i_SAX       (Mos6502 &, addr_t);
+    static int i_LAX_imm   (Mos6502 &, addr_t);
+    static int i_LAX       (Mos6502 &, addr_t);
+    static int i_DCP       (Mos6502 &, addr_t);
+    static int i_ISC       (Mos6502 &, addr_t);
+    static int i_ANC_imm   (Mos6502 &, addr_t);
+    static int i_ALR_imm   (Mos6502 &, addr_t);
+    static int i_ARR_imm   (Mos6502 &, addr_t);
+    static int i_XAA_imm   (Mos6502 &, addr_t);
+    static int i_SBX_imm   (Mos6502 &, addr_t);
+    static int i_SHA_zp    (Mos6502 &, addr_t);
+    static int i_SHA       (Mos6502 &, addr_t);
+    static int i_SHY       (Mos6502 &, addr_t);
+    static int i_SHX       (Mos6502 &, addr_t);
+    static int i_SHS       (Mos6502 &, addr_t);
+    static int i_LAS       (Mos6502 &, addr_t);
 
-    static void i_KIL       (Mos6502 &, addr_t);
+    static int i_KIL       (Mos6502 &, addr_t);
 };
 
 }

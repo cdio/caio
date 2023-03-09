@@ -21,7 +21,7 @@
 
 namespace caio {
 
-void Mos6502::i_CLC(Mos6502 &self, addr_t _)
+int Mos6502::i_CLC(Mos6502 &self, addr_t _)
 {
     /*
      * CLC  - Clear Carry
@@ -29,9 +29,10 @@ void Mos6502::i_CLC(Mos6502 &self, addr_t _)
      * 2 cycles
      */
     self.flag_C(false);
+    return 0;
 }
 
-void Mos6502::i_SEC(Mos6502 &self, addr_t _)
+int Mos6502::i_SEC(Mos6502 &self, addr_t _)
 {
     /*
      * SEC  - Set Carry
@@ -39,9 +40,10 @@ void Mos6502::i_SEC(Mos6502 &self, addr_t _)
      * 2 cycles
      */
     self.flag_C(true);
+    return 0;
 }
 
-void Mos6502::i_CLI(Mos6502 &self, addr_t _)
+int Mos6502::i_CLI(Mos6502 &self, addr_t _)
 {
     /*
      * CLI  - Clear Interrupt flag
@@ -49,9 +51,10 @@ void Mos6502::i_CLI(Mos6502 &self, addr_t _)
      * 2 cycles.
      */
     self.flag_I(false);
+    return 0;
 }
 
-void Mos6502::i_SEI(Mos6502 &self, addr_t _)
+int Mos6502::i_SEI(Mos6502 &self, addr_t _)
 {
     /*
      * SEI  - Set Interrupt flag
@@ -59,9 +62,10 @@ void Mos6502::i_SEI(Mos6502 &self, addr_t _)
      * 2 cycles
      */
     self.flag_I(true);
+    return 0;
 }
 
-void Mos6502::i_CLV(Mos6502 &self, addr_t _)
+int Mos6502::i_CLV(Mos6502 &self, addr_t _)
 {
     /*
      * CLV  - Clear Overflow flag
@@ -69,9 +73,10 @@ void Mos6502::i_CLV(Mos6502 &self, addr_t _)
      * 2 cycles
      */
     self.flag_V(false);
+    return 0;
 }
 
-void Mos6502::i_CLD(Mos6502 &self, addr_t)
+int Mos6502::i_CLD(Mos6502 &self, addr_t)
 {
     /*
      * CLD  - Clear Decimal flag
@@ -79,9 +84,10 @@ void Mos6502::i_CLD(Mos6502 &self, addr_t)
      * 2 cycles
      */
     self.flag_D(false);
+    return 0;
 }
 
-void Mos6502::i_SED(Mos6502 &self, addr_t)
+int Mos6502::i_SED(Mos6502 &self, addr_t)
 {
     /*
      * SED  - Set Decimal flag
@@ -89,6 +95,7 @@ void Mos6502::i_SED(Mos6502 &self, addr_t)
      * 2 cycles
      */
     self.flag_D(true);
+    return 0;
 }
 
 }
