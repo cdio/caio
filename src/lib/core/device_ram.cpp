@@ -21,6 +21,8 @@
 #include "types.hpp"
 #include "utils.hpp"
 
+#include "device_rom.hpp"
+
 
 namespace caio {
 
@@ -50,8 +52,29 @@ DeviceRAM::DeviceRAM(const std::vector<uint8_t> &data)
 {
 }
 
+DeviceRAM::DeviceRAM(DeviceROM &&rom)
+    : Device{TYPE, rom.label()},
+      _data{std::move(rom._data)}
+{
+}
+
+DeviceRAM::DeviceRAM(const DeviceROM &rom)
+    : Device{TYPE, rom.label()},
+      _data{rom._data}
+{
+}
+
 DeviceRAM::~DeviceRAM()
 {
+}
+
+void DeviceRAM::copy(const class DeviceROM &rom, size_t offset)
+{
+    if (offset + rom.size() > size()) {
+        throw Error{*this, "Can't copy: ROM at offset exceeds RAM size"};
+    }
+
+    std::copy(rom._data.begin(), rom._data.end(), _data.begin() + offset);
 }
 
 void DeviceRAM::reset()

@@ -65,7 +65,28 @@ public:
      */
     DeviceRAM(const std::vector<uint8_t> &data);
 
+    /**
+     * Convert a ROM into a RAM device
+     * @param rom ROM device to convert.
+     */
+    DeviceRAM(class DeviceROM &&rom);
+
+    /**
+     * Convert a ROM into a RAM device
+     * @param rom ROM device to convert.
+     */
+    DeviceRAM(const class DeviceROM &rom);
+
     virtual ~DeviceRAM();
+
+    /**
+     * Merge a ROM into a RAM device
+     * Copy the content of a ROM device inside this RAM.
+     * @param rom    ROM device to merge;
+     * @param offset Destination starting offset.
+     * @execption Error If the ROM size plus the specified offset is larger than the RAM size.
+     */
+    void copy(const class DeviceROM &rom, size_t offset = 0);
 
     /**
      * @see Device::reset()

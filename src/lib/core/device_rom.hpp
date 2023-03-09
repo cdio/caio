@@ -99,6 +99,8 @@ public:
 
 private:
     std::vector<uint8_t> _data{};
+
+    friend class DeviceRAM;
 };
 
 }
