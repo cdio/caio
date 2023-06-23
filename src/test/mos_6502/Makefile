@@ -31,9 +31,9 @@ TESTS=		test_mos6510_arith_adc.mon \
 # TODO: illegal instructions
 # TODO: ghost instructions
 
-BIN=		../../c64
+BIN=		../../main/c64
 
-ROMPATH=	../../roms
+ROMPATH=	../../../data/roms
 
 TEST_FLAGS=	--audio no \
 		--monitor \
@@ -43,10 +43,10 @@ TEST_FLAGS=	--audio no \
 V?=		0
 
 ifeq (${V}, 1)
-LOGLEVEL=	EWID
+LOGLEVEL=	all
 STDOUT=
 else
-LOGLEVEL=	" "
+LOGLEVEL=	"none"
 STDOUT=		> /dev/null
 endif
 
