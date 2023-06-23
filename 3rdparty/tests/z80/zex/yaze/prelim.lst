@@ -1,0 +1,464 @@
+Sjasm Z80 Assembler v0.42c - www.xl2s.tk             [2023.03.10 - 00:58:53]
+
+prelim.z80
+Errors: 75
+
+prelim.z80(1) : Unrecognized instruction: .
+       1   00:0100                      	.title	'Preliminary Z80 tests'
+       2   00:0100                      
+       3   00:0100                      ; prelim.z80 - Preliminary Z80 tests
+       4   00:0100                      ; Copyright (C) 1994  Frank D. Cringle
+       5   00:0100                      ;
+       6   00:0100                      ; This program is free software; you can redistribute it and/or
+       7   00:0100                      ; modify it under the terms of the GNU General Public License
+       8   00:0100                      ; as published by the Free Software Foundation; either version 2
+       9   00:0100                      ; of the License, or (at your option) any later version.
+      10   00:0100                      ;
+      11   00:0100                      ; This program is distributed in the hope that it will be useful,
+      12   00:0100                      ; but WITHOUT ANY WARRANTY; without even the implied warranty of
+      13   00:0100                      ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      14   00:0100                      ; GNU General Public License for more details.
+      15   00:0100                      ;
+      16   00:0100                      ; You should have received a copy of the GNU General Public License
+      17   00:0100                      ; along with this program; if not, write to the Free Software
+      18   00:0100                      ; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+      19   00:0100                      
+      20   00:0100                      
+      21   00:0100                      ; These tests have two goals.  To start with, we assume the worst and
+      22   00:0100                      ; successively test the instructions needed to continue testing.
+      23   00:0100                      ; Then we try to test all instructions which cannot be handled by
+      24   00:0100                      ; zexlax - the crc-based instruction exerciser.
+      25   00:0100                      
+      26   00:0100                      ; Initially errors are 'reported' by jumping to 0.  This should reboot
+      27   00:0100                      ; cp/m, so if the program terminates without any output one of the
+      28   00:0100                      ; early tests failed.  Later errors are reported by outputting an
+      29   00:0100                      ; address via the bdos conout routine.  The address can be located in
+      30   00:0100                      ; a listing of this program.
+      31   00:0100                      
+      32   00:0100                      ; If the program runs to completion it displays a suitable message.
+      33   00:0100                      
+prelim.z80(34) : Unrecognized instruction: aseg
+      34   00:0100                      	aseg
+      35   00:0100                      	org	100h
+      36   00:0100                      
+      37   00:0100  3E 01               start:	ld	a,1		; test simple compares and z/nz jumps
+      38   00:0102  FE 02               	cp	2
+      39   00:0104  CA 00 00            	jp	z,0
+      40   00:0107  FE 01               	cp	1
+      41   00:0109  C2 00 00            	jp	nz,0
+      42   00:010C  C3 11 01            	jp	lab0
+      43   00:010F  76                  	halt			; emergency exit
+      44   00:0110  FF                  	db	0ffh
+      45   00:0111                      	
+      46   00:0111  CD 17 01            lab0:	call	lab2		; does a simple call work?
+      47   00:0114  C3 00 00            lab1:	jp	0		; fail
+      48   00:0117                      	
+      49   00:0117  E1                  lab2:	pop	hl		; check return address
+      50   00:0118  7C                  	ld	a,h
+      51   00:0119  FE 01               	cp	high lab1
+      52   00:011B  CA 21 01            	jp	z,lab3
+      53   00:011E  C3 00 00            	jp	0
+      54   00:0121  7D                  lab3:	ld	a,l
+      55   00:0122  FE 14               	cp	low lab1
+      56   00:0124  CA 2A 01            	jp	z,lab4
+      57   00:0127  C3 00 00            	jp	0
+      58   00:012A                      
+      59   00:012A                      ; test presence and uniqueness of all machine registers
+      60   00:012A                      ; (except ir)
+      61   00:012A  31 AC 02            lab4:	ld	sp,regs1
+      62   00:012D  F1                  	pop	af
+      63   00:012E  C1                  	pop	bc
+      64   00:012F  D1                  	pop	de
+      65   00:0130  E1                  	pop	hl
+      66   00:0131  08                  	ex	af,af'
+      67   00:0132  D9                  	exx
+      68   00:0133  F1                  	pop	af
+      69   00:0134  C1                  	pop	bc
+      70   00:0135  D1                  	pop	de
+      71   00:0136  E1                  	pop	hl
+      72   00:0137  DD E1               	pop	ix
+      73   00:0139  FD E1               	pop	iy
+      74   00:013B  31 C3 02            	ld	sp,regs2+20
+      75   00:013E  FD E5               	push	iy
+      76   00:0140  DD E5               	push	ix
+      77   00:0142  E5                  	push	hl
+      78   00:0143  D5                  	push	de
+      79   00:0144  C5                  	push	bc
+      80   00:0145  F5                  	push	af
+      81   00:0146  08                  	ex	af,af'
+      82   00:0147  D9                  	exx
+      83   00:0148  E5                  	push	hl
+      84   00:0149  D5                  	push	de
+      85   00:014A  C5                  	push	bc
+      86   00:014B  F5                  	push	af
+      87   00:014C                      
+      88   00:014C  CB C3               v:	set	0
+prelim.z80(89) : Unrecognized instruction: rept
+      89   00:014E                      	rept	20
+      90   00:014E  3A 55 03            	ld	a,(regs2+v/2)
+prelim.z80(91) : Duplicate labelname: v
+prelim.z80(91) : Illegal operand
+      91   00:0151                      v:	set	v+2
+prelim.z80(92) : Value out of range
+      92   00:0151  FE 4C               	cp	v
+      93   00:0153  C2 00 00            	jp	nz,0
+prelim.z80(94) : ENDMACRO without MACRO
+      94   00:0156                      	endm
+      95   00:0156                      
+      96   00:0156                      ; test access to memory via (hl)
+      97   00:0156  21 C3 02            	ld	hl,hlval
+      98   00:0159  7E                  	ld	a,(hl)
+      99   00:015A  FE A5               	cp	0a5h
+     100   00:015C  C2 00 00            	jp	nz,0
+     101   00:015F  21 C4 02            	ld	hl,hlval+1
+     102   00:0162  7E                  	ld	a,(hl)
+     103   00:0163  FE 3C               	cp	03ch
+     104   00:0165  C2 00 00            	jp	nz,0
+     105   00:0168                      
+     106   00:0168                      ; test unconditional return
+     107   00:0168  31 00 04            	ld	sp,stack
+     108   00:016B  21 73 01            	ld	hl,reta
+     109   00:016E  E5                  	push	hl
+     110   00:016F  C9                  	ret
+     111   00:0170  C3 00 00            	jp	0
+     112   00:0173                      
+     113   00:0173                      ; test instructions needed for hex output
+     114   00:0173  3E FF               reta:	ld	a,255
+     115   00:0175  E6 0F               	and	a,15
+     116   00:0177  FE 0F               	cp	15
+     117   00:0179  C2 00 00            	jp	nz,0
+     118   00:017C  3E 5A               	ld	a,05ah
+     119   00:017E  E6 0F               	and	15
+     120   00:0180  FE 0A               	cp	00ah
+     121   00:0182  C2 00 00            	jp	nz,0
+     122   00:0185  0F                  	rrca
+     123   00:0186  FE 05               	cp	005h
+     124   00:0188  C2 00 00            	jp	nz,0
+     125   00:018B  0F                  	rrca
+     126   00:018C  FE 82               	cp	082h
+     127   00:018E  C2 00 00            	jp	nz,0
+     128   00:0191  0F                  	rrca
+     129   00:0192  FE 41               	cp	041h
+     130   00:0194  C2 00 00            	jp	nz,0
+     131   00:0197  0F                  	rrca
+     132   00:0198  FE A0               	cp	0a0h
+     133   00:019A  C2 00 00            	jp	nz,0
+     134   00:019D  21 34 12            	ld	hl,01234h
+     135   00:01A0  E5                  	push	hl
+     136   00:01A1  C1                  	pop	bc
+     137   00:01A2  78                  	ld	a,b
+     138   00:01A3  FE 12               	cp	012h
+     139   00:01A5  C2 00 00            	jp	nz,0
+     140   00:01A8  79                  	ld	a,c
+     141   00:01A9  FE 34               	cp	034h
+     142   00:01AB  C2 00 00            	jp	nz,0
+     143   00:01AE                      	
+     144   00:01AE                      ; from now on we can report errors by displaying an address
+     145   00:01AE                      
+     146   00:01AE                      ; test conditional call, ret, jp, jr
+prelim.z80(147) : Unrecognized instruction: macro
+     147   00:01AE                      tcond:	macro	flag,pcond,ncond,rel
+prelim.z80(148) : Syntax error
+     148   00:01AE                      	ld	hl,&flag
+     149   00:01AE  E5                  	push	hl
+     150   00:01AF  F1                  	pop	af
+prelim.z80(151) : Syntax error
+     151   00:01B0                      	call	&pcond,lab1&pcond
+     152   00:01B0  C3 63 02            	jp	error
+prelim.z80(153) : Duplicate labelname: lab1
+prelim.z80(153) : Unrecognized instruction: &pcond:
+     153   00:01B3                      lab1&pcond:	pop	hl
+prelim.z80(154) : Syntax error
+     154   00:01B3                      	ld	hl,0d7h xor &flag
+     155   00:01B3  E5                  	push	hl
+     156   00:01B4  F1                  	pop	af
+prelim.z80(157) : Syntax error
+     157   00:01B5                      	call	&ncond,lab2&pcond
+     158   00:01B5  C3 63 02            	jp	error
+prelim.z80(159) : Duplicate labelname: lab2
+prelim.z80(159) : Unrecognized instruction: &pcond:
+     159   00:01B8                      lab2&pcond:	pop	hl
+prelim.z80(160) : Label not found: pcond
+     160   00:01B8  21 00 00            	ld	hl,lab3&pcond
+     161   00:01BB  E5                  	push	hl
+prelim.z80(162) : Syntax error
+     162   00:01BC                      	ld	hl,&flag
+     163   00:01BC  E5                  	push	hl
+     164   00:01BD  F1                  	pop	af
+prelim.z80(165) : Syntax error
+     165   00:01BE  C9                  	ret	&pcond
+     166   00:01BF  CD 63 02            	call	error
+prelim.z80(167) : Duplicate labelname: lab3
+prelim.z80(167) : Unrecognized instruction: &pcond:
+     167   00:01C2                      lab3&pcond:	ld	hl,lab4&pcond
+     168   00:01C2  E5                  	push	hl
+prelim.z80(169) : Syntax error
+     169   00:01C3                      	ld	hl,0d7h xor &flag
+     170   00:01C3  E5                  	push	hl
+     171   00:01C4  F1                  	pop	af
+prelim.z80(172) : Syntax error
+     172   00:01C5  C9                  	ret	&ncond
+     173   00:01C6  CD 63 02            	call	error
+prelim.z80(174) : Duplicate labelname: lab4
+prelim.z80(174) : Unrecognized instruction: &pcond:
+     174   00:01C9                      lab4&pcond:	ld	hl,&flag
+     175   00:01C9  E5                  	push	hl
+     176   00:01CA  F1                  	pop	af
+prelim.z80(177) : Syntax error
+     177   00:01CB                      	jp	&pcond,lab5&pcond
+     178   00:01CB  CD 63 02            	call	error
+prelim.z80(179) : Unrecognized instruction: &pcond:
+     179   00:01CE                      lab5&pcond:	ld	hl,0d7h xor &flag
+     180   00:01CE  E5                  	push	hl
+     181   00:01CF  F1                  	pop	af
+prelim.z80(182) : Syntax error
+     182   00:01D0                      	jp	&ncond,lab6&pcond
+     183   00:01D0  CD 63 02            	call	error
+prelim.z80(184) : Unrecognized instruction: &pcond:
+     184   00:01D3                      lab6&pcond:	
+prelim.z80(185) : Syntax error
+prelim.z80(185) : Expression expected
+     185   00:01D3                            if	&rel
+prelim.z80(186) : Syntax error
+     186   00:01D3                      	ld	hl,&flag
+     187   00:01D3  E5                  	push	hl
+     188   00:01D4  F1                  	pop	af
+prelim.z80(189) : Syntax error
+     189   00:01D5                      	jr	&pcond,lab7&pcond
+     190   00:01D5  CD 63 02            	call	error
+prelim.z80(191) : Unrecognized instruction: &pcond:
+     191   00:01D8                      lab7&pcond:	ld	hl,0d7h xor &flag
+     192   00:01D8  E5                  	push	hl
+     193   00:01D9  F1                  	pop	af
+prelim.z80(194) : Syntax error
+     194   00:01DA                      	jr	&ncond,lab8&pcond
+     195   00:01DA  CD 63 02            	call	error
+prelim.z80(196) : Unrecognized instruction: &pcond:
+     196   00:01DD                      lab8&pcond:
+prelim.z80(197) : ENDIF without IF
+     197   00:01DD                            endif
+prelim.z80(198) : ENDMACRO without MACRO
+     198   00:01DD                      	endm
+     199   00:01DD                      
+prelim.z80(200) : Unrecognized instruction: tcond
+     200   00:01DD                      	tcond	1,c,nc,1
+prelim.z80(201) : Unrecognized instruction: tcond
+     201   00:01DD                      	tcond	4,pe,po,0
+prelim.z80(202) : Unrecognized instruction: tcond
+     202   00:01DD                      	tcond	040h,z,nz,1
+prelim.z80(203) : Unrecognized instruction: tcond
+     203   00:01DD                      	tcond	080h,m,p,0
+     204   00:01DD                      
+     205   00:01DD                      ; test indirect jumps
+     206   00:01DD  21 CE 01            	ld	hl,lab5
+     207   00:01E0  E9                  	jp	(hl)
+     208   00:01E1  CD 63 02            	call	error
+prelim.z80(209) : Duplicate labelname: lab5
+     209   00:01E4  21 D3 01            lab5:	ld	hl,lab6
+     210   00:01E7  E5                  	push	hl
+     211   00:01E8  DD E1               	pop	ix
+     212   00:01EA  DD E9               	jp	(ix)
+     213   00:01EC  CD 63 02            	call	error
+prelim.z80(214) : Duplicate labelname: lab6
+     214   00:01EF  21 D8 01            lab6:	ld	hl,lab7
+     215   00:01F2  E5                  	push	hl
+     216   00:01F3  FD E1               	pop	iy
+     217   00:01F5  FD E9               	jp	(iy)
+     218   00:01F7  CD 63 02            	call	error
+     219   00:01FA                      
+     220   00:01FA                      ; djnz (and (partially) inc a, inc hl)
+prelim.z80(221) : Duplicate labelname: lab7
+     221   00:01FA  3E A5               lab7:	ld	a,0a5h
+     222   00:01FC  06 04               	ld	b,4
+prelim.z80(223) : Duplicate labelname: lab8
+     223   00:01FE  0F                  lab8:	rrca
+     224   00:01FF  10 DC               	djnz	lab8
+     225   00:0201  FE 5A               	cp	05ah
+     226   00:0203  C4 63 02            	call	nz,error
+     227   00:0206  06 10               	ld	b,16
+     228   00:0208  3C                  lab9:	inc	a
+     229   00:0209  10 FD               	djnz	lab9
+     230   00:020B  FE 6A               	cp	06ah
+     231   00:020D  C4 63 02            	call	nz,error
+     232   00:0210  06 00               	ld	b,0
+     233   00:0212  21 00 00            	ld	hl,0
+     234   00:0215  23                  lab10:	inc	hl
+     235   00:0216  10 FD               	djnz	lab10
+     236   00:0218  7C                  	ld	a,h
+     237   00:0219  FE 01               	cp	1
+     238   00:021B  C4 63 02            	call	nz,error
+     239   00:021E  7D                  	ld	a,l
+     240   00:021F  FE 00               	cp	0
+     241   00:0221  C4 63 02            	call	nz,error
+     242   00:0224                      	
+     243   00:0224                      ; relative addressing
+prelim.z80(244) : Unrecognized instruction: macro
+     244   00:0224                      reladr:	macro	r
+prelim.z80(245) : Syntax error
+     245   00:0224                      	ld	&r,hlval
+prelim.z80(246) : Syntax error
+prelim.z80(246) : ')' Expected
+prelim.z80(246) : Closing ) expected
+     246   00:0224                      	ld	a,(&r)
+     247   00:0224  FE A5               	cp	0a5h
+     248   00:0226  C4 63 02            	call	nz,error
+prelim.z80(249) : Syntax error
+prelim.z80(249) : ')' Expected
+prelim.z80(249) : Closing ) expected
+     249   00:0229                      	ld	a,(&r+1)
+     250   00:0229  FE 3C               	cp	03ch
+     251   00:022B  C4 63 02            	call	nz,error
+prelim.z80(252) : Syntax error
+     252   00:022E                      	inc	&r
+prelim.z80(253) : Syntax error
+prelim.z80(253) : ')' Expected
+prelim.z80(253) : Closing ) expected
+     253   00:022E                      	ld	a,(&r-1)
+     254   00:022E  FE A5               	cp	0a5h
+     255   00:0230  C4 63 02            	call	nz,error
+prelim.z80(256) : Syntax error
+     256   00:0233                      	ld	&r,hlval-126
+prelim.z80(257) : Syntax error
+prelim.z80(257) : ')' Expected
+prelim.z80(257) : Closing ) expected
+     257   00:0233                      	ld	a,(&r+127)
+     258   00:0233  FE 3C               	cp	03ch
+     259   00:0235  C4 63 02            	call	nz,error
+prelim.z80(260) : Syntax error
+     260   00:0238                      	ld	&r,hlval+128
+prelim.z80(261) : Syntax error
+prelim.z80(261) : ')' Expected
+prelim.z80(261) : Closing ) expected
+     261   00:0238                      	ld	a,(&r-128)
+     262   00:0238  FE A5               	cp	0a5h
+     263   00:023A  C4 63 02            	call	nz,error
+prelim.z80(264) : ENDMACRO without MACRO
+     264   00:023D                      	endm
+     265   00:023D                      
+prelim.z80(266) : Unrecognized instruction: reladr
+     266   00:023D                      	reladr	ix
+prelim.z80(267) : Unrecognized instruction: reladr
+     267   00:023D                      	reladr	iy
+     268   00:023D                      	
+     269   00:023D  11 48 02            allok:	ld	de,okmsg
+     270   00:0240  0E 09               	ld	c,9
+     271   00:0242  CD 05 00            	call	5
+     272   00:0245  C3 00 00            	jp	0
+     273   00:0248                      
+     274   00:0248                      okmsg:	db	'Preliminary tests complete$'
+     274   00:0248  50 72 65 6C 69 6D 69 6E 61 72 79 20 74 65 73 74 
+     274   00:0258  73 20 63 6F 6D 70 6C 65 74 65 24 
+     275   00:0263                      
+     276   00:0263                      	
+     277   00:0263                      ; display address at top of stack and exit
+     278   00:0263  C1                  error:	pop	bc
+     279   00:0264  26 03               	ld	h,high hextab
+     280   00:0266  78                  	ld	a,b
+     281   00:0267  0F                  	rrca
+     282   00:0268  0F                  	rrca
+     283   00:0269  0F                  	rrca
+     284   00:026A  0F                  	rrca
+     285   00:026B  E6 0F               	and	15
+     286   00:026D  6F                  	ld	l,a
+     287   00:026E  7E                  	ld	a,(hl)
+     288   00:026F  CD 9B 02            	call	conout
+     289   00:0272  78                  	ld	a,b
+     290   00:0273  E6 0F               	and	15
+     291   00:0275  6F                  	ld	l,a
+     292   00:0276  7E                  	ld	a,(hl)
+     293   00:0277  CD 9B 02            	call	conout
+     294   00:027A  79                  	ld	a,c
+     295   00:027B  0F                  	rrca
+     296   00:027C  0F                  	rrca
+     297   00:027D  0F                  	rrca
+     298   00:027E  0F                  	rrca
+     299   00:027F  E6 0F               	and	15
+     300   00:0281  6F                  	ld	l,a
+     301   00:0282  7E                  	ld	a,(hl)
+     302   00:0283  CD 9B 02            	call	conout
+     303   00:0286  79                  	ld	a,c
+     304   00:0287  E6 0F               	and	15
+     305   00:0289  6F                  	ld	l,a
+     306   00:028A  7E                  	ld	a,(hl)
+     307   00:028B  CD 9B 02            	call	conout
+     308   00:028E  3E 0D               	ld	a,13
+     309   00:0290  CD 9B 02            	call	conout
+     310   00:0293  3E 0A               	ld	a,10
+     311   00:0295  CD 9B 02            	call	conout
+     312   00:0298  C3 00 00            	jp	0
+     313   00:029B                      
+     314   00:029B  F5                  conout:	push	af
+     315   00:029C  C5                  	push	bc
+     316   00:029D  D5                  	push	de
+     317   00:029E  E5                  	push	hl
+     318   00:029F  0E 02               	ld	c,2
+     319   00:02A1  5F                  	ld	e,a
+     320   00:02A2  CD 05 00            	call	5
+     321   00:02A5  E1                  	pop	hl
+     322   00:02A6  D1                  	pop	de
+     323   00:02A7  C1                  	pop	bc
+     324   00:02A8  F1                  	pop	af
+     325   00:02A9  C9                  	ret
+     326   00:02AA                      	
+prelim.z80(327) : Duplicate labelname: v
+     327   00:02AA  CB C3               v:	set	0
+prelim.z80(328) : Unrecognized instruction: rept
+     328   00:02AC                      regs1:	rept	20
+prelim.z80(329) : Duplicate labelname: v
+prelim.z80(329) : Illegal operand
+     329   00:02AC  CB F0               v:	set	v+2
+prelim.z80(330) : Value out of range
+     330   00:02AE  4C                  	db	v
+prelim.z80(331) : ENDMACRO without MACRO
+     331   00:02AF                      	endm
+     332   00:02AF                      
+     333   00:02AF  00 (20)             regs2:	ds	20,0
+     334   00:02C3                      
+     335   00:02C3  A5 3C               hlval:	db	0a5h,03ch
+     336   00:02C5                      
+     337   00:02C5                      ; skip to next page boundary
+     338   00:02C5                      	org	(($+255)/256)*256
+     339   00:0300                      hextab:	db	'0123456789abcdef'
+     339   00:0300  30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 66 
+     340   00:0310  00 (240)            	ds	240
+     341   00:0400  (00:0400)           stack:	equ	$
+     342   00:0400                      
+     343   00:0400                      	end
+
+    LABELS
+-------------------------------------------------
+00:00000100 X start
+00:00000111   lab0
+00:00000114   lab1
+00:00000117   lab2
+00:00000121   lab3
+00:0000012A   lab4
+00:0000014C   v
+00:00000173   reta
+00:000001AE X tcond
+00:000001CE   lab5
+00:000001D3   lab6
+00:000001D8   lab7
+00:000001DD   lab8
+00:00000208   lab9
+00:00000215   lab10
+00:00000224 X reladr
+00:0000023D X allok
+00:00000248   okmsg
+00:00000263   error
+00:0000029B   conout
+00:000002AC   regs1
+00:000002AF   regs2
+00:000002C3   hlval
+00:00000300   hextab
+00:00000400   stack
+
+
+ Output: prelim.out
+-------------------------------------------------
+
+ Page: 00
+  Org: 00000100  Size: *  Used: 000002C5
+
+   Address   Length Align   Label
+   00000100     709         start

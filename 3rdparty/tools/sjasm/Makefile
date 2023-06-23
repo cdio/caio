@@ -30,7 +30,7 @@ TARGETDIR=	${abspath .}/sjasm/src
 
 MAKEFILE=	files/Makefile
 
-CLEANFILES=	${BUILDIR}
+DISTCLEANFILES=	${BUILDIR}
 
 .PHONY: all debug
 
@@ -38,16 +38,14 @@ all debug: ${BIN}
 
 ${BIN}: ${SRCBIN}
 	[ -d ${dir $@} ] || ${INSTALL} -m ${MODE_BINDIR} -d ${dir $@}
-	${INSTALL} -m ${MODE_BIN} $< $@
+	${INSTALL} -m ${MODE_BIN} ${SRCBIN} $@
 
-${SRCBIN}: ${MAKEFILE}
+${SRCBIN}: ${BUILDIR}
 	${MAKE} -C ${dir $@} all
-
-${MAKEFILE}: ${BUILDIR}
-	${INSTALL} -m ${MODE_DATA} $@ $<
 
 ${BUILDIR}:
 	${INSTALL} -m ${MODE_BIN} -d $@
 	cd $@ && ${LN} -sf ${TARGETDIR}/* .
+	${INSTALL} -m ${MODE_DATA} ${MAKEFILE} $@
 
 include ${ROOT}/mk/clean.mk

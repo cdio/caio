@@ -16,14 +16,10 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ../}
+ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
-DIRS=		resid \
-		tools \
-		tests
-
-DIRS+=		${EXTRA_3RDPARTY_DIRS}
+DIRS+=		z80
 
 include ${ROOT}/mk/dir.mk
