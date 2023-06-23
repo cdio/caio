@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-.PHONY: clean
+.PHONY: clean distclean
 
 clean:
 ifdef CLEANFILES
@@ -24,4 +24,12 @@ ifdef CLEANFILES
 endif
 ifdef CLEANDIRS
 	for d in ${CLEANDIRS}; do ${MAKE} ${MAKEARGS} -C$$d clean; done
+endif
+
+distclean: clean
+ifdef DISTCLEANFILES
+	-${RM} -rf ${DISTCLEANFILES}
+endif
+ifdef DISTCLEANDIRS
+	for d in ${DISTCLEANDIRS}; do ${MAKE} ${MAKEARGS} -C$$d distclean; done
 endif

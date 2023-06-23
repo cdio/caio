@@ -52,6 +52,9 @@ TAR?=			tar
 TOUCH?=			touch
 UNAME?=			uname
 
+TOOLSDIR=		${abspath ${ROOT}}/3rdparty/tools
+TOOLS_BINDIR=		${TOOLSDIR}/bin
+
 LIBDIR=			${abspath ${PREFIX}}/lib
 
 INCDIR=			${abspath ${PREFIX}}/include
