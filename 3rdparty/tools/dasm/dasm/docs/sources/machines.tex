@@ -1,0 +1,81 @@
+\chapter{Machines}
+\label{Machine}
+
+\dasm supports specific machines and processors through the provision of companion source-code files that can assist with programming each platform. These files are located in the \mono{machines} subdirectory. Machine-specific support is provided for...
+
+\begin{itemize}
+\item \nameref{Machine:atari2600}
+\item \nameref{machine:atari7800}
+\item \nameref{machine:channelF}
+\item 68hc11
+\item 68hc908
+\end{itemize}
+
+
+\section{Atari 2600}
+\index{Machine:Atari 2600}
+\label{Machine:atari2600}
+\label{changelog:20200908atari}
+
+The \mono{Atari 2600} is a game console from \mono{1977} that uses a \mono{6507} processor. This processor is similar to the \mono{6502} processor (supported by \dasm). The difference in the processors is the number of hardware address lines on the chips; these being \mono{16} on the \mono{6502}, and \mono{13} on the \mono{6507}. Thus, the \mono{6502} can directly address \mono{64 KiB} of memory and the \mono{6507} only \mono{8 KiB} of memory.  From the point of view of \dasm, the machines are identical, as the \mono{6502} and \mono{6507} share a common instruction set.
+
+\subsection{Processor selection}
+
+The target CPU is selected with \nameref{pseudoop:processor}
+as the first directive inside the source file that should be assembled.
+
+\begin{usage}
+	processor 6502
+\end{usage}
+
+
+\subsection{Support Files}
+
+The \mono{Atari 2600} is explicitly supported with two files generally included in most programs for that machine.
+
+\subsubsection{\mono{vcs.h}}
+
+Contains the standardised register definitions for the \mono{RIOT} and \mono{TIA} chips, defined with uninitialised segments. The implementation allows relocation of the \mono{TIA} base address to a shadow register address.
+
+\subsubsection{\mono{macro.h}}
+\label{support6502}
+
+Contains some useful macros.
+
+\section{Atari 7800}
+\index{machine!Atari 7800}
+\label{machine:atari7800}
+
+The \mono{Atari 7800 ProSystem}, or simply the \mono{Atari 7800}, is a home video game console officially released by the Atari Corporation in \mono{1986}. It is almost fully backward-compatible with the \nameref{Machine:Atari 2600}. It uses a variant of the \mono{6502} processor.
+
+\subsection{Processor selection}
+
+The target CPU is selected with \nameref{pseudoop:processor}
+as the first directive inside the source file that should be assembled.
+
+\begin{usage}
+	processor 6502
+\end{usage}
+
+\subsection{Support Files}
+
+The \mono{Atari 7800} is explicitly supported with two files generally included in most programs for that machine.
+
+\subsubsection{\mono{vcs.h}}
+
+Contains the standardised register definitions.
+
+\subsubsection{\mono{macro.h}}
+
+Contains some useful macros.
+
+
+\section{Channel F}
+\label{machine:channelF}
+
+\label{changelog:20200906f8}
+\index{Machine!Channel F}
+
+\emph{No content yet}
+
+See \nameref{processor:f8}

@@ -1,0 +1,185 @@
+\begin{savequote}
+\sffamily
+%I'm completely operational and all my circuits are functioning normally--
+%\qauthor{Hal (2001, A Space Odyssey)}
+%\index{AUV}
+%\index{AUV!\emph{Starbug}}
+"Do you program in Assembly?" she asked.\newline
+"NOP", he said.\\[0.5cm]
+
+%\qauthor{Sayer}
+
+
+\includegraphics[width=0.75\textwidth]{dasm-logo.png}
+
+
+\end{savequote}
+
+
+
+\chapter{Introduction}
+
+%\begin{epigraphs}
+%\qitem{
+%\emph{``Always code as if the guy who ends up maintaining your code will be a violent psychopath who knows %where you live.''
+%\end{epigraphs}
+
+
+\section{About} 
+
+This is the Technical Documentation and User Guide for the \dasm macro-assembler. It explains how
+to use \dasm and the supported assembler directives.
+
+\section{Home}
+
+Since release 2.20.12, \dasm has lived at
+
+~~~~\url{https://dasm-assembler.github.io/}
+
+On that page you can download prebuilt binaries for MacOS, Linux, and Windows operating systems. You can also download the full source code and build the program binary yourself.
+
+\label{changelog:20200913bugs}
+\index{Bugs!Reporting}
+For bugs and feature requests, please visit
+
+~~~~\url{https://github.com/dasm-assembler/dasm/issues}
+
+
+\section{Features}
+
+\dasm is packed with features...
+
+\begin{itemize}
+	\item fast assembly
+\item supports several common 8 bit processor models
+\item takes as many passes as needed
+\item automatic checksum generation, special symbol '...'
+\item several binary output formats available.
+\item allows reverse indexed origins.
+\item multiple segments, BSS segments (no generation), relocatable origin.
+\item expressions, as in C
+\item expressions are computed using 32 bit integers
+\item no real limitation on label size
+\item complex pseudo-ops, repeat loops, macros
+\end{itemize}
+
+
+\section{Conventions in this Document}
+
+This document uses standardised terminology to describe usage and function.
+
+\textit{Should the name be ``\mono{dasm}'', ``\mono{DASM}'' or ``\mono{Dasm}''?}
+
+Yes. In this document we shall refer to it as \dasm.
+
+Usage of directives and command-line options are shown in a box like this...
+
+\begin{usage}
+dasm source.asm -f3 -v5 -otest.bin
+\end{usage}
+
+Items/examples that appear in source code are shown like this...
+
+\begin{code}
+  MAC END_BANK
+    IF _CURRENT_BANK_TYPE = _TYPE_RAM
+      CHECK_RAM_BANK_SIZE
+    ELSE
+      CHECK_BANK_SIZE
+    ENDIF
+  ENDM
+\end{code}
+
+\label{change:lsbmsb}
+In 8-bit microprocessors, 16-bit values are represented by pairs of bytes, either in low/high or high/low ordering. The ordering, called the ``endianness'', differs between processors. In this document, \mono{LSB} refers to the least-significant byte, and \mono{MSB} refers to the most-significant byte, independent of the endianness of the processor. See the unary operators \mono{<} and \mono{>} which are used to retrieve the \mono{LSB} or \mono{MSB} from a symbol/value.
+
+See \nameref{operators:unary}.
+
+\subsection{SI Units}
+\label{changelog:20200909SI}
+Computer memory sizes are referred to in this document using SI units.
+
+In particular, \mono{kilo} (\mono{K}) is \mono{1000}, and \mono{kibi} (\mono{Ki}) is \mono{1024}. A \mono{bit} is \mono{b}, a \mono{byte} is \mono{B}. Thus, \mono{4096 bytes} is \mono{4 kibibytes}, or \mono{4 KiB}.
+
+Historically, disk drive manufacturers were responsible for this change in meaning of the "kilobyte", as they divided capacity by 1000 instead of 1024 when listing drive size. This not only made their drives seem bigger, it created an ambiguity when discussing computer and disk memory size. The adoption of the new SI units for computer memory size removed the ambiguity.
+
+\subsection{Format Description}
+\label{changelog:20200829formatdescription}
+
+The following format templates are used to describe items on the command line.
+
+\begin{table}[H]
+	\begin{tabularx}{\linewidth}{lll}
+	\toprule
+\textbf{Format}&\textbf{Result}\\
+\hline
+\\
+\mono{item}& one item\\
+\mono{item ...}&  one or more items, space-separated\\
+\mono{item,...}&  one or more items, comma-separated\\
+\mono{\{item|...\}}&  only one of the items, bar-separated\\
+\mono{[item]} &optional item\\
+\mono{[ ]...}&optional whitespace(s)\\
+\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{Examples}
+\begin{code}
+A[ {B|C}]       "A" or "A B" or "A C"
+DC[{.B|.W|.L}]  "DC" or "DC.B" or "DC.W" or "DC.L"
+DC[.{B|W|L}]    the same
+\end{code} 
+ 
+\section{Assembler Passes}
+\index{Assembler Passes}
+ 
+\dasm is most likely to make multiple passes through the source code to resolve all symbols. It is not necessary for anything to be resolved in the first pass. The maximum number of passes (default 3) is controllable.
+
+\dasm will return an error if it can't resolve all referenced symbols within the maximum number of passes.
+ 
+ See  \nameref{flag:passes} and \nameref{flag:passes2}.
+
+\subsubsection{Example}
+ 
+ The following contrived example will resolve in 12 passes:
+ 
+ \begin{code}
+   ORG 1
+   REPEAT [[addr < 11] ? [addr-11]] + 11
+     DC.b addr
+   REPEND
+ addr:
+ \end{code}
+ 
+ \begin{outputx}
+ > dasm test.asm -P11
+test.asm (8): error: Label mismatch...
+ --> addr 000b                  
+test.asm (8): error: Too many passes (12).
+\end{outputx}
+  
+In the above example, the example does not assemble because the number of passes (set to 11) is insufficient to resolve the value of \mono{addr}.  
+    
+ \begin{outputx}
+ > dasm test.asm -P12
+ Complete. (0)
+\end{outputx} 
+ 
+ In the above example, 12 passes is sufficient to assemble the code.
+ 
+ There is generally no harm in setting the number of passes to a sufficiently high value.
+ 
+ 
+ Most everything is recursive.  You cannot have a macro definition
+ within a macro definition, but you can nest macro calls, repeat loops,
+ and include files.
+ 
+ The other major feature in this assembler is the \nameref{pseudoop:subroutine} directive , which logically separates \nameref{locallabels} (starting with a dot).  This
+ allows you to reuse label names (for example, \mono{.1, .fail}) rather than
+ think up crazy combinations of letters and numbers to keep it all unique.
+ 
+ See \nameref{flag:passes}, \nameref{flag:passes2}, and \nameref{pseudoop:subroutine}.
+ 
+ 

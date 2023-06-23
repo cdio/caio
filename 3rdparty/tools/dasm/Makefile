@@ -16,17 +16,25 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ../..}
+ROOT=		${abspath ../../..}
 
 include ${ROOT}/mk/config.mk
 
-DIRS+=		dasm \
-		sjasm
+BIN=		${TOOLS_BINDIR}/dasm
+SRCDIR=		${abspath .}/dasm
+SRCBIN=		${SRCDIR}/bin/dasm
 
-all debug clean:
-	for i in ${DIRS}; do ( ${MAKE} ${MAKEARGS} -C$$i $@ || exit 1 ); done
+DISTCLEANDIRS=	${SRCDIR}
 
-distclean:
-	for i in ${DIRS}; do ( ${MAKE} ${MAKEARGS} -C$$i $@ || exit 1 ); done
-	${RM} -rf bin
+.PHONY: all debug
 
+all debug: ${BIN}
+
+${BIN}: ${SRCBIN}
+	[ -d ${dir $@} ] || ${INSTALL} -m ${MODE_BINDIR} -d ${dir $@}
+	${INSTALL} -m ${MODE_BIN} $< $@
+
+${SRCBIN}:
+	${MAKE} -C ${SRCDIR} all
+
+include ${ROOT}/mk/clean.mk
