@@ -19,18 +19,14 @@
 #include <gsl/pointers> // for not_null, operator<, operator<=, operator>
 
 #include <algorithm> // for addressof
+#include <cstdint>   // for uint16_t
 #include <memory>    // for shared_ptr, make_shared, operator<, opera...
 #include <sstream>   // for operator<<, ostringstream, basic_ostream:...
-#include <stdint.h>  // for uint16_t
 #include <string>    // for basic_string, operator==, string, operator<<
 #include <typeinfo>  // for type_info
 
+#include "deathTestCommon.h"
 using namespace gsl;
-
-namespace
-{
-static constexpr char deathstring[] = "Expected Death";
-} //namespace
 
 struct MyBase
 {
@@ -56,7 +52,7 @@ template <typename T>
 struct CustomPtr
 {
     CustomPtr(T* p) : p_(p) {}
-    operator T*() { return p_; }
+    operator T*() const { return p_; }
     bool operator!=(std::nullptr_t) const { return p_ != nullptr; }
     T* p_ = nullptr;
 };
@@ -64,7 +60,9 @@ struct CustomPtr
 template <typename T, typename U>
 std::string operator==(CustomPtr<T> const& lhs, CustomPtr<U> const& rhs)
 {
+    // clang-format off
     GSL_SUPPRESS(type.1) // NO-FORMAT: attribute
+    // clang-format on
     return reinterpret_cast<const void*>(lhs.p_) == reinterpret_cast<const void*>(rhs.p_) ? "true"
                                                                                           : "false";
 }
@@ -72,7 +70,9 @@ std::string operator==(CustomPtr<T> const& lhs, CustomPtr<U> const& rhs)
 template <typename T, typename U>
 std::string operator!=(CustomPtr<T> const& lhs, CustomPtr<U> const& rhs)
 {
+    // clang-format off
     GSL_SUPPRESS(type.1) // NO-FORMAT: attribute
+    // clang-format on
     return reinterpret_cast<const void*>(lhs.p_) != reinterpret_cast<const void*>(rhs.p_) ? "true"
                                                                                           : "false";
 }
@@ -80,7 +80,9 @@ std::string operator!=(CustomPtr<T> const& lhs, CustomPtr<U> const& rhs)
 template <typename T, typename U>
 std::string operator<(CustomPtr<T> const& lhs, CustomPtr<U> const& rhs)
 {
+    // clang-format off
     GSL_SUPPRESS(type.1) // NO-FORMAT: attribute
+    // clang-format on
     return reinterpret_cast<const void*>(lhs.p_) < reinterpret_cast<const void*>(rhs.p_) ? "true"
                                                                                          : "false";
 }
@@ -88,7 +90,9 @@ std::string operator<(CustomPtr<T> const& lhs, CustomPtr<U> const& rhs)
 template <typename T, typename U>
 std::string operator>(CustomPtr<T> const& lhs, CustomPtr<U> const& rhs)
 {
+    // clang-format off
     GSL_SUPPRESS(type.1) // NO-FORMAT: attribute
+    // clang-format on
     return reinterpret_cast<const void*>(lhs.p_) > reinterpret_cast<const void*>(rhs.p_) ? "true"
                                                                                          : "false";
 }
@@ -96,7 +100,9 @@ std::string operator>(CustomPtr<T> const& lhs, CustomPtr<U> const& rhs)
 template <typename T, typename U>
 std::string operator<=(CustomPtr<T> const& lhs, CustomPtr<U> const& rhs)
 {
+    // clang-format off
     GSL_SUPPRESS(type.1) // NO-FORMAT: attribute
+    // clang-format on
     return reinterpret_cast<const void*>(lhs.p_) <= reinterpret_cast<const void*>(rhs.p_) ? "true"
                                                                                           : "false";
 }
@@ -104,7 +110,9 @@ std::string operator<=(CustomPtr<T> const& lhs, CustomPtr<U> const& rhs)
 template <typename T, typename U>
 std::string operator>=(CustomPtr<T> const& lhs, CustomPtr<U> const& rhs)
 {
+    // clang-format off
     GSL_SUPPRESS(type.1) // NO-FORMAT: attribute
+    // clang-format on
     return reinterpret_cast<const void*>(lhs.p_) >= reinterpret_cast<const void*>(rhs.p_) ? "true"
                                                                                           : "false";
 }
@@ -118,12 +126,19 @@ struct NonCopyableNonMovable
     NonCopyableNonMovable& operator=(NonCopyableNonMovable&&) = delete;
 };
 
-GSL_SUPPRESS(f.4) // NO-FORMAT: attribute
+namespace
+{
+// clang-format off
+GSL_SUPPRESS(f .4) // NO-FORMAT: attribute
+// clang-format on
 bool helper(not_null<int*> p) { return *p == 12; }
-GSL_SUPPRESS(f.4) // NO-FORMAT: attribute
+// clang-format off
+GSL_SUPPRESS(f .4) // NO-FORMAT: attribute
+// clang-format on
 bool helper_const(not_null<const int*> p) { return *p == 12; }
 
 int* return_pointer() { return nullptr; }
+} // namespace
 
 TEST(notnull_tests, TestNotNullConstructors)
 {
@@ -142,10 +157,12 @@ TEST(notnull_tests, TestNotNullConstructors)
 #endif
     }
 
-    std::set_terminate([] {
+    const auto terminateHandler = std::set_terminate([] {
         std::cerr << "Expected Death. TestNotNullConstructors";
         std::abort();
     });
+    const auto expected = GetExpectedDeathString(terminateHandler);
+
     {
         // from shared pointer
         int i = 12;
@@ -157,7 +174,7 @@ TEST(notnull_tests, TestNotNullConstructors)
             std::make_shared<int>(10)); // shared_ptr<int> is nullptr assignable
 
         int* pi = nullptr;
-        EXPECT_DEATH((not_null<decltype(pi)>(pi)), deathstring);
+        EXPECT_DEATH((not_null<decltype(pi)>(pi)), expected);
     }
 
     {
@@ -214,8 +231,8 @@ TEST(notnull_tests, TestNotNullConstructors)
     {
         // from returned pointer
 
-        EXPECT_DEATH(helper(return_pointer()), deathstring);
-        EXPECT_DEATH(helper_const(return_pointer()), deathstring);
+        EXPECT_DEATH(helper(return_pointer()), expected);
+        EXPECT_DEATH(helper_const(return_pointer()), expected);
     }
 }
 
@@ -275,17 +292,18 @@ TEST(notnull_tests, TestNotNullCasting)
 
 TEST(notnull_tests, TestNotNullAssignment)
 {
-    std::set_terminate([] {
+    const auto terminateHandler = std::set_terminate([] {
         std::cerr << "Expected Death. TestNotNullAssignmentd";
         std::abort();
     });
+    const auto expected = GetExpectedDeathString(terminateHandler);
 
     int i = 12;
     not_null<int*> p(&i);
     EXPECT_TRUE(helper(p));
 
     int* q = nullptr;
-    EXPECT_DEATH(p = not_null<int*>(q), deathstring);
+    EXPECT_DEATH(p = not_null<int*>(q), expected);
 }
 
 TEST(notnull_tests, TestNotNullRawPointerComparison)
@@ -424,6 +442,18 @@ TEST(notnull_tests, TestNotNullConstructorTypeDeduction)
     }
 
     {
+        const int i = 42;
+
+        not_null x{&i};
+#ifdef CONFIRM_COMPILATION_ERRORS
+        helper(not_null{&i});
+#endif
+        helper_const(not_null{&i});
+
+        EXPECT_TRUE(*x == 42);
+    }
+
+    {
         int i = 42;
         int* p = &i;
 
@@ -434,17 +464,31 @@ TEST(notnull_tests, TestNotNullConstructorTypeDeduction)
         EXPECT_TRUE(*x == 42);
     }
 
-    std::set_terminate([] {
+    {
+        const int i = 42;
+        const int* p = &i;
+
+        not_null x{p};
+#ifdef CONFIRM_COMPILATION_ERRORS
+        helper(not_null{p});
+#endif
+        helper_const(not_null{p});
+
+        EXPECT_TRUE(*x == 42);
+    }
+
+    const auto terminateHandler = std::set_terminate([] {
         std::cerr << "Expected Death. TestNotNullConstructorTypeDeduction";
         std::abort();
     });
+    const auto expected = GetExpectedDeathString(terminateHandler);
 
     {
         auto workaround_macro = []() {
             int* p1 = nullptr;
             const not_null x{p1};
         };
-        EXPECT_DEATH(workaround_macro(), deathstring);
+        EXPECT_DEATH(workaround_macro(), expected);
     }
 
     {
@@ -452,14 +496,14 @@ TEST(notnull_tests, TestNotNullConstructorTypeDeduction)
             const int* p1 = nullptr;
             const not_null x{p1};
         };
-        EXPECT_DEATH(workaround_macro(), deathstring);
+        EXPECT_DEATH(workaround_macro(), expected);
     }
 
     {
         int* p = nullptr;
 
-        EXPECT_DEATH(helper(not_null{p}), deathstring);
-        EXPECT_DEATH(helper_const(not_null{p}), deathstring);
+        EXPECT_DEATH(helper(not_null{p}), expected);
+        EXPECT_DEATH(helper_const(not_null{p}), expected);
     }
 
 #ifdef CONFIRM_COMPILATION_ERRORS
@@ -485,6 +529,18 @@ TEST(notnull_tests, TestMakeNotNull)
     }
 
     {
+        const int i = 42;
+
+        const auto x = make_not_null(&i);
+#ifdef CONFIRM_COMPILATION_ERRORS
+        helper(make_not_null(&i));
+#endif
+        helper_const(make_not_null(&i));
+
+        EXPECT_TRUE(*x == 42);
+    }
+
+    {
         int i = 42;
         int* p = &i;
 
@@ -495,10 +551,24 @@ TEST(notnull_tests, TestMakeNotNull)
         EXPECT_TRUE(*x == 42);
     }
 
-    std::set_terminate([] {
+    {
+        const int i = 42;
+        const int* p = &i;
+
+        const auto x = make_not_null(p);
+#ifdef CONFIRM_COMPILATION_ERRORS
+        helper(make_not_null(p));
+#endif
+        helper_const(make_not_null(p));
+
+        EXPECT_TRUE(*x == 42);
+    }
+
+    const auto terminateHandler = std::set_terminate([] {
         std::cerr << "Expected Death. TestMakeNotNull";
         std::abort();
     });
+    const auto expected = GetExpectedDeathString(terminateHandler);
 
     {
         const auto workaround_macro = []() {
@@ -506,7 +576,7 @@ TEST(notnull_tests, TestMakeNotNull)
             const auto x = make_not_null(p1);
             EXPECT_TRUE(*x == 42);
         };
-        EXPECT_DEATH(workaround_macro(), deathstring);
+        EXPECT_DEATH(workaround_macro(), expected);
     }
 
     {
@@ -515,21 +585,52 @@ TEST(notnull_tests, TestMakeNotNull)
             const auto x = make_not_null(p1);
             EXPECT_TRUE(*x == 42);
         };
-        EXPECT_DEATH(workaround_macro(), deathstring);
+        EXPECT_DEATH(workaround_macro(), expected);
     }
 
     {
         int* p = nullptr;
 
-        EXPECT_DEATH(helper(make_not_null(p)), deathstring);
-        EXPECT_DEATH(helper_const(make_not_null(p)), deathstring);
+        EXPECT_DEATH(helper(make_not_null(p)), expected);
+        EXPECT_DEATH(helper_const(make_not_null(p)), expected);
     }
 
 #ifdef CONFIRM_COMPILATION_ERRORS
     {
-        EXPECT_DEATH(make_not_null(nullptr), deathstring);
-        EXPECT_DEATH(helper(make_not_null(nullptr)), deathstring);
-        EXPECT_DEATH(helper_const(make_not_null(nullptr)), deathstring);
+        EXPECT_DEATH(make_not_null(nullptr), expected);
+        EXPECT_DEATH(helper(make_not_null(nullptr)), expected);
+        EXPECT_DEATH(helper_const(make_not_null(nullptr)), expected);
     }
 #endif
+}
+
+TEST(notnull_tests, TestStdHash)
+{
+    {
+        int x = 42;
+        int y = 99;
+        not_null<int*> nn{&x};
+        const not_null<int*> cnn{&x};
+
+        std::hash<not_null<int*>> hash_nn;
+        std::hash<int*> hash_intptr;
+
+        EXPECT_TRUE(hash_nn(nn) == hash_intptr(&x));
+        EXPECT_FALSE(hash_nn(nn) == hash_intptr(&y));
+        EXPECT_FALSE(hash_nn(nn) == hash_intptr(nullptr));
+    }
+
+    {
+        const int x = 42;
+        const int y = 99;
+        not_null<const int*> nn{&x};
+        const not_null<const int*> cnn{&x};
+
+        std::hash<not_null<const int*>> hash_nn;
+        std::hash<const int*> hash_intptr;
+
+        EXPECT_TRUE(hash_nn(nn) == hash_intptr(&x));
+        EXPECT_FALSE(hash_nn(nn) == hash_intptr(&y));
+        EXPECT_FALSE(hash_nn(nn) == hash_intptr(nullptr));
+    }
 }

@@ -16,8 +16,8 @@
 
 #include <gtest/gtest.h>
 
-#include <gsl/gsl_byte> // for byte
-#include <gsl/span>     // for span, span_iterator, operator==, operator!=
+#include <gsl/byte> // for byte
+#include <gsl/span> // for span, span_iterator, operator==, operator!=
 
 #include <array>       // for array
 #include <cstddef>     // for ptrdiff_t
@@ -55,14 +55,14 @@ void ArrayConvertibilityCheck()
         EXPECT_TRUE(sp_const_nullptr_1.data() == stl_nullptr.data());
         EXPECT_TRUE(sp_const_nullptr_1.size() == 3);
 
-        span<const T* const> sp_const_nullptr_2{std::as_const(stl_nullptr)};
+        gsl::span<const T* const> sp_const_nullptr_2{std::as_const(stl_nullptr)};
         EXPECT_TRUE(sp_const_nullptr_2.data() == stl_nullptr.data());
         EXPECT_TRUE(sp_const_nullptr_2.size() == 3);
 
-        static_assert(std::is_same<decltype(span{stl_nullptr}), span<T*, 3>>::value,
+        static_assert(std::is_same<decltype(gsl::span{stl_nullptr}), gsl::span<T*, 3>>::value,
                       "std::is_same< decltype(span{stl_nullptr}), span<T*, 3>>::value");
         static_assert(
-            std::is_same<decltype(span{std::as_const(stl_nullptr)}), span<T* const, 3>>::value,
+            std::is_same<decltype(gsl::span{std::as_const(stl_nullptr)}), gsl::span<T* const, 3>>::value,
             "std::is_same< decltype(span{std::as_const(stl_nullptr)}), span<T* const, "
             "3>>::value");
     }
@@ -846,8 +846,6 @@ static_assert(!std::is_constructible<gsl::span<int, 3>, std::array<int, 500>&>::
               "!std::is_constructible<gsl::span<int, 3>, std::array<int, 500>&>");
 static_assert(!std::is_constructible<gsl::span<int, 3>, const std::array<int, 3>&>::value,
               "!std::is_constructible<gsl::span<int, 3>, const std::array<int, 3>&>");
-static_assert(!std::is_constructible<gsl::span<int, 3>, const gsl::span<int>&>::value,
-              "!std::is_constructible<gsl::span<int, 3>, const gsl::span<int>&>");
 static_assert(!std::is_constructible<gsl::span<int, 3>, const gsl::span<int, 500>&>::value,
               "!std::is_constructible<gsl::span<int, 3>, const gsl::span<int, 500>&>");
 static_assert(!std::is_constructible<gsl::span<int, 3>, const gsl::span<const int>&>::value,
@@ -866,12 +864,8 @@ static_assert(!std::is_constructible<gsl::span<const int>, std::array<double, 3>
 static_assert(!std::is_constructible<gsl::span<const int>, const gsl::span<double, 3>&>::value,
               "!std::is_constructible<gsl::span<const int>, const gsl::span<double, 3>&>");
 
-static_assert(!std::is_constructible<gsl::span<const int, 3>, const gsl::span<int>&>::value,
-              "!std::is_constructible<gsl::span<const int, 3>, const gsl::span<int>&>");
 static_assert(!std::is_constructible<gsl::span<const int, 3>, const gsl::span<int, 500>&>::value,
               "!std::is_constructible<gsl::span<const int, 3>, const gsl::span<int, 500>&>");
-static_assert(!std::is_constructible<gsl::span<const int, 3>, const gsl::span<const int>&>::value,
-              "!std::is_constructible<gsl::span<const int, 3>, const gsl::span<const int>&>");
 static_assert(
     !std::is_constructible<gsl::span<const int, 3>, const gsl::span<const int, 500>&>::value,
     "!std::is_constructible<gsl::span<const int, 3>, const gsl::span<const int, 500>&>");
@@ -924,6 +918,14 @@ static_assert(!std::is_constructible<gsl::span<const Derived>, std::array<Base, 
               "!std::is_constructible<gsl::span<const Derived>, std::array<Base, 3>&>");
 static_assert(!std::is_constructible<gsl::span<const Derived>, const std::array<Base, 3>&>::value,
               "!std::is_constructible<gsl::span<const Derived>, const std::array<Base, 3>&>");
+
+// Explicit construction enabled in P1976R2
+static_assert(std::is_constructible<gsl::span<int, 3>, const gsl::span<int>&>::value,
+              "std::is_constructible<gsl::span<int, 3>, const gsl::span<int>&>");
+static_assert(std::is_constructible<gsl::span<const int, 3>, const gsl::span<int>&>::value,
+              "std::is_constructible<gsl::span<const int, 3>, const gsl::span<int>&>");
+static_assert(std::is_constructible<gsl::span<const int, 3>, const gsl::span<const int>&>::value,
+              "std::is_constructible<gsl::span<const int, 3>, const gsl::span<const int>&>");
 
 // no throw copy constructor
 static_assert(std::is_nothrow_copy_constructible<gsl::span<int>>::value,

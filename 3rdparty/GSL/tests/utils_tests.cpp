@@ -16,14 +16,15 @@
 
 #include <gtest/gtest.h>
 
-#include <gsl/gsl_util> // for narrow, finally, narrow_cast, narrowing_e...
-
 #include <algorithm>   // for move
-#include <functional>  // for reference_wrapper, _Bind_helper<>::type
-#include <limits>      // for numeric_limits
-#include <stdint.h>    // for uint32_t, int32_t
-#include <type_traits> // for is_same
+#include <complex>
 #include <cstddef>     // for std::ptrdiff_t
+#include <cstdint>     // for uint32_t, int32_t
+#include <functional>  // for reference_wrapper, _Bind_helper<>::type
+#include <gsl/narrow>  // for narrow, narrowing_error
+#include <gsl/util>    // finally, narrow_cast
+#include <limits>      // for numeric_limits
+#include <type_traits> // for is_same
 
 using namespace gsl;
 
@@ -32,8 +33,7 @@ namespace
 void f(int& i) { i += 1; }
 static int j = 0;
 void g() { j += 1; }
-}
-
+} // namespace
 
 TEST(utils_tests, sanity_check_for_gsl_index_typedef)
 {
@@ -70,11 +70,33 @@ TEST(utils_tests, finally_lambda_move)
     EXPECT_TRUE(i == 1);
 }
 
+TEST(utils_tests, finally_const_lvalue_lambda)
+{
+    int i = 0;
+    {
+        const auto const_lvalue_lambda = [&]() { f(i); };
+        auto _ = finally(const_lvalue_lambda);
+        EXPECT_TRUE(i == 0);
+    }
+    EXPECT_TRUE(i == 1);
+}
+
+TEST(utils_tests, finally_mutable_lvalue_lambda)
+{
+    int i = 0;
+    {
+        auto mutable_lvalue_lambda = [&]() { f(i); };
+        auto _ = finally(mutable_lvalue_lambda);
+        EXPECT_TRUE(i == 0);
+    }
+    EXPECT_TRUE(i == 1);
+}
+
 TEST(utils_tests, finally_function_with_bind)
 {
     int i = 0;
     {
-        auto _ = finally(std::bind(&f, std::ref(i)));
+        auto _ = finally([&i] { return f(i); });
         EXPECT_TRUE(i == 0);
     }
     EXPECT_TRUE(i == 1);
@@ -85,6 +107,16 @@ TEST(utils_tests, finally_function_ptr)
     j = 0;
     {
         auto _ = finally(&g);
+        EXPECT_TRUE(j == 0);
+    }
+    EXPECT_TRUE(j == 1);
+}
+
+TEST(utils_tests, finally_function)
+{
+    j = 0;
+    {
+        auto _ = finally(g);
         EXPECT_TRUE(j == 0);
     }
     EXPECT_TRUE(j == 1);
@@ -101,6 +133,7 @@ TEST(utils_tests, narrow_cast)
     EXPECT_TRUE(uc == 44);
 }
 
+#ifndef GSL_KERNEL_MODE
 TEST(utils_tests, narrow)
 {
     int n = 120;
@@ -123,7 +156,10 @@ TEST(utils_tests, narrow)
     n = -42;
     EXPECT_THROW(narrow<unsigned>(n), narrowing_error);
 
-#if GSL_CONSTEXPR_NARROW
-    static_assert(narrow<char>(120) == 120, "Fix GSL_CONSTEXPR_NARROW");
-#endif
+    EXPECT_TRUE(
+        narrow<std::complex<float>>(std::complex<double>(4, 2)) == std::complex<float>(4, 2));
+    EXPECT_THROW(narrow<std::complex<float>>(std::complex<double>(4.2)), narrowing_error);
+
+    EXPECT_TRUE(narrow<int>(float(1)) == 1);
 }
+#endif // GSL_KERNEL_MODE

@@ -14,30 +14,40 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <gsl/pointers> // for not_null, operator<, operator<=, operator>
 #include <gtest/gtest.h>
-#include <gsl/pointers>           // for not_null, operator<, operator<=, operator>
 
-namespace gsl
-{
-struct fail_fast;
-} // namespace gsl
+#include "deathTestCommon.h"
 
 using namespace gsl;
 
-GSL_SUPPRESS(f.4)  // NO-FORMAT: attribute
+namespace
+{
+// clang-format off
+GSL_SUPPRESS(f.4) // NO-FORMAT: attribute
+// clang-format on
 bool helper(not_null<int*> p) { return *p == 12; }
 
+// clang-format off
 GSL_SUPPRESS(f.4) // NO-FORMAT: attribute
+// clang-format on
 bool helper_const(not_null<const int*> p) { return *p == 12; }
 
+// clang-format off
 GSL_SUPPRESS(f.4) // NO-FORMAT: attribute
+// clang-format on
 bool strict_helper(strict_not_null<int*> p) { return *p == 12; }
 
+// clang-format off
 GSL_SUPPRESS(f.4) // NO-FORMAT: attribute
+// clang-format on
 bool strict_helper_const(strict_not_null<const int*> p) { return *p == 12; }
 
+#ifdef CONFIRM_COMPILATION_ERRORS
 int* return_pointer() { return nullptr; }
 const int* return_pointer_const() { return nullptr; }
+#endif
+} // namespace
 
 TEST(strict_notnull_tests, TestStrictNotNull)
 {
@@ -62,6 +72,28 @@ TEST(strict_notnull_tests, TestStrictNotNull)
     }
 
     {
+        // raw ptr <-> strict_not_null
+        const int x = 42;
+
+#ifdef CONFIRM_COMPILATION_ERRORS
+        strict_not_null<int*> snn = &x;
+        strict_helper(&x);
+        strict_helper_const(&x);
+        strict_helper(return_pointer());
+        strict_helper_const(return_pointer_const());
+#endif
+
+        const strict_not_null<const int*> snn1{&x};
+
+#ifdef CONFIRM_COMPILATION_ERRORS
+        helper(snn1);
+#endif
+        helper_const(snn1);
+
+        EXPECT_TRUE(*snn1 == 42);
+    }
+
+    {
         // strict_not_null -> strict_not_null
         int x = 42;
 
@@ -69,6 +101,22 @@ TEST(strict_notnull_tests, TestStrictNotNull)
         const strict_not_null<int*> snn2{&x};
 
         strict_helper(snn1);
+        strict_helper_const(snn1);
+        strict_helper_const(snn2);
+
+        EXPECT_TRUE(snn1 == snn2);
+    }
+
+    {
+        // strict_not_null -> strict_not_null
+        const int x = 42;
+
+        strict_not_null<const int*> snn1{&x};
+        const strict_not_null<const int*> snn2{&x};
+
+#ifdef CONFIRM_COMPILATION_ERRORS
+        strict_helper(snn1);
+#endif
         strict_helper_const(snn1);
         strict_helper_const(snn2);
 
@@ -85,6 +133,24 @@ TEST(strict_notnull_tests, TestStrictNotNull)
         const not_null<int*> nn2{snn};
 
         helper(snn);
+        helper_const(snn);
+
+        EXPECT_TRUE(snn == nn1);
+        EXPECT_TRUE(snn == nn2);
+    }
+
+    {
+        // strict_not_null -> not_null
+        const int x = 42;
+
+        strict_not_null<const int*> snn{&x};
+
+        const not_null<const int*> nn1 = snn;
+        const not_null<const int*> nn2{snn};
+
+#ifdef CONFIRM_COMPILATION_ERRORS
+        helper(snn);
+#endif
         helper_const(snn);
 
         EXPECT_TRUE(snn == nn1);
@@ -115,6 +181,32 @@ TEST(strict_notnull_tests, TestStrictNotNull)
         EXPECT_TRUE(hash_snn(snn1) == hash_snn(nn));
     }
 
+    {
+        // not_null -> strict_not_null
+        const int x = 42;
+
+        not_null<const int*> nn{&x};
+
+        const strict_not_null<const int*> snn1{nn};
+        const strict_not_null<const int*> snn2{nn};
+
+#ifdef CONFIRM_COMPILATION_ERRORS
+        strict_helper(nn);
+#endif
+        strict_helper_const(nn);
+
+        EXPECT_TRUE(snn1 == nn);
+        EXPECT_TRUE(snn2 == nn);
+
+        std::hash<strict_not_null<const int*>> hash_snn;
+        std::hash<not_null<const int*>> hash_nn;
+
+        EXPECT_TRUE(hash_nn(snn1) == hash_nn(nn));
+        EXPECT_TRUE(hash_snn(snn1) == hash_nn(nn));
+        EXPECT_TRUE(hash_nn(snn1) == hash_nn(snn2));
+        EXPECT_TRUE(hash_snn(snn1) == hash_snn(nn));
+    }
+
 #ifdef CONFIRM_COMPILATION_ERRORS
     {
         strict_not_null<int*> p{nullptr};
@@ -123,23 +215,32 @@ TEST(strict_notnull_tests, TestStrictNotNull)
 }
 
 #if defined(__cplusplus) && (__cplusplus >= 201703L)
-namespace
-{
-static constexpr char deathstring[] = "Expected Death";
-}
 
 TEST(strict_notnull_tests, TestStrictNotNullConstructorTypeDeduction)
 {
-    std::set_terminate([] {
+    const auto terminateHandler = std::set_terminate([] {
         std::cerr << "Expected Death. TestStrictNotNullConstructorTypeDeduction";
         std::abort();
     });
+    const auto expected = GetExpectedDeathString(terminateHandler);
 
     {
         int i = 42;
 
         strict_not_null x{&i};
         helper(strict_not_null{&i});
+        helper_const(strict_not_null{&i});
+
+        EXPECT_TRUE(*x == 42);
+    }
+
+    {
+        const int i = 42;
+
+        strict_not_null x{&i};
+#ifdef CONFIRM_COMPILATION_ERRORS
+        helper(strict_not_null{&i});
+#endif
         helper_const(strict_not_null{&i});
 
         EXPECT_TRUE(*x == 42);
@@ -157,11 +258,24 @@ TEST(strict_notnull_tests, TestStrictNotNullConstructorTypeDeduction)
     }
 
     {
+        const int i = 42;
+        const int* p = &i;
+
+        strict_not_null x{p};
+#ifdef CONFIRM_COMPILATION_ERRORS
+        helper(strict_not_null{p});
+#endif
+        helper_const(strict_not_null{p});
+
+        EXPECT_TRUE(*x == 42);
+    }
+
+    {
         auto workaround_macro = []() {
             int* p1 = nullptr;
             const strict_not_null x{p1};
         };
-        EXPECT_DEATH(workaround_macro(), deathstring);
+        EXPECT_DEATH(workaround_macro(), expected);
     }
 
     {
@@ -169,14 +283,14 @@ TEST(strict_notnull_tests, TestStrictNotNullConstructorTypeDeduction)
             const int* p1 = nullptr;
             const strict_not_null x{p1};
         };
-        EXPECT_DEATH(workaround_macro(), deathstring);
+        EXPECT_DEATH(workaround_macro(), expected);
     }
 
     {
         int* p = nullptr;
 
-        EXPECT_DEATH(helper(strict_not_null{p}), deathstring);
-        EXPECT_DEATH(helper_const(strict_not_null{p}), deathstring);
+        EXPECT_DEATH(helper(strict_not_null{p}), expected);
+        EXPECT_DEATH(helper_const(strict_not_null{p}), expected);
     }
 
 #ifdef CONFIRM_COMPILATION_ERRORS
