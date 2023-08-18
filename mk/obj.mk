@@ -36,7 +36,7 @@ CLEANFILES+=		${OBJS} \
 ${_CXXSRCS}: ${EXTRA_DEPS}
 
 %.o: %.cpp
-	${MKDEP} ${CPPFLAGS} ${CXXFLAGS} ${MKDEP_FLAGS} $< > ${@:.o=.d}
+	${MKDEP} ${CPPFLAGS} ${CXXFLAGS} ${MKDEP_FLAGS} $< | ${SED} -e 's,${notdir $@},$@,g' > ${@:.o=.d}
 	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o $@ $<
 
 -include ${HDEPS}

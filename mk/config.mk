@@ -25,6 +25,8 @@ endif
 
 SYSDEP_MK:=		${MKDIR}/config.${OS}.mk
 
+CWD:=			${abspath .}
+
 include ${SYSDEP_MK}
 
 CAT?=			cat
@@ -64,7 +66,7 @@ CPPFLAGS+=		${SYSDEP_CPPFLAGS}
 CPPFLAGS+=		-DD_VERSION='"${VERSION}"' \
 			-DD_PREFIX='"${PREFIX}"'
 
-CPPFLAGS+=		-I. \
+CPPFLAGS+=		-I${CWD} \
 			-I${ROOT} \
 			-I${ROOT}/src \
 			-I${ROOT}/src/lib \
@@ -100,8 +102,7 @@ ARFLAGS=		crs
 
 LDFLAGS?=
 
-MKDEP_FLAGS=		-MM \
-			-MG
+MKDEP_FLAGS=		-MM
 
 LN_FLAGS?=		-sf
 
