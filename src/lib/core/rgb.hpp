@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -83,7 +83,7 @@ struct Rgba {
      * @param color RGBA to copy from.
      * @return This RGBA.
      */
-    Rgba &set(const Rgba &color) {
+    Rgba& set(const Rgba& color) {
         if (!color.is_transparent()) {
             u32 = color.u32;
         }
@@ -106,7 +106,7 @@ struct Rgba {
      * @param value Increment value.
      * @return The new colour.
      */
-    friend Rgba operator+(const Rgba &color, int value);
+    friend Rgba operator+(const Rgba& color, int value);
 
     /**
      * Transparent colour.
@@ -124,33 +124,32 @@ public:
      * Initialise this RGBA table with values from memory.
      * @param il RGBA values.
      */
-    RgbaTable(const std::initializer_list<Rgba> &il);
+    RgbaTable(const std::initializer_list<Rgba>& il)
+        : std::vector<Rgba>(il) {
+    }
 
     /**
      * Initialise this RGBA table with values from disk.
      * @param fname Name of the file containing the colour table.
      * @exception IOError
      */
-    explicit RgbaTable(const std::string &fname);
-
-    /**
-     * Release this RGBA table.
-     */
-    virtual ~RgbaTable();
+    RgbaTable(const std::string& fname) {
+        load(fname);
+    }
 
     /**
      * (Re-)Initialise this RGBA table with values from disk.
      * @param fname File name.
      * @exception IOError
      */
-    void load(const std::string &fname);
+    void load(const std::string& fname);
 
     /**
      * Save this RGBA table to disk.
      * @param fname File name.
      * @exception IOError
      */
-    void save(const std::string &fname);
+    void save(const std::string& fname);
 };
 
 /**
@@ -160,7 +159,7 @@ template<size_t N>
 class RgbaN_ {
 public:
     template<typename... Ts>
-    RgbaN_(const Ts &... colors)
+    RgbaN_(const Ts&... colors)
         : _colors{{colors...}} {
     }
 

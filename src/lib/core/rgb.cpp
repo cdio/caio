@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -41,7 +41,7 @@ std::string Rgba::to_string() const
     return os.str();
 }
 
-Rgba operator+(const Rgba &color, int value)
+Rgba operator+(const Rgba& color, int value)
 {
     auto r = color.r + value;
     auto g = color.g + value;
@@ -73,21 +73,7 @@ Rgba operator+(const Rgba &color, int value)
     };
 }
 
-RgbaTable::RgbaTable(const std::initializer_list<Rgba> &il)
-    : std::vector<Rgba>(il)
-{
-}
-
-RgbaTable::RgbaTable(const std::string &fname)
-{
-    load(fname);
-}
-
-RgbaTable::~RgbaTable()
-{
-}
-
-void RgbaTable::load(const std::string &fname)
+void RgbaTable::load(const std::string& fname)
 {
     std::ifstream is{fname, std::ios::binary | std::ios::in};
     if (!is) {
@@ -97,6 +83,8 @@ void RgbaTable::load(const std::string &fname)
     clear();
     std::string line{};
     while (std::getline(is, line)) {
+        line = utils::trim(line);
+
         if (line.empty() || line[0] == '#') {
             continue;
         }
@@ -111,7 +99,7 @@ void RgbaTable::load(const std::string &fname)
         try {
             auto value = utils::to_number<uint32_t>(line.c_str());
             push_back(Rgba{value});
-        } catch (const InvalidNumber &) {
+        } catch (const InvalidNumber&) {
             throw IOError{"Invalid line: " + line};
         }
     }
@@ -119,14 +107,14 @@ void RgbaTable::load(const std::string &fname)
     is.close();
 }
 
-void RgbaTable::save(const std::string &fname)
+void RgbaTable::save(const std::string& fname)
 {
     std::ofstream os{fname, std::ios::binary | std::ios::out | std::ios::trunc};
     if (!os) {
         throw IOError{"Can't create: " + fname + ": " + Error::to_string()};
     }
 
-    for (const auto &rgb : *this) {
+    for (const auto& rgb : *this) {
         os << rgb.to_string() << std::endl;
         if (!os) {
             throw IOError{"Can't write: " + fname + ": " + Error::to_string()};
