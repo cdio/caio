@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -25,11 +25,12 @@
 
 
 namespace caio {
+namespace mos_6581 {
 
 /*
  * Attack time table (seconds).
  */
-const std::array<float, 16> Mos6581::Envelope::attack_times = {
+const std::array<float, 16> Envelope::attack_times = {
     0.002f, 0.008f, 0.016f, 0.024f, 0.038f, 0.056f, 0.068f, 0.080f,
     0.100f, 0.250f, 0.500f, 0.800f, 1.000f, 3.000f, 5.000f, 8.000f
 };
@@ -38,24 +39,20 @@ const std::array<float, 16> Mos6581::Envelope::attack_times = {
 /*
  * Release/Decay time table (seconds).
  */
-const std::array<float, 16> Mos6581::Envelope::decay_times = {
+const std::array<float, 16> Envelope::decay_times = {
     0.006f, 0.024f, 0.048f, 0.072f, 0.114f, 0.168f,  0.204f,  0.240f,
     0.300f, 0.750f, 1.500f, 2.400f, 3.000f, 9.000f, 15.000f, 24.000f
 };
 
 
-Mos6581::Oscillator::Oscillator(unsigned clkf, Oscillator &syncos)
+Oscillator::Oscillator(unsigned clkf, Oscillator& syncos)
     : _clkf{static_cast<float>(clkf)},
       _syncos{syncos}
 {
     reset();
 }
 
-Mos6581::Oscillator::~Oscillator()
-{
-}
-
-void Mos6581::Oscillator::reset()
+void Oscillator::reset()
 {
     _type   = WAVE_NONE;
     _ring   = false;;
@@ -74,91 +71,91 @@ void Mos6581::Oscillator::reset()
     rand_reset();
 }
 
-inline void Mos6581::Oscillator::freq_hi(uint8_t fh)
+inline void Oscillator::freq_hi(uint8_t fh)
 {
     _ufreq = (_ufreq & 0x00FF) | (static_cast<uint16_t>(fh) << 8);
     setfreq();
 }
 
-inline void Mos6581::Oscillator::freq_lo(uint8_t fl)
+inline void Oscillator::freq_lo(uint8_t fl)
 {
     _ufreq = (_ufreq & 0xFF00) | fl;
     setfreq();
 }
 
-inline float Mos6581::Oscillator::freq() const {
+inline float Oscillator::freq() const {
     return _freq;
 }
 
-inline void Mos6581::Oscillator::width_hi(uint8_t wh)
+inline void Oscillator::width_hi(uint8_t wh)
 {
     _uwidth = (_uwidth & 0x00FF) | (static_cast<uint16_t>(wh & 15) << 8);
     setwidth();
 }
 
-inline void Mos6581::Oscillator::width_lo(uint8_t wl)
+inline void Oscillator::width_lo(uint8_t wl)
 {
     _uwidth = (_uwidth & 0x0F00) | wl;
     setwidth();
 }
 
-inline float Mos6581::Oscillator::width() const
+inline float Oscillator::width() const
 {
     return _width;
 }
 
-inline void Mos6581::Oscillator::type(unsigned wt)
+inline void Oscillator::type(unsigned wt)
 {
     _type = static_cast<WaveType>(wt);
 }
 
-inline void Mos6581::Oscillator::ring(bool rb)
+inline void Oscillator::ring(bool rb)
 {
     _ring = rb;
 }
 
-inline void Mos6581::Oscillator::test(bool tb)
+inline void Oscillator::test(bool tb)
 {
     _test = tb;
 }
 
-inline void Mos6581::Oscillator::sync(bool sb)
+inline void Oscillator::sync(bool sb)
 {
     _sync = sb;
 }
 
-inline bool Mos6581::Oscillator::is_test() const
+inline bool Oscillator::is_test() const
 {
     return _test;
 }
 
-inline float Mos6581::Oscillator::amplitude() const
+inline float Oscillator::amplitude() const
 {
     return _A;
 }
 
-inline float Mos6581::Oscillator::time() const
+inline float Oscillator::time() const
 {
     return _t;
 }
 
-inline void Mos6581::Oscillator::setfreq()
+inline void Oscillator::setfreq()
 {
     _freq = static_cast<float>(_ufreq) * _clkf / 16777216.0f;
     _T = 1.0f / _freq;
 }
 
-inline void Mos6581::Oscillator::setwidth()
+inline void Oscillator::setwidth()
 {
     _width = ((_uwidth == 0) ? 1.0f : static_cast<float>(_uwidth) / 4095.0f);
 }
 
-inline void Mos6581::Oscillator::rand_reset()
+inline void Oscillator::rand_reset()
 {
     _rreg = RANDOM_IV;
 }
 
-uint8_t Mos6581::Oscillator::rand()
+uint8_t Oscillator::rand()
 {
     /*
      * See http://www.sidmusic.org/sid/sidtech5.html.
@@ -181,13 +178,13 @@ uint8_t Mos6581::Oscillator::rand()
     return value;
 }
 
-float Mos6581::Oscillator::noise()
+float Oscillator::noise()
 {
     /*
      * See http://www.sidmusic.org/sid/sidtech5.html.
      */
     if (_ndelay <= 0) {
-        _ndelay += NOISE_DELAY / (_clkf / Mos6581::SAMPLING_RATE);
+        _ndelay += NOISE_DELAY / (_clkf / SAMPLING_RATE);
         _nvalue = (rand() - 128.0f) / 128.0f;
     }
 
@@ -196,7 +193,7 @@ float Mos6581::Oscillator::noise()
     return _nvalue;
 }
 
-float Mos6581::Oscillator::tick()
+float Oscillator::tick()
 {
     if (_test) {
         _A = (_type == WAVE_PULSE ? 1.0f : 0.0f);
@@ -241,17 +238,13 @@ float Mos6581::Oscillator::tick()
     return _A;
 }
 
-Mos6581::Envelope::Envelope(unsigned clkf)
+Envelope::Envelope(unsigned clkf)
     : _tadj{1000000.0f / static_cast<float>(clkf)}
 {
     reset();
 }
 
-Mos6581::Envelope::~Envelope()
-{
-}
-
-void Mos6581::Envelope::reset()
+void Envelope::reset()
 {
     _attack_time  = attack_times[0];
     _decay_time   = decay_times[0];
@@ -264,32 +257,32 @@ void Mos6581::Envelope::reset()
     _cycle        = CYCLE_NONE;
 }
 
-inline void Mos6581::Envelope::attack(uint8_t value)
+inline void Envelope::attack(uint8_t value)
 {
     _attack_time = attack_times[value] * _tadj;
 }
 
-inline void Mos6581::Envelope::decay(uint8_t value)
+inline void Envelope::decay(uint8_t value)
 {
     _decay_time = decay_times[value] * _tadj;
 }
 
-inline void Mos6581::Envelope::sustain(uint8_t value)
+inline void Envelope::sustain(uint8_t value)
 {
     _sustain = static_cast<float>(value) / 15.0f;
 }
 
-inline void Mos6581::Envelope::release(uint8_t value)
+inline void Envelope::release(uint8_t value)
 {
     _release_time = decay_times[value] * _tadj;
 }
 
-inline float Mos6581::Envelope::amplitude() const
+inline float Envelope::amplitude() const
 {
     return _A;
 }
 
-void Mos6581::Envelope::gate(bool gb)
+void Envelope::gate(bool gb)
 {
     if (gb && !_gate) {
         _t = _A * _attack_time;
@@ -299,7 +292,7 @@ void Mos6581::Envelope::gate(bool gb)
     _gate = gb;
 }
 
-float Mos6581::Envelope::tick()
+float Envelope::tick()
 {
     if (_gate) {
         /*
@@ -373,63 +366,59 @@ float Mos6581::Envelope::tick()
     return _A;
 }
 
-Mos6581::Voice::Voice(unsigned clkf, Voice &svoice)
+Voice::Voice(unsigned clkf, Voice& svoice)
     : _osc{clkf, svoice._osc},
       _env{clkf}
 {
 }
 
-Mos6581::Voice::~Voice()
-{
-}
-
-inline void Mos6581::Voice::reset()
+inline void Voice::reset()
 {
     _osc.reset();
     _env.reset();
 }
 
-inline void Mos6581::Voice::freq_hi(uint8_t fh)
+inline void Voice::freq_hi(uint8_t fh)
 {
     _osc.freq_hi(fh);
 }
 
-inline void Mos6581::Voice::freq_lo(uint8_t fl)
+inline void Voice::freq_lo(uint8_t fl)
 {
     _osc.freq_lo(fl);
 }
 
-inline void Mos6581::Voice::width_hi(uint8_t pwh)
+inline void Voice::width_hi(uint8_t pwh)
 {
     _osc.width_hi(pwh);
 }
 
-inline void Mos6581::Voice::width_lo(uint8_t pwl)
+inline void Voice::width_lo(uint8_t pwl)
 {
     _osc.width_lo(pwl);
 }
 
-inline void Mos6581::Voice::attack(uint8_t value)
+inline void Voice::attack(uint8_t value)
 {
     _env.attack(value);
 }
 
-inline void Mos6581::Voice::decay(uint8_t value)
+inline void Voice::decay(uint8_t value)
 {
     _env.decay(value);
 }
 
-inline void Mos6581::Voice::sustain(uint8_t value)
+inline void Voice::sustain(uint8_t value)
 {
     _env.sustain(value);
 }
 
-inline void Mos6581::Voice::release(uint8_t value)
+inline void Voice::release(uint8_t value)
 {
     _env.release(value);
 }
 
-void Mos6581::Voice::control(uint8_t value)
+void Voice::control(uint8_t value)
 {
     _osc.type(value >> 4);
     _osc.test(value & 8);
@@ -438,36 +427,32 @@ void Mos6581::Voice::control(uint8_t value)
     _env.gate(value & 1);
 }
 
-inline float Mos6581::Voice::tick()
+inline float Voice::tick()
 {
     return _osc.tick() * _env.tick() * 0.50f;
 }
 
-inline Mos6581::Oscillator &Mos6581::Voice::osc()
+inline Oscillator& Voice::osc()
 {
     return _osc;
 }
 
-inline const Mos6581::Oscillator &Mos6581::Voice::osc() const
+inline const Oscillator& Voice::osc() const
 {
     return _osc;
 }
 
-inline const Mos6581::Envelope &Mos6581::Voice::env() const
+inline const Envelope& Voice::env() const
 {
     return _env;
 }
 
-Mos6581::Filter::Filter()
+Filter::Filter()
 {
     reset();
 }
 
-Mos6581::Filter::~Filter()
-{
-}
-
-void Mos6581::Filter::reset()
+void Filter::reset()
 {
     _ufc      = 0;
     _pufc     = 0.0f;
@@ -482,62 +467,62 @@ void Mos6581::Filter::reset()
     _kba_data.fill(0.0f);
 }
 
-inline void Mos6581::Filter::freq_hi(uint8_t hi)
+inline void Filter::freq_hi(uint8_t hi)
 {
     _ufc = (_ufc & 7) | (static_cast<uint16_t>(hi) << 3);
 }
 
-inline void Mos6581::Filter::freq_lo(uint8_t lo)
+inline void Filter::freq_lo(uint8_t lo)
 {
     _ufc = (_ufc & 0xFFF8) | (lo & 7);
 }
 
-inline void Mos6581::Filter::resonance(uint8_t rs)
+inline void Filter::resonance(uint8_t rs)
 {
     _res = rs & 15;
 }
 
-inline void Mos6581::Filter::lopass(bool active)
+inline void Filter::lopass(bool active)
 {
     _lopass = active;
 }
 
-inline void Mos6581::Filter::hipass(bool active)
+inline void Filter::hipass(bool active)
 {
     _hipass = active;
 }
 
-inline void Mos6581::Filter::bandpass(bool active)
+inline void Filter::bandpass(bool active)
 {
     _bandpass = active;
 }
 
-inline bool Mos6581::Filter::lopass() const
+inline bool Filter::lopass() const
 {
     return _lopass;
 }
 
-inline bool Mos6581::Filter::hipass() const
+inline bool Filter::hipass() const
 {
     return _hipass;
 }
 
-inline bool Mos6581::Filter::bandpass() const
+inline bool Filter::bandpass() const
 {
     return _bandpass;
 }
 
-inline bool Mos6581::Filter::is_enabled() const
+inline bool Filter::is_enabled() const
 {
     return (_lopass || _hipass || _bandpass);
 }
 
-inline bool Mos6581::Filter::is_disabled() const
+inline bool Filter::is_disabled() const
 {
     return (!is_enabled());
 }
 
-inline float Mos6581::Filter::frequency() const
+inline float Filter::frequency() const
 {
     /*
      * MOS-6581 does not follow the specs, MOS-8580 does, kind of.
@@ -570,7 +555,7 @@ inline float Mos6581::Filter::frequency() const
     return fc;
 }
 
-inline float Mos6581::Filter::Q() const
+inline float Filter::Q() const
 {
     /*
      * From reSID v1.0-pre:
@@ -581,8 +566,8 @@ inline float Mos6581::Filter::Q() const
      *  theoretically unlimited, which is quite unheard of in a filter circuit."
      */
     auto nres = (~_res) & 15;
-    if (nres == 15) {
-        --nres;
+    if (nres == 0) {
+        nres = 1;
     }
 
     float Q = 8.0f / nres;
@@ -590,7 +575,7 @@ inline float Mos6581::Filter::Q() const
     return Q;
 }
 
-void Mos6581::Filter::generate()
+void Filter::generate()
 {
     if (_pufc != _ufc || _pres != _res) {
         _pufc = _ufc;
@@ -610,7 +595,7 @@ void Mos6581::Filter::generate()
     }
 }
 
-samples_fp Mos6581::Filter::apply(samples_fp &v)
+samples_fp Filter::apply(samples_fp& v)
 {
     generate();
 
@@ -629,8 +614,8 @@ samples_fp Mos6581::Filter::apply(samples_fp &v)
     return v;
 }
 
-Mos6581::Mos6581(const std::string &label, unsigned clkf)
-    : Mos6581I{label, clkf},
+Mos6581::Mos6581(const std::string& label, unsigned clkf)
+    : Mos6581_{label, clkf},
       _voice_1{clkf, _voice_3},
       _voice_2{clkf, _voice_1},
       _voice_3{clkf, _voice_2}
@@ -663,7 +648,7 @@ void Mos6581::reset()
     _last_value   = 0;
 }
 
-uint8_t Mos6581::read(addr_t addr) const
+uint8_t Mos6581::read(addr_t addr, ReadMode)
 {
     switch (addr) {
     case ADC_1:
@@ -829,7 +814,7 @@ void Mos6581::write(addr_t addr, uint8_t value)
     _last_value = value;
 }
 
-size_t Mos6581::tick(const Clock &clk)
+size_t Mos6581::tick(const Clock& clk)
 {
     if (_audio_buffer) {
         _v1[_sample_index] = _voice_1.tick();
@@ -945,4 +930,5 @@ inline bool Mos6581::is_v3_active() const
     return (_voice_3_filtered || !_voice_3_off);
 }
 
+}
 }

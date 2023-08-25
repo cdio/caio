@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -51,7 +51,7 @@ namespace c64 {
  */
 class CartEasyFlash : public Cartridge {
 public:
-    constexpr static const char *TYPE              = "CART_EASY_FLASH";
+    constexpr static const char* TYPE              = "CART_EASY_FLASH";
     constexpr static const size_t MAX_BANKS        = 64;
     constexpr static const size_t BANK_MASK        = 63;
     constexpr static const size_t ROM_SIZE         = 8192;
@@ -62,17 +62,20 @@ public:
     constexpr static const uint8_t REG2_EXROM      = 0x02;
     constexpr static const uint8_t REG2_GAME       = 0x01;
 
-    CartEasyFlash(const std::shared_ptr<Crt> &crt);
+    CartEasyFlash(const sptr_t<Crt>& crt)
+        : Cartridge{TYPE, crt} {
+    }
 
-    virtual ~CartEasyFlash();
+    virtual ~CartEasyFlash() {
+    }
 
     /**
      * @see Device::read()
      */
-    uint8_t read(addr_t addr) const override;
+    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
-     * @see Device::write();
+     * @see Device::write()
      */
     void write(addr_t addr, uint8_t data) override;
 
@@ -97,9 +100,9 @@ public:
     void reset() override;
 
 private:
-    void add_rom(size_t entry, const Crt::Chip &chip, const devptr_t &rom);
+    void add_rom(size_t entry, const Crt::Chip& chip, const devptr_t& rom);
 
-    void add_ram(size_t entry, const Crt::Chip &chip, const devptr_t &ram);
+    void add_ram(size_t entry, const Crt::Chip& chip, const devptr_t& ram);
 
     devptr_t                        _ram{};     /* 256 bytes RAM (if present)   */
     size_t                          _bank{};    /* Current ROM bank             */

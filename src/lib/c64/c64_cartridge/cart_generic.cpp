@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -33,15 +33,6 @@
 
 namespace caio {
 namespace c64 {
-
-CartGeneric::CartGeneric(const std::shared_ptr<Crt> &crt)
-    : Cartridge{TYPE, crt}
-{
-}
-
-CartGeneric::~CartGeneric()
-{
-}
 
 void CartGeneric::reset()
 {
@@ -111,7 +102,7 @@ void CartGeneric::reset()
     propagate();
 }
 
-uint8_t CartGeneric::read(addr_t addr) const
+uint8_t CartGeneric::read(addr_t addr, ReadMode)
 {
     /* Addresses from $DE00 to $DFFF */
     return 255;
@@ -124,7 +115,7 @@ void CartGeneric::write(addr_t addr, uint8_t data)
 
 std::string CartGeneric::to_string() const
 {
-    const char *modestr;
+    const char* modestr;
 
     switch (_generic_mode) {
     case GenericMode::NORMAL_8K:

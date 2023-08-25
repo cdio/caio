@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -20,27 +20,29 @@
 
 #include "mos_6581_i.hpp"
 
+
 namespace caio {
+namespace mos_6581 {
 
 /**
  * MOS6581 reSID.
  * reSID library wrapper.
- * @see Mos6581I
+ * @see Mos6581_
  */
-class Mos6581Resid : public Mos6581I {
+class Mos6581Resid : public Mos6581_ {
 public:
-    Mos6581Resid(const std::string &label, unsigned clkf);
+    Mos6581Resid(const std::string& label, unsigned clkf);
 
     virtual ~Mos6581Resid() {
     }
 
     /**
-     * @see Mos6581I::read()
+     * @see Device::read()
      */
-    uint8_t read(addr_t addr) const override;
+    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
-     * @see Mos6581I::write()
+     * @see Device::write()
      */
     void write(addr_t addr, uint8_t value) override;
 
@@ -57,9 +59,13 @@ private:
      * @return The number of clock cycles that must pass before this method could be called again.
      * @see Clockable::tick(const Clock &)
      */
-    size_t tick(const Clock &clk) override;
+    size_t tick(const Clock& clk) override;
 
-    std::shared_ptr<class Resid> _resid{};
+    sptr_t<class Resid> _resid{};
 };
+
+}
+
+using Mos6581Resid = mos_6581::Mos6581Resid;
 
 }

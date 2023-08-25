@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -21,36 +21,7 @@
 
 namespace caio {
 
-Mos6510::Mos6510(const std::string &type, const std::string &label)
-    : Mos6502{type, label}
-{
-}
-
-Mos6510::Mos6510(const std::shared_ptr<ASpace> &mmap, const std::string &type, const std::string &label)
-    : Mos6502{mmap, type, label}
-{
-}
-
-Mos6510::~Mos6510()
-{
-}
-
-void Mos6510::add_ior(const ior_t &ior, uint8_t mask)
-{
-   _ioport.add_ior(ior, mask);
-}
-
-void Mos6510::add_iow(const iow_t &iow, uint8_t mask)
-{
-    _ioport.add_iow(iow, mask);
-}
-
-void Mos6510::bpadd(addr_t addr, const breakpoint_cb_t &cb, void *arg)
-{
-    Mos6502::bpadd(addr, *reinterpret_cast<const Mos6502::breakpoint_cb_t *>(&cb), arg);
-}
-
-uint8_t Mos6510::read(addr_t addr) const
+uint8_t Mos6510::read(addr_t addr, Device::ReadMode mode)
 {
     switch (addr) {
     case PORT_0:
@@ -62,7 +33,7 @@ uint8_t Mos6510::read(addr_t addr) const
     default:;
     }
 
-    return Mos6502::read(addr);
+    return Mos6502::read(addr, mode);
 }
 
 void Mos6510::write(addr_t addr, uint8_t value)

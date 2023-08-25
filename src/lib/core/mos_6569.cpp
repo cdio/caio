@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -48,7 +48,7 @@ RgbaTable Mos6569::builtin_palette{
 };
 
 
-Mos6569::Mos6569(const std::string &label, const std::shared_ptr<ASpace> &mmap, const devptr_t &vcolor)
+Mos6569::Mos6569(const std::string& label, const sptr_t<ASpace>& mmap, const devptr_t& vcolor)
     : Device{TYPE, label},
       Clockable{},
       _mmap{mmap},
@@ -58,38 +58,34 @@ Mos6569::Mos6569(const std::string &label, const std::shared_ptr<ASpace> &mmap, 
 {
 }
 
-Mos6569::~Mos6569()
-{
-}
-
-void Mos6569::render_line(const std::function<void(unsigned, const ui::Scanline &)> &rl)
+void Mos6569::render_line(const std::function<void(unsigned, const ui::Scanline&)>& rl)
 {
     _render_line = rl;
 }
 
-void Mos6569::palette(const std::string &fname)
+void Mos6569::palette(const std::string& fname)
 {
     if (!fname.empty()) {
         _palette.load(fname);
     }
 }
 
-void Mos6569::palette(const RgbaTable &plt)
+void Mos6569::palette(const RgbaTable& plt)
 {
     _palette = plt;
 }
 
-void Mos6569::vsync(const std::function<void(unsigned)> &cb)
+void Mos6569::vsync(const std::function<void(unsigned)>& cb)
 {
     _vsync = cb;
 }
 
-void Mos6569::irq(const OutputPinCb &irq_out)
+void Mos6569::irq(const OutputPinCb& irq_out)
 {
     _irq_out = irq_out;
 }
 
-void Mos6569::ba(const OutputPinCb &ba_out)
+void Mos6569::ba(const OutputPinCb& ba_out)
 {
     _ba_out = ba_out;
 }
@@ -124,7 +120,7 @@ size_t Mos6569::size() const
     return Registers::REGMAX;
 }
 
-uint8_t Mos6569::read(addr_t addr) const
+uint8_t Mos6569::read(addr_t addr, ReadMode mode)
 {
     uint8_t data{};
 
@@ -258,7 +254,9 @@ uint8_t Mos6569::read(addr_t addr) const
          * MIB-MIB collision register automatically cleared when read.
          */
         data = _mib_mib_collision;
-        const_cast<Mos6569 *>(this)->_mib_mib_collision = 0;
+        if (mode != ReadMode::Peek) {
+            const_cast<Mos6569*>(this)->_mib_mib_collision = 0;
+        }
         return data;
 
     case REG_MIB_DATA_COLLISION:
@@ -266,7 +264,9 @@ uint8_t Mos6569::read(addr_t addr) const
          * MIB-DATA collision register automatically cleared when read.
          */
         data = _mib_data_collision;
-        const_cast<Mos6569 *>(this)->_mib_data_collision = 0;
+        if (mode != ReadMode::Peek) {
+            const_cast<Mos6569*>(this)->_mib_data_collision = 0;
+        }
         return data;
 
     case REG_BORDER_COLOR:
@@ -498,62 +498,62 @@ void Mos6569::write(addr_t addr, uint8_t data)
     }
 }
 
-std::ostream &Mos6569::dump(std::ostream &os, addr_t base) const
+std::ostream& Mos6569::dump(std::ostream& os, addr_t base) const
 {
     std::array<uint8_t, Registers::REGMAX> regs = {
-        read(REG_MIB_0_X),
-        read(REG_MIB_0_Y),
-        read(REG_MIB_1_X),
-        read(REG_MIB_1_Y),
-        read(REG_MIB_2_X),
-        read(REG_MIB_2_Y),
-        read(REG_MIB_3_X),
-        read(REG_MIB_3_Y),
-        read(REG_MIB_4_X),
-        read(REG_MIB_4_Y),
-        read(REG_MIB_5_X),
-        read(REG_MIB_5_Y),
-        read(REG_MIB_6_X),
-        read(REG_MIB_6_Y),
-        read(REG_MIB_7_X),
-        read(REG_MIB_7_Y),
-        read(REG_MIBS_MSB_X),
-        read(REG_CONTROL_1),
-        read(REG_RASTER_COUNTER),
-        read(REG_LIGHT_PEN_X),
-        read(REG_LIGHT_PEN_Y),
-        read(REG_MIB_ENABLE),
-        read(REG_CONTROL_2),
-        read(REG_MIB_Y_EXPANSION),
-        read(REG_MEMORY_POINTERS),
-        read(REG_INTERRUPT),
-        read(REG_INTERRUPT_ENABLE),
-        read(REG_MIB_DATA_PRI),
-        read(REG_MIB_MULTICOLOR_SEL),
-        read(REG_MIB_X_EXPANSION),
-        _mib_mib_collision,                 /* Cleared after read() */
-        _mib_data_collision,                /* Cleared after read() */
-        read(REG_BORDER_COLOR),
-        read(REG_BACKGROUND_COLOR_0),
-        read(REG_BACKGROUND_COLOR_1),
-        read(REG_BACKGROUND_COLOR_2),
-        read(REG_BACKGROUND_COLOR_3),
-        read(REG_MIB_MULTICOLOR_0),
-        read(REG_MIB_MULTICOLOR_1),
-        read(REG_MIB_0_COLOR),
-        read(REG_MIB_1_COLOR),
-        read(REG_MIB_2_COLOR),
-        read(REG_MIB_3_COLOR),
-        read(REG_MIB_4_COLOR),
-        read(REG_MIB_5_COLOR),
-        read(REG_MIB_6_COLOR),
-        read(REG_MIB_7_COLOR)
+        peek(REG_MIB_0_X),
+        peek(REG_MIB_0_Y),
+        peek(REG_MIB_1_X),
+        peek(REG_MIB_1_Y),
+        peek(REG_MIB_2_X),
+        peek(REG_MIB_2_Y),
+        peek(REG_MIB_3_X),
+        peek(REG_MIB_3_Y),
+        peek(REG_MIB_4_X),
+        peek(REG_MIB_4_Y),
+        peek(REG_MIB_5_X),
+        peek(REG_MIB_5_Y),
+        peek(REG_MIB_6_X),
+        peek(REG_MIB_6_Y),
+        peek(REG_MIB_7_X),
+        peek(REG_MIB_7_Y),
+        peek(REG_MIBS_MSB_X),
+        peek(REG_CONTROL_1),
+        peek(REG_RASTER_COUNTER),
+        peek(REG_LIGHT_PEN_X),
+        peek(REG_LIGHT_PEN_Y),
+        peek(REG_MIB_ENABLE),
+        peek(REG_CONTROL_2),
+        peek(REG_MIB_Y_EXPANSION),
+        peek(REG_MEMORY_POINTERS),
+        peek(REG_INTERRUPT),
+        peek(REG_INTERRUPT_ENABLE),
+        peek(REG_MIB_DATA_PRI),
+        peek(REG_MIB_MULTICOLOR_SEL),
+        peek(REG_MIB_X_EXPANSION),
+        peek(REG_MIB_MIB_COLLISION),
+        peek(REG_MIB_DATA_COLLISION),
+        peek(REG_BORDER_COLOR),
+        peek(REG_BACKGROUND_COLOR_0),
+        peek(REG_BACKGROUND_COLOR_1),
+        peek(REG_BACKGROUND_COLOR_2),
+        peek(REG_BACKGROUND_COLOR_3),
+        peek(REG_MIB_MULTICOLOR_0),
+        peek(REG_MIB_MULTICOLOR_1),
+        peek(REG_MIB_0_COLOR),
+        peek(REG_MIB_1_COLOR),
+        peek(REG_MIB_2_COLOR),
+        peek(REG_MIB_3_COLOR),
+        peek(REG_MIB_4_COLOR),
+        peek(REG_MIB_5_COLOR),
+        peek(REG_MIB_6_COLOR),
+        peek(REG_MIB_7_COLOR)
     };
 
     return utils::dump(os, regs, base);
 }
 
-size_t Mos6569::tick(const Clock &clk)
+size_t Mos6569::tick(const Clock& clk)
 {
     switch (_cycle) {
     case 0:
@@ -1010,7 +1010,7 @@ void Mos6569::paint(unsigned start, unsigned width, const Rgba &color)
     }
 }
 
-void Mos6569::paint_byte(unsigned start, uint8_t bitmap, const Rgba4 &colors)
+void Mos6569::paint_byte(unsigned start, uint8_t bitmap, const Rgba4& colors)
 {
     if (start < _scanline.size()) {
         const auto &bg_color = colors[0];
@@ -1023,7 +1023,7 @@ void Mos6569::paint_byte(unsigned start, uint8_t bitmap, const Rgba4 &colors)
     }
 }
 
-void Mos6569::paint_mcm_byte(unsigned start, uint8_t bitmap, const Rgba4 &colors)
+void Mos6569::paint_mcm_byte(unsigned start, uint8_t bitmap, const Rgba4& colors)
 {
     if (start + 1 < _scanline.size()) {
         auto it = _scanline.begin() + start;
@@ -1124,7 +1124,7 @@ void Mos6569::paint_bitmap_mode(unsigned line, unsigned x)
     }
 }
 
-void Mos6569::paint_sprite_line(unsigned start, uint64_t bitmap, const Rgba4 &colors, bool expand)
+void Mos6569::paint_sprite_line(unsigned start, uint64_t bitmap, const Rgba4& colors, bool expand)
 {
     paint_byte(start,      (bitmap >> 56),       colors);
     paint_byte(start + 8,  (bitmap >> 48) & 255, colors);
@@ -1137,7 +1137,7 @@ void Mos6569::paint_sprite_line(unsigned start, uint64_t bitmap, const Rgba4 &co
     }
 }
 
-void Mos6569::paint_sprite_line_mcm(unsigned start, uint64_t bitmap, const Rgba4 &colors, bool expand)
+void Mos6569::paint_sprite_line_mcm(unsigned start, uint64_t bitmap, const Rgba4& colors, bool expand)
 {
     paint_mcm_byte(start,      (bitmap >> 56),       colors);
     paint_mcm_byte(start + 8,  (bitmap >> 48) & 255, colors);

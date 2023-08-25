@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -33,22 +33,23 @@
 
 
 namespace caio {
+namespace mos_6581 {
+
+constexpr static const unsigned SAMPLING_RATE = 44100;
+constexpr static const float DT               = 1.0f / SAMPLING_RATE;
+
+constexpr static const float  SAMPLES_TIME    = 0.020f;
+constexpr static const size_t SAMPLES         = static_cast<size_t>(utils::ceil(SAMPLING_RATE * SAMPLES_TIME));
+
+constexpr static const size_t CHANNELS        = 1;
 
 /**
  * MOS6581 Sound Interface Device (SID) base class.
  * This class must be derived by the actual implementation.
  */
-class Mos6581I : public Device, public Clockable {
+class Mos6581_ : public Device, public Clockable {
 public:
-    constexpr static const char  *TYPE            = "MOS6581";
-
-    constexpr static const unsigned SAMPLING_RATE = 44100;
-    constexpr static const float DT               = 1.0f / SAMPLING_RATE;
-
-    constexpr static const float  SAMPLES_TIME    = 0.020f;
-    constexpr static const size_t SAMPLES         = static_cast<size_t>(utils::ceil(SAMPLING_RATE * SAMPLES_TIME));
-
-    constexpr static const size_t CHANNELS        = 1;
+    constexpr static const char* TYPE = "MOS6581";
 
     enum Registers {
         VOICE_1_FREQ_LO         = 0x00,
@@ -96,28 +97,34 @@ public:
 
     constexpr static const addr_t SIZE = Registers::REGMAX;
 
-    virtual ~Mos6581I();
+    virtual ~Mos6581_() {
+    }
 
     /**
      * Set the audio buffer provider.
      * @param abuf Audio buffer provider.
      */
-    void audio_buffer(const std::function<ui::AudioBuffer()> &abuf);
+    void audio_buffer(const std::function<ui::AudioBuffer()>& abuf) {
+        _audio_buffer = abuf;
+    }
 
     /**
      * @see Device::reset()
      */
-    void reset() override;
+    void reset() override {
+    }
 
     /**
      * @see Device::size()
      */
-    size_t size() const override;
+    size_t size() const override {
+        return SIZE;
+    }
 
     /**
      * @see Device::dump()
      */
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
+    std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
 
 protected:
     /**
@@ -125,11 +132,19 @@ protected:
      * @param label Label assigned to this instance;
      * @param clkf  System clock frequency.
      */
-    Mos6581I(const std::string &label, unsigned clkf);
+    Mos6581_(const std::string& label, unsigned clkf)
+        : Device{TYPE, label},
+          _clkf{clkf},
+          _samples_cycles{Clock::cycles(SAMPLES_TIME, clkf)} {
+    }
 
     std::function<ui::AudioBuffer()> _audio_buffer{};
     unsigned                         _clkf{};
     size_t                           _samples_cycles{};  /* SAMPLES_TIME as clock cycles */
 };
+
+}
+
+using Mos6581_ = mos_6581::Mos6581_;
 
 }

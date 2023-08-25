@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -23,22 +23,14 @@
 
 namespace caio {
 
-ASpace::ASpace()
-{
-}
-
-ASpace::ASpace(const addrmap_t &rmaps, const addrmap_t &wmaps, addr_t amask)
-{
-    reset(rmaps, wmaps, amask);
-}
-
-uint8_t ASpace::read(addr_t addr) const
+uint8_t ASpace::read(addr_t addr, ReadMode mode)
 {
     try {
         const auto [bank, offset] = decode(addr);
         auto &dev = _rmaps.at(bank);
-        return dev.first->read(dev.second + offset);
-    } catch (std::out_of_range &) {
+        auto addr = dev.second + offset;
+        return dev.first->read(addr, mode);
+    } catch (std::out_of_range&) {
         throw InvalidReadAddress{"ASpace", addr};
     }
 }
@@ -48,17 +40,14 @@ void ASpace::write(addr_t addr, uint8_t value)
     try {
         const auto [bank, offset] = decode(addr);
         auto &dev = _wmaps.at(bank);
-        dev.first->write(dev.second + offset, value);
-    } catch (std::out_of_range &) {
+        auto addr = dev.second + offset;
+        dev.first->write(addr, value);
+    } catch (std::out_of_range&) {
         throw InvalidWriteAddress{"ASpace", addr};
     }
 }
 
-void ASpace::reset()
-{
-}
-
-void ASpace::reset(const addrmap_t &rmaps, const addrmap_t &wmaps, addr_t amask)
+void ASpace::reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask)
 {
     auto banks = wmaps.size();
     if (!banks) {
@@ -87,7 +76,7 @@ inline std::pair<addr_t, addr_t> ASpace::decode(addr_t addr) const
     return {bank, offset};
 }
 
-std::ostream &ASpace::dump(std::ostream &os) const
+std::ostream& ASpace::dump(std::ostream& os) const
 {
     os.setf(std::ios::left, std::ios::adjustfield);
 

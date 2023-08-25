@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -29,7 +29,7 @@ namespace caio {
 constexpr static const unsigned ICON_WIDTH  = 160;
 constexpr static const unsigned ICON_HEIGHT = 138;
 
-static const std::array<Rgba, 22097> icon_data{
+static const Rgba icon_data[] = {
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
@@ -2797,7 +2797,7 @@ const Image &icon()
     static const Image caio_icon32 = {
         .width  = ICON_WIDTH,
         .height = ICON_HEIGHT,
-        .data   = gsl::span{icon_data.data(), icon_data.size()}
+        .data   = gsl::span{icon_data, std::size(icon_data)}
     };
 
     return caio_icon32;

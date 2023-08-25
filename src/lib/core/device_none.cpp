@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -24,37 +24,5 @@
 namespace caio {
 
 devptr_t device_none = std::make_shared<DeviceNone>();
-
-DeviceNone::DeviceNone()
-    : Device{TYPE, TYPE}
-{
-}
-
-DeviceNone::~DeviceNone()
-{
-}
-
-void DeviceNone::reset()
-{
-}
-
-size_t DeviceNone::size() const
-{
-    return 0;
-}
-
-uint8_t DeviceNone::read(addr_t) const
-{
-    return 0;
-}
-
-void DeviceNone::write(addr_t, uint8_t)
-{
-}
-
-std::ostream &DeviceNone::dump(std::ostream &os, addr_t) const
-{
-    return os;
-}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -34,15 +34,6 @@
 
 namespace caio {
 namespace c64 {
-
-CartOceanType1::CartOceanType1(const std::shared_ptr<Crt> &crt)
-    : Cartridge{TYPE, crt}
-{
-}
-
-CartOceanType1::~CartOceanType1()
-{
-}
 
 void CartOceanType1::reset()
 {
@@ -94,11 +85,11 @@ void CartOceanType1::reset()
     _banks = 0;
     _roms.fill(devptr_t{});
 
-    const auto &cart = crt();
+    const auto& cart = crt();
     for (size_t entry = 0; entry < cart.chips(); ++entry) {
         const auto chipdev = cart[entry];
-        const Crt::Chip &chip = chipdev.first;
-        const devptr_t &rom = chipdev.second;
+        const Crt::Chip& chip = chipdev.first;
+        const devptr_t& rom = chipdev.second;
 
         switch (chip.type) {
         case Crt::CHIP_TYPE_ROM:
@@ -142,7 +133,7 @@ void CartOceanType1::reset()
     propagate();
 }
 
-uint8_t CartOceanType1::read(addr_t addr) const
+uint8_t CartOceanType1::read(addr_t addr, ReadMode)
 {
     if (addr == 0x0000) {
         /*
@@ -172,7 +163,7 @@ void CartOceanType1::write(addr_t addr, uint8_t data)
             /*
              * Force the propagation of GAME/EXROM output pins.
              * This makes the connected devices to update their internal status
-             * even if the GAME/EXROM pins are not changed (this case).
+             * even if the GAME/EXROM pins are not changed (like in this case).
              */
             propagate(true);
         }

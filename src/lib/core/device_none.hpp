@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -28,44 +28,54 @@ namespace caio {
  */
 class DeviceNone : public Device {
 public:
-    constexpr static const char *TYPE = "NONE";
+    constexpr static const char* TYPE = "NONE";
 
     /**
      * Initialise None Device.
      */
-    DeviceNone();
+    DeviceNone()
+        : Device{TYPE, TYPE} {
+    }
 
-    ~DeviceNone();
+    virtual ~DeviceNone() {
+    }
 
     /**
      * @see Device::reset()
      */
-    void reset() override;
+    void reset() override {
+    }
 
     /**
      * @return 0.
      */
-    size_t size() const override;
+    size_t size() const override {
+        return 0;
+    }
 
     /**
      * This method does nothing.
      * @return 0.
      */
-    uint8_t read(addr_t) const override;
+    uint8_t read(addr_t, ReadMode) override {
+        return 0;
+    }
 
     /**
      * This method does nothing.
      */
-    void write(addr_t, uint8_t) override;
+    void write(addr_t, uint8_t) override {
+    }
 
     /**
      * This method does nothing.
      * @param os Output stream.
      * @return The output stream.
      */
-    std::ostream &dump(std::ostream &os, addr_t = 0) const override;
+    std::ostream& dump(std::ostream& os, addr_t = 0) const override {
+        return os;
+    }
 };
-
 
 extern devptr_t device_none;
 

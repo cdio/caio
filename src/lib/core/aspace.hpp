@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -37,6 +37,8 @@ namespace caio {
  */
 class ASpace {
 public:
+    using ReadMode = Device::ReadMode;
+
     /**
      * Device mappings type.
      * The device mappings type binds a device instance to a memory bank.
@@ -61,13 +63,10 @@ public:
      */
     using addrmap_t = std::vector<devmap_t>;
 
-    virtual ~ASpace() {
-    }
-
     /**
      * @see Device::read()
      */
-    virtual uint8_t read(addr_t addr) const;
+    virtual uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read);
 
     /**
      * @see Device::write()
@@ -77,16 +76,18 @@ public:
     /**
      * Reset this address space.
      */
-    virtual void reset();
+    virtual void reset() {
+    }
 
     /**
      * Dump the contents of the read and write mappings as human readable strings.
      * @param os Stream to dump to;
      */
-    std::ostream &dump(std::ostream &os) const;
+    std::ostream& dump(std::ostream& os) const;
 
 protected:
-    ASpace();
+    ASpace() {
+    }
 
     /**
      * Initialise this address space.
@@ -96,7 +97,9 @@ protected:
      * @exception InvalidArgument if one of the parameters is ill formed.
      * @see reset()
      */
-    ASpace(const addrmap_t &rmaps, const addrmap_t &wmaps, addr_t amask);
+    ASpace(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask) {
+        reset(rmaps, wmaps, amask);
+    }
 
     /**
      * Reset this address space with a new set of mappings.
@@ -109,7 +112,7 @@ protected:
      * @param amask Address space mask (addresses are ANDed with this mask).
      * @exception InvalidArgument if one of the parameters is ill formed.
      */
-    void reset(const addrmap_t &rmaps, const addrmap_t &wmaps, addr_t amask);
+    void reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask);
 
 private:
     std::pair<addr_t, addr_t> decode(addr_t addr) const;

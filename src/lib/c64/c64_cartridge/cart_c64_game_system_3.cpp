@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -34,15 +34,6 @@
 
 namespace caio {
 namespace c64 {
-
-CartC64GameSystem3::CartC64GameSystem3(const std::shared_ptr<Crt> &crt)
-    : Cartridge{TYPE, crt}
-{
-}
-
-CartC64GameSystem3::~CartC64GameSystem3()
-{
-}
 
 void CartC64GameSystem3::reset()
 {
@@ -126,14 +117,14 @@ void CartC64GameSystem3::reset()
     propagate();
 }
 
-uint8_t CartC64GameSystem3::read(addr_t addr) const
+uint8_t CartC64GameSystem3::read(addr_t addr, ReadMode rmode)
 {
     addr &= IO_ADDR_MASK;
-    if (addr < 256) {
+    if (addr < 255 && rmode != ReadMode::Peek) {
         /*
          * Reading from anywhere in the I/O-1 range will disable the cart.
          */
-        const_cast<CartC64GameSystem3 *>(this)->mode(GameExromMode::MODE_INVISIBLE);
+        mode(GameExromMode::MODE_INVISIBLE);
     }
 
     return 255;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -42,7 +42,7 @@ namespace c64 {
  */
 class C64IO : public Device {
 public:
-    constexpr static const char *TYPE           = "I/O";
+    constexpr static const char* TYPE           = "I/O";
     constexpr static const addr_t START_ADDR    = 0xD000;
     constexpr static const addr_t END_ADDR      = 0xE000;
     constexpr static const size_t SIZE          = END_ADDR - START_ADDR;
@@ -63,10 +63,19 @@ public:
      * @param cia2   CIA#2 device;
      * @param ioexp  I/O expansion device.
      */
-    C64IO(const devptr_t &vic2, const devptr_t &sid, const devptr_t &vcolor, const devptr_t &cia1,
-        const devptr_t &cia2, const devptr_t &ioexp);
+    C64IO(const devptr_t& vic2, const devptr_t& sid, const devptr_t& vcolor, const devptr_t& cia1,
+        const devptr_t& cia2, const devptr_t& ioexp)
+        : Device{TYPE, TYPE},
+          _vic2{vic2},
+          _sid{sid},
+          _vcolor{vcolor},
+          _cia1{cia1},
+          _cia2{cia2},
+          _ioexp{ioexp} {
+    }
 
-    virtual ~C64IO();
+    virtual ~C64IO() {
+    }
 
     /**
      * Reset this device.
@@ -78,12 +87,14 @@ public:
     /**
      * @see Device::size()
      */
-    size_t size() const override;
+    size_t size() const override {
+        return SIZE;
+    }
 
     /**
      * @see Device::read()
      */
-    uint8_t read(addr_t addr) const override;
+    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
      * @see Device::write()
@@ -93,7 +104,7 @@ public:
     /**
      * @see Device::dump();
      */
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
+    std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
 
 private:
     devptr_t _vic2{};

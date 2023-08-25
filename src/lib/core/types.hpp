@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -37,8 +37,13 @@ namespace caio {
 using addr_t = uint16_t;
 using saddr_t = int16_t;
 
+template<typename T>
+using sptr_t = std::shared_ptr<T>;
 
-void stacktrace(std::ostream &);
+template<typename T>
+using uptr_t = std::unique_ptr<T>;
+
+void stacktrace(std::ostream&);
 
 
 /**
@@ -52,7 +57,7 @@ public:
      * @param elem   Name of the element that generated this error;
      * @param reason Reason for this error.
      */
-    Error(const std::string &elem, const std::string &reason)
+    Error(const std::string& elem, const std::string& reason)
         : std::exception{},
           _reason{(elem.empty() ? reason : elem + ": " + reason)} {
     }
@@ -61,7 +66,7 @@ public:
      * Initialise an error exception.
      * @param reason Reason for this error.
      */
-    Error(const std::string &reason = {})
+    Error(const std::string& reason = {})
         : Error{{}, reason} {
     }
 
@@ -69,14 +74,14 @@ public:
      * Initialise an error exception.
      * @param ex Exception.
      */
-    Error(const std::exception &ex)
+    Error(const std::exception& ex)
         : Error{{}, ex.what()} {
     }
 
     /**
      * @return The reason for this error.
      */
-    const char *what() const noexcept override {
+    const char* what() const noexcept override {
         return _reason.c_str();
     }
 
@@ -85,7 +90,7 @@ public:
      * @param reason Reason for this error.
      * @return A reference to this error.
      */
-    Error &operator=(const std::string &reason) {
+    Error& operator=(const std::string& reason) {
         _reason = reason;
         return *this;
     }
@@ -120,7 +125,7 @@ class InternalError : public Error {
  */
 class InvalidAddress : public Error {
 protected:
-    InvalidAddress(const std::string &elem, addr_t addr, bool read);
+    InvalidAddress(const std::string& elem, addr_t addr, bool read);
 };
 
 
@@ -129,7 +134,7 @@ protected:
  */
 class InvalidReadAddress : public InvalidAddress {
 public:
-    InvalidReadAddress(const std::string &elem, addr_t addr)
+    InvalidReadAddress(const std::string& elem, addr_t addr)
         : InvalidAddress{elem, addr, true} {
     }
 };
@@ -140,7 +145,7 @@ public:
  */
 class InvalidWriteAddress : public InvalidAddress {
 public:
-    InvalidWriteAddress(const std::string &elem, addr_t addr)
+    InvalidWriteAddress(const std::string& elem, addr_t addr)
         : InvalidAddress{elem, addr, false} {
     }
 };
@@ -191,7 +196,7 @@ class IOError : public Error {
  */
 class MissingKeyError : public Error {
 public:
-    MissingKeyError(const std::string &key)
+    MissingKeyError(const std::string& key)
         : Error{"Missing key: " + key} {
     }
 };

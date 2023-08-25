@@ -24,43 +24,20 @@
 
 
 namespace caio {
+namespace mos_6581 {
 
-Mos6581I::Mos6581I(const std::string &label, unsigned clkf)
-    : Device{TYPE, label},
-      _clkf{clkf},
-      _samples_cycles{Clock::cycles(SAMPLES_TIME, clkf)}
-{
-}
-
-Mos6581I::~Mos6581I()
-{
-}
-
-void Mos6581I::reset()
-{
-}
-
-void Mos6581I::audio_buffer(const std::function<ui::AudioBuffer()> &abuf)
-{
-    _audio_buffer = abuf;
-}
-
-size_t Mos6581I::size() const
-{
-    return SIZE;
-}
-
-std::ostream &Mos6581I::dump(std::ostream &os, addr_t base) const
+std::ostream& Mos6581_::dump(std::ostream& os, addr_t base) const
 {
     std::array<uint8_t, SIZE> regs{};
     std::fill(regs.begin(), regs.end(), 255);
 
-    regs[ADC_1] = read(ADC_1);
-    regs[ADC_2] = read(ADC_2);
-    regs[VOICE_3_OSC] = read(VOICE_3_OSC);
-    regs[VOICE_3_ENV] = read(VOICE_3_ENV);
+    regs[ADC_1] = peek(ADC_1);
+    regs[ADC_2] = peek(ADC_2);
+    regs[VOICE_3_OSC] = peek(VOICE_3_OSC);
+    regs[VOICE_3_ENV] = peek(VOICE_3_ENV);
 
     return utils::dump(os, regs, base);
 }
 
+}
 }

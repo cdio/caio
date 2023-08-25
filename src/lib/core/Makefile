@@ -97,7 +97,6 @@ CXXSRCS+=	mos_6502.cpp \
 
 INCS+=		mos_6502.hpp \
 		mos_6510.hpp \
-		mos_6510_monitor.hpp \
 		mos_6526.hpp \
 		mos_6569.hpp \
 		mos_6581.hpp \

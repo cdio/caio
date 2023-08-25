@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -35,16 +35,6 @@
 namespace caio {
 namespace c64 {
 
-CartSimonsBasic::CartSimonsBasic(const std::shared_ptr<Crt> &crt)
-    : Cartridge{TYPE, crt}
-{
-    CartSimonsBasic::reset();
-}
-
-CartSimonsBasic::~CartSimonsBasic()
-{
-}
-
 void CartSimonsBasic::reset()
 {
     /*
@@ -71,8 +61,9 @@ void CartSimonsBasic::reset()
      * @see https://ist.uwaterloo.ca/~schepers/formats/CRT.TXT
      * @see https://vice-emu.sourceforge.io/vice_17.html#SEC399
      *
-     * The bank switching mechanism described above is not correct.
-     * Reading from $DE00 sets the 8K mode while writing to $DE00 sets the 16K mode.
+     * WARNING:
+     *      The bank switching mechanism described above is not correct.
+     *      Reading from $DE00 sets the 8K mode while writing to $DE00 sets the 16K mode.
      */
     Cartridge::reset();
 
@@ -80,11 +71,11 @@ void CartSimonsBasic::reset()
     _romh = {};
     _reg  = 0;
 
-    auto &cart = crt();
+    auto& cart = crt();
     for (size_t entry = 0; entry < cart.chips(); ++entry) {
         const auto chipdev = cart[entry];
-        const Crt::Chip &chip = chipdev.first;
-        const devptr_t &rom = chipdev.second;
+        const Crt::Chip& chip = chipdev.first;
+        const devptr_t& rom = chipdev.second;
 
         switch (chip.type) {
         case Crt::CHIP_TYPE_ROM:
@@ -121,13 +112,13 @@ void CartSimonsBasic::reset()
     propagate();
 }
 
-uint8_t CartSimonsBasic::read(addr_t addr) const
+uint8_t CartSimonsBasic::read(addr_t addr, ReadMode rmode)
 {
-    if (addr == 0x0000) {
+    if (addr == 0x0000 && rmode != ReadMode::Peek) {
         /*
          * Reading from $DE00 sets the 8K mode.
          */
-        const_cast<CartSimonsBasic *>(this)->mode(MODE_8K);
+        mode(MODE_8K);
     }
 
     return 0;

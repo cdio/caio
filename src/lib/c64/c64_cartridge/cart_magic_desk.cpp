@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -34,15 +34,6 @@
 
 namespace caio {
 namespace c64 {
-
-CartMagicDesk::CartMagicDesk(const std::shared_ptr<Crt> &crt)
-    : Cartridge{TYPE, crt}
-{
-}
-
-CartMagicDesk::~CartMagicDesk()
-{
-}
 
 void CartMagicDesk::reset()
 {
@@ -93,11 +84,11 @@ void CartMagicDesk::reset()
     _banks = 0;
     _roms.fill(devptr_t{});
 
-    const auto &cart = crt();
+    const auto& cart = crt();
     for (size_t entry = 0; entry < cart.chips(); ++entry) {
         const auto chipdev = cart[entry];
-        const Crt::Chip &chip = chipdev.first;
-        const devptr_t &rom = chipdev.second;
+        const Crt::Chip& chip = chipdev.first;
+        const devptr_t& rom = chipdev.second;
 
         switch (chip.type) {
         case Crt::CHIP_TYPE_ROM:
@@ -140,7 +131,7 @@ void CartMagicDesk::reset()
     mode(GameExromMode::MODE_8K);   /* Invalid mode on the only magic desk cartridge I tested, force 8K mode */
 }
 
-uint8_t CartMagicDesk::read(addr_t addr) const
+uint8_t CartMagicDesk::read(addr_t addr, ReadMode)
 {
     addr &= IO_ADDR_MASK;
     if (addr == 0x0000) {
@@ -192,7 +183,7 @@ std::string CartMagicDesk::to_string() const
 
     os << Name::to_string() << ", banks " << _banks << ", size " << cartsize() << " (" << (cartsize() >> 10) << "K)";
 
-    for (const auto &rom : _roms) {
+    for (const auto& rom : _roms) {
         if (rom) {
             os << ", " << rom->to_string();
         }

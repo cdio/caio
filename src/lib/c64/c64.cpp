@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -40,15 +40,6 @@
 
 namespace caio {
 namespace c64 {
-
-C64::C64(const C64Config &conf)
-    : _conf{conf}
-{
-}
-
-C64::~C64()
-{
-}
 
 void C64::run()
 {
@@ -150,7 +141,7 @@ void C64::reset()
     }
 }
 
-std::string C64::rompath(const std::string &fname) const
+std::string C64::rompath(const std::string& fname) const
 {
     auto path = fs::search(fname, {_conf.romdir});
     if (path.empty()) {
@@ -160,7 +151,7 @@ std::string C64::rompath(const std::string &fname) const
     return path;
 }
 
-std::string C64::cartpath(const std::string &fname) const
+std::string C64::cartpath(const std::string& fname) const
 {
     auto path = fs::search(fname, {_conf.cartdir});
     if (path.empty()) {
@@ -170,17 +161,17 @@ std::string C64::cartpath(const std::string &fname) const
     return path;
 }
 
-inline std::string C64::palettepath(const std::string &fname) const
+inline std::string C64::palettepath(const std::string& fname) const
 {
     return fs::search(fname, {_conf.palettedir});
 }
 
-inline std::string C64::keymapspath(const std::string &fname) const
+inline std::string C64::keymapspath(const std::string& fname) const
 {
     return fs::search(fname, {_conf.keymapsdir});
 }
 
-std::shared_ptr<Cartridge> C64::attach_cartridge()
+sptr_t<Cartridge> C64::attach_cartridge()
 {
     if (!_conf.cartfile.empty()) {
         std::string fpath{cartpath(_conf.cartfile)};
@@ -195,8 +186,8 @@ void C64::attach_prg()
 {
     if (!_conf.prgfile.empty()) {
         try {
-            PrgFile *prog;
-            const char *format;
+            PrgFile* prog;
+            const char* format;
 
             log.debug("Preloading program: " + _conf.prgfile + "\n");
 
@@ -211,11 +202,11 @@ void C64::attach_prg()
             log.debug("Detected format: %s, start address: $%04X, size: %d ($%04X)\n", format, prog->address(),
                 prog->size(), prog->size());
 
-            _cpu->bpadd(BASIC_READY_ADDR, [](Mos6510 &cpu, void *arg) {
+            _cpu->bpadd(BASIC_READY_ADDR, [](Mos6510& cpu, void* arg) {
                 /*
                  * Load PRG into memory.
                  */
-                auto *prog = static_cast<PrgFile *>(arg);
+                auto* prog = static_cast<PrgFile*>(arg);
                 for (size_t i = 0; i < prog->size(); ++i) {
                     cpu.write(prog->address() + i, (*prog)[i]);
                 }
@@ -241,29 +232,29 @@ void C64::attach_prg()
                 delete prog;
             }, prog);
 
-        } catch (const std::exception &ex) {
-            throw IOError{ex};
+        } catch (const std::exception& err) {
+            throw IOError{err};
         }
     }
 }
 
-void C64::ram_init(uint64_t pattern, std::vector<uint64_t> &data)
+void C64::ram_init(uint64_t pattern, gsl::span<uint64_t>& data)
 {
-    std::for_each(data.begin(), data.end(), [&pattern](uint64_t &value) {
+    std::for_each(data.begin(), data.end(), [&pattern](uint64_t& value) {
         value = pattern;
         pattern ^= static_cast<uint64_t>(-1);
 
         /* Put some random values */
         if (std::rand() % 100 < 20) {
-            reinterpret_cast<uint8_t *>(&value)[std::rand() % 8] = std::rand() % 256;
+            reinterpret_cast<uint8_t*>(&value)[std::rand() % 8] = std::rand() % 256;
         }
     });
 }
 
 void C64::create_devices()
 {
-    auto ram_init = [this](std::vector<uint8_t> &data) {
-        auto &data64 = reinterpret_cast<std::vector<uint64_t>&>(data);
+    auto ram_init = [this](gsl::span<uint8_t>& data) {
+        auto& data64 = reinterpret_cast<gsl::span<uint64_t>&>(data);
         this->ram_init(RAM_INIT_PATTERN1, data64);
     };
 
@@ -369,7 +360,7 @@ void C64::connect_devices()
     }
 
     /*
-     * Connect CPU's irq and nmi pins to CIA1, CIA2 and VIC2 irq outputs.
+     * Connect the CPU irq and nmi pins to CIA1, CIA2 and VIC2 irq outputs.
      */
     auto set_irq = [this](bool active) {
         _cpu->irq_pin(active);
@@ -384,7 +375,7 @@ void C64::connect_devices()
     _vic2->irq(set_irq);
 
     /*
-     * Connect CPU's rdy pin to the VIC2's ba pin.
+     * Connect the CPU rdy pin to the VIC2 ba pin.
      */
     auto set_rdy = [this](bool active) {
         _cpu->rdy_pin(active);
@@ -445,7 +436,7 @@ void C64::connect_devices()
     _cia1->add_iow(kbd_write, KBD_MASK);
 
     /*
-     * Connect the RESTORE key to the CPU's nmi pin.
+     * Connect the RESTORE key to the CPU nmi pin.
      */
     auto restore_key = [this]() {
         _cpu->nmi_pin(true);
@@ -489,9 +480,9 @@ void C64::create_ui()
     ui::Config uiconf {
         .audio = {
             .enabled       = _conf.audio_enabled,
-            .srate         = Mos6581::SAMPLING_RATE,
-            .channels      = Mos6581::CHANNELS,
-            .samples       = Mos6581::SAMPLES
+            .srate         = mos_6581::SAMPLING_RATE,
+            .channels      = mos_6581::CHANNELS,
+            .samples       = mos_6581::SAMPLES
         },
         .video = {
             .title         = title,
@@ -593,7 +584,7 @@ void C64::connect_ui()
     /*
      * Connect the video output.
      */
-    _vic2->render_line([this](unsigned line, const ui::Scanline &scanline) {
+    _vic2->render_line([this](unsigned line, const ui::Scanline& scanline) {
         _ui->render_line(line, scanline);
     });
 

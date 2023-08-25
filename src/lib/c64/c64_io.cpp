@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -24,22 +24,6 @@
 namespace caio {
 namespace c64 {
 
-C64IO::C64IO(const devptr_t &vic2, const devptr_t &sid, const devptr_t &vcolor, const devptr_t &cia1,
-    const devptr_t &cia2, const devptr_t &ioexp)
-    : Device{TYPE, TYPE},
-      _vic2{vic2},
-      _sid{sid},
-      _vcolor{vcolor},
-      _cia1{cia1},
-      _cia2{cia2},
-      _ioexp{ioexp}
-{
-}
-
-C64IO::~C64IO()
-{
-}
-
 void C64IO::reset()
 {
     _vic2->reset();
@@ -53,12 +37,7 @@ void C64IO::reset()
     }
 }
 
-size_t C64IO::size() const
-{
-    return SIZE;
-}
-
-uint8_t C64IO::read(addr_t addr) const
+uint8_t C64IO::read(addr_t addr, ReadMode mode)
 {
     if (addr < SID_ADDR) {
         /*
@@ -66,42 +45,42 @@ uint8_t C64IO::read(addr_t addr) const
          * Addresses between 47 and 64 of each block contain 255 as fixed value.
          */
         addr = (addr - VIC2_ADDR) % 64;
-        return ((addr < _vic2->size()) ? _vic2->read(addr) : 255);
+        return ((addr < _vic2->size()) ? _vic2->read(addr, mode) : 255);
     }
 
     if (addr < VCOLOR_ADDR) {
         /*
          * SID.
          */
-        return _sid->read((addr - SID_ADDR) % 32);
+        return _sid->read((addr - SID_ADDR) % 32, mode);
     }
 
     if (addr < CIA1_ADDR) {
         /*
          * Colour RAM.
          */
-        return _vcolor->read(addr - VCOLOR_ADDR);
+        return _vcolor->read(addr - VCOLOR_ADDR, mode);
     }
 
     if (addr < CIA2_ADDR) {
         /*
          * CIA1.
          */
-        return _cia1->read((addr - CIA1_ADDR) % 0x10);
+        return _cia1->read((addr - CIA1_ADDR) % 0x10, mode);
     }
 
     if (addr < IOEXP_ADDR) {
         /*
          * CIA2.
          */
-        return _cia2->read((addr - CIA2_ADDR) % 0x10);
+        return _cia2->read((addr - CIA2_ADDR) % 0x10, mode);
     }
 
     if (addr < SIZE && _ioexp) {
         /*
          * I/O Expansion.
          */
-        return _ioexp->read(addr - IOEXP_ADDR);
+        return _ioexp->read(addr - IOEXP_ADDR, mode);
     }
 
     return 255;
@@ -160,7 +139,7 @@ void C64IO::write(addr_t addr, uint8_t value)
     }
 }
 
-std::ostream &C64IO::dump(std::ostream &os, addr_t base) const
+std::ostream& C64IO::dump(std::ostream& os, addr_t base) const
 {
     /*
      * $D000 - $D02E -- $0000 - $002E   VIC2 registers

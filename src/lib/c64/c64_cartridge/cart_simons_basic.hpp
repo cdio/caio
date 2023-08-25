@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -52,22 +52,25 @@ namespace c64 {
  */
 class CartSimonsBasic : public Cartridge {
 public:
-    constexpr static const char *TYPE              = "CART_SIMONS_BASIC";
+    constexpr static const char* TYPE              = "CART_SIMONS_BASIC";
     constexpr static const size_t ROM_SIZE         = 8192;
     constexpr static const addr_t ROML_LOAD_ADDR   = 0x8000;
     constexpr static const addr_t ROMH_LOAD_ADDR   = 0xA000;
 
-    CartSimonsBasic(const std::shared_ptr<Crt> &crt);
+    CartSimonsBasic(const sptr_t<Crt>& crt)
+        : Cartridge{TYPE, crt} {
+    }
 
-    virtual ~CartSimonsBasic();
+    virtual ~CartSimonsBasic() {
+    }
 
     /**
      * @see Device::read()
      */
-    uint8_t read(addr_t addr) const override;
+    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
-     * @see Device::write();
+     * @see Device::write()
      */
     void write(addr_t addr, uint8_t data) override;
 

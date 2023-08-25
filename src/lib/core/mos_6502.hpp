@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -44,8 +44,8 @@ namespace caio {
  */
 class Mos6502 : public Clockable, public Name {
 public:
-    constexpr static const char *TYPE     = "MOS6502";
-    constexpr static const char *LABEL    = "CPU";
+    constexpr static const char* TYPE     = "MOS6502";
+    constexpr static const char* LABEL    = "CPU";
 
     constexpr static const addr_t vNMI    = 0xFFFA;
     constexpr static const addr_t vRESET  = 0xFFFC;
@@ -54,7 +54,7 @@ public:
     constexpr static const addr_t S_base  = 0x0100;
     constexpr static const uint8_t S_init = 0xFF;
 
-    using breakpoint_cb_t = std::function<void(Mos6502 &, void *)>;
+    using breakpoint_cb_t = std::function<void(Mos6502&, void*)>;
 
     enum AddressingMode {
         MODE_NONE,
@@ -83,8 +83,8 @@ public:
     };
 
     struct Instruction {
-        const char *format;                 /* Mnemonic format string (*=00, ^=0000, +=rel) */
-        int (*fn)(Mos6502 &, addr_t);       /* Instruction callback                         */
+        const char* format;                 /* Mnemonic format string (*=00, ^=0000, +=rel) */
+        int (*fn)(Mos6502&, addr_t);        /* Instruction callback                         */
         AddressingMode mode;                /* Addressing mode                              */
         size_t cycles;                      /* Clock cycles consumed by this instruction    */
         size_t size;                        /* Size of the instruction (in bytes)           */
@@ -108,7 +108,9 @@ public:
      * @param type  CPU type;
      * @param label CPU label.
      */
-    Mos6502(const std::string &type = TYPE, const std::string &label = LABEL);
+    Mos6502(const std::string& type = TYPE, const std::string& label = LABEL)
+        : Name{type, label} {
+    }
 
     /**
      * Initialise this CPU.
@@ -117,9 +119,10 @@ public:
      * @param label CPU label.
      * @see ASpace
      */
-    Mos6502(const std::shared_ptr<ASpace> &mmap, const std::string &type = TYPE, const std::string &label = LABEL);
-
-    virtual ~Mos6502();
+    Mos6502(const sptr_t<ASpace>& mmap, const std::string& type = TYPE, const std::string& label = LABEL)
+        : Name{type, (label.empty() ? LABEL : label)} {
+        init(mmap);
+    }
 
     /**
      * Initialise a monitor for this CPU.
@@ -131,19 +134,19 @@ public:
      * @exception InvalidArgument if the system mappings are not set.
      * @see reset()
      */
-    void init_monitor(std::istream &is, std::ostream &os);
+    void init_monitor(std::istream& is, std::ostream& os);
 
     /**
      * Set the single-step log level.
      * @param lvs Log level string to set.
-     * @see Logger::loglevel(const std::string &)
+     * @see Logger::loglevel(const std::string&)
      */
-    void loglevel(const std::string &lvs);
+    void loglevel(const std::string& lvs);
 
     /**
      * @return The current single-step log level.
      */
-    Logger::Level loglevel() const;
+    Loglevel loglevel() const;
 
     /**
      * Restart this CPU.
@@ -186,7 +189,7 @@ public:
      * @param addr Address;
      * @parma cb   Method to call when the breakpoint hits.
      */
-    void bpadd(addr_t addr, const breakpoint_cb_t &cb, void *arg);
+    void bpadd(addr_t addr, const breakpoint_cb_t& cb, void* arg);
 
     /**
      * Delete a breakpoint on a memory address.
@@ -197,7 +200,7 @@ public:
     /**
      * @return The register values.
      */
-    const Registers &regs() const;
+    const Registers& regs() const;
 
     /**
      * Disassembler.
@@ -206,7 +209,7 @@ public:
      * @param count   Number of instructions to disassemble.
      * @param show_pc true if the position of the PC must be marked in the disassembled code; false otherwise (default).
      */
-    void disass(std::ostream &os, addr_t start, size_t count, bool show_pc = false);
+    void disass(std::ostream& os, addr_t start, size_t count, bool show_pc = false);
 
     /**
      * Read an address from an address.
@@ -215,7 +218,7 @@ public:
      * @exception InvalidReadAddress
      * @see read()
      */
-    addr_t read_addr(size_t addr) const;
+    addr_t read_addr(size_t addr);
 
     /**
      * Write an address into an address.
@@ -227,12 +230,19 @@ public:
     void write_addr(addr_t addr, addr_t data);
 
     /**
-     * @see ASpace::read()
+     * @see Device::read()
      */
-    virtual uint8_t read(addr_t addr) const;
+    virtual uint8_t read(addr_t addr, Device::ReadMode mode = Device::ReadMode::Read);
 
     /**
-     * @see ASpace::write()
+     * @see Device::peek()
+     */
+    virtual uint8_t peek(addr_t addr) const {
+        return const_cast<Mos6502*>(this)->read(addr, Device::ReadMode::Peek);
+    }
+
+    /**
+     * @see Device::write()
      */
     virtual void write(addr_t addr, uint8_t data);
 
@@ -241,7 +251,7 @@ private:
      * Initialise this CPU.
      * @param mmap System mappings.
      */
-    void init(const std::shared_ptr<ASpace> &mmap = {});
+    void init(const sptr_t<ASpace>& mmap = {});
 
     /**
      * Tick event method.
@@ -255,7 +265,7 @@ private:
      * @see single_step()
      * @see Monitor::run()
      */
-    size_t tick(const Clock &clk) override;
+    size_t tick(const Clock& clk) override;
 
     /**
      * Disassemble a single instruction located at a specified address.
@@ -265,7 +275,7 @@ private:
      *                false otherwise.
      * @return A string with the disassembled instruction.
      */
-    std::string disass(addr_t &addr, bool show_pc = false);
+    std::string disass(addr_t& addr, bool show_pc = false);
 
     /**
      * Execute a single instruction located at the current PC address.
@@ -384,17 +394,17 @@ private:
         _regs.P = pop() | Flags::_;
     }
 
-    Logger                   _log{};
-    std::unique_ptr<Monitor> _monitor{};
-    Registers                _regs{};
-    std::shared_ptr<ASpace>  _mmap{};
-    IRQPin                   _irq_pin{};
-    IRQPin                   _nmi_pin{};
-    InputPin                 _rdy_pin{};
-    bool                     _halted{};
+    Logger          _log{};
+    uptr_t<Monitor> _monitor{};
+    Registers       _regs{};
+    sptr_t<ASpace>  _mmap{};
+    IRQPin          _irq_pin{};
+    IRQPin          _nmi_pin{};
+    InputPin        _rdy_pin{};
+    bool            _halted{};
 
     std::atomic_bool _break{};
-    std::map<addr_t, std::pair<breakpoint_cb_t, void *>> _breakpoints{};
+    std::map<addr_t, std::pair<breakpoint_cb_t, void*>> _breakpoints{};
 
     static const std::array<Instruction, 256> instr_set;
 
@@ -555,146 +565,146 @@ private:
     /*
      * Instruction callbacks: Logical and Arithmetic operations.
      */
-    static int i_AND_imm   (Mos6502 &, addr_t);
-    static int i_AND       (Mos6502 &, addr_t);
+    static int i_AND_imm   (Mos6502&, addr_t);
+    static int i_AND       (Mos6502&, addr_t);
 
-    static int i_BIT       (Mos6502 &, addr_t);
+    static int i_BIT       (Mos6502&, addr_t);
 
-    static int i_ORA_imm   (Mos6502 &, addr_t);
-    static int i_ORA       (Mos6502 &, addr_t);
+    static int i_ORA_imm   (Mos6502&, addr_t);
+    static int i_ORA       (Mos6502&, addr_t);
 
-    static int i_EOR_imm   (Mos6502 &, addr_t);
-    static int i_EOR       (Mos6502 &, addr_t);
+    static int i_EOR_imm   (Mos6502&, addr_t);
+    static int i_EOR       (Mos6502&, addr_t);
 
-    static int i_ADC_imm   (Mos6502 &, addr_t);
-    static int i_ADC       (Mos6502 &, addr_t);
+    static int i_ADC_imm   (Mos6502&, addr_t);
+    static int i_ADC       (Mos6502&, addr_t);
 
-    static int i_SBC_imm   (Mos6502 &, addr_t);
-    static int i_SBC       (Mos6502 &, addr_t);
+    static int i_SBC_imm   (Mos6502&, addr_t);
+    static int i_SBC       (Mos6502&, addr_t);
 
-    static int i_CMP_imm   (Mos6502 &, addr_t);
-    static int i_CMP       (Mos6502 &, addr_t);
+    static int i_CMP_imm   (Mos6502&, addr_t);
+    static int i_CMP       (Mos6502&, addr_t);
 
-    static int i_CPX_imm   (Mos6502 &, addr_t);
-    static int i_CPX       (Mos6502 &, addr_t);
+    static int i_CPX_imm   (Mos6502&, addr_t);
+    static int i_CPX       (Mos6502&, addr_t);
 
-    static int i_CPY_imm   (Mos6502 &, addr_t);
-    static int i_CPY       (Mos6502 &, addr_t);
+    static int i_CPY_imm   (Mos6502&, addr_t);
+    static int i_CPY       (Mos6502&, addr_t);
 
-    static int i_DEC       (Mos6502 &, addr_t);
-    static int i_DEX       (Mos6502 &, addr_t);
-    static int i_DEY       (Mos6502 &, addr_t);
+    static int i_DEC       (Mos6502&, addr_t);
+    static int i_DEX       (Mos6502&, addr_t);
+    static int i_DEY       (Mos6502&, addr_t);
 
-    static int i_INC       (Mos6502 &, addr_t);
-    static int i_INX       (Mos6502 &, addr_t);
-    static int i_INY       (Mos6502 &, addr_t);
+    static int i_INC       (Mos6502&, addr_t);
+    static int i_INX       (Mos6502&, addr_t);
+    static int i_INY       (Mos6502&, addr_t);
 
-    static int i_ASL_acc   (Mos6502 &, addr_t);
-    static int i_ASL       (Mos6502 &, addr_t);
+    static int i_ASL_acc   (Mos6502&, addr_t);
+    static int i_ASL       (Mos6502&, addr_t);
 
-    static int i_ROL_acc   (Mos6502 &, addr_t);
-    static int i_ROL       (Mos6502 &, addr_t);
+    static int i_ROL_acc   (Mos6502&, addr_t);
+    static int i_ROL       (Mos6502&, addr_t);
 
-    static int i_LSR_acc   (Mos6502 &, addr_t);
-    static int i_LSR       (Mos6502 &, addr_t);
+    static int i_LSR_acc   (Mos6502&, addr_t);
+    static int i_LSR       (Mos6502&, addr_t);
 
-    static int i_ROR_acc   (Mos6502 &, addr_t);
-    static int i_ROR       (Mos6502 &, addr_t);
+    static int i_ROR_acc   (Mos6502&, addr_t);
+    static int i_ROR       (Mos6502&, addr_t);
 
     /*
      * Instruction callbacks: Move operations.
      */
-    static int i_LDA_imm   (Mos6502 &, addr_t);
-    static int i_LDA       (Mos6502 &, addr_t);
+    static int i_LDA_imm   (Mos6502&, addr_t);
+    static int i_LDA       (Mos6502&, addr_t);
 
-    static int i_LDX_imm   (Mos6502 &, addr_t);
-    static int i_LDX       (Mos6502 &, addr_t);
+    static int i_LDX_imm   (Mos6502&, addr_t);
+    static int i_LDX       (Mos6502&, addr_t);
 
-    static int i_LDY_imm   (Mos6502 &, addr_t);
-    static int i_LDY       (Mos6502 &, addr_t);
+    static int i_LDY_imm   (Mos6502&, addr_t);
+    static int i_LDY       (Mos6502&, addr_t);
 
-    static int i_STA       (Mos6502 &, addr_t);
-    static int i_STX       (Mos6502 &, addr_t);
-    static int i_STY       (Mos6502 &, addr_t);
+    static int i_STA       (Mos6502&, addr_t);
+    static int i_STX       (Mos6502&, addr_t);
+    static int i_STY       (Mos6502&, addr_t);
 
-    static int i_TAX       (Mos6502 &, addr_t);
-    static int i_TXA       (Mos6502 &, addr_t);
-    static int i_TAY       (Mos6502 &, addr_t);
-    static int i_TYA       (Mos6502 &, addr_t);
+    static int i_TAX       (Mos6502&, addr_t);
+    static int i_TXA       (Mos6502&, addr_t);
+    static int i_TAY       (Mos6502&, addr_t);
+    static int i_TYA       (Mos6502&, addr_t);
 
-    static int i_TSX       (Mos6502 &, addr_t);
-    static int i_TXS       (Mos6502 &, addr_t);
+    static int i_TSX       (Mos6502&, addr_t);
+    static int i_TXS       (Mos6502&, addr_t);
 
-    static int i_PLA       (Mos6502 &, addr_t);
-    static int i_PHA       (Mos6502 &, addr_t);
+    static int i_PLA       (Mos6502&, addr_t);
+    static int i_PHA       (Mos6502&, addr_t);
 
-    static int i_PLP       (Mos6502 &, addr_t);
-    static int i_PHP       (Mos6502 &, addr_t);
+    static int i_PLP       (Mos6502&, addr_t);
+    static int i_PHP       (Mos6502&, addr_t);
 
     /*
      * Instruction callbacks: Branch/Jump.
      */
-    static int i_BPL       (Mos6502 &, addr_t);
-    static int i_BMI       (Mos6502 &, addr_t);
+    static int i_BPL       (Mos6502&, addr_t);
+    static int i_BMI       (Mos6502&, addr_t);
 
-    static int i_BVC       (Mos6502 &, addr_t);
-    static int i_BVS       (Mos6502 &, addr_t);
+    static int i_BVC       (Mos6502&, addr_t);
+    static int i_BVS       (Mos6502&, addr_t);
 
-    static int i_BCC       (Mos6502 &, addr_t);
-    static int i_BCS       (Mos6502 &, addr_t);
+    static int i_BCC       (Mos6502&, addr_t);
+    static int i_BCS       (Mos6502&, addr_t);
 
-    static int i_BNE       (Mos6502 &, addr_t);
-    static int i_BEQ       (Mos6502 &, addr_t);
+    static int i_BNE       (Mos6502&, addr_t);
+    static int i_BEQ       (Mos6502&, addr_t);
 
-    static int i_BRK       (Mos6502 &, addr_t);
-    static int i_RTI       (Mos6502 &, addr_t);
+    static int i_BRK       (Mos6502&, addr_t);
+    static int i_RTI       (Mos6502&, addr_t);
 
-    static int i_JSR       (Mos6502 &, addr_t);
-    static int i_RTS       (Mos6502 &, addr_t);
+    static int i_JSR       (Mos6502&, addr_t);
+    static int i_RTS       (Mos6502&, addr_t);
 
-    static int i_JMP       (Mos6502 &, addr_t);
+    static int i_JMP       (Mos6502&, addr_t);
 
-    static int i_NOP       (Mos6502 &, addr_t);
+    static int i_NOP       (Mos6502&, addr_t);
 
     /*
      * Instruction callbacks: Flags.
      */
-    static int i_CLC       (Mos6502 &, addr_t);
-    static int i_SEC       (Mos6502 &, addr_t);
+    static int i_CLC       (Mos6502&, addr_t);
+    static int i_SEC       (Mos6502&, addr_t);
 
-    static int i_CLI       (Mos6502 &, addr_t);
-    static int i_SEI       (Mos6502 &, addr_t);
+    static int i_CLI       (Mos6502&, addr_t);
+    static int i_SEI       (Mos6502&, addr_t);
 
-    static int i_CLV       (Mos6502 &, addr_t);
+    static int i_CLV       (Mos6502&, addr_t);
 
-    static int i_CLD       (Mos6502 &, addr_t);
-    static int i_SED       (Mos6502 &, addr_t);
+    static int i_CLD       (Mos6502&, addr_t);
+    static int i_SED       (Mos6502&, addr_t);
 
     /*
      * Instruction callbacks: Illegal Instructions.
      */
-    static int i_SLO       (Mos6502 &, addr_t);
-    static int i_RLA       (Mos6502 &, addr_t);
-    static int i_SRE       (Mos6502 &, addr_t);
-    static int i_RRA       (Mos6502 &, addr_t);
-    static int i_SAX       (Mos6502 &, addr_t);
-    static int i_LAX_imm   (Mos6502 &, addr_t);
-    static int i_LAX       (Mos6502 &, addr_t);
-    static int i_DCP       (Mos6502 &, addr_t);
-    static int i_ISC       (Mos6502 &, addr_t);
-    static int i_ANC_imm   (Mos6502 &, addr_t);
-    static int i_ALR_imm   (Mos6502 &, addr_t);
-    static int i_ARR_imm   (Mos6502 &, addr_t);
-    static int i_XAA_imm   (Mos6502 &, addr_t);
-    static int i_SBX_imm   (Mos6502 &, addr_t);
-    static int i_SHA_zp    (Mos6502 &, addr_t);
-    static int i_SHA       (Mos6502 &, addr_t);
-    static int i_SHY       (Mos6502 &, addr_t);
-    static int i_SHX       (Mos6502 &, addr_t);
-    static int i_SHS       (Mos6502 &, addr_t);
-    static int i_LAS       (Mos6502 &, addr_t);
+    static int i_SLO       (Mos6502&, addr_t);
+    static int i_RLA       (Mos6502&, addr_t);
+    static int i_SRE       (Mos6502&, addr_t);
+    static int i_RRA       (Mos6502&, addr_t);
+    static int i_SAX       (Mos6502&, addr_t);
+    static int i_LAX_imm   (Mos6502&, addr_t);
+    static int i_LAX       (Mos6502&, addr_t);
+    static int i_DCP       (Mos6502&, addr_t);
+    static int i_ISC       (Mos6502&, addr_t);
+    static int i_ANC_imm   (Mos6502&, addr_t);
+    static int i_ALR_imm   (Mos6502&, addr_t);
+    static int i_ARR_imm   (Mos6502&, addr_t);
+    static int i_XAA_imm   (Mos6502&, addr_t);
+    static int i_SBX_imm   (Mos6502&, addr_t);
+    static int i_SHA_zp    (Mos6502&, addr_t);
+    static int i_SHA       (Mos6502&, addr_t);
+    static int i_SHY       (Mos6502&, addr_t);
+    static int i_SHX       (Mos6502&, addr_t);
+    static int i_SHS       (Mos6502&, addr_t);
+    static int i_LAS       (Mos6502&, addr_t);
 
-    static int i_KIL       (Mos6502 &, addr_t);
+    static int i_KIL       (Mos6502&, addr_t);
 };
 
 }

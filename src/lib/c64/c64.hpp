@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -42,9 +42,9 @@
 namespace caio {
 namespace c64 {
 
-constexpr static const char *KERNAL_FNAME         = "c64_kernal.901227-03.bin";
-constexpr static const char *BASIC_FNAME          = "c64_basic.901226-01.bin";
-constexpr static const char *CHARGEN_FNAME        = "c64_characters.901225-01.bin";
+constexpr static const char* KERNAL_FNAME         = "c64_kernal.901227-03.bin";
+constexpr static const char* BASIC_FNAME          = "c64_basic.901226-01.bin";
+constexpr static const char* CHARGEN_FNAME        = "c64_characters.901225-01.bin";
 
 constexpr static const size_t KERNAL_SIZE         = 8192;
 constexpr static const size_t BASIC_SIZE          = 8192;
@@ -83,9 +83,9 @@ public:
      * @see C64Config
      * @see run()
      */
-    C64(const C64Config &conf);
-
-    virtual ~C64();
+    C64(const C64Config& conf)
+        : _conf{conf} {
+    }
 
     /**
      * Build a C64 emulator and start it.
@@ -156,7 +156,7 @@ private:
      * @return The full path.
      * @exception IOError if the ROM file is not found.
      */
-    std::string rompath(const std::string &fname) const;
+    std::string rompath(const std::string& fname) const;
 
     /**
      * Get the full pathname for a cartridge file.
@@ -164,28 +164,28 @@ private:
      * @return The full path.
      * @exception IOError if the Cartridge file is not found.
      */
-    std::string cartpath(const std::string &fname) const;
+    std::string cartpath(const std::string& fname) const;
 
     /**
      * Get the full pathname for a palette file.
      * @param fname Colour table file name.
      * @return The full path; an empty string if the file is not found.
      */
-    std::string palettepath(const std::string &fname) const;
+    std::string palettepath(const std::string& fname) const;
 
     /**
      * Get the full pathname for a key mappings file.
      * @param fname Colour table file name.
      * @return The full path; an empty string if the file is not found.
      */
-    std::string keymapspath(const std::string &fname) const;
+    std::string keymapspath(const std::string& fname) const;
 
     /**
      * Initialise RAM memory using a specific pattern.
      * @param pattern Initialisation patter;
      * @param data    RAM to initialise.
      */
-    void ram_init(uint64_t pattern, std::vector<uint64_t> &data);
+    void ram_init(uint64_t pattern, gsl::span<uint64_t>& data);
 
     /**
      * Attach a cartridge image file.
@@ -196,7 +196,7 @@ private:
      * @see Cartridge
      * @see Crt
      */
-    std::shared_ptr<Cartridge> attach_cartridge();
+    sptr_t<Cartridge> attach_cartridge();
 
     /**
      * Attach A PRG file.
@@ -212,33 +212,33 @@ private:
      */
     void hotkeys(Keyboard::Key key);
 
-    C64Config                         _conf{};
-    devptr_t                          _ram{};
-    devptr_t                          _basic{};
-    devptr_t                          _kernal{};
-    devptr_t                          _chargen{};
-    devptr_t                          _vcolor{};
-    devptr_t                          _io{};
-    std::shared_ptr<PLA>              _pla{};
-    std::shared_ptr<Mos6510>          _cpu{};
-    std::shared_ptr<Mos6569>          _vic2{};
-    std::shared_ptr<Mos6581I>         _sid{};
-    std::shared_ptr<Mos6526>          _cia1{};
-    std::shared_ptr<Mos6526>          _cia2{};
-    std::shared_ptr<Cartridge>        _ioexp{};
-    std::shared_ptr<cbm_bus::Bus>     _bus{};
-    std::shared_ptr<C64BusController> _busdev{};
-    std::shared_ptr<cbm_bus::Device>  _unit8{};
-    std::shared_ptr<cbm_bus::Device>  _unit9{};
-    std::shared_ptr<Clock>            _clk{};
-    std::shared_ptr<C64Keyboard>      _kbd{};
-    std::shared_ptr<C64Joystick>      _joy1{};
-    std::shared_ptr<C64Joystick>      _joy2{};
-    std::shared_ptr<ui::UI>           _ui{};
-    std::shared_ptr<ui::Widget>       _wfloppy8{};
-    std::shared_ptr<ui::Widget>       _wfloppy9{};
-    std::shared_ptr<ui::Widget>       _wgamepad1{};
-    std::shared_ptr<ui::Widget>       _wgamepad2{};
+    C64Config                _conf{};
+    devptr_t                 _ram{};
+    devptr_t                 _basic{};
+    devptr_t                 _kernal{};
+    devptr_t                 _chargen{};
+    devptr_t                 _vcolor{};
+    devptr_t                 _io{};
+    sptr_t<PLA>              _pla{};
+    sptr_t<Mos6510>          _cpu{};
+    sptr_t<Mos6569>          _vic2{};
+    sptr_t<Mos6581_>         _sid{};
+    sptr_t<Mos6526>          _cia1{};
+    sptr_t<Mos6526>          _cia2{};
+    sptr_t<Cartridge>        _ioexp{};
+    sptr_t<cbm_bus::Bus>     _bus{};
+    sptr_t<C64BusController> _busdev{};
+    sptr_t<cbm_bus::Device>  _unit8{};
+    sptr_t<cbm_bus::Device>  _unit9{};
+    sptr_t<Clock>            _clk{};
+    sptr_t<C64Keyboard>      _kbd{};
+    sptr_t<C64Joystick>      _joy1{};
+    sptr_t<C64Joystick>      _joy2{};
+    sptr_t<ui::UI>           _ui{};
+    sptr_t<ui::Widget>       _wfloppy8{};
+    sptr_t<ui::Widget>       _wfloppy9{};
+    sptr_t<ui::Widget>       _wgamepad1{};
+    sptr_t<ui::Widget>       _wgamepad2{};
 };
 
 }

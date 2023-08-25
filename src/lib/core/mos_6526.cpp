@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -26,7 +26,7 @@
 
 namespace caio {
 
-Mos6526::Timer::Timer(Mos6526 &dev, uint8_t pbit)
+Mos6526::Timer::Timer(Mos6526& dev, uint8_t pbit)
     : _dev{dev},
       _pbit{pbit}
 {
@@ -150,12 +150,12 @@ void Mos6526::Timer::unsetpb()
     }
 }
 
-inline bool Mos6526::Tod::TodData::operator==(const TodData &tod) const
+inline bool Mos6526::Tod::TodData::operator==(const TodData& tod) const
 {
     return (tth == tod.tth && sec == tod.sec && min == tod.min && hour == tod.hour);
 }
 
-Mos6526::Tod::TodData &Mos6526::Tod::TodData::operator=(const TodData &tod)
+Mos6526::Tod::TodData& Mos6526::Tod::TodData::operator=(const TodData& tod)
 {
     tth  = tod.tth;
     sec  = tod.sec;
@@ -165,7 +165,7 @@ Mos6526::Tod::TodData &Mos6526::Tod::TodData::operator=(const TodData &tod)
     return *this;
 }
 
-Mos6526::Tod::TodData &Mos6526::Tod::TodData::operator++()
+Mos6526::Tod::TodData& Mos6526::Tod::TodData::operator++()
 {
     ++tth;
 
@@ -278,7 +278,7 @@ inline void Mos6526::Tod::stop()
     _is_running = false;
 }
 
-bool Mos6526::Tod::tick(const Clock &clk)
+bool Mos6526::Tod::tick(const Clock& clk)
 {
     if (_is_running) {
         if (_cycles == 0) {
@@ -293,7 +293,7 @@ bool Mos6526::Tod::tick(const Clock &clk)
     return false;
 }
 
-Mos6526::Mos6526(const std::string &label)
+Mos6526::Mos6526(const std::string& label)
     : Device{TYPE, label},
       _timer_A{*this, PB6},
       _timer_B{*this, PB7}
@@ -323,7 +323,7 @@ size_t Mos6526::size() const
     return REGMAX;
 }
 
-uint8_t Mos6526::read(addr_t addr) const
+uint8_t Mos6526::read(addr_t addr, ReadMode mode)
 {
     switch (addr) {
     case PRA:
@@ -371,9 +371,11 @@ uint8_t Mos6526::read(addr_t addr) const
          * ICR DATA register is cleared after read.
          */
         uint8_t data = _icr_data;
-        const_cast<Mos6526 *>(this)->_icr_data = 0;
-        if ((data & ICR_IR) != 0) {
-            const_cast<Mos6526 *>(this)->irq_out(false);
+        if (mode == ReadMode::Read) {
+            const_cast<Mos6526 *>(this)->_icr_data = 0;
+            if ((data & ICR_IR) != 0) {
+                const_cast<Mos6526 *>(this)->irq_out(false);
+            }
         }
         return data;
     }
@@ -491,36 +493,36 @@ void Mos6526::write(addr_t addr, uint8_t data)
     }
 }
 
-std::ostream &Mos6526::dump(std::ostream &os, addr_t base) const
+std::ostream& Mos6526::dump(std::ostream& os, addr_t base) const
 {
     std::array<uint8_t, REGMAX> regs{
-        read(PRA),
-        read(PRB),
-        read(DDRA),
-        read(DDRB),
-        read(TALO),
-        read(TAHI),
-        read(TBLO),
-        read(TBHI),
-        read(TOD_10THS),
-        read(TOD_SEC),
-        read(TOD_MIN),
-        read(TOD_HR),
-        read(SDR),
-        _icr_data,      /* Cleared after read */
-        read(CRA),
-        read(CRB)
+        peek(PRA),
+        peek(PRB),
+        peek(DDRA),
+        peek(DDRB),
+        peek(TALO),
+        peek(TAHI),
+        peek(TBLO),
+        peek(TBHI),
+        peek(TOD_10THS),
+        peek(TOD_SEC),
+        peek(TOD_MIN),
+        peek(TOD_HR),
+        peek(SDR),
+        peek(ICR),
+        peek(CRA),
+        peek(CRB)
     };
 
     return utils::dump(os, regs, base);
 }
 
-void Mos6526::irq(const OutputPinCb &irq_out)
+void Mos6526::irq(const OutputPinCb& irq_out)
 {
     _irq_out = irq_out;
 }
 
-size_t Mos6526::tick(const Clock &clk)
+size_t Mos6526::tick(const Clock& clk)
 {
     if (tick(_timer_A, timer_A_mode())) {
         _icr_data |= ICR_TA;
@@ -542,7 +544,7 @@ size_t Mos6526::tick(const Clock &clk)
     return 1;
 }
 
-bool Mos6526::tick(Timer &timer, TimerMode mode)
+bool Mos6526::tick(Timer& timer, TimerMode mode)
 {
     if (timer.is_started()) {
         timer.unsetpb();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -59,15 +59,6 @@ namespace c64 {
  *
  * @see https://skoe.de/easyflash/files/devdocs/EasyFlash-ProgRef.pdf
  */
-CartEasyFlash::CartEasyFlash(const std::shared_ptr<Crt> &crt)
-    : Cartridge{TYPE, crt}
-{
-}
-
-CartEasyFlash::~CartEasyFlash()
-{
-}
-
 void CartEasyFlash::reset()
 {
     Cartridge::reset();
@@ -83,11 +74,11 @@ void CartEasyFlash::reset()
     /*
      * Load ROMs and RAM.
      */
-    const auto &cart = crt();
+    const auto& cart = crt();
     for (size_t entry = 0; entry < cart.chips(); ++entry) {
         const auto chipdev = cart[entry];
-        const Crt::Chip &chip = chipdev.first;
-        const devptr_t &dev = chipdev.second;
+        const Crt::Chip& chip = chipdev.first;
+        const devptr_t& dev = chipdev.second;
 
         switch (chip.type) {
         case Crt::CHIP_TYPE_ROM:
@@ -113,7 +104,7 @@ void CartEasyFlash::reset()
     propagate();
 }
 
-void CartEasyFlash::add_rom(size_t entry, const Crt::Chip &chip, const devptr_t &rom)
+void CartEasyFlash::add_rom(size_t entry, const Crt::Chip& chip, const devptr_t& rom)
 {
     if (chip.rsiz != ROM_SIZE) {
         throw_invalid_cartridge("Invalid ROM size " + std::to_string(chip.rsiz), entry);
@@ -142,13 +133,13 @@ void CartEasyFlash::add_rom(size_t entry, const Crt::Chip &chip, const devptr_t 
     DEBUG("%s(\"%s\"): Chip %d: ROM device: %s\n", type().c_str(), name().c_str(), entry, Crt::to_string(chip).c_str());
 }
 
-void CartEasyFlash::add_ram(size_t entry, const Crt::Chip &chip, const devptr_t &ram)
+void CartEasyFlash::add_ram(size_t entry, const Crt::Chip& chip, const devptr_t& ram)
 {
     _ram = ram;
     DEBUG("%s(\"%s\"): Chip %d: RAM device: %s\n", type().c_str(), name().c_str(), entry, Crt::to_string(chip).c_str());
 }
 
-uint8_t CartEasyFlash::read(addr_t addr) const
+uint8_t CartEasyFlash::read(addr_t addr, ReadMode mode)
 {
     /*
      * 256 bytes of RAM mapped into the I/O-2 range.
@@ -186,7 +177,7 @@ uint8_t CartEasyFlash::read(addr_t addr) const
      * I/O-2 ($DF00-$DFFF): Cartridge RAM (if present).
      */
     if (_ram && addr > 0x00FF && addr < 0x0200) {
-        return _ram->read(addr - 256);
+        return _ram->read(addr - 256, mode);
     }
 
     return 255;

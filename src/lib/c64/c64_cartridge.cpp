@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -20,6 +20,7 @@
 
 #include <array>
 #include <sstream>
+#include <gsl/assert>
 
 #include "logger.hpp"
 #include "types.hpp"
@@ -36,14 +37,12 @@
 namespace caio {
 namespace c64 {
 
-Cartridge::Cartridge(const std::string &type, const std::shared_ptr<Crt> &crt)
-    : Device{type, crt->name()},
+Cartridge::Cartridge(const std::string& type, const sptr_t<Crt>& crt)
+    : Device{type, (crt ? crt->name() : "")},
       _crt{crt}
 {
-}
-
-Cartridge::~Cartridge()
-{
+    using namespace gsl;
+    Expects(crt);
 }
 
 std::string Cartridge::name() const
@@ -63,23 +62,23 @@ size_t Cartridge::size() const
     return IO_SIZE;
 }
 
-std::ostream &Cartridge::dump(std::ostream &os, addr_t base) const
+std::ostream& Cartridge::dump(std::ostream& os, addr_t base) const
 {
     std::array<uint8_t, IO_SIZE> data{};
 
     for (size_t i = 0; i < IO_SIZE; ++i) {
-        data[i] = read(i);
+        data[i] = peek(i);
     }
 
     return utils::dump(os, data, base);
 }
 
-void Cartridge::add_ior(const Gpio::ior_t &ior, uint8_t mask)
+void Cartridge::add_ior(const Gpio::ior_t& ior, uint8_t mask)
 {
     _ioport.add_ior(ior, mask);
 }
 
-void Cartridge::add_iow(const Gpio::iow_t &iow, uint8_t mask)
+void Cartridge::add_iow(const Gpio::iow_t& iow, uint8_t mask)
 {
     _ioport.add_iow(iow, mask);
 }
@@ -89,7 +88,7 @@ void Cartridge::propagate(bool force)
     _ioport.iow(0, _mode, force);
 }
 
-const Crt &Cartridge::crt() const
+const Crt& Cartridge::crt() const
 {
     return (*_crt);
 }
@@ -107,7 +106,7 @@ void Cartridge::mode(Cartridge::GameExromMode mode)
     }
 }
 
-void Cartridge::throw_invalid_cartridge(const std::string &reason, ssize_t entry)
+void Cartridge::throw_invalid_cartridge(const std::string& reason, ssize_t entry)
 {
     std::ostringstream err{};
 
@@ -122,7 +121,7 @@ void Cartridge::throw_invalid_cartridge(const std::string &reason, ssize_t entry
     throw InvalidCartridge{type(), err.str()};
 }
 
-std::shared_ptr<Cartridge> Cartridge::create(const std::string &fname)
+sptr_t<Cartridge> Cartridge::create(const std::string& fname)
 {
     auto crt = std::make_shared<Crt>(fname);
 

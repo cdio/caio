@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -29,7 +29,7 @@
 
 namespace caio {
 
-void stacktrace(std::ostream &os)
+void stacktrace(std::ostream& os)
 {
     std::array<void *, 256> buffer{};
     size_t size = ::backtrace(buffer.data(), buffer.size());
@@ -45,6 +45,7 @@ void stacktrace(std::ostream &os)
         os << "Unable to retreive symbols: " << Error::to_string(errno) << std::endl << "--" << std::endl;
     }
 
+//TODO std::format
     for (size_t i = 0; i < size; ++i) {
         if (symbols) {
             os << "  " << symbols[i] << std::endl;
@@ -71,7 +72,7 @@ std::string Error::to_string(int err)
 #endif
 }
 
-InvalidAddress::InvalidAddress(const std::string &elem, addr_t addr, bool read)
+InvalidAddress::InvalidAddress(const std::string& elem, addr_t addr, bool read)
     : Error{elem, "Invalid " + std::string{(read ? "read" : "write")} + " address: $" + utils::to_string(addr)}
 {
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -20,14 +20,6 @@
 
 
 namespace caio {
-
-Device::Device(const std::string &type, const std::string &label)
-    : Name{type, label} {
-}
-
-Device::~Device()
-{
-}
 
 std::string Device::to_string() const
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -30,39 +30,39 @@ namespace caio {
 Logger log{};
 
 std::map<std::string, Logger::Level> Logger::loglevel_map = {
-    { ERROR_STR,    Logger::ERROR   },
-    { WARN_STR,     Logger::WARN    },
-    { INFO_STR,     Logger::INFO    },
-    { DEBUG_STR,    Logger::DEBUG   },
-    { ALL_STR,      Logger::ALL     },
-    { NONE_STR,     Logger::NONE    }
+    { ERROR_STR,    Logger::Error   },
+    { WARN_STR,     Logger::Warn    },
+    { INFO_STR,     Logger::Info    },
+    { DEBUG_STR,    Logger::Debug   },
+    { ALL_STR,      Logger::All     },
+    { NONE_STR,     Logger::None    }
 };
 
 
-Logger::Level Logger::to_loglevel(const std::string &level)
+Logger::Level Logger::to_loglevel(const std::string& level)
 {
     if (level.empty()) {
-        return Level::NONE;
+        return Level::None;
     }
 
     try {
         return loglevel_map.at(level);
-    } catch (std::out_of_range &) {
-        return Level::INVALID;
+    } catch (std::out_of_range&) {
+        return Level::Invalid;
     }
 }
 
-Logger::Level Logger::parse_loglevel(const std::string &levels)
+Logger::Level Logger::parse_loglevel(const std::string& levels)
 {
     static const std::regex re_loglevel("([^\\|]+)", std::regex::extended);
-    int loglevel = NONE;
+    int loglevel = Level::None;
 
     for (auto it = std::sregex_iterator(levels.begin(), levels.end(), re_loglevel);
         it != std::sregex_iterator(); ++it) {
 
-        const std::string &lstr = utils::trim(it->str());
+        const std::string& lstr = utils::trim(it->str());
         Level l = Logger::to_loglevel(lstr);
-        if (l == Level::INVALID) {
+        if (l == Level::Invalid) {
             /*
              * Malformed levels string.
              */
@@ -84,16 +84,12 @@ Logger::Logger()
     _os.open(DEFAULT_LOGFILE);
 }
 
-Logger::~Logger()
-{
-}
-
-void Logger::loglevel(const std::string &lvs)
+void Logger::loglevel(const std::string& lvs)
 {
     _lv = Logger::parse_loglevel(lvs);
 }
 
-void Logger::logfile(const std::string &fname)
+void Logger::logfile(const std::string& fname)
 {
     if (!fname.empty()) {
         std::ofstream ofs{fname};
@@ -106,7 +102,7 @@ void Logger::logfile(const std::string &fname)
     }
 }
 
-Logger &Logger::log(Level lv, const std::string &msg)
+Logger& Logger::log(Level lv, const std::string& msg)
 {
     if (_os && is_level(lv) && !msg.empty()) {
         std::string m{msg};
@@ -119,15 +115,15 @@ Logger &Logger::log(Level lv, const std::string &msg)
 
         std::string color{ANSI_FG};
         switch (lv) {
-        case ERROR:
+        case Level::Error:
             color += std::string{ANSI_WHITE} + ANSI_BG + ANSI_RED;
             break;
 
-        case WARN:
+        case Level::Warn:
             color += ANSI_YELLOW;
             break;
 
-        case DEBUG:
+        case Level::Debug:
             color += ANSI_GREEN;
             break;
 
@@ -142,7 +138,7 @@ Logger &Logger::log(Level lv, const std::string &msg)
     return *this;
 }
 
-Logger &Logger::log(Level lv, const char *fmt, va_list ap)
+Logger& Logger::log(Level lv, const char* fmt, va_list ap)
 {
     char buf[LINE_MAX];
 
@@ -151,7 +147,7 @@ Logger &Logger::log(Level lv, const char *fmt, va_list ap)
     return log(lv, std::string{buf});
 }
 
-Logger &Logger::log(Level lv, const char *fmt, ...)
+Logger &Logger::log(Level lv, const char* fmt, ...)
 {
     va_list ap;
 
@@ -163,14 +159,14 @@ Logger &Logger::log(Level lv, const char *fmt, ...)
 }
 
 [[noreturn]]
-void Logger::fatal(const char *fmt, va_list ap)
+void Logger::fatal(const char* fmt, va_list ap)
 {
     error(fmt, ap);
     std::terminate();
 }
 
 [[noreturn]]
-void Logger::fatal(const char *fmt, ...)
+void Logger::fatal(const char* fmt, ...)
 {
     va_list ap;
 
@@ -179,7 +175,7 @@ void Logger::fatal(const char *fmt, ...)
     va_end(ap);
 }
 
-Logger &Logger::error(const char *fmt, ...)
+Logger &Logger::error(const char* fmt, ...)
 {
     if (is_error()) {
         va_list ap;
@@ -192,7 +188,7 @@ Logger &Logger::error(const char *fmt, ...)
     return *this;
 }
 
-Logger &Logger::warn(const char *fmt, ...)
+Logger &Logger::warn(const char* fmt, ...)
 {
     if (is_warn()) {
         va_list ap;
@@ -205,7 +201,7 @@ Logger &Logger::warn(const char *fmt, ...)
     return *this;
 }
 
-Logger &Logger::info(const char *fmt, ...)
+Logger &Logger::info(const char* fmt, ...)
 {
     if (is_info()) {
         va_list ap;
@@ -218,7 +214,7 @@ Logger &Logger::info(const char *fmt, ...)
     return *this;
 }
 
-Logger &Logger::debug(const char *fmt, ...)
+Logger &Logger::debug(const char* fmt, ...)
 {
     if (is_debug()) {
         va_list ap;

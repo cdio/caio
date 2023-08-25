@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -46,7 +46,7 @@ namespace caio {
  */
 class Mos6569 : public Device, public Clockable {
 public:
-    constexpr static const char *TYPE = "MOS6569";
+    constexpr static const char* TYPE = "MOS6569";
 
     /*
      * PAL timing and screen resolution:
@@ -246,18 +246,19 @@ public:
      * @param mmap   Address space for this device (memory area that can
      *               be seen by this video controller through its address lines);
      * @param vcolor Colour RAM (1K).
-     * @see render_line(const std::function<void(unsigned, const ui::Scanline &)> &);
+     * @see render_line(const std::function<void(unsigned, const ui::Scanline&)>&);
      */
-    Mos6569(const std::string &label, const std::shared_ptr<ASpace> &mmap, const devptr_t &vcolor);
+    Mos6569(const std::string& label, const sptr_t<ASpace>& mmap, const devptr_t& vcolor);
 
-    virtual ~Mos6569();
+    virtual ~Mos6569() {
+    }
 
     /**
      * Set the render line callback.
      * The render line callback must send the video output to the user interface.
      * @param rl The render line callback.
      */
-    void render_line(const std::function<void(unsigned, const ui::Scanline &)> &rl);
+    void render_line(const std::function<void(unsigned, const ui::Scanline&)>& rl);
 
     /**
      * Set a colour palette from disk.
@@ -265,35 +266,35 @@ public:
      * @exception IOError see RgbaTable::load().
      * @see palette(const RgbaTable &)
      */
-    void palette(const std::string &fname);
+    void palette(const std::string& fname);
 
     /**
      * Set a colour palette from memory.
      * @param plt Colour palette to set.
      * @see RgbaTable
      */
-    void palette(const RgbaTable &plt);
+    void palette(const RgbaTable& plt);
 
     /**
      * Set the vsync callback.
      * The vsync callback is called by this controller each time a full screen frame is rendered.
      * @param cb V-Sync callback.
      */
-    void vsync(const std::function<void(unsigned)> &cb);
+    void vsync(const std::function<void(unsigned)>& cb);
 
     /**
      * Set the IRQ pin callback.
      * The IRQ pin callback is called when the status of the IRQ output pin of this device is changed.
      * @param irq_out IRQ output pin callback.
      */
-    void irq(const OutputPinCb &irq_out);
+    void irq(const OutputPinCb& irq_out);
 
     /**
      * Set the BA (Bus Available) pin callback.
      * The BA pin callback is called when the value of the BA output pin of this device is changed.
      * @param ba_out BA pin callback.
      */
-    void ba(const OutputPinCb &ba_out);
+    void ba(const OutputPinCb& ba_out);
 
     /**
      * LP edge triggered input.
@@ -313,7 +314,7 @@ public:
     /**
      * @see Device::read()
      */
-    uint8_t read(addr_t addr) const override;
+    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
      * @see Device::write()
@@ -323,7 +324,7 @@ public:
     /**
      * @see Device::dump()
      */
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
+    std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
 
 private:
     /**
@@ -333,7 +334,7 @@ private:
      * @return The number of clock cycles that must pass until the clock is allowed to call this method again.
      * @see Clockable
      */
-    size_t tick(const Clock &clk) override;
+    size_t tick(const Clock& clk) override;
 
     /**
      * Paint a cycle of the display area in the current scanline.
@@ -433,7 +434,7 @@ private:
      * @param width Segment width in pixels (if 0, the entire scanline from the starting position is painted);
      * @param color RGBA colour to use.
      */
-    void paint(unsigned start, unsigned width, const Rgba &color);
+    void paint(unsigned start, unsigned width, const Rgba& color);
 
     /**
      * Paint a byte bitmap (1 bit per pixel) in the current scanline.
@@ -443,7 +444,7 @@ private:
      * @param bitmap Byte bitmap;
      * @param colors Background and foreground colours.
      */
-    void paint_byte(unsigned start, uint8_t bitmap, const Rgba4 &colors);
+    void paint_byte(unsigned start, uint8_t bitmap, const Rgba4& colors);
 
     /**
      * Paint a multicolor byte bitmap (2 bits per pixel) in the current scanline.
@@ -459,7 +460,7 @@ private:
      * @param bitmap Byte bitmap containing the 4 pixels to paint;
      * @param colors 4 colours.
      */
-    void paint_mcm_byte(unsigned start, uint8_t bitmap, const Rgba4 &colors);
+    void paint_mcm_byte(unsigned start, uint8_t bitmap, const Rgba4& colors);
 
     /**
      * Paint a character mode display line.
@@ -482,7 +483,7 @@ private:
      * @param colors Sprite background and foreground colours;
      * @param expand true if the bitmap contains an horizontally expanded sprite; false otherwise.
      */
-    void paint_sprite_line(unsigned start, uint64_t bitmap, const Rgba4 &colors, bool expand);
+    void paint_sprite_line(unsigned start, uint64_t bitmap, const Rgba4& colors, bool expand);
 
     /**
      * Paint a multicolor sprite bitmap line.
@@ -491,7 +492,7 @@ private:
      * @param colors 4 colours for the spirte;
      * @param expand true if the bitmap contains an horizontally expanded sprite; false otherwise.
      */
-    void paint_sprite_line_mcm(unsigned start, uint64_t bitmap, const Rgba4 &colors, bool expand);
+    void paint_sprite_line_mcm(unsigned start, uint64_t bitmap, const Rgba4& colors, bool expand);
 
     /**
      * Paint a sprite line.
@@ -568,7 +569,7 @@ private:
      */
     uint8_t update_collision_mib(uint8_t mib, unsigned start, bool mcm, uint64_t bitmap);
 
-    std::function<void(unsigned, const ui::Scanline &)> _render_line{}; /* Line renderer callback                   */
+    std::function<void(unsigned, const ui::Scanline&)> _render_line{};  /* Line renderer callback                   */
     std::function<void(size_t)> _vsync{};                       /* Vertical sync callback                           */
 
     OutputPinCb             _irq_out{};                         /* IRQ output pin callback                          */

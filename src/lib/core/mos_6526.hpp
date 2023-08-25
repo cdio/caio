@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -36,7 +36,7 @@ namespace caio {
  */
 class Mos6526 : public Device, public Gpio, public Clockable {
 public:
-    constexpr static const char *TYPE = "MOS6526";
+    constexpr static const char* TYPE = "MOS6526";
 
     enum Registers {
         PRA         = 0,    /* Port A                       */
@@ -101,7 +101,7 @@ public:
 
     class Timer {
     public:
-        Timer(Mos6526 &dev, uint8_t pbit);
+        Timer(Mos6526& dev, uint8_t pbit);
 
         void     reset();
         uint8_t  counter_hi() const;
@@ -123,7 +123,7 @@ public:
         void     unsetpb();
 
     private:
-        Mos6526 &_dev;
+        Mos6526& _dev;
         uint8_t  _pbit;
 
         uint8_t  _cr;
@@ -148,9 +148,9 @@ public:
             uint8_t sec{};
             uint8_t tth{};
 
-            bool     operator==(const TodData &tod) const;
-            TodData &operator=(const TodData &tod);
-            TodData &operator++();
+            bool     operator==(const TodData& tod) const;
+            TodData& operator=(const TodData& tod);
+            TodData& operator++();
         };
 
         Tod();
@@ -169,7 +169,7 @@ public:
         void    alarm_tth(uint8_t tth);
         void    start();
         void    stop();
-        bool    tick(const Clock &clk);
+        bool    tick(const Clock& clk);
 
     private:
         bool             _is_running{};
@@ -183,7 +183,7 @@ public:
      * Initalise this CIA instance.
      * @param label Label assigned to this device.
      */
-    explicit Mos6526(const std::string &label = {});
+    explicit Mos6526(const std::string& label = {});
 
     virtual ~Mos6526();
 
@@ -200,7 +200,7 @@ public:
     /**
      * @see Device::read()
      */
-    uint8_t read(addr_t addr) const override;
+    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
      * @see Device::write()
@@ -210,22 +210,22 @@ public:
     /**
      * @see Device::dump()
      */
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
+    std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
 
     /**
      * Set the IRQ pin callback.
      * The IRQ pin callback is called when the status of the IRQ output pin of this device is changed.
      * @param irq_out IRQ output pin callback.
      */
-    void irq(const OutputPinCb &irq_out);
+    void irq(const OutputPinCb& irq_out);
 
 private:
     /**
      * @see Clockable::tick()
      */
-    size_t tick(const Clock &clk) override;
+    size_t tick(const Clock& clk) override;
 
-    bool tick(Timer &timer, TimerMode mode);
+    bool tick(Timer& timer, TimerMode mode);
 
     TimerMode timer_A_mode() const;
 

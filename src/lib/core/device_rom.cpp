@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -25,23 +25,7 @@
 
 namespace caio {
 
-DeviceROM::DeviceROM(const std::string &label, const std::vector<uint8_t> &data)
-    : Device{TYPE, label},
-      _data(data)
-{
-}
-
-DeviceROM::DeviceROM(const std::vector<uint8_t> &data)
-    : DeviceROM{{}, data}
-{
-}
-
-DeviceROM::DeviceROM(const std::string &fname, size_t size)
-    : DeviceROM{fname, {}, size}
-{
-}
-
-DeviceROM::DeviceROM(const std::string &fname, const std::string &label, size_t size)
+DeviceROM::DeviceROM(const std::string& fname, const std::string& label, size_t size)
     : Device{TYPE, label}
 {
     std::ifstream is{fname, std::ios::binary | std::ios::in};
@@ -57,7 +41,7 @@ DeviceROM::DeviceROM(const std::string &fname, const std::string &label, size_t 
     _data = std::move(data);
 }
 
-DeviceROM::DeviceROM(std::istream &is, size_t size)
+DeviceROM::DeviceROM(std::istream& is, size_t size)
     : Device{TYPE, {}}
 {
     if (!is) {
@@ -75,16 +59,7 @@ DeviceROM::DeviceROM(std::istream &is, size_t size)
     }
 }
 
-void DeviceROM::reset()
-{
-}
-
-size_t DeviceROM::size() const
-{
-    return _data.size();
-}
-
-uint8_t DeviceROM::read(addr_t addr) const
+uint8_t DeviceROM::read(addr_t addr, ReadMode)
 {
     if (addr < _data.size()) {
         return _data[addr];
@@ -97,11 +72,6 @@ void DeviceROM::write(addr_t addr, uint8_t data)
 {
     log.warn("%s(%s): Write attempt, address $%04x, data $%02x\n",
         type().c_str(), label().c_str(), addr, data);
-}
-
-std::ostream &DeviceROM::dump(std::ostream &os, addr_t base) const
-{
-    return utils::dump(os, _data, base);
 }
 
 }

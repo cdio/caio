@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -70,22 +70,25 @@ namespace c64 {
  */
 class CartMagicDesk : public Cartridge {
 public:
-    constexpr static const char *TYPE            = "CART_MAGIC_DESK";
+    constexpr static const char* TYPE            = "CART_MAGIC_DESK";
     constexpr static const size_t ROM_SIZE       = 8192;
     constexpr static const size_t MAX_BANKS      = 15;
     constexpr static const addr_t ROML_LOAD_ADDR = 0x8000;
 
-    CartMagicDesk(const std::shared_ptr<Crt> &crt);
+    CartMagicDesk(const sptr_t<Crt>& crt)
+        : Cartridge{TYPE, crt} {
+    }
 
-    virtual ~CartMagicDesk();
+    virtual ~CartMagicDesk() {
+    }
 
     /**
      * @see Device::read()
      */
-    uint8_t read(addr_t addr) const override;
+    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
-     * @see Device::write();
+     * @see Device::write()
      */
     void write(addr_t addr, uint8_t data) override;
 

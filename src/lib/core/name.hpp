@@ -38,9 +38,6 @@ public:
           _label{(label.empty() ? "" : label)} {
     }
 
-    virtual ~Name() {
-    }
-
     /**
      * @return The type of this instance.
      */

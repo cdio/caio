@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -41,7 +41,7 @@ namespace c64 {
  */
 class Cartridge : public Device {
 public:
-    constexpr static const char *TYPE            = "I/O-EXPANSION";
+    constexpr static const char* TYPE            = "I/O-EXPANSION";
     constexpr static const size_t IO_SIZE        = 512;
     constexpr static const size_t IO_ADDR_MASK   = 0x01FF;
     constexpr static const uint8_t GAME          = 0x01;
@@ -67,9 +67,10 @@ public:
      * @see c64::Crt
      * @see reset()
      */
-    static std::shared_ptr<Cartridge> create(const std::string &fname);
+    static sptr_t<Cartridge> create(const std::string& fname);
 
-    virtual ~Cartridge();
+    virtual ~Cartridge() {
+    }
 
     /**
      * @return The name of this cartridge.
@@ -95,7 +96,7 @@ public:
     /**
      * @see Device::dump()
      */
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
+    std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
 
     /**
      * Add an input callback.
@@ -103,7 +104,7 @@ public:
      * @param mask Bits used by the callback.
      * @see Gpio::add_ior()
      */
-    void add_ior(const Gpio::ior_t &ior, uint8_t mask);
+    void add_ior(const Gpio::ior_t& ior, uint8_t mask);
 
     /**
      * Add an ouput callback.
@@ -111,7 +112,7 @@ public:
      * @param mask Bits used by the callback.
      * @see Gpio::add_iow()
      */
-    void add_iow(const Gpio::iow_t &iow, uint8_t mask);
+    void add_iow(const Gpio::iow_t& iow, uint8_t mask);
 
     /**
      * Retrieve the cartridge internal device that must handle a specific memory address.
@@ -134,7 +135,7 @@ public:
     GameExromMode mode() const;
 
 protected:
-    Cartridge(const std::string &type, const std::shared_ptr<Crt> &crt);
+    Cartridge(const std::string& type, const sptr_t<Crt>& crt);
 
     /**
      * Set a new GAME/EXROM mode.
@@ -156,9 +157,9 @@ protected:
      * @return A reference to the embedded CRT file.
      * @see Crt
      */
-    const Crt &crt() const;
+    const Crt& crt() const;
 
-    virtual void throw_invalid_cartridge(const std::string &reason, ssize_t entry = -1);
+    virtual void throw_invalid_cartridge(const std::string& reason, ssize_t entry = -1);
 
 private:
     std::shared_ptr<Crt> _crt;

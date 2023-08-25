@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -21,54 +21,21 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-#include "device_rom.hpp"
-
 
 namespace caio {
 
-DeviceRAM::DeviceRAM(const std::string &label, size_t size, const init_cb_t &initcb)
+DeviceRAM::DeviceRAM(const std::string& label, size_t size, const init_cb_t& initcb)
     : Device{TYPE, label},
       _data(size),
       _initcb{initcb}
 {
     if (_initcb) {
-        _initcb(_data);
+        gsl::span data{_data.data(), _data.size()};
+        _initcb(data);
     }
 }
 
-DeviceRAM::DeviceRAM(size_t size, const init_cb_t &initcb)
-    : DeviceRAM{{}, size, initcb}
-{
-}
-
-DeviceRAM::DeviceRAM(const std::string &label, const std::vector<uint8_t> &data)
-    : Device{TYPE, label},
-      _data(data)
-{
-}
-
-DeviceRAM::DeviceRAM(const std::vector<uint8_t> &data)
-    : DeviceRAM{{}, data}
-{
-}
-
-DeviceRAM::DeviceRAM(DeviceROM &&rom)
-    : Device{TYPE, rom.label()},
-      _data{std::move(rom._data)}
-{
-}
-
-DeviceRAM::DeviceRAM(const DeviceROM &rom)
-    : Device{TYPE, rom.label()},
-      _data{rom._data}
-{
-}
-
-DeviceRAM::~DeviceRAM()
-{
-}
-
-void DeviceRAM::copy(const class DeviceROM &rom, size_t offset)
+void DeviceRAM::copy(const DeviceROM& rom, size_t offset)
 {
     if (offset + rom.size() > size()) {
         throw Error{*this, "Can't copy: ROM at offset exceeds RAM size"};
@@ -77,16 +44,7 @@ void DeviceRAM::copy(const class DeviceROM &rom, size_t offset)
     std::copy(rom._data.begin(), rom._data.end(), _data.begin() + offset);
 }
 
-void DeviceRAM::reset()
-{
-}
-
-size_t DeviceRAM::size() const
-{
-    return _data.size();
-}
-
-uint8_t DeviceRAM::read(addr_t addr) const
+uint8_t DeviceRAM::read(addr_t addr, ReadMode)
 {
     if (addr < _data.size()) {
         return _data[addr];
@@ -97,16 +55,11 @@ uint8_t DeviceRAM::read(addr_t addr) const
 
 void DeviceRAM::write(addr_t addr, uint8_t data)
 {
-    if (addr < _data.size()) {
-        _data[addr] = data;
-    } else {
+    if (addr >= _data.size()) {
         throw InvalidWriteAddress{*this, addr};
     }
-}
 
-std::ostream &DeviceRAM::dump(std::ostream &os, addr_t base) const
-{
-    return utils::dump(os, _data, base);
+    _data[addr] = data;
 }
 
 }

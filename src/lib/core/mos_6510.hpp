@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -29,7 +29,7 @@ namespace caio {
  */
 class Mos6510 : public Mos6502 {
 public:
-    constexpr static const char *TYPE    = "MOS6510";
+    constexpr static const char* TYPE    = "MOS6510";
 
     constexpr static const addr_t PORT_0 = 0x0000;  /* Data direction register  */
     constexpr static const addr_t PORT_1 = 0x0001;  /* I/O port                 */
@@ -44,7 +44,7 @@ public:
     constexpr static const uint8_t P7    = 0x80;
     constexpr static const uint8_t PALL  = 0xFF;
 
-    using breakpoint_cb_t = std::function<void(Mos6510 &, void *)>;
+    using breakpoint_cb_t = std::function<void(Mos6510&, void*)>;
 
     using ior_t = Gpio::ior_t;
     using iow_t = Gpio::iow_t;
@@ -54,7 +54,9 @@ public:
      * @param type  CPU type;
      * @param label CPU label.
      */
-    Mos6510(const std::string &type = TYPE, const std::string &label = LABEL);
+    Mos6510(const std::string& type = TYPE, const std::string& label = LABEL)
+        : Mos6502{type, label} {
+    }
 
     /**
      * Initialise this CPU.
@@ -63,9 +65,9 @@ public:
      * @param label CPU label.
      * @see ASpace
      */
-    Mos6510(const std::shared_ptr<ASpace> &mmap, const std::string &type = TYPE, const std::string &label = LABEL);
-
-    virtual ~Mos6510();
+    Mos6510(const sptr_t<ASpace>& mmap, const std::string& type = TYPE, const std::string& label = LABEL)
+        : Mos6502{mmap, type, label} {
+    }
 
     /**
      * Add an input callback.
@@ -73,7 +75,9 @@ public:
      * @param mask Bits used by the callback.
      * @see Gpio::add_ior()
      */
-    void add_ior(const ior_t &ior, uint8_t mask);
+    void add_ior(const ior_t& ior, uint8_t mask) {
+        _ioport.add_ior(ior, mask);
+    }
 
     /**
      * Add an ouput callback.
@@ -81,23 +85,27 @@ public:
      * @param mask Bits used by the callback.
      * @see Gpio::add_iow()
      */
-    void add_iow(const iow_t &iow, uint8_t mask);
+    void add_iow(const iow_t& iow, uint8_t mask) {
+        _ioport.add_iow(iow, mask);
+    }
 
     /**
      * Add a breakpoint on a memory address.
      * @see Mos6502::bpadd()
      */
-    void bpadd(addr_t addr, const breakpoint_cb_t &cb, void *arg);
+    void bpadd(addr_t addr, const breakpoint_cb_t& cb, void* arg) {
+        Mos6502::bpadd(addr, *reinterpret_cast<const Mos6502::breakpoint_cb_t*>(&cb), arg);
+    }
 
     /**
      * @see Mos6502::read()
      */
-    uint8_t read(addr_t addr) const override;
+    uint8_t read(addr_t addr, Device::ReadMode mode = Device::ReadMode::Read);
 
     /**
      * @see Mos6502::write()
      */
-    void write(addr_t addr, uint8_t data) override;
+    void write(addr_t addr, uint8_t data);
 
 private:
     uint8_t _iodir{};

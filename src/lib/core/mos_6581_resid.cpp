@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -25,22 +25,23 @@
 
 
 namespace caio {
+namespace mos_6581 {
 
 class Resid : public ::SID {
 public:
     using ::SID::SID;
 };
 
-Mos6581Resid::Mos6581Resid(const std::string &label, unsigned clkf)
-    : Mos6581I{label, clkf},
+Mos6581Resid::Mos6581Resid(const std::string& label, unsigned clkf)
+    : Mos6581_{label, clkf},
       _resid{std::make_shared<Resid>()}
 {
     _resid->set_chip_model(::chip_model::MOS6581);
-    _resid->set_sampling_parameters(clkf, ::sampling_method::SAMPLE_FAST, Mos6581I::SAMPLING_RATE);
+    _resid->set_sampling_parameters(clkf, ::sampling_method::SAMPLE_FAST, SAMPLING_RATE);
     _resid->reset();
 }
 
-uint8_t Mos6581Resid::read(addr_t addr) const
+uint8_t Mos6581Resid::read(addr_t addr, ReadMode)
 {
     return _resid->read(addr);
 }
@@ -50,7 +51,7 @@ void Mos6581Resid::write(addr_t addr, uint8_t value)
     _resid->write(addr, value);
 }
 
-size_t Mos6581Resid::tick(const Clock &clk)
+size_t Mos6581Resid::tick(const Clock& clk)
 {
     if (_audio_buffer) {
         auto v = _audio_buffer();
@@ -69,4 +70,5 @@ const std::string Mos6581Resid::version()
     return std::string{"reSID-"} + resid_version_string;
 }
 
+}
 }

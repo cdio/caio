@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "device.hpp"
+#include "device_rom.hpp"
 
 
 namespace caio {
@@ -31,9 +32,9 @@ namespace caio {
  */
 class DeviceRAM : public Device {
 public:
-    constexpr static const char *TYPE = "RAM";
+    constexpr static const char* TYPE = "RAM";
 
-    using init_cb_t = std::function<void(std::vector<uint8_t> &)>;
+    using init_cb_t = std::function<void(gsl::span<uint8_t>&)>;
 
     /**
      * Initialise a RAM Device.
@@ -42,7 +43,7 @@ public:
      * @param initcb Initialisation callback (if this parameter is not set
      * the memory is initialised with zeros).
      */
-    DeviceRAM(const std::string &label, size_t size, const init_cb_t &initcb = {});
+    DeviceRAM(const std::string& label, size_t size, const init_cb_t& initcb = {});
 
     /**
      * Initialise a RAM Device.
@@ -50,34 +51,48 @@ public:
      * @param initcb Initialisation callback (if this parameter is not set
      * the memory is initialised with zeros).
      */
-    DeviceRAM(size_t size, const init_cb_t &initcb = {});
+    DeviceRAM(size_t size, const init_cb_t& initcb = {})
+        : DeviceRAM{{}, size, initcb} {
+    }
 
     /**
      * Initialise a RAM Device with predefined values.
      * @param label Label assigned to this Device;
      * @param data  Buffer with data values.
      */
-    DeviceRAM(const std::string &label, const std::vector<uint8_t> &data);
+    DeviceRAM(const std::string& label, const std::vector<uint8_t>& data)
+        : Device{TYPE, label},
+          _data(data) {
+    }
 
     /**
      * Initialise a RAM Device with predefined values.
      * @param data Buffer with predefined values.
      */
-    DeviceRAM(const std::vector<uint8_t> &data);
+    DeviceRAM(const std::vector<uint8_t>& data)
+        : DeviceRAM{{}, data} {
+    }
 
     /**
      * Convert a ROM into a RAM device
      * @param rom ROM device to convert.
      */
-    DeviceRAM(class DeviceROM &&rom);
+    DeviceRAM(class DeviceROM&& rom)
+        : Device{TYPE, rom.label()},
+          _data{std::move(rom._data)} {
+    }
 
     /**
      * Convert a ROM into a RAM device
      * @param rom ROM device to convert.
      */
-    DeviceRAM(const class DeviceROM &rom);
+    DeviceRAM(const class DeviceROM& rom)
+        : Device{TYPE, rom.label()},
+          _data{rom._data} {
+    }
 
-    virtual ~DeviceRAM();
+    virtual ~DeviceRAM() {
+    }
 
     /**
      * Merge a ROM into a RAM device
@@ -86,22 +101,25 @@ public:
      * @param offset Destination starting offset.
      * @execption Error If the ROM size plus the specified offset is larger than the RAM size.
      */
-    void copy(const class DeviceROM &rom, size_t offset = 0);
+    void copy(const class DeviceROM& rom, size_t offset = 0);
 
     /**
      * @see Device::reset()
      */
-    void reset() override;
+    void reset() override {
+    }
 
     /**
      * @see Device::size()
      */
-    size_t size() const override;
+    size_t size() const override {
+        return _data.size();
+    }
 
     /**
      * @see Device::read()
      */
-    uint8_t read(addr_t addr) const override;
+    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
      * @see Device::write()
@@ -111,7 +129,9 @@ public:
     /**
      * @see Device::dump()
      */
-    std::ostream &dump(std::ostream &os, addr_t base = 0) const override;
+    std::ostream& dump(std::ostream& os, addr_t base = 0) const override {
+        return utils::dump(os, _data, base);
+    }
 
 private:
     std::vector<uint8_t> _data{};
