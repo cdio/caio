@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 
+#include "types.hpp"
 #include "cbm_bus.hpp"
 
 
@@ -43,7 +44,6 @@ constexpr static const size_t COMMAND_MAXLEN   = 58;
 
 constexpr static const addr_t PRG_START_ADDR   = 0x0401;    /* C1541 forces this value on PRGs */
 
-
 /**
  * Convert a PETSCII character to UTF-8.
  * @param petscii The PETSCII character.
@@ -55,7 +55,6 @@ static inline uint8_t pet_to_u8(uint8_t petscii)
 {
     return ((petscii & ~128) | 32);
 }
-
 
 /**
  * Convert a UTF-8 character to PETSCII.
@@ -69,7 +68,6 @@ static inline uint8_t u8_to_pet(uint8_t u8)
     return std::toupper(u8);
 }
 
-
 /**
  * Convert a PETSCII string to UTF-8.
  * @param petscii The PETSCII string.
@@ -77,13 +75,12 @@ static inline uint8_t u8_to_pet(uint8_t u8)
  * @see pet_to_u8(uint8_t)
  * @see u8_to_pet(string &)
  */
-inline std::string pet_to_u8(const std::string &petscii)
+inline std::string pet_to_u8(const std::string& petscii)
 {
     std::string u8{petscii};
     std::transform(u8.begin(), u8.end(), u8.begin(), static_cast<uint8_t(*)(uint8_t)>(&pet_to_u8));
     return u8;
 }
-
 
 /**
  * Convert a UTF-8 string to PETSCII.
@@ -92,22 +89,20 @@ inline std::string pet_to_u8(const std::string &petscii)
  * @see u8_to_pet(uint8_t)
  * @see pet_to_u8(string &)
  */
-inline std::string u8_to_pet(const std::string &u8)
+inline std::string u8_to_pet(const std::string& u8)
 {
     std::string petscii{u8};
     std::transform(petscii.begin(), petscii.end(), petscii.begin(), static_cast<uint8_t(*)(uint8_t)>(&u8_to_pet));
     return petscii;
 }
 
-
 /**
  * @return True if the string contains pattern matching values ('?', '*'); false otherwise.
  */
-static inline bool is_pattern(const std::string &fname)
+static inline bool is_pattern(const std::string& fname)
 {
     return (fname.find_first_of("*?") != std::string::npos);
 }
-
 
 /**
  * Commodore 1541 status codes.
@@ -149,7 +144,6 @@ enum class Status {
     DRIVE_NOT_READY                 = 74
 };
 
-
 /**
  * Get the string representation of a status code.
  * @param st Status code.
@@ -157,7 +151,6 @@ enum class Status {
  * @see Status
  */
 std::string to_string(Status st);
-
 
 /**
  * Commodore 1541 DOS commands.
@@ -194,7 +187,6 @@ enum class DOSCommand {
     UI_M,                   /* Set VIC20 speed                          */
 };
 
-
 /**
  * Commodore 1541 file open modes.
  */
@@ -204,7 +196,6 @@ enum class OpenMode {
     TRUNC,                  /* Open for write, truncate if it exists    */
     DIR,                    /* Open directory (filename matching)       */
 };
-
 
 /**
  * Commodore 1541 file types.
@@ -217,7 +208,6 @@ enum class FileType {
     REL = 4,
 };
 
-
 /**
  * Commodore 1541 base class.
  * This class handles the bus communications, it parses and executes commands
@@ -225,8 +215,7 @@ enum class FileType {
  */
 class C1541 : public cbm_bus::Device {
 public:
-    constexpr static const char *TYPE = "C1541";
-
+    constexpr static const char* TYPE = "C1541";
 
     /**
      * Initialise this C1541 drive.
@@ -237,7 +226,7 @@ public:
      * @see cbm_bus::Device
      * @see attach()
      */
-    C1541(uint8_t unit, const std::shared_ptr<cbm_bus::Bus> &bus)
+    C1541(uint8_t unit, const sptr_t<cbm_bus::Bus>& bus)
         : cbm_bus::Device{unit, bus} {
         type(TYPE);
     }
@@ -251,7 +240,7 @@ public:
      * @param path File, directory or device to attach to.
      * @exception IOError
      */
-    virtual void attach(const std::string &path) = 0;
+    virtual void attach(const std::string& path) = 0;
 
     /**
      * Reset this drive.
@@ -263,7 +252,7 @@ public:
     /**
      * @return A reference to the attached path.
      */
-    const std::string &attached_path() const {
+    const std::string& attached_path() const {
         return _attached_path;
     }
 
@@ -300,7 +289,7 @@ protected:
      * @see OpenMode
      * @see Status
      */
-    virtual Status channel_open(uint8_t ch, const std::string &petfname, FileType type, OpenMode mode) = 0;
+    virtual Status channel_open(uint8_t ch, const std::string& petfname, FileType type, OpenMode mode) = 0;
 
     /**
      * Close a channel.
@@ -333,7 +322,7 @@ protected:
      * @return A status code.
      * @see Status
      */
-    virtual Status channel_write(uint8_t ch, const buf_t &buf) = 0;
+    virtual Status channel_write(uint8_t ch, const buf_t& buf) = 0;
 
     /**
      * Execute a DOS command.
@@ -343,13 +332,13 @@ protected:
      * @see DOSCommand
      * @see Status
      */
-    virtual Status command(DOSCommand cmd, const std::string &param) = 0;
+    virtual Status command(DOSCommand cmd, const std::string& param) = 0;
 
     /**
      * Set attached native path name.
      * @param path Path to attach to.
      */
-    void attached_path(const std::string &path) {
+    void attached_path(const std::string& path) {
         _attached_path = path;
     }
 
@@ -360,23 +349,22 @@ private:
         DOSCommand        code;     /* Command code                 */
     };
 
-
     class StatusChannel {
     public:
         explicit StatusChannel(Status st, uint8_t track = 0, uint8_t sector = 0) {
             reset(st, track, sector);
         }
 
-        StatusChannel &operator=(const Status &st) {
+        StatusChannel& operator=(Status st) {
             reset(st, 0, 0);
             return *this;
         }
 
-        bool operator==(const Status &st) const {
+        bool operator==(Status st) const {
             return _status == st;
         }
 
-        void reset(const Status &st, uint8_t track, uint8_t sector);
+        void reset(Status st, uint8_t track, uint8_t sector);
 
         ReadByte read();
 
@@ -393,11 +381,10 @@ private:
         size_t                _pos{};
     };
 
-
     /**
      * @see cbm_bus::Device::open()
      */
-    void open(uint8_t ch, const std::string &param) override;
+    void open(uint8_t ch, const std::string& param) override;
 
     /**
      * @see cbm_bus::Device::close()
@@ -417,7 +404,7 @@ private:
     /**
      * @see cbm_bus::Device::write()
      */
-    void write(uint8_t ch, const buf_t &buf) override;
+    void write(uint8_t ch, const buf_t& buf) override;
 
     /**
      * Execute a command.
@@ -426,7 +413,7 @@ private:
      * @see COMMAND_CHANNEL
      * @see command(DOSCommand, const std::string &)
      */
-    void command(const std::string &param);
+    void command(const std::string& param);
 
     /**
      * Check wether this disk drive is attached.

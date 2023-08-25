@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -33,7 +33,7 @@ namespace caio {
  */
 class Joystick : public Name {
 public:
-    constexpr static const char *TYPE       = "JOY";
+    constexpr static const char* TYPE       = "JOY";
     constexpr static unsigned JOYID_INVALID = static_cast<unsigned>(-1);
 
     enum JoyPosition {
@@ -49,9 +49,12 @@ public:
      * Initialise this joystick.
      * @param label Label assigned to this joystick.
      */
-    Joystick(const std::string &label = {});
+    Joystick(const std::string& label = {})
+        : Name{TYPE, label} {
+    }
 
-    virtual ~Joystick();
+    virtual ~Joystick() {
+    }
 
     /**
      * Reset this joystick.
@@ -59,25 +62,34 @@ public:
      * this joystick to a real game controller.
      * @param jid Identifier assigned to this joystick.
      */
-    virtual void reset(unsigned jid = JOYID_INVALID);
+    virtual void reset(unsigned jid = JOYID_INVALID) {
+        _joyid = jid;
+        _position = JOY_NONE;
+    }
 
     /**
      * Set the current joystick position.
      * @param pos A bitwise combination of the joystick positions.
      * @see JoyPosition
      */
-    virtual void position(uint8_t pos);
+    virtual void position(uint8_t pos) {
+        _position = pos;
+    }
 
     /**
      * @return A bitwise combination of the current joystick positions.
      * @see JoyPosition
      */
-    virtual uint8_t position() const;
+    virtual uint8_t position() const {
+        return _position;
+    }
 
     /**
      * @return True if there is a real game controller behind this joystick; false otherwise
      */
-    bool is_connected() const;
+    bool is_connected() const {
+        return (_joyid != JOYID_INVALID);
+    }
 
 private:
     unsigned _joyid{JOYID_INVALID};

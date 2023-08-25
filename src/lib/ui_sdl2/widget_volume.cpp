@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -26,8 +26,7 @@ namespace widget {
 
 #include "icons/volume_128x21.hpp"
 
-
-Volume::Volume(SDL_Renderer *renderer, const std::function<float()> &getvol, const std::function<void(float)> &setvol)
+Volume::Volume(SDL_Renderer* renderer, const std::function<float()>& getvol, const std::function<void(float)>& setvol)
     : Widget{renderer},
       _getvol{getvol},
       _setvol{setvol}
@@ -35,16 +34,12 @@ Volume::Volume(SDL_Renderer *renderer, const std::function<float()> &getvol, con
     Widget::load(volume_128x21_png);
 }
 
-Volume::~Volume()
-{
-}
-
 bool Volume::enabled() const
 {
     return (_getvol && _setvol);
 }
 
-void Volume::event(const SDL_Event &event, const SDL_Rect &rect)
+void Volume::event(const SDL_Event& event, const SDL_Rect& rect)
 {
     switch (event.type) {
     case SDL_MOUSEWHEEL:
@@ -65,7 +60,7 @@ void Volume::event(const SDL_Event &event, const SDL_Rect &rect)
     Widget::event(event, rect);
 }
 
-void Volume::render(const SDL_Rect &dstrect)
+void Volume::render(const SDL_Rect& dstrect)
 {
     if (_volidx < 0) {
         volume(0);

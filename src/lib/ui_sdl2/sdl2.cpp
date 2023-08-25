@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -160,12 +160,12 @@ std::string sdl_error()
     return SDL_GetError();
 }
 
-void throw_sdl_uierror(const std::string &reason)
+void throw_sdl_uierror(const std::string& reason)
 {
     throw UIError{"ui", reason + ": " + sdl_error()};
 }
 
-bool in_rect(int x, int y, const SDL_Rect &rect)
+bool in_rect(int x, int y, const SDL_Rect& rect)
 {
     return ((x >= rect.x && x < rect.x + rect.w) && (y >= rect.y && y < rect.y + rect.h));
 }

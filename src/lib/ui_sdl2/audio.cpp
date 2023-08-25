@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -29,15 +29,7 @@ namespace caio {
 namespace ui {
 namespace sdl2 {
 
-AudioStream::AudioStream()
-{
-}
-
-AudioStream::~AudioStream()
-{
-}
-
-void AudioStream::reset(const ui::AudioConfig &aconf)
+void AudioStream::reset(const ui::AudioConfig& aconf)
 {
     if (_devid) {
         SDL_CloseAudioDevice(_devid);
@@ -55,7 +47,7 @@ void AudioStream::reset(const ui::AudioConfig &aconf)
     desired.format   = AUDIO_S16SYS;  /* Native endian signed 16 bits */
     desired.channels = aconf.channels;
     desired.samples  = aconf.samples;
-    desired.userdata = static_cast<void *>(this);
+    desired.userdata = static_cast<void*>(this);
     desired.callback = reinterpret_cast<SDL_AudioCallback>(AudioStream::stream_data);
 
     _devid = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0);
@@ -135,7 +127,7 @@ float AudioStream::volume() const
 
 AudioBuffer AudioStream::buffer()
 {
-    static auto dispatcher = [this](samples_i16 &&buf) {
+    static auto dispatcher = [this](samples_i16&& buf) {
         _playing_queue.push(std::move(buf));
     };
 
@@ -151,7 +143,7 @@ AudioBuffer AudioStream::buffer()
     return {dispatcher, _free_queue.pop()};
 }
 
-void AudioStream::stream_data(AudioStream *self, uint8_t *stream, int len)
+void AudioStream::stream_data(AudioStream* self, uint8_t* stream, int len)
 {
     if (self->_stop || self->_playing_queue.size() == 0) {
         std::fill_n(stream, len, 0);
@@ -159,7 +151,7 @@ void AudioStream::stream_data(AudioStream *self, uint8_t *stream, int len)
     }
 
     const auto samples = self->_playing_queue.pop();
-    int16_t *data = reinterpret_cast<int16_t *>(stream);
+    int16_t* data = reinterpret_cast<int16_t*>(stream);
     size_t datasiz = std::min<size_t>(len >> 1, samples.size());;
     if (datasiz < samples.size()) {
         log.warn("ui: audio: Destination buffer size: %d, expected %d. Audio stream truncated\n",

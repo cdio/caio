@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -37,8 +37,7 @@ public:
     constexpr static const uint8_t CBMBUS_READ_MASK  = CBMBUS_CLK_IN | CBMBUS_DAT_IN;
     constexpr static const uint8_t CBMBUS_WRITE_MASK = CBMBUS_ATN_OUT | CBMBUS_CLK_OUT | CBMBUS_DAT_OUT;
 
-
-    C64BusController(const std::shared_ptr<cbm_bus::Bus> &bus, const std::shared_ptr<Mos6526> &cia2);
+    C64BusController(const sptr_t<cbm_bus::Bus>& bus, const sptr_t<Mos6526>& cia2);
 
     virtual ~C64BusController() {
     }
@@ -54,9 +53,8 @@ private:
      */
     void bus_write(uint8_t addr, uint8_t value);
 
-
-    std::shared_ptr<Mos6526> _cia2{};
-    uint8_t                  _lastw{};    /* Last written value */
+    sptr_t<Mos6526> _cia2{};
+    uint8_t         _lastw{};   /* Last written value */
 };
 
 }

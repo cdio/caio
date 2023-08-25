@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -35,7 +35,6 @@ namespace fs {
  */
 std::string home();
 
-
 /**
  * Set a the proper home path.
  * If the specified path starts with '~' it is replaced
@@ -43,34 +42,30 @@ std::string home();
  * @parma path Path to fix.
  * @return The fixed path.
  */
-std::string fix_home(const std::string &path);
-
+std::string fix_home(const std::string& path);
 
 /**
  * Detect whether a file exists or not.
  * @param path Path to the file.
  * @return True if the specified file exists; false otherwise.
  */
-bool exists(const std::string &path);
-
+bool exists(const std::string& path);
 
 /**
  * std::filesystem::is_directory() wrapper.
  */
-static inline bool is_directory(const std::string &path)
+static inline bool is_directory(const std::string& path)
 {
     return std::filesystem::is_directory(path);
 }
 
-
 /**
  * std::filesystem::file_size() wrapper.
  */
-static inline std::uintmax_t file_size(const std::string &path)
+static inline std::uintmax_t file_size(const std::string& path)
 {
     return std::filesystem::file_size(path);
 }
-
 
 /**
  * Search for a file.
@@ -85,14 +80,12 @@ static inline std::uintmax_t file_size(const std::string &path)
  *              if it is not found there then try the search paths.
  * @return The existing file name; an empty string if the file is not found.
  */
-std::string search(const std::string &fname, const std::initializer_list<std::string> &spath = {}, bool cwd = false);
-
+std::string search(const std::string& fname, const std::initializer_list<std::string>& spath = {}, bool cwd = false);
 
 /**
  * @return The base name given a full path name.
  */
-std::string basename(const std::string &fullpath);
-
+std::string basename(const std::string& fullpath);
 
 /**
  * Concatenate files.
@@ -101,16 +94,14 @@ std::string basename(const std::string &fullpath);
  * @param src Source file name.
  * @exception IOError
  */
-void concat(const std::string &dst, const std::string &src);
-
+void concat(const std::string& dst, const std::string& src);
 
 /**
  * Remove a file.
  * @param fname File remove.
  * @return True on success; false on error.
  */
-bool unlink(const std::string &fname);
-
+bool unlink(const std::string& fname);
 
 /**
  * Match a file.
@@ -119,8 +110,7 @@ bool unlink(const std::string &fname);
  * @return True if the file name matches the specified pattern; false otherwise.
  * @see ::fnmatch(3)
  */
-bool match(const std::string &path, const std::string &pattern);
-
+bool match(const std::string& path, const std::string& pattern);
 
 /**
  * Get a directory listing.
@@ -130,9 +120,8 @@ bool match(const std::string &path, const std::string &pattern);
  * @return False if the callback stopped the traversal; true otherwise.
  * @see fs::match()
  */
-bool directory(const std::string &path, const std::string &pattern,
-    const std::function<bool(const std::string &, uint64_t)> &callback);
-
+bool directory(const std::string& path, const std::string& pattern,
+    const std::function<bool(const std::string&, uint64_t)>& callback);
 
 /**
  * Get a directory listing.
@@ -142,7 +131,7 @@ bool directory(const std::string &path, const std::string &pattern,
  * @see directory(const std::string &, const std::string &, const std::function<void(const std::string &, uint64_t)> &)
  * @see fs::match()
  */
-std::vector<std::pair<std::string, uint64_t>> directory(const std::string &path, const std::string &pattern);
+std::vector<std::pair<std::string, uint64_t>> directory(const std::string& path, const std::string& pattern);
 
 }
 }

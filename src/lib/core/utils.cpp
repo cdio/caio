@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -24,7 +24,7 @@
 namespace caio {
 namespace utils {
 
-std::string tolow(const std::string &str)
+std::string tolow(const std::string& str)
 {
     std::string lstr{str};
 
@@ -35,7 +35,7 @@ std::string tolow(const std::string &str)
     return lstr;
 }
 
-std::string toup(const std::string &str)
+std::string toup(const std::string& str)
 {
     std::string ustr{str};
 
@@ -46,7 +46,7 @@ std::string toup(const std::string &str)
     return ustr;
 }
 
-std::vector<std::string> split(const std::string &str, char sep)
+std::vector<std::string> split(const std::string& str, char sep)
 {
     std::vector<std::string> v{};
     size_t pos{}, ipos{};
@@ -60,7 +60,7 @@ std::vector<std::string> split(const std::string &str, char sep)
     return v;
 }
 
-std::string trim(const std::string &str)
+std::string trim(const std::string& str)
 {
     size_t len = str.length();
     size_t begin = str.find_first_not_of(" \t");
@@ -79,7 +79,7 @@ std::string trim(const std::string &str)
     return (str.substr(begin, end));
 }
 
-unsigned long long to_ulonglong(const std::string &str, size_t max)
+unsigned long long to_ulonglong(const std::string& str, size_t max)
 {
     if (str.empty()) {
         throw InvalidNumber{str};
@@ -97,7 +97,7 @@ unsigned long long to_ulonglong(const std::string &str, size_t max)
     default:;
     }
 
-    char *err;
+    char* err;
     unsigned long long val = std::strtoull(str.c_str() + pos, &err, base);
     if (*err != '\0' || val > max) {
         throw InvalidNumber{str};
@@ -106,11 +106,11 @@ unsigned long long to_ulonglong(const std::string &str, size_t max)
     return val;
 }
 
-std::string to_string(const std::vector<uint8_t> &buf)
+std::string to_string(const std::vector<uint8_t>& buf)
 {
     std::string str{};
 
-    for (auto &value : buf) {
+    for (auto& value : buf) {
         str.push_back(static_cast<char>(value));
     }
 

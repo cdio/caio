@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -27,18 +27,14 @@ namespace widget {
 #include "icons/pause_128x2.hpp"
 
 
-Pause::Pause(SDL_Renderer *renderer, const std::function<bool()> &upd)
+Pause::Pause(SDL_Renderer* renderer, const std::function<bool()>& upd)
     : Widget{renderer},
       _update{upd}
 {
     Widget::load(pause_128x2_png);
 }
 
-Pause::~Pause()
-{
-}
-
-void Pause::render(const SDL_Rect &dstrect)
+void Pause::render(const SDL_Rect& dstrect)
 {
     bool is_paused{};
 

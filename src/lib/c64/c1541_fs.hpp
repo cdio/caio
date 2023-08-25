@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -43,17 +43,16 @@ namespace c1541 {
  */
 class C1541Fs : public C1541 {
 public:
-    constexpr static const char *TYPE = "C1541FS";
-
+    constexpr static const char* TYPE = "C1541FS";
 
     /**
      * Initialise this 1541 Filesystem drive.
      * @param unit Unit number (usually 8, 9, 10 or 11);
      * @param bus  Bus to connect to.
      * @exception InvalidArgument
-     * @see C1541(uint8_t, const std::shared_ptr<cbm_bus::Bus> &)
+     * @see C1541(uint8_t, const sptr_t<cbm_bus::Bus>&)
      */
-    C1541Fs(uint8_t unit, const std::shared_ptr<cbm_bus::Bus> &bus)
+    C1541Fs(uint8_t unit, const sptr_t<cbm_bus::Bus>& bus)
         : C1541{unit, bus} {
         type(TYPE);
     }
@@ -64,7 +63,7 @@ public:
     /**
      * @see C1541::attach()
      */
-    void attach(const std::string &path) override;
+    void attach(const std::string& path) override;
 
 private:
     /**
@@ -83,11 +82,11 @@ private:
         Channel() {
         }
 
-        Channel(Channel &&other) {
+        Channel(Channel&& other) {
             operator=(std::move(other));
         }
 
-        Channel &operator=(Channel &&other) {
+        Channel& operator=(Channel&& other) {
             fname    = std::move(other.fname);
             type     = other.type;
             mode     = other.mode;
@@ -110,11 +109,10 @@ private:
 
     using channel_array_t = std::array<Channel, MAX_CHANNELS - 1>;
 
-
     /**
      * @see C1541::channel_open()
      */
-    Status channel_open(uint8_t ch, const std::string &petfname, FileType type, OpenMode mode) override;
+    Status channel_open(uint8_t ch, const std::string& petfname, FileType type, OpenMode mode) override;
 
     /**
      * @see C1541::channel_close()
@@ -134,24 +132,24 @@ private:
     /**
      * @see C1541::channel_write()
      */
-    Status channel_write(uint8_t ch, const buf_t &buf) override;
+    Status channel_write(uint8_t ch, const buf_t& buf) override;
 
     /**
-     * @see C1541::command(DOSCommand, const std::string &)
+     * @see C1541::command(DOSCommand, const std::string&)
      */
-    Status command(DOSCommand cmd, const std::string &param) override;
+    Status command(DOSCommand cmd, const std::string& param) override;
 
-    std::string to_basic(addr_t &addr, const std::filesystem::path &fspath, size_t fsize);
+    std::string to_basic(addr_t& addr, const std::filesystem::path& fspath, size_t fsize);
 
-    Status open_dir(uint8_t ch, Channel &channel, const std::string &fname, FileType type, OpenMode mode);
+    Status open_dir(uint8_t ch, Channel& channel, const std::string& fname, FileType type, OpenMode mode);
 
-    Status open_file(uint8_t ch, Channel &channel, const std::string &fname, FileType type, OpenMode mode);
+    Status open_file(uint8_t ch, Channel& channel, const std::string& fname, FileType type, OpenMode mode);
 
-    Status copy(const std::string &param);
+    Status copy(const std::string& param);
 
-    Status rename(const std::string &param);
+    Status rename(const std::string& param);
 
-    Status scratch(const std::string &param);
+    Status scratch(const std::string& param);
 
     Status initialize();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -47,9 +47,10 @@ public:
      * @param ram     RAM (64K);
      * @param chargen Chargen ROM (4K).
      */
-    Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, const devptr_t &ram, const devptr_t &chargen);
+    Vic2ASpace(const sptr_t<Mos6526>& cia2, const devptr_t& ram, const devptr_t& chargen);
 
-    virtual ~Vic2ASpace();
+    virtual ~Vic2ASpace() {
+    }
 
 private:
     /**
@@ -60,7 +61,7 @@ private:
         ASpace::reset(_rbanks[_bank], _wbanks[_bank], ADDR_MASK);
     }
 
-    std::shared_ptr<Mos6526> _cia2{};
+    sptr_t<Mos6526>          _cia2{};
     size_t                   _bank{};
     std::array<addrmap_t, 4> _rbanks{};
     std::array<addrmap_t, 4> _wbanks{};

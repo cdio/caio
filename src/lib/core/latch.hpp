@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -44,7 +44,7 @@ public:
      * @param value Value to set.
      * @return this.
      */
-    Latch_ &operator=(T value) {
+    Latch_& operator=(T value) {
         _reg = value;
         return *this;
     }
@@ -87,7 +87,7 @@ public:
      * @parma value Value to AND to this latch register.
      * @return this
      */
-    Latch_ &operator&=(T value) {
+    Latch_& operator&=(T value) {
         _reg &= value;
         return *this;
     }
@@ -97,7 +97,7 @@ public:
      * @param value Value to OR to this latch register.
      * @return this
      */
-    Latch_ &operator|=(T value) {
+    Latch_& operator|=(T value) {
         _reg |= value;
         return *this;
     }

@@ -47,7 +47,6 @@ RgbaTable Mos6569::builtin_palette{
     0xB2B2B2FF
 };
 
-
 Mos6569::Mos6569(const std::string& label, const sptr_t<ASpace>& mmap, const devptr_t& vcolor)
     : Device{TYPE, label},
       Clockable{},

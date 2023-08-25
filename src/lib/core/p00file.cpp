@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -25,21 +25,7 @@
 
 namespace caio {
 
-P00File::P00File(const std::string &fname)
-{
-    P00File::load(fname);
-}
-
-P00File::~P00File()
-{
-}
-
-const P00File::P00Header &P00File::header() const
-{
-    return _hdr;
-}
-
-void P00File::load(const std::string &fname)
+void P00File::load(const std::string& fname)
 {
     if (!fname.empty()) {
         std::ifstream is{fname, std::ios::binary | std::ios::in};
@@ -47,7 +33,7 @@ void P00File::load(const std::string &fname)
             throw IOError{"Can't open P00 file: " + fname + ": " + Error::to_string()};
         }
 
-        if (!is.read(reinterpret_cast<char *>(&_hdr), sizeof(_hdr))) {
+        if (!is.read(reinterpret_cast<char*>(&_hdr), sizeof(_hdr))) {
             throw IOError{"Can't read P00 header: " + fname + ": " + Error::to_string()};
         }
 
@@ -63,7 +49,7 @@ void P00File::load(const std::string &fname)
     }
 }
 
-void P00File::save(const std::string &fname, addr_t addr)
+void P00File::save(const std::string& fname, addr_t addr)
 {
     if (!fname.empty()) {
         std::ofstream os{fname, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
@@ -71,7 +57,7 @@ void P00File::save(const std::string &fname, addr_t addr)
             throw IOError{"Can't create P00 file: " + fname + ": " + Error::to_string()};
         }
 
-        if (!os.write(reinterpret_cast<char *>(&_hdr), sizeof(_hdr))) {
+        if (!os.write(reinterpret_cast<char*>(&_hdr), sizeof(_hdr))) {
             throw IOError{"Can't write P00 header: " + fname + ": " + Error::to_string()};
         }
 

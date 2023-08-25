@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -22,14 +22,10 @@
 namespace caio {
 namespace c64 {
 
-C64Joystick::C64Joystick(const std::string &label)
+C64Joystick::C64Joystick(const std::string& label)
     : Joystick{label}
 {
     C64Joystick::reset();
-}
-
-C64Joystick::~C64Joystick()
-{
 }
 
 void C64Joystick::reset(unsigned jid)

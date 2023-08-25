@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -32,26 +32,19 @@ class ConfileError : public Error {
     using Error::Error;
 };
 
-
 /**
  * Section of a configuration file.
  * @see Confile
  */
 class ConfileSection : public std::map<std::string, std::string> {
 public:
-    ConfileSection() {
-    }
-
-    virtual ~ConfileSection() {
-    }
-
     /**
      * Get a configuration value.
      * If the specified key does not exit an empty one is created.
      * @param key Key name.
      * @return The value associated with the specified key.
      */
-    std::string &operator[](const std::string &key) {
+    std::string& operator[](const std::string& key) {
         return (std::map<std::string, std::string>::operator[](key));
     }
 
@@ -62,7 +55,7 @@ public:
      * @param dvalue Default value to set in case the specified key does not exist.
      * @return The value associated to the specified key.
      */
-    std::string &operator()(const std::string &key, const std::string &dvalue = {});
+    std::string& operator()(const std::string& key, const std::string& dvalue = {});
 
     /**
      * Get a configuration value.
@@ -70,13 +63,12 @@ public:
      * @return The value associated to the specified key.
      * @exception MissingKeyError
      */
-    std::string &at(const std::string &key);
+    std::string& at(const std::string& key);
 
-    const std::string &at(const std::string &key) const {
-        return const_cast<ConfileSection *>(this)->at(key);
+    const std::string& at(const std::string& key) const {
+        return const_cast<ConfileSection*>(this)->at(key);
     }
 };
-
 
 /**
  * Configuration file.
@@ -107,7 +99,7 @@ public:
      * @param fname  Name of the configuration file;
      * @param spaths Search paths.
      */
-    Confile(const std::string &fname, const std::initializer_list<std::string> &spaths = {}) {
+    Confile(const std::string& fname, const std::initializer_list<std::string>& spaths = {}) {
         parse(fname, spaths);
     }
 
@@ -131,7 +123,7 @@ public:
     /**
      * @return The full pathname of the parsed configuration file.
      */
-    const std::string &fullpath() const {
+    const std::string& fullpath() const {
         return _fullpath;
     }
 
@@ -143,7 +135,7 @@ public:
      * @return true if the file is loaded and parsed; false otherwise.
      * @exception ConfileError if the specified file is not found or cannot be opened.
      */
-    virtual void parse(const std::string &fname, const std::initializer_list<std::string> &spaths = {});
+    virtual void parse(const std::string& fname, const std::initializer_list<std::string>& spaths = {});
 
     /**
      * Get a configuration section.
@@ -151,7 +143,7 @@ public:
      * @param sname Name of the section.
      * @return The requested section.
      */
-    ConfileSection &operator[](const std::string &sname) {
+    ConfileSection& operator[](const std::string& sname) {
         return _sections[utils::tolow(sname)];
     }
 
@@ -160,7 +152,7 @@ public:
      * @param secname Section name.
      * @return An iterator to the section; or end() if the section does not exists.
      */
-    std::map<std::string, ConfileSection>::const_iterator find(const std::string &secname) const {
+    std::map<std::string, ConfileSection>::const_iterator find(const std::string& secname) const {
         return _sections.find(secname);
     }
 
@@ -177,10 +169,10 @@ public:
      * @return The required section.
      * @exception MissingSectionError
      */
-    ConfileSection &at(const std::string &sname);
+    ConfileSection& at(const std::string& sname);
 
-    const ConfileSection &at(const std::string &key) const {
-        return const_cast<Confile *>(this)->at(key);
+    const ConfileSection& at(const std::string& key) const {
+        return const_cast<Confile*>(this)->at(key);
     }
 
     /**
@@ -189,9 +181,9 @@ public:
     std::string to_string() const;
 
 private:
-    std::ifstream open(const std::string &fname, const std::initializer_list<std::string> &spaths = {});
+    std::ifstream open(const std::string& fname, const std::initializer_list<std::string>& spaths = {});
 
-    void load(std::ifstream &is);
+    void load(std::ifstream& is);
 
     std::string                           _fullpath{};
     std::map<std::string, ConfileSection> _sections{};

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -28,19 +28,14 @@ namespace widget {
 
 #include "icons/floppy_128x2.hpp"
 
-
-Floppy::Floppy(SDL_Renderer *renderer, const std::function<Status()> &upd)
+Floppy::Floppy(SDL_Renderer* renderer, const std::function<Status()>& upd)
     : Widget{renderer},
       _update{upd}
 {
     Widget::load(floppy_128x2_png);
 }
 
-Floppy::~Floppy()
-{
-}
-
-void Floppy::render(const SDL_Rect &dstrect)
+void Floppy::render(const SDL_Rect& dstrect)
 {
     Status st{};
     if (_update) {
@@ -61,7 +56,7 @@ void Floppy::render(const SDL_Rect &dstrect)
         }
     }
 
-    const Rgba &colour = (st.is_attached ? ENABLED_COLOR : DISABLED_COLOR);
+    const Rgba& colour = (st.is_attached ? ENABLED_COLOR : DISABLED_COLOR);
     Widget::render(rect, dstrect, colour);
 }
 

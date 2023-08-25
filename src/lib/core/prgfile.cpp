@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -25,26 +25,7 @@
 
 namespace caio {
 
-PrgFile::PrgFile(const std::string &fname)
-{
-    PrgFile::load(fname);
-}
-
-PrgFile::~PrgFile()
-{
-}
-
-addr_t PrgFile::address() const
-{
-    return _hdr.addr;
-}
-
-void PrgFile::address(addr_t addr)
-{
-    _hdr.addr = addr;
-}
-
-void PrgFile::load(const std::string &fname)
+void PrgFile::load(const std::string& fname)
 {
     if (!fname.empty()) {
         std::ifstream is{fname, std::ios::binary | std::ios::in};
@@ -56,9 +37,9 @@ void PrgFile::load(const std::string &fname)
     }
 }
 
-std::istream &PrgFile::load(std::istream &is)
+std::istream &PrgFile::load(std::istream& is)
 {
-    if (!is.read(reinterpret_cast<char *>(&_hdr), sizeof(_hdr))) {
+    if (!is.read(reinterpret_cast<char*>(&_hdr), sizeof(_hdr))) {
         throw IOError{"Can't read PRG header: " + Error::to_string()};
     }
 
@@ -66,14 +47,14 @@ std::istream &PrgFile::load(std::istream &is)
 
     clear();
     uint8_t c{};
-    while (is.read(reinterpret_cast<char *>(&c), sizeof(c))) {
+    while (is.read(reinterpret_cast<char*>(&c), sizeof(c))) {
         push_back(c);
     }
 
     return is;
 }
 
-void PrgFile::save(const std::string &fname, addr_t addr)
+void PrgFile::save(const std::string& fname, addr_t addr)
 {
     if (!fname.empty()) {
         std::ofstream os{fname, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
@@ -85,16 +66,16 @@ void PrgFile::save(const std::string &fname, addr_t addr)
     }
 }
 
-std::ostream &PrgFile::save(std::ostream &os, addr_t addr)
+std::ostream& PrgFile::save(std::ostream& os, addr_t addr)
 {
     return PrgFile::save(os, (addr == 0 ? address() : addr), {data(), size()});
 }
 
-std::ostream &PrgFile::save(std::ostream &os, addr_t addr, const gsl::span<uint8_t> &data)
+std::ostream& PrgFile::save(std::ostream& os, addr_t addr, const gsl::span<uint8_t>& data)
 {
     addr_t leaddr = htole16(addr);
-    if (!os.write(reinterpret_cast<char *>(&leaddr), sizeof(leaddr)) ||
-        !os.write(reinterpret_cast<char *>(data.data()), data.size())) {
+    if (!os.write(reinterpret_cast<char*>(&leaddr), sizeof(leaddr)) ||
+        !os.write(reinterpret_cast<char*>(data.data()), data.size())) {
             throw IOError{"Can't write file data: " + Error::to_string()};
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -24,7 +24,7 @@ namespace caio {
 /********************************************************************************
  * BPL (Branch relative if positive)
  ********************************************************************************/
-int Mos6502::i_BPL(Mos6502 &self, addr_t rel)
+int Mos6502::i_BPL(Mos6502& self, addr_t rel)
 {
     /*
      * BPL $r8
@@ -42,7 +42,7 @@ int Mos6502::i_BPL(Mos6502 &self, addr_t rel)
 /********************************************************************************
  * BMI (Branch relative if negative)
  ********************************************************************************/
-int Mos6502::i_BMI(Mos6502 &self, addr_t rel)
+int Mos6502::i_BMI(Mos6502& self, addr_t rel)
 {
     /*
      * BMI $r8
@@ -60,7 +60,7 @@ int Mos6502::i_BMI(Mos6502 &self, addr_t rel)
 /********************************************************************************
  * BVC (Branch relative if not overflow)
  ********************************************************************************/
-int Mos6502::i_BVC(Mos6502 &self, addr_t rel)
+int Mos6502::i_BVC(Mos6502& self, addr_t rel)
 {
     /*
      * BVC $r8
@@ -78,7 +78,7 @@ int Mos6502::i_BVC(Mos6502 &self, addr_t rel)
 /********************************************************************************
  * BVS (Branch relative if overflow)
  ********************************************************************************/
-int Mos6502::i_BVS(Mos6502 &self, addr_t rel)
+int Mos6502::i_BVS(Mos6502& self, addr_t rel)
 {
     /*
      * BVS $r8
@@ -96,7 +96,7 @@ int Mos6502::i_BVS(Mos6502 &self, addr_t rel)
 /********************************************************************************
  * BCC (Branch relative if carry is not set)
  ********************************************************************************/
-int Mos6502::i_BCC(Mos6502 &self, addr_t rel)
+int Mos6502::i_BCC(Mos6502& self, addr_t rel)
 {
     /*
      * BCC $r8
@@ -114,7 +114,7 @@ int Mos6502::i_BCC(Mos6502 &self, addr_t rel)
 /********************************************************************************
  * BCS (Branch relative if carry is set)
  ********************************************************************************/
-int Mos6502::i_BCS(Mos6502 &self, addr_t rel)
+int Mos6502::i_BCS(Mos6502& self, addr_t rel)
 {
     /*
      * BCS $r8
@@ -132,7 +132,7 @@ int Mos6502::i_BCS(Mos6502 &self, addr_t rel)
 /********************************************************************************
  * BNE (Branch relative if not zero)
  ********************************************************************************/
-int Mos6502::i_BNE(Mos6502 &self, addr_t rel)
+int Mos6502::i_BNE(Mos6502& self, addr_t rel)
 {
     /*
      * BNE $r8
@@ -150,7 +150,7 @@ int Mos6502::i_BNE(Mos6502 &self, addr_t rel)
 /********************************************************************************
  * BEQ (Branch relative if zero)
  ********************************************************************************/
-int Mos6502::i_BEQ(Mos6502 &self, addr_t rel)
+int Mos6502::i_BEQ(Mos6502& self, addr_t rel)
 {
     /*
      * BEQ $r8
@@ -168,7 +168,7 @@ int Mos6502::i_BEQ(Mos6502 &self, addr_t rel)
 /********************************************************************************
  * BRK (Software interrupt)
  ********************************************************************************/
-int Mos6502::i_BRK(Mos6502 &self, addr_t _)
+int Mos6502::i_BRK(Mos6502& self, addr_t)
 {
     /*
      * BRK
@@ -196,7 +196,7 @@ int Mos6502::i_BRK(Mos6502 &self, addr_t _)
 /********************************************************************************
  * RTI (Return from Interrupt)
  ********************************************************************************/
-int Mos6502::i_RTI(Mos6502 &self, addr_t _)
+int Mos6502::i_RTI(Mos6502& self, addr_t)
 {
     /*
      * RTI
@@ -215,7 +215,7 @@ int Mos6502::i_RTI(Mos6502 &self, addr_t _)
 /********************************************************************************
  * JSR (Jump to Subroutine)
  ********************************************************************************/
-int Mos6502::i_JSR(Mos6502 &self, addr_t addr)
+int Mos6502::i_JSR(Mos6502& self, addr_t addr)
 {
     /*
      * JSR $0000
@@ -232,7 +232,7 @@ int Mos6502::i_JSR(Mos6502 &self, addr_t addr)
 /********************************************************************************
  * RTS (Return from Subroutine)
  ********************************************************************************/
-int Mos6502::i_RTS(Mos6502 &self, addr_t _)
+int Mos6502::i_RTS(Mos6502& self, addr_t)
 {
     /*
      * RTS
@@ -248,7 +248,7 @@ int Mos6502::i_RTS(Mos6502 &self, addr_t _)
 /********************************************************************************
  * JMP (Jump to absolute address)
  ********************************************************************************/
-int Mos6502::i_JMP(Mos6502 &self, addr_t addr)
+int Mos6502::i_JMP(Mos6502& self, addr_t addr)
 {
     /*
      * JMP $0000
@@ -265,7 +265,7 @@ int Mos6502::i_JMP(Mos6502 &self, addr_t addr)
 /********************************************************************************
  * NOP (No Operation: Jump to next instruction)
  ********************************************************************************/
-int Mos6502::i_NOP(Mos6502 &self, addr_t _)
+int Mos6502::i_NOP(Mos6502& self, addr_t)
 {
     /*
      * NOP

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -43,7 +43,7 @@ using Scanline = std::vector<Rgba>;
 /**
  * @return The SDL2 library version.
  */
-constexpr const char *sdl_version()
+constexpr const char* sdl_version()
 {
     return "SDL2-" CAIO_STR(SDL_MAJOR_VERSION) "." \
                    CAIO_STR(SDL_MINOR_VERSION) "." \
@@ -61,7 +61,7 @@ extern std::string sdl_error();
  * @param reason Error message.
  * @exception UIError
  */
-extern void throw_sdl_uierror(const std::string &reason);
+extern void throw_sdl_uierror(const std::string& reason);
 
 /**
  * Convert a SDL scan code to Keyboard::Key code.
@@ -78,7 +78,7 @@ extern Keyboard::Key to_key(SDL_Scancode code);
  * @para  rect Rectangle.
  * @return True if the coordinates fall inside the rectangle; false otherwise.
  */
-extern bool in_rect(int x, int y, const SDL_Rect &rect);
+extern bool in_rect(int x, int y, const SDL_Rect& rect);
 
 }
 }

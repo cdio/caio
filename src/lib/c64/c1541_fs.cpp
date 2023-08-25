@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -30,7 +30,7 @@
 namespace caio {
 namespace c1541 {
 
-void C1541Fs::attach(const std::string &path)
+void C1541Fs::attach(const std::string& path)
 {
     if (!path.empty() && (!fs::exists(path) || !fs::is_directory(path))) {
         std::ostringstream os{};
@@ -42,7 +42,7 @@ void C1541Fs::attach(const std::string &path)
     reset();
 }
 
-std::string C1541Fs::to_basic(addr_t &addr, const std::filesystem::path &fspath, size_t fsize)
+std::string C1541Fs::to_basic(addr_t& addr, const std::filesystem::path& fspath, size_t fsize)
 {
     /*
      * PRG format for LOAD "$", 8:
@@ -87,7 +87,7 @@ std::string C1541Fs::to_basic(addr_t &addr, const std::filesystem::path &fspath,
         std::string pentry{u8_to_pet(entry).substr(0, 16)};
         addr_t blocks = (fsize >> 8) | 1;
 
-        std::string stype;
+        std::string stype{};
         if (ext == ".prg") {
             stype = "PRG";
         } else if (ext == ".seq") {
@@ -129,7 +129,7 @@ std::string C1541Fs::to_basic(addr_t &addr, const std::filesystem::path &fspath,
     return os.str();
 }
 
-Status C1541Fs::open_dir(uint8_t ch, Channel &channel, const std::string &fname, FileType type, OpenMode mode)
+Status C1541Fs::open_dir(uint8_t ch, Channel& channel, const std::string& fname, FileType type, OpenMode mode)
 {
     const std::string pattern{attached_path() + (fname.empty() ? "*" : fname)};
     size_t root_len = attached_path().size();
@@ -139,7 +139,7 @@ Status C1541Fs::open_dir(uint8_t ch, Channel &channel, const std::string &fname,
     ss << to_basic(addr, {}, 0);
 
     fs::directory(attached_path(), pattern,
-        [this, &ss, &addr, &root_len](const std::string &entry, uint64_t size) -> bool {
+        [this, &ss, &addr, &root_len](const std::string& entry, uint64_t size) -> bool {
             ss << to_basic(addr, entry.substr(root_len), size);
             return true;
         }
@@ -161,7 +161,7 @@ Status C1541Fs::open_dir(uint8_t ch, Channel &channel, const std::string &fname,
     return Status::OK;
 }
 
-Status C1541Fs::open_file(uint8_t ch, Channel &channel, const std::string &fname, FileType type, OpenMode mode)
+Status C1541Fs::open_file(uint8_t ch, Channel& channel, const std::string& fname, FileType type, OpenMode mode)
 {
     std::ios_base::openmode fmode{std::ios_base::binary};
 
@@ -217,8 +217,8 @@ Status C1541Fs::open_file(uint8_t ch, Channel &channel, const std::string &fname
              * The '*' wildcard w/o a previously accessed file
              * loads the first file in the disk.
              */
-            const std::string &pattern = attached_path() + c1541::pet_to_u8(fname) + ext;
-            fs::directory(attached_path(), pattern, [&fullpath](const std::string &entry, uint64_t size) -> bool {
+            const std::string& pattern = attached_path() + c1541::pet_to_u8(fname) + ext;
+            fs::directory(attached_path(), pattern, [&fullpath](const std::string& entry, uint64_t size) -> bool {
                 fullpath = entry;
                 return false;
             });
@@ -278,9 +278,9 @@ Status C1541Fs::open_file(uint8_t ch, Channel &channel, const std::string &fname
     return Status::OK;
 }
 
-Status C1541Fs::channel_open(uint8_t ch, const std::string &petfname, FileType type, OpenMode mode)
+Status C1541Fs::channel_open(uint8_t ch, const std::string& petfname, FileType type, OpenMode mode)
 {
-    auto &channel = _channels[ch];
+    auto& channel = _channels[ch];
 
     if (channel.is_open()) {
         if (ch != LOAD_CHANNEL && ch != SAVE_CHANNEL) {
@@ -294,7 +294,7 @@ Status C1541Fs::channel_open(uint8_t ch, const std::string &petfname, FileType t
 
     auto fname = pet_to_u8(petfname);
 
-    auto it = std::find_if(_channels.begin(), _channels.end(), [&fname](const Channel &channel) -> bool {
+    auto it = std::find_if(_channels.begin(), _channels.end(), [&fname](const Channel& channel) -> bool {
         return (channel.is_open() && channel.fname == fname);
     });
 
@@ -312,7 +312,7 @@ Status C1541Fs::channel_open(uint8_t ch, const std::string &petfname, FileType t
 
 Status C1541Fs::channel_close(uint8_t ch)
 {
-    auto &channel = _channels[ch];
+    auto& channel = _channels[ch];
 
     if (channel.is_open()) {
         if (channel.fs) {
@@ -330,7 +330,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
 {
     //TODO: PRGs are loaded on 401 not 801
 
-    auto &channel = _channels[ch];
+    auto& channel = _channels[ch];
 
     if (!channel.is_open()) {
         return {{}, Status::FILE_NOT_OPEN};
@@ -347,8 +347,8 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
         return {{}, Status::OK};
     }
 
-    auto &is = (channel.mode == OpenMode::DIR ?
-        static_cast<std::istream &>(channel.ss) : static_cast<std::istream &>(channel.fs));
+    auto& is = (channel.mode == OpenMode::DIR ?
+        static_cast<std::istream&>(channel.ss) : static_cast<std::istream&>(channel.fs));
 
     bool is_last = (channel.pos + 1 == channel.size);
     uint8_t value{};
@@ -387,21 +387,21 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
 
 void C1541Fs::channel_push_back(uint8_t ch)
 {
-    auto &channel = _channels[ch];
+    auto& channel = _channels[ch];
 
     if (channel.is_open() && !channel.is_write() && channel.pos > 0) {
         --channel.pos;
 
-        auto &is = (channel.mode == OpenMode::DIR ?
-            static_cast<std::istream &>(channel.ss) : static_cast<std::istream &>(channel.fs));
+        auto& is = (channel.mode == OpenMode::DIR ?
+            static_cast<std::istream&>(channel.ss) : static_cast<std::istream&>(channel.fs));
 
         is.seekg(-1, std::ios_base::cur);
     }
 }
 
-Status C1541Fs::channel_write(uint8_t ch, const buf_t &buf)
+Status C1541Fs::channel_write(uint8_t ch, const buf_t& buf)
 {
-    auto &channel = _channels[ch];
+    auto& channel = _channels[ch];
 
     if (!channel.is_open()) {
         return Status::FILE_NOT_OPEN;
@@ -422,7 +422,7 @@ Status C1541Fs::channel_write(uint8_t ch, const buf_t &buf)
     return Status::OK;
 }
 
-Status C1541Fs::command(DOSCommand cmd, const std::string &param)
+Status C1541Fs::command(DOSCommand cmd, const std::string& param)
 {
     switch (cmd) {
     case DOSCommand::COPY:
@@ -515,7 +515,7 @@ Status C1541Fs::command(DOSCommand cmd, const std::string &param)
     return Status::OK;
 }
 
-Status C1541Fs::copy(const std::string &param)
+Status C1541Fs::copy(const std::string& param)
 {
     /*
      * Copy or concatenate files:
@@ -530,7 +530,7 @@ Status C1541Fs::copy(const std::string &param)
         return Status::COMMAND_INVALID_COMMAND;
     }
 
-    const auto &newfile = result.str(1);
+    const auto& newfile = result.str(1);
     if (newfile.empty()) {
         return Status::NO_FILE_GIVEN;
     }
@@ -544,20 +544,20 @@ Status C1541Fs::copy(const std::string &param)
         return Status::NO_FILE_GIVEN;
     }
 
-    for (const auto &fname : catfiles) {
+    for (const auto& fname : catfiles) {
         if (c1541::is_pattern(fname)) {
             return Status::SYNTAX_ERROR;
         }
     }
 
-    for (const auto &fname : catfiles) {
+    for (const auto& fname : catfiles) {
         if (!fs::exists(fname)) {
             return Status::FILE_NOT_FOUND;
         }
 
         try {
             fs::concat(newfile, fname);
-        } catch (const IOError &err) {
+        } catch (const IOError& err) {
             log.error("%s: %s: %s\n", name(15).c_str(), param.c_str(), err.what());
             return Status::WRITE_ERROR;  /* Another error code? */
         }
@@ -568,7 +568,7 @@ Status C1541Fs::copy(const std::string &param)
     return Status::OK;
 }
 
-Status C1541Fs::rename(const std::string &param)
+Status C1541Fs::rename(const std::string& param)
 {
     /*
      * Rename:
@@ -584,8 +584,8 @@ Status C1541Fs::rename(const std::string &param)
         return Status::COMMAND_INVALID_COMMAND;
     }
 
-    const auto &newname = c1541::pet_to_u8(result.str(1));
-    const auto &oldname = c1541::pet_to_u8(result.str(2));
+    const auto& newname = c1541::pet_to_u8(result.str(1));
+    const auto& oldname = c1541::pet_to_u8(result.str(2));
 
     if (c1541::is_pattern(newname) || c1541::is_pattern(oldname)) {
         return Status::SYNTAX_ERROR;
@@ -615,7 +615,7 @@ Status C1541Fs::rename(const std::string &param)
     return Status::OK;
 }
 
-Status C1541Fs::scratch(const std::string &param)
+Status C1541Fs::scratch(const std::string& param)
 {
     /*
      * Scratch (remove) files:
@@ -628,7 +628,7 @@ Status C1541Fs::scratch(const std::string &param)
     std::smatch result{};
 
     if (std::regex_match(param, result, re_scratch) && result.size() == 2) {
-        auto remove = [this](const std::string &entry, uint64_t size) -> bool {
+        auto remove = [this](const std::string& entry, uint64_t size) -> bool {
             if (!fs::unlink(entry)) {
                 log.error("%s: Can't scratch: \"%s\": %s\n", name(15).c_str(), entry.c_str(),
                     Error::to_string().c_str());
@@ -638,7 +638,7 @@ Status C1541Fs::scratch(const std::string &param)
             return true;
         };
 
-        const auto &fname = attached_path() + c1541::pet_to_u8(result.str(1));
+        const auto& fname = attached_path() + c1541::pet_to_u8(result.str(1));
         bool success{};
 
         if (!fname.empty() && fs::exists(fname)) {

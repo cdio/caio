@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -28,11 +28,12 @@ namespace widget {
 
 class Fullscreen : public Widget {
 public:
-    Fullscreen(SDL_Renderer *_renderer, const std::function<bool()> &upd);
+    Fullscreen(SDL_Renderer* _renderer, const std::function<bool()>& upd);
 
-    virtual ~Fullscreen();
+    virtual ~Fullscreen() {
+    }
 
-    void render(const SDL_Rect &dstrect) override;
+    void render(const SDL_Rect& dstrect) override;
 
 private:
     std::function<bool()> _update;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -26,19 +26,14 @@ namespace widget {
 
 #include "icons/fullscreen_128x2.hpp"
 
-
-Fullscreen::Fullscreen(SDL_Renderer *renderer, const std::function<bool()> &upd)
+Fullscreen::Fullscreen(SDL_Renderer* renderer, const std::function<bool()>& upd)
     : Widget{renderer},
       _update{upd}
 {
     Widget::load(fullscreen_128x2_png);
 }
 
-Fullscreen::~Fullscreen()
-{
-}
-
-void Fullscreen::render(const SDL_Rect &dstrect)
+void Fullscreen::render(const SDL_Rect& dstrect)
 {
     bool is_fullscreen{};
 

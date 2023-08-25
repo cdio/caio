@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -54,7 +54,7 @@ static void signal_handler(int signo)
     }
 }
 
-UI::UI(const Config &conf)
+UI::UI(const Config& conf)
     : _conf{conf}
 {
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) < 0 ||
@@ -62,7 +62,7 @@ UI::UI(const Config &conf)
         throw_sdl_uierror("Can't initialise SDL library");
     }
 
-    const auto &vconf = conf.video;
+    const auto& vconf = conf.video;
 
     _fps_time = 1000000 / vconf.fps;
 
@@ -88,9 +88,9 @@ UI::UI(const Config &conf)
         throw_sdl_uierror("Can't create main window");
     }
 
-    const Image &ico = icon();
+    const Image& ico = icon();
 
-    _icon = SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba *>(ico.data.data()), ico.width, ico.height, 32,
+    _icon = SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()), ico.width, ico.height, 32,
         ico.width * 4, SDL_PIXELFORMAT_RGBA8888);
 
     if (_icon == nullptr) {
@@ -133,8 +133,8 @@ UI::~UI()
     //XXX FIXME stop does not mean that we can destroy the elements below
     //          we need to make sure the main loop is ended before doing that.
 
-    for (auto &pair : _sdl_joys) {
-        SDL_Joystick *sjoy = pair.second;
+    for (auto& pair : _sdl_joys) {
+        SDL_Joystick* sjoy = pair.second;
         SDL_JoystickClose(sjoy);
     }
 
@@ -156,24 +156,24 @@ UI::~UI()
     SDL_Quit();
 }
 
-void UI::title(const std::string &title)
+void UI::title(const std::string& title)
 {
     if (_window != nullptr) {
         SDL_SetWindowTitle(_window, title.c_str());
     }
 }
 
-void UI::keyboard(const keyboard_ptr_t &kbd)
+void UI::keyboard(const keyboard_ptr_t& kbd)
 {
     _kbd = kbd;
 }
 
-void UI::joystick(const std::initializer_list<joystick_ptr_t> &il)
+void UI::joystick(const std::initializer_list<joystick_ptr_t>& il)
 {
     _joys = il;
 }
 
-void UI::hotkeys(const hotkeys_cb_t &hotkeys_cb)
+void UI::hotkeys(const hotkeys_cb_t& hotkeys_cb)
 {
     _hotkeys_cb = hotkeys_cb;
 }
@@ -185,7 +185,7 @@ void UI::hotkeys(Keyboard::Key key)
     }
 }
 
-void UI::pause(const std::function<void(bool)> &pause_cb, const std::function<bool()> &ispause_cb)
+void UI::pause(const std::function<void(bool)>& pause_cb, const std::function<bool()>& ispause_cb)
 {
     _pause_cb = pause_cb;
     _ispause_cb = ispause_cb;
@@ -208,7 +208,7 @@ bool UI::paused() const
     return false;
 }
 
-void UI::reset(const std::function<void()> &reset_cb)
+void UI::reset(const std::function<void()>& reset_cb)
 {
     _reset_cb = reset_cb;
 }
@@ -267,7 +267,7 @@ AudioBuffer UI::audio_buffer()
     return {{}, {}};
 }
 
-void UI::render_line(unsigned line, const Scanline &sline)
+void UI::render_line(unsigned line, const Scanline& sline)
 {
     if (_stop) {
 //        log.debug("ui: Can't render line: System is stopped.\n");
@@ -292,12 +292,12 @@ std::string UI::to_string() const
     return sdl_version();
 }
 
-std::shared_ptr<Panel> UI::panel()
+sptr_t<Panel> UI::panel()
 {
     return _panel;
 }
 
-SDL_Renderer *UI::renderer()
+SDL_Renderer* UI::renderer()
 {
     return _renderer;
 }
@@ -445,9 +445,9 @@ void UI::event_loop()
     }
 }
 
-void UI::win_event(const SDL_Event &event)
+void UI::win_event(const SDL_Event& event)
 {
-    const auto &wevent = event.window;
+    const auto& wevent = event.window;
 
     switch (wevent.event) {
     case SDL_WINDOWEVENT_CLOSE:
@@ -467,10 +467,10 @@ void UI::win_event(const SDL_Event &event)
     }
 }
 
-void UI::kbd_event(const SDL_Event &event)
+void UI::kbd_event(const SDL_Event& event)
 {
-    const auto &kevent = event.key;
-    const auto &key = kevent.keysym;
+    const auto& kevent = event.key;
+    const auto& key = kevent.keysym;
 
     switch (kevent.type) {
     case SDL_KEYDOWN:
@@ -554,7 +554,7 @@ void UI::kbd_event(const SDL_Event &event)
     }
 }
 
-void UI::joy_event(const SDL_Event &event)
+void UI::joy_event(const SDL_Event& event)
 {
     int32_t jid{};
     joystick_ptr_t ejoy{};
@@ -688,7 +688,7 @@ void UI::joy_event(const SDL_Event &event)
     }
 }
 
-void UI::mouse_event(const SDL_Event &event)
+void UI::mouse_event(const SDL_Event& event)
 {
     switch (event.type) {
     case SDL_MOUSEBUTTONUP:
@@ -812,7 +812,7 @@ void UI::render_screen()
     /*
      * Draw the scaled emulated screen.
      */
-    if (SDL_LockTexture(_screen_tex, nullptr, reinterpret_cast<void **>(&dst), &pitch) < 0) {
+    if (SDL_LockTexture(_screen_tex, nullptr, reinterpret_cast<void**>(&dst), &pitch) < 0) {
         throw_sdl_uierror("Can't lock texture");
     }
 
@@ -823,7 +823,7 @@ void UI::render_screen()
     }
 #endif
 
-    for (auto &pixel : _screen_raw) {
+    for (auto& pixel : _screen_raw) {
         *dst++ = pixel.to_host_u32();
     }
 
@@ -876,7 +876,7 @@ void UI::render_screen()
     SDL_RenderPresent(_renderer);
 }
 
-std::shared_ptr<Joystick> UI::joystick(unsigned jid)
+sptr_t<Joystick> UI::joystick(unsigned jid)
 {
     if (jid < _joys.size()) {
         return _joys[jid];

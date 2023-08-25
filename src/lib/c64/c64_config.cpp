@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -27,39 +27,7 @@
 namespace caio {
 namespace c64 {
 
-C64Confile::C64Confile()
-{
-}
-
-C64Confile::C64Confile(Confile &&other)
-{
-    *this = std::move(other);
-}
-
-C64Confile::~C64Confile()
-{
-}
-
-C64Confile &C64Confile::operator=(Confile &&other)
-{
-    static_cast<Confile &>(*this) = std::move(other);
-    return *this;
-}
-
-C64Config::C64Config()
-{
-}
-
-C64Config::C64Config(const Confile &conf)
-{
-    *this = conf;
-}
-
-C64Config::~C64Config()
-{
-}
-
-C64Config &C64Config::operator=(const Confile &conf)
+C64Config& C64Config::operator=(const Confile& conf)
 {
     Config::operator=(conf);
 
@@ -115,12 +83,12 @@ C64Config &C64Config::operator=(const Confile &conf)
     return *this;
 }
 
-std::string C64Config::palette_file(const std::string &palette) const
+std::string C64Config::palette_file(const std::string& palette) const
 {
     return "c64_" + Config::palette_file(palette);
 }
 
-std::string C64Config::keymaps_file(const std::string &cc) const
+std::string C64Config::keymaps_file(const std::string& cc) const
 {
     return "c64_" + Config::keymaps_file(cc);
 }

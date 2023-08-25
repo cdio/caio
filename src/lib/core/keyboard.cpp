@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -141,27 +141,13 @@ std::map<std::string, Keyboard::Key> Keyboard::name_to_key{
     { "KEY_FN" ,                Keyboard::KEY_FN                }
 };
 
-
-Keyboard::Keyboard()
-{
-}
-
-Keyboard::Keyboard(const std::string &label)
-    : Name{TYPE, label}
-{
-}
-
-Keyboard::~Keyboard()
-{
-}
-
-Keyboard::Key Keyboard::to_key(const std::string &name)
+Keyboard::Key Keyboard::to_key(const std::string& name)
 {
     auto it = name_to_key.find(name);
     return (it == name_to_key.end() ? Key::KEY_NONE : it->second);
 }
 
-void Keyboard::load(const std::string &fname)
+void Keyboard::load(const std::string& fname)
 {
     static const std::regex re_comment{"^[ \t]*#.*$", std::regex::extended};
     static const std::regex re_line{"^[ \t]*([^ \t]+)[ \t]+(SHIFT)?[ \t]*(ALTGR)?[ \t]*([^ \t]+)[ \t]*(SHIFT)?[ \t]*$",
@@ -195,15 +181,15 @@ void Keyboard::load(const std::string &fname)
                 throw InvalidArgument{};
             }
 
-            const auto &key_name  = result.str(1);
+            const auto& key_name  = result.str(1);
             bool key_shift        = (result.str(2) == "SHIFT" ? true : false);
             bool key_altgr        = (result.str(3) == "ALTGR" ? true : false);
-            const auto &impl_name = result.str(4);
+            const auto& impl_name = result.str(4);
             bool impl_shift       = (result.str(5) == "SHIFT" ? true : false);
 
             add_key_map(key_name, key_shift, key_altgr, impl_name, impl_shift);
 
-        } catch (const InvalidArgument &err) {
+        } catch (const InvalidArgument& err) {
             std::stringstream ss{};
             ss << fname << ": Invalid entry at line " << lineno << ": ";
             if (std::string{err.what()}.empty()) {

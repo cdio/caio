@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -21,7 +21,7 @@
 
 namespace caio {
 
-int Mos6502::i_CLC(Mos6502 &self, addr_t _)
+int Mos6502::i_CLC(Mos6502& self, addr_t)
 {
     /*
      * CLC  - Clear Carry
@@ -32,7 +32,7 @@ int Mos6502::i_CLC(Mos6502 &self, addr_t _)
     return 0;
 }
 
-int Mos6502::i_SEC(Mos6502 &self, addr_t _)
+int Mos6502::i_SEC(Mos6502& self, addr_t)
 {
     /*
      * SEC  - Set Carry
@@ -43,7 +43,7 @@ int Mos6502::i_SEC(Mos6502 &self, addr_t _)
     return 0;
 }
 
-int Mos6502::i_CLI(Mos6502 &self, addr_t _)
+int Mos6502::i_CLI(Mos6502& self, addr_t)
 {
     /*
      * CLI  - Clear Interrupt flag
@@ -54,7 +54,7 @@ int Mos6502::i_CLI(Mos6502 &self, addr_t _)
     return 0;
 }
 
-int Mos6502::i_SEI(Mos6502 &self, addr_t _)
+int Mos6502::i_SEI(Mos6502& self, addr_t)
 {
     /*
      * SEI  - Set Interrupt flag
@@ -65,7 +65,7 @@ int Mos6502::i_SEI(Mos6502 &self, addr_t _)
     return 0;
 }
 
-int Mos6502::i_CLV(Mos6502 &self, addr_t _)
+int Mos6502::i_CLV(Mos6502& self, addr_t)
 {
     /*
      * CLV  - Clear Overflow flag
@@ -76,7 +76,7 @@ int Mos6502::i_CLV(Mos6502 &self, addr_t _)
     return 0;
 }
 
-int Mos6502::i_CLD(Mos6502 &self, addr_t)
+int Mos6502::i_CLD(Mos6502& self, addr_t)
 {
     /*
      * CLD  - Clear Decimal flag
@@ -87,7 +87,7 @@ int Mos6502::i_CLD(Mos6502 &self, addr_t)
     return 0;
 }
 
-int Mos6502::i_SED(Mos6502 &self, addr_t)
+int Mos6502::i_SED(Mos6502& self, addr_t)
 {
     /*
      * SED  - Set Decimal flag

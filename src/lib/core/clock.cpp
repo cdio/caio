@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -32,48 +32,10 @@ namespace caio {
 
 using namespace std::chrono_literals;
 
-Clock::Clock(const std::string &label, size_t freq, float delay)
-    : Name{TYPE, label},
-      _freq{freq},
-      _delay{delay}
-{
-}
-
-Clock::Clock(size_t freq, float delay)
-    : Name{TYPE, {}},
-      _freq{freq},
-      _delay{delay}
-{
-}
-
-Clock::~Clock()
-{
-}
-
-size_t Clock::freq() const
-{
-    return _freq;
-}
-
-void Clock::freq(size_t freq)
-{
-    _freq = freq;
-}
-
-float Clock::delay() const
-{
-    return _delay;
-}
-
-void Clock::delay(float delay)
-{
-    _delay = delay;
-}
-
-void Clock::add(const std::shared_ptr<Clockable> &clkb)
+void Clock::add(const sptr_t<Clockable>& clkb)
 {
     if (clkb) {
-        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&clkb](const clockable_pair_t &pair) -> bool {
+        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&clkb](const clockable_pair_t& pair) -> bool {
             return (pair.first.get() == clkb.get());
         });
 
@@ -83,10 +45,10 @@ void Clock::add(const std::shared_ptr<Clockable> &clkb)
     }
 }
 
-void Clock::del(const std::shared_ptr<Clockable> &clkb)
+void Clock::del(const std::shared_ptr<Clockable>& clkb)
 {
     if (clkb) {
-        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&clkb](const clockable_pair_t &pair) -> bool {
+        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&clkb](const clockable_pair_t& pair) -> bool {
             return (pair.first.get() == clkb.get());
         });
 
@@ -146,7 +108,7 @@ void Clock::run()
             std::this_thread::sleep_for(std::chrono::microseconds{static_cast<int64_t>(wait_time * _delay)});
 
             /*
-             * Don't expect the operating system's scheduler to be real-time,
+             * Don't expect the operating system' scheduler to be real-time,
              * this thread probably slept far more than requested.
              * Adjust for this situation.
              */
@@ -161,8 +123,8 @@ void Clock::run()
 
 size_t Clock::tick()
 {
-    for (auto &pair : _clockables) {
-        auto &cycles = pair.second;
+    for (auto& pair : _clockables) {
+        auto& cycles = pair.second;
         if (cycles == 0) {
             cycles = pair.first->tick(*this);
             if (cycles == Clockable::HALT) {
@@ -182,21 +144,11 @@ size_t Clock::tick()
 void Clock::reset()
 {
     if (paused()) {
-        for (auto &pair : _clockables) {
-            auto &cycles = pair.second;
+        for (auto& pair : _clockables) {
+            auto& cycles = pair.second;
             cycles = 0;
         }
     }
-}
-
-void Clock::stop()
-{
-    _stop = true;
-}
-
-void Clock::pause(bool susp)
-{
-    _suspend = susp;
 }
 
 void Clock::pause_wait(bool susp)
@@ -209,16 +161,6 @@ void Clock::pause_wait(bool susp)
     }
 }
 
-void Clock::toggle_pause()
-{
-    _suspend = (_suspend ? false : true);
-}
-
-bool Clock::paused() const
-{
-    return _suspend;
-}
-
 std::string Clock::to_string() const
 {
     std::stringstream os{};
@@ -228,16 +170,6 @@ std::string Clock::to_string() const
        << ", delay " << std::setprecision(3) << _delay;
 
     return os.str();
-}
-
-size_t Clock::cycles(float secs) const
-{
-    return cycles(secs, _freq);
-}
-
-float Clock::time(size_t cycles) const
-{
-    return time(cycles, _freq);
 }
 
 }

@@ -28,7 +28,6 @@ namespace caio {
 
 Rgba Rgba::transparent{0};
 
-
 std::string Rgba::to_string() const
 {
     std::ostringstream os{};

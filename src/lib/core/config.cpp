@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -24,13 +24,13 @@
 
 namespace caio {
 
-Config &Config::operator=(const Confile &conf)
+Config& Config::operator=(const Confile& conf)
 {
     title = "caio";
 
     const auto secit = conf.find(CaioConfile::CAIO_CONFIG_SECTION);
     if (secit != conf.end()) {
-        const auto &sec = secit->second;
+        const auto& sec = secit->second;
 
         auto it = sec.find(CaioConfile::ROMDIR_CONFIG_KEY);
         romdir = (it != sec.end() ? it->second : CaioConfile::ROMDIR);
@@ -45,7 +45,7 @@ Config &Config::operator=(const Confile &conf)
 
         it = sec.find(CaioConfile::PALETTE_CONFIG_KEY);
         if (it != sec.end()) {
-            const auto &palette = it->second;
+            const auto& palette = it->second;
             palettefile = palette_file(palette);
         }
 
@@ -54,7 +54,7 @@ Config &Config::operator=(const Confile &conf)
 
         it = sec.find(CaioConfile::KEYMAPS_CONFIG_KEY);
         if (it != sec.end()) {
-            const auto &cc = it->second;
+            const auto& cc = it->second;
             keymapsfile = keymaps_file(cc);
         }
 
@@ -70,7 +70,7 @@ Config &Config::operator=(const Confile &conf)
 
         it = sec.find(CaioConfile::SCALE_CONFIG_KEY);
         if (it != sec.end()) {
-            const std::string &str = it->second;
+            const std::string& str = it->second;
             if (!str.empty()) {
                 scale = std::atof(str.c_str());
                 if (scale < 1.0f) {
@@ -104,7 +104,7 @@ Config &Config::operator=(const Confile &conf)
 
         it = sec.find(CaioConfile::DELAY_CONFIG_KEY);
         if (it != sec.end()) {
-            const std::string &str = it->second;
+            const std::string& str = it->second;
             if (!str.empty()) {
                 delay = std::atof(str.c_str());
             }
@@ -126,12 +126,12 @@ Config &Config::operator=(const Confile &conf)
     return *this;
 }
 
-std::string Config::palette_file(const std::string &palette) const
+std::string Config::palette_file(const std::string& palette) const
 {
     return (palette.ends_with(PALETTEFILE_SUFFIX) ? palette : palette + PALETTEFILE_SUFFIX);
 }
 
-std::string Config::keymaps_file(const std::string &cc) const
+std::string Config::keymaps_file(const std::string& cc) const
 {
     return (cc.ends_with(KEYMAPSFILE_SUFFIX) ? cc : cc + KEYMAPSFILE_SUFFIX);
 }

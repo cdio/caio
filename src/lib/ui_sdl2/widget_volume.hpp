@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -36,17 +36,18 @@ public:
      * @param getvol   Callback to retrieve the current volume value;
      * @param setvol   Callback to set the current volume value.
      * @exception UIError
-     * @see Widget::load(const gsl::span<const uint8_t> &)
+     * @see Widget::load(const gsl::span<const uint8_t>&)
      */
-    Volume(SDL_Renderer *renderer, const std::function<float()> &getvol, const std::function<void(float)> &setvol);
+    Volume(SDL_Renderer* renderer, const std::function<float()>& getvol, const std::function<void(float)>& setvol);
 
-    virtual ~Volume();
+    virtual ~Volume() {
+    }
 
     bool enabled() const override;
 
-    void render(const SDL_Rect &dstrect) override;
+    void render(const SDL_Rect& dstrect) override;
 
-    void event(const SDL_Event &event, const SDL_Rect &rect) override;
+    void event(const SDL_Event& event, const SDL_Rect& rect) override;
 
 private:
     void volume(int incr);

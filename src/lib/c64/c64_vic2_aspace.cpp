@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -22,7 +22,7 @@
 namespace caio {
 namespace c64 {
 
-Vic2ASpace::Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, const devptr_t &ram, const devptr_t &chargen)
+Vic2ASpace::Vic2ASpace(const sptr_t<Mos6526>& cia2, const devptr_t& ram, const devptr_t& chargen)
     : _cia2{cia2}
 {
     /*
@@ -80,10 +80,6 @@ Vic2ASpace::Vic2ASpace(const std::shared_ptr<Mos6526> &cia2, const devptr_t &ram
      * Default bank.
      */
     bank(3);
-}
-
-Vic2ASpace::~Vic2ASpace()
-{
 }
 
 }

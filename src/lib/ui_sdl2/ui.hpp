@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -51,8 +51,8 @@ public:
     constexpr static const uint64_t MOUSE_INACTIVE_TIME = 2'000'000;    /* us */
     constexpr static const uint8_t PANEL_BUTTON         = SDL_BUTTON_RIGHT;
 
-    using keyboard_ptr_t = std::shared_ptr<Keyboard>;
-    using joystick_ptr_t = std::shared_ptr<Joystick>;
+    using keyboard_ptr_t = sptr_t<Keyboard>;
+    using joystick_ptr_t = sptr_t<Joystick>;
     using hotkeys_cb_t   = std::function<void(Keyboard::Key)>;
 
     /**
@@ -60,7 +60,7 @@ public:
      * @param conf Configuration parameters.
      * @exception UIError
      */
-    explicit UI(const Config &conf);
+    UI(const Config& conf);
 
     virtual ~UI();
 
@@ -78,44 +78,44 @@ public:
      * Set the main window's title.
      * @param title The new title.
      */
-    void title(const std::string &title);
+    void title(const std::string& title);
 
     /**
      * Set the emulated keyboard.
      * @param kbd Keyboard to set.
      */
-    void keyboard(const keyboard_ptr_t &kbd);
+    void keyboard(const keyboard_ptr_t& kbd);
 
     /**
      * Set the emulated joysticks and associate connected gamepads to them.
      * @param il Joysticks to set.
      */
-    void joystick(const std::initializer_list<joystick_ptr_t> &il);
+    void joystick(const std::initializer_list<joystick_ptr_t>& il);
 
     /**
      * Set the hot-keys callback.
      * @param hotkeys_cb Callback.
      */
-    void hotkeys(const hotkeys_cb_t &hotkeys_cb);
+    void hotkeys(const hotkeys_cb_t& hotkeys_cb);
 
     /**
      * Set the pause callbacks.
      * @param pause_cb   Callback to pause the emulator;
      * @param ispause_cb Callback get the pause status of the emulator.
      */
-    void pause(const std::function<void(bool)> &pause_cb, const std::function<bool()> &ispause_cb);
+    void pause(const std::function<void(bool)>& pause_cb, const std::function<bool()>& ispause_cb);
 
     /**
      * Set the reset callback.
      * @param reset_cb Called when the user requests a reset.
      */
-    void reset(const std::function<void()> &reset_cb);
+    void reset(const std::function<void()>& reset_cb);
 
     /**
      * Suspend/Resume emulator.
      * This only works if the pause callbacks are set.
      * @param suspend true to suspend, false to resume.
-     * @see pause(const std::function<void(bool)> &, const std::function<bool()> &)
+     * @see pause(const std::function<void(bool)>&, const std::function<bool()>&)
      */
     void pause(bool suspend);
 
@@ -188,7 +188,7 @@ public:
      * @param line  Number of scanline to render;
      * @param sline Scanline pixel data.
      */
-    void render_line(unsigned line, const Scanline &sline);
+    void render_line(unsigned line, const Scanline& sline);
 
     /**
      * Stop the main loop.
@@ -265,25 +265,25 @@ private:
      * Process window events.
      * @param event SDL event.
      */
-    void win_event(const SDL_Event &event);
+    void win_event(const SDL_Event& event);
 
     /**
      * Process keyboard events.
      * @param event SDL event.
      */
-    void kbd_event(const SDL_Event &event);
+    void kbd_event(const SDL_Event& event);
 
     /**
      * Process joystick/game controller events.
      * @param event SDL event.
      */
-    void joy_event(const SDL_Event &event);
+    void joy_event(const SDL_Event& event);
 
     /**
      * Process mouse events.
      * @param event SDL event.
      */
-    void mouse_event(const SDL_Event &event);
+    void mouse_event(const SDL_Event& event);
 
     /**
      * Associate a new game controller to an emulated joystick.
@@ -302,7 +302,7 @@ private:
      * @param jid Joystick ID.
      * @return The requested joystick on success; nullptr if the specified joystick does not exist.
      */
-    std::shared_ptr<Joystick> joystick(unsigned jid);
+    sptr_t<Joystick> joystick(unsigned jid);
 
     Config                      _conf{};                /* UI configuration                                   */
     uint64_t                    _fps_time{};            /* FPS in microseconds                                */
@@ -324,17 +324,17 @@ private:
     uint64_t                    _mouse_active_time{};   /* Inactivity time until the cursor becomes invisible */
     bool                        _mouse_visible{true};   /* Whether the mouse cursor is visible or not         */
 
-    SDL_Window *                _window{nullptr};       /* Main window                                        */
-    SDL_Renderer *              _renderer{nullptr};     /* Main window renderer                               */
-    SDL_Surface *               _icon{nullptr};         /* Main window icon                                   */
+    SDL_Window*                 _window{nullptr};       /* Main window                                        */
+    SDL_Renderer*               _renderer{nullptr};     /* Main window renderer                               */
+    SDL_Surface*                _icon{nullptr};         /* Main window icon                                   */
     std::vector<Rgba>           _screen_raw{};          /* Emulated screen raw RGBA data                      */
-    SDL_Texture *               _screen_tex{nullptr};   /* Emulated screen texture ready to be rendered       */
+    SDL_Texture*                _screen_tex{nullptr};   /* Emulated screen texture ready to be rendered       */
     SDL_Rect                    _screen_rect{};         /* Emulated screen rendering coordinates              */
-    std::shared_ptr<Panel>      _panel{};               /* Info Panel                                         */
+    sptr_t<Panel>               _panel{};               /* Info Panel                                         */
 
     AudioStream                 _audio_stream{};        /* Audio driver                                       */
 
-    std::map<int32_t, SDL_Joystick *> _sdl_joys{};      /* Map of SDL detected joysticks                      */
+    std::map<int32_t, SDL_Joystick*> _sdl_joys{};      /* Map of SDL detected joysticks                      */
 };
 
 }

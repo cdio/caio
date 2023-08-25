@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -41,9 +41,9 @@ float blackman(size_t pos, size_t N)
     return (0.42f - 0.5f * std::cos(2.0f * M_PI * k) + 0.08f * std::cos(4.0f * M_PI * k));
 }
 
-void spectral_inversion(samples_fp &krn)
+void spectral_inversion(samples_fp& krn)
 {
-    std::for_each(krn.begin(), krn.end(), [](float &value) {
+    std::for_each(krn.begin(), krn.end(), [](float& value) {
         value = -value;
     });
 
@@ -51,7 +51,7 @@ void spectral_inversion(samples_fp &krn)
     krn[c] += 1.0f;
 }
 
-samples_fp conv(samples_fp &dst, const samples_fp &sig, const samples_fp &krn, enum ConvShape shape)
+samples_fp conv(samples_fp& dst, const samples_fp& sig, const samples_fp& krn, enum ConvShape shape)
 {
     const size_t Ns = sig.size();
     const size_t Nk = krn.size();
@@ -86,7 +86,7 @@ samples_fp conv(samples_fp &dst, const samples_fp &sig, const samples_fp &krn, e
     return samples_fp{dst.data(), Nf};
 }
 
-samples_fp lopass(samples_fp &krn, float fc, float fs, bool osiz)
+samples_fp lopass(samples_fp& krn, float fc, float fs, bool osiz)
 {
     size_t N;
     if (osiz) {
@@ -113,22 +113,24 @@ samples_fp lopass(samples_fp &krn, float fc, float fs, bool osiz)
         sum += value;
     }
 
-    std::for_each(krn.begin(), krn.end(), [&sum](float &value) {
+    std::for_each(krn.begin(), krn.end(), [&sum](float& value) {
         value /= sum;
     });
 
     return krn.subspan(0, N);
 }
 
-samples_fp hipass(samples_fp &krn, float fc, float fs, bool osiz)
+samples_fp hipass(samples_fp& krn, float fc, float fs, bool osiz)
 {
     auto hi_krn = lopass(krn, fc, fs, osiz);
     spectral_inversion(hi_krn);
     return hi_krn;
 }
 
-samples_fp bapass(samples_fp &krn, float fcl, float fch, float fs, bool osiz)
+samples_fp bapass(samples_fp& krn, float fcl, float fch, float fs, bool osiz)
 {
+//FIXME test
+#if 0
     float fhi = std::min(fcl, fch);
     float flo = std::max(fcl, fch);
 
@@ -144,16 +146,32 @@ samples_fp bapass(samples_fp &krn, float fcl, float fch, float fs, bool osiz)
 
     auto ba_krn = conv(krn, lo_krn, hi_krn, ConvShape::Central);
     return ba_krn;
+#else
+    float fhi = std::min(fcl, fch);
+    float flo = std::max(fcl, fch);
+    float w0  = M_PI * (fhi + flo);
+
+    size_t N = kernel_size(flo, fs);
+    float data[N];
+    samples_fp lo{data, N};
+    auto ba_krn = lopass(lo, flo, fs, false);
+
+    for (size_t k = 0; k < ba_krn.size(); ++k) {
+        ba_krn[k] *= 2.0f * std::cos(w0 * k);
+    }
+
+    return ba_krn;
+#endif
 }
 
-samples_fp bastop(samples_fp &krn, float fcl, float fch, float fs, bool osiz)
+samples_fp bastop(samples_fp& krn, float fcl, float fch, float fs, bool osiz)
 {
     auto sb = bapass(krn, fcl, fch, fs, osiz);
     spectral_inversion(sb);
     return sb;
 }
 
-samples_fp lopass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz)
+samples_fp lopass_40(samples_fp& krn, float f0, float Q, float fs, bool osiz)
 {
     size_t N;
     if (osiz) {
@@ -196,7 +214,7 @@ samples_fp lopass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz)
         sum += value;
     }
 
-    std::for_each(krn.begin(), krn.end(), [&sum](float &value) {
+    std::for_each(krn.begin(), krn.end(), [&sum](float& value) {
         value /= sum;
     });
 
@@ -204,14 +222,14 @@ samples_fp lopass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz)
     return qp;
 }
 
-samples_fp hipass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz)
+samples_fp hipass_40(samples_fp& krn, float f0, float Q, float fs, bool osiz)
 {
     auto iqp = lopass_40(krn, f0, Q, fs, osiz);
     spectral_inversion(iqp);
     return iqp;
 }
 
-samples_fp lopass_20(samples_fp &krn, float f0, float fs, bool osiz)
+samples_fp lopass_20(samples_fp& krn, float f0, float fs, bool osiz)
 {
     size_t N;
     if (osiz) {
@@ -248,7 +266,7 @@ samples_fp lopass_20(samples_fp &krn, float f0, float fs, bool osiz)
         sum += value;
     }
 
-    std::for_each(krn.begin(), krn.end(), [&sum](float &value) {
+    std::for_each(krn.begin(), krn.end(), [&sum](float& value) {
         value /= sum;
     });
 
@@ -256,14 +274,14 @@ samples_fp lopass_20(samples_fp &krn, float f0, float fs, bool osiz)
     return lo20;
 }
 
-samples_fp hipass_20(samples_fp &krn, float f0, float fs, bool osiz)
+samples_fp hipass_20(samples_fp& krn, float f0, float fs, bool osiz)
 {
     auto z = lopass_20(krn, f0, fs, osiz);
     spectral_inversion(z);
     return z;
 }
 
-samples_fp bapass_20(samples_fp &krn, float f0, float fs, bool osiz)
+samples_fp bapass_20(samples_fp& krn, float f0, float fs, bool osiz)
 {
     size_t N = kernel_size(f0, fs);
     float lodata[N];
@@ -278,7 +296,7 @@ samples_fp bapass_20(samples_fp &krn, float f0, float fs, bool osiz)
     return tri_krn;
 }
 
-std::ostream &dump(std::ostream &os, const samples_fp &samples, const std::string &name, float fs,
+std::ostream& dump(std::ostream& os, const samples_fp& samples, const std::string& name, float fs,
     float fc1, float fc2, float Q)
 {
     os << name << " = struct('fs', "   << fs  << ", "
@@ -287,7 +305,7 @@ std::ostream &dump(std::ostream &os, const samples_fp &samples, const std::strin
                <<           "'Q', "    << Q   << ", "
                <<           "'v', [ ";
 
-    std::for_each(samples.begin(), samples.end(), [&os](const float &value) {
+    std::for_each(samples.begin(), samples.end(), [&os](const float& value) {
         os << value << " ";
     });
 

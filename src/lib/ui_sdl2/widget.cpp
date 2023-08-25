@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -27,10 +27,9 @@ namespace caio {
 namespace ui {
 namespace sdl2 {
 
-Widget *Widget::pressed_widget{nullptr};
+Widget* Widget::pressed_widget{nullptr};
 
-
-Widget::Widget(SDL_Renderer *renderer)
+Widget::Widget(SDL_Renderer* renderer)
     : _renderer{renderer}
 {
 }
@@ -42,7 +41,7 @@ Widget::~Widget()
     }
 }
 
-void Widget::load(const std::string &fname)
+void Widget::load(const std::string& fname)
 {
     if (_texture != nullptr) {
         SDL_DestroyTexture(_texture);
@@ -57,7 +56,7 @@ void Widget::load(const std::string &fname)
     }
 }
 
-void Widget::load(const gsl::span<const uint8_t> &data)
+void Widget::load(const gsl::span<const uint8_t>& data)
 {
     if (_texture != nullptr) {
         SDL_DestroyTexture(_texture);
@@ -65,7 +64,7 @@ void Widget::load(const gsl::span<const uint8_t> &data)
     }
 
     if (_renderer != nullptr) {
-        SDL_RWops *ops = SDL_RWFromConstMem(data.data(), data.size());
+        SDL_RWops* ops = SDL_RWFromConstMem(data.data(), data.size());
         if (ops == nullptr) {
             throw_sdl_uierror("Can't load image from memory");
         }
@@ -77,7 +76,7 @@ void Widget::load(const gsl::span<const uint8_t> &data)
     }
 }
 
-void Widget::action(const std::function<void()> &act)
+void Widget::action(const std::function<void()>& act)
 {
     _action = act;
 }
@@ -94,7 +93,7 @@ bool Widget::enabled() const
     return true;
 }
 
-void Widget::event(const SDL_Event &event, const SDL_Rect &rect)
+void Widget::event(const SDL_Event& event, const SDL_Rect& rect)
 {
     switch (event.type) {
     case SDL_JOYAXISMOTION:
@@ -133,14 +132,14 @@ void Widget::event(const SDL_Event &event, const SDL_Rect &rect)
     }
 }
 
-void Widget::render(const SDL_Rect &srcrect, const SDL_Rect &dstrect)
+void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect)
 {
     if (SDL_RenderCopy(_renderer, _texture, &srcrect, &dstrect) < 0) {
         throw_sdl_uierror("Can't SDL_RenderCopy");
     }
 }
 
-void Widget::render(const SDL_Rect &srcrect, const SDL_Rect &dstrect, const Rgba &colour)
+void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const Rgba& colour)
 {
     auto prev_colour = color_modulator();
     color_modulator(colour);
@@ -148,16 +147,16 @@ void Widget::render(const SDL_Rect &srcrect, const SDL_Rect &dstrect, const Rgba
     color_modulator(prev_colour);
 }
 
-void Widget::render(const SDL_Rect &srcrect, const SDL_Rect &dstrect, const SDL_Point &centre, float angle,
-    const SDL_RendererFlip &flip)
+void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_Point& centre, float angle,
+    const SDL_RendererFlip& flip)
 {
     if (SDL_RenderCopyEx(_renderer, _texture, &srcrect, &dstrect, angle, &centre, flip) < 0) {
         throw_sdl_uierror("Can't SDL_RenderCopyEx");
     }
 }
 
-void Widget::render(const SDL_Rect &srcrect, const SDL_Rect &dstrect, const SDL_Point &centre, float angle,
-    const SDL_RendererFlip &flip, const Rgba &colour)
+void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_Point& centre, float angle,
+    const SDL_RendererFlip& flip, const Rgba& colour)
 {
     auto prev_colour = color_modulator();
     color_modulator(colour);
@@ -176,7 +175,7 @@ Rgba Widget::draw_color() const
     return colour;
 }
 
-void Widget::draw_color(const Rgba &colour)
+void Widget::draw_color(const Rgba& colour)
 {
     if (SDL_SetRenderDrawColor(_renderer, colour.r, colour.g, colour.b, colour.a) < 0) {
         throw_sdl_uierror("Can't SDL_SetRenderDrawColor");
@@ -195,7 +194,7 @@ Rgba Widget::color_modulator() const
     return colour;
 }
 
-void Widget::color_modulator(const Rgba &colour)
+void Widget::color_modulator(const Rgba& colour)
 {
     if (SDL_SetTextureColorMod(_texture, colour.r, colour.g, colour.b) < 0 ||
         SDL_SetTextureAlphaMod(_texture, colour.a) < 0) {

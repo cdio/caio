@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -36,7 +36,6 @@ namespace cbm_bus {
 
 using buf_t = std::vector<uint8_t>;
 
-
 /**
  * CBM-BUS data.
  */
@@ -44,11 +43,10 @@ class BusData {
 public:
     constexpr static const bool RELEASED = true;
 
-
-    explicit BusData() {
+    BusData() {
     }
 
-    BusData(const BusData &bd)
+    BusData(const BusData& bd)
         : _srq{bd._srq},
           _atn{bd._atn},
           _clk{bd._clk},
@@ -104,7 +102,7 @@ public:
         _srq = _atn = _clk = _dat = _rst = RELEASED;
     }
 
-    BusData &operator&=(const BusData &bd) {
+    BusData& operator&=(const BusData& bd) {
         _srq &= bd._srq;
         _atn &= bd._atn;
         _clk &= bd._clk;
@@ -123,7 +121,6 @@ private:
     bool _rst{RELEASED};
 };
 
-
 /**
  * CBM-BUS (Commodore-IEC serial bus).
  * The CBM-BUS is a stripped down version of IEEE-488/IEC-425.
@@ -131,10 +128,9 @@ private:
  */
 class Bus : public Name {
 public:
-    constexpr static const char *TYPE = "CBM-BUS";
+    constexpr static const char* TYPE = "CBM-BUS";
 
-
-    explicit Bus(const std::string &label = "")
+    explicit Bus(const std::string& label = "")
         : Name{TYPE, label} {
     }
 
@@ -147,18 +143,18 @@ public:
      * @return True on success; false if another device with
      * the same unit number is already attached to this bus.
      */
-    bool add(class Controller *dev);
+    bool add(class Controller* dev);
 
     /**
      * Detach a device from this bus.
      * @param dev Device to detach.
      */
-    void del(class Controller *dev);
+    void del(class Controller* dev);
 
     /**
      * @return A reference to this bus' data lines.
      */
-    const BusData &data() const {
+    const BusData& data() const {
         return _data;
     }
 
@@ -175,10 +171,9 @@ public:
     std::string to_string() const override;
 
 private:
-    BusData                         _data{};    /* Bus lines                        */
-    std::vector<class Controller *> _devs{};    /* Devices connected to this bus    */
+    BusData                        _data{};     /* Bus lines                        */
+    std::vector<class Controller*> _devs{};     /* Devices connected to this bus    */
 };
-
 
 /**
  * CBM-BUS Controlller.
@@ -186,10 +181,9 @@ private:
  */
 class Controller : public Name {
 public:
-    constexpr static const char *TYPE              = "CBM-BUS-DEVICE";
-    constexpr static const char *LABEL             = "controller";
+    constexpr static const char* TYPE              = "CBM-BUS-DEVICE";
+    constexpr static const char* LABEL             = "controller";
     constexpr static const uint8_t CONTROLLER_UNIT = 255;
-
 
     /**
      * Initialise this bus controller.
@@ -197,7 +191,7 @@ public:
      * @param label Label asssigned to this controller.
      * @exception InvalidArgument if the bus is empty.
      */
-    Controller(const std::shared_ptr<Bus> &bus)
+    Controller(const sptr_t<Bus>& bus)
         : Controller{CONTROLLER_UNIT, bus, LABEL} {
     }
 
@@ -208,11 +202,11 @@ public:
         return _unit;
     }
 
-    const BusData &bus_data() const {
+    const BusData& bus_data() const {
         return _bus->data();
     }
 
-    const BusData &data() const {
+    const BusData& data() const {
         return _data;
     }
 
@@ -274,7 +268,7 @@ protected:
      * @param label Label asssigned to this controller.
      * @exception InvalidArgument if the bus is empty.
      */
-    Controller(uint8_t unit, const std::shared_ptr<Bus> &bus, const std::string &label = LABEL);
+    Controller(uint8_t unit, const sptr_t<Bus>& bus, const std::string& label = LABEL);
 
     uint8_t              _unit;
     std::shared_ptr<Bus> _bus;
@@ -405,7 +399,7 @@ public:
         return _chunit;
     }
 
-    buf_t &param() {
+    buf_t& param() {
         return _param;
     }
 
@@ -557,7 +551,7 @@ public:
      * @param bus  The CBM-BUS to connect to.
      * @exception InvalidArgument
      */
-    Device(uint8_t unit, const std::shared_ptr<Bus> &bus);
+    Device(uint8_t unit, const sptr_t<Bus>& bus);
 
     virtual ~Device();
 
@@ -572,7 +566,7 @@ public:
      * @param ch    Channel to open;
      * @param param Channel parameters.
      */
-    virtual void open(uint8_t ch, const std::string &param) = 0;
+    virtual void open(uint8_t ch, const std::string& param) = 0;
 
     /**
      * Close a channel.
@@ -605,7 +599,7 @@ public:
      * @param ch    Channel to write to:
      * @param value Buffer to write.
      */
-    virtual void write(uint8_t ch, const buf_t &buf) = 0;
+    virtual void write(uint8_t ch, const buf_t& buf) = 0;
 
     /**
      * Get the device activity status.
@@ -619,7 +613,7 @@ protected:
     /**
      * @see Clockable::tick()
      */
-    size_t tick(const Clock &clock) override;
+    size_t tick(const Clock& clock) override;
 
     bool tick_rx();
 

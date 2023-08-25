@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -30,8 +30,8 @@ public:
     LockedQueue() {
     }
 
-    LockedQueue(LockedQueue &&lq)
-        : _queue{static_cast<const std::queue<T> &&>(lq)} {
+    LockedQueue(LockedQueue&& lq)
+        : _queue{static_cast<const std::queue<T>&&>(lq)} {
     }
 
     virtual ~LockedQueue() {
@@ -42,7 +42,7 @@ public:
         _queue = {};
     }
 
-    void push(const T &&value) {
+    void push(const T&& value) {
         std::scoped_lock<std::mutex> _{_qlock};
         _queue.push(std::move(value));
     }
@@ -54,7 +54,7 @@ public:
         return val;
     }
 
-    T & back() {
+    T& back() {
         std::scoped_lock<std::mutex> _{_qlock};
         return _queue.back();
     }

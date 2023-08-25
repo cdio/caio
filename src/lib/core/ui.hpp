@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -44,13 +44,13 @@ using Widget      = sdl2::Widget;
 namespace widget  = sdl2::widget;
 
 template<typename W, class... A>
-std::shared_ptr<W> make_widget(UI &ui, const A&... args)
+sptr_t<W> make_widget(UI& ui, const A&... args)
 {
     return std::make_shared<W>(ui.renderer(), args...);
 }
 
 template<typename W, class... A>
-std::shared_ptr<W> make_widget(const std::shared_ptr<UI> &ui, const A&... args)
+std::shared_ptr<W> make_widget(const std::shared_ptr<UI>& ui, const A&... args)
 {
     return make_widget<W>(*ui, args...);
 }

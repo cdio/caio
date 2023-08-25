@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -28,11 +28,12 @@ namespace widget {
 
 class Reset : public Widget {
 public:
-    Reset(SDL_Renderer *_renderer, const std::function<bool()> &is_paused);
+    Reset(SDL_Renderer* _renderer, const std::function<bool()>& is_paused);
 
-    virtual ~Reset();
+    virtual ~Reset() {
+    }
 
-    void render(const SDL_Rect &dstrect) override;
+    void render(const SDL_Rect& dstrect) override;
 
 private:
     std::function<bool()> _is_paused{};

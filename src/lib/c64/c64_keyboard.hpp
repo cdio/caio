@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -139,7 +139,7 @@ public:
      * @param label      Label assigned to this keyboard;
      * @param restore_cb Callback to call when the RESTORE key is pressed.
      */
-    C64Keyboard(const std::string &label, const std::function<void()> &restore_cb = {});
+    C64Keyboard(const std::string& label, const std::function<void()>& restore_cb = {});
 
     virtual ~C64Keyboard();
 
@@ -147,7 +147,7 @@ public:
      * Set the RESTORE key callback.
      * @param restore_cb Callback to call when the RESTORE key is pressed.
      */
-    void restore_key(const std::function<void()> &restore_cb);
+    void restore_key(const std::function<void()>& restore_cb);
 
     /**
      * @see Keyboard::reset()
@@ -177,7 +177,7 @@ public:
     /**
      * @see Keyboard::add_key_map()
      */
-    void add_key_map(const std::string &key_name, bool key_shift, bool key_altgr, const std::string &impl_name,
+    void add_key_map(const std::string& key_name, bool key_shift, bool key_altgr, const std::string& impl_name,
         bool impl_shift) override;
 
     /**
@@ -191,7 +191,7 @@ public:
      * @return The KeyMatrix code (KeyMatrix::NONE if the key name is invalid).
      * @see name_to_c64
      */
-    static MatrixKey to_c64(const std::string &name);
+    static MatrixKey to_c64(const std::string& name);
 
 private:
     /**

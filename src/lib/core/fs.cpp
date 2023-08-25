@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -35,11 +35,11 @@ namespace fs {
 
 std::string home()
 {
-    static const char *chome = std::getenv("HOME");
+    static const char* chome = std::getenv("HOME");
     return (chome == nullptr ? "" : chome);
 }
 
-std::string fix_home(const std::string &path)
+std::string fix_home(const std::string& path)
 {
     if (!path.empty() && path[0] == '~') {
         std::string newpath{path};
@@ -50,14 +50,14 @@ std::string fix_home(const std::string &path)
     return path;
 }
 
-bool exists(const std::string &path)
+bool exists(const std::string& path)
 {
     //TODO: use std::filesystem::exists() ?
     struct ::stat st{};
     return (::stat(path.c_str(), &st) == 0);
 }
 
-std::string search(const std::string &fname, const std::initializer_list<std::string> &spath, bool cwd)
+std::string search(const std::string& fname, const std::initializer_list<std::string>& spath, bool cwd)
 {
     if (fname.empty()) {
         return {};
@@ -102,13 +102,13 @@ std::string search(const std::string &fname, const std::initializer_list<std::st
     return {};
 }
 
-std::string basename(const std::string &fullpath)
+std::string basename(const std::string& fullpath)
 {
     auto pos = fullpath.find_last_of("/");
     return (pos == std::string::npos ? fullpath : fullpath.substr(pos + 1));
 }
 
-void concat(const std::string &dst, const std::string &src)
+void concat(const std::string& dst, const std::string& src)
 {
     std::ifstream is{src, std::ios_base::in | std::ios_base::binary};
     if (!is) {
@@ -124,31 +124,31 @@ void concat(const std::string &dst, const std::string &src)
         is.unsetf(std::ios_base::skipws);
         std::copy(std::istream_iterator<uint8_t>(is), std::istream_iterator<uint8_t>(),
             std::ostream_iterator<uint8_t>(os));
-    } catch (const std::exception &err) {
+    } catch (const std::exception& err) {
         throw IOError{err};
     }
 }
 
-bool unlink(const std::string &fname)
+bool unlink(const std::string& fname)
 {
     return (fname.empty() || !::unlink(fname.c_str()));
 }
 
-bool match(const std::string &path, const std::string &pattern)
+bool match(const std::string& path, const std::string& pattern)
 {
-    const char *cpath = path.c_str();
-    const char *cpattern = pattern.c_str();
+    const char* cpath = path.c_str();
+    const char* cpattern = pattern.c_str();
     return (!::fnmatch(cpattern, cpath, FNM_NOESCAPE));
 }
 
-bool directory(const std::string &path, const std::string &pattern,
-    const std::function<bool(const std::string &, uint64_t)> &callback)
+bool directory(const std::string& path, const std::string& pattern,
+    const std::function<bool(const std::string&, uint64_t)>& callback)
 {
-    const auto &end = std::filesystem::end(std::filesystem::recursive_directory_iterator{});
+    const auto& end = std::filesystem::end(std::filesystem::recursive_directory_iterator{});
     std::filesystem::recursive_directory_iterator it{path, std::filesystem::directory_options::skip_permission_denied};
 
     for (; it != end; ++it) {
-        const auto &entry = it->path();
+        const auto& entry = it->path();
         if (!std::filesystem::is_directory(entry) && fs::match(entry, pattern)) {
             auto size = std::filesystem::file_size(entry);
             if (callback(entry, size) == false) {
@@ -160,11 +160,11 @@ bool directory(const std::string &path, const std::string &pattern,
     return true;
 }
 
-std::vector<std::pair<std::string, uint64_t>> directory(const std::string &path, const std::string &pattern)
+std::vector<std::pair<std::string, uint64_t>> directory(const std::string& path, const std::string& pattern)
 {
     std::vector<std::pair<std::string, uint64_t>> entries{};
 
-    directory(path, pattern, [&entries](const std::string &entry, uint64_t size) -> bool {
+    directory(path, pattern, [&entries](const std::string& entry, uint64_t size) -> bool {
         entries.push_back({entry, size});
         return true;
     });

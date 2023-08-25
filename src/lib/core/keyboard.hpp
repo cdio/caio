@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -33,7 +33,7 @@ namespace caio {
  */
 class Keyboard : public Name {
 public:
-    constexpr static const char *TYPE = "KBD";
+    constexpr static const char* TYPE = "KBD";
 
     /**
      * caio Key codes.
@@ -158,10 +158,11 @@ public:
         KEY_NONE            = -1
     };
 
+    Keyboard() {
+    }
 
-    Keyboard();
-
-    virtual ~Keyboard();
+    virtual ~Keyboard() {
+    }
 
     /**
      * Load a key mapping table from a file.
@@ -171,7 +172,7 @@ public:
      * @see add_key_map()
      * @see clear_key_map()
      */
-    void load(const std::string &fname);
+    void load(const std::string& fname);
 
     /**
      * Reset the keyboard.
@@ -216,7 +217,7 @@ public:
      * @exception InvalidArgument if the key_name or the impl_name is not valid.
      * @see clear_key_map()
      */
-    virtual void add_key_map(const std::string &key_name, bool key_shift, bool key_altgr, const std::string &impl_name,
+    virtual void add_key_map(const std::string& key_name, bool key_shift, bool key_altgr, const std::string& impl_name,
         bool impl_shift) = 0;
 
     /**
@@ -231,10 +232,12 @@ public:
      * @return The Key code (Key::KEY_NONE if the key name is invalid).
      * @see name_to_key
      */
-    static Key to_key(const std::string &name);
+    static Key to_key(const std::string& name);
 
 protected:
-    Keyboard(const std::string &label = {});
+    Keyboard(const std::string& label = {})
+        : Name{TYPE, label} {
+    }
 
 private:
     static std::map<std::string, Key> name_to_key;

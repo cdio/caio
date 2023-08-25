@@ -38,7 +38,6 @@ const std::pair<std::string, Expr::ex_t> Expr::operators[] = {
     { "|",  [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) | b(*cpu); }}
 };
 
-
 Expr::fn_t Expr::compile_argument(MonitoredCPU& cpu, const std::string& line)
 {
     /*

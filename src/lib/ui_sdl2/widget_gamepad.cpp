@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -26,19 +26,14 @@ namespace widget {
 
 #include "icons/gamepad_128x3.hpp"
 
-
-Gamepad::Gamepad(SDL_Renderer *renderer, const std::function<Status()> &upd)
+Gamepad::Gamepad(SDL_Renderer* renderer, const std::function<Status()>& upd)
     : Widget{renderer},
       _update{upd}
 {
     Widget::load(gamepad_128x3_png);
 }
 
-Gamepad::~Gamepad()
-{
-}
-
-void Gamepad::render(const SDL_Rect &dstrect)
+void Gamepad::render(const SDL_Rect& dstrect)
 {
     static const SDL_Rect normal_rect{0, 0, 128, 128};
     static const SDL_Rect swapped_0_rect{128, 0, 128, 128};
@@ -49,8 +44,8 @@ void Gamepad::render(const SDL_Rect &dstrect)
         st = _update();
     }
 
-    const Rgba &colour = (st.is_connected ? ENABLED_COLOR : DISABLED_COLOR);
-    const auto &rect = (!st.is_swapped ? normal_rect : ((st.id % 2) == 0 ? swapped_0_rect : swapped_1_rect));
+    const Rgba& colour = (st.is_connected ? ENABLED_COLOR : DISABLED_COLOR);
+    const auto& rect = (!st.is_swapped ? normal_rect : ((st.id % 2) == 0 ? swapped_0_rect : swapped_1_rect));
     Widget::render(rect, dstrect, colour);
 }
 

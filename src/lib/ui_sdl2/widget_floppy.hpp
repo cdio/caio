@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -33,11 +33,12 @@ public:
         bool is_idle{};
     };
 
-    Floppy(SDL_Renderer *renderer, const std::function<Status()> &upd);
+    Floppy(SDL_Renderer* renderer, const std::function<Status()>& upd);
 
-    virtual ~Floppy();
+    virtual ~Floppy() {
+    }
 
-    void render(const SDL_Rect &dstrect) override;
+    void render(const SDL_Rect& dstrect) override;
 
 private:
     std::function<Status()> _update;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -55,7 +55,7 @@ public:
      * @exception UIError
      * @see reset()
      */
-    Panel(SDL_Renderer *renderer = nullptr);
+    Panel(SDL_Renderer* renderer = nullptr);
 
     virtual ~Panel();
 
@@ -64,7 +64,7 @@ public:
      * @param renderer Renderer;
      * @exception UIError
      */
-    void reset(SDL_Renderer *renderer = nullptr);
+    void reset(SDL_Renderer* renderer = nullptr);
 
     /**
      * Set the panel visibility.
@@ -81,7 +81,7 @@ public:
      * Process SDL events.
      * @param event SDL event.
      */
-    void event(const SDL_Event &event);
+    void event(const SDL_Event& event);
 
     /**
      * Render the panel.
@@ -97,19 +97,19 @@ public:
      * @param just   Justification (Just::LEFT or Just::RIGHT);
      * @return true if the widget was added, false if there is no room for a new widget in the panel.
      */
-    void add(const std::shared_ptr<Widget> &widget, Just just = Just::LEFT);
+    void add(const sptr_t<Widget>& widget, Just just = Just::LEFT);
 
 private:
-    using just_rect_widget_t = std::tuple<Just, SDL_Rect, std::shared_ptr<Widget>>;
+    using just_rect_widget_t = std::tuple<Just, SDL_Rect, sptr_t<Widget>>;
 
     std::vector<just_rect_widget_t>::const_iterator find_widget(int x, int y);
 
-    bool                             _visible{};            /* Panel visibility                 */
-    SDL_Renderer                    *_renderer{nullptr};    /* Renderer                         */
-    SDL_Texture                     *_tex{nullptr};         /* Panel texture                    */
-    SDL_Rect                         _ext_rect{};           /* Panel rectangle                  */
-    std::shared_ptr<Widget>          _cur_widget{};         /* Widget under the mouse cursor    */
-    std::vector<just_rect_widget_t>  _widgets{};            /* Panel widgets                    */
+    bool                            _visible{};         /* Panel visibility                 */
+    SDL_Renderer*                   _renderer{nullptr}; /* Renderer                         */
+    SDL_Texture*                    _tex{nullptr};      /* Panel texture                    */
+    SDL_Rect                        _ext_rect{};        /* Panel rectangle                  */
+    sptr_t<Widget>                  _cur_widget{};      /* Widget under the mouse cursor    */
+    std::vector<just_rect_widget_t> _widgets{};         /* Panel widgets                    */
 };
 
 }

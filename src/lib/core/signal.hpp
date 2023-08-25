@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -43,7 +43,7 @@ extern std::random_device rd;
 extern std::uniform_real_distribution<float> uni_random;
 
 using samples_fp = gsl::span<float>;
-using samples_i16 = std::vector<int16_t>;
+using samples_i16 = std::vector<int16_t>;   //TODO avoid vector
 
 
 /**
@@ -66,7 +66,6 @@ enum class ConvShape {
      */
     Central
 };
-
 
 /**
  * @return A positive random value between 0.0 and 1.0.
@@ -169,7 +168,7 @@ static inline float square(float t, float dc)
  * @return The average value.
  */
 template <typename C, typename = std::enable_if<utils::is_container<C>::value>>
-float average(const C &samples)
+float mean(const C& samples)
 {
     float sum = std::accumulate(samples.begin(), samples.end(), 0.0f);
     return (sum / samples.size());
@@ -200,7 +199,7 @@ float blackman(size_t pos, size_t N);
  * Invert the frequency spectrum of a kernel.
  * @param krn Kernel to invert.
  */
-void spectral_inversion(samples_fp &krn);
+void spectral_inversion(samples_fp& krn);
 
 /**
  * Convolution product.
@@ -213,7 +212,7 @@ void spectral_inversion(samples_fp &krn);
  * @exception InvalidArgument if the destination buffer does not have enough space.
  * @see ConvShape
  */
-samples_fp conv(samples_fp &dst, const samples_fp &sig, const samples_fp &krn, enum ConvShape shape);
+samples_fp conv(samples_fp& dst, const samples_fp& sig, const samples_fp& krn, enum ConvShape shape);
 
 /**
  * Generate a Low-pass filter kernel.
@@ -226,7 +225,7 @@ samples_fp conv(samples_fp &dst, const samples_fp &sig, const samples_fp &krn, e
  * @see kernel_size()
  * TODO: use bilinear transform
  */
-samples_fp lopass(samples_fp &krn, float fc, float fs, bool osiz = true);
+samples_fp lopass(samples_fp& krn, float fc, float fs, bool osiz = true);
 
 /**
  * Generate a High-pass filter kernel.
@@ -239,7 +238,7 @@ samples_fp lopass(samples_fp &krn, float fc, float fs, bool osiz = true);
  * @see kernel_size()
  * TODO: use bilinear transform
  */
-samples_fp hipass(samples_fp &buf, float fc, float fs, bool osiz = true);
+samples_fp hipass(samples_fp& buf, float fc, float fs, bool osiz = true);
 
 /**
  * Generate a Band-pass filter kernel.
@@ -253,7 +252,7 @@ samples_fp hipass(samples_fp &buf, float fc, float fs, bool osiz = true);
  * @see kernel_size()
  * TODO: use bilinear transform
  */
-samples_fp bapass(samples_fp &krn, float fcl, float fch, float fs, bool osiz = true);
+samples_fp bapass(samples_fp& krn, float fcl, float fch, float fs, bool osiz = true);
 
 /**
  * Generate a Band-stop filter kernel.
@@ -269,7 +268,7 @@ samples_fp bapass(samples_fp &krn, float fcl, float fch, float fs, bool osiz = t
  * @see kernel_size()
  * TODO: use bilinear transform
  */
-samples_fp bastop(samples_fp &krn, float fcl, float fch, float fs, bool osiz = true);
+samples_fp bastop(samples_fp& krn, float fcl, float fch, float fs, bool osiz = true);
 
 /**
  * Generate a Low-pass filter kernel using a second order pole.
@@ -284,7 +283,7 @@ samples_fp bastop(samples_fp &krn, float fcl, float fch, float fs, bool osiz = t
  * @see kernel_size()
  * TODO: use bilinear transform
  */
-samples_fp lopass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz = true);
+samples_fp lopass_40(samples_fp& krn, float f0, float Q, float fs, bool osiz = true);
 
 /**
  * Generate a High-pass filter kernel using an inverted second order pole.
@@ -299,7 +298,7 @@ samples_fp lopass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz = t
  * @see kernel_size()
  * TODO: use bilinear transform
  */
-samples_fp hipass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz = true);
+samples_fp hipass_40(samples_fp& krn, float f0, float Q, float fs, bool osiz = true);
 
 /**
  * Generate a Low-pass filter kernel using a simple pole.
@@ -313,7 +312,7 @@ samples_fp hipass_40(samples_fp &krn, float f0, float Q, float fs, bool osiz = t
  * @see kernel_size()
  * TODO: use bilinear transform
  */
-samples_fp lopass_20(samples_fp &krn, float f0, float fs, bool osiz = true);
+samples_fp lopass_20(samples_fp& krn, float f0, float fs, bool osiz = true);
 
 /**
  * Generate a Hi-pass filter kernel using an inverted pole.
@@ -327,7 +326,7 @@ samples_fp lopass_20(samples_fp &krn, float f0, float fs, bool osiz = true);
  * @see kernel_size()
  * TODO: use bilinear transform
  */
-samples_fp hipass_20(samples_fp &krn, float f0, float fs, bool osiz = true);
+samples_fp hipass_20(samples_fp& krn, float f0, float fs, bool osiz = true);
 
 /**
  * Generate a "triangular" Band-pass filter kernel using a zero and a pole.
@@ -342,7 +341,7 @@ samples_fp hipass_20(samples_fp &krn, float f0, float fs, bool osiz = true);
  * @see kernel_size()
  * TODO: use bilinear transform
  */
-samples_fp bapass_20(samples_fp &krn, float f0, float fs, bool osiz = true);
+samples_fp bapass_20(samples_fp& krn, float f0, float fs, bool osiz = true);
 
 /**
  * Convert an integer value to floating point.
@@ -382,13 +381,13 @@ static inline int16_t to_i16(float value)
  * @return An octave compatible representation of a samples buffer.
  */
 template<typename T, typename = std::enable_if<utils::is_container<T>::value>>
-std::string to_string(const T &samples)
+std::string to_string(const T& samples)
 {
     std::stringstream os{};
 
     os << "[";
 
-    for (const auto &sample : samples) {
+    for (const auto& sample : samples) {
         os << +sample << ", ";
     }
 
@@ -408,7 +407,7 @@ std::string to_string(const T &samples)
  * @param Q       Q factor or 0.
  * @return os.
  */
-std::ostream &dump(std::ostream &os, const samples_fp &samples, const std::string &name, float fs, float fc1,
+std::ostream& dump(std::ostream& os, const samples_fp& samples, const std::string& name, float fs, float fc1,
     float fc2, float Q);
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -62,9 +62,9 @@ std::string BusData::to_string() const
 }
 
 
-bool Bus::add(Controller *dev)
+bool Bus::add(Controller* dev)
 {
-    auto it = std::find_if(_devs.begin(), _devs.end(), [&dev](const Controller *rdev) -> bool {
+    auto it = std::find_if(_devs.begin(), _devs.end(), [&dev](const Controller* rdev) -> bool {
         return (rdev == dev || rdev->unit() == dev->unit());
     });
 
@@ -78,7 +78,7 @@ bool Bus::add(Controller *dev)
     return true;
 }
 
-void Bus::del(Controller *dev)
+void Bus::del(Controller* dev)
 {
     auto it = std::find(_devs.begin(), _devs.end(), dev);
     if (it != _devs.end()) {
@@ -90,7 +90,7 @@ void Bus::propagate()
 {
     BusData bd{};
 
-    for (auto &dev : _devs) {
+    for (auto& dev : _devs) {
         bd &= dev->data();
     }
 
@@ -111,7 +111,7 @@ std::string Bus::to_string() const
 }
 
 
-Controller::Controller(uint8_t unit, const std::shared_ptr<Bus> &bus, const std::string &label)
+Controller::Controller(uint8_t unit, const sptr_t<Bus>& bus, const std::string& label)
     : Name{TYPE, label},
       _unit{unit},
       _bus{bus}
@@ -125,7 +125,7 @@ Controller::Controller(uint8_t unit, const std::shared_ptr<Bus> &bus, const std:
 }
 
 
-Device::Device(uint8_t unit, const std::shared_ptr<Bus> &bus)
+Device::Device(uint8_t unit, const sptr_t<Bus>& bus)
     : Controller{unit, bus, LABEL_PREFIX + std::to_string(+unit)},
       Clockable{}
 {
@@ -144,7 +144,7 @@ void Device::reset()
     release();
 }
 
-size_t Device::tick(const Clock &clock)
+size_t Device::tick(const Clock& clock)
 {
     //TODO: General timeout on blocking states.
 

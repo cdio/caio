@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -58,15 +58,7 @@ const std::vector<::option> CaioCmdline::lopts = {
     { "help",       no_argument,        nullptr, CaioCmdline::OPTION_HELP       }
 };
 
-CaioCmdline::CaioCmdline()
-{
-}
-
-CaioCmdline::~CaioCmdline()
-{
-}
-
-CaioCmdline::CaioCmdline(const std::vector<::option> &ext_lopts)
+CaioCmdline::CaioCmdline(const std::vector<::option>& ext_lopts)
     : _lopts{lopts.begin(), lopts.end()}
 {
     _lopts.insert(_lopts.end(), ext_lopts.begin(), ext_lopts.end());
@@ -116,12 +108,12 @@ void CaioCmdline::usage()
               << " -h|--help              Print this message and exit"                                  << std::endl;
 }
 
-bool CaioCmdline::parse(Confile &conf, int opt, const std::string &arg)
+bool CaioCmdline::parse(Confile& conf, int opt, const std::string& arg)
 {
     return false;
 }
 
-Confile CaioCmdline::parse(int argc, char *const *argv)
+Confile CaioCmdline::parse(int argc, char* const* argv)
 {
     _progname = fs::basename(argv[0]);
 
@@ -155,7 +147,7 @@ Confile CaioCmdline::parse(int argc, char *const *argv)
              * Search for the configuration file in the default search path.
              */
             conf.parse();
-        } catch (const ConfileError &) {
+        } catch (const ConfileError&) {
         }
     } else {
         try {
@@ -163,13 +155,13 @@ Confile CaioCmdline::parse(int argc, char *const *argv)
              * The user specified a configuration file name.
              */
             conf.parse(cfile, { CaioConfile::CWD });
-        } catch (const std::exception &err) {
+        } catch (const std::exception& err) {
             std::cerr << _progname << ": " << err.what() << std::endl;
             std::exit(EXIT_FAILURE);
         }
     }
 
-    auto &sec = conf[std::string{conf.CAIO_CONFIG_SECTION}];
+    auto& sec = conf[std::string{conf.CAIO_CONFIG_SECTION}];
     bool terminate{};
     optind = 0;
 

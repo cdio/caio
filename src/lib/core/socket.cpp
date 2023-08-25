@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -38,14 +38,14 @@
 
 namespace caio {
 
-SocketAddress::SocketAddress(const sockaddr_t &saddr)
+SocketAddress::SocketAddress(const sockaddr_t& saddr)
 {
     char buf[INET_ADDRSTRLEN + 1];
 
     switch (saddr.sa.sa_family) {
     case AF_UNIX:
         _saddrlen = SUN_LEN(&saddr.un);
-        std::copy_n(reinterpret_cast<const uint8_t *>(&saddr), _saddrlen, reinterpret_cast<uint8_t *>(&_saddr));
+        std::copy_n(reinterpret_cast<const uint8_t*>(&saddr), _saddrlen, reinterpret_cast<uint8_t*>(&_saddr));
         _addr = _saddr.un.sun_path;
         break;
 
@@ -61,7 +61,7 @@ SocketAddress::SocketAddress(const sockaddr_t &saddr)
     }
 }
 
-std::pair<std::string, std::string> SocketAddress::host_port(const std::string &addr)
+std::pair<std::string, std::string> SocketAddress::host_port(const std::string& addr)
 {
     auto pos = addr.find(":");
     if (pos == std::string::npos) {
@@ -74,7 +74,7 @@ std::pair<std::string, std::string> SocketAddress::host_port(const std::string &
     return {host, port};
 }
 
-void SocketAddress::resolve(const std::string &addr)
+void SocketAddress::resolve(const std::string& addr)
 {
     static const ::addrinfo hints_unix = {
         .ai_flags    = AI_CANONNAME,
@@ -88,7 +88,7 @@ void SocketAddress::resolve(const std::string &addr)
         .ai_socktype = SOCK_STREAM
     };
 
-    ::addrinfo *res{};
+    ::addrinfo* res{};
     auto [host, port] = host_port(addr);
 
     int err = ::getaddrinfo(host.c_str(), port.c_str(), &hints_unix, &res);
@@ -101,13 +101,12 @@ void SocketAddress::resolve(const std::string &addr)
 
     _addr = std::string{res->ai_canonname} + ":" + port;
     _saddrlen = res->ai_addrlen;
-    std::copy_n(reinterpret_cast<uint8_t *>(res->ai_addr), _saddrlen, reinterpret_cast<uint8_t *>(&_saddr));
+    std::copy_n(reinterpret_cast<uint8_t*>(res->ai_addr), _saddrlen, reinterpret_cast<uint8_t*>(&_saddr));
 
     ::freeaddrinfo(res);
 }
 
-
-Socket::Socket(const SocketAddress &sa, int fd)
+Socket::Socket(const SocketAddress& sa, int fd)
 {
     if (fd < 0) {
         _fd = ::socket(sa._saddr.sa.sa_family, SOCK_STREAM, 0);
@@ -121,7 +120,7 @@ Socket::Socket(const SocketAddress &sa, int fd)
     _sa = sa;
 }
 
-Socket Socket::connect(const SocketAddress &sa)
+Socket Socket::connect(const SocketAddress& sa)
 {
     Socket socket{sa};
 
@@ -132,7 +131,7 @@ Socket Socket::connect(const SocketAddress &sa)
     return socket;
 }
 
-Socket Socket::listen(const SocketAddress &sa)
+Socket Socket::listen(const SocketAddress& sa)
 {
     Socket socket{sa};
 
@@ -176,7 +175,7 @@ void Socket::close()
     }
 }
 
-Socket &Socket::operator=(Socket &&other)
+Socket& Socket::operator=(Socket&& other)
 {
     close();
 
@@ -268,7 +267,7 @@ void Socket::poll_write(int timeout)
     poll(POLLOUT, timeout);
 }
 
-void Socket::read(uint8_t *buf, size_t bufsiz)
+void Socket::read(uint8_t* buf, size_t bufsiz)
 {
     while (bufsiz) {
         poll_read();
@@ -292,7 +291,7 @@ void Socket::read(uint8_t *buf, size_t bufsiz)
     }
 }
 
-void Socket::write(const uint8_t *buf, size_t bufsiz)
+void Socket::write(const uint8_t* buf, size_t bufsiz)
 {
     while (bufsiz) {
         poll_write();

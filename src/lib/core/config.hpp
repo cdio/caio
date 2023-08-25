@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -57,33 +57,33 @@ namespace caio {
  */
 class CaioConfile : public Confile {
 public:
-    constexpr static const char *SYSTEM_CONFDIR         = D_SYSCONFDIR;
-    constexpr static const char *HOME_CONFDIR           = D_HOMECONFDIR;
-    constexpr static const char *CWD                    = ".";
-    constexpr static const char *ROMDIR                 = D_ROMDIR;
-    constexpr static const char *PALETTEDIR             = D_PALETTEDIR;
-    constexpr static const char *KEYMAPSDIR             = D_KEYMAPSDIR;
+    constexpr static const char* SYSTEM_CONFDIR         = D_SYSCONFDIR;
+    constexpr static const char* HOME_CONFDIR           = D_HOMECONFDIR;
+    constexpr static const char* CWD                    = ".";
+    constexpr static const char* ROMDIR                 = D_ROMDIR;
+    constexpr static const char* PALETTEDIR             = D_PALETTEDIR;
+    constexpr static const char* KEYMAPSDIR             = D_KEYMAPSDIR;
 
-    constexpr static const char *CAIO_CONFIG_FILE       = "caio.conf";
+    constexpr static const char* CAIO_CONFIG_FILE       = "caio.conf";
 
-    constexpr static const char *CAIO_CONFIG_SECTION    = "caio";
+    constexpr static const char* CAIO_CONFIG_SECTION    = "caio";
 
-    constexpr static const char *ROMDIR_CONFIG_KEY      = "romdir";
-    constexpr static const char *PALETTEDIR_CONFIG_KEY  = "palettedir";
-    constexpr static const char *PALETTE_CONFIG_KEY     = "palette";
-    constexpr static const char *KEYMAPSDIR_CONFIG_KEY  = "keymapsdir";
-    constexpr static const char *KEYMAPS_CONFIG_KEY     = "keymaps";
-    constexpr static const char *CARTDIR_CONFIG_KEY     = "cartdir";
-    constexpr static const char *FPS_CONFIG_KEY         = "fps";
-    constexpr static const char *SCALE_CONFIG_KEY       = "scale";
-    constexpr static const char *SCANLINES_CONFIG_KEY   = "scanlines";
-    constexpr static const char *FULLSCREEN_CONFIG_KEY  = "fullscreen";
-    constexpr static const char *SRESIZE_CONFIG_KEY     = "sresize";
-    constexpr static const char *AUDIO_CONFIG_KEY       = "audio";
-    constexpr static const char *DELAY_CONFIG_KEY       = "delay";
-    constexpr static const char *MONITOR_CONFIG_KEY     = "monitor";
-    constexpr static const char *LOGFILE_CONFIG_KEY     = "logfile";
-    constexpr static const char *LOGLEVEL_CONFIG_KEY    = "loglevel";
+    constexpr static const char* ROMDIR_CONFIG_KEY      = "romdir";
+    constexpr static const char* PALETTEDIR_CONFIG_KEY  = "palettedir";
+    constexpr static const char* PALETTE_CONFIG_KEY     = "palette";
+    constexpr static const char* KEYMAPSDIR_CONFIG_KEY  = "keymapsdir";
+    constexpr static const char* KEYMAPS_CONFIG_KEY     = "keymaps";
+    constexpr static const char* CARTDIR_CONFIG_KEY     = "cartdir";
+    constexpr static const char* FPS_CONFIG_KEY         = "fps";
+    constexpr static const char* SCALE_CONFIG_KEY       = "scale";
+    constexpr static const char* SCANLINES_CONFIG_KEY   = "scanlines";
+    constexpr static const char* FULLSCREEN_CONFIG_KEY  = "fullscreen";
+    constexpr static const char* SRESIZE_CONFIG_KEY     = "sresize";
+    constexpr static const char* AUDIO_CONFIG_KEY       = "audio";
+    constexpr static const char* DELAY_CONFIG_KEY       = "delay";
+    constexpr static const char* MONITOR_CONFIG_KEY     = "monitor";
+    constexpr static const char* LOGFILE_CONFIG_KEY     = "logfile";
+    constexpr static const char* LOGLEVEL_CONFIG_KEY    = "loglevel";
 
     CaioConfile() {
     }
@@ -94,12 +94,11 @@ public:
     /**
      * @see Confile::parse()
      */
-    void parse(const std::string &fname = CAIO_CONFIG_FILE,
-        const std::initializer_list<std::string> &spaths = {HOME_CONFDIR, SYSTEM_CONFDIR}) override {
+    void parse(const std::string& fname = CAIO_CONFIG_FILE,
+        const std::initializer_list<std::string>& spaths = {HOME_CONFDIR, SYSTEM_CONFDIR}) override {
         Confile::parse(fname, spaths);
     }
 };
-
 
 /**
  * Base configuration.
@@ -107,17 +106,17 @@ public:
 struct Config {
     constexpr static const unsigned DEFAULT_FPS              = 50;
     constexpr static const float    DEFAULT_SCALE            = 1.0f;
-    constexpr static const char *   DEFAULT_SCANLINES_EFFECT = "n";
+    constexpr static const char*    DEFAULT_SCANLINES_EFFECT = "n";
     constexpr static const bool     DEFAULT_FULLSCREEN       = false;
     constexpr static const bool     DEFAULT_SMOOTH_RESIZE    = true;
     constexpr static const bool     DEFAULT_AUDIO_ENABLED    = true;
     constexpr static const float    DEFAULT_DELAY_FACTOR     = 1.0f;
     constexpr static const bool     DEFAULT_MONITOR_ACTIVE   = false;
-    constexpr static const char *   DEFAULT_LOGFILE          = Logger::DEFAULT_LOGFILE;
-    constexpr static const char *   DEFAULT_LOGLEVEL         = Logger::DEFAULT_LOGLEVEL;
+    constexpr static const char*    DEFAULT_LOGFILE          = Logger::DEFAULT_LOGFILE;
+    constexpr static const char*    DEFAULT_LOGLEVEL         = Logger::DEFAULT_LOGLEVEL;
 
-    constexpr static const char *   PALETTEFILE_SUFFIX       = ".plt";
-    constexpr static const char *   KEYMAPSFILE_SUFFIX       = ".kbd";
+    constexpr static const char*    PALETTEFILE_SUFFIX       = ".plt";
+    constexpr static const char*    KEYMAPSFILE_SUFFIX       = ".kbd";
 
     std::string title{};
     std::string romdir{};
@@ -137,33 +136,27 @@ struct Config {
     std::string logfile{DEFAULT_LOGFILE};
     std::string loglevel{DEFAULT_LOGLEVEL};
 
-    Config() {
-    }
-
-    virtual ~Config() {
-    }
-
     /**
      * Set this config with values from a configuration file.
      * Only existing values are set, values not defined in the configuration file are left untouched.
      * @param conf Configuration file to load values from.
      * @return This configuration.
      */
-    Config &operator=(const Confile &conf);
+    Config& operator=(const Confile& conf);
 
     /**
      * Get the palette file name given the palette naem.
      * @param palette Palette name.
      * @return The palette file name.
      */
-    virtual std::string palette_file(const std::string &palette) const;
+    virtual std::string palette_file(const std::string& palette) const;
 
     /**
      * Get the keymaps file name given the country code.
      * @param cc Country code.
      * @return The keymaps file name.
      */
-    virtual std::string keymaps_file(const std::string &cc) const;
+    virtual std::string keymaps_file(const std::string& cc) const;
 
     /**
      * @return A human readable string representation of this configuration.

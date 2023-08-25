@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -27,7 +27,7 @@ namespace caio {
 namespace ui {
 namespace sdl2 {
 
-Panel::Panel(SDL_Renderer *renderer)
+Panel::Panel(SDL_Renderer* renderer)
 {
     reset(renderer);
 }
@@ -37,7 +37,7 @@ Panel::~Panel()
     reset();
 }
 
-void Panel::reset(SDL_Renderer *renderer)
+void Panel::reset(SDL_Renderer* renderer)
 {
     _renderer = renderer;
 
@@ -82,7 +82,7 @@ bool Panel::visible() const
     return _visible;
 }
 
-void Panel::event(const SDL_Event &event)
+void Panel::event(const SDL_Event& event)
 {
     if (!_visible) {
         return;
@@ -97,8 +97,8 @@ void Panel::event(const SDL_Event &event)
         return;
     }
 
-    auto &rect = std::get<1>(*it);
-    auto &widget = std::get<2>(*it);
+    auto& rect = std::get<1>(*it);
+    auto& widget = std::get<2>(*it);
     widget->event(event, rect);
     _cur_widget = widget;
 }
@@ -180,10 +180,10 @@ void Panel::render(int width, int height)
         /*
          * Draw widgets.
          */
-        for (auto &tup : _widgets) {
+        for (auto& tup : _widgets) {
             auto just = std::get<0>(tup);
-            auto &rect = std::get<1>(tup);
-            auto &widget = std::get<2>(tup);
+            auto& rect = std::get<1>(tup);
+            auto& widget = std::get<2>(tup);
             if (widget) {
                 if (just == Just::LEFT) {
                     rect = wid_rect;
@@ -215,16 +215,16 @@ void Panel::render(int width, int height)
     }
 }
 
-void Panel::add(const std::shared_ptr<Widget> &widget, Panel::Just just)
+void Panel::add(const sptr_t<Widget>& widget, Panel::Just just)
 {
     _widgets.push_back({just, {}, widget});
 }
 
 std::vector<Panel::just_rect_widget_t>::const_iterator Panel::find_widget(int x, int y)
 {
-    auto it = std::find_if(_widgets.begin(), _widgets.end(), [x, y](const just_rect_widget_t &tup) {
-        auto &rect = std::get<1>(tup);
-        auto &widget = std::get<2>(tup);
+    auto it = std::find_if(_widgets.begin(), _widgets.end(), [x, y](const just_rect_widget_t& tup) {
+        auto& rect = std::get<1>(tup);
+        auto& widget = std::get<2>(tup);
         return (widget && in_rect(x, y, rect));
     });
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -28,12 +28,12 @@ namespace caio {
  */
 class Name {
 public:
-    constexpr static const char *TYPE_UNKNOWN = "UNK";
+    constexpr static const char* TYPE_UNKNOWN = "UNK";
 
     Name() {
     }
 
-    explicit Name(const std::string &type, const std::string &label = {})
+    Name(const std::string& type, const std::string& label = {})
         : _type{(type.empty() ? TYPE_UNKNOWN : type)},
           _label{(label.empty() ? "" : label)} {
     }
@@ -41,7 +41,7 @@ public:
     /**
      * @return The type of this instance.
      */
-    const std::string &type() const {
+    const std::string& type() const {
         return _type;
     }
 
@@ -49,14 +49,14 @@ public:
      * Change the type of this instance.
      * @param type New type to set.
      */
-    void type(const std::string &type) {
+    void type(const std::string& type) {
         _type = type;
     }
 
     /**
      * @return The label of this instance.
      */
-    const std::string &label() const {
+    const std::string& label() const {
         return _label;
     }
 
@@ -64,7 +64,7 @@ public:
      * Change the label of this instance.
      * @param label New label to set.
      */
-    void label(const std::string &label) {
+    void label(const std::string& label) {
         _label = label;
     }
 

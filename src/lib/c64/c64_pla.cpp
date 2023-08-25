@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -25,8 +25,8 @@
 namespace caio {
 namespace c64 {
 
-PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, const devptr_t &chargen,
-    const devptr_t &io)
+PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, const devptr_t& chargen,
+    const devptr_t& io)
 {
     /*
      * Fixed mappings to accelerate bank switching.
@@ -51,7 +51,7 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { ram,          0xF000 }
     };
 
-    auto &mode_01 = mode_00;
+    auto& mode_01 = mode_00;
 
     addrmap_t mode_02 = {
         { ram,          0x0000 },
@@ -91,7 +91,7 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { kernal,       0x1000 },
     };
 
-    auto &mode_04 = mode_00;
+    auto& mode_04 = mode_00;
 
     addrmap_t mode_05 = {
         { ram,          0x0000 },
@@ -150,7 +150,7 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { kernal,       0x1000 },
     };
 
-    auto &mode_08 = mode_00;
+    auto& mode_08 = mode_00;
 
     addrmap_t mode_09 = {
         { ram,          0x0000 },
@@ -209,8 +209,8 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { kernal,       0x1000 },
     };
 
-    auto &mode_12 = mode_00;
-    auto &mode_13 = mode_05;
+    auto& mode_12 = mode_00;
+    auto& mode_13 = mode_05;
 
     addrmap_t mode_14 = {
         { ram,          0x0000 },
@@ -269,16 +269,16 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { device_none,  0x3000 },
     };
 
-    auto &mode_17 = mode_16;
-    auto &mode_18 = mode_16;
-    auto &mode_19 = mode_16;
-    auto &mode_20 = mode_16;
-    auto &mode_21 = mode_16;
-    auto &mode_22 = mode_16;
-    auto &mode_23 = mode_16;
-    auto &mode_24 = mode_00;
-    auto &mode_25 = mode_09;
-    auto &mode_26 = mode_10;
+    auto& mode_17 = mode_16;
+    auto& mode_18 = mode_16;
+    auto& mode_19 = mode_16;
+    auto& mode_20 = mode_16;
+    auto& mode_21 = mode_16;
+    auto& mode_22 = mode_16;
+    auto& mode_23 = mode_16;
+    auto& mode_24 = mode_00;
+    auto& mode_25 = mode_09;
+    auto& mode_26 = mode_10;
 
     addrmap_t mode_27 = {
         { ram,          0x0000 },
@@ -299,9 +299,9 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { kernal,       0x1000 },
     };
 
-    auto &mode_28 = mode_00;
-    auto &mode_29 = mode_05;
-    auto &mode_30 = mode_14;
+    auto& mode_28 = mode_00;
+    auto& mode_29 = mode_05;
+    auto& mode_30 = mode_14;
 
     addrmap_t mode_31 = {
         { ram,          0x0000 },
@@ -329,22 +329,22 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         mode_24, mode_25, mode_26, mode_27, mode_28, mode_29, mode_30, mode_31
     };
 
-    auto &wmode_00 = mode_00;
-    auto &wmode_01 = mode_00;
-    auto &wmode_02 = mode_00;
-    auto &wmode_03 = mode_00;
-    auto &wmode_04 = mode_00;
-    auto &wmode_05 = mode_13;
-    auto &wmode_06 = mode_13;
-    auto &wmode_07 = mode_13;
-    auto &wmode_08 = mode_00;
-    auto &wmode_09 = mode_00;
-    auto &wmode_10 = mode_00;
-    auto &wmode_11 = mode_00;
-    auto &wmode_12 = mode_00;
-    auto &wmode_13 = mode_13;
-    auto &wmode_14 = mode_13;
-    auto &wmode_15 = mode_13;
+    auto& wmode_00 = mode_00;
+    auto& wmode_01 = mode_00;
+    auto& wmode_02 = mode_00;
+    auto& wmode_03 = mode_00;
+    auto& wmode_04 = mode_00;
+    auto& wmode_05 = mode_13;
+    auto& wmode_06 = mode_13;
+    auto& wmode_07 = mode_13;
+    auto& wmode_08 = mode_00;
+    auto& wmode_09 = mode_00;
+    auto& wmode_10 = mode_00;
+    auto& wmode_11 = mode_00;
+    auto& wmode_12 = mode_00;
+    auto& wmode_13 = mode_13;
+    auto& wmode_14 = mode_13;
+    auto& wmode_15 = mode_13;
 
     addrmap_t wmode_16 = {
         { ram,          0x0000 },
@@ -365,21 +365,21 @@ PLA::PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, con
         { ram,          0xF000 },
     };
 
-    auto &wmode_17 = wmode_16;
-    auto &wmode_18 = wmode_16;
-    auto &wmode_19 = wmode_16;
-    auto &wmode_20 = wmode_16;
-    auto &wmode_21 = wmode_16;
-    auto &wmode_22 = wmode_16;
-    auto &wmode_23 = wmode_16;
-    auto &wmode_24 = mode_00;
-    auto &wmode_25 = mode_00;
-    auto &wmode_26 = mode_00;
-    auto &wmode_27 = mode_00;
-    auto &wmode_28 = mode_00;
-    auto &wmode_29 = mode_13;
-    auto &wmode_30 = mode_13;
-    auto &wmode_31 = mode_13;
+    auto& wmode_17 = wmode_16;
+    auto& wmode_18 = wmode_16;
+    auto& wmode_19 = wmode_16;
+    auto& wmode_20 = wmode_16;
+    auto& wmode_21 = wmode_16;
+    auto& wmode_22 = wmode_16;
+    auto& wmode_23 = wmode_16;
+    auto& wmode_24 = mode_00;
+    auto& wmode_25 = mode_00;
+    auto& wmode_26 = mode_00;
+    auto& wmode_27 = mode_00;
+    auto& wmode_28 = mode_00;
+    auto& wmode_29 = mode_13;
+    auto& wmode_30 = mode_13;
+    auto& wmode_31 = mode_13;
 
     _wmodes = std::array<addrmap_t, 32>{
         wmode_00, wmode_01, wmode_02, wmode_03, wmode_04, wmode_05, wmode_06, wmode_07,
@@ -422,7 +422,7 @@ uint8_t PLA::mode() const
     return _mode;
 }
 
-void PLA::extmap(const extmap_cb_t &extmap)
+void PLA::extmap(const extmap_cb_t& extmap)
 {
     _extmap = extmap;
 }

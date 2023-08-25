@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -45,7 +45,7 @@ public:
     constexpr static const Rgba DISABLED_COLOR    = { 255, 255, 255, 64  };     /* Color modulators */
     constexpr static const Rgba ENABLED_COLOR     = { 255, 255, 255, 255 };
 
-    Widget(SDL_Renderer *renderer = nullptr);
+    Widget(SDL_Renderer* renderer = nullptr);
 
     virtual ~Widget();
 
@@ -54,14 +54,14 @@ public:
      * @param fname Image file name.
      * @exception UIError
      */
-    void load(const std::string &fname);
+    void load(const std::string& fname);
 
     /**
      * Load an image from memory.
      * @param data Image data.
      * @exception UIError
      */
-    void load(const gsl::span<const uint8_t> &data);
+    void load(const gsl::span<const uint8_t>& data);
 
     /**
      * Set the action callback.
@@ -69,7 +69,7 @@ public:
      * @param act Action callback
      * @see ACTION_BUTTON
      */
-    void action(const std::function<void()> &act);
+    void action(const std::function<void()>& act);
 
     /**
      * Call the action callback.
@@ -86,39 +86,39 @@ public:
      * @param event SDL event;
      * @param rect  Coordinates of this widget.
      */
-    virtual void event(const SDL_Event &event, const SDL_Rect &rect);
+    virtual void event(const SDL_Event& event, const SDL_Rect& rect);
 
     /**
      * Render the widget.
      * @param dstrect Destination rectangle.
      * @exception UIError
      */
-    virtual void render(const SDL_Rect &dstrect) = 0;
+    virtual void render(const SDL_Rect& dstrect) = 0;
 
 protected:
-    void render(const SDL_Rect &srcrect, const SDL_Rect &dstrect);
+    void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect);
 
-    void render(const SDL_Rect &srcrect, const SDL_Rect &dstrect, const Rgba &colour);
+    void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const Rgba& colour);
 
-    void render(const SDL_Rect &srcrect, const SDL_Rect &dstrect, const SDL_Point &centre, float angle,
-        const SDL_RendererFlip &flip);
+    void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_Point& centre, float angle,
+        const SDL_RendererFlip& flip);
 
-    void render(const SDL_Rect &srcrect, const SDL_Rect &dstrect, const SDL_Point &centre, float angle,
-        const SDL_RendererFlip &flip, const Rgba &colour);
+    void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_Point& centre, float angle,
+        const SDL_RendererFlip& flip, const Rgba& colour);
 
     Rgba draw_color() const;
 
-    void draw_color(const Rgba &color);
+    void draw_color(const Rgba& color);
 
     Rgba color_modulator() const;
 
-    void color_modulator(const Rgba &colour);
+    void color_modulator(const Rgba& colour);
 
-    SDL_Renderer          *_renderer;
-    SDL_Texture           *_texture{nullptr};
-    std::function<void()>  _action{};
+    SDL_Renderer*         _renderer;
+    SDL_Texture*          _texture{nullptr};
+    std::function<void()> _action{};
 
-    static Widget         *pressed_widget;  /* Last widget that received a button press event */
+    static Widget*        pressed_widget;  /* Last widget that received a button press event */
 };
 
 }

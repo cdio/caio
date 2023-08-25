@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -63,8 +63,8 @@ public:
      * @param io      I/O device (see C64IO)
      * @see C64IO
      */
-    PLA(const devptr_t &ram, const devptr_t &basic, const devptr_t &kernal, const devptr_t &chargen,
-        const devptr_t &io);
+    PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, const devptr_t& chargen,
+        const devptr_t& io);
 
     virtual ~PLA();
 
@@ -97,7 +97,7 @@ public:
      * @param extmap I/O extension mappings callback.
      * @see ASpace::devptr_t
      */
-    void extmap(const extmap_cb_t &extmap);
+    void extmap(const extmap_cb_t& extmap);
 
 private:
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -41,16 +41,21 @@ public:
         C64_OPTION_MAX
     };
 
-    C64Cmdline();
+    C64Cmdline()
+        : CaioCmdline{lopts} {
+    }
 
-    virtual ~C64Cmdline();
+    virtual ~C64Cmdline() {
+    }
 
-    Confile parse(int argc, char *const *argv) override;
+    Confile parse(int argc, char* const* argv) override {
+        return CaioCmdline::parse(argc, argv);
+    }
 
 private:
     void usage() override;
 
-    bool parse(Confile &conf, int opt, const std::string &arg) override;
+    bool parse(Confile& conf, int opt, const std::string& arg) override;
 
     static const std::vector<::option> lopts;
 };

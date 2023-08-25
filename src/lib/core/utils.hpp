@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -49,7 +49,6 @@ template <typename... Ts> struct is_container<std::vector<Ts...>> : std::true_ty
 template <typename... Ts> struct is_container<std::array<Ts...>> : std::true_type{};
 template <typename... Ts> struct is_container<gsl::span<Ts...>> : std::true_type{};
 
-
 /**
  * Align a value to its type size.
  * @param val Value to align.
@@ -82,14 +81,14 @@ constexpr static inline int ceil(T fval)
  * @param str String to convert.
  * @return The converted line.
  */
-std::string tolow(const std::string &str);
+std::string tolow(const std::string& str);
 
 /**
  * Toupper a string.
  * @param str String to convert.
  * @return The converted string.
  */
-std::string toup(const std::string &str);
+std::string toup(const std::string& str);
 
 /**
  * Split a string.
@@ -97,14 +96,14 @@ std::string toup(const std::string &str);
  * @param sep Separator.
  * @return The splitted string without the separator.
  */
-std::vector<std::string> split(const std::string &str, char sep);
+std::vector<std::string> split(const std::string& str, char sep);
 
 /**
  * Remove leading and trailing white spaces from a string.
  * @param str The string to trim.
  * @return The trimmed string.
  */
-std::string trim(const std::string &str);
+std::string trim(const std::string& str);
 
 /**
  * Detect whether a number is a power of two.
@@ -124,7 +123,7 @@ bool is_power_of_two(T n)
  * @param buf Byte buffer to convert.
  * @return The string.
  */
-std::string to_string(const std::vector<uint8_t> &buf);
+std::string to_string(const std::vector<uint8_t>& buf);
 
 /**
  * Convert an integer value to uppercase hexadecimal string.
@@ -155,7 +154,7 @@ std::string to_string(T v)
  * @return The output stream.
  */
 template <typename Iterator>
-std::ostream &dump(std::ostream &os, const Iterator begin, const Iterator end, addr_t base = 0)
+std::ostream& dump(std::ostream& os, const Iterator begin, const Iterator end, addr_t base = 0)
 {
     constexpr static size_t WIDTH = 6 + 11 * 4 + 8;
     constexpr static size_t ELEMS_PER_LINE = 16;
@@ -195,7 +194,7 @@ std::ostream &dump(std::ostream &os, const Iterator begin, const Iterator end, a
  * @return The output stream.
  */
 template<typename C, typename = std::enable_if<is_container<C>::value>>
-std::ostream &dump(std::ostream &os, const C &cont, addr_t base = 0)
+std::ostream& dump(std::ostream& os, const C& cont, addr_t base = 0)
 {
     return dump(os, cont.begin(), cont.end(), base);
 }
@@ -207,7 +206,7 @@ std::ostream &dump(std::ostream &os, const C &cont, addr_t base = 0)
  * @return The string.
  */
 template<typename C, typename = std::enable_if<is_container<C>::value>>
-std::string dump(const C &cont, addr_t base = 0)
+std::string dump(const C& cont, addr_t base = 0)
 {
     std::ostringstream os{};
     dump(os, cont, base);
@@ -223,7 +222,7 @@ std::string dump(const C &cont, addr_t base = 0)
  * @return The converted number.
  * @exception InvalidNumber
  */
-unsigned long long to_ulonglong(const std::string &str, size_t max);
+unsigned long long to_ulonglong(const std::string& str, size_t max);
 
 /**
  * Convert a string into an integer type.
@@ -235,7 +234,7 @@ unsigned long long to_ulonglong(const std::string &str, size_t max);
  * @exception InvalidNumber
  */
 template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
-T to_number(const std::string &str)
+T to_number(const std::string& str)
 {
     return static_cast<T>(to_ulonglong(str, std::numeric_limits<T>::max()));
 }
@@ -324,9 +323,9 @@ constexpr static inline uint8_t convert_01_10(uint8_t byte)
  * @see convert_01_10(uint8_t)
  */
 template<typename C, typename = std::enable_if<is_container<C>::value>>
-void convert_01_10(C &bytes)
+void convert_01_10(C& bytes)
 {
-    std::for_each(bytes.begin(), bytes.end(), [](uint8_t &byte) {
+    std::for_each(bytes.begin(), bytes.end(), [](uint8_t& byte) {
         byte = convert_01_10(byte);
     });
 }
@@ -353,9 +352,9 @@ constexpr static inline uint8_t convert_01_10_to_11(uint8_t byte)
  * @note Out of immagination for naming.
  */
 template<typename C, typename = std::enable_if<is_container<C>::value>>
-void convert_01_10_to_11(C &bytes)
+void convert_01_10_to_11(C& bytes)
 {
-    std::for_each(bytes.begin(), bytes.end(), [](uint8_t &byte) {
+    std::for_each(bytes.begin(), bytes.end(), [](uint8_t& byte) {
         byte = convert_01_10_to_11(byte);
     });
 }

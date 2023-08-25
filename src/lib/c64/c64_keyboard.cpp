@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -271,13 +271,13 @@ std::map<std::tuple<Keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> C64K
 };
 
 
-C64Keyboard::MatrixKey C64Keyboard::to_c64(const std::string &name)
+C64Keyboard::MatrixKey C64Keyboard::to_c64(const std::string& name)
 {
     auto it = name_to_c64.find(name);
     return (it == name_to_c64.end() ? MatrixKey::KEY_NONE : it->second);
 }
 
-C64Keyboard::C64Keyboard(const std::string &label, const std::function<void()> &restore_cb)
+C64Keyboard::C64Keyboard(const std::string& label, const std::function<void()>& restore_cb)
     : Keyboard{label},
       _restore_cb{restore_cb},
       _key_to_c64{default_key_to_c64}
@@ -289,7 +289,7 @@ C64Keyboard::~C64Keyboard()
 {
 }
 
-void C64Keyboard::restore_key(const std::function<void()> &restore_cb)
+void C64Keyboard::restore_key(const std::function<void()>& restore_cb)
 {
     _restore_cb = restore_cb;
 }
@@ -352,7 +352,7 @@ void C64Keyboard::key_released(Key key)
 
     } else {
         auto pc_key = std::find_if(_prev_keys.begin(), _prev_keys.end(),
-            [&key](const std::tuple<Key, bool, bool> &elem) -> bool {
+            [&key](const std::tuple<Key, bool, bool>& elem) -> bool {
                 return (std::get<0>(elem) == key);
         });
 
@@ -389,7 +389,7 @@ void C64Keyboard::write(uint8_t row)
     _scanrow = row;
 }
 
-void C64Keyboard::add_key_map(const std::string &key_name, bool key_shift, bool key_altgr, const std::string &impl_name,
+void C64Keyboard::add_key_map(const std::string& key_name, bool key_shift, bool key_altgr, const std::string& impl_name,
     bool impl_shift)
 {
     Key key = Keyboard::to_key(key_name);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -29,21 +29,28 @@ namespace c64 {
  */
 class C64Confile : public CaioConfile {
 public:
-    constexpr static const char *C64_CONFIG_SECTION      = "c64";
-    constexpr static const char *C64_CARTFILE_CONFIG_KEY = "cart";
-    constexpr static const char *C64_PRGFILE_CONFIG_KEY  = "prg";
-    constexpr static const char *C64_RESID_CONFIG_KEY    = "resid";
-    constexpr static const char *C64_SWAPJOY_CONFIG_KEY  = "swapj";
-    constexpr static const char *C64_UNIT_8_CONFIG_KEY   = "unit8";
-    constexpr static const char *C64_UNIT_9_CONFIG_KEY   = "unit9";
+    constexpr static const char* C64_CONFIG_SECTION      = "c64";
+    constexpr static const char* C64_CARTFILE_CONFIG_KEY = "cart";
+    constexpr static const char* C64_PRGFILE_CONFIG_KEY  = "prg";
+    constexpr static const char* C64_RESID_CONFIG_KEY    = "resid";
+    constexpr static const char* C64_SWAPJOY_CONFIG_KEY  = "swapj";
+    constexpr static const char* C64_UNIT_8_CONFIG_KEY   = "unit8";
+    constexpr static const char* C64_UNIT_9_CONFIG_KEY   = "unit9";
 
-    C64Confile();
+    C64Confile() {
+    }
 
-    explicit C64Confile(Confile &&other);
+    C64Confile(Confile&& other) {
+        *this = std::move(other);
+    }
 
-    virtual ~C64Confile();
+    virtual ~C64Confile() {
+    }
 
-    C64Confile &operator=(Confile &&other);
+    C64Confile& operator=(Confile&& other) {
+        static_cast<Confile&>(*this) = std::move(other);
+        return *this;
+    }
 };
 
 /**
@@ -57,26 +64,30 @@ struct C64Config : public Config {
     std::string unit8{};
     std::string unit9{};
 
-    C64Config();
+    C64Config() {
+    }
 
-    explicit C64Config(const Confile &conf);
+    C64Config(const Confile& conf) {
+        *this = conf;
+    }
 
-    virtual ~C64Config();
+    virtual ~C64Config() {
+    }
 
     /**
-     * @see Config::operator=(const Confile &)
+     * @see Config::operator=(const Confile&)
      */
-    C64Config &operator=(const Confile &conf);
+    C64Config& operator=(const Confile& conf);
 
     /**
      * @see Config::palette_file()
      */
-    std::string palette_file(const std::string &palette) const override;
+    std::string palette_file(const std::string& palette) const override;
 
     /**
      * @see Config::keymaps_file()
      */
-    std::string keymaps_file(const std::string &cc) const override;
+    std::string keymaps_file(const std::string& cc) const override;
 
     /**
      * @see Config::to_string()

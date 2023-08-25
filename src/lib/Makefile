@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2022 Claudio Castiglia
+# Copyright (C) 2020 Claudio Castiglia
 #
 # This file is part of caio.
 #
@@ -18,20 +18,10 @@
 #
 ROOT=		${abspath ../..}
 
-include ${ROOT}/mk/config.mk
+DIRS=		core \
+		ui_sdl2
 
-3RDPARTY_LIBS=	${ROOT}/3rdparty/resid/libresid.a
+DIRS+=		c64 \
+		zx80
 
-CAIO_LIBS=	core/libcaio_core.a \
-		ui_sdl2/libcaio_ui_sdl2.a \
-		c64/libcaio_c64.a \
-		zx80/libcaio_zx80.a
-
-LIBS=		${CAIO_LIBS} \
-		${3RDPARTY_LIBS}
-
-CLEANDIRS=	${dir ${LIBS}}
-
-SHLIB=		libcaio.${SHLIB_EXT}
-
-include ${ROOT}/mk/shlib.mk
+include ${ROOT}/mk/dir.mk

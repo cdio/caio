@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -30,7 +30,6 @@ using namespace caio;
 
 static std::terminate_handler prev_terminate{};
 
-
 [[noreturn]]
 static void terminate()
 {
@@ -39,7 +38,7 @@ static void terminate()
     ::exit(EXIT_FAILURE);
 }
 
-int main(int argc, char * const *argv)
+int main(int argc, char* const* argv)
 {
     prev_terminate = std::get_terminate();
     std::set_terminate(terminate);

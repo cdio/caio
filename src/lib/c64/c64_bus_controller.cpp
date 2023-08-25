@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -22,7 +22,7 @@
 namespace caio {
 namespace c64 {
 
-C64BusController::C64BusController(const std::shared_ptr<cbm_bus::Bus> &bus, const std::shared_ptr<Mos6526> &cia2)
+C64BusController::C64BusController(const sptr_t<cbm_bus::Bus>& bus, const sptr_t<Mos6526>& cia2)
     : cbm_bus::Controller{bus},
       _cia2{cia2}
 {

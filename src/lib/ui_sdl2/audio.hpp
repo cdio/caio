@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -51,16 +51,18 @@ public:
      * The reset() method must be called before using ths instance for the first time.
      * @see reset()
      */
-    AudioStream();
+    AudioStream() {
+    }
 
-    virtual ~AudioStream();
+    virtual ~AudioStream() {
+    }
 
     /**
      * Reset this audio stream.
      * @param aconf Audio configuration.
      * @exception UIError
      */
-    void reset(const ui::AudioConfig &aconf);
+    void reset(const ui::AudioConfig& aconf);
 
     /**
      * Stop the audio stream.
@@ -113,7 +115,7 @@ private:
      * @param stream Destination buffer to fill with audio samples;
      * @param len    Size of the destination buffer.
      */
-    static void stream_data(AudioStream *self, uint8_t *stream, int len);
+    static void stream_data(AudioStream* self, uint8_t* stream, int len);
 
     std::atomic_bool         _stop{};
     bool                     _paused{true};

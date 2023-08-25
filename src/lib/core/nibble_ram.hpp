@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -29,9 +29,9 @@ namespace caio {
  */
 class NibbleRAM : public DeviceRAM {
 public:
-    constexpr static const char *TYPE = "4-BIT RAM";
+    constexpr static const char* TYPE = "4-BIT RAM";
 
-    NibbleRAM(const std::string &label, size_t size)
+    NibbleRAM(const std::string& label, size_t size)
         : DeviceRAM{label, size} {
         type(TYPE);
     }

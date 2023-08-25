@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -26,7 +26,7 @@
 
 namespace caio {
 
-std::string &ConfileSection::operator()(const std::string &key, const std::string &dvalue)
+std::string& ConfileSection::operator()(const std::string& key, const std::string& dvalue)
 {
     if (find(key) != end()) {
         return operator[](key);
@@ -38,16 +38,16 @@ std::string &ConfileSection::operator()(const std::string &key, const std::strin
     return value;
 }
 
-std::string &ConfileSection::at(const std::string &key)
+std::string& ConfileSection::at(const std::string& key)
 {
     try {
         return std::map<std::string, std::string>::at(key);
-    } catch (std::out_of_range &) {
+    } catch (std::out_of_range&) {
         throw MissingKeyError{key};
     }
 }
 
-std::ifstream Confile::open(const std::string &fname, const std::initializer_list<std::string> &spaths)
+std::ifstream Confile::open(const std::string& fname, const std::initializer_list<std::string>& spaths)
 {
     std::string fullpath = fs::search(fname, spaths);
     if (fullpath.empty()) {
@@ -69,7 +69,7 @@ std::ifstream Confile::open(const std::string &fname, const std::initializer_lis
     return ifs;
 }
 
-void Confile::load(std::ifstream &ifs)
+void Confile::load(std::ifstream& ifs)
 {
     static const std::regex re_comment("^[ \t]*#.*$", std::regex::extended);
     static const std::regex re_section("^[ \t]*\\[[ \t]*([^[ \t\\]]+)[ \t]*\\].*$");
@@ -78,7 +78,7 @@ void Confile::load(std::ifstream &ifs)
     std::smatch result{};
     std::string str{};
 
-    ConfileSection *cursect = nullptr;
+    ConfileSection* cursect = nullptr;
     size_t line = 0;
 
     while (std::getline(ifs, str)) {
@@ -120,23 +120,23 @@ void Confile::load(std::ifstream &ifs)
             throw ConfileError{ss.str()};
         }
 
-        const std::string &key = result[1];
-        const std::string &value = result[2];
+        const std::string& key = result[1];
+        const std::string& value = result[2];
         (*cursect)[key] = value;
     }
 }
 
-void Confile::parse(const std::string &fname, const std::initializer_list<std::string> &spaths)
+void Confile::parse(const std::string& fname, const std::initializer_list<std::string>& spaths)
 {
     std::ifstream ifs{open(fname, spaths)};
     load(ifs);
 }
 
-ConfileSection &Confile::at(const std::string &sname)
+ConfileSection& Confile::at(const std::string& sname)
 {
     try {
         return (_sections.at(utils::tolow(sname)));
-    } catch (const std::out_of_range &) {
+    } catch (const std::out_of_range&) {
         throw MissingSectionError{sname};
     }
 }
@@ -146,11 +146,11 @@ std::string Confile::to_string() const
     std::stringstream ss;
 
     ss << "config file=" << std::quoted(fullpath()) << std::endl;
-    for (const auto &sec : _sections) {
-        const std::string &secname = sec.first;
-        const ConfileSection &secdata = sec.second;
+    for (const auto& sec : _sections) {
+        const std::string& secname = sec.first;
+        const ConfileSection& secdata = sec.second;
         ss << "[ " << secname << " ]" << std::endl;
-        for (const auto &elem : secdata) {
+        for (const auto& elem : secdata) {
             ss << "\t" << elem.first << " = " << elem.second << std::endl;
         }
     }

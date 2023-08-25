@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -34,12 +34,6 @@ namespace caio {
  */
 class PullUp {
 public:
-    PullUp() {
-    }
-
-    virtual ~PullUp() {
-    }
-
     /**
      * Activate/Deactivate this pull-up.
      * This method *must* be called twice by the connected outputs,
@@ -47,7 +41,7 @@ public:
      * @param value true to activate this pull-up (drive it low), false to de-activate it (drive it high).
      * @return this
      */
-    PullUp &operator=(bool value) {
+    PullUp& operator=(bool value) {
         /* Impemented this way to emulate edge triggered interrupts */
         if (value) {
             ++_count;

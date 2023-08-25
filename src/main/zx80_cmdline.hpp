@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -31,15 +31,22 @@ namespace zx80 {
 class ZX80Cmdline : public CaioCmdline {
 public:
     enum ZX80Options {
-        //TODO
+        ZX80_OPTION_16K_RAM = Options::OPTION_MAX,
+        ZX80_OPTION_8K_ROM,
+
         ZX80_OPTION_MAX
     };
 
-    ZX80Cmdline();
+    ZX80Cmdline()
+        : CaioCmdline{lopts} {
+    }
 
-    virtual ~ZX80Cmdline();
+    virtual ~ZX80Cmdline() {
+    }
 
-    Confile parse(int argc, char *const *argv) override;
+    Confile parse(int argc, char* const* argv) override {
+        return CaioCmdline::parse(argc, argv);
+    }
 
 private:
     void usage() override;

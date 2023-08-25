@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -33,21 +33,21 @@ class DispatcherT : public T {
 public:
     DispatcherT() = delete;
 
-    DispatcherT(const DispatcherT &) = delete;
+    DispatcherT(const DispatcherT&) = delete;
 
-    DispatcherT(DispatcherT &) = delete;
+    DispatcherT(DispatcherT&) = delete;
 
     /**
      * Create a dispatcher.
      * @param dispatch Dispatcher callback;
      * @param instance Instance to move into this dispatcher.
      */
-    DispatcherT(const std::function<void(T &&)> &dispatch, T &&instance)
+    DispatcherT(const std::function<void(T&&)>& dispatch, T&& instance)
         : T{std::move(instance)},
           _dispatch{dispatch} {
     }
 
-    DispatcherT(DispatcherT &&other) {
+    DispatcherT(DispatcherT&& other) {
         operator=(std::move(other));
     }
 
@@ -64,8 +64,8 @@ public:
      * Move operator.
      * @param other Dispatcher to move into this dispatcher.
      */
-    DispatcherT &operator=(DispatcherT &&other) {
-        static_cast<T &>(*this) = static_cast<T &&>(other);
+    DispatcherT& operator=(DispatcherT&& other) {
+        static_cast<T&>(*this) = static_cast<T&&>(other);
         _dispatch = std::move(other._dispatch);
         return *this;
     }
@@ -78,7 +78,7 @@ public:
     void dispatch() {
         if (_dispatch) {
             _dispatch(std::move(*this));
-            static_cast<T &>(*this) = {};
+            static_cast<T&>(*this) = {};
             _dispatch = {};
         }
     }
@@ -98,7 +98,7 @@ public:
     }
 
 private:
-    std::function<void(T &&)> _dispatch{};
+    std::function<void(T&&)> _dispatch{};
 };
 
 }

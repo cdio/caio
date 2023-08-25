@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2020-2022 Claudio Castiglia
+# Copyright (C) 2020 Claudio Castiglia
 #
 # This file is part of caio.
 #
@@ -24,7 +24,7 @@ SIZE=$(ls -l ${PNG} | awk '{print $5'})
 
 cat <<-END
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *

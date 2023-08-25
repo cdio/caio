@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -38,8 +38,8 @@ namespace c64 {
  */
 class Crt {
 public:
-    constexpr static const char *HDRSIGN   = "C64 CARTRIDGE   ";
-    constexpr static const char *CHIPSIGN  = "CHIP";
+    constexpr static const char* HDRSIGN   = "C64 CARTRIDGE   ";
+    constexpr static const char* CHIPSIGN  = "CHIP";
     constexpr static uint32_t    HDRMINSIZ = 0x40;
 
     /**
@@ -173,17 +173,21 @@ public:
         HW_TYPE_FREEZE_FRAME_MK2        = 77
     };
 
-    Crt();
+    Crt() {
+    }
 
     /**
      * Create a CRT instance.
      * @param fname Name of the cartridge file to open.
      * @exceptions InvalidCartridge
-     * @see open(const std::string &)
+     * @see open(const std::string&)
      */
-    Crt(const std::string &fname);
+    Crt(const std::string& fname) {
+        open(fname);
+    }
 
-    virtual ~Crt();
+    virtual ~Crt() {
+    }
 
     /**
      * Open and read a CRT cartridge file.
@@ -191,7 +195,7 @@ public:
      * @param fname Name of the CRT cartridge file to open.
      * @exception InvalidCartridge
      */
-    void open(const std::string &fname);
+    void open(const std::string& fname);
 
     /**
      * @return The hardware type of this CRT file.
@@ -217,7 +221,9 @@ public:
     /**
      * @return The number of CHIP sections in this CRT.
      */
-    size_t chips() const;
+    size_t chips() const {
+        return _chips.size();
+    }
 
     /**
      * Get a CHIP entry.
@@ -225,7 +231,7 @@ public:
      * @return A reference to the chip header and a pointer to its content.
      * @exception InvalidArgument If the specified index is not valid.
      */
-    std::pair<const Chip &, devptr_t> operator[](size_t index) const;
+    std::pair<const Chip&, devptr_t> operator[](size_t index) const;
 
     /**
      * @return A human readable description of this CRT.
@@ -242,31 +248,31 @@ public:
      * @param fname File name.
      * @return true if the specified file is a CRT file; false otherwise.
      */
-    static bool is_crt(const std::string &fname);
+    static bool is_crt(const std::string& fname);
 
     /**
      * Detect whether a CRT header is valid.
      * @param hdr CRT header.
      * @return true if valid; false otherwise.
      */
-    static bool is_valid(const Header &hdr);
+    static bool is_valid(const Header& hdr);
 
     /**
      * Detect whether a CHIP header is valid.
      * @param ch CHIP header.
      * @return true if valid; false otherwise.
      */
-    static bool is_valid(const Chip &ch);
+    static bool is_valid(const Chip& ch);
 
     /**
      * @return A human readable description of a CRT header.
      */
-    static std::string to_string(const Header &hdr);
+    static std::string to_string(const Header& hdr);
 
     /**
      * @return A human readable description of a CHIP header.
      */
-    static std::string to_string(const Chip &ch);
+    static std::string to_string(const Chip& ch);
 
 private:
     /**
@@ -274,7 +280,7 @@ private:
      * @param is Input stream.
      * @exception InvalidCartridge
      */
-    void open(std::istream &is);
+    void open(std::istream& is);
 
     /**
      * Load a CRT header from an input stream.
@@ -283,7 +289,7 @@ private:
      * @param hdr Destination buffer.
      * @exception IOError
      */
-    static void load_header(std::istream &is, Header &hdr);
+    static void load_header(std::istream& is, Header& hdr);
 
     /**
      * Load a CRT CHIP section header from an input stream.
@@ -292,7 +298,7 @@ private:
      * @param hdr Destination buffer.
      * @exception IOError
      */
-    static void load_chip(std::istream &is, Chip &hdr);
+    static void load_chip(std::istream& is, Chip& hdr);
 
     /**
      * Load a CRT CHIP data from an input stream.
@@ -301,19 +307,19 @@ private:
      * @return A pointer to a rom device with the loaded data.
      * @exception IOError
      */
-    static devptr_t load_rom(std::istream &is, const Chip &ch);
+    static devptr_t load_rom(std::istream& is, const Chip& ch);
 
     /**
      * Convert a CRT header to the host endianness.
      * @param hdr Header to convert.
      */
-    static void to_host(Header &hdr);
+    static void to_host(Header& hdr);
 
     /**
      * Convert a CHIP header to the host endianness.
      * @param ch Header to convert.
      */
-    static void to_host(Chip &ch);
+    static void to_host(Chip& ch);
 
     std::string           _fname{};
     Header                _hdr{};

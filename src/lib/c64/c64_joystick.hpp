@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -61,9 +61,10 @@ public:
      * Initialise this C64 Joystick.
      * @param label Label assigned to this joystick.
      */
-    C64Joystick(const std::string &label = {});
+    C64Joystick(const std::string& label = {});
 
-    virtual ~C64Joystick();
+    virtual ~C64Joystick() {
+    }
 
     /**
      * @see Joystick::reset().

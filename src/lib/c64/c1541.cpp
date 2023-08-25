@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -66,7 +66,6 @@ std::array<C1541::DiskCommand, C1541::COMMANDS> C1541::commands{{
     { "UI+",                "",     DOSCommand::UI_P            },
     { "UI-",                "",     DOSCommand::UI_M            }
 }};
-
 
 std::string to_string(Status st)
 {
@@ -157,7 +156,6 @@ std::string to_string(Status st)
     return "";
 }
 
-
 void C1541::reset()
 {
     cbm_bus::Device::reset();
@@ -174,7 +172,7 @@ std::string C1541::to_string() const
     return ss.str();
 }
 
-void C1541::open(uint8_t ch, const std::string &param)
+void C1541::open(uint8_t ch, const std::string& param)
 {
     if (!check_attached()) {
         return;
@@ -226,10 +224,10 @@ void C1541::open(uint8_t ch, const std::string &param)
         return;
     }
 
-    const std::string &prefix = result.str(PREFIX);
+    const std::string& prefix = result.str(PREFIX);
     std::string fname         = result.str(NAME);
-    const std::string &type   = result.str(TYPE);
-    const std::string &mode   = result.str(MODE);
+    const std::string& type   = result.str(TYPE);
+    const std::string& mode   = result.str(MODE);
 
     if (fname.empty() && prefix.starts_with("$")) {
         _statusch = Status::NO_FILE_GIVEN;
@@ -337,7 +335,7 @@ void C1541::push_back(uint8_t ch)
     }
 }
 
-void C1541::write(uint8_t ch, const buf_t &buf)
+void C1541::write(uint8_t ch, const buf_t& buf)
 {
     if (!check_attached()) {
         return;
@@ -349,7 +347,7 @@ void C1541::write(uint8_t ch, const buf_t &buf)
          */
         auto cmd = utils::to_string(buf);
         auto pos = cmd.rfind("\r");
-        const auto &param = (pos == std::string::npos ? cmd : cmd.substr(0, pos));
+        const auto& param = (pos == std::string::npos ? cmd : cmd.substr(0, pos));
         command(param);
     } else {
         /*
@@ -359,7 +357,7 @@ void C1541::write(uint8_t ch, const buf_t &buf)
     }
 }
 
-void C1541::command(const std::string &param)
+void C1541::command(const std::string& param)
 {
     /*
      * OPEN#15,8,15, "<CMD>"
@@ -372,7 +370,7 @@ void C1541::command(const std::string &param)
             st = Status::LINE_TOO_LONG;
 
         } else {
-            auto it = std::find_if(commands.begin(), commands.end(), [&param](const DiskCommand &dc) -> bool {
+            auto it = std::find_if(commands.begin(), commands.end(), [&param](const DiskCommand& dc) -> bool {
                 return (param.find(dc.name) == 0 || param.find(dc.alias) == 0);
             });
 
@@ -399,7 +397,7 @@ bool C1541::check_attached()
 }
 
 
-void C1541::StatusChannel::reset(const Status &st, uint8_t track, uint8_t sector)
+void C1541::StatusChannel::reset(Status st, uint8_t track, uint8_t sector)
 {
     /*
      * Fill the channel buffer with the execution status:

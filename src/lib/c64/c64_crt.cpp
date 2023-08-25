@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -28,20 +28,7 @@
 namespace caio {
 namespace c64 {
 
-Crt::Crt()
-{
-}
-
-Crt::Crt(const std::string &fname)
-{
-    open(fname);
-}
-
-Crt::~Crt()
-{
-}
-
-void Crt::open(const std::string &fname)
+void Crt::open(const std::string& fname)
 {
     std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
     if (!is) {
@@ -55,7 +42,7 @@ void Crt::open(const std::string &fname)
     open(is);
 }
 
-void Crt::open(std::istream &is)
+void Crt::open(std::istream& is)
 {
     try {
         load_header(is, _hdr);
@@ -67,7 +54,7 @@ void Crt::open(std::istream &is)
             Chip ch{};
             try {
                 load_chip(is, ch);
-            } catch (const IOError &) {
+            } catch (const IOError&) {
                 /* No more CHIPS to read */
                 break;
             }
@@ -100,17 +87,12 @@ void Crt::open(std::istream &is)
             }
         }
 
-    } catch (const std::exception &e) {
-        throw InvalidCartridge{_fname, e.what()};
+    } catch (const std::exception& err) {
+        throw InvalidCartridge{_fname, err.what()};
     }
 }
 
-size_t Crt::chips() const
-{
-    return _chips.size();
-}
-
-std::pair<const Crt::Chip &, devptr_t> Crt::operator[](size_t n) const
+std::pair<const Crt::Chip&, devptr_t> Crt::operator[](size_t n) const
 {
     if (n > _chips.size()) {
         throw InvalidArgument{};
@@ -126,7 +108,7 @@ std::string Crt::to_string() const
     ss << "CRT " << std::quoted(_fname)
        << ", " << to_string(_hdr);
 
-    for (const auto &ch : _chips) {
+    for (const auto& ch : _chips) {
         ss << ", chip(" <<  to_string(ch) << ")";
     }
 
@@ -139,7 +121,7 @@ std::string Crt::name() const
         std::strlen(reinterpret_cast<const char *>(_hdr.name))};
 }
 
-bool Crt::is_crt(const std::string &fname)
+bool Crt::is_crt(const std::string& fname)
 {
     try {
         std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
@@ -148,20 +130,20 @@ bool Crt::is_crt(const std::string &fname)
             load_header(is, hdr);
             return is_valid(hdr);
         }
-    } catch (const std::exception &) {
+    } catch (const std::exception&) {
     }
 
     return false;
 }
 
-bool Crt::is_valid(const Crt::Header &hdr)
+bool Crt::is_valid(const Crt::Header& hdr)
 {
     std::string sign{reinterpret_cast<const char *>(hdr.sign), sizeof(hdr.sign)};
 
     return (sign == HDRSIGN && hdr.size >= HDRMINSIZ);
 }
 
-bool Crt::is_valid(const Crt::Chip &ch)
+bool Crt::is_valid(const Crt::Chip& ch)
 {
     std::string sign{reinterpret_cast<const char *>(ch.sign), sizeof(ch.sign)};
 
@@ -170,7 +152,7 @@ bool Crt::is_valid(const Crt::Chip &ch)
         (ch.size == sizeof(Chip) + ch.rsiz));
 }
 
-void Crt::load_header(std::istream &is, Header &hdr)
+void Crt::load_header(std::istream& is, Header& hdr)
 {
     if (!is.read(reinterpret_cast<char *>(&hdr), sizeof(hdr))) {
         throw IOError{"Can't read CRT header: " + Error::to_string()};
@@ -179,7 +161,7 @@ void Crt::load_header(std::istream &is, Header &hdr)
     to_host(hdr);
 }
 
-void Crt::load_chip(std::istream &is, Chip &ch)
+void Crt::load_chip(std::istream& is, Chip& ch)
 {
     if (!is.read(reinterpret_cast<char *>(&ch), sizeof(ch))) {
         throw IOError{"Can't read CHIP header: " + Error::to_string()};
@@ -188,12 +170,12 @@ void Crt::load_chip(std::istream &is, Chip &ch)
     to_host(ch);
 }
 
-devptr_t Crt::load_rom(std::istream &is, const Chip &ch)
+devptr_t Crt::load_rom(std::istream& is, const Chip& ch)
 {
     return std::make_shared<DeviceROM>(is, ch.rsiz);
 }
 
-std::string Crt::to_string(const Crt::Header &hdr)
+std::string Crt::to_string(const Crt::Header& hdr)
 {
     std::ostringstream ss{};
     std::string name{reinterpret_cast<const char *>(hdr.name), std::strlen(reinterpret_cast<const char *>(hdr.name))};
@@ -207,7 +189,7 @@ std::string Crt::to_string(const Crt::Header &hdr)
     return ss.str();
 }
 
-std::string Crt::to_string(const Crt::Chip &ch)
+std::string Crt::to_string(const Crt::Chip& ch)
 {
     std::ostringstream ss{};
 
@@ -220,14 +202,14 @@ std::string Crt::to_string(const Crt::Chip &ch)
     return ss.str();
 }
 
-void Crt::to_host(Crt::Header &hdr)
+void Crt::to_host(Crt::Header& hdr)
 {
     hdr.size    = be32toh(hdr.size);
     hdr.version = be16toh(hdr.version);
     hdr.hwtype  = be16toh(hdr.hwtype);
 }
 
-void Crt::to_host(Crt::Chip &ch)
+void Crt::to_host(Crt::Chip& ch)
 {
     ch.size = be32toh(ch.size);
     ch.type = be16toh(ch.type);

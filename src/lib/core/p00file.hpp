@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -42,21 +42,25 @@ public:
         /* data follows */
     } __attribute__((packed));
 
-
     /**
      * Load a P00 file.
      * @param fname If defined, name of the P00 file to load.
      * @exception IOError
      * @see load(const std::string &)
      */
-    P00File(const std::string &fname = {});
+    P00File(const std::string& fname = {}) {
+        P00File::load(fname);
+    }
 
-    virtual ~P00File();
+    virtual ~P00File() {
+    }
 
     /**
      * @return The raw header of this P00 file.
      */
-    const P00Header &header() const;
+    const P00Header& header() const {
+        return _hdr;
+    }
 
     /**
      * Load a P00 file.
@@ -64,7 +68,7 @@ public:
      * @param fname Name of the P00 file to load.
      * @exception IOError
      */
-    void load(const std::string &fname) override;
+    void load(const std::string& fname) override;
 
     /**
      * Save this P00 file.
@@ -72,7 +76,7 @@ public:
      * @param addr  If non-zero, use this value as the P00's start address ignoring PrgFile::address().
      * @exception IOError
      */
-    void save(const std::string &fname, addr_t addr = 0) override;
+    void save(const std::string& fname, addr_t addr = 0) override;
 
 private:
     P00Header _hdr{};

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2022 Claudio Castiglia
+# Copyright (C) 2020 Claudio Castiglia
 #
 # This file is part of caio.
 #
@@ -38,8 +38,15 @@ CXXSRCS=	caio_cmdline.cpp \
 		zx80_cmdline.cpp \
 		main.cpp
 
+EXTRA_DEPS+=	${ROOT}/src/lib/c64/libcaio_c64.a \
+		${ROOT}/src/lib/zx80/libcaio_zx80.a \
+		${ROOT}/src/lib/core/libcaio_core.a \
+		${ROOT}/3rdparty/resid/libresid.a
+
 CPPFLAGS+=	-I${ROOT}/src/lib/c64 \
 		-I${ROOT}/src/lib/zx80
+
+LDADD+=		${EXTRA_DEPS}
 
 include ${ROOT}/mk/bin.mk
 

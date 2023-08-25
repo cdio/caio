@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -31,7 +31,7 @@ template<class CMDLINE, class CONFILE, class CONFIG, class MACHINE>
 class Main_
 {
 public:
-    Main_(int argc, char *const *argv) {
+    Main_(int argc, char* const* argv) {
         try {
             CMDLINE cmdline{};
             CONFILE cfile{cmdline.parse(argc, argv)};
@@ -45,7 +45,7 @@ public:
 
             std::exit(EXIT_SUCCESS);
 
-        } catch (const std::exception &err) {
+        } catch (const std::exception& err) {
             std::cerr << MACHINE::name() << ": Error: " << err.what() << std::endl;
         }
 

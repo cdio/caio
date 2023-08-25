@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -57,9 +57,11 @@ public:
         OPTION_MAX
     };
 
-    CaioCmdline();
+    CaioCmdline() {
+    }
 
-    virtual ~CaioCmdline();
+    virtual ~CaioCmdline() {
+    }
 
     /**
      * Parse the command line options and load the configuration file.
@@ -69,14 +71,14 @@ public:
      * configuration file on disk overrided by command line arguments.
      * In case of errors this method prints the error message and terminates the current process.
      */
-    virtual Confile parse(int argc, char *const *argv);
+    virtual Confile parse(int argc, char* const* argv);
 
 protected:
     /**
      * Command line and configuration file parser.
      * @param ext_lopts Extended long options.
      */
-    CaioCmdline(const std::vector<::option> &ext_lopts);
+    CaioCmdline(const std::vector<::option>& ext_lopts);
 
     /**
      * Print the command line options usage on standard error.
@@ -90,7 +92,7 @@ protected:
      * @param arg  Command line argument.
      * @return true if the option was recoginised; false otherwise.
      */
-    virtual bool parse(Confile &conf, int opt, const std::string &arg);
+    virtual bool parse(Confile& conf, int opt, const std::string& arg);
 
     std::string           _progname;
     std::vector<::option> _lopts{};

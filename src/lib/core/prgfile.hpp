@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -40,27 +40,33 @@ public:
         /* data follows */
     } __attribute__((packed));
 
-
     /**
      * Load a PRG file.
      * @param fname If defined, name of the PRG file to load.
      * @exception IOError
      * @see load(const std::string &)
      */
-    PrgFile(const std::string &fname = {});
+    PrgFile(const std::string& fname = {}) {
+        PrgFile::load(fname);
+    }
 
-    virtual ~PrgFile();
+    virtual ~PrgFile() {
+    }
 
     /**
      * @return The start address of this PRG file.
      */
-    addr_t address() const;
+    addr_t address() const {
+        return _hdr.addr;
+    }
 
     /**
      * Set a new start address for this PRG file.
      * @parma addr New start address.
      */
-    void address(addr_t addr);
+    void address(addr_t addr) {
+        _hdr.addr = addr;
+    }
 
     /**
      * Load a PRG file.
@@ -68,7 +74,7 @@ public:
      * @param fname Name of the PRG file to load.
      * @exception IOError
      */
-    virtual void load(const std::string &fname);
+    virtual void load(const std::string& fname);
 
     /**
      * Load a PRG file from an already open stream.
@@ -77,7 +83,7 @@ public:
      * @return is.
      * @exception IOError
      */
-    virtual std::istream &load(std::istream &is);
+    virtual std::istream &load(std::istream& is);
 
     /**
      * Save a PRG file.
@@ -85,7 +91,7 @@ public:
      * @param addr  If non-zero, use this value as the PRG's start address ignoring address().
      * @exception IOError
      */
-    virtual void save(const std::string &fname, addr_t addr = 0);
+    virtual void save(const std::string& fname, addr_t addr = 0);
 
     /**
      * Save a PRG file.
@@ -94,7 +100,7 @@ public:
      * @return os.
      * @exception IOError
      */
-    virtual std::ostream &save(std::ostream &os, addr_t addr = 0);
+    virtual std::ostream& save(std::ostream& os, addr_t addr = 0);
 
     /**
      * Save a PRG file.
@@ -103,7 +109,7 @@ public:
      * @param data  Data.
      * @exception IOError
      */
-    static void save(const std::string &fname, addr_t addr, const gsl::span<uint8_t> &data);
+    static void save(const std::string& fname, addr_t addr, const gsl::span<uint8_t>& data);
 
     /**
      * Save a PRG file.
@@ -113,7 +119,7 @@ public:
      * @return os.
      * @exception IOError
      */
-    static std::ostream &save(std::ostream &os, addr_t addr, const gsl::span<uint8_t> &data);
+    static std::ostream& save(std::ostream& os, addr_t addr, const gsl::span<uint8_t>& data);
 
 private:
     PrgHeader _hdr{};

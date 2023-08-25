@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -24,7 +24,7 @@ namespace ui {
 namespace sdl2 {
 namespace widget {
 
-Empty::Empty(SDL_Renderer *renderer)
+Empty::Empty(SDL_Renderer* renderer)
     : Widget{renderer}
 {
 }
@@ -38,7 +38,7 @@ bool Empty::enabled() const
     return false;
 }
 
-void Empty::render(const SDL_Rect &dstrect)
+void Empty::render(const SDL_Rect& dstrect)
 {
 }
 

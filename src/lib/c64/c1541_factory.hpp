@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -40,7 +40,7 @@ namespace c1541 {
  * @see C1541::C1541()
  * @see C1541::attach()
  */
-std::shared_ptr<C1541> create(const std::string &path, uint8_t unit, const std::shared_ptr<cbm_bus::Bus> &bus);
+sptr_t<C1541> create(const std::string& path, uint8_t unit, const sptr_t<cbm_bus::Bus>& bus);
 
 }
 }

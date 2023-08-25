@@ -45,7 +45,6 @@ using uptr_t = std::unique_ptr<T>;
 
 void stacktrace(std::ostream&);
 
-
 /**
  * Base error.
  * All the exceptions thrown by any emulator component have error as base class.
@@ -111,14 +110,12 @@ private:
     std::string _reason{};
 };
 
-
 /**
  * Internal error: When something is not ok within the emulator library itself.
  */
 class InternalError : public Error {
     using Error::Error;
 };
-
 
 /**
  * Invalid Address.
@@ -127,7 +124,6 @@ class InvalidAddress : public Error {
 protected:
     InvalidAddress(const std::string& elem, addr_t addr, bool read);
 };
-
 
 /**
  * Invalid Read Address.
@@ -139,7 +135,6 @@ public:
     }
 };
 
-
 /**
  * Invalid Write Address.
  */
@@ -150,14 +145,12 @@ public:
     }
 };
 
-
 /**
  * Invalid Argument.
  */
 class InvalidArgument : public Error {
     using Error::Error;
 };
-
 
 /**
  * Invalid Cartridge.
@@ -166,14 +159,12 @@ class InvalidCartridge : public Error {
     using Error::Error;
 };
 
-
 /**
  * Invalid Expression.
  */
 class InvalidExpression : public Error {
     using Error::Error;
 };
-
 
 /**
  * Invalid number conversion from or to string.
@@ -182,14 +173,12 @@ class InvalidNumber : public Error {
     using Error::Error;
 };
 
-
 /**
  * Failed I/O operation.
  */
 class IOError : public Error {
     using Error::Error;
 };
-
 
 /**
  * Missing Key Error.
@@ -201,14 +190,12 @@ public:
     }
 };
 
-
 /**
  * Missing Section Error.
  */
 class MissingSectionError : public MissingKeyError {
     using MissingKeyError::MissingKeyError;
 };
-
 
 /**
  * Not implemented.
@@ -217,14 +204,12 @@ class NotImplemented : public Error {
     using Error::Error;
 };
 
-
 /**
  * Not supported.
  */
 class NotSupported : public Error {
     using Error::Error;
 };
-
 
 /**
  * User Interface Error.

@@ -35,7 +35,6 @@ const std::array<float, 16> Envelope::attack_times = {
     0.100f, 0.250f, 0.500f, 0.800f, 1.000f, 3.000f, 5.000f, 8.000f
 };
 
-
 /*
  * Release/Decay time table (seconds).
  */
@@ -43,7 +42,6 @@ const std::array<float, 16> Envelope::decay_times = {
     0.006f, 0.024f, 0.048f, 0.072f, 0.114f, 0.168f,  0.204f,  0.240f,
     0.300f, 0.750f, 1.500f, 2.400f, 3.000f, 9.000f, 15.000f, 24.000f
 };
-
 
 Oscillator::Oscillator(unsigned clkf, Oscillator& syncos)
     : _clkf{static_cast<float>(clkf)},

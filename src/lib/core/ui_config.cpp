@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -27,7 +27,7 @@
 namespace caio {
 namespace ui {
 
-SLEffect to_sleffect(const std::string &str)
+SLEffect to_sleffect(const std::string& str)
 {
     if (str.empty()) {
         return SLEffect::NONE;

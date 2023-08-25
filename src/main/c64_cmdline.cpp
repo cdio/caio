@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -35,20 +35,6 @@ const std::vector<::option> C64Cmdline::lopts = {
     { "9",      required_argument,  nullptr,    C64Cmdline::C64_OPTION_UNIT_9   }
 };
 
-C64Cmdline::C64Cmdline()
-    : CaioCmdline{lopts}
-{
-}
-
-C64Cmdline::~C64Cmdline()
-{
-}
-
-Confile C64Cmdline::parse(int argc, char *const *argv)
-{
-    return CaioCmdline::parse(argc, argv);
-}
-
 void C64Cmdline::usage()
 {
     CaioCmdline::usage();
@@ -66,9 +52,9 @@ void C64Cmdline::usage()
               << " --swapj                Swap Joysticks"                                   << std::endl;
 }
 
-bool C64Cmdline::parse(Confile &conf, int opt, const std::string &arg)
+bool C64Cmdline::parse(Confile& conf, int opt, const std::string& arg)
 {
-    auto &sec = conf[std::string{C64Confile::C64_CONFIG_SECTION}];
+    auto& sec = conf[std::string{C64Confile::C64_CONFIG_SECTION}];
 
     switch (opt) {
     case C64_OPTION_CARTFILE:   /* Attach a Cartridge image */
