@@ -24,6 +24,7 @@
 #include <memory>       // for shared_ptr, unique_ptr
 #include <system_error> // for hash
 #include <type_traits>  // for enable_if_t, is_convertible, is_assignable
+#include <utility>      // for declval
 
 #if !defined(GSL_NO_IOSTREAMS)
 #include <iosfwd> // for ostream
@@ -117,6 +118,7 @@ public:
     not_null(const not_null& other) = default;
     not_null& operator=(const not_null& other) = default;
     constexpr details::value_or_reference_return_t<T> get() const
+        noexcept(noexcept(details::value_or_reference_return_t<T>{std::declval<T&>()}))
     {
         return ptr_;
     }
