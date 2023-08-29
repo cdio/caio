@@ -18,6 +18,7 @@
  */
 #include "c64.hpp"
 
+#include <unistd.h>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
@@ -53,7 +54,8 @@ void C64::run()
     connect_ui();
 
     if (_conf.monitor) {
-        _cpu->init_monitor(std::cin, std::cout);
+        //TODO _cpu->init_monitor(std::cin, std::cout); C++26
+        _cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO);
     }
 
     start();

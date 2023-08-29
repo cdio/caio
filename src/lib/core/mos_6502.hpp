@@ -135,6 +135,7 @@ public:
      * @see reset()
      */
     void init_monitor(std::istream& is, std::ostream& os);
+    void init_monitor(int ifd, int ofd);
 
     /**
      * Set the single-step log level.

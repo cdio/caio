@@ -38,6 +38,7 @@ CXXSRCS=	aspace.cpp \
 		name.cpp \
 		p00file.cpp \
 		prgfile.cpp \
+		readline.cpp \
 		rgb.cpp \
 		signal.cpp \
 		socket.cpp \
@@ -72,6 +73,7 @@ INCS=		aspace.hpp \
 		prgfile.hpp \
 		pin.hpp \
 		pullup.hpp \
+		readline.hpp \
 		rgb.hpp \
 		signal.hpp \
 		socket.hpp \

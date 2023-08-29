@@ -164,6 +164,7 @@ Command Monitor::commands[] = {
     { "load",     "l",  "fname [$addr]",        "Load binary or PRG file",                  Monitor::load           },
     { "save",     "w",  "fname $start $end",    "Create PRG file",                          Monitor::save           },
     { "loglevel", "lv", "loglevel",             "Set the CPU loglevel",                     Monitor::loglevel       },
+    { "fc",       "fc", "",                     "Show command history",                     Monitor::history        },
     { "quit",     "q",  "[code]",               "Terminate the emulator with exit code",    Monitor::quit           },
     { "help",     "h",  "",                     "This help",                                Monitor::help           },
     { "help",     "?",  "",                     "",                                         Monitor::help           }
@@ -174,14 +175,9 @@ bool Monitor::run()
     _is_running = true;
 
     while (_is_running) {
-        _os << prompt();
+        _rd.write(prompt());
 
-        std::string line{};
-        if (!std::getline(_is, line, '\n')) {
-            /* Most probably EOF */
-            break;
-        }
-
+        std::string line = _rd.getline();
         if (line.empty()) {
 //XXX breaks monitor test scripts
 #if 1
@@ -209,7 +205,7 @@ bool Monitor::run()
         });
 
         if (it == end) {
-            _os << "Invalid command: " << args[0] << std::endl;
+            _rd.write("Invalid command: " + args[0] + "\n");
             continue;
         }
 
@@ -238,7 +234,7 @@ bool Monitor::is_breakpoint(addr_t addr) const
             /*
              * Unconditional breakpoint.
              */
-            _os << "Breakpoint at $" << utils::to_string(addr) << std::endl;
+            _rd.write("Breakpoint at $" + utils::to_string(addr) + "\n");
             return true;
         }
 
@@ -246,7 +242,7 @@ bool Monitor::is_breakpoint(addr_t addr) const
             /*
              * Conditional breakpoint.
              */
-            _os << "Conditional breakpoint at $" << utils::to_string(addr) << " " << cond.second << std::endl;
+            _rd.write("Conditional breakpoint at $" + utils::to_string(addr) + " " + cond.second + "\n");
             return true;
         }
     }
@@ -262,12 +258,12 @@ std::string Monitor::prompt()
     std::stringstream os{};
 
     if (_prev_fn == "s") {
-        _cpu.disass(_os, _cpu.pc(), 10, true);
-        _cpu.regs(_os);
-        _os << std::endl;
+        _cpu.disass(os, _cpu.pc(), 10, true);
+        _cpu.regs(os);
+        os << std::endl;
     }
 
-    _os << PROMPT_PREFIX << "$" << utils::to_string(_cpu.pc()) << PROMPT_SUFFIX;
+    os << PROMPT_PREFIX << "$" << utils::to_string(_cpu.pc()) << PROMPT_SUFFIX;
 
     return os.str();
 }
@@ -283,7 +279,7 @@ size_t Monitor::to_count(const std::string& str)
         return utils::to_number<size_t>(str);
 
     } catch (const InvalidNumber& err) {
-        _os << "Invalid value: " << str << std::endl;
+        _rd.write("Invalid value: " + str + "\n");
         throw err;
     }
 }
@@ -305,17 +301,14 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
         }
     }
 
-    mon._os << "Entering edit mode. To finish write '.' or an empty line" << std::endl;
+    mon._rd.write(std::string{"Entering edit mode. To finish write '.' or an empty line\n"});
 
+    auto [ifd, ofd] = mon._rd.fds();
+    Readline editor{ifd, ofd};
     while (true) {
-        mon._os << "$" << utils::to_string(addr) << ": " << std::flush;
+        editor.write("$" + utils::to_string(addr) + ": ");
 
-        std::string line{};
-        if (!std::getline(mon._is, line, '\n')) {
-            /* Most probably EOF */
-            break;
-        }
-
+        std::string line = editor.getline();
         line = utils::trim(line);
 
         if (line.empty() || line == ".") {
@@ -339,7 +332,7 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
                 /*
                  * Show the error and invalidate the whole line.
                  */
-                mon._os << "Invalid value: " << str << std::endl;
+                editor.write("Invalid value: " + str + "\n");
                 program.clear();
                 break;
             }
@@ -356,8 +349,9 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
             /*
              * Error, exit from edit mode.
              */
-            mon._os << "Unexpected error: " << err.what() << std::endl
-                    << "Exiting edit mode." << std::endl;
+            std::ostringstream os{};
+            os << "Unexpected error: " << err.what() << std::endl << "Exiting edit mode." << std::endl;
+            editor.write(os.str());
             break;
         }
     }
@@ -385,7 +379,9 @@ bool Monitor::disassemble(Monitor& mon, const Command::args_t& args)
         return false;
     }
 
-    mon._cpu.disass(mon._os, addr, count, true);
+    std::ostringstream os{};
+    mon._cpu.disass(os, addr, count, true);
+    mon._rd.write(os.str());
     return false;
 }
 
@@ -419,12 +415,13 @@ bool Monitor::dump(Monitor& mon, const Command::args_t& args)
 
     std::vector<uint8_t> data(count);
 
-    std::generate(data.begin(), data.end(), [mon, &ra]() -> uint8_t {
+    std::generate(data.begin(), data.end(), [&mon, &ra]() -> uint8_t {
         return mon._cpu.peek(ra++);
     });
 
-    utils::dump(mon._os, data, addr) << std::endl;
-
+    std::ostringstream os{};
+    utils::dump(os, data, addr) << std::endl;
+    mon._rd.write(os.str());
     return false;
 }
 
@@ -433,8 +430,9 @@ bool Monitor::registers(Monitor& mon, const Command::args_t& args)
     /*
      * registers, r
      */
-    mon._cpu.regs(mon._os);
-    mon._os << std::endl;
+    std::ostringstream os{};
+    mon._cpu.regs(os) << std::endl;
+    mon._rd.write(os.str());
     return false;
 }
 
@@ -443,7 +441,9 @@ bool Monitor::mmap(Monitor& mon, const Command::args_t& args)
     /*
      * mmap, m
      */
-    mon._cpu.mmap()->dump(mon._os) << std::endl;
+    std::ostringstream os{};
+    mon._cpu.mmap()->dump(os) << std::endl;
+    mon._rd.write(os.str());
     return false;
 }
 
@@ -474,19 +474,21 @@ bool Monitor::bp_add(Monitor& mon, const Command::args_t& args)
      * Help.
      */
     if (args[1] == "h" || args[1] == "?" || args[1] == "help") {
+        std::ostringstream os{};
 //FIXME XXX
-        mon._os << args[0] << " help | h | ?" << std::endl
-                << args[0] << " <addr> [<cond>]" << std::endl
-                << std::endl
-                << "<cond> = <val> <op> <val>" << std::endl
-                << "<val>  = [*]{[#][$]<u16>| ra | rx | ry | rs | rp | rp.n | rp.v | rp.b | rp.i | rp.z | rp.c}"
-                << std::endl
-                << "<op>   = '<' | '>' | '<=' | '>=' | '==' | '!=' | '&' | '|'" << std::endl
-                << std::endl
-                << "examples:" << std::endl
-                << "  b $8009 *$fd20 >= #$f0" << std::endl
-                << "  b $8010 rx >= 80" << std::endl
-                << "  b $4100 rp.n == 1" << std::endl;
+        os << args[0] << " help | h | ?" << std::endl
+           << args[0] << " <addr> [<cond>]" << std::endl
+           << std::endl
+           << "<cond> = <val> <op> <val>" << std::endl
+           << "<val>  = [*]{[#][$]<u16>| ra | rx | ry | rs | rp | rp.n | rp.v | rp.b | rp.i | rp.z | rp.c}"
+           << std::endl
+           << "<op>   = '<' | '>' | '<=' | '>=' | '==' | '!=' | '&' | '|'" << std::endl
+           << std::endl
+           << "examples:" << std::endl
+           << "  b $8009 *$fd20 >= #$f0" << std::endl
+           << "  b $8010 rx >= 80" << std::endl
+           << "  b $4100 rp.n == 1" << std::endl;
+        mon._rd.write(os.str());
         return false;
     }
 
@@ -507,7 +509,7 @@ bool Monitor::bp_add(Monitor& mon, const Command::args_t& args)
             auto expr = Expr::compile(mon._cpu, line);
             cond = {expr, line};
         } catch (const std::exception& err) {
-            mon._os << err.what() << std::endl;
+            mon._rd.write(std::string{err.what()} + "\n");
             return false;
         }
     }
@@ -560,21 +562,24 @@ bool Monitor::bp_list(Monitor& mon, const Command::args_t& args)
     /*
      * bplist, bl
      */
+    std::ostringstream os{};
+
     for (const auto& kv : mon._breakpoints) {
         auto &addr = kv.first;
         auto &cond = kv.second;
         auto &cfn  = cond.first;
         auto &cstr = cond.second;
 
-        mon._os << "$" << utils::to_string(addr);
+        os << "$" << utils::to_string(addr);
 
         if (cfn) {
-            mon._os << " " << cstr;
+            os << " " << cstr;
         }
 
-        mon._os << ((addr == mon._cpu.pc() )? " <" : "") << std::endl;
+        os << ((addr == mon._cpu.pc() )? " <" : "") << std::endl;
     }
 
+    mon._rd.write(os.str());
     return false;
 }
 
@@ -594,7 +599,7 @@ bool Monitor::go(Monitor& mon, const Command::args_t& args)
         return true;
 
     } catch (const std::exception&) {
-        mon._os << "Invalid address: " << args[1] << std::endl;
+        mon._rd.write(std::string{"Invalid address: "} + args[1] + "\n");
     }
 
     return false;
@@ -616,7 +621,7 @@ bool Monitor::step(Monitor& mon, const Command::args_t& args)
         return true;
 
     } catch (const std::exception&) {
-        mon._os << "Invalid address: " << args[1] << std::endl;
+        mon._rd.write(std::string{"Invalid address: "} + args[1] + "\n");
     }
 
     return false;
@@ -637,11 +642,13 @@ bool Monitor::load(Monitor& mon, const Command::args_t& args)
 
             auto [start, size] = mon._cpu.load(args[1], addr);
 
-            mon._os << "load: " << args[1] << " loaded at $" << utils::to_string(addr)
-                     << ", size " << size << " ($" << utils::to_string(size) << ")" << std::endl;
+            std::ostringstream os{};
+            os << "load: " << args[1] << " loaded at $" << utils::to_string(addr)
+               << ", size " << size << " ($" << utils::to_string(size) << ")" << std::endl;
+            mon._rd.write(os.str());
         }
     } catch (const std::exception& e) {
-        mon._os << e.what() << std::endl;
+        mon._rd.write(std::string{e.what()} + "\n");
     }
 
     return false;
@@ -668,7 +675,7 @@ bool Monitor::save(Monitor& mon, const Command::args_t& args)
         mon._cpu.save(fname, start, end);
 
     } catch (const std::exception& e) {
-        mon._os << e.what() << std::endl;
+        mon._rd.write(std::string{e.what()} + "\n");
     }
 
     return false;
@@ -683,15 +690,24 @@ bool Monitor::loglevel(Monitor& mon, const Command::args_t& args)
     try {
         if (args.size() != 2) {
             unsigned lv = mon._cpu.loglevel({});
-            mon._os << lv << std::endl;
+            mon._rd.write(std::to_string(lv) + "\n");
         } else {
             mon._cpu.loglevel(args[1]);
         }
 
     } catch (const std::exception& e) {
-        mon._os << e.what() << std::endl;
+        mon._rd.write(std::string{e.what()} + "\n");
     }
 
+    return false;
+}
+
+bool Monitor::history(Monitor& mon, const Command::args_t& args)
+{
+    /*
+     * fc
+     */
+    mon._rd.write(mon._rd.history());
     return false;
 }
 
@@ -701,8 +717,10 @@ bool Monitor::quit(Monitor& mon, const Command::args_t& args)
      * quit, q
      */
     if (args.size() > 1) {
+        std::ostringstream os{};
         int eval = std::atoi(args[1].c_str());
-        mon._os << "Emulator terminated with exit code: " << eval << std::endl;
+        os << "Emulator terminated with exit code: " << eval << std::endl;
+        mon._rd.write(os.str());
         std::exit(eval);
     }
 
@@ -715,17 +733,21 @@ bool Monitor::help(Monitor& mon, const Command::args_t& args)
     /*
      * help, h, ?
      */
-    mon._os << "Monitor Commands: " << std::endl;
+    std::ostringstream os{};
+
+    os << "Monitor Commands: " << std::endl;
 
     for (const auto& cmd : commands) {
         std::ostringstream oss{};
         oss << cmd.command << " " << cmd.args;
-        mon._os << std::setw(3) << std::right << cmd.short_command << " | "
-                 << std::setw(24) << std::left << oss.str() << cmd.help << std::endl;
+        os << std::setw(3) << std::right << cmd.short_command << " | "
+           << std::setw(24) << std::left << oss.str() << cmd.help << std::endl;
     }
 
-    mon._os << "values without a prefix or prefixed by '$' are considered hexadecimal" << std::endl
-            << "values prefixed only by '#' are considered decimal numbers" << std::endl;
+    os << "values without a prefix or prefixed by '$' are considered hexadecimal" << std::endl
+       << "values prefixed only by '#' are considered decimal numbers" << std::endl;
+
+    mon._rd.write(os.str());
 
     return false;
 }

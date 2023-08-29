@@ -71,7 +71,7 @@ std::string trim(const std::string& str)
     }
 
     if (end == std::string::npos) {
-        end = len;
+        end = len - 1;
     } else {
         ++end;
     }

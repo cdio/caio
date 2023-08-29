@@ -20,7 +20,6 @@
 
 #include <cstdint>
 #include <functional>
-#include <iostream>
 #include <map>
 #include <memory>
 #include <string>
@@ -29,6 +28,7 @@
 
 #include "aspace.hpp"
 #include "logger.hpp"
+#include "readline.hpp"
 #include "types.hpp"
 
 
@@ -52,6 +52,10 @@ struct MonitoredCPU {
     std::function<void(const std::string&, addr_t, addr_t)>                 save{};
     std::function<Loglevel(const std::string&)>                             loglevel{};
     std::function<uint16_t(const std::string&)>                             regvalue{};
+
+    operator bool() const {
+        return (regs && pc && peek && write && disass && mmap && ebreak && load && save && loglevel && regvalue);
+    }
 };
 
 /**
@@ -119,6 +123,7 @@ struct Command {
  */
 class Monitor {
 public:
+    constexpr static const char* HISTFILE      = "monitor.hist";
     constexpr static const char* PROMPT_PREFIX = "";
     constexpr static const char* PROMPT_SUFFIX = "> ";
 
@@ -126,14 +131,14 @@ public:
 
     /**
      * Initialise this monitor.
-     * @param is  Input stream used to communicate with the user;
-     * @param os  Output stream used to communicate with the user;
+     * @param ifd Input file descriptor used to communicate with the user;
+     * @param ofd Output file descriptor used to communicate with the user;
      * @param cpu Monitored CPU.
      * @see MonitoredCPU
+     * TODO: replace with iostream and native_handle() (C++26)
      */
-    Monitor(std::istream& is, std::ostream& os, MonitoredCPU&& cpu)
-        : _is{is},
-          _os{os},
+    Monitor(int ifd, int ofd, MonitoredCPU&& cpu)
+        : _rd{ifd, ofd},
           _cpu{cpu} {
     }
 
@@ -194,9 +199,8 @@ private:
     //FIXME: move to utils
     size_t to_count(const std::string& str);
 
-    std::istream&            _is;
-    std::ostream&            _os;
-    MonitoredCPU             _cpu;
+    Readline                 _rd{};
+    MonitoredCPU             _cpu{};
 
     bool                     _is_running{};
     std::string              _prev_line{};
@@ -221,6 +225,8 @@ private:
     static bool save        (Monitor& mon, const Command::args_t& args);
 
     static bool loglevel    (Monitor& mon, const Command::args_t& args);
+
+    static bool history     (Monitor& mon, const Command::args_t& args);
 
     static bool quit        (Monitor& mon, const Command::args_t& args);
     static bool help        (Monitor& mon, const Command::args_t& args);

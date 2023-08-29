@@ -335,6 +335,11 @@ std::string Mos6502::Registers::to_string() const
 
 void Mos6502::init_monitor(std::istream& is, std::ostream& os)
 {
+    throw Error{"Wait for C++26"};
+}
+
+void Mos6502::init_monitor(int ifd, int ofd)
+{
     static std::map<std::string, std::function<int(const Mos6502 &)>> regvals{
         { "ra",   [](const Mos6502& cpu) { return cpu._regs.A;  }},
         { "rx",   [](const Mos6502& cpu) { return cpu._regs.X;  }},
@@ -437,7 +442,7 @@ void Mos6502::init_monitor(std::istream& is, std::ostream& os)
         .regvalue = regvalue
     };
 
-    _monitor = std::make_unique<Monitor>(is, os, std::move(monitor_funcs));
+    _monitor = std::make_unique<Monitor>(ifd, ofd, std::move(monitor_funcs));
     _monitor->add_breakpoint(read_addr(vRESET));
 }
 
