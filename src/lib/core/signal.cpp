@@ -19,17 +19,16 @@
 #include "signal.hpp"
 
 #include <fstream>
-#include <sstream>
-
-#include <gsl/span>
+#include <numbers>
 
 
 namespace caio {
 namespace signal {
 
+namespace math = std::numbers;
+
 std::random_device rd{};
 std::uniform_real_distribution<float> uni_random{-1.0f, 1.0f};
-
 
 float blackman(size_t pos, size_t N)
 {
@@ -38,7 +37,7 @@ float blackman(size_t pos, size_t N)
     }
 
     const float k = static_cast<float>(pos) / static_cast<float>(N - 1);
-    return (0.42f - 0.5f * std::cos(2.0f * M_PI * k) + 0.08f * std::cos(4.0f * M_PI * k));
+    return (0.42f - 0.5f * std::cos(2.0f * math::pi * k) + 0.08f * std::cos(4.0f * math::pi * k));
 }
 
 void spectral_inversion(samples_fp& krn)
@@ -58,11 +57,8 @@ samples_fp conv(samples_fp& dst, const samples_fp& sig, const samples_fp& krn, e
     const size_t Nc = Ns + Nk - 1;
     const size_t Nf = (shape == ConvShape::Central ? Ns : Nc);
 
-    if (dst.size() < Nf) {
-        std::ostringstream os{};
-        os << "Required buffer size " << Nf << ", provided buffer size " << dst.size();
-        throw InvalidArgument{__FUNCTION__, os.str()};
-    }
+    using namespace gsl;
+    Expects(Nf <= dst.size());
 
     float cdata[Nc];
     samples_fp c{cdata, Nc};
@@ -83,24 +79,22 @@ samples_fp conv(samples_fp& dst, const samples_fp& sig, const samples_fp& krn, e
         std::copy(c.begin(), c.end(), dst.begin());
     }
 
-    return samples_fp{dst.data(), Nf};
+    return dst.subspan(0, Nf);
 }
 
 samples_fp lopass(samples_fp& krn, float fc, float fs, bool osiz)
 {
+    using namespace gsl;
+
     size_t N;
     if (osiz) {
         N = kernel_size(fc, fs);
-        if (N > krn.size()) {
-            std::ostringstream os{};
-            os << "fc " << fc << ", fs " << fs << ", krn size " << krn.size() << ", required size " << N;
-            throw InvalidArgument{__FUNCTION__, os.str()};
-        }
+        Expects(N <= krn.size());
     } else {
         N = krn.size();
     }
 
-    const float w = 2.0f * M_PI * fc;
+    const float w = 2.0f * math::pi * fc;
     const float ts = 1.0f / fs;
 
     float t = -ts * static_cast<float>(N >> 1);
@@ -129,12 +123,20 @@ samples_fp hipass(samples_fp& krn, float fc, float fs, bool osiz)
 
 samples_fp bapass(samples_fp& krn, float fcl, float fch, float fs, bool osiz)
 {
-//FIXME test
 #if 0
+    using namespace gsl;
+
     float fhi = std::min(fcl, fch);
     float flo = std::max(fcl, fch);
 
-    size_t N = kernel_size(flo, fs);
+    size_t N;
+    if (osiz) {
+        N = kernel_size(flo, fs);
+        Expects(N <= krn.size());
+    } else {
+        N = krn.size();
+    }
+
     float lodata[N];
     samples_fp lo{lodata, N};
     auto lo_krn = lopass(lo, flo, fs, false);
@@ -147,20 +149,28 @@ samples_fp bapass(samples_fp& krn, float fcl, float fch, float fs, bool osiz)
     auto ba_krn = conv(krn, lo_krn, hi_krn, ConvShape::Central);
     return ba_krn;
 #else
+//FIXME test
+    using namespace gsl;
+
     float fhi = std::min(fcl, fch);
     float flo = std::max(fcl, fch);
-    float w0  = M_PI * (fhi + flo);
+    float w0  = math::pi * (fhi + flo);
 
-    size_t N = kernel_size(flo, fs);
-    float data[N];
-    samples_fp lo{data, N};
-    auto ba_krn = lopass(lo, flo, fs, false);
-
-    for (size_t k = 0; k < ba_krn.size(); ++k) {
-        ba_krn[k] *= 2.0f * std::cos(w0 * k);
+    size_t N;
+    if (osiz) {
+        N = kernel_size(flo, fs);
+        Expects(N <= krn.size());
+    } else {
+        N = krn.size();
     }
 
-    return ba_krn;
+    lopass(krn, flo, fs, false);
+
+    for (size_t k = 0; k < N; ++k) {
+        krn[k] *= 2.0f * std::cos(w0 * k);
+    }
+
+    return krn.subspan(0, N);
 #endif
 }
 
@@ -173,14 +183,12 @@ samples_fp bastop(samples_fp& krn, float fcl, float fch, float fs, bool osiz)
 
 samples_fp lopass_40(samples_fp& krn, float f0, float Q, float fs, bool osiz)
 {
+    using namespace gsl;
+
     size_t N;
     if (osiz) {
         N = kernel_size(f0, fs);
-        if (N > krn.size()) {
-            std::ostringstream os{};
-            os << "f0 " << f0 << ", fs " << fs << ", krn size " << krn.size() << ", required size " << N;
-            throw InvalidArgument{__FUNCTION__, os.str()};
-        }
+        Expects(N <= krn.size());
     } else {
         N = krn.size();
     }
@@ -196,7 +204,7 @@ samples_fp lopass_40(samples_fp& krn, float f0, float Q, float fs, bool osiz)
      * v  ./= sum(v);
      */
     const float FT = std::sqrt(1.0f - 1.0f / (4.0f * Q * Q));
-    const float w0 = 2 * M_PI * f0;
+    const float w0 = 2 * math::pi * f0;
     const float w  = w0 * FT;
     const float a  = w0 / (2.0f * Q);
     const float A  = w0 / FT;
@@ -231,14 +239,12 @@ samples_fp hipass_40(samples_fp& krn, float f0, float Q, float fs, bool osiz)
 
 samples_fp lopass_20(samples_fp& krn, float f0, float fs, bool osiz)
 {
+    using namespace gsl;
+
     size_t N;
     if (osiz) {
         N = kernel_size(f0, fs);
-        if (N > krn.size()) {
-            std::ostringstream os{};
-            os << "f0 " << f0 << ", fs " << fs << ", krn size " << krn.size() << ", required size " << N;
-            throw InvalidArgument{__FUNCTION__, os.str()};
-        }
+        Expects(N <= krn.size());
     } else {
         N = krn.size();
     }
@@ -251,7 +257,7 @@ samples_fp lopass_20(samples_fp& krn, float f0, float fs, bool osiz)
      * v  ./= sum(v);
      */
     const float ts = 1.0f / fs;
-    const float w0 = 2 * M_PI * f0;
+    const float w0 = 2 * math::pi * f0;
     float t        = 0.0f;
     float sum      = 0.0f;
 
@@ -283,7 +289,16 @@ samples_fp hipass_20(samples_fp& krn, float f0, float fs, bool osiz)
 
 samples_fp bapass_20(samples_fp& krn, float f0, float fs, bool osiz)
 {
-    size_t N = kernel_size(f0, fs);
+    using namespace gsl;
+
+    size_t N;
+    if (osiz) {
+        N = kernel_size(f0, fs);
+        Expects(N <= krn.size());
+    } else {
+        N = krn.size();
+    }
+
     float lodata[N];
     samples_fp lo{lodata, N};
     auto lo_krn = lopass_20(lo, f0, fs, false);
@@ -292,7 +307,7 @@ samples_fp bapass_20(samples_fp& krn, float f0, float fs, bool osiz)
     samples_fp hi{hidata, N};
     auto hi_krn = hipass_20(hi, f0, fs, false);
 
-    auto tri_krn = conv(lo_krn, lo_krn, hi_krn, ConvShape::Central);
+    auto tri_krn = conv(krn, lo_krn, hi_krn, ConvShape::Central);
     return tri_krn;
 }
 

@@ -79,10 +79,10 @@ void AudioStream::reset(const ui::AudioConfig& aconf)
     _playing_queue.clear();
     _free_queue.clear();
 
-    _free_queue.push(samples_i16(aconf.samples));
-    _free_queue.push(samples_i16(aconf.samples));
-    _free_queue.push(samples_i16(aconf.samples));
-    _free_queue.push(samples_i16(aconf.samples));
+    std::for_each(_buffers, _buffers + std::size(_buffers), [this, &aconf](std::vector<int16_t>& buf) {
+        buf.resize(aconf.samples);
+        this->_free_queue.push({buf.data(), buf.size()});
+    });
 
     _stop = false;
 }
@@ -152,7 +152,7 @@ void AudioStream::stream_data(AudioStream* self, uint8_t* stream, int len)
 
     const auto samples = self->_playing_queue.pop();
     int16_t* data = reinterpret_cast<int16_t*>(stream);
-    size_t datasiz = std::min<size_t>(len >> 1, samples.size());;
+    size_t datasiz = std::min<size_t>(len >> 1, samples.size());
     if (datasiz < samples.size()) {
         log.warn("ui: audio: Destination buffer size: %d, expected %d. Audio stream truncated\n",
             datasiz,

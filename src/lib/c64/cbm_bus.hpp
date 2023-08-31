@@ -404,7 +404,7 @@ public:
     }
 
     std::string param_str() const {
-        return utils::to_string(_param);
+        return utils::to_string({_param.data(), _param.size()});
     }
 
     void command(uint8_t cmd) {

@@ -123,7 +123,7 @@ bool is_power_of_two(T n)
  * @param buf Byte buffer to convert.
  * @return The string.
  */
-std::string to_string(const std::vector<uint8_t>& buf);
+std::string to_string(const gsl::span<const uint8_t>& buf);
 
 /**
  * Convert an integer value to uppercase hexadecimal string.

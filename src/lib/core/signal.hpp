@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <ctime>
@@ -43,7 +42,7 @@ extern std::random_device rd;
 extern std::uniform_real_distribution<float> uni_random;
 
 using samples_fp = gsl::span<float>;
-using samples_i16 = std::vector<int16_t>;   //TODO avoid vector
+using samples_i16 = gsl::span<int16_t>;
 
 
 /**
@@ -209,7 +208,7 @@ void spectral_inversion(samples_fp& krn);
  * @param shape Desired output shape (see ConvShape).
  * @return A subspan of the destination buffer containing the convolution product, the size of this buffer
  * depends on the specified shape.
- * @exception InvalidArgument if the destination buffer does not have enough space.
+ * @note The destination buffer is expected to be large enough (see ConvShape)
  * @see ConvShape
  */
 samples_fp conv(samples_fp& dst, const samples_fp& sig, const samples_fp& krn, enum ConvShape shape);
@@ -221,7 +220,7 @@ samples_fp conv(samples_fp& dst, const samples_fp& sig, const samples_fp& krn, e
  * @param fs   Sampling frequency;
  * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
  * @return A subspan of the destination buffer containing the actual kernel.
- * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @note If osiz is true, the destination buffer is expected to be large enough.
  * @see kernel_size()
  * TODO: use bilinear transform
  */
@@ -234,7 +233,7 @@ samples_fp lopass(samples_fp& krn, float fc, float fs, bool osiz = true);
  * @param fs   Sampling frequency;
  * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
  * @return A subspan of the destination buffer containing the actual kernel.
- * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @note If osiz is true, the destination buffer is expected to be large enough.
  * @see kernel_size()
  * TODO: use bilinear transform
  */
@@ -248,7 +247,7 @@ samples_fp hipass(samples_fp& buf, float fc, float fs, bool osiz = true);
  * @param fs   Sampling frequency;
  * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
  * @return A subspan of the destination buffer containing the actual kernel.
- * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @note If osiz is true, the destination buffer is expected to be large enough.
  * @see kernel_size()
  * TODO: use bilinear transform
  */
@@ -264,7 +263,7 @@ samples_fp bapass(samples_fp& krn, float fcl, float fch, float fs, bool osiz = t
  * @param fs   Sampling frequency;
  * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
  * @return A subspan of the destination buffer containing the actual kernel.
- * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @note If osiz is true, the destination buffer is expected to be large enough.
  * @see kernel_size()
  * TODO: use bilinear transform
  */
@@ -279,7 +278,7 @@ samples_fp bastop(samples_fp& krn, float fcl, float fch, float fs, bool osiz = t
  * @param fs   Sampling frequency;
  * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
  * @return A subspan of the destination buffer containing the actual kernel.
- * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @note If osiz is true, the destination buffer is expected to be large enough.
  * @see kernel_size()
  * TODO: use bilinear transform
  */
@@ -294,7 +293,7 @@ samples_fp lopass_40(samples_fp& krn, float f0, float Q, float fs, bool osiz = t
  * @param fs   Sampling frequency;
  * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
  * @return A subspan of the destination buffer containing the actual kernel.
- * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @note If osiz is true, the destination buffer is expected to be large enough.
  * @see kernel_size()
  * TODO: use bilinear transform
  */
@@ -308,7 +307,7 @@ samples_fp hipass_40(samples_fp& krn, float f0, float Q, float fs, bool osiz = t
  * @param fs   Sampling frequency;
  * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
  * @return A subspan of the destination buffer containing the actual kernel.
- * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @note If osiz is true, the destination buffer is expected to be large enough.
  * @see kernel_size()
  * TODO: use bilinear transform
  */
@@ -322,7 +321,7 @@ samples_fp lopass_20(samples_fp& krn, float f0, float fs, bool osiz = true);
  * @param fs   Sampling frequency;
  * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
  * @return A subspan of the destination buffer containing the actual kernel.
- * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @note If osiz is true, the destination buffer is expected to be large enough.
  * @see kernel_size()
  * TODO: use bilinear transform
  */
@@ -337,7 +336,7 @@ samples_fp hipass_20(samples_fp& krn, float f0, float fs, bool osiz = true);
  * @param fs   Sampling frequency;
  * @param osiz If true, calculate the optimal size of the kernel; otherwise use the specified buffer size.
  * @return A subspan of the destination buffer containing the actual kernel.
- * @exception InvalidArgument If the destination buffer is not large enough to contain the generated kernel.
+ * @note If osiz is true, the destination buffer is expected to be large enough.
  * @see kernel_size()
  * TODO: use bilinear transform
  */

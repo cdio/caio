@@ -106,7 +106,7 @@ unsigned long long to_ulonglong(const std::string& str, size_t max)
     return val;
 }
 
-std::string to_string(const std::vector<uint8_t>& buf)
+std::string to_string(const gsl::span<const uint8_t>& buf)
 {
     std::string str{};
 

@@ -123,6 +123,9 @@ private:
     LockedQueue<samples_i16> _free_queue{};
     LockedQueue<samples_i16> _playing_queue{};
     float                    _volume{DEFAULT_VOLUME};
+
+    constexpr static const size_t AUDIO_BUFFERS = 4;
+    std::vector<int16_t> _buffers[AUDIO_BUFFERS] = {};
 };
 
 }
