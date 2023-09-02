@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -18,19 +18,17 @@
  */
 #include "zilog_z80.hpp"
 
-#include "logger.hpp"
-#include "types.hpp"
-#include "utils.hpp"
-
 
 namespace caio {
+namespace zilog {
 
-int ZilogZ80::i_RLCA(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_RLCA(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * RLCA
-     * The contents of the Accumulator (Register A) are rotated left 1 bit position. The sign bit
-     * (bit 7) is copied to the Carry flag and also to bit 0. Bit 0 is the least-significant bit.
+     * The content of the accumulator is rotated left 1 bit position.
+     * The sign bit (bit 7) is copied to the Carry flag and also to bit 0
+     * (bit 0 is the least-significant bit).
      * S is not affected.
      * Z is not affected.
      * H is reset.
@@ -44,14 +42,16 @@ int ZilogZ80::i_RLCA(ZilogZ80 &self, uint8_t op, addr_t arg)
     self.flag_C(b7);
     self.flag_H(0);
     self.flag_N(0);
+    self.flag_Y(self._regs.A & 0x20);
+    self.flag_X(self._regs.A & 0x08);
     return 0;
 }
 
-int ZilogZ80::i_RRCA(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_RRCA(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * RRCA
-     * The contents of the Accumulator (Register A) are rotated right 1 bit position.
+     * The content of the Accumulator (Register A) is rotated right 1 bit position.
      * Bit 0 is copied to the Carry flag and also to bit 7. Bit 0 is the least-significant bit.
      * S is not affected.
      * Z is not affected.
@@ -62,19 +62,21 @@ int ZilogZ80::i_RRCA(ZilogZ80 &self, uint8_t op, addr_t arg)
      */
     bool b0 = (self._regs.A & 0x01);
     self._regs.A >>= 1;
-    self._regs.A |= (0 ? 0x80 : 0x00);
+    self._regs.A |= (b0 ? 0x80 : 0x00);
     self.flag_C(b0);
     self.flag_N(0);
     self.flag_H(0);
+    self.flag_Y(self._regs.A & 0x20);
+    self.flag_X(self._regs.A & 0x08);
     return 0;
 }
 
-int ZilogZ80::i_RLA(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_RLA(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * RLA
-     * The contents of the Accumulator (Register A) are rotated left 1 bit position
-     * through the Carry flag. The previous contents of the Carry flag are copied to bit 0.
+     * The content of the Accumulator (Register A) is rotated left 1 bit position
+     * through the Carry flag. The previous content of the Carry flag is copied to bit 0.
      * S is not affected.
      * Z is not affected.
      * H is reset.
@@ -88,14 +90,16 @@ int ZilogZ80::i_RLA(ZilogZ80 &self, uint8_t op, addr_t arg)
     self.flag_C(b7);
     self.flag_H(0);
     self.flag_N(0);
+    self.flag_Y(self._regs.A & 0x20);
+    self.flag_X(self._regs.A & 0x08);
     return 0;
 }
 
-int ZilogZ80::i_RRA(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_RRA(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * The contents of the Accumulator (Register A) are rotated right 1 bit position through
-     * the Carry flag. The previous contents of the Carry flag are copied to bit 7.
+     * The content of the Accumulator (Register A) is rotated right 1 bit position through
+     * the Carry flag. The previous content of the Carry flag is copied to bit 7.
      * S is not affected.
      * Z is not affected.
      * H is reset.
@@ -109,7 +113,10 @@ int ZilogZ80::i_RRA(ZilogZ80 &self, uint8_t op, addr_t arg)
     self.flag_C(b0);
     self.flag_H(0);
     self.flag_N(0);
+    self.flag_Y(self._regs.A & 0x20);
+    self.flag_X(self._regs.A & 0x08);
     return 0;
 }
 
+}
 }

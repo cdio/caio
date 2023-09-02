@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -20,8 +20,9 @@
 
 
 namespace caio {
+namespace zilog {
 
-int ZilogZ80::i_LD_rr_nn(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_LD_rr_nn(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * LD BC, nn
@@ -29,12 +30,13 @@ int ZilogZ80::i_LD_rr_nn(ZilogZ80 &self, uint8_t op, addr_t arg)
      * LD HL, nn
      * LD SP, nn
      */
-    uint16_t &reg = self.reg16_from_opcode(op);
-    reg = arg;
+    auto [rget, rset] = self.reg16_from_opcode(op);
+    rset(arg);
+    self._regs.memptr = arg + 1;
     return 0;
 }
 
-int ZilogZ80::i_LD_r_n(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_LD_r_n(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * LD A, n
@@ -45,121 +47,126 @@ int ZilogZ80::i_LD_r_n(ZilogZ80 &self, uint8_t op, addr_t arg)
      * LD H, n
      * LD L, n
      */
-    uint8_t &reg = self.reg8_from_opcode(op);
+    uint8_t& reg = self.reg8_from_opcode(op);
     reg = static_cast<uint8_t>(arg & 0xFF);
     return 0;
 }
 
-int ZilogZ80::i_LD_r_r(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_LD_r_r(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * LD {ABCDEHL}, {ABCDEHL}
      */
-    uint8_t &dst_reg = self.reg8_from_opcode(op);
-    uint8_t &src_reg = self.reg8_src_from_opcode(op);
+    uint8_t& dst_reg = self.reg8_from_opcode(op);
+    uint8_t& src_reg = self.reg8_src_from_opcode(op);
     dst_reg = src_reg;
     return 0;
 }
 
-int ZilogZ80::i_LD_r_mHL(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_LD_r_mHL(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * LD {ABCDEHL}, (HL)
      */
-    uint8_t &dst_reg = self.reg8_from_opcode(op);
-    uint8_t data = self.read(self._regs.HL);
+    uint8_t& dst_reg = self.reg8_from_opcode(op);
+    uint8_t data = self.read(self._regs.HL());
     dst_reg = data;
     return 0;
 }
 
-int ZilogZ80::i_LD_mHL_r(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_LD_mHL_r(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * LD (HL), {ABCDEHL}
      */
-    uint8_t &src_reg = self.reg8_src_from_opcode(op);
-    self.write(self._regs.HL, src_reg);
+    uint8_t& src_reg = self.reg8_src_from_opcode(op);
+    self.write(self._regs.HL(), src_reg);
     return 0;
 }
 
-int ZilogZ80::i_LD_A_mdd(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_LD_A_mdd(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * LD A, (BC)   $0A
-     * LD A, (DE)   $1A
-     * LD A, (nn)   $3A
+     * LD A, (BC) - $0A
+     * LD A, (DE) - $1A
+     * LD A, (nn) - $3A
      */
-    addr_t addr = (op == 0x0A ? self._regs.BC : (op == 0x1A ? self._regs.DE : arg));
+    addr_t addr = (op == 0x0A ? self._regs.BC() : (op == 0x1A ? self._regs.DE() : arg));
     uint8_t data = self.read(addr);
     self._regs.A = data;
+    self._regs.memptr = addr + 1;
     return 0;
 }
 
-int ZilogZ80::i_LD_mdd_A(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_LD_mdd_A(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * LD (BC), A   $02
-     * LD (DE), A   $12
-     * LD (nn), A   $32
+     * LD (BC), A - $02
+     * LD (DE), A - $12
+     * LD (nn), A - $32
      */
-    addr_t addr = (op == 0x02 ? self._regs.BC : (op == 0x12 ? self._regs.DE : arg));
+    addr_t addr = (op == 0x02 ? self._regs.BC() : (op == 0x12 ? self._regs.DE() : arg));
     self.write(addr, self._regs.A);
+    self._regs.memptr = (static_cast<uint16_t>(self._regs.A) << 8) | ((addr + 1) & 0xFF);
     return 0;
 }
 
-int ZilogZ80::i_LD_mnn_HL(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_LD_mnn_HL(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * LD (nn), HL
      */
     self.write(arg, self._regs.L);
     self.write(arg + 1, self._regs.H);
+    self._regs.memptr = arg + 1;
     return 0;
 }
 
-int ZilogZ80::i_LD_HL_mnn(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_LD_HL_mnn(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * LD HL, (nn)
      */
     self._regs.L = self.read(arg);
     self._regs.H = self.read(arg + 1);
+    self._regs.memptr = arg + 1;
     return 0;
 }
 
-int ZilogZ80::i_LD_mHL_n(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_LD_mHL_n(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * LD (HL), n
      */
-    self.write(self._regs.HL, static_cast<uint8_t>(arg & 0xFF));
+    self.write(self._regs.HL(), static_cast<uint8_t>(arg & 0xFF));
     return 0;
 }
 
-int ZilogZ80::i_LD_SP_HL(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_LD_SP_HL(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * LD SP, HL
      */
-    self._regs.SP = self._regs.HL;
+    self._regs.SP = self._regs.HL();
     return 0;
 }
 
-int ZilogZ80::i_POP_rr(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_POP_rr(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * POP {BC,DE,HL,AF}
      */
-    uint16_t &r16 = self.reg16_from_opcode(op, true /* no SP */);
-    r16 = self.pop_addr();
+    auto [rget, rset] = self.reg16_from_opcode(op, true /* no SP */);
+    rset(self.pop_addr());
     return 0;
 }
 
-int ZilogZ80::i_PUSH_rr(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_PUSH_rr(Z80& self, uint8_t op, addr_t arg)
 {
-    const uint16_t &r16 = self.reg16_from_opcode(op, true /* no SP */);
-    self.push_addr(r16);
+    auto [rget, rset] = self.reg16_from_opcode(op, true /* no SP */);
+    self.push_addr(rget());
     return 0;
 }
 
+}
 }

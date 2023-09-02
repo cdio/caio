@@ -16,10 +16,39 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ../../../}
+ROOT=		${abspath ../../../..}
 
 include ${ROOT}/mk/config.mk
 
-DIRS+=		rak
+BIN=		./z80-test
 
-include ${ROOT}/mk/dir.mk
+CXXSRCS=	z80_test.cpp \
+		z80_test_aspace.cpp
+
+EXTRA_DEPS+=	${ROOT}/src/lib/core/libcaio_core.a
+
+LDADD+=		${EXTRA_DEPS}
+
+# Do not change order
+TESTS=		zexdoc.com \
+		zexall.com
+
+CLEANFILES+=	${BIN}
+
+.PHONY: all clean debug install test
+
+all: ${BIN}
+
+debug:
+	${MAKE} ${MAKEARGS} DEBUG=yes all
+
+test: ${BIN}
+	${BIN} -b ${TESTS}
+
+install:
+
+include ${ROOT}/mk/obj.mk
+
+${BIN}: ${OBJS} ${LIB} ${EXTRA_DEPS}
+	${LD} ${LDFLAGS} -o $@ $^ ${LDADD}
+

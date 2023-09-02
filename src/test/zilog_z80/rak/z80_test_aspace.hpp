@@ -16,40 +16,40 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
+#pragma once
+
+#include <iostream>
+#include <memory>
+
+#include "aspace.hpp"
+#include "device.hpp"
 #include "zilog_z80.hpp"
 
 
 namespace caio {
-namespace zilog {
+namespace test {
 
-uint8_t Z80::io_in(uint8_t port)
-{
-    iorq_pin(true);
-    auto value = read(port);
-    iorq_pin(false);
-    return value;
-}
+/**
+ * Z80 test device.
+ * The rom is mapped at $8000
+ */
+class Z80TestASpace : public ASpace {
+public:
+    Z80TestASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr_t& rom, std::ostream& out);
 
-void Z80::io_out(uint8_t port, uint8_t value)
-{
-    iorq_pin(true);
-    write(port, value);
-    iorq_pin(false);
-}
+    virtual ~Z80TestASpace() {
+    }
 
-int Z80::i_IN_A_n(Z80& self, uint8_t op, addr_t arg)
-{
-    self._regs.memptr = (static_cast<uint16_t>(self._regs.A) << 8) + arg + 1;
-    self._regs.A = self.io_in(arg);
-    return 0;
-}
+    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
-int Z80::i_OUT_n_A(Z80& self, uint8_t op, addr_t arg)
-{
-    self._regs.memptr = (static_cast<uint16_t>(self._regs.A) << 8) + ((arg + 1) & 255);
-    self.io_out(arg & 255, self._regs.A);
-    return 0;
-}
+    void write(addr_t addr, uint8_t value) override;
+
+private:
+    sptr_t<Z80>   _cpu;
+    devptr_t      _ram;
+    devptr_t      _rom;
+    std::ostream& _out;
+};
 
 }
 }

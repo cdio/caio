@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -18,18 +18,16 @@
  */
 #include "zilog_z80.hpp"
 
-#include <chrono>
-#include <iomanip>
-
 
 namespace caio {
+namespace zilog {
 
-int ZilogZ80::i_NOP(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_NOP(Z80& self, uint8_t op, addr_t arg)
 {
     return 0;
 }
 
-int ZilogZ80::i_DJNZ(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_DJNZ(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * B = B - 1
@@ -45,16 +43,17 @@ int ZilogZ80::i_DJNZ(ZilogZ80 &self, uint8_t op, addr_t arg)
     return 0;
 }
 
-int ZilogZ80::i_JR(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_JR(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * JR $rel
      */
+    self._regs.memptr = arg;
     self.take_branch(static_cast<int8_t>(arg & 0xFF));
     return 0;
 }
 
-int ZilogZ80::i_JR_NZ(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_JR_NZ(Z80& self, uint8_t op, addr_t arg)
 {
     if (!self.test_Z()) {
         self.take_branch(static_cast<int8_t>(arg & 0xFF));
@@ -63,7 +62,7 @@ int ZilogZ80::i_JR_NZ(ZilogZ80 &self, uint8_t op, addr_t arg)
     return 0x00020007;
 }
 
-int ZilogZ80::i_JR_Z(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_JR_Z(Z80& self, uint8_t op, addr_t arg)
 {
     if (self.test_Z()) {
         self.take_branch(static_cast<int8_t>(arg & 0xFF));
@@ -72,7 +71,7 @@ int ZilogZ80::i_JR_Z(ZilogZ80 &self, uint8_t op, addr_t arg)
     return 0x00020007;
 }
 
-int ZilogZ80::i_JR_NC(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_JR_NC(Z80& self, uint8_t op, addr_t arg)
 {
     if (!self.test_C()) {
         self.take_branch(static_cast<int8_t>(arg & 0xFF));
@@ -81,7 +80,7 @@ int ZilogZ80::i_JR_NC(ZilogZ80 &self, uint8_t op, addr_t arg)
     return 0x00020007;
 }
 
-int ZilogZ80::i_JR_C(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_JR_C(Z80& self, uint8_t op, addr_t arg)
 {
     if (self.test_C()) {
         self.take_branch(static_cast<uint8_t>(arg & 0xFF));
@@ -90,7 +89,7 @@ int ZilogZ80::i_JR_C(ZilogZ80 &self, uint8_t op, addr_t arg)
     return 0x00020007;
 }
 
-bool ZilogZ80::test_cond_from_opcode(uint8_t op)
+bool Z80::test_cond_from_opcode(uint8_t op)
 {
     constexpr static uint8_t COND_MASK = 0x38;
     switch (op & COND_MASK) {
@@ -121,16 +120,17 @@ bool ZilogZ80::test_cond_from_opcode(uint8_t op)
     }
 }
 
-int ZilogZ80::i_RET(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_RET(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * RET
      */
     self._regs.PC = self.pop_addr();
+    self._regs.memptr = self._regs.PC;
     return 0;
 }
 
-int ZilogZ80::i_RET_cc(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_RET_cc(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * RET NZ
@@ -151,13 +151,14 @@ int ZilogZ80::i_RET_cc(ZilogZ80 &self, uint8_t op, addr_t arg)
     return 0x00010005;
 }
 
-int ZilogZ80::i_JP_nn(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_JP_nn(Z80& self, uint8_t op, addr_t arg)
 {
     self._regs.PC = arg;
+    self._regs.memptr = arg;
     return 0;
 }
 
-int ZilogZ80::i_JP_cc_nn(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_JP_cc_nn(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * JP NZ nn
@@ -169,6 +170,7 @@ int ZilogZ80::i_JP_cc_nn(ZilogZ80 &self, uint8_t op, addr_t arg)
      * JP P  nn
      * JP M  nn
      */
+    self._regs.memptr = arg;
     bool cond = self.test_cond_from_opcode(op);
     if (cond) {
         self._regs.PC = arg;
@@ -177,25 +179,26 @@ int ZilogZ80::i_JP_cc_nn(ZilogZ80 &self, uint8_t op, addr_t arg)
     return 0;
 }
 
-int ZilogZ80::i_JP_HL(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_JP_HL(Z80& self, uint8_t op, addr_t arg)
 {
-    self._regs.PC = self._regs.HL;
+    self._regs.PC = self._regs.HL();
     return 0;
 }
 
-inline int ZilogZ80::call(addr_t addr)
+inline int Z80::call(addr_t addr)
 {
     push_addr(_regs.PC);
     _regs.PC = addr;
     return 0;
 }
 
-int ZilogZ80::i_CALL_nn(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_CALL_nn(Z80& self, uint8_t op, addr_t arg)
 {
+    self._regs.memptr = arg;
     return self.call(arg);
 }
 
-int ZilogZ80::i_CALL_cc_nn(ZilogZ80 &self, uint8_t op, addr_t addr)
+int Z80::i_CALL_cc_nn(Z80& self, uint8_t op, addr_t addr)
 {
     /*
      * CALL NZ nn
@@ -207,6 +210,7 @@ int ZilogZ80::i_CALL_cc_nn(ZilogZ80 &self, uint8_t op, addr_t addr)
      * CALL P  nn
      * CALL M  nn
      */
+    self._regs.memptr = addr;
     bool cond = self.test_cond_from_opcode(op);
     if (cond) {
         return self.call(addr);
@@ -216,7 +220,7 @@ int ZilogZ80::i_CALL_cc_nn(ZilogZ80 &self, uint8_t op, addr_t addr)
     return 0x00030010;
 }
 
-int ZilogZ80::i_RST_p(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_RST_p(Z80& self, uint8_t op, addr_t arg)
 {
     /*
      * RST 00
@@ -232,7 +236,9 @@ int ZilogZ80::i_RST_p(ZilogZ80 &self, uint8_t op, addr_t arg)
     addr_t addr = op & RST_ADDR_MASK;
     self.push_addr(self._regs.PC + 1);
     self._regs.PC = addr;
+    self._regs.memptr = addr;
     return 0;
 }
 
+}
 }

@@ -16,40 +16,40 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
+#pragma once
+
+#include <memory>
+#include <string>
+
+#include "clock.hpp"
 #include "zilog_z80.hpp"
+#include "device_ram.hpp"
+#include "device_rom.hpp"
+
+#include "z80_test_aspace.hpp"
 
 
 namespace caio {
-namespace zilog {
+namespace test {
 
-uint8_t Z80::io_in(uint8_t port)
-{
-    iorq_pin(true);
-    auto value = read(port);
-    iorq_pin(false);
-    return value;
-}
+constexpr static const unsigned CLOCK_FREQ = 3250000;
 
-void Z80::io_out(uint8_t port, uint8_t value)
-{
-    iorq_pin(true);
-    write(port, value);
-    iorq_pin(false);
-}
+/**
+ * Z80 tester.
+ */
+class Z80Test {
+public:
+    Z80Test(const std::string& fname);
 
-int Z80::i_IN_A_n(Z80& self, uint8_t op, addr_t arg)
-{
-    self._regs.memptr = (static_cast<uint16_t>(self._regs.A) << 8) + arg + 1;
-    self._regs.A = self.io_in(arg);
-    return 0;
-}
+    void run(bool autostart);
 
-int Z80::i_OUT_n_A(Z80& self, uint8_t op, addr_t arg)
-{
-    self._regs.memptr = (static_cast<uint16_t>(self._regs.A) << 8) + ((arg + 1) & 255);
-    self.io_out(arg & 255, self._regs.A);
-    return 0;
-}
+private:
+    sptr_t<Clock>         _clk{};
+    devptr_t              _ram{};
+    devptr_t              _rom{};
+    sptr_t<Z80>           _cpu{};
+    sptr_t<Z80TestASpace> _mmap{};
+};
 
 }
 }

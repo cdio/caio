@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -18,30 +18,29 @@
  */
 #include "zilog_z80.hpp"
 
-#include <chrono>
-#include <iomanip>
-
 
 namespace caio {
+namespace zilog {
 
-int ZilogZ80::i_HALT(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_HALT(Z80& self, uint8_t op, addr_t arg)
 {
-    self._is_halted = true;
+    self.halt_pin(true);
     return 0;
 }
 
-int ZilogZ80::i_DI(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_DI(Z80& self, uint8_t op, addr_t arg)
 {
     self._IFF1 = false;
     self._IFF2 = false;
     return 0;
 }
 
-int ZilogZ80::i_EI(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_EI(Z80& self, uint8_t op, addr_t arg)
 {
     self._IFF1 = true;
     self._IFF2 = true;
     return 0;
 }
 
+}
 }

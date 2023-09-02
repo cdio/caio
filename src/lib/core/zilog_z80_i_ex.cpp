@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2022 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -20,46 +20,70 @@
 
 
 namespace caio {
+namespace zilog {
 
-int ZilogZ80::i_EX_AF_sAF(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_EX_AF_sAF(Z80& self, uint8_t op, addr_t arg)
 {
-    uint16_t aAF = self._regs.aAF;
-    self._regs.aAF = self._regs.AF;
-    self._regs.AF = aAF;
+    /*
+     * EX AF, AF'
+     * Swap AF, AF'
+     */
+    uint16_t aAF = self._regs.aAF();
+    self._regs.aAF(self._regs.AF());
+    self._regs.AF(aAF);
     return 0;
 }
 
-int ZilogZ80::i_EX_DE_HL(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_EX_DE_HL(Z80& self, uint8_t op, addr_t arg)
 {
-    uint16_t HL = self._regs.HL;
-    self._regs.HL = self._regs.DE;
-    self._regs.DE = HL;
+    /*
+     * EX HL, DE
+     * Swap HL, DE
+     */
+    uint16_t HL = self._regs.HL();
+    self._regs.HL(self._regs.DE());
+    self._regs.DE(HL);
     return 0;
 }
 
-int ZilogZ80::i_EXX(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_EXX(Z80& self, uint8_t op, addr_t arg)
 {
-    uint16_t tmp = self._regs.aBC;
-    self._regs.aBC = self._regs.BC;
-    self._regs.BC = tmp;
+    /*
+     * EXX
+     * Swap BC, BC'
+     * Swap DE, DE'
+     * Swap HL, HL'
+     */
+    uint16_t tmp = self._regs.aBC();
+    self._regs.aBC(self._regs.BC());
+    self._regs.BC(tmp);
 
-    tmp = self._regs.aDE;
-    self._regs.aDE = self._regs.DE;
-    self._regs.DE = tmp;
+    tmp = self._regs.aDE();
+    self._regs.aDE(self._regs.DE());
+    self._regs.DE(tmp);
 
-    tmp = self._regs.aHL;
-    self._regs.aHL = self._regs.HL;
-    self._regs.HL = tmp;
+    tmp = self._regs.aHL();
+    self._regs.aHL(self._regs.HL());
+    self._regs.HL(tmp);
 
     return 0;
 }
 
-int ZilogZ80::i_EX_mSP_HL(ZilogZ80 &self, uint8_t op, addr_t arg)
+int Z80::i_EX_mSP_HL(Z80& self, uint8_t op, addr_t arg)
 {
-    uint16_t HL = self._regs.HL;
-    self._regs.HL = self.pop_addr();
-    self.push_addr(HL);
+    /*
+     * EX (SP), HL
+     * Swap *SP, HL
+     */
+    uint8_t lo = self.read(self._regs.SP);
+    uint8_t hi = self.read(self._regs.SP + 1);
+    self.write(self._regs.SP, self._regs.L);
+    self.write(self._regs.SP + 1, self._regs.H);
+    self._regs.L = lo;
+    self._regs.H = hi;
+    self._regs.memptr = self._regs.HL();
     return 0;
 }
 
+}
 }

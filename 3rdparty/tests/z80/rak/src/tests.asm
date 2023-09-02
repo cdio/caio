@@ -4,9 +4,7 @@
 ;
 ; This source code is released under the MIT license, see included license.txt.
 
-;selftests   equ     0           ; Set to 1 to include detailed self tests.
-;(caio)
-selftests   equ     1           ; Set to 1 to include detailed self tests.
+selftests   equ     0           ; Set to 1 to include detailed self tests.
 
 failcheck   equ     0           ; Run the test only after some prior failure.
 incheck     equ     1           ; Fail and skip the test in case of IN mismatch.

@@ -26,6 +26,8 @@ CLEANFILES=	*.out *.lst ${PROGS} ${OBJS}
 
 all: ${SJASM} ${OBJS}
 
+debug: all
+
 %.out: %.asm
 	${SJASM} $<
 
