@@ -50,7 +50,10 @@ public:
     constexpr static const addr_t A13       = 1 << 13;
 
     constexpr static const addr_t ADDR_MASK = 0xFFFF;
+    constexpr static const size_t BANKS     = 32;
+    constexpr static const size_t BLOCKS    = 16;
 
+    using bank_t = std::array<devmap_t, BLOCKS>;
     using extmap_cb_t = std::function<std::pair<devmap_t, devmap_t>(addr_t, bool, bool)>;
 
     /**
@@ -66,7 +69,8 @@ public:
     PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, const devptr_t& chargen,
         const devptr_t& io);
 
-    virtual ~PLA();
+    virtual ~PLA() {
+    }
 
     /**
      * Reset this PLA.
@@ -112,8 +116,10 @@ private:
 
     uint8_t                   _mode{INVALID};   /* Bitwise combination of LORAM, HIRAM, CHAREN, GAME, and EXROM */
     extmap_cb_t               _extmap{};        /* I/O Extension (cartridge) callback                           */
-    std::array<addrmap_t, 32> _rmodes{};        /* Default read mapping modes                                   */
-    std::array<addrmap_t, 32> _wmodes{};        /* Default write mapping modes                                  */
+    std::array<bank_t, BANKS> _rmodes{};        /* Default read mapping modes                                   */
+    std::array<bank_t, BANKS> _wmodes{};        /* Default write mapping modes                                  */
+    bank_t                    _rmaps{};         /* Current read mappings                                        */
+    bank_t                    _wmaps{};         /* Current write mappings                                       */
 };
 
 }

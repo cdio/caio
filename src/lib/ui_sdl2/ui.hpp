@@ -334,7 +334,7 @@ private:
 
     AudioStream                 _audio_stream{};        /* Audio driver                                       */
 
-    std::map<int32_t, SDL_Joystick*> _sdl_joys{};      /* Map of SDL detected joysticks                      */
+    std::map<int32_t, SDL_Joystick*> _sdl_joys{};       /* Map of SDL detected joysticks                      */
 };
 
 }

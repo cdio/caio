@@ -72,9 +72,4 @@ std::string Error::to_string(int err)
 #endif
 }
 
-InvalidAddress::InvalidAddress(const std::string& elem, addr_t addr, bool read)
-    : Error{elem, "Invalid " + std::string{(read ? "read" : "write")} + " address: $" + utils::to_string(addr)}
-{
-}
-
 }

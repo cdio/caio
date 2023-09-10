@@ -376,7 +376,7 @@ std::string Z80::Registers::to_string() const
        << "  E="     << utils::to_string(E)
        << "  H="     << utils::to_string(H)
        << "  L="     << utils::to_string(L)
-       << "  F="     << utils::to_string(F) << " " << to_string(static_cast<Flags>(F)) << std::endl
+       << "  F="     << utils::to_string(F)  << " " << to_string(static_cast<Flags>(F)) << std::endl
        << "  A'="    << utils::to_string(aA)
        << " B'="     << utils::to_string(aB)
        << " C'="     << utils::to_string(aC)
@@ -903,7 +903,7 @@ size_t Z80::m1_cycle_interrupt()
             /*
              * 7 cycles to fetch the lower eight bits from the interrupting device,
              * 6 cycles to save the program counter, and
-             * 6 cycels to obtain the jump address.
+             * 6 cycles to obtain the jump address.
              */
             cycles += 7 + 6 + 6;
             break;
@@ -930,7 +930,7 @@ size_t Z80::m1_cycle_interrupt()
 size_t Z80::execute(uint8_t opcode, bool forced)
 {
     std::string line{};
-    auto &ins = instr_set[opcode];
+    auto& ins = instr_set[opcode];
 
     if (_log.is_debug()) {
         if (forced) {
@@ -1076,8 +1076,8 @@ size_t Z80::tick(const Clock& clk)
      */
     auto bp = _breakpoints.find(_regs.PC);
     if (bp != _breakpoints.end()) {
-        auto &fn = bp->second.first;
-        auto *arg = bp->second.second;
+        auto& fn = bp->second.first;
+        auto* arg = bp->second.second;
         fn(*this, arg);
     }
 
@@ -1088,12 +1088,12 @@ size_t Z80::tick(const Clock& clk)
 void Z80::disass(std::ostream& os, addr_t start, size_t count, bool show_pc)
 {
     for (addr_t addr = start; count; --count) {
-        const std::string &line = disass(addr, show_pc);
+        const std::string& line = disass(addr, show_pc);
         os << line << std::endl;
     }
 }
 
-std::string Z80::disass(addr_t &addr, bool show_pc)
+std::string Z80::disass(addr_t& addr, bool show_pc)
 {
     /*
      * Output format:
@@ -1108,9 +1108,9 @@ std::string Z80::disass(addr_t &addr, bool show_pc)
     constexpr static const size_t MNE_SIZE = 20;
 
     addr_t faddr = addr;
-    auto *iset = &instr_set;
+    auto* iset = &instr_set;
 
-    const Instruction *ins{};
+    const Instruction* ins{};
     uint8_t oplo{}, ophi{};
     uint8_t opcode{};
     bool has_oplo{};
@@ -1218,7 +1218,7 @@ std::string Z80::disass(addr_t &addr, bool show_pc)
             /*
              * If argument is an 8 bits value it must be disassembled as +/- $hex
              * If argument is a 16 bits value it must be disassembled as +/- $hex and $00
-             * (that is, the next byte is the printed as sign+hexadecimal, and the second byte as hexadecimal).
+             * (that is, the next byte is printed as sign+hexadecimal, and the second byte as hexadecimal).
              */
             if (oplo & 0x80) {
                 oplo -= oplo;

@@ -58,7 +58,7 @@ public:
      * @param addr Address to read from;
      * @param mode Read mode (Peek or Read, default is Read).
      * @return The data stored at the specified address.
-     * @exception InvalidReadAddress if the specified address is not handled by this device.
+     * @note It is expected the specified address is handled by this device.
      * @see ReadMode
      */
     virtual uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) = 0;
@@ -67,7 +67,7 @@ public:
      * Read from an address wihtout changing the device internal state.
      * @param addr Address to read from;
      * @return The data stored at the specified address.
-     * @exception InvalidReadAddress if the specified address is not handled by this device.
+     * @note It is expected the specified address is handled by this device.
      */
     uint8_t peek(addr_t addr) const {
         return const_cast<Device*>(this)->read(addr, ReadMode::Peek);
@@ -77,7 +77,7 @@ public:
      * Write into an address.
      * @param addr Address to write into;
      * @param data Data to write.
-     * @exception InvalidWriteAddress if the specified address is not handled by this device.
+     * @note It is expected the specified address is handled by this device.
      */
     virtual void write(addr_t addr, uint8_t data) = 0;
 
@@ -92,7 +92,7 @@ public:
      * @param base Base address.
      * @return The output stream.
      */
-    virtual std::ostream &dump(std::ostream &os, addr_t base = 0) const = 0;
+    virtual std::ostream& dump(std::ostream& os, addr_t base = 0) const = 0;
 
 protected:
     Device(const std::string& type, const std::string& label)

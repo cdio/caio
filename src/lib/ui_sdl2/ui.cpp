@@ -638,6 +638,7 @@ void UI::joy_event(const SDL_Event& event)
     case SDL_JOYAXISMOTION:
         jid = event.jaxis.which;
         ejoy = joystick(jid);
+//        log.debug("ui: joy: %d, axis: %d, value: %d\n", jid, event.jaxis.axis, event.jaxis.value);
         if (ejoy) {
             /*
              * Axis 0: Left joystick X direction

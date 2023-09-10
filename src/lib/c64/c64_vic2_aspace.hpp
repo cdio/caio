@@ -38,8 +38,11 @@ namespace c64 {
  */
 class Vic2ASpace : public ASpace {
 public:
-    constexpr static const size_t MEMORY_BANKS = 4;
-    constexpr static const addr_t ADDR_MASK    = 0x3FFF;
+    constexpr static const size_t BANKS     = 4;
+    constexpr static const size_t BLOCKS    = 4;
+    constexpr static const addr_t ADDR_MASK = 0x3FFF;
+
+    using bank_t = std::array<devmap_t, BLOCKS>;
 
     /**
      * Initialise this VIC2 Address Space.
@@ -56,15 +59,12 @@ private:
     /**
      * Set the memory bank seen by the video controller.
      */
-    void bank(size_t bank) {
-        _bank = bank;
-        ASpace::reset(_rbanks[_bank], _wbanks[_bank], ADDR_MASK);
-    }
+    void bank(size_t bank);
 
-    sptr_t<Mos6526>          _cia2{};
-    size_t                   _bank{};
-    std::array<addrmap_t, 4> _rbanks{};
-    std::array<addrmap_t, 4> _wbanks{};
+    sptr_t<Mos6526>           _cia2{};
+    size_t                    _bank{};
+    std::array<bank_t, BANKS> _rbanks{};
+    std::array<bank_t, BANKS> _wbanks{};
 };
 
 }

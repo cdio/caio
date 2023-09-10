@@ -62,19 +62,19 @@ constexpr static const addr_t BASIC_STREND        = 0x0031;     /* Pointer to en
 constexpr static const addr_t BASIC_KEYB_BUFF     = 0x0277;     /* Keyboard buffer used by basic (10 bytes)     */
 constexpr static const addr_t BASIC_KEYB_BUFF_POS = 0x00C6;     /* Number of elements in the keyboard buffer    */
 
+/*
+ * RAM initialisation patterns.
+ * See the comments here: https://csdb.dk/forums/?roomid=11&topicid=116800&showallposts=1
+ */
+constexpr static const uint64_t RAM_INIT_PATTERN1 = 0x00FF00FF00FF00FFULL;
+constexpr static const uint64_t RAM_INIT_PATTERN2 = 0xFFFFFFFF00000000ULL;
+constexpr static const uint64_t RAM_INIT_PATTERN3 = 0x0000FFFFFFFF0000ULL;
+
 /**
  * The C64 emulator.
  */
 class C64 {
 public:
-    /*
-     * RAM initialisation patterns.
-     * See the comments here: https://csdb.dk/forums/?roomid=11&topicid=116800&showallposts=1
-     */
-    constexpr static const uint64_t RAM_INIT_PATTERN1 = 0x00FF00FF00FF00FFULL;
-    constexpr static const uint64_t RAM_INIT_PATTERN2 = 0xFFFFFFFF00000000ULL;
-    constexpr static const uint64_t RAM_INIT_PATTERN3 = 0x0000FFFFFFFF0000ULL;
-
     /**
      * Instantiate this C64.
      * This method only sets the specified configuration parameters.

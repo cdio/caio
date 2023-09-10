@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <vector>
+#include <gsl/span>
 
 #include "device.hpp"
 #include "types.hpp"
@@ -59,9 +59,8 @@ public:
      * Address mappings type.
      * The address mappings type defines the device mappings for an entire address space.
      * It must not contain holes (unmapped addresses): The entire addr_t set must be mapped.
-     * TODO Don't use vector
      */
-    using addrmap_t = std::vector<devmap_t>;
+    using addrmap_t = gsl::span<devmap_t>;
 
     /**
      * @see Device::read()
@@ -94,7 +93,7 @@ protected:
      * @param rmaps Address mappings for read operations (it must have the same size as the write map);
      * @param wmaps Address mappings for write operations (it must have the same size as the read map);
      * @param amask Address space mask (addresses are ANDed with this mask).
-     * @exception InvalidArgument if one of the parameters is ill formed.
+     * @note It is expected that all parameters are correct.
      * @see reset()
      */
     ASpace(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask) {
@@ -110,7 +109,7 @@ protected:
      * @param rmaps Address mappings for read operations;
      * @param wmaps Address mappings for write operations;
      * @param amask Address space mask (addresses are ANDed with this mask).
-     * @exception InvalidArgument if one of the parameters is ill formed.
+     * @note It is expected that all parameters are correct.
      */
     void reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask);
 

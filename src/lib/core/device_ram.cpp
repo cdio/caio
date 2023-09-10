@@ -18,6 +18,8 @@
  */
 #include "device_ram.hpp"
 
+#include <gsl/assert>
+
 #include "types.hpp"
 #include "utils.hpp"
 
@@ -37,28 +39,22 @@ DeviceRAM::DeviceRAM(const std::string& label, size_t size, const init_cb_t& ini
 
 void DeviceRAM::copy(const DeviceROM& rom, size_t offset)
 {
-    if (offset + rom.size() > size()) {
-        throw Error{*this, "Can't copy: ROM at offset exceeds RAM size"};
-    }
-
+    using namespace gsl;
+    Expects(offset + rom.size() > size());
     std::copy(rom._data.begin(), rom._data.end(), _data.begin() + offset);
 }
 
 uint8_t DeviceRAM::read(addr_t addr, ReadMode)
 {
-    if (addr < _data.size()) {
-        return _data[addr];
-    }
-
-    throw InvalidReadAddress{*this, addr};
+    using namespace gsl;
+    Expects(addr < _data.size());
+    return _data[addr];
 }
 
 void DeviceRAM::write(addr_t addr, uint8_t data)
 {
-    if (addr >= _data.size()) {
-        throw InvalidWriteAddress{*this, addr};
-    }
-
+    using namespace gsl;
+    Expects(addr < _data.size());
     _data[addr] = data;
 }
 

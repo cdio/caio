@@ -340,7 +340,7 @@ void Mos6502::init_monitor(std::istream& is, std::ostream& os)
 
 void Mos6502::init_monitor(int ifd, int ofd)
 {
-    static std::map<std::string, std::function<int(const Mos6502 &)>> regvals{
+    static std::map<std::string, std::function<int(const Mos6502&)>> regvals{
         { "ra",   [](const Mos6502& cpu) { return cpu._regs.A;  }},
         { "rx",   [](const Mos6502& cpu) { return cpu._regs.X;  }},
         { "ry",   [](const Mos6502& cpu) { return cpu._regs.Y;  }},
@@ -510,7 +510,7 @@ void Mos6502::bpdel(addr_t addr)
     _breakpoints.erase(addr);
 }
 
-const Mos6502::Registers &Mos6502::regs() const
+const Mos6502::Registers& Mos6502::regs() const
 {
     return _regs;
 }
@@ -518,7 +518,7 @@ const Mos6502::Registers &Mos6502::regs() const
 void Mos6502::disass(std::ostream& os, addr_t start, size_t count, bool show_pc)
 {
     for (addr_t addr = start; count; --count) {
-        const std::string &line = disass(addr, show_pc);
+        const std::string& line = disass(addr, show_pc);
         os << line << std::endl;
     }
 }
@@ -541,7 +541,7 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
      * Get the opcode.
      */
     uint8_t opcode = read(addr);
-    auto &ins = instr_set[opcode];
+    auto& ins = instr_set[opcode];
 
     if (show_pc && addr != _regs.PC) {
         show_pc = false;
@@ -572,7 +572,8 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
                 << "opcode " << utils::to_string(opcode)
                 << ", size " << ins.size
                 << ", fmt " << std::quoted(ins.format);
-            throw InternalError{*this, err.str()};
+            log.fatal("%s: %s\n", Name::type().c_str(), err.str().c_str());
+            /* NOTREACHED */
         }
 
         /*
@@ -677,7 +678,7 @@ size_t Mos6502::single_step()
 
     uint8_t opcode = read(_regs.PC++);
     addr_t arg{};
-    auto &ins = instr_set[opcode];
+    auto& ins = instr_set[opcode];
 
     if (ins.size >= 1) {
         /*
@@ -787,7 +788,7 @@ size_t Mos6502::tick(const Clock& clk)
         /*
          * System breakpoint (from some part of the emulator).
          */
-        auto &fn = bp->second.first;
+        auto& fn = bp->second.first;
         auto *arg = bp->second.second;
         fn(*this, arg);
     }

@@ -99,7 +99,7 @@ public:
      * Copy the content of a ROM device inside this RAM.
      * @param rom    ROM device to merge;
      * @param offset Destination starting offset.
-     * @execption Error If the ROM size plus the specified offset is larger than the RAM size.
+     * @note It is expected the ROM size plus the specified offset is equal or larger than the RAM size.
      */
     void copy(const class DeviceROM& rom, size_t offset = 0);
 

@@ -19,6 +19,7 @@
 #include "device_rom.hpp"
 
 #include <fstream>
+#include <gsl/assert>
 
 #include "logger.hpp"
 
@@ -61,15 +62,16 @@ DeviceROM::DeviceROM(std::istream& is, size_t size)
 
 uint8_t DeviceROM::read(addr_t addr, ReadMode)
 {
-    if (addr < _data.size()) {
-        return _data[addr];
-    }
-
-    throw InvalidReadAddress{*this, addr};
+    using namespace gsl;
+    Expects(addr < _data.size());
+    return _data[addr];
 }
 
 void DeviceROM::write(addr_t addr, uint8_t data)
 {
+    using namespace gsl;
+    Expects(addr < _data.size());
+
     log.warn("%s(%s): Write attempt, address $%04x, data $%02x\n",
         type().c_str(), label().c_str(), addr, data);
 }

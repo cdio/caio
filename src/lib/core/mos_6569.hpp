@@ -264,7 +264,7 @@ public:
      * Set a colour palette from disk.
      * @param fname Palette file name.
      * @exception IOError see RgbaTable::load().
-     * @see palette(const RgbaTable &)
+     * @see palette(const RgbaTable&)
      */
     void palette(const std::string& fname);
 
@@ -352,7 +352,7 @@ private:
      * Render the current scanline.
      * @param line Line number assigned to the curent scanline.
      * This method calls the render_line callback in order to render the specified line.
-     * @see render_line(const std::function<void(unsigned, const ui::Scanline &)> &rl)
+     * @see render_line(const std::function<void(unsigned, const ui::Scanline&)>& rl)
      */
     void render_line(unsigned line);
 

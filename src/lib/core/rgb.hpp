@@ -22,6 +22,7 @@
 #include <initializer_list>
 #include <string>
 #include <vector>
+#include <gsl/assert>
 
 #include "endian.hpp"
 #include "types.hpp"
@@ -138,7 +139,7 @@ public:
     }
 
     /**
-     * (Re-)Initialise this RGBA table with values from disk.
+     * (Re-)Initialise this RGBA table with values from a file.
      * @param fname File name.
      * @exception IOError
      */
@@ -163,10 +164,9 @@ public:
         : _colors{{colors...}} {
     }
 
-    ~RgbaN_() {
-    }
-
-    const Rgba &operator[](size_t index) const {
+    const Rgba& operator[](size_t index) const {
+        using namespace gsl;
+        Expects(index < N);
         return _colors[index];
     }
 

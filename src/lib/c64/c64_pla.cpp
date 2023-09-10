@@ -31,8 +31,11 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
     /*
      * Fixed mappings to accelerate bank switching.
      * See https://www.c64-wiki.com/wiki/Bank_Switching.
+     *
+     * The 64K address space is subdivided into 32 modes implemented
+     * as memory banks, each of these modes is subdivided into 16 4K blocks.
      */
-    addrmap_t mode_00 = {
+    bank_t mode_00 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -49,11 +52,11 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { ram,          0xD000 },
         { ram,          0xE000 },
         { ram,          0xF000 }
-    };
+    }};
 
     auto& mode_01 = mode_00;
 
-    addrmap_t mode_02 = {
+    bank_t mode_02 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -70,9 +73,9 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { chargen,      0x0000 },
         { kernal,       0x0000 },
         { kernal,       0x1000 },
-    };
+    }};
 
-    addrmap_t mode_03 = {
+    bank_t mode_03 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -89,11 +92,11 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { chargen,      0x0000 },
         { kernal,       0x0000 },
         { kernal,       0x1000 },
-    };
+    }};
 
     auto& mode_04 = mode_00;
 
-    addrmap_t mode_05 = {
+    bank_t mode_05 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -110,9 +113,9 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { io,           0x0000 },
         { ram,          0xE000 },
         { ram,          0xF000 },
-    };
+    }};
 
-    addrmap_t mode_06 = {
+    bank_t mode_06 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -129,9 +132,9 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { io,           0x0000 },
         { kernal,       0x0000 },
         { kernal,       0x1000 },
-    };
+    }};
 
-    addrmap_t mode_07 = {
+    bank_t mode_07 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -148,11 +151,11 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { io,           0x0000 },
         { kernal,       0x0000 },
         { kernal,       0x1000 },
-    };
+    }};
 
     auto& mode_08 = mode_00;
 
-    addrmap_t mode_09 = {
+    bank_t mode_09 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -169,9 +172,9 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { chargen,      0x0000 },
         { ram,          0xE000 },
         { ram,          0xF000 },
-    };
+    }};
 
-    addrmap_t mode_10 = {
+    bank_t mode_10 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -188,9 +191,9 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { chargen,      0x0000 },
         { kernal,       0x0000 },
         { kernal,       0x1000 },
-    };
+    }};
 
-    addrmap_t mode_11 = addrmap_t{
+    bank_t mode_11 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -207,12 +210,12 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { chargen,      0x0000 },
         { kernal,       0x0000 },
         { kernal,       0x1000 },
-    };
+    }};
 
     auto& mode_12 = mode_00;
     auto& mode_13 = mode_05;
 
-    addrmap_t mode_14 = {
+    bank_t mode_14 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -229,9 +232,9 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { io,           0x0000 },
         { kernal,       0x0000 },
         { kernal,       0x1000 },
-    };
+    }};
 
-    addrmap_t mode_15 = {
+    bank_t mode_15 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -248,9 +251,9 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { io,           0x0000 },
         { kernal,       0x0000 },
         { kernal,       0x1000 },
-    };
+    }};
 
-    addrmap_t mode_16 = {
+    bank_t mode_16 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { device_none,  0x0000 },
@@ -267,7 +270,7 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { io,           0x0000 },
         { device_none,  0x2000 },
         { device_none,  0x3000 },
-    };
+    }};
 
     auto& mode_17 = mode_16;
     auto& mode_18 = mode_16;
@@ -280,7 +283,7 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
     auto& mode_25 = mode_09;
     auto& mode_26 = mode_10;
 
-    addrmap_t mode_27 = {
+    bank_t mode_27 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -297,13 +300,13 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { chargen,      0x0000 },
         { kernal,       0x0000 },
         { kernal,       0x1000 },
-    };
+    }};
 
     auto& mode_28 = mode_00;
     auto& mode_29 = mode_05;
     auto& mode_30 = mode_14;
 
-    addrmap_t mode_31 = {
+    bank_t mode_31 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { ram,          0x2000 },
@@ -320,9 +323,9 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { io,           0x0000 },
         { kernal,       0x0000 },
         { kernal,       0x1000 },
-    };
+    }};
 
-    _rmodes = std::array<addrmap_t, 32>{
+    _rmodes = std::array<bank_t, BANKS>{
         mode_00, mode_01, mode_02, mode_03, mode_04, mode_05, mode_06, mode_07,
         mode_08, mode_09, mode_10, mode_11, mode_12, mode_13, mode_14, mode_15,
         mode_16, mode_17, mode_18, mode_19, mode_20, mode_21, mode_22, mode_23,
@@ -346,7 +349,7 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
     auto& wmode_14 = mode_13;
     auto& wmode_15 = mode_13;
 
-    addrmap_t wmode_16 = {
+    bank_t wmode_16 = {{
         { ram,          0x0000 },
         { ram,          0x1000 },
         { device_none,  0x0000 },
@@ -363,7 +366,7 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
         { io,           0x0000 },
         { ram,          0xE000 },
         { ram,          0xF000 },
-    };
+    }};
 
     auto& wmode_17 = wmode_16;
     auto& wmode_18 = wmode_16;
@@ -381,7 +384,7 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
     auto& wmode_30 = mode_13;
     auto& wmode_31 = mode_13;
 
-    _wmodes = std::array<addrmap_t, 32>{
+    _wmodes = std::array<bank_t, BANKS>{
         wmode_00, wmode_01, wmode_02, wmode_03, wmode_04, wmode_05, wmode_06, wmode_07,
         wmode_08, wmode_09, wmode_10, wmode_11, wmode_12, wmode_13, wmode_14, wmode_15,
         wmode_16, wmode_17, wmode_18, wmode_19, wmode_20, wmode_21, wmode_22, wmode_23,
@@ -392,10 +395,6 @@ PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, con
      * Default mappings.
      */
     PLA::reset();
-}
-
-PLA::~PLA()
-{
 }
 
 void PLA::reset()
@@ -453,15 +452,14 @@ inline bool PLA::roml(addr_t addr) const
     return roml;
 }
 
-void PLA::remap()
+inline void PLA::remap()
 {
-    //TODO avoid vector
-    addrmap_t rmaps = _rmodes[_mode];
-    addrmap_t wmaps = _wmodes[_mode];
+    _rmaps = _rmodes[_mode];
+    _wmaps = _wmodes[_mode];
 
     if (_extmap) {
-        for (size_t bank = 0; bank < rmaps.size(); ++bank) {
-            addr_t addr = static_cast<addr_t>(bank * 0x1000);
+        for (size_t bank = 0; bank < _rmaps.size(); ++bank) {
+            addr_t addr = bank * 0x1000;
             bool rh = romh(addr);
             bool rl = roml(addr);
             auto [rdevmap, wdevmap] = _extmap(addr, rh, rl);
@@ -476,7 +474,7 @@ void PLA::remap()
                     rdevmap.first->to_string().c_str());
 #endif
 
-                rmaps[bank] = rdevmap;
+                _rmaps[bank] = rdevmap;
             } else {
 //                log.debug("PLA: Mode: %d, addr $%04X not mapped for read\n", _mode, addr);
             }
@@ -489,7 +487,7 @@ void PLA::remap()
                     wdevmap.second,
                     wdevmap.first->to_string().c_str());
 
-                wmaps[bank] = wdevmap;
+                _wmaps[bank] = wdevmap;
             } else {
 //                log.debug("PLA: Mode: %d, addr $%04X not mapped for write\n", _mode, addr);
             }
@@ -499,13 +497,13 @@ void PLA::remap()
 #if 0
     log.debug("PLA: Mappings for mode: %d ($%02X)\n", _mode, _mode);
     for (size_t bank = 0; bank < rmaps.size(); ++bank) {
-        auto &devmap = rmaps[bank];
+        auto &devmap = _rmaps[bank];
         log.debug("  bank %d, device %s, addr $%04X, offset $%04X\n", bank, devmap.first->to_string().c_str(),
             bank * 0x1000, devmap.second);
     }
 #endif
 
-    ASpace::reset(std::move(rmaps), std::move(wmaps), ADDR_MASK);
+    ASpace::reset(_rmaps, _wmaps, ADDR_MASK);
 }
 
 }

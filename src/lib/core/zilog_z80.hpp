@@ -40,8 +40,6 @@ namespace zilog {
 
 /**
  * Zilog Z80 emulator.
- *
- * @see https://gist.github.com/drhelius/8497817
  */
 class Z80 : public Clockable, public Name {
 public:

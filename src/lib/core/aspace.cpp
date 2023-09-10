@@ -18,6 +18,9 @@
  */
 #include "aspace.hpp"
 
+#include <gsl/assert>
+
+#include "logger.hpp"
 #include "utils.hpp"
 
 
@@ -25,40 +28,40 @@ namespace caio {
 
 uint8_t ASpace::read(addr_t addr, ReadMode mode)
 {
-    try {
-        const auto [bank, offset] = decode(addr);
-        auto &dev = _rmaps.at(bank);
+    const auto [bank, offset] = decode(addr);
+    if (bank < _rmaps.size()) {
+        auto& dev = _rmaps[bank];
         auto addr = dev.second + offset;
         return dev.first->read(addr, mode);
-    } catch (std::out_of_range&) {
-        throw InvalidReadAddress{"ASpace", addr};
     }
+
+    log.fatal("ASpace: Invalid read address: %04x\n", addr);
+    /* NOTREACHED */
 }
 
 void ASpace::write(addr_t addr, uint8_t value)
 {
-    try {
-        const auto [bank, offset] = decode(addr);
-        auto &dev = _wmaps.at(bank);
+    const auto [bank, offset] = decode(addr);
+    if (bank < _wmaps.size()) {
+        auto& dev = _wmaps[bank];
         auto addr = dev.second + offset;
         dev.first->write(addr, value);
-    } catch (std::out_of_range&) {
-        throw InvalidWriteAddress{"ASpace", addr};
+    } else {
+        log.fatal("ASpace: Invalid write address: %04x\n", addr);
+        /* NOTREACHED */
     }
 }
 
 void ASpace::reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask)
 {
+    using namespace gsl;
+
     auto banks = wmaps.size();
-    if (!banks) {
-        throw InvalidArgument{"ASpace::reset(): 0 banks specified"};
-    }
+    Expects(banks != 0 && banks == rmaps.size());
 
     auto bsize = (static_cast<size_t>(amask) + 1) / banks;
     auto bmask = bsize - 1;
-    if ((bsize & bmask) != 0) {
-        throw InvalidArgument{"ASpace::reset(): Bank size is not a power of 2: " + std::to_string(bsize)};
-    }
+    Expects((bsize & bmask) == 0);
 
     _amask = amask;
     _rmaps = rmaps;
@@ -84,8 +87,8 @@ std::ostream& ASpace::dump(std::ostream& os) const
 
     for (unsigned addr = 0; addr < amax; addr += _bsize) {
         auto [bank, _] = decode(addr);
-        const auto &rdev = _rmaps[bank];
-        const auto &wdev = _wmaps[bank];
+        const auto& rdev = _rmaps[bank];
+        const auto& wdev = _wmaps[bank];
         const addr_t astart = static_cast<addr_t>(addr);
         const addr_t aend = addr + _bsize - 1;
         const addr_t rstart = rdev.second;
