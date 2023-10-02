@@ -28,4 +28,9 @@ std::string version()
     return VERSION;
 }
 
+std::string full_version()
+{
+    return "caio v" + version();
+}
+
 }

@@ -79,12 +79,12 @@ public:
      * Instantiate this C64.
      * This method only sets the specified configuration parameters.
      * Call the run() method to build and start the actual C64 emulator.
-     * @param conf Configuration parameters.
+     * @param sec Configuration section.
      * @see C64Config
      * @see run()
      */
-    C64(const C64Config& conf)
-        : _conf{conf} {
+    C64(config::Section& sec)
+        : _conf{sec} {
     }
 
     /**
@@ -102,7 +102,9 @@ public:
     /**
      * @return The name of this platform.
      */
-    static std::string name();
+    constexpr static const char* name() {
+        return "C64";
+    }
 
 private:
     /**
@@ -156,29 +158,7 @@ private:
      * @return The full path.
      * @exception IOError if the ROM file is not found.
      */
-    std::string rompath(const std::string& fname) const;
-
-    /**
-     * Get the full pathname for a cartridge file.
-     * @param fname Cartridge file name.
-     * @return The full path.
-     * @exception IOError if the Cartridge file is not found.
-     */
-    std::string cartpath(const std::string& fname) const;
-
-    /**
-     * Get the full pathname for a palette file.
-     * @param fname Colour table file name.
-     * @return The full path; an empty string if the file is not found.
-     */
-    std::string palettepath(const std::string& fname) const;
-
-    /**
-     * Get the full pathname for a key mappings file.
-     * @param fname Colour table file name.
-     * @return The full path; an empty string if the file is not found.
-     */
-    std::string keymapspath(const std::string& fname) const;
+    std::string rompath(const std::string& fname);
 
     /**
      * Initialise RAM memory using a specific pattern.
@@ -192,7 +172,8 @@ private:
      * Load a .crt image and associate it to an I/O expansion device.
      * @return An I/O expansion device (Cartridge) attached to the specified image;
      * nullptr if the cartridge is not specified in the configuration.
-     * @exception InvalidCartridge
+     * @exception InvalidCartridge if the specified file is not recognised as a cartrdige.
+     * @exception IOError if the specified file does not exists or cannot be opened.
      * @see Cartridge
      * @see Crt
      */
@@ -212,7 +193,7 @@ private:
      */
     void hotkeys(Keyboard::Key key);
 
-    C64Config                _conf{};
+    C64Config                _conf;
     devptr_t                 _ram{};
     devptr_t                 _basic{};
     devptr_t                 _kernal{};

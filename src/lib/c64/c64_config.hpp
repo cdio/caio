@@ -24,74 +24,43 @@
 namespace caio {
 namespace c64 {
 
-/**
- * C64 configuation file.
- */
-class C64Confile : public CaioConfile {
+constexpr static const char* SEC_C64            = "c64";
+constexpr static const char* KEY_PRGFILE        = "prg";
+constexpr static const char* KEY_RESID          = "resid";
+constexpr static const char* KEY_SWAPJOY        = "swapj";
+constexpr static const char* KEY_UNIT_8         = "unit8";
+constexpr static const char* KEY_UNIT_9         = "unit9";
+
+constexpr static const char* DEFAULT_PRGFILE    = "";
+constexpr static const char* DEFAULT_RESID      = "no";
+constexpr static const char* DEFAULT_SWAPJOY    = "no";
+constexpr static const char* DEFAULT_UNIT_8     = "";
+constexpr static const char* DEFAULT_UNIT_9     = "";
+
+class C64Cmdline : public config::Cmdline {
 public:
-    constexpr static const char* C64_CONFIG_SECTION      = "c64";
-    constexpr static const char* C64_CARTFILE_CONFIG_KEY = "cart";
-    constexpr static const char* C64_PRGFILE_CONFIG_KEY  = "prg";
-    constexpr static const char* C64_RESID_CONFIG_KEY    = "resid";
-    constexpr static const char* C64_SWAPJOY_CONFIG_KEY  = "swapj";
-    constexpr static const char* C64_UNIT_8_CONFIG_KEY   = "unit8";
-    constexpr static const char* C64_UNIT_9_CONFIG_KEY   = "unit9";
+    using Cmdline::Cmdline;
 
-    C64Confile() {
+    virtual ~C64Cmdline() {
     }
 
-    C64Confile(Confile&& other) {
-        *this = std::move(other);
-    }
-
-    virtual ~C64Confile() {
-    }
-
-    C64Confile& operator=(Confile&& other) {
-        static_cast<Confile&>(*this) = std::move(other);
-        return *this;
-    }
+    std::vector<config::Option> options() const override;
+    std::string usage() const override;
+    std::string sname() const override;
 };
 
-/**
- *  C64 configuration.
- */
-struct C64Config : public Config {
-    std::string cartfile{};
+struct C64Config : public config::Config {
     std::string prgfile{};
     bool        resid{};
     bool        swapj{};
     std::string unit8{};
     std::string unit9{};
 
-    C64Config() {
-    }
-
-    C64Config(const Confile& conf) {
-        *this = conf;
-    }
+    C64Config(config::Section& sec);
 
     virtual ~C64Config() {
     }
 
-    /**
-     * @see Config::operator=(const Confile&)
-     */
-    C64Config& operator=(const Confile& conf);
-
-    /**
-     * @see Config::palette_file()
-     */
-    std::string palette_file(const std::string& palette) const override;
-
-    /**
-     * @see Config::keymaps_file()
-     */
-    std::string keymaps_file(const std::string& cc) const override;
-
-    /**
-     * @see Config::to_string()
-     */
     std::string to_string() const override;
 };
 

@@ -18,17 +18,16 @@
  */
 #pragma once
 
-#include "zx80_cmdline.hpp"
-#include "zx80_config.hpp"
 #include "zx80.hpp"
-
 #include "main.hpp"
 
 
 namespace caio {
+namespace sinclair {
 namespace zx80 {
 
-using main = caio::Main_<ZX80Cmdline, ZX80Confile, ZX80Config, ZX80>;
+using main = caio::Main_<ZX80, ZX80Cmdline>;
 
+}
 }
 }

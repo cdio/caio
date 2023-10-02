@@ -35,9 +35,6 @@ class LoggerError : public Error {
 
 class Logger {
 public:
-    constexpr static const char* DEFAULT_LOGFILE  = "/dev/tty";
-    constexpr static const char* DEFAULT_LOGLEVEL = "";
-
     constexpr static const char* ERROR_STR        = "error";
     constexpr static const char* WARN_STR         = "warning";
     constexpr static const char* INFO_STR         = "info";
@@ -53,6 +50,9 @@ public:
     constexpr static const char* ANSI_YELLOW      = "255;255;0m";
     constexpr static const char* ANSI_RESET       = "\x1b[0m";
 
+    constexpr static const char* DEFAULT_LOGFILE  = "/dev/tty";
+    constexpr static const char* DEFAULT_LOGLEVEL = NONE_STR;
+
     enum Level {
         None    = 0x00,
         Error   = 0x01,
@@ -60,7 +60,7 @@ public:
         Info    = 0x04,
         Debug   = 0x08,
         All     = Error | Warn | Info | Debug,
-        Invalid = 0x80
+        Invalid = 0xFF
     };
 
     Logger();
@@ -131,7 +131,7 @@ public:
 
     Logger& warn(const char* fmt, ...);
 
-    Logger& info(const std::string &msg) {
+    Logger& info(const std::string& msg) {
         return log(Level::Info, msg);
     }
 
@@ -171,7 +171,7 @@ private:
     std::ofstream _os;
     std::string   _logfile{};
 
-    static std::map<std::string, Level> loglevel_map;
+    static std::map<std::string, Logger::Level> loglevels;
 };
 
 using Loglevel = Logger::Level;

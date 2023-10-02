@@ -18,17 +18,14 @@
  */
 #pragma once
 
-#include "c64_cmdline.hpp"
-#include "c64_config.hpp"
 #include "c64.hpp"
-
 #include "main.hpp"
 
 
 namespace caio {
 namespace c64 {
 
-using main = caio::Main_<C64Cmdline, C64Confile, C64Config, C64>;
+using main = caio::Main_<C64, C64Cmdline>;
 
 }
 }

@@ -30,20 +30,35 @@ using namespace caio;
 
 static std::terminate_handler prev_terminate{};
 
+std::string progname{};
+
 [[noreturn]]
 static void terminate()
 {
     stacktrace(std::cerr);
     prev_terminate();
-    ::exit(EXIT_FAILURE);
+    std::exit(EXIT_FAILURE);
 }
 
-int main(int argc, char* const* argv)
+[[noreturn]]
+static void usage()
+{
+    std::cerr << "usage: " << progname << " <arch> [--help]" << std::endl
+              << "where arch is one of: "                    << std::endl
+              << "c64"                                       << std::endl
+              << "zx80"                                      << std::endl
+              << std::endl;
+
+    std::exit(EXIT_FAILURE);
+}
+
+int main(int argc, const char** argv)
 {
     prev_terminate = std::get_terminate();
     std::set_terminate(terminate);
 
-    auto progname = *argv;
+    progname = *argv;
+
     auto name = utils::tolow(fs::basename(*argv));
     if (name == "caio") {
         if (argc > 1) {
@@ -51,27 +66,21 @@ int main(int argc, char* const* argv)
             --argc;
             ++argv;
         } else {
-            name = {};
+            name = "";
         }
 
         if (name == "" || name == "--help" || name == "-h" || name == "-?") {
-            std::cerr << "usage: " << progname << " <arch> [--help]" << std::endl
-                      << "where arch is one of: "                    << std::endl
-                      << "c64"                                       << std::endl
-                      << "zx80"                                      << std::endl
-                      << std::endl;
-
-            return EXIT_FAILURE;
+            usage();
+            /* NOTREACHED */
         }
     }
 
     if (name == "c64") {
         c64::main(argc, argv);
     } else if (name == "zx80") {
-        zx80::main(argc, argv);
+        sinclair::zx80::main(argc, argv);
     }
 
     std::cerr << "Unknown emulator: " << name << std::endl;
-
     return EXIT_FAILURE;
 }

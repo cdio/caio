@@ -33,10 +33,7 @@ DST_LINKS=	${LN_BINS:%=${DST_BINDIR}/%}
 
 DST_CONFIG=	${DST_SYSCONFDIR}/${CONFIG}
 
-CXXSRCS=	caio_cmdline.cpp \
-		c64_cmdline.cpp \
-		zx80_cmdline.cpp \
-		main.cpp
+CXXSRCS=	main.cpp
 
 EXTRA_DEPS+=	${ROOT}/src/lib/c64/libcaio_c64.a \
 		${ROOT}/src/lib/zx80/libcaio_zx80.a \

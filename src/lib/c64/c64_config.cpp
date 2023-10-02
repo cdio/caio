@@ -18,7 +18,6 @@
  */
 #include "c64_config.hpp"
 
-#include <iomanip>
 #include <sstream>
 
 #include "utils.hpp"
@@ -27,83 +26,64 @@
 namespace caio {
 namespace c64 {
 
-C64Config& C64Config::operator=(const Confile& conf)
-{
-    Config::operator=(conf);
+static const config::Option c64_options[] = {
+    { "prg",    SEC_C64,  KEY_PRGFILE,  DEFAULT_PRGFILE,    config::Arg::Required,  config::set_value   },
+    { "resid",  SEC_C64,  KEY_RESID,    DEFAULT_RESID,      config::Arg::Required,  config::set_bool    },
+    { "swapj",  SEC_C64,  KEY_SWAPJOY,  DEFAULT_SWAPJOY,    config::Arg::None,      config::set_true    },
+    { "8",      SEC_C64,  KEY_UNIT_8,   DEFAULT_UNIT_8,     config::Arg::Required,  config::set_value   },
+    { "9",      SEC_C64,  KEY_UNIT_9,   DEFAULT_UNIT_9,     config::Arg::Required,  config::set_value   }
+};
 
+std::string C64Cmdline::usage() const
+{
+    std::ostringstream os{};
+
+        // 0         1         2         3         4         5         6         7
+        // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
+    os << config::Cmdline::usage() << std::endl << std::endl
+       << "Commodore C64 specific:"                                                                     << std::endl
+       << " --prg <prg>            Load a PRG file as soon as the basic is ready"                       << std::endl
+       << " --resid <yes|no>       Use the MOS6581 reSID library (default is " << DEFAULT_RESID << ")"  << std::endl
+       << " --8 <path>             Attach a disk drive unit 8"                                          << std::endl
+       << " --9 <path>             Attach a disk drive unit 9"                                          << std::endl
+       << " --swapj                Swap Joysticks";
+
+    return os.str();
+}
+
+std::vector<config::Option> C64Cmdline::options() const
+{
+    auto opts = Cmdline::options();
+    opts.insert(opts.end(), &c64_options[0], &c64_options[std::size(c64_options)]);
+    return opts;
+}
+
+std::string C64Cmdline::sname() const
+{
+    return SEC_C64;
+}
+
+C64Config::C64Config(config::Section& sec)
+    : Config{sec, "c64_"},
+      prgfile{sec[KEY_PRGFILE]},
+      resid{config::is_true(sec[KEY_RESID])},
+      swapj{config::is_true(sec[KEY_SWAPJOY])},
+      unit8{sec[KEY_UNIT_8]},
+      unit9{sec[KEY_UNIT_8]}
+{
     title += " - C64";
-
-    const auto secit = conf.find(C64Confile::C64_CONFIG_SECTION);
-    if (secit != conf.end()) {
-        const auto &sec = secit->second;
-
-        auto it = sec.find(C64Confile::C64_CARTFILE_CONFIG_KEY);
-        if (it != sec.end()) {
-            cartfile = it->second;
-        }
-
-        it = sec.find(C64Confile::C64_PRGFILE_CONFIG_KEY);
-        if (it != sec.end()) {
-            prgfile = it->second;
-        }
-
-        it = sec.find(C64Confile::C64_RESID_CONFIG_KEY);
-        if (it != sec.end()) {
-            std::string str = utils::tolow(it->second);
-            if (!str.empty()) {
-                resid = (str == "yes" || str == "ye" || str == "y");
-            }
-        }
-
-        it = sec.find(C64Confile::C64_SWAPJOY_CONFIG_KEY);
-        if (it != sec.end()) {
-            std::string str = utils::tolow(it->second);
-            if (!str.empty()) {
-                swapj = (str == "yes" || str == "ye" || str == "y");
-            }
-        }
-
-        /* Palette entry in the c64 section, overrides any palette set in the caio section */
-        it = sec.find(CaioConfile::PALETTE_CONFIG_KEY);
-        if (it != sec.end()) {
-            Config::palettefile = palette_file(it->second);
-        }
-
-        it = sec.find(C64Confile::C64_UNIT_8_CONFIG_KEY);
-        if (it != sec.end()) {
-            unit8 = it->second;
-        }
-
-        it = sec.find(C64Confile::C64_UNIT_9_CONFIG_KEY);
-        if (it != sec.end()) {
-            unit9 = it->second;
-        }
-    }
-
-    return *this;
-}
-
-std::string C64Config::palette_file(const std::string& palette) const
-{
-    return "c64_" + Config::palette_file(palette);
-}
-
-std::string C64Config::keymaps_file(const std::string& cc) const
-{
-    return "c64_" + Config::keymaps_file(cc);
 }
 
 std::string C64Config::to_string() const
 {
     std::ostringstream os{};
 
-    os << Config::to_string() << std::endl
-       << "  Use MOS6581 reSID:  " << (resid ? "yes" : "no") << std::endl
-       << "  Swap Joysticks:     " << (swapj ? "yes" : "no") << std::endl
-       << "  Attached Cartridge: " << std::quoted(cartfile)  << std::endl
-       << "  Attached PRG:       " << std::quoted(prgfile)   << std::endl
-       << "  Unit-8:             " << std::quoted(unit8)     << std::endl
-       << "  Unit-9:             " << std::quoted(unit9);
+    os << Config::to_string()                                   << std::endl
+       << "  Swap Joysticks:     " << (swapj ? "yes" : "no")    << std::endl
+       << "  Attached PRG:       " << std::quoted(prgfile)      << std::endl
+       << "  Unit-8:             " << std::quoted(unit8)        << std::endl
+       << "  unit-9:             " << std::quoted(unit9)        << std::endl
+       << "  Use reSID library:  " << (resid ? "yes" : "no");
 
     return os.str();
 }

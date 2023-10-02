@@ -28,5 +28,6 @@
 namespace caio {
 
 std::string version();
+std::string full_version();
 
 }

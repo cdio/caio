@@ -24,6 +24,7 @@ LIB=		libcaio_core.a
 
 CXXSRCS=	aspace.cpp \
 		clock.cpp \
+		cmdline.cpp \
 		config.cpp \
 		confile.cpp \
 		device.cpp \
@@ -50,7 +51,6 @@ CXXSRCS=	aspace.cpp \
 INCS=		aspace.hpp \
 		clock.hpp \
 		config.hpp \
-		confile.hpp \
 		device.hpp \
 		device_none.hpp \
 		device_ram.hpp \

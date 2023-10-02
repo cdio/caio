@@ -16,61 +16,33 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "confile.hpp"
+#include "config.hpp"
 
 #include <regex>
 
-#include "fs.hpp"
-#include "logger.hpp"
+#include "utils.hpp"
 
 
 namespace caio {
+namespace config {
 
-std::string& ConfileSection::operator()(const std::string& key, const std::string& dvalue)
+Confile::Confile(const std::string& fname)
+    : _sections{}
 {
-    if (find(key) != end()) {
-        return operator[](key);
-    }
-
-    std::string &value = operator[](key);
-    value = dvalue;
-
-    return value;
+    load(fname);
 }
 
-std::string& ConfileSection::at(const std::string& key)
+void Confile::load(const std::string& fname)
 {
-    try {
-        return std::map<std::string, std::string>::at(key);
-    } catch (std::out_of_range&) {
-        throw MissingKeyError{key};
-    }
-}
-
-std::ifstream Confile::open(const std::string& fname, const std::initializer_list<std::string>& spaths)
-{
-    std::string fullpath = fs::search(fname, spaths);
-    if (fullpath.empty()) {
-        throw ConfileError{fname + ": " + Error::to_string(ENOENT)};
+    if (fname.empty()) {
+        return;
     }
 
-    if (fullpath != fname) {
-        log.debug("Loading configuration from " + fullpath + "...\n");
-    }
-
-    std::ifstream ifs{fullpath};
+    std::ifstream ifs{fname};
     if (!ifs) {
-        return {};
+        throw IOError{"Can't open configuration file: " + fname + ": " + Error::to_string()};
     }
 
-    _fullpath = fullpath;
-    _sections.clear();
-
-    return ifs;
-}
-
-void Confile::load(std::ifstream& ifs)
-{
     static const std::regex re_comment("^[ \t]*#.*$", std::regex::extended);
     static const std::regex re_section("^[ \t]*\\[[ \t]*([^[ \t\\]]+)[ \t]*\\].*$");
     static const std::regex re_param("^[ \t]*([^ \t=]+)[ \t]*=[ \t]*([^ \t]*)[ \t]*$", std::regex::extended);
@@ -78,7 +50,7 @@ void Confile::load(std::ifstream& ifs)
     std::smatch result{};
     std::string str{};
 
-    ConfileSection* cursect = nullptr;
+    Section* cursect = nullptr;
     size_t line = 0;
 
     while (std::getline(ifs, str)) {
@@ -94,8 +66,8 @@ void Confile::load(std::ifstream& ifs)
             /*
              * Section detected.
              */
-            std::string secname{utils::tolow(result[1])};
-            cursect = &_sections[secname];
+            std::string sname{utils::tolow(result[1])};
+            cursect = &_sections[sname];
             continue;
         }
 
@@ -103,59 +75,50 @@ void Confile::load(std::ifstream& ifs)
             /*
              * Invalid entry.
              */
-            std::stringstream ss;
-            ss << fullpath() << ": Invalid entry at line #" << line << ": " << std::quoted(str);
-            throw ConfileError{ss.str()};
+            std::stringstream ss{};
+            ss << fname << ": Invalid entry at line #" << line << ": " << std::quoted(str);
+            throw ConfigError{ss.str()};
         }
 
         /*
-         * Key=value pair detected.
+         * Key-value pair detected.
          */
         if (cursect == nullptr) {
             /*
-             * Key-value pair is not valid when a section is not defined (empty sections are not supported).
+             * Key-value pair is not valid when a section is not defined (empty sections are not allowed).
              */
-            std::stringstream ss;
-            ss << fullpath() << ": Entry without section at line #" << line << ": " << std::quoted(str);
-            throw ConfileError{ss.str()};
+            std::stringstream ss{};
+            ss << fname << ": Entry without section at line #" << line << ": " << std::quoted(str);
+            throw ConfigError{ss.str()};
         }
 
-        const std::string& key = result[1];
+        const std::string& key = utils::tolow(result[1]);
         const std::string& value = result[2];
+
         (*cursect)[key] = value;
     }
 }
 
-void Confile::parse(const std::string& fname, const std::initializer_list<std::string>& spaths)
+Section& Confile::operator[](const std::string& sname)
 {
-    std::ifstream ifs{open(fname, spaths)};
-    load(ifs);
+    return _sections[utils::tolow(sname)];
 }
 
-ConfileSection& Confile::at(const std::string& sname)
+Section Confile::extract(const std::string& sname)
 {
-    try {
-        return (_sections.at(utils::tolow(sname)));
-    } catch (const std::out_of_range&) {
-        throw MissingSectionError{sname};
-    }
+    auto nh = _sections.extract(utils::tolow(sname));
+    return (nh ? std::move(nh.mapped()) : Section{});
 }
 
-std::string Confile::to_string() const
+std::map<std::string, Section>::const_iterator Confile::find(const std::string& sname) const
 {
-    std::stringstream ss;
-
-    ss << "config file=" << std::quoted(fullpath()) << std::endl;
-    for (const auto& sec : _sections) {
-        const std::string& secname = sec.first;
-        const ConfileSection& secdata = sec.second;
-        ss << "[ " << secname << " ]" << std::endl;
-        for (const auto& elem : secdata) {
-            ss << "\t" << elem.first << " = " << elem.second << std::endl;
-        }
-    }
-
-    return ss.str();
+    return _sections.find(utils::tolow(sname));
 }
 
+std::map<std::string, Section>::const_iterator Confile::end() const
+{
+    return _sections.end();
+}
+
+}
 }

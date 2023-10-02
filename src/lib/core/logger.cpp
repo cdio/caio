@@ -27,9 +27,7 @@
 
 namespace caio {
 
-Logger log{};
-
-std::map<std::string, Logger::Level> Logger::loglevel_map = {
+std::map<std::string, Logger::Level> Logger::loglevels = {
     { ERROR_STR,    Logger::Error   },
     { WARN_STR,     Logger::Warn    },
     { INFO_STR,     Logger::Info    },
@@ -38,6 +36,7 @@ std::map<std::string, Logger::Level> Logger::loglevel_map = {
     { NONE_STR,     Logger::None    }
 };
 
+Logger log{};
 
 Logger::Level Logger::to_loglevel(const std::string& level)
 {
@@ -45,11 +44,8 @@ Logger::Level Logger::to_loglevel(const std::string& level)
         return Level::None;
     }
 
-    try {
-        return loglevel_map.at(level);
-    } catch (std::out_of_range&) {
-        return Level::Invalid;
-    }
+    auto it = loglevels.find(level);
+    return (it == loglevels.end() ? Level::Invalid : it->second);
 }
 
 Logger::Level Logger::parse_loglevel(const std::string& levels)
@@ -147,7 +143,7 @@ Logger& Logger::log(Level lv, const char* fmt, va_list ap)
     return log(lv, std::string{buf});
 }
 
-Logger &Logger::log(Level lv, const char* fmt, ...)
+Logger& Logger::log(Level lv, const char* fmt, ...)
 {
     va_list ap;
 
@@ -175,7 +171,7 @@ void Logger::fatal(const char* fmt, ...)
     va_end(ap);
 }
 
-Logger &Logger::error(const char* fmt, ...)
+Logger& Logger::error(const char* fmt, ...)
 {
     if (is_error()) {
         va_list ap;
@@ -188,7 +184,7 @@ Logger &Logger::error(const char* fmt, ...)
     return *this;
 }
 
-Logger &Logger::warn(const char* fmt, ...)
+Logger& Logger::warn(const char* fmt, ...)
 {
     if (is_warn()) {
         va_list ap;
@@ -201,7 +197,7 @@ Logger &Logger::warn(const char* fmt, ...)
     return *this;
 }
 
-Logger &Logger::info(const char* fmt, ...)
+Logger& Logger::info(const char* fmt, ...)
 {
     if (is_info()) {
         va_list ap;
@@ -214,7 +210,7 @@ Logger &Logger::info(const char* fmt, ...)
     return *this;
 }
 
-Logger &Logger::debug(const char* fmt, ...)
+Logger& Logger::debug(const char* fmt, ...)
 {
     if (is_debug()) {
         va_list ap;

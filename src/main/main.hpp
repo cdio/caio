@@ -27,20 +27,19 @@
 
 namespace caio {
 
-template<class CMDLINE, class CONFILE, class CONFIG, class MACHINE>
+template<class MACHINE, class CMDLINE>
 class Main_
 {
 public:
-    Main_(int argc, char* const* argv) {
+    Main_(int argc, const char** argv) {
         try {
             CMDLINE cmdline{};
-            CONFILE cfile{cmdline.parse(argc, argv)};
-            CONFIG  conf{cfile};
+            auto sec = config::parse(argc, argv, cmdline);
 
-            log.logfile(conf.logfile);
-            log.loglevel(conf.loglevel);
+            log.logfile(sec[config::KEY_LOGFILE]);
+            log.loglevel(sec[config::KEY_LOGLEVEL]);
 
-            MACHINE machine{conf};
+            MACHINE machine{sec};
             machine.run();
 
             std::exit(EXIT_SUCCESS);

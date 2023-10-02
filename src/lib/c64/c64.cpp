@@ -63,7 +63,7 @@ void C64::run()
 
 void C64::start()
 {
-    log.info("Starting caio v" + caio::version() + " - C64\n" + to_string() + "\n");
+    log.info("Starting caio v" + caio::version() + " - Commodore C64\n" + to_string() + "\n");
 
     /*
      * The emulator runs on its own thread.
@@ -143,7 +143,7 @@ void C64::reset()
     }
 }
 
-std::string C64::rompath(const std::string& fname) const
+std::string C64::rompath(const std::string& fname)
 {
     auto path = fs::search(fname, {_conf.romdir});
     if (path.empty()) {
@@ -153,51 +153,37 @@ std::string C64::rompath(const std::string& fname) const
     return path;
 }
 
-std::string C64::cartpath(const std::string& fname) const
-{
-    auto path = fs::search(fname, {_conf.cartdir});
-    if (path.empty()) {
-        throw IOError{"Can't load Cartridge: " + fname + ": " + Error::to_string(ENOENT)};
-    }
-
-    return path;
-}
-
-inline std::string C64::palettepath(const std::string& fname) const
-{
-    return fs::search(fname, {_conf.palettedir});
-}
-
-inline std::string C64::keymapspath(const std::string& fname) const
-{
-    return fs::search(fname, {_conf.keymapsdir});
-}
-
 sptr_t<Cartridge> C64::attach_cartridge()
 {
-    if (!_conf.cartfile.empty()) {
-        std::string fpath{cartpath(_conf.cartfile)};
-        auto cart = Cartridge::create(fpath);
-        return cart;
+    if (_conf.cartridge.empty()) {
+        return {};
     }
 
-    return {};
+    auto fpath = fs::search(_conf.cartridge);
+    if (fpath.empty()) {
+        throw IOError{"Can't load Cartridge: " + _conf.cartridge + ": " + Error::to_string(ENOENT)};
+    }
+
+    auto cart = Cartridge::create(fpath);
+    return cart;
 }
 
 void C64::attach_prg()
 {
-    if (!_conf.prgfile.empty()) {
-        try {
-            PrgFile* prog;
-            const char* format;
+    std::string prgfile{fs::fix_home(_conf.prgfile)};
 
-            log.debug("Preloading program: " + _conf.prgfile + "\n");
+    if (!prgfile.empty()) {
+        try {
+            PrgFile* prog{};
+            const char* format{};
+
+            log.debug("Preloading program: " + prgfile + "\n");
 
             try {
-                prog = new P00File{fs::fix_home(_conf.prgfile)};
+                prog = new P00File{prgfile};
                 format = "P00";
-            } catch (const IOError &) {
-                prog = new PrgFile{fs::fix_home(_conf.prgfile)};
+            } catch (const IOError&) {
+                prog = new PrgFile{prgfile};
                 format = "PRG";
             }
 
@@ -208,7 +194,7 @@ void C64::attach_prg()
                 /*
                  * Load PRG into memory.
                  */
-                auto* prog = static_cast<PrgFile*>(arg);
+                uptr_t<PrgFile> prog{static_cast<PrgFile*>(arg)};
                 for (size_t i = 0; i < prog->size(); ++i) {
                     cpu.write(prog->address() + i, (*prog)[i]);
                 }
@@ -231,7 +217,6 @@ void C64::attach_prg()
                 }
 
                 cpu.bpdel(BASIC_READY_ADDR);
-                delete prog;
             }, prog);
 
         } catch (const std::exception& err) {
@@ -289,12 +274,14 @@ void C64::create_devices()
 
     _clk = std::make_shared<Clock>("CLK", CLOCK_FREQ_PAL, _conf.delay);
 
-    if (!_conf.unit8.empty()) {
-        _unit8 = c1541::create(_conf.unit8, 8, _bus);
+    auto unit8 = fs::fix_home(_conf.unit8);
+    if (!unit8.empty()) {
+        _unit8 = c1541::create(unit8, 8, _bus);
     }
 
-    if (!_conf.unit9.empty()) {
-        _unit9 = c1541::create(_conf.unit9, 9, _bus);
+    auto unit9 = fs::fix_home(_conf.unit9);
+    if (!unit9.empty()) {
+        _unit9 = c1541::create(unit9, 9, _bus);
     }
 
     _kbd  = std::make_shared<C64Keyboard>("KBD");
@@ -388,13 +375,8 @@ void C64::connect_devices()
     /*
      * Load the VIC2 colour palette.
      */
-    if (!_conf.palettefile.empty()) {
-        const auto ppath = palettepath(_conf.palettefile);
-        if (ppath.empty()) {
-            throw Error{"Palette file not found: " + _conf.palettefile};
-        }
-
-        _vic2->palette(ppath);
+    if (!_conf.palette.empty()) {
+        _vic2->palette(_conf.palette);
     }
 
     /*
@@ -449,13 +431,8 @@ void C64::connect_devices()
     /*
      * Load the keyboard mappings.
      */
-    if (!_conf.keymapsfile.empty()) {
-        const auto kpath = keymapspath(_conf.keymapsfile);
-        if (kpath.empty()) {
-            throw Error{"Keymaps file not found: " + _conf.keymapsfile};
-        }
-
-        _kbd->load(kpath);
+    if (!_conf.keymaps.empty()) {
+        _kbd->load(_conf.keymaps);
     }
 
     /*
@@ -473,15 +450,16 @@ void C64::connect_devices()
 void C64::create_ui()
 {
     std::string title{_conf.title};
+    std::string prgfile{_conf.prgfile};
     if (_ioexp) {
         title += " - " + _ioexp->name();
-    } else if (!_conf.prgfile.empty()) {
-        title += " - " + fs::basename(_conf.prgfile);
+    } else if (!prgfile.empty()) {
+        title += " - " + fs::basename(prgfile);
     }
 
     ui::Config uiconf {
         .audio = {
-            .enabled       = _conf.audio_enabled,
+            .enabled       = _conf.audio,
             .srate         = mos_6581::SAMPLING_RATE,
             .channels      = mos_6581::CHANNELS,
             .samples       = mos_6581::SAMPLES
@@ -494,7 +472,7 @@ void C64::create_ui()
             .scale         = _conf.scale,
             .sleffect      = ui::to_sleffect(_conf.scanlines),
             .fullscreen    = _conf.fullscreen,
-            .smooth_resize = _conf.smooth_resize,
+            .smooth_resize = _conf.sresize
         },
     };
 
@@ -680,11 +658,6 @@ std::string C64::to_string() const
     os << "UI backend: " << _ui->to_string() << std::endl;
 
     return os.str();
-}
-
-std::string C64::name()
-{
-    return "C64";
 }
 
 }

@@ -79,9 +79,9 @@ CXXFLAGS+=		-Wall \
 			-Werror
 
 ifeq (${CXX}, clang++)
-CXXFLAGS+=		-std=c++2a
+CXXFLAGS+=		-std=c++20
 else
-CXXFLAGS+=		-std=c++2a
+CXXFLAGS+=		-std=c++20
 endif
 
 ifeq (${DEBUG}, yes)

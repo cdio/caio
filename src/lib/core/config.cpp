@@ -18,147 +18,125 @@
  */
 #include "config.hpp"
 
-#include "utils.hpp"
+#include <cstdlib>
+
+#include "fs.hpp"
 #include "logger.hpp"
+#include "utils.hpp"
+#include "ui_config.hpp"
 
 
 namespace caio {
+namespace config {
 
-Config& Config::operator=(const Confile& conf)
+Section parse(int argc, const char** argv, Cmdline& cmdline)
 {
-    title = "caio";
+    Confile def{cmdline.defaults()};
+    Confile cline{cmdline.parse(argc, argv)};
+    Confile cfile{};
 
-    const auto secit = conf.find(CaioConfile::CAIO_CONFIG_SECTION);
-    if (secit != conf.end()) {
-        const auto& sec = secit->second;
-
-        auto it = sec.find(CaioConfile::ROMDIR_CONFIG_KEY);
-        romdir = (it != sec.end() ? it->second : CaioConfile::ROMDIR);
-
-        it = sec.find(CaioConfile::CARTDIR_CONFIG_KEY);
-        if (it != sec.end()) {
-            cartdir = it->second;
+    const auto& gsec = cline[SEC_GENERIC];
+    const auto& it = gsec.find(KEY_CONFIG_FILE);
+    std::string fname{};
+    if (it != gsec.end()) {
+        /*
+         * A configuration file is specified in the command line.
+         */
+        fname = it->second;
+        log.debug("Configuration file: %s\n", fname.c_str());
+        cfile.load(fname);
+    } else {
+        /*
+         * Searh for the configuration file in standard directories.
+         */
+        fname = fs::search(CONFIG_FILE, {HOME_CONFDIR, SYSTEM_CONFDIR});
+        if (fname.empty()) {
+            log.debug("Configuration file not found. Using default values\n");
+        } else {
+            log.debug("Configuration file found: %s\n", fname.c_str());
+            cfile.load(fname);
         }
-
-        it = sec.find(CaioConfile::PALETTEDIR_CONFIG_KEY);
-        palettedir = (it != sec.end() ? it->second : CaioConfile::PALETTEDIR);
-
-        it = sec.find(CaioConfile::PALETTE_CONFIG_KEY);
-        if (it != sec.end()) {
-            const auto& palette = it->second;
-            palettefile = palette_file(palette);
-        }
-
-        it = sec.find(CaioConfile::KEYMAPSDIR_CONFIG_KEY);
-        keymapsdir = (it != sec.end() ? it->second : CaioConfile::KEYMAPSDIR);
-
-        it = sec.find(CaioConfile::KEYMAPS_CONFIG_KEY);
-        if (it != sec.end()) {
-            const auto& cc = it->second;
-            keymapsfile = keymaps_file(cc);
-        }
-
-        it = sec.find(CaioConfile::FPS_CONFIG_KEY);
-        if (it != sec.end()) {
-            try {
-                auto val = std::stoi(it->second);
-                fps = (val > 0 ? val : DEFAULT_FPS);
-            } catch (...) {
-                fps = DEFAULT_FPS;
-            }
-        }
-
-        it = sec.find(CaioConfile::SCALE_CONFIG_KEY);
-        if (it != sec.end()) {
-            const std::string& str = it->second;
-            if (!str.empty()) {
-                scale = std::atof(str.c_str());
-                if (scale < 1.0f) {
-                    scale = 1.0f;
-                }
-            }
-        }
-
-        it = sec.find(CaioConfile::SCANLINES_CONFIG_KEY);
-        if (it != sec.end()) {
-            scanlines = utils::tolow(it->second);
-        }
-
-        it = sec.find(CaioConfile::FULLSCREEN_CONFIG_KEY);
-        if (it != sec.end()) {
-            const std::string str = utils::tolow(it->second);
-            fullscreen = (str == "yes" || str == "ye" || str == "y");
-        }
-
-        it = sec.find(CaioConfile::SRESIZE_CONFIG_KEY);
-        if (it != sec.end()) {
-            const std::string str = utils::tolow(it->second);
-            smooth_resize = (str == "yes" || str == "ye" || str == "y");
-        }
-
-        it = sec.find(CaioConfile::AUDIO_CONFIG_KEY);
-        if (it != sec.end()) {
-            const std::string str = utils::tolow(it->second);
-            audio_enabled = (str == "yes" || str == "ye" || str == "y");
-        }
-
-        it = sec.find(CaioConfile::DELAY_CONFIG_KEY);
-        if (it != sec.end()) {
-            const std::string& str = it->second;
-            if (!str.empty()) {
-                delay = std::atof(str.c_str());
-            }
-        }
-
-        it = sec.find(CaioConfile::MONITOR_CONFIG_KEY);
-        if (it != sec.end()) {
-            const std::string str = utils::tolow(it->second);
-            monitor = (str == "yes" || str == "ye" || str == "y");
-        }
-
-        it = sec.find(CaioConfile::LOGFILE_CONFIG_KEY);
-        logfile = (it != sec.end() ? logfile = it->second : DEFAULT_LOGFILE);
-
-        it = sec.find(CaioConfile::LOGLEVEL_CONFIG_KEY);
-        loglevel = (it != sec.end() ? utils::tolow(it->second) : DEFAULT_LOGLEVEL);
     }
 
-    return *this;
+    const auto& sname = cmdline.sname();
+
+    Section merged{};
+    merged.merge(cline.extract(sname));
+    merged.merge(cline.extract(SEC_GENERIC));
+
+    merged.merge(cfile.extract(sname));
+    merged.merge(cfile.extract(SEC_GENERIC));
+
+    merged.merge(def.extract(sname));
+    merged.merge(def.extract(SEC_GENERIC));
+
+    return merged;
 }
 
-std::string Config::palette_file(const std::string& palette) const
+Config::Config(Section& sec, const std::string& prefix)
+    : title{"caio"},
+      romdir{sec[KEY_ROMDIR]},
+      palette{(sec[KEY_PALETTE].empty() ? "" : resolve(sec[KEY_PALETTE], sec[KEY_PALETTEDIR], prefix, PALETTEFILE_EXT))},
+      keymaps{(sec[KEY_KEYMAPS].empty() ? "" : resolve(sec[KEY_KEYMAPS], sec[KEY_KEYMAPSDIR], prefix, KEYMAPSFILE_EXT))},
+      cartridge{sec[KEY_CARTRIDGE]},
+      fps{static_cast<unsigned>(std::atoi(sec[KEY_FPS].c_str()))},
+      scale{static_cast<float>(std::atof(sec[KEY_SCALE].c_str()))},
+      scanlines{static_cast<char>(ui::to_sleffect(sec[KEY_SCANLINES]))},
+      fullscreen{is_true(sec[KEY_FULLSCREEN])},
+      sresize{is_true(sec[KEY_SRESIZE])},
+      audio{is_true(sec[KEY_AUDIO])},
+      delay{static_cast<float>(std::atof(sec[KEY_DELAY].c_str()))},
+      monitor{is_true(sec[KEY_MONITOR])},
+      logfile{sec[KEY_LOGFILE]},
+      loglevel{sec[KEY_LOGLEVEL]}
 {
-    return (palette.ends_with(PALETTEFILE_SUFFIX) ? palette : palette + PALETTEFILE_SUFFIX);
 }
 
-std::string Config::keymaps_file(const std::string& cc) const
+std::string Config::resolve(const std::string& name, const std::string& path, const std::string& prefix,
+    const std::string& ext)
 {
-    return (cc.ends_with(KEYMAPSFILE_SUFFIX) ? cc : cc + KEYMAPSFILE_SUFFIX);
+    std::string fname{fs::search(name)};
+    if (!fname.empty()) {
+        /*
+         * name is referencing an existing file.
+         */
+        return fname;
+    }
+
+    /*
+     * Build the basename and search for the file in the specified path.
+     */
+    fname = prefix + fname + ext;
+    std::string fullpath{fs::search(fname, {path})};
+    if (!fullpath.empty()) {
+        return fullpath;
+    }
+
+    throw IOError{"File not found: name " + fname + ", path " + path};
 }
 
 std::string Config::to_string() const
 {
     std::ostringstream os{};
 
-    os << "  Title:              " << std::quoted(title) << std::endl
-       << "  ROMs path:          " << std::quoted(romdir) << std::endl
-       << "  Cartridge path:     " << std::quoted(cartdir) << std::endl
-       << "  Palette path:       " << std::quoted(palettedir) << std::endl
-       << "  Palette file:       " << std::quoted(palettefile.empty() ? "" : palettefile) << std::endl
-       << "  Keymaps path:       " << std::quoted(keymapsdir) << std::endl
-       << "  Keymaps file:       " << std::quoted(keymapsfile.empty() ? "" : keymapsfile) << std::endl
-       << "  FPS:                " << fps << std::endl
-       << "  Scale:              " << scale << "x" << std::endl
-       << "  Scanlines effect:   " << scanlines << std::endl
-       << "  Fullscreen:         " << (fullscreen ? "yes" : "no") << std::endl
-       << "  Smooth resize:      " << (smooth_resize ? "yes" : "no") << std::endl
-       << "  Audio enabled:      " << (audio_enabled ? "yes" : "no") << std::endl
-       << "  Speed Delay         " << delay << "x" << std::endl
-       << "  CPU Monitor:        " << (monitor ? "yes" : "no") << std::endl
-       << "  Log file:           " << logfile << std::endl
+    os << "  Title:              " << std::quoted(title)            << std::endl
+       << "  ROMs path:          " << std::quoted(romdir)           << std::endl
+       << "  Palette:            " << std::quoted(palette)          << std::endl
+       << "  Keymaps:            " << std::quoted(keymaps)          << std::endl
+       << "  Cartridge:          " << std::quoted(cartridge)        << std::endl
+       << "  FPS:                " << fps                           << std::endl
+       << "  Scale:              " << scale << "x"                  << std::endl
+       << "  Scanlines effect:   " << scanlines                     << std::endl
+       << "  Fullscreen:         " << (fullscreen ? "yes" : "no")   << std::endl
+       << "  Smooth resize:      " << (sresize ? "yes" : "no")      << std::endl
+       << "  Audio enabled:      " << (audio ? "yes" : "no")        << std::endl
+       << "  Clock delay:        " << delay << "x"                  << std::endl
+       << "  CPU Monitor:        " << (monitor ? "yes" : "no")      << std::endl
+       << "  Log file:           " << std::quoted(logfile)          << std::endl
        << "  Log level:          " << loglevel;
 
     return os.str();
 }
 
+}
 }
