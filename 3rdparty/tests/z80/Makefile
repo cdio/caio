@@ -22,4 +22,8 @@ include ${ROOT}/mk/config.mk
 
 DIRS+=		rak
 
+CLEANDIRS=	${DIRS}
+
+DISTCLEANDIRS=	${DIRS}
+
 include ${ROOT}/mk/dir.mk

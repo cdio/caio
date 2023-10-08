@@ -7,15 +7,12 @@ The goal of caio is to provide a single core architecture able to emulate
 several different hardware platforms. To do that, the chip-set used by those
 platforms are emulated.
 
-For more information about caio refer to the
-[development documentation](doc/devel.md).
-
 
 ## Status
 
 caio is currently in alpha state, it is **work-in-progress** and at the
 moment only the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
-is emulated, under Linux and MacOS.
+is emulated, under Linux and macOS.
 
 The emulation of the
 [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64) almost reached a
@@ -43,7 +40,7 @@ See the [releases](#releases) section below.
     ...
 ```
 
-#### MacOS:
+#### macOS:
 
 [xcode](https://developer.apple.com/xcode), xcode command line tools, and
 [brew](https://brew.sh) must be installed.
@@ -104,7 +101,7 @@ as the basic is started:
 Note that this won't work for advanced or big program files that overwrite
 memory areas not configured as RAM.
 
-Under linux, a third way the emulator can be launched is from a GUI
+Under Linux, a third way the emulator can be launched is from a GUI
 (like a file manager), in this case the logs must not be sent to the terminal
 (there won't be one), if that happens the emulator is silently terminated as
 soon as it is started (see the `logfile` configuration file option).

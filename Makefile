@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2022 Claudio Castiglia
+# Copyright (C) 2020 Claudio Castiglia
 #
 # This file is part of caio.
 #
@@ -22,6 +22,10 @@ DIRS=		3rdparty \
 		src \
 		data
 
+CLEANDIRS=	${DIRS}
+
+DISTCLEANDIRS=	${DIRS}
+
 DISTCLEANFILES=	build
 
 .PHONY: distclean %-package
@@ -30,6 +34,3 @@ include ${ROOT}/mk/dir.mk
 
 %-package:
 	${MAKE} ${MAKEARGS} ROOT=${ROOT} -f mk/package.mk $@
-
-distclean: clean
-	${RM} -r ${DISTCLEANFILES}

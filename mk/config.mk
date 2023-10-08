@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2022 Claudio Castiglia
+# Copyright (C) 2020 Claudio Castiglia
 #
 # This file is part of caio.
 #
@@ -30,7 +30,7 @@ CWD:=			${abspath .}
 include ${SYSDEP_MK}
 
 CAT?=			cat
-CXX=			clang++
+override CXX=		clang++
 CUT?=			cut
 CMAKE?=			cmake
 DIRNAME?=		dirname
@@ -69,8 +69,7 @@ CPPFLAGS+=		-DD_VERSION='"${VERSION}"' \
 CPPFLAGS+=		-I${CWD} \
 			-I${ROOT} \
 			-I${ROOT}/src \
-			-I${ROOT}/src/lib \
-			-I${ROOT}/src/lib/core \
+			-I${ROOT}/src/core \
 			-I${ROOT}/3rdparty/GSL/include
 
 CXXFLAGS+=		${SYSDEP_CXXFLAGS}
@@ -78,19 +77,13 @@ CXXFLAGS+=		${SYSDEP_CXXFLAGS}
 CXXFLAGS+=		-Wall \
 			-Werror
 
-ifeq (${CXX}, clang++)
 CXXFLAGS+=		-std=c++20
-else
-CXXFLAGS+=		-std=c++20
-endif
 
 ifeq (${DEBUG}, yes)
 CPPFLAGS+=		-DD_DEBUG
 CXXFLAGS+=		-O0 \
-			-g
-ifeq (${CXX}, clang++)
-CXXFLAGS+=		-fstandalone-debug
-endif
+			-g \
+			-fstandalone-debug
 else
 CXXFLAGS+=		-O3
 LDFLAGS+=		-Wl,-s

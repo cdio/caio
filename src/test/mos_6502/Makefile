@@ -71,4 +71,5 @@ ${TESTS}: ${BIN}
 ${BIN}:
 	${MAKE} ${MAKEARGS} -C ${dir $@} ${notdir $@}
 
-install clean:
+install clean distclean:
+

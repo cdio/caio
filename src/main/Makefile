@@ -35,13 +35,13 @@ DST_CONFIG=	${DST_SYSCONFDIR}/${CONFIG}
 
 CXXSRCS=	main.cpp
 
-EXTRA_DEPS+=	${ROOT}/src/lib/c64/libcaio_c64.a \
-		${ROOT}/src/lib/zx80/libcaio_zx80.a \
-		${ROOT}/src/lib/core/libcaio_core.a \
+EXTRA_DEPS+=	${ROOT}/src/c64/libcaio_c64.a \
+		${ROOT}/src/zx80/libcaio_zx80.a \
+		${ROOT}/src/core/libcaio_core.a \
 		${ROOT}/3rdparty/resid/libresid.a
 
-CPPFLAGS+=	-I${ROOT}/src/lib/c64 \
-		-I${ROOT}/src/lib/zx80
+CPPFLAGS+=	-I${ROOT}/src/c64 \
+		-I${ROOT}/src/zx80
 
 LDADD+=		${EXTRA_DEPS}
 

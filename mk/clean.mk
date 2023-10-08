@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2022 Claudio Castiglia
+# Copyright (C) 2020 Claudio Castiglia
 #
 # This file is part of caio.
 #
@@ -33,3 +33,4 @@ endif
 ifdef DISTCLEANDIRS
 	for d in ${DISTCLEANDIRS}; do ${MAKE} ${MAKEARGS} -C$$d distclean; done
 endif
+

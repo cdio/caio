@@ -22,4 +22,8 @@ include ${ROOT}/mk/config.mk
 
 DIRS+=		z80
 
+CLEANDIRS=	${DIRS}
+
+DISTCLEANDIRS=	${DIRS}
+
 include ${ROOT}/mk/dir.mk

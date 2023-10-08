@@ -23,10 +23,10 @@ include ${ROOT}/mk/config.mk
 DIRS+=		dasm \
 		sjasm
 
-all debug clean:
-	for i in ${DIRS}; do ( ${MAKE} ${MAKEARGS} -C$$i $@ || exit 1 ); done
+CLEANDIRS=	${DIRS}
 
-distclean:
-	for i in ${DIRS}; do ( ${MAKE} ${MAKEARGS} -C$$i $@ || exit 1 ); done
-	${RM} -rf bin
+DISTCLEANDIRS=	${CLEANDIRS}
 
+DISTCLEANFILES=	bin
+
+include ${ROOT}/mk/dir.mk

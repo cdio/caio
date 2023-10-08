@@ -36,11 +36,8 @@ are also used. An example of this is the emulator of the
 two different implementations are provided, the internal one which reached an
 arguable decent level of accuracy and another one that uses the
 [reSID](https://en.wikipedia.org/wiki/ReSID) library which emulates the device
-quite accurately thanks to a big deal of reverse engineering work done by its
-author.
-
-For more information about caio's internal structure read the source
-code, it is fully documented.
+quite accurately thanks to the results of a reverse engineering work done by
+its author.
 
 ## Random notes done during development
 
@@ -85,17 +82,17 @@ used by caio, and the formula described in the technical specifications:
 
 <img src="filter.png" width="640"/>
 
-The resonance value is also translated to a quadratic response Q factor, but
-it is not mentioned in the documentation how this factor is obtained.
-The author of reSID v1.0-pre found that this factor can be obtained by
-applying the following formula:
+The resonance value is also translated to a quadratic response Q factor
+but the documentation does not explain how this factor is obtained.
+The author of reSID found that this factor can be obtained by applying the
+following formula:
 
 ```
   Q = 8 / (~res & 15)
 
 ```
 where `res` is the 4 bits resonance value specified by the user.
-Caio's limits the Q value to a maximum of 8.
+Caio limits the value of Q to a maximum of 8.
 
 #### Other bugs:
 

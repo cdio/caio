@@ -20,4 +20,8 @@ ROOT=		${abspath ../../../..}
 
 DIRS+=		src
 
+CLEANDIRS=	${DIRS}
+
+DISTCLEANDIRS=	${DIRS}
+
 include ${ROOT}/mk/dir.mk

@@ -50,5 +50,5 @@ ${DST_PALETTES}: ${DST_PALETTEDIR} ${notdir $@}
 ${DST_PALETTEDIR}:
 	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
 
-clean:
+clean distclean:
 

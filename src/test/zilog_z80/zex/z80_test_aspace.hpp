@@ -34,6 +34,9 @@ namespace test {
  */
 class Z80TestASpace : public ASpace {
 public:
+    constexpr static const size_t BLOCKS = 4;
+    using bank_t = std::array<devmap_t, BLOCKS>;
+
     Z80TestASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr_t& rom, std::ostream& out);
 
     virtual ~Z80TestASpace() {
@@ -46,10 +49,11 @@ public:
 private:
     void bdos(uint8_t cmd, addr_t arg);
 
-    std::shared_ptr<Z80> _cpu;
-    devptr_t             _ram;
-    devptr_t             _rom;
-    std::ostream&        _out;
+    sptr_t<Z80>     _cpu;
+    devptr_t        _ram;
+    devptr_t        _rom;
+    std::ostream&   _out;
+    bank_t          _mmap;
 };
 
 }

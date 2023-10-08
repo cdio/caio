@@ -54,23 +54,15 @@ Z80TestASpace::Z80TestASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const 
     : _cpu{cpu},
       _ram{ram},
       _rom{rom},
-      _out{out}
+      _out{out},
+      _mmap{{
+        { _ram,     0x0000 },
+        { _ram,     0x4000 },
+        { _rom,     0x0000 },
+        { _ram,     0xC000 }
+      }}
 {
-    addrmap_t rmap = {
-        { _ram,     0x0000 },
-        { _ram,     0x4000 },
-        { _rom,     0x0000 },
-        { _ram,     0xC000 }
-    };
-
-    addrmap_t wmap = {
-        { _ram,     0x0000 },
-        { _ram,     0x4000 },
-        { _rom,     0x0000 },
-        { _ram,     0xC000 }
-    };
-
-    ASpace::reset(rmap, wmap, 0xFFFF);
+    ASpace::reset(_mmap, _mmap, 0xFFFF);
 
     /*
      * Intercept calls to $0005 (bdos)

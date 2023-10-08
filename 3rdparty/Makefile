@@ -20,9 +20,13 @@ ROOT=		${abspath ../}
 
 include ${ROOT}/mk/config.mk
 
-DIRS=		resid \
+DIRS=		resid
+
+CLEANDIRS=	${DIRS} \
 		tools \
 		tests
+
+DISTCLEANDIRS=	${CLEANDIRS}
 
 DIRS+=		${EXTRA_3RDPARTY_DIRS}
 

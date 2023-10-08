@@ -19,7 +19,17 @@
 ROOT=		${abspath ..}
 
 DIRS=		icons \
-		lib \
-		main
+		core \
+		ui_sdl2
+
+DIRS+=		c64 \
+		zx80
+
+DIRS+=		main
+
+CLEANDIRS=	${DIRS} \
+		test
+
+DISTCLEANDIRS=	${CLEANDIRS}
 
 include ${ROOT}/mk/dir.mk

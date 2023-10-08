@@ -37,7 +37,7 @@ CONVERT=	./png2cpp.sh
 
 .PHONY: all clean debug install
 
-all clean debug install:
+all clean debug distclean install:
 
 all: ${ALL}
 

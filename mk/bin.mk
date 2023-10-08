@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2022 Claudio Castiglia
+# Copyright (C) 2020 Claudio Castiglia
 #
 # This file is part of caio.
 #
@@ -20,11 +20,11 @@ CXXFLAGS+=	-I${ROOT}/lib
 
 CXXFLAGS+=	${UI_CXXFLAGS}
 
-LDADD+=		${ROOT}/src/lib/ui_sdl2/libcaio_ui_sdl2.a \
+LDADD+=		${ROOT}/src/ui_sdl2/libcaio_ui_sdl2.a \
 		${UI_LDADD} \
 		-lpthread
 
-EXTRA_DEPS+=	${ROOT}/src/lib/ui_sdl2/libcaio_ui_sdl2.a
+EXTRA_DEPS+=	${ROOT}/src/ui_sdl2/libcaio_ui_sdl2.a
 
 CLEANFILES+=	${BIN} \
 		${LN_BINS}

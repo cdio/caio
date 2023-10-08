@@ -44,7 +44,7 @@ cat <<-END
 /*
  * Automatically generated from ${PNG}
  */
-static const std::array<uint8_t, ${SIZE}> ${NAME}{
+static const uint8_t ${NAME}[] = {
 END
 
 printf "    "

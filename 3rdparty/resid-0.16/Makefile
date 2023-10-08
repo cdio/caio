@@ -76,7 +76,7 @@ CLEANFILES+=	${LIB} ${OBJS} ${HDEPS}
 .PHONY:		_all all debug clean install
 
 all debug install: _all
-	${MAKE} ${MAKEARGS} -j${NPROC} _all
+	${MAKE} ${MAKEARGS} -j _all
 
 _all: ${LIB}
 

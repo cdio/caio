@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2022 Claudio Castiglia
+# Copyright (C) 2020 Claudio Castiglia
 #
 # This file is part of caio.
 #
@@ -18,7 +18,7 @@
 #
 .PHONY: all clean debug install distclean ${DIRS}
 
-all debug install clean distclean:
+all debug install:
 	for i in ${DIRS}; do \
 		${MAKE} -C $$i ${MAKEARGS} $@ || exit 1; \
 	done
@@ -26,3 +26,4 @@ all debug install clean distclean:
 ${DIRS}:
 	${MAKE} -C $@ ${MAKEARGS}
 
+include ${ROOT}/mk/clean.mk

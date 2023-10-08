@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2022 Claudio Castiglia
+# Copyright (C) 2020 Claudio Castiglia
 #
 # This file is part of caio.
 #
@@ -44,5 +44,5 @@ ${DST_KEYSYMS}: ${DST_KEYSYMSDIR} ${notdir $@}
 ${DST_KEYSYMSDIR}:
 	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
 
-clean:
+clean distclean:
 

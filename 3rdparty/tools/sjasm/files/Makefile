@@ -19,11 +19,27 @@ OBJS=		${CXXSRCS:%.cpp=%.o}
 
 CPPFLAGS+=	-I.
 
-CXXFLAGS+=	-O2
+CXXFLAGS+=	-std=c++14 \
+		-O2 \
+		-Wall \
+		-Werror
+
+# No comment.
+CXXFLAGS+=	-Wno-dangling-else \
+		-Wno-parentheses \
+		-Wno-switch-bool \
+		-Wno-switch \
+		-Wno-tautological-constant-out-of-range-compare \
+		-Wno-reorder-ctor \
+		-Wno-missing-braces \
+		-Wno-char-subscripts \
+		-Wno-unused-private-field
 
 LDFLAGS?=
 
 BIN=		sjasm
+
+override CXX=	clang++
 
 all: ${BIN}
 

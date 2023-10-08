@@ -44,11 +44,11 @@ public:
     void run(bool autostart);
 
 private:
-    std::shared_ptr<Clock>         _clk{};
-    std::shared_ptr<DeviceRAM>     _ram{};
-    std::shared_ptr<DeviceROM>     _rom{};
-    std::shared_ptr<Z80>           _cpu{};
-    std::shared_ptr<Z80TestASpace> _mmap{};
+    sptr_t<Clock>           _clk{};
+    sptr_t<DeviceRAM>       _ram{};
+    sptr_t<DeviceROM>       _rom{};
+    sptr_t<Z80>             _cpu{};
+    sptr_t<Z80TestASpace>   _mmap{};
 };
 
 }

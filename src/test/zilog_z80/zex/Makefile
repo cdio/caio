@@ -25,7 +25,7 @@ BIN=		./z80-test
 CXXSRCS=	z80_test.cpp \
 		z80_test_aspace.cpp
 
-EXTRA_DEPS+=	${ROOT}/src/lib/core/libcaio_core.a
+EXTRA_DEPS+=	${ROOT}/src/core/libcaio_core.a
 
 LDADD+=		${EXTRA_DEPS}
 

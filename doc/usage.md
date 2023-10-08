@@ -14,52 +14,43 @@ c64
 $ caio c64 --help
 usage: c64 <options>
 where <options> are:
- --conf <confile>       Configuration file
-                        (default is caio.conf)
- --romdir <romdir>      ROMs directory
- --cartdir <cdir>       Cartridge directory
- --palettedir <pdir>    Colour palette directory
- --palette <palette>    Colour palette file
- --keymapsdir <kdir>    Key mappings directory
- --keymaps <keymaps>    Key mappings file
- --fps <rate>           Frame rate
-                        (default is 50)
- --scale <scale>        Graphics scale factor
-                        (default is 1)
- --scanlines <v|h|n>    Scanlines effect (horizontal, vertical or none)
-                        (default is "n")
- --fullscreen           Launch in fullscreen mode
- --sresize <yes|no>     Smooth window resize
-                        (default is yes)
- --audio <yes|no>       Enable (disable) audio
-                        (default is yes)
- --delay <delay>        Speed delay factor
-                        (default is 1)
- --monitor              Activate the CPU monitor
- --logfile <file>       Write log information into the specified file
-                        (default is /dev/tty)
- --loglevel <lv>        Use the specified loglevel; a combination of:
-                        error|warn|info|debug|all
-                        (default is "")
- -v|--version           Show version information and exit
- -h|--help              Print this message and exit
+ --conf <cfile>          Configuration file
+ --romdir <romdir>       ROMs directory
+ --palettedir <pdir>     Colour palette directory
+ --palette <palette>     Colour palette name or filename
+ --keymapsdir <kdir>     Key mappings directory
+ --keymaps <keymaps>     Key mappings name or filename
+ --cart <cfile>          Cartridge filename
+ --fps <rate>            Frame rate (default is 50)
+ --scale <scale>         Window scale factor (default is 1)
+ --scanlines <n|h|v|H|V> Scanlines effect: (n)one, (h)orizontal, (v)ertical,
+                         advanced (H)orizontal, advanced (V)ertical
+                         (default is n)
+ --fullscreen            Start in fullscreen mode
+ --sresize <yes|no>      Smooth window resize (default is yes)
+ --audio <yes|no>        Enable audio (default is yes)
+ --delay <delay>         Clock delay factor (default is 1)
+ --monitor               Activate the CPU monitor during boot
+ --logfile <file>        Send log information to the specified destination
+                         (default is /dev/tty)
+ --loglevel <lv>         Loglevel, bitwise combination of:
+                         error|warn|info|debug|all (default is none)
+ -v|--version            Show version information and exit
+ -h|--help               Print this message and exit
 
-C64 specific:
- --cart <cart>          Attach a cartridge (CRT format)
- --prg <prg>            Load a PRG file as soon as the basic is ready
- --8 <path>             Attach a disk drive unit 8
- --9 <path>             Attach a disk drive unit 9
- --resid <yes|no>       Use the MOS6581 reSID library
-                        (default is no; caio's implementation is used)
- --swapj                Swap Joysticks
-
+Commodore C64 specific:
+ --prg <prg>             Load a PRG file as soon as the basic is ready
+ --resid <yes|no>        Use the MOS6581 reSID library (default is no)
+ --swapj                 Swap Joysticks
+ --8 <path>              Attach a disk drive unit 8
+ --9 <path>              Attach a disk drive unit 9
 ```
 
 All these command line options can be specified in a
 [configuration file](../src/main/caio.conf).
 
-caio will search for the configuration file as follows, stopping at the first
-match:
+The configuration file is searched in the following directories (stop at
+first match):
 
 1. Command line option               `--conf`
 2. User's configuration directory:   `$HOME/.config/caio/caio.conf`
@@ -72,10 +63,19 @@ Examples:
 
 The following command activates the horizontal scanlines visual effect, scales
 up the emulated screen resolution 3 times (that is, a 320x200 screen is scaled
-to 960x600), loads and launches the cartridge named *ghostngobblins*:
+up to 960x600), loads and launches the cartridge named *ghostngobblins*:
 
 ```
     $ caio c64 --scanlines h --scale 3 --cart /games/c64/ghostngobblins.crt
+```
+
+The next command activates the advanced horizontal scanlines visual effect
+(note the captial H), in this mode the specified scale factor is doubled
+(that is, a 320x200 screen is scaled up to 1280x800), loads and launches the
+cartridge *Simon's Basic*:
+
+```
+    $ caio c64 --scanlines H --scale 2 --cart ./simons_basic.crt
 ```
 
 The next command instructs caio to build a
@@ -89,11 +89,11 @@ basic is started:
     $ c64 --prg /sid/fanatics/music.prg --resid yes
 ```
 
-Since the program is injected directly into RAM before the actual emulator
-is started, the previous command won't work for advanced or big files that are
-expected to overwrite memory areas not configured as RAM.
+The program is injected directly into RAM before the actual emulator is
+started, this means that the previous command won't work for advanced or
+big files that are expected to overwrite memory areas not configured as RAM.
 
-Under linux, caio can be launched from a GUI (like a file manager) only if it
+Under Linux, caio can be launched from a GUI (like a file manager) only if it
 is not configured to send log messages to the terminal (because there won't
 be one) if that happens the emulator is silently terminated (see the `logfile`
 configuration file option).
@@ -129,7 +129,7 @@ tested):
 
 Keyboard layouts are simple text files, existing layouts can be modified using
 a text editor and new layouts can be added to the system by placing the new
-file inside the `keymasdir` directory which defaults to
+file inside the `keymapsdir` directory which defaults to
 `$PREFIX/share/caio/keymaps`.
 
 Like the [VICE](https://en.wikipedia.org/wiki/VICE) emulator, the `RESTORE`
