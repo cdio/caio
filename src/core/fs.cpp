@@ -24,7 +24,9 @@
 #include <unistd.h>
 
 #include <cstdlib>
+#include <fstream>
 #include <iterator>
+#include <sstream>
 
 #include "logger.hpp"
 #include "types.hpp"
@@ -170,6 +172,66 @@ std::vector<std::pair<std::string, uint64_t>> directory(const std::string& path,
     });
 
     return entries;
+}
+
+std::vector<uint8_t> load(const std::string& fname, size_t maxsiz)
+{
+    std::string errmsg{};
+
+    try {
+        std::ifstream is{fname, std::ios::in};
+        if (is) {
+            return load(is, maxsiz);
+        }
+    } catch (const std::exception& err) {
+        errmsg = err.what();
+    }
+
+    throw IOError{"Can't load: " + fname + ": " + (errmsg.empty() ? Error::to_string(): errmsg)};
+}
+
+std::vector<uint8_t> load(std::istream& is, size_t maxsiz)
+{
+    std::vector<uint8_t> buf{};
+    uint8_t c{};
+
+    while (buf.size() < maxsiz) {
+        if (!is.read(reinterpret_cast<char*>(&c), sizeof(c))) {
+            if (!is.eof()) {
+                throw IOError{"Can't read from stream: " + Error::to_string()};
+            }
+            break;
+        }
+
+        buf.push_back(c);
+    }
+
+    return buf;
+}
+
+void save(const std::string& fname, const gsl::span<uint8_t>& buf, std::ios_base::openmode mode)
+{
+    std::string errmsg{};
+
+    try {
+        std::ofstream os{fname, mode};
+        if (os) {
+            save(os, buf);
+        }
+    } catch (const std::exception& err) {
+        errmsg = err.what();
+    }
+
+    throw IOError{"Can't save: " + fname + ": " + (errmsg.empty() ? Error::to_string() : errmsg)};
+}
+
+std::ostream& save(std::ostream& os, const gsl::span<uint8_t>& buf)
+{
+    if (!os.write(reinterpret_cast<char*>(buf.data()), buf.size())) {
+        throw IOError{"Can't write: " + Error::to_string()};
+    }
+
+    return os;
 }
 
 }

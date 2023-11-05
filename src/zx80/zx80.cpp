@@ -29,6 +29,8 @@
 #include "types.hpp"
 #include "version.hpp"
 
+#include "ofile.hpp"
+
 
 namespace caio {
 namespace sinclair {
@@ -44,8 +46,28 @@ void ZX80::run()
     connect_ui();
 
     if (_conf.monitor) {
-        //TODO _cpu->init_monitor(std::cin, std::cout); C++26
-        _cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO);
+        auto load = [this](const std::string& fname, addr_t start) -> std::pair<addr_t, addr_t> {
+            OFile ofile{fname};
+            if (start == 0) {
+                start = OFile::LOAD_ADDR;
+            }
+            addr_t addr = start;
+            for (uint8_t c : ofile) {
+                this->_cpu->write(addr++, c);
+            }
+            return {start, ofile.size()};
+        };
+
+        auto save = [this](const std::string& fname, addr_t start, addr_t end) {
+            OFile ofile{};
+            for (auto addr = start; addr <= end; ++addr) {
+                uint8_t c = this->_cpu->read(addr);
+                ofile.push_back(c);
+            }
+            ofile.save(fname);
+        };
+
+        this->_cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO, load, save);
     }
 
     start();
@@ -104,7 +126,6 @@ void ZX80::reset()
         _rom->reset();
         _cpu->reset();
         _kbd->reset();
-        _video->reset();
 
         _clk->reset();
         _clk->pause(false);
@@ -137,20 +158,20 @@ void ZX80::ram_init(uint64_t pattern, gsl::span<uint64_t>& data)
 void ZX80::create_devices()
 {
     auto ram_init = [this](gsl::span<uint8_t>& data) {
-        auto& data64 = reinterpret_cast<gsl::span<uint64_t>&>(data);
+        gsl::span<uint64_t> data64{reinterpret_cast<uint64_t*>(data.data()), data.size() / sizeof(uint64_t)};
         this->ram_init(RAM_INIT_PATTERN, data64);
     };
 
     size_t ramsiz  = (_conf.ram16 ? EXTERNAL_RAM_SIZE : INTERNAL_RAM_SIZE);
-    size_t romsiz  = (_conf.rom8  ? ROM8_SIZE  : ROM4_SIZE);
-    auto   romfile = (_conf.rom8  ? ROM8_FNAME : ROM4_FNAME);
+    size_t romsiz  = (_conf.rom8 ? ROM8_SIZE  : ROM4_SIZE);
+    auto   romfile = (_conf.rom8 ? ROM8_FNAME : ROM4_FNAME);
 
+    _cpu   = std::make_shared<Z80>(Z80::TYPE, "CPU");
     _ram   = std::make_shared<DeviceRAM>("RAM", ramsiz, ram_init);
     _rom   = std::make_shared<DeviceROM>(rompath(romfile), "ROM", romsiz);
-    _video = std::make_shared<ZX80Video>("VIDEO");
-    _cpu   = std::make_shared<Z80>(Z80::TYPE, "CPU");
-    _mmap  = std::make_shared<ZX80ASpace>(_cpu, _ram, _rom, _video);
+    _video = std::make_shared<ZX80Video>("VID");
     _kbd   = std::make_shared<ZX80Keyboard>("KBD");
+    _mmap  = std::make_shared<ZX80ASpace>(_cpu, _ram, _rom, _video, _kbd);
     _clk   = std::make_shared<Clock>("CLK", CLOCK_FREQ, _conf.delay);
 
     _cpu->init(_mmap);
@@ -159,73 +180,11 @@ void ZX80::create_devices()
 void ZX80::connect_devices()
 {
     /*
-     * Connect CPU's irq and nmi pins to CIA1, CIA2 and VIC2 irq outputs.
-     */
-#if 0
-    auto set_irq = [this](bool active) {
-        _cpu->int_pin(active);
-    };
-
-    auto set_nmi = [this](bool active) {
-        _cpu->nmi_pin(active);
-    };
-#endif
-
-//XXX    _cia1->irq(set_irq);
-//XXX    _cia2->irq(set_nmi);
-//XXX    _vic2->irq(set_irq);
-
-    
-
-    /*
      * Load the colour palette.
      */
     if (!_conf.palette.empty()) {
         _video->palette(_conf.palette);
     }
-
-//TODO
-#if 0
-    /*
-     * Connect keyboard and joysticks to the proper CIA1 ports.
-     */
-    constexpr uint8_t KBD_MASK = 255;
-
-    auto kbd_read = [this](uint8_t addr) -> uint8_t {
-        switch (addr) {
-        case Mos6526::PRA:
-            return (_conf.swapj ? _joy1->port() : _joy2->port());
-
-        case Mos6526::PRB:
-            return (_kbd->read() & (_conf.swapj ? _joy2->port() : _joy1->port()));
-
-        default:;
-        }
-
-        return 255; /* Pull-ups */
-    };
-
-    auto kbd_write = [this](uint8_t addr, uint8_t value, bool _) {
-        switch (addr) {
-        case Mos6526::PRA:
-            /* Keyboard matrix row to scan */
-            _kbd->write(value);
-            break;
-
-        case Mos6526::PRB:
-            if (value & Mos6526::P4) {
-                /* Port B4 is connected to the LP edge triggered input */
-                _vic2->trigger_lp();
-            }
-            break;
-
-        default:;
-        }
-    };
-
-    _cia1->add_ior(kbd_read, KBD_MASK);
-    _cia1->add_iow(kbd_write, KBD_MASK);
-#endif
 
     /*
      * Load the keyboard mappings.
@@ -238,21 +197,10 @@ void ZX80::connect_devices()
      * Connect clockable devices to the system clock.
      */
     _clk->add(_cpu);
-    _clk->add(_video);
 }
 
 void ZX80::create_ui()
 {
-    std::string title{_conf.title};
-//XXX    if (_ioexp) {
-//XXX        title += " - " + _ioexp->name();
-//XXX    }
-
-
-//- fare un mmap con ram e rom e nient'altro
-//- fare l'expansion port
-//- display: 24 lines x 32 chars (256x192 pixels) 64x48 Dots Block Graphics
-
     ui::Config uiconf {
         .audio = {
             .enabled    = false,
@@ -261,7 +209,7 @@ void ZX80::create_ui()
             .samples    = 0
         },
         .video = {
-            .title      = title,
+            .title      = _conf.title,
             .width      = ZX80Video::WIDTH,
             .height     = ZX80Video::HEIGHT,
             .fps        = _conf.fps,
@@ -307,7 +255,7 @@ void ZX80::connect_ui()
     });
 
     /*
-     * Connect keyboard and joysticks.
+     * Connect the keyboard.
      */
     auto hotkeys = [this](Keyboard::Key key) {
         this->hotkeys(key);
@@ -320,7 +268,7 @@ void ZX80::connect_ui()
 void ZX80::hotkeys(Keyboard::Key key)
 {
     /*
-     * This methods is called in the context of the UI thread
+     * This methods is called within the context of the UI thread
      * (see connect_ui()).
      */
     switch (key) {

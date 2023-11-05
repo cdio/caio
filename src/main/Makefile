@@ -21,16 +21,9 @@ ROOT=		${abspath ../..}
 include ${ROOT}/mk/config.mk
 
 BIN=		caio
-
-LN_BINS=	c64 \
-		zx80
-
 CONFIG=		caio.conf
 
 DST_BIN=	${DST_BINDIR}/${BIN}
-
-DST_LINKS=	${LN_BINS:%=${DST_BINDIR}/%}
-
 DST_CONFIG=	${DST_SYSCONFDIR}/${CONFIG}
 
 CXXSRCS=	main.cpp
@@ -47,10 +40,7 @@ LDADD+=		${EXTRA_DEPS}
 
 include ${ROOT}/mk/bin.mk
 
-install: ${DST_LINKS} ${DST_CONFIG} ${DST_README}
-
-${DST_LINKS}: ${DST_BIN}
-	${LN} ${LN_FLAGS} ${BIN} $@
+install: ${DST_BIN} ${DST_CONFIG} ${DST_README}
 
 ${DST_BIN}: ${BIN}
 	[ -d ${dir $@} ] || ${INSTALL} -d -m ${MODE_BINDIR} -o ${OWNER_BINDIR} -g ${GROUP_BINDIR} ${dir $@}

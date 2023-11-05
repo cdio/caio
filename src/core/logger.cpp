@@ -19,6 +19,7 @@
 #include "logger.hpp"
 
 #include <climits>
+#include <cstdlib>
 #include <iomanip>
 #include <regex>
 
@@ -158,7 +159,7 @@ Logger& Logger::log(Level lv, const char* fmt, ...)
 void Logger::fatal(const char* fmt, va_list ap)
 {
     error(fmt, ap);
-    std::terminate();
+    std::exit(EXIT_FAILURE);
 }
 
 [[noreturn]]

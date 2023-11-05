@@ -37,6 +37,32 @@ namespace caio {
 using addr_t = uint16_t;
 using saddr_t = int16_t;
 
+constexpr static const uint8_t D0 = (1 << 0);
+constexpr static const uint8_t D1 = (1 << 1);
+constexpr static const uint8_t D2 = (1 << 2);
+constexpr static const uint8_t D3 = (1 << 3);
+constexpr static const uint8_t D4 = (1 << 4);
+constexpr static const uint8_t D5 = (1 << 5);
+constexpr static const uint8_t D6 = (1 << 6);
+constexpr static const uint8_t D7 = (1 << 7);
+
+constexpr static const addr_t A0  = (1 << 0);
+constexpr static const addr_t A1  = (1 << 1);
+constexpr static const addr_t A2  = (1 << 2);
+constexpr static const addr_t A3  = (1 << 3);
+constexpr static const addr_t A4  = (1 << 4);
+constexpr static const addr_t A5  = (1 << 5);
+constexpr static const addr_t A6  = (1 << 6);
+constexpr static const addr_t A7  = (1 << 7);
+constexpr static const addr_t A8  = (1 << 8);
+constexpr static const addr_t A9  = (1 << 9);
+constexpr static const addr_t A10 = (1 << 10);
+constexpr static const addr_t A11 = (1 << 11);
+constexpr static const addr_t A12 = (1 << 12);
+constexpr static const addr_t A13 = (1 << 13);
+constexpr static const addr_t A14 = (1 << 14);
+constexpr static const addr_t A15 = (1 << 15);
+
 template<typename T>
 using sptr_t = std::shared_ptr<T>;
 

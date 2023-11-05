@@ -301,7 +301,7 @@ const std::array<Z80::Instruction, 256> Z80::mi_instr_set{{
     { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED FF */
 }};
 
-int Z80::i_mi_io(Z80& self, uint8_t op, addr_t arg)
+int Z80::i_mi_io(Z80& self, uint8_t op, addr_t)
 {
     /*
      * IN {ABCDEHL}, (C)
@@ -328,7 +328,7 @@ int Z80::i_mi_io(Z80& self, uint8_t op, addr_t arg)
 
     uint8_t data{};
     uint8_t& reg = self.reg8_from_opcode(op, data);
-    uint8_t port = self._regs.C;
+    addr_t port = self._regs.BC();
 
     switch (op & OP_MASK) {
     case IN_OP:
@@ -341,14 +341,14 @@ int Z80::i_mi_io(Z80& self, uint8_t op, addr_t arg)
         self.flag_Y(reg & Flags::Y);
         self.flag_X(reg & Flags::X);
         if (op == 0x78 /* IN A, (C) */) {
-            self._regs.memptr = self._regs.BC() + 1;
+            self._regs.memptr = port + 1;
         }
         break;
 
     case OUT_OP:
         self.io_out(port, reg);
         if (op == 0x79 /* OUT (C), A */) {
-            self._regs.memptr = self._regs.BC() + 1;
+            self._regs.memptr = port + 1;
         }
         break;
 
@@ -578,7 +578,7 @@ int Z80::i_mi_RETI(Z80& self, uint8_t op, addr_t arg)
      */
     self._regs.PC = self.pop_addr();
     self._regs.memptr = self._regs.PC;
-    //TODO FIXME how to signal an i/o ?
+    //TODO FIXME how to signal interrupt completion?
     return 0;
 }
 

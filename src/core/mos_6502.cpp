@@ -23,7 +23,6 @@
 #include <gsl/assert>
 
 #include "monitor.hpp"
-#include "prgfile.hpp"
 
 
 namespace caio {
@@ -333,94 +332,34 @@ std::string Mos6502::Registers::to_string() const
     return ss.str();
 }
 
-void Mos6502::init_monitor(std::istream& is, std::ostream& os)
+void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb& load, const monitor::save_cb& save)
 {
-    throw Error{"Wait for C++26"};
-}
-
-void Mos6502::init_monitor(int ifd, int ofd)
-{
-    static std::map<std::string, std::function<int(const Mos6502&)>> regvals{
-        { "ra",   [](const Mos6502& cpu) { return cpu._regs.A;  }},
-        { "rx",   [](const Mos6502& cpu) { return cpu._regs.X;  }},
-        { "ry",   [](const Mos6502& cpu) { return cpu._regs.Y;  }},
-        { "rs",   [](const Mos6502& cpu) { return cpu._regs.S;  }},
-        { "rp",   [](const Mos6502& cpu) { return cpu._regs.P;  }},
-        { "rp.n", [](const Mos6502& cpu) { return cpu.test_N(); }},
-        { "rp.v", [](const Mos6502& cpu) { return cpu.test_V(); }},
-        { "rp.b", [](const Mos6502& cpu) { return cpu.test_B(); }},
-        { "rp.d", [](const Mos6502& cpu) { return cpu.test_D(); }},
-        { "rp.i", [](const Mos6502& cpu) { return cpu.test_I(); }},
-        { "rp.z", [](const Mos6502& cpu) { return cpu.test_Z(); }},
-        { "rp.c", [](const Mos6502& cpu) { return cpu.test_C(); }}
-    };
-
     using namespace gsl;
-    Expects(_mmap);
-
-    auto regs = [this](std::ostream& os) -> std::ostream& {
-        return (os << this->_regs.to_string());
-    };
+    Expects(ifd >= 0 && ofd >= 0);
 
     auto pc = [this]() -> addr_t& {
         return this->_regs.PC;
-    };
-
-    auto peek = [this](addr_t addr) {
-        return this->peek(addr);
-    };
-
-    auto write = [this](addr_t addr, uint8_t data) {
-        this->write(addr, data);
-    };
-
-    auto disass = [this](std::ostream& os, addr_t start, addr_t count, bool show_pc) {
-        this->disass(os, start, count, show_pc);
     };
 
     auto mmap = [this]() {
         return this->_mmap;
     };
 
-    auto ebreak = [this]() {
-        this->ebreak();
-    };
-
-    auto load = [this](const std::string& fname, addr_t start) -> std::pair<addr_t, addr_t> {
-        PrgFile prog{fname};      /* FIXME PRG format the same for all platforms using 6502? */
-        addr_t addr = prog.address();
-
-        if (start != 0) {
-            addr = start;
-            prog.address(start);
-        } else {
-            start = addr;
-        }
-
-        for (auto c : prog) {
-            this->write(addr++, c);
-        }
-
-        return {start, prog.size()};
-    };
-
-    auto save = [this](const std::string& fname, addr_t start, addr_t end) {
-        PrgFile prog{};
-        for (auto addr = start; addr <= end; ++addr) {
-            uint8_t c = this->read(addr);
-            prog.push_back(c);
-        }
-        prog.save(fname, start);
-    };
-
-    auto loglevel = [this](const std::string& lv) {
-        if (!empty(lv)) {
-            this->loglevel(lv);
-        }
-        return this->loglevel();
-    };
-
     auto regvalue = [this](const std::string& rname) -> uint16_t {
+        static std::map<std::string, std::function<int(const Mos6502&)>> regvals{
+            { "ra",   [](const Mos6502& cpu) { return cpu._regs.A;  }},
+            { "rx",   [](const Mos6502& cpu) { return cpu._regs.X;  }},
+            { "ry",   [](const Mos6502& cpu) { return cpu._regs.Y;  }},
+            { "rs",   [](const Mos6502& cpu) { return cpu._regs.S;  }},
+            { "rp",   [](const Mos6502& cpu) { return cpu._regs.P;  }},
+            { "rp.n", [](const Mos6502& cpu) { return cpu.test_N(); }},
+            { "rp.v", [](const Mos6502& cpu) { return cpu.test_V(); }},
+            { "rp.b", [](const Mos6502& cpu) { return cpu.test_B(); }},
+            { "rp.d", [](const Mos6502& cpu) { return cpu.test_D(); }},
+            { "rp.i", [](const Mos6502& cpu) { return cpu.test_I(); }},
+            { "rp.z", [](const Mos6502& cpu) { return cpu.test_Z(); }},
+            { "rp.c", [](const Mos6502& cpu) { return cpu.test_C(); }}
+        };
         auto it = regvals.find(rname);
         if (it != regvals.end()) {
             return it->second(*this);
@@ -428,19 +367,18 @@ void Mos6502::init_monitor(int ifd, int ofd)
         throw InvalidArgument{};
     };
 
-    MonitoredCPU monitor_funcs{
-        .regs     = regs,
-        .pc       = pc,
-        .peek     = peek,
-        .write    = write,
-        .disass   = disass,
-        .mmap     = mmap,
-        .ebreak   = ebreak,
-        .load     = load,
-        .save     = save,
-        .loglevel = loglevel,
-        .regvalue = regvalue
-    };
+    MonitoredCPU monitor_funcs = monitor::monitored_cpu_defaults(this);
+    monitor_funcs.pc = pc;
+    monitor_funcs.mmap = mmap;
+    monitor_funcs.regvalue = regvalue;
+
+    if (load) {
+        monitor_funcs.load = load;
+    }
+
+    if (save) {
+        monitor_funcs.save = save;
+    }
 
     _monitor = std::make_unique<Monitor>(ifd, ofd, std::move(monitor_funcs));
     _monitor->add_breakpoint(read_addr(vRESET));
@@ -540,7 +478,7 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
     /*
      * Get the opcode.
      */
-    uint8_t opcode = read(addr);
+    uint8_t opcode = peek(addr);
     auto& ins = instr_set[opcode];
 
     if (show_pc && addr != _regs.PC) {
@@ -584,7 +522,7 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
         addr_t operand{};
         uint8_t ophi{}, oplo{};
 
-        oplo = read(addr++);
+        oplo = peek(addr++);
 
         hex << " " << utils::to_string(oplo);
 
@@ -596,7 +534,7 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
 
         case '^':
             /* Operand is a 16 bit value, must be disassembled as $0000 */
-            ophi = read(addr++);
+            ophi = peek(addr++);
             operand = (static_cast<addr_t>(ophi) << 8) | oplo;
             hex << " " << utils::to_string(ophi);
             ops << utils::to_string(operand);

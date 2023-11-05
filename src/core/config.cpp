@@ -109,7 +109,7 @@ std::string Config::resolve(const std::string& name, const std::string& path, co
     /*
      * Build the basename and search for the file in the specified path.
      */
-    fname = prefix + fname + ext;
+    fname = prefix + name + ext;
     std::string fullpath{fs::search(fname, {path})};
     if (!fullpath.empty()) {
         return fullpath;

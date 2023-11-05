@@ -34,9 +34,11 @@ namespace caio {
 class Keyboard : public Name {
 public:
     constexpr static const char* TYPE = "KBD";
+    constexpr static const bool SHIFT = true;
+    constexpr static const bool NONE  = false;
 
     /**
-     * caio Key codes.
+     * caio key codes.
      * (US ANSI layout + something else).
      */
     enum Key {
@@ -166,7 +168,7 @@ public:
 
     /**
      * Load a key mapping table from a file.
-     * The previous key mappings is cleared.
+     * Previous key mappings within this instance are cleared.
      * @param fname Name of the file containing the key mappings.
      * @exception IOError
      * @see add_key_map()

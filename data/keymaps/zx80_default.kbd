@@ -4,7 +4,7 @@
 # The PC key names use the US-ANSI layout as reference.
 #
 # Format:
-#   <pc-key> [<pc-shift>] [<pc-altgr>]  <c64-key> [<c64-shift>]
+#   <pc-key> [<pc-shift>] [<pc-altgr>]  <ZX80-key> [<ZX80-shift>]
 #
 ###############################################################
 # PC-KEY-NAME       SHIFT   ALTGR   ZX80-KEY-NAME       SHIFT
@@ -73,6 +73,7 @@
   KEY_ENTER         SHIFT           KEY_NEWLINE         SHIFT
 
   KEY_LEFT_SHIFT                    KEY_SHIFT
+  KEY_RIGHT_SHIFT                   KEY_SHIFT
   KEY_Z                             KEY_Z
   KEY_X                             KEY_X
   KEY_C                             KEY_C
@@ -91,3 +92,10 @@
   KEY_M             SHIFT           KEY_M               SHIFT
   KEY_DOT           SHIFT           KEY_DOT             SHIFT
   KEY_SPACE         SHIFT           KEY_SPACE           SHIFT
+
+# Not positional but useful
+  KEY_BACKSPACE                     KEY_0               SHIFT
+  KEY_CURSOR_LEFT                   KEY_5               SHIFT
+  KEY_CURSOR_RIGHT                  KEY_8               SHIFT
+  KEY_CURSOR_UP                     KEY_7               SHIFT
+  KEY_CURSOR_DOWN                   KEY_6               SHIFT

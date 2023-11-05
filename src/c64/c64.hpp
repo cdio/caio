@@ -77,7 +77,7 @@ class C64 {
 public:
     /**
      * Instantiate this C64.
-     * This method only sets the specified configuration parameters.
+     * This method only sets the configuration parameters.
      * Call the run() method to build and start the actual C64 emulator.
      * @param sec Configuration section.
      * @see C64Config
@@ -88,7 +88,7 @@ public:
     }
 
     /**
-     * Build a C64 emulator and start it.
+     * Build this C64 emulator and start it.
      * This method returns on error or when the user terminates the emulator through the UI.
      * @see start()
      */

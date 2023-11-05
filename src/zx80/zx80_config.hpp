@@ -25,12 +25,24 @@ namespace caio {
 namespace sinclair {
 namespace zx80 {
 
-constexpr static const char* SEC_ZX80           = "zx80";
-constexpr static const char* KEY_RAM_16K        = "ram16";
-constexpr static const char* KEY_ROM_8K         = "rom8";
+constexpr static const unsigned CLOCK_FREQ       = 3250000;
+constexpr static const uint64_t RAM_INIT_PATTERN = 0x0000000000000000ULL;
 
-constexpr static const char* DEFAULT_RAM_16K    = "no";
-constexpr static const char* DEFAULT_ROM_8K     = "no";
+constexpr static const char* ROM4_FNAME          = "zx80_rom.bin";
+constexpr static const char* ROM8_FNAME          = "zx81_rom.bin";
+
+constexpr static const size_t ROM4_SIZE          = 4096;
+constexpr static const size_t ROM8_SIZE          = 8192;
+
+constexpr static const size_t INTERNAL_RAM_SIZE  = 1024;
+constexpr static const size_t EXTERNAL_RAM_SIZE  = 16384;
+
+constexpr static const char* SEC_ZX80            = "zx80";
+constexpr static const char* KEY_RAM_16K         = "ram16";
+constexpr static const char* KEY_ROM_8K          = "rom8";
+
+constexpr static const char* DEFAULT_RAM_16K     = "no";
+constexpr static const char* DEFAULT_ROM_8K      = "no";
 
 class ZX80Cmdline : public config::Cmdline {
 public:

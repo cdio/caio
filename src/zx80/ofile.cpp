@@ -16,42 +16,36 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "zilog_z80.hpp"
+#include "ofile.hpp"
+
+#include "endian.hpp"
+#include "fs.hpp"
 
 
 namespace caio {
-namespace zilog {
+namespace sinclair {
+namespace zx80 {
 
-uint8_t Z80::io_in(addr_t port)
+void OFile::load(const std::string& fname)
 {
-    iorq_pin(true);
-    auto value = read(port);
-    iorq_pin(false);
-    return value;
+    *static_cast<std::vector<uint8_t>*>(this) = fs::load(fname);
+
+    uint16_t size = le16toh(*reinterpret_cast<uint16_t*>(data() + SIZE_OFFSET));
+    if (size < LOAD_ADDR) {
+        throw IOError{"Invalid cassette file: " + fname};
+    }
+
+    size -= LOAD_ADDR;
+    if (size > MAX_SIZE) {
+        throw IOError{"Invalid cassette file size: " + fname + ": " + std::to_string(size)};
+    }
 }
 
-void Z80::io_out(addr_t port, uint8_t value)
+void OFile::save(const std::string& fname)
 {
-    iorq_pin(true);
-    write(port, value);
-    iorq_pin(false);
+    fs::save(fname, *this);
 }
 
-int Z80::i_IN_A_n(Z80& self, uint8_t op, addr_t arg)
-{
-    addr_t port = (static_cast<uint16_t>(self._regs.A) << 8) | (arg & 255);
-    self._regs.memptr = port + 1;
-    self._regs.A = self.io_in(port);
-    return 0;
 }
-
-int Z80::i_OUT_n_A(Z80& self, uint8_t op, addr_t arg)
-{
-    addr_t port = (static_cast<uint16_t>(self._regs.A) << 8) + (arg & 255);
-    self._regs.memptr = (port & 0xFF) | ((arg + 1) & 255);      //XXX check this
-    self.io_out(port, self._regs.A);
-    return 0;
-}
-
 }
 }

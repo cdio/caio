@@ -129,13 +129,12 @@ public:
      * This CPU must be properly initialised (system mappings set) before this method can be called.
      * The CPU monitor is initialised and a breakpoint is added at the reset address (vRESET),
      * the monitor takes control as soon as this CPU is started.
-     * @param is Input stream used to communicate with the user;
-     * @param os Output stream used to communicate with the user.
-     * @exception InvalidArgument if the system mappings are not set.
-     * @see reset()
+     * @param is   Input stream used to communicate with the user;
+     * @param os   Output stream used to communicate with the user.
+     * @param load Monitor load callback (empty for default);
+     * @param save Monitor save calblack (empty for default).
      */
-    void init_monitor(std::istream& is, std::ostream& os);
-    void init_monitor(int ifd, int ofd);
+    void init_monitor(int ifd, int ofd, const monitor::load_cb& load = {}, const monitor::save_cb& save = {});
 
     /**
      * Set the single-step log level.

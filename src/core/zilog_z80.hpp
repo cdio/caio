@@ -60,8 +60,8 @@ public:
 
     using breakpoint_cb_t = std::function<void(Z80&, void*)>;
 
-    enum ClockCycle {
-        T1 = 0,
+    enum class Cycle {
+        T1,
         T2,
         T3,
         Tn
@@ -186,7 +186,7 @@ public:
      * @param label CPU label.
      */
     Z80(const std::string& type = TYPE, const std::string& label = LABEL)
-        : Name{type, label} {
+        : Name{type, (label.empty() ? LABEL : label)} {
     }
 
     /**
@@ -206,13 +206,13 @@ public:
      * This CPU must be properly initialised (system mappings set) before this method can be called.
      * The CPU monitor is initialised and a breakpoint is added at the reset address (vRESET),
      * the monitor takes control as soon as this CPU is started.
-     * @param is Input stream used to communicate with the user;
-     * @param os Output stream used to communicate with the user.
-     * @exception InvalidArgument if the system mappings are not set.
+     * @param is   Input stream used to communicate with the user;
+     * @param os   Output stream used to communicate with the user;
+     * @param load Monitor load callback (empty for default);
+     * @param save Monitor save calblack (empty for default).
      * @see reset()
      */
-    void init_monitor(std::istream& is, std::ostream& os);
-    void init_monitor(int ifd, int ofd);
+    void init_monitor(int ifd, int ofd, const monitor::load_cb& load, const monitor::save_cb& save);
 
     /**
      * Set the single-step log level.
@@ -517,14 +517,14 @@ private:
      * @param port I/O port to read from.
      * @return The value at the specifed I/O port.
      */
-    uint8_t io_in(uint8_t port);
+    uint8_t io_in(addr_t port);
 
     /*
      * OUT helper.
      * @param port  I/O port to write to;
      * @param value Value to write.
      */
-    void io_out(uint8_t port, uint8_t value);
+    void io_out(addr_t port, uint8_t value);
 
     void flag(uint8_t bits, bool act = true) {
         _regs.F = (act ? (_regs.F | bits) : (_regs.F & (~bits)));
@@ -647,7 +647,7 @@ private:
     OutputPinCb      _rfsh_cb{};
     bool             _is_int{};
     bool             _is_nmi{};
-    int              _tx{T1};
+    Cycle            _tx{Cycle::T1};
     std::atomic_bool _break{};
     std::map<addr_t, std::pair<breakpoint_cb_t, void*>> _breakpoints{};
 

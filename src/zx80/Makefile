@@ -25,13 +25,15 @@ LIB=		libcaio_zx80.a
 #
 # Sinclair ZX80 Specifics
 #
-CXXSRCS=	zx80.cpp \
+CXXSRCS=	ofile.cpp \
+		zx80.cpp \
 		zx80_aspace.cpp \
 		zx80_config.cpp \
 		zx80_keyboard.cpp \
 		zx80_video.cpp
 
-INCS=		zx80.hpp \
+INCS=		ofile.hpp \
+		zx80.hpp \
 		zx80_aspace.hpp \
 		zx80_config.hpp \
 		zx80_keyboard.hpp \

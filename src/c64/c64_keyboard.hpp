@@ -58,7 +58,9 @@ namespace c64 {
  */
 class C64Keyboard : public Keyboard {
 public:
-    enum class MatrixKey {
+    constexpr static const unsigned MATRIX_ROWS = 8;
+
+    enum class MatrixKey : uint16_t {
         KEY_RUNSTOP      = 0x0780,
         KEY_Q            = 0x0740,
         KEY_CBM          = 0x0720,
@@ -131,7 +133,7 @@ public:
         KEY_RETURN       = 0x0002,
         KEY_DELETE       = 0x0001,
 
-        KEY_NONE         = -1
+        KEY_NONE         = 0xFFFF
     };
 
     /**
@@ -215,7 +217,7 @@ private:
     /**
      * The keyboard matrix.
      */
-    std::array<uint8_t, 8> _matrix{};
+    std::array<uint8_t, MATRIX_ROWS> _matrix{};
     mutable std::mutex _matrix_mutex{};
 
     /**

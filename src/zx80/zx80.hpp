@@ -35,12 +35,6 @@ namespace caio {
 namespace sinclair {
 namespace zx80 {
 
-constexpr static const char* ROM4_FNAME             = "zx80_rom.bin";
-constexpr static const char* ROM8_FNAME             = "zx81_rom.bin";
-
-constexpr static const unsigned CLOCK_FREQ          = 3250000;
-constexpr static const uint64_t RAM_INIT_PATTERN    = 0x0000000000000000ULL;
-
 /**
  * Sinclair ZX80 emulator.
  */
@@ -48,7 +42,7 @@ class ZX80 {
 public:
     /**
      * Instantiate this ZX80.
-     * This method only sets the specified configuration parameters.
+     * This method only sets the configuration parameters.
      * Call the run() method to build and start the actual ZX80 emulator.
      * @param sec Configuration section.
      * @see ZX80Config
@@ -59,7 +53,7 @@ public:
     }
 
     /**
-     * Build a ZX80 emulator and start it.
+     * Build this ZX80 emulator and start it.
      * This method returns on error or when the user terminates the emulator through the UI.
      * @see start()
      */

@@ -51,15 +51,6 @@ public:
 
     /**
      * Initialise this CPU.
-     * @param type  CPU type;
-     * @param label CPU label.
-     */
-    Mos6510(const std::string& type = TYPE, const std::string& label = LABEL)
-        : Mos6502{type, label} {
-    }
-
-    /**
-     * Initialise this CPU.
      * @param mmap  System mappings;
      * @param type  CPU type;
      * @param label CPU label.

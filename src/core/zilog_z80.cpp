@@ -18,6 +18,10 @@
  */
 #include "zilog_z80.hpp"
 
+#include "fs.hpp"
+
+
+using namespace std::literals::string_literals;
 
 namespace caio {
 namespace zilog {
@@ -405,125 +409,64 @@ void Z80::init(const sptr_t<ASpace>& mmap)
     Z80::reset();
 }
 
-void Z80::init_monitor(std::istream& is, std::ostream& os)
+void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb& load, const monitor::save_cb& save)
 {
-    throw Error{"Wait for C++26"};
-}
-
-void Z80::init_monitor(int ifd, int ofd)
-{
-    static std::map<std::string, std::function<int(const Z80&)>> regvals{
-        { "ra",    [](const Z80& cpu) { return cpu._regs.A;        }},
-        { "rf",    [](const Z80& cpu) { return cpu._regs.F;        }},
-        { "raf",   [](const Z80& cpu) { return cpu._regs.AF();     }},
-        { "rb",    [](const Z80& cpu) { return cpu._regs.B;        }},
-        { "rc",    [](const Z80& cpu) { return cpu._regs.C;        }},
-        { "rbc",   [](const Z80& cpu) { return cpu._regs.BC();     }},
-        { "rd",    [](const Z80& cpu) { return cpu._regs.D;        }},
-        { "re",    [](const Z80& cpu) { return cpu._regs.E;        }},
-        { "rde",   [](const Z80& cpu) { return cpu._regs.DE();     }},
-        { "rh",    [](const Z80& cpu) { return cpu._regs.H;        }},
-        { "rl",    [](const Z80& cpu) { return cpu._regs.L;        }},
-        { "rhl",   [](const Z80& cpu) { return cpu._regs.HL();     }},
-        { "ra'",   [](const Z80& cpu) { return cpu._regs.aA;       }},
-        { "rf'",   [](const Z80& cpu) { return cpu._regs.aF;       }},
-        { "raf'",  [](const Z80& cpu) { return cpu._regs.aAF();    }},
-        { "rb'",   [](const Z80& cpu) { return cpu._regs.aB;       }},
-        { "rc'",   [](const Z80& cpu) { return cpu._regs.aC;       }},
-        { "rbc'",  [](const Z80& cpu) { return cpu._regs.aBC();    }},
-        { "rd'",   [](const Z80& cpu) { return cpu._regs.aD;       }},
-        { "re'",   [](const Z80& cpu) { return cpu._regs.aE;       }},
-        { "rde'",  [](const Z80& cpu) { return cpu._regs.aDE();    }},
-        { "rh'",   [](const Z80& cpu) { return cpu._regs.aH;       }},
-        { "rl'",   [](const Z80& cpu) { return cpu._regs.aL;       }},
-        { "rhl'",  [](const Z80& cpu) { return cpu._regs.aHL();    }},
-        { "ri",    [](const Z80& cpu) { return cpu._regs.I;        }},
-        { "rr",    [](const Z80& cpu) { return cpu._regs.R;        }},
-        { "rx",    [](const Z80& cpu) { return cpu._regs.IX;       }},
-        { "ry",    [](const Z80& cpu) { return cpu._regs.IY;       }},
-        { "rsp",   [](const Z80& cpu) { return cpu._regs.SP;       }},
-        { "rpc",   [](const Z80& cpu) { return cpu._regs.PC;       }},
-        { "rf.s",  [](const Z80& cpu) { return cpu.test_S();       }},
-        { "rf.z",  [](const Z80& cpu) { return cpu.test_Z();       }},
-        { "rf.h",  [](const Z80& cpu) { return cpu.test_H();       }},
-        { "rf.v",  [](const Z80& cpu) { return cpu.test_V();       }},
-        { "rf.n",  [](const Z80& cpu) { return cpu.test_N();       }},
-        { "rf.c",  [](const Z80& cpu) { return cpu.test_C();       }},
-        { "rf'.s", [](const Z80& cpu) { return cpu.test_aS();      }},
-        { "rf'.z", [](const Z80& cpu) { return cpu.test_aZ();      }},
-        { "rf'.h", [](const Z80& cpu) { return cpu.test_aH();      }},
-        { "rf'.v", [](const Z80& cpu) { return cpu.test_aV();      }},
-        { "rf'.n", [](const Z80& cpu) { return cpu.test_aN();      }},
-        { "rf'.c", [](const Z80& cpu) { return cpu.test_aC();      }}
-    };
-
     using namespace gsl;
-    Expects(_mmap);
-
-    auto regs = [this](std::ostream& os) -> std::ostream& {
-        return (os << this->status());
-    };
+    Expects(ifd >= 0 && ofd >= 0);
 
     auto pc = [this]() -> addr_t& {
         return this->_regs.PC;
-    };
-
-    auto peek = [this](addr_t addr) {
-        return this->peek(addr);
-    };
-
-    auto write = [this](addr_t addr, uint8_t data) {
-        this->write(addr, data);
-    };
-
-    auto disass = [this](std::ostream& os, addr_t start, addr_t count, bool show_pc) {
-        this->disass(os, start, count, show_pc);
     };
 
     auto mmap = [this]() {
         return this->_mmap;
     };
 
-    auto ebreak = [this]() {
-        this->ebreak();
-    };
-
-    auto load = [/*this*/](const std::string& fname, addr_t start) -> std::pair<addr_t, addr_t> {
-#if 0 /* TODO */
-        PrgFile prog{fname};
-        addr_t addr = prog.address();
-
-        if (start != 0) {
-            addr = start;
-            prog.address(start);
-        }
-
-        for (auto c : prog) {
-            this->write(addr++, c);
-        }
-
-        return static_cast<addr_t>(prog.size());
-#endif
-        return {0, 0};
-    };
-
-    auto save = [/*this*/](const std::string& fname, addr_t start, addr_t end) {
-#if 0 /* TODO */
-        PrgFile prog{};
-        for (auto addr = start; addr <= end; ++addr) {
-            uint8_t c = this->read(addr);
-            prog.push_back(c);
-        }
-        prog.save(fname, start);
-#endif
-    };
-
-    auto loglevel = [this](const std::string& lvs) -> Loglevel {
-        this->loglevel(lvs);
-        return this->loglevel();
-    };
-
     auto regvalue = [this](const std::string& rname) -> uint16_t {
+        static std::map<std::string, std::function<int(const Z80&)>> regvals{
+            { "ra",    [](const Z80& cpu) { return cpu._regs.A;        }},
+            { "rf",    [](const Z80& cpu) { return cpu._regs.F;        }},
+            { "raf",   [](const Z80& cpu) { return cpu._regs.AF();     }},
+            { "rb",    [](const Z80& cpu) { return cpu._regs.B;        }},
+            { "rc",    [](const Z80& cpu) { return cpu._regs.C;        }},
+            { "rbc",   [](const Z80& cpu) { return cpu._regs.BC();     }},
+            { "rd",    [](const Z80& cpu) { return cpu._regs.D;        }},
+            { "re",    [](const Z80& cpu) { return cpu._regs.E;        }},
+            { "rde",   [](const Z80& cpu) { return cpu._regs.DE();     }},
+            { "rh",    [](const Z80& cpu) { return cpu._regs.H;        }},
+            { "rl",    [](const Z80& cpu) { return cpu._regs.L;        }},
+            { "rhl",   [](const Z80& cpu) { return cpu._regs.HL();     }},
+            { "ra'",   [](const Z80& cpu) { return cpu._regs.aA;       }},
+            { "rf'",   [](const Z80& cpu) { return cpu._regs.aF;       }},
+            { "raf'",  [](const Z80& cpu) { return cpu._regs.aAF();    }},
+            { "rb'",   [](const Z80& cpu) { return cpu._regs.aB;       }},
+            { "rc'",   [](const Z80& cpu) { return cpu._regs.aC;       }},
+            { "rbc'",  [](const Z80& cpu) { return cpu._regs.aBC();    }},
+            { "rd'",   [](const Z80& cpu) { return cpu._regs.aD;       }},
+            { "re'",   [](const Z80& cpu) { return cpu._regs.aE;       }},
+            { "rde'",  [](const Z80& cpu) { return cpu._regs.aDE();    }},
+            { "rh'",   [](const Z80& cpu) { return cpu._regs.aH;       }},
+            { "rl'",   [](const Z80& cpu) { return cpu._regs.aL;       }},
+            { "rhl'",  [](const Z80& cpu) { return cpu._regs.aHL();    }},
+            { "ri",    [](const Z80& cpu) { return cpu._regs.I;        }},
+            { "rr",    [](const Z80& cpu) { return cpu._regs.R;        }},
+            { "rx",    [](const Z80& cpu) { return cpu._regs.IX;       }},
+            { "ry",    [](const Z80& cpu) { return cpu._regs.IY;       }},
+            { "rsp",   [](const Z80& cpu) { return cpu._regs.SP;       }},
+            { "rpc",   [](const Z80& cpu) { return cpu._regs.PC;       }},
+            { "rf.s",  [](const Z80& cpu) { return cpu.test_S();       }},
+            { "rf.z",  [](const Z80& cpu) { return cpu.test_Z();       }},
+            { "rf.h",  [](const Z80& cpu) { return cpu.test_H();       }},
+            { "rf.v",  [](const Z80& cpu) { return cpu.test_V();       }},
+            { "rf.n",  [](const Z80& cpu) { return cpu.test_N();       }},
+            { "rf.c",  [](const Z80& cpu) { return cpu.test_C();       }},
+            { "rf'.s", [](const Z80& cpu) { return cpu.test_aS();      }},
+            { "rf'.z", [](const Z80& cpu) { return cpu.test_aZ();      }},
+            { "rf'.h", [](const Z80& cpu) { return cpu.test_aH();      }},
+            { "rf'.v", [](const Z80& cpu) { return cpu.test_aV();      }},
+            { "rf'.n", [](const Z80& cpu) { return cpu.test_aN();      }},
+            { "rf'.c", [](const Z80& cpu) { return cpu.test_aC();      }}
+        };
         auto it = regvals.find(rname);
         if (it != regvals.end()) {
             return it->second(*this);
@@ -531,19 +474,18 @@ void Z80::init_monitor(int ifd, int ofd)
         throw InvalidArgument{};
     };
 
-    MonitoredCPU monitor_funcs{
-        .regs     = regs,
-        .pc       = pc,
-        .peek     = peek,
-        .write    = write,
-        .disass   = disass,
-        .mmap     = mmap,
-        .ebreak   = ebreak,
-        .load     = load,
-        .save     = save,
-        .loglevel = loglevel,
-        .regvalue = regvalue
-    };
+    MonitoredCPU monitor_funcs = monitor::monitored_cpu_defaults(this);
+    monitor_funcs.pc = pc;
+    monitor_funcs.mmap = mmap;
+    monitor_funcs.regvalue = regvalue;
+
+    if (load) {
+        monitor_funcs.load = load;
+    }
+
+    if (save) {
+        monitor_funcs.save = save;
+    }
 
     _monitor = std::make_unique<Monitor>(ifd, ofd, std::move(monitor_funcs));
     _monitor->add_breakpoint(vRESET);
@@ -691,7 +633,7 @@ void Z80::reset()
     m1_pin(false);
     rfsh_pin(false);
 
-    _tx = T1;
+    _tx = Cycle::T1;
 }
 
 size_t Z80::m1_cycle()
@@ -702,27 +644,27 @@ size_t Z80::m1_cycle()
     bool forced{};
 
     switch (_tx) {
-    case T1:
+    case Cycle::T1:
         /*
          * Initiate the M1 cycle.
          */
         m1_pin(true);
         rfsh_pin(false);
-        _tx = T2;
+        _tx = Cycle::T2;
         return 1;
 
-    case T2:
+    case Cycle::T2:
         /*
          * Add wait-states (if requested by external devices).
          */
         if (wait_pin()) {
             _log.debug("Wait state\n");
         } else {
-            _tx = T3;
+            _tx = Cycle::T3;
         }
         return 1;
 
-    case T3:
+    case Cycle::T3:
         /*
          * Fetch the opcode.
          */
@@ -763,27 +705,26 @@ size_t Z80::m1_cycle()
          */
         rfsh_pin(true);
         rfsh_addr = (static_cast<addr_t>(_regs.I) << 8) | _regs.R;
-        read(rfsh_addr);    /* Force rfsh_addr on the address bus and discard the read value */
+        read(rfsh_addr);    /* Force rfsh_addr on the address bus */
 
         /*
-         * The cycles variable include T1, T2 and Tn.
-         * T1 and T2 were already consumed by the clock.
-         * Tn is the next call to this method and it will be consumed separately.
+         * The cycles variable include the timing for T1, T2 and Tn.
+         * Times for T1 and T2 have been consumed by the clock.
+         * Tn takes place during the next call to this method and its time will be consumed separately.
          * But,
          * "When an EI instruction is executed, any pending interrupt request is not accepted
          * until after the instruction following EI is executed. This single instruction delay
          * is necessary when the next instruction is a return instruction." (z80cpu_um.pdf p18).
          */
         if (opcode == I_EI) {
-            _tx = T1;
-            return cycles - 2;
+            _tx = Cycle::T1;
+            return (cycles - 2);
         }
 
-        _tx = Tn;
+        _tx = Cycle::Tn;
         return (cycles - 3);
 
-    case Tn:
-    default:
+    case Cycle::Tn:
         /*
          * Inpterrupt pins sampled on last instruction cycle.
          */
@@ -793,7 +734,7 @@ size_t Z80::m1_cycle()
             _is_int = true;
         }
 
-        _tx = T1;
+        _tx = Cycle::T1;
         return 1;
     }
 }
@@ -801,7 +742,7 @@ size_t Z80::m1_cycle()
 size_t Z80::m1_cycle_interrupt()
 {
     switch (_tx) {
-    case T1:
+    case Cycle::T1:
         /*
          * Initiate the special M1 cycle.
          */
@@ -813,21 +754,21 @@ size_t Z80::m1_cycle_interrupt()
             iorq_pin(true);
         }
 
-        _tx = T2;
+        _tx = Cycle::T2;
         return 1;
 
-    case T2:
+    case Cycle::T2:
         /*
          * Add wait-states for /INT (if requested by external devices).
          */
         if (_is_int && wait_pin()) {
             _log.debug("INT wait state\n");
         } else {
-            _tx = T3;
+            _tx = Cycle::T3;
         }
         return 1;
 
-    case T3:
+    case Cycle::T3:
     default:
         /*
          * End the special M1 cycle.
@@ -862,7 +803,8 @@ size_t Z80::m1_cycle_interrupt()
         _IFF1 = false;
         _IFF2 = false;
 
-        uint8_t vec = io_in(0);     /* /IORQ automatically deactivated */
+        uint8_t vec = _mmap->databus();
+        iorq_pin(false);
 
         switch (_imode) {
         case IMODE_0:
@@ -915,9 +857,9 @@ size_t Z80::m1_cycle_interrupt()
      */
     rfsh_pin(true);
     addr_t rfsh_addr = (static_cast<addr_t>(_regs.I) << 8) | _regs.R;
-    read(rfsh_addr);    /* Force rfsh_addr on the address bus and discard the read value */
+    read(rfsh_addr);    /* Force rfsh_addr on the address bus */
 
-    _tx = T1;
+    _tx = Cycle::T1;
     _is_nmi = false;
     _is_int = false;
 
@@ -934,7 +876,7 @@ size_t Z80::execute(uint8_t opcode, bool forced)
 
     if (_log.is_debug()) {
         if (forced) {
-            line = std::string{"Forced instruction: "} + ins.format;
+            line = "Forced instruction: "s + ins.format;
         } else {
             addr_t addr = _regs.PC;
             line = disass(addr);
@@ -1059,7 +1001,7 @@ size_t Z80::tick(const Clock& clk)
     /*
      * Break hot-key or breakpoint from monitor.
      */
-    if (_monitor && _tx == T1 && (_break || _monitor->is_breakpoint(_regs.PC))) {
+    if (_monitor && _tx == Cycle::T1 && (_break || _monitor->is_breakpoint(_regs.PC))) {
         addr_t pc{};
         do {
             _break = false;
@@ -1126,7 +1068,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
      */
     bool multibyte{true};
     do {
-        opcode = read(addr++);
+        opcode = peek(addr++);
         hex << " " << utils::to_string(opcode);
 
         ins = &iset->operator[](opcode);
@@ -1144,13 +1086,13 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
             iset = &iy_instr_set;
             break;
         case ArgType::IXBit:
-            oplo = read(addr++);
+            oplo = peek(addr++);
             has_oplo = true;
             hex << " " << utils::to_string(oplo);
             iset = &ix_bit_instr_set;
             break;
         case ArgType::IYBit:
-            oplo = read(addr++);
+            oplo = peek(addr++);
             has_oplo = true;
             hex << " " << utils::to_string(oplo);
             iset = &iy_bit_instr_set;
@@ -1181,7 +1123,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
         char sign{};
 
         if (!has_oplo) {
-            oplo = read(addr++);
+            oplo = peek(addr++);
             hex << " " << utils::to_string(oplo);
         }
 
@@ -1199,7 +1141,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
                 break;
 
             case ArgType::A16:
-                ophi = read(addr++);
+                ophi = peek(addr++);
                 operand = (static_cast<addr_t>(ophi) << 8) | oplo;
                 hex << " " << utils::to_string(ophi);
                 ops << utils::to_string(operand);
@@ -1242,7 +1184,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
                         "opcode: $%02X, disassembled: %s\n", format.c_str(), opcode, hex.str().c_str());
                     /* NOTREACHED */
                 }
-                ophi = read(addr++);
+                ophi = peek(addr++);
                 ops << utils::to_string(ophi);
                 format = format.replace(pos, 1, ops.str());
                 break;

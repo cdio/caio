@@ -45,10 +45,6 @@ public:
     constexpr static const uint8_t INVALID  = 0xFF;
     constexpr static const uint8_t MASK     = LORAM | HIRAM | CHAREN | GAME | EXROM;
 
-    constexpr static const addr_t A15       = 1 << 15;
-    constexpr static const addr_t A14       = 1 << 14;
-    constexpr static const addr_t A13       = 1 << 13;
-
     constexpr static const addr_t ADDR_MASK = 0xFFFF;
     constexpr static const size_t BANKS     = 32;
     constexpr static const size_t BLOCKS    = 16;

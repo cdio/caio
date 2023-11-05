@@ -25,10 +25,13 @@ namespace caio {
 namespace sinclair {
 namespace zx80 {
 
-ZX80ASpace::ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr_t& rom, const sptr_t<ZX80Video>& video)
+ZX80ASpace::ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr_t& rom,
+    const sptr_t<ZX80Video>& video, const sptr_t<ZX80Keyboard>& kbd)
     : ASpace{},
       _cpu{cpu},
+      _rom{rom},
       _video{video},
+      _kbd{kbd},
       _mmap{}
 {
     using namespace gsl;
@@ -262,254 +265,238 @@ ZX80ASpace::ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr
         _mmap[6]  = { rom, 0x1800 };
         _mmap[7]  = { rom, 0x1C00 };
 
-        _mmap[32] = { rom, 0x0000 };  //display TODO: create two ram/rom devices to be used by video interface, it requires only M1
-        _mmap[33] = { rom, 0x0400 };  //display       the ram/rom device send data to the video interface
-        _mmap[34] = { rom, 0x0800 };  //display       so these devices control the video signal generation + timing
-        _mmap[35] = { rom, 0x0C00 };  //display       reproducing the flickering
+        _mmap[12] = { rom, 0x1000 };
+        _mmap[13] = { rom, 0x1400 };
+        _mmap[14] = { rom, 0x1800 };
+        _mmap[15] = { rom, 0x1C00 };
 
-        _mmap[36] = { rom, 0x1000 };  //display
-        _mmap[37] = { rom, 0x1400 };  //display
-        _mmap[38] = { rom, 0x1800 };  //display
-        _mmap[39] = { rom, 0x1C00 };  //display
+        _mmap[36] = { rom, 0x1000 };
+        _mmap[37] = { rom, 0x1400 };
+        _mmap[38] = { rom, 0x1800 };
+        _mmap[39] = { rom, 0x1C00 };
+
+        _mmap[44] = { rom, 0x1000 };
+        _mmap[45] = { rom, 0x1400 };
+        _mmap[46] = { rom, 0x1800 };
+        _mmap[47] = { rom, 0x1C00 };
     }
 
     ASpace::reset(_mmap, _mmap, ADDR_MASK);
 }
 
+void ZX80ASpace::interrupt_req()
+{
+    _cpu->int_pin(true);
+    _int = true;
+}
+
+void ZX80ASpace::interrupt_ack()
+{
+    _cpu->int_pin(false);
+    _int = false;
+    _video->hsync();
+    _counter = (_counter + 1) % 8;
+}
+
+inline uint8_t ZX80ASpace::character_bitmap(addr_t base)
+{
+    /*
+     * The refresh address is equal to (I << 8 | R) which is set
+     * to the base address of the character bitmap data inside the ROM.
+     * Each character is a bitmap block of 8 lines x 8 bits.
+     *
+     * bitmap_address = 000RRRRC CCCCCLLL
+     * RRRR = Bitmap base address
+     * CCCC = Character code (D5..D0)
+     * LLL  = Character line (_counter)
+     *
+     * http://searle.x10host.com/zx80/zx80ScopePics.html
+     */
+    addr_t offset = static_cast<addr_t>(_chcode & CHCODE_MASK) << 3;
+    addr_t bitmap_addr = base | offset | _counter;
+
+    uint8_t invert = ((_chcode & VIDEO_INVERT) ? 255 : 0);
+    uint8_t bitmap = _rom->read(bitmap_addr) ^ invert;
+
+    return bitmap;
+}
+
 uint8_t ZX80ASpace::read(addr_t addr, ReadMode mode)
 {
     if (mode == ReadMode::Peek) {
-        return ASpace::read(addr, mode);
+        return (_cpu->iorq_pin() ? io_read(addr) : ASpace::read(addr, mode));
+    }
+
+    if (_cpu->iorq_pin()) {
+        if (_int) {
+            /*
+             * Interrupt acknowledged by the CPU:
+             * Generate the video HSYNC signal and
+             * increment the character line counter.
+             */
+            interrupt_ack();
+        }
+
+        /*
+         * I/O read.
+         */
+        return io_read(addr);
     }
 
     /*
-     * Refresh address A6 bit is hardwired to the cpu's /INT pin.
+     * Memory read.
      */
-    bool irq = _cpu->rfsh_pin() && ((addr & A6) == 0);
-    if (irq && !_int) {
-        _cpu->int_pin(true);
-        _int = true;
-    } else if (!irq && _int) {
-        _cpu->int_pin(false);
-        _int = false;
-    }
-
     uint8_t data = ASpace::read(addr, mode);
 
-#if 1
-        if (_cpu->rfsh_pin()) {
-            /*
-             * Refresh cycle:
-             * The address bus contains the base address of the character data in ROM,
-             * this address is sampled by a shift register to generate the video signal.
-             * Here, this data byte is sent to the video emulator which paints the 8 bits
-             * at once during the next video tick (see ZX80Video::tick()).
-             */
-            bool invert = data & VIDEO_INVERT;
-            uint8_t vdata = data & VDATA_MASK;
-            _video->video_data(vdata, invert);
-
-        } else {
-            /*
-             * CPU is accessing the address space.
-             */
-            bool video_access = _cpu->m1_pin() && (addr & VIDEO_ADDRESS);
-            if (video_access) {
-                /*
-                 * Display opcode fetch.
-                 */
-                bool nop_generator = !(data & VIDEO_NOP);
-    log.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> video accessed nop generator %d\n", nop_generator);
-                if (nop_generator) {
-                    /*
-                     * Load character data and force a NOP on the data bus.
-                     */
-                    uint8_t vdata = data & VDATA_MASK;
-                    bool invert = data & VIDEO_INVERT;;
-                    _video->video_data(vdata, invert);
-    log.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ch=%02x\n", vdata);
-//                    _video->addr_lo(video_data);
-                    return Z80::I_NOP; /* The CPU must read a NOP */
-
-                } else {
-                    _video->hsync();
-                    return data;
-                }
-            }
-        }
-
-        if (_cpu->m1_pin()) {
-            /*
-             * Video interface ticked at M1.
-             */
-            //XXX M1 lasts for a long time, it must be edge triggered here
-//    log.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> tick\n");
-//            _video->tick();
-        }
-
+    if (_vsync) {
         /*
-         * I/O Read.
+         * VSYNC period: Return the data.
          */
-        if (_cpu->iorq_pin()) {
-            /* TODO XXX
-             *
-             * From "https://problemkaputt.de/zxdocs.htm#zx80zx81memorymapandsystemarea" :
-             *
-             * Input from Port FEh (or any other port with A0 zero)
-             * Reading from this port initiates the Vertical Retrace period (and accordingly,
-             * Cassette Output becomes Low), and resets the LINECNTR register to zero,
-             * LINECNTR remains stopped/zero until user terminates retrace - In the ZX81,
-             * all of the above happens only if NMIs are disabled.
-             *
-             *   Bit  Expl.
-             *   0-4  Keyboard column bits (0=Pressed)
-             *   5    Not used             (1)
-             *   6    Display Refresh Rate (0=60Hz, 1=50Hz)
-             *   7    Cassette input       (0=Normal, 1=Pulse)
-             *
-             * When reading from the keyboard, one of the upper bits (A8-A15) of the I/O
-             * address must be "0" to select the desired keyboard row (0-7).
-             * (When using IN A,(nn), the old value of the A register is output as upper
-             * address bits and <nn> as lower bits. Otherwise, ie. when using IN r,(C) or
-             * INI or IND, the BC register is output to the address bus.)
-             *
-             * The ZX81/ZX80 Keyboard Matrix
-             *
-             *   Port____Line____Bit__0____1____2____3____4__
-             *   FEFEh  0  (A8)     SHIFT  Z    X    C    V
-             *   FDFEh  1  (A9)       A    S    D    F    G
-             *   FBFEh  2  (A10)      Q    W    E    R    T
-             *   F7FEh  3  (A11)      1    2    3    4    5
-             *   EFFEh  4  (A12)      0    9    8    7    6
-             *   DFFEh  5  (A13)      P    O    I    U    Y
-             *   BFFEh  6  (A14)    ENTER  L    K    J    H
-             *   7FFEh  7  (A15)     SPC   .    M    N    B
-             */
-            if ((addr & 1) == 0) {
- //               _video->vsync();
-            }
-
-            //XXX
-            return 0x7F;
-        }
-#else
-
-    if (_cpu->halt_pin()) {
-        _video->stopline();
-        return 0;
+        return data;
     }
 
-    if ((addr & A15) && !(data & CH_NOP_BIT)) {
-        if (!_cpu->rfsh_pin()) {
-            _video->video_data(addr
-            _video->addr_lo(data & CH_MASK);
-
-        } else {
-            /*
-             * Refresh cycle:
-             * The address bus contains the address of the current character line in ROM,
-             * this address must be captured by the video interface.
-             */
-            _video->addr_hi(addr >> 8);
-        _video->tick();
-            return 0;
-        }
-    }
-
-//        bool video_access = (addr & A15) && !_cpu->halt_pin() && !(data & CH_NOP_BIT);
-//        if (video_access) {
-//            _video->addr_lo(addr & CH_MASK);
-
+    if (_cpu->m1_pin()) {
+        /*
+         * M1 cycle: Opcode fetch.
+         * The video memory is only accessed during M1.
+         */
+        bool video_access = (addr & VIDEO_ADDR_MASK);
+        if (video_access) {
             /*
              * Display opcode fetch.
              */
-//            bool nop_generator = !(data & CH_NOP_BIT);
-//            if (nop_generator) {
-//                return 0x00; /* The CPU must read a NOP */
-//            } else {
+            bool force_nop = !(data & VIDEO_HALT);
+            if (force_nop) {
                 /*
-                 * Finish the current scanline.
+                 * Latch the character code and force the NOP opcode on the data bus
+                 * (the CPU will read this opcode and execute it).
                  */
-//log.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> STOPLINE\n");
-//                _video->stopline();
-//            }
-//    }
+                _chcode = data;
+                data = Z80::I_NOP;
+            } else {
+                /*
+                 * Halt instruction (or any other data with the VIDEO_HALT bit set):
+                 * The rest of the scanline must be cleared, this is done by
+                 * setting the character code to "space".
+                 * FIXME: the problem with this is that _chcode is 8 pixels long
+                 */
+                _chcode = CHCODE_BLANK;
+            }
+        }
+    }
 
-//    if (_cpu->m1_pin()) {
+    if (_cpu->rfsh_pin()) {
         /*
-         * Video interface ticked at M1.
+         * Refresh cycle: The address bus contains the base address of the character
+         * bitmap data. This is when the bitmap of the latched character must be
+         * painted on the screen.
          */
-        //XXX M1 lasts for a long time, it must be edge triggered here
- //       _video->tick();
-  //  }
-#endif
+        uint8_t bitmap = character_bitmap(addr & BITMAP_ADDR_MASK);
+        _video->bitmap(bitmap);
 
+        /*
+         * The line INTERRUPT_ADDR_MASK (A6) of the refresh address is hardwired to the
+         * CPU's /INT pin so when this bit is cleared an interrupt request must be triggered.
+         */
+        bool irq = ((addr & INTERRUPT_ADDR_MASK) == 0);
+        if (irq && !_int) {
+            /*
+             * Interrupt request.
+             */
+            interrupt_req();
+
+        } else if (!irq && _int) {
+            /*
+             * Interrupt acknowledged by the CPU:
+             * Generate the video HSYNC signal and
+             * increment the character line counter.
+             */
+            interrupt_ack();
+        }
+    }
+
+    return data;
+}
+
+uint8_t ZX80ASpace::io_read(addr_t addr)
+{
+    /*
+     * I/O Read:
+     * +-----+---------------------------------------------------+
+     * |     | D7    D6    D5    D4    D3    D2    D1    D0      |
+     * +-----+---------------------------------------------------+
+     * | A8  |                   V     C     X     Z     SHIFT   |
+     * | A9  |                   G     F     D     S     A       |
+     * | A10 |                   T     R     E     W     Q       |
+     * | A11 |                   5     4     3     2     1       |
+     * | A12 |                   6     7     8     9     0       |
+     * | A13 |                   Y     U     I     O     P       |
+     * | A14 |                   H     J     K     L     NEWLINE |
+     * | A15 |                   B     N     M     .     SPACE   |
+     * +-----+---------------------------------------------------+
+     *
+     * A8-A16: Keyboard row to scan (0->Scan, 1->Do not scan)
+     *  D0-D4: Keyboard columns (0->Pressed, 1->Released)
+     *     D5: unused
+     *     D6: 0->60Hz, 1->50Hz
+     *     D7: Cassette input (0->None, 1->Pulse)
+     *
+     * Officially, the keyboard is scanned by delivering a I/O read
+     * to port $xxFE, where xx specifies the row to scan (A8-A16).
+     * Actually, any read from any port with A0=0 performs a keyboard row scan.
+     *
+     * Note that during IN A,(port) the previous value of A is set as A8-A15
+     * and during IN r,(C), INI or IND, the B register is set as A8-A15.
+     *
+     * https://problemkaputt.de/zxdocs.htm#zx80zx81memorymapandsystemarea
+     */
+    uint8_t data = 255;
+
+    /*
+     * The keyboard is read on I/O accesses with A0==0.
+     */
+    if ((addr & KEYBOARD_ADDR_MASK) == 0) {
+        /*
+         * A row scan starts the VSYNC period and
+         * resets the character line counter.
+         */
+        _vsync = true;
+        _counter = 0;
+        _video->vsync();
+
+        data = VIDEO_RATE_50HZ; /* Enforced by hardware */
+
+        uint8_t nrow = addr >> 8;
+        _kbd->write(nrow);
+        data |= _kbd->read();
+
+        //TODO Casette input
+    }
+
+    switch (addr) {
+    case 0xFF7E:
+        data |= VIDEO_RATE_50HZ;
+        break;
+    default:;
+    }
+
+    /*
+     * Normal I/O input
+     * TODO
+     */
     return data;
 }
 
 void ZX80ASpace::write(addr_t addr, uint8_t value)
 {
-    /*
-     * A6 hard-wired to cpu's INT pin.
-     */
-    bool irq = _cpu->rfsh_pin() && ((addr & A6) == 0);
-    if (irq && !_int) {
-        _cpu->int_pin(true);
-        _int = true;
-    } else if (!irq && _int) {
-        _cpu->int_pin(false);
-        _int = false;
-    }
-
-    if (_cpu->rfsh_pin()) {
-        return;
-    }
-
-    /*
-     * I/O write.
-     */
     if (_cpu->iorq_pin()) {
-        /* TODO XXX
-         *
-         * From "https://problemkaputt.de/zxdocs.htm#zx80zx81memorymapandsystemarea" :
-         *
-         * Output to Port FFh (or ANY other port)
-         * Writing any data to any port terminates the Vertical Retrace period,
-         * and restarts the LINECNTR counter. The retrace signal is also output
-         * to the cassette (ie. the Cassette Output becomes High).
-         *
-         * Input from Port FEh (or any other port with A0 zero)
-         * Reading from this port initiates the Vertical Retrace period (and accordingly,
-         * Cassette Output becomes Low), and resets the LINECNTR register to zero,
-         * LINECNTR remains stopped/zero until user terminates retrace - In the ZX81,
-         * all of the above happens only if NMIs are disabled.
-         *
-         *   Bit  Expl.
-         *   0-4  Keyboard column bits (0=Pressed)
-         *   5    Not used             (1)
-         *   6    Display Refresh Rate (0=60Hz, 1=50Hz)
-         *   7    Cassette input       (0=Normal, 1=Pulse)
-         *
-         * When reading from the keyboard, one of the upper bits (A8-A15) of the I/O
-         * address must be "0" to select the desired keyboard row (0-7).
-         * (When using IN A,(nn), the old value of the A register is output as upper
-         * address bits and <nn> as lower bits. Otherwise, ie. when using IN r,(C) or
-         * INI or IND, the BC register is output to the address bus.)
-         *
-         * The ZX81/ZX80 Keyboard Matrix
-         *
-         *   Port____Line____Bit__0____1____2____3____4__
-         *   FEFEh  0  (A8)     SHIFT  Z    X    C    V
-         *   FDFEh  1  (A9)       A    S    D    F    G
-         *   FBFEh  2  (A10)      Q    W    E    R    T
-         *   F7FEh  3  (A11)      1    2    3    4    5
-         *   EFFEh  4  (A12)      0    9    8    7    6
-         *   DFFEh  5  (A13)      P    O    I    U    Y
-         *   BFFEh  6  (A14)    ENTER  L    K    J    H
-         *   7FFEh  7  (A15)     SPC   .    M    N    B
+        /*
+         * Any I/O write ends the VSYNC period.
          */
-        _video->hsync();
-
+#if 0 /* FIXME */
+        if ((addr & 0xFE) == 0xFE)
+#endif
+            _vsync = false;
     } else {
         ASpace::write(addr, value);
     }

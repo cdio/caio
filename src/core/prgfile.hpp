@@ -62,7 +62,7 @@ public:
 
     /**
      * Set a new start address for this PRG file.
-     * @parma addr New start address.
+     * @param addr New start address.
      */
     void address(addr_t addr) {
         _hdr.addr = addr;

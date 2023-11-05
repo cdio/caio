@@ -214,8 +214,10 @@ char Readline::getc()
 {
     char ch{};
 
-    if (::read(_ifd, &ch, 1) <= 0) {
-        throw IOError{"Readline", "Can't read character: " + Error::to_string(errno)};
+    while (::read(_ifd, &ch, 1) <= 0) {
+        if (errno != EINTR) {
+            throw IOError{"Readline", "Can't read character: " + Error::to_string(errno)};
+        }
     }
 
     return ch;

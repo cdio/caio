@@ -59,25 +59,24 @@ int main(int argc, const char** argv)
 
     progname = *argv;
 
-    auto name = utils::tolow(fs::basename(*argv));
-    if (name == "caio") {
-        if (argc > 1) {
-            name = fs::basename(argv[1]);
-            --argc;
-            ++argv;
-        } else {
-            name = "";
-        }
+    std::string name{};
 
-        if (name == "" || name == "--help" || name == "-h" || name == "-?") {
-            usage();
-            /* NOTREACHED */
-        }
+    if (argc > 1) {
+        name = utils::tolow(fs::basename(argv[1]));
+        --argc;
+        ++argv;
+    }
+
+    if (name == "" || name == "--help" || name == "-h" || name == "-?") {
+        usage();
+        /* NOTREACHED */
     }
 
     if (name == "c64") {
         c64::main(argc, argv);
-    } else if (name == "zx80") {
+    }
+
+    if (name == "zx80") {
         sinclair::zx80::main(argc, argv);
     }
 

@@ -47,12 +47,10 @@ ${LIBRESID}:
 ${EXTRA_DEPS}:
 	${MAKE} ${MAKEARGS} -j -C${dir $@} ${notdir $@}
 
-_all: ${LN_BINS}
-
-${LN_BINS}: ${BIN}
-	${LN} -fs ${BIN} $@
+_all: ${BIN}
 
 include ${ROOT}/mk/obj.mk
 
 ${BIN}: ${OBJS} ${LIB} ${EXTRA_DEPS}
 	${LD} ${LDFLAGS} -o $@ $^ ${LDADD}
+	${STRIP} $@

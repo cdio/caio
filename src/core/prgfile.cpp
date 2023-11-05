@@ -21,20 +21,19 @@
 #include <fstream>
 
 #include "endian.hpp"
+#include "fs.hpp"
 
 
 namespace caio {
 
 void PrgFile::load(const std::string& fname)
 {
-    if (!fname.empty()) {
-        std::ifstream is{fname, std::ios::binary | std::ios::in};
-        if (!is) {
-            throw IOError{"Can't open PRG file: " + fname + ": " + Error::to_string()};
-        }
-
-        load(is);
+    std::ifstream is{fname, std::ios::in};
+    if (!is) {
+        throw IOError{"Can't open PRG file: " + fname + ": " + Error::to_string()};
     }
+
+    load(is);
 }
 
 std::istream& PrgFile::load(std::istream& is)
@@ -44,20 +43,15 @@ std::istream& PrgFile::load(std::istream& is)
     }
 
     _hdr.addr = le16toh(_hdr.addr);
-
     clear();
-    uint8_t c{};
-    while (is.read(reinterpret_cast<char*>(&c), sizeof(c))) {
-        push_back(c);
-    }
-
+    *static_cast<std::vector<uint8_t>*>(this) = fs::load(is);
     return is;
 }
 
 void PrgFile::save(const std::string& fname, addr_t addr)
 {
     if (!fname.empty()) {
-        std::ofstream os{fname, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
+        std::ofstream os{fname, std::ios_base::out | std::ios_base::trunc};
         if (!os) {
             throw IOError{"Can't create PRG file: " + fname + ": " + Error::to_string()};
         }

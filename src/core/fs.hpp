@@ -22,9 +22,12 @@
 #include <filesystem>
 #include <functional>
 #include <initializer_list>
+#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <gsl/span>
 
 
 namespace caio {
@@ -132,6 +135,52 @@ bool directory(const std::string& path, const std::string& pattern,
  * @see fs::match()
  */
 std::vector<std::pair<std::string, uint64_t>> directory(const std::string& path, const std::string& pattern);
+
+/**
+ * Load the contents of a file into memory.
+ * @param fname  File name;
+ * @param maxsiz Maximum number of bytes to read.
+ * @return A buffer with the contents of the file.
+ * @exception IOError
+ * @see load(std::istream&)
+ * @see save(const std::string&, const gsl::span<uint8_t>&, std::ios_base::openmode)
+ * @see save(std::ostream&, const gsl::span<uint8_t>&)
+ */
+std::vector<uint8_t> load(const std::string& fname, size_t maxsiz = 65536);
+
+/**
+ * Read data from an input stream and create a memory buffer.
+ * @param is     Input stream;
+ * @param maxsiz Maximum number of bytes to read.
+ * @return A buffer with the data read from the input stream.
+ * @exception IOError
+ * @see load(const std::string&)
+ * @see save(const std::string&, const gsl::span<uint8_t>&, std::ios_base::openmode)
+ * @see save(std::ostream&, const gsl::span<uint8_t>&)
+ */
+std::vector<uint8_t> load(std::istream& is, size_t maxsiz = 65536);
+
+/**
+ * Save a buffer to a file.
+ * @param fname File name;
+ * @param buf   Buffer to save;
+ * @param mode  Open mode.
+ * @exception IOError
+ * @see load(const std::string&)
+ * @see load(std::istream&)
+ * @see save(std::ostream&, const gsl::span<uint8_t>&)
+ */
+void save(const std::string& fname, const gsl::span<uint8_t>& buf, std::ios_base::openmode mode = std::ios_base::out);
+
+/**
+ * Send a buffer to an output stream.
+ * @param os  Output stream;
+ * @param buf Buffer.
+ * @see load(const std::string&)
+ * @see load(std::istream&)
+ * @see save(const std::string&, const gsl::span<uint8_t>&, std::ios_base::openmode)
+ */
+std::ostream& save(std::ostream& os, const gsl::span<uint8_t>& buf);
 
 }
 }

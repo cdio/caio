@@ -75,7 +75,7 @@ Z80TestASpace::Z80TestASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const 
 void Z80TestASpace::write(addr_t addr, uint8_t value)
 {
     if (_cpu->iorq_pin()) {
-        switch (addr) {
+        switch (addr & 255) {
         case 255:
             /*
              * out (ff), A

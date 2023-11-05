@@ -30,8 +30,7 @@ PALETTES=	c64_vice-rgb.plt \
 		c64_c64-wiki.plt \
 		c64_arne.plt
 
-PALETTES+=	zx80_2green.plt \
-		zx80_bw.plt \
+PALETTES+=	zx80_bw.plt \
 		zx80_green.plt
 
 DST_PALETTEDIR=	${DST_DATADIR}/palette

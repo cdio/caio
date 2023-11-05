@@ -21,42 +21,25 @@
 #include <fstream>
 #include <gsl/assert>
 
+#include "fs.hpp"
 #include "logger.hpp"
 
 
 namespace caio {
 
 DeviceROM::DeviceROM(const std::string& fname, const std::string& label, size_t size)
-    : Device{TYPE, label}
+    : Device{TYPE, label},
+      _data{fs::load(fname, size + 1)}
 {
-    std::ifstream is{fname, std::ios::binary | std::ios::in};
-    if (!is) {
-        throw IOError{*this, "Can't open: " + fname + ": " + Error::to_string()};
-    }
-
-    _data.clear();
-    _data.insert(_data.begin(), std::istreambuf_iterator<char>{is}, std::istreambuf_iterator<char>{});
     if (size && _data.size() != size) {
-        throw IOError{*this, "Size is " + std::to_string(_data.size()) + ", it must be " + std::to_string(size)};
+        throw IOError{*this, "Invalid file size: " + fname + ": It must be " + std::to_string(size)};
     }
 }
 
 DeviceROM::DeviceROM(std::istream& is, size_t size)
-    : Device{TYPE, {}}
+    : Device{TYPE, {}},
+      _data{fs::load(is, size)}
 {
-    if (!is) {
-        throw IOError{*this, "Invalid input stream"};
-    }
-
-    if (size) {
-        std::vector<uint8_t> data(size);
-
-        if (!is.read(reinterpret_cast<char *>(&data[0]), size)) {
-            throw IOError{*this, "Input stream exausted"};
-        }
-
-        _data = std::move(data);
-    }
 }
 
 uint8_t DeviceROM::read(addr_t addr, ReadMode)

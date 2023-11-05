@@ -34,11 +34,9 @@ std::string ZX80Cmdline::usage() const
 {
     std::ostringstream os{};
 
-        // 0         1         2         3         4         5         6         7
-        // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
     os << config::Cmdline::usage() << std::endl << std::endl
-       << "Sinclair ZX80 specific:"                                                     << std::endl
-       << " --ram16                 Attach a 16K RAM instead of the default 1K RAM"     << std::endl
+       << "Sinclair ZX80 specific:" << std::endl
+       << " --ram16                 Attach a 16K RAM instead of the default 1K RAM" << std::endl
        << " --rom8                  Attach the 8K ROM instead of the default 4K ROM";
 
     return os.str();
@@ -69,8 +67,8 @@ std::string ZX80Config::to_string() const
     std::ostringstream os{};
 
     os << Config::to_string()                                   << std::endl
-       << "  Attach 16K RAM:     " << (ram16 ? "yes" : "no")    << std::endl
-       << "  Use 8K ROM:         " << (rom8 ? "yes" : "no");
+       << "  16K RAM:            " << (ram16 ? "yes" : "no")    << std::endl
+       << "  8K ROM:             " << (rom8  ? "yes" : "no");
 
     return os.str();
 }

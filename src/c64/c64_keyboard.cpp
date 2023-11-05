@@ -47,9 +47,6 @@ namespace c64 {
  */
 using MatrixKey = C64Keyboard::MatrixKey;
 
-constexpr static const bool SHIFT = true;
-constexpr static const bool NONE = false;
-
 std::map<std::string, MatrixKey> C64Keyboard::name_to_c64{
     { "KEY_RUNSTOP",      MatrixKey::KEY_RUNSTOP      },
     { "KEY_Q",            MatrixKey::KEY_Q            },
@@ -270,7 +267,6 @@ std::map<std::tuple<Keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> C64K
     {{ Keyboard::KEY_PAGE_DOWN,     SHIFT,  NONE    }, { MatrixKey::KEY_UP_ARROW,       SHIFT }},
 };
 
-
 C64Keyboard::MatrixKey C64Keyboard::to_c64(const std::string& name)
 {
     auto it = name_to_c64.find(name);
@@ -375,7 +371,7 @@ uint8_t C64Keyboard::read()
 
     uint8_t cols{0};
 
-    for (size_t r = 0; r < _matrix.size(); ++r) {
+    for (size_t r = 0; r < std::size(_matrix); ++r) {
         if ((_scanrow & (1 << r)) == 0) {
             cols |= _matrix[r];
         }
@@ -410,7 +406,7 @@ void C64Keyboard::add_key_map(const std::string& key_name, bool key_shift, bool 
         /* Replace the existing definition */
         it.first->second = c64_key;
 
-        log.warn("C64Keyboard: key redefined: %s%s%s. Previous value has been replaced\n", key_name.c_str(),
+        log.warn("C64Keyboard: Key redefined: %s%s%s. Previous value has been replaced\n", key_name.c_str(),
             (key_shift ? " SHIFT" : ""), (key_altgr ? " ALTGR" : ""));
     }
 }

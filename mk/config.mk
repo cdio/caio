@@ -52,6 +52,7 @@ RM?=			rm
 SED?=			sed
 TAR?=			tar
 TOUCH?=			touch
+STRIP?=			strip
 UNAME?=			uname
 
 TOOLSDIR=		${abspath ${ROOT}}/3rdparty/tools
@@ -86,7 +87,7 @@ CXXFLAGS+=		-O0 \
 			-fstandalone-debug
 else
 CXXFLAGS+=		-O3
-LDFLAGS+=		-Wl,-s
+LDFLAGS+=
 endif
 
 CXXFLAGS+=		${UI_CXXFLAGS}

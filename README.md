@@ -11,15 +11,13 @@ platforms are emulated.
 ## Status
 
 caio is currently in alpha state, it is **work-in-progress** and at the
-moment only the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
-is emulated, under Linux and macOS.
+moment the following platforms are emulated:
 
-The emulation of the
-[Commodore 64](https://en.wikipedia.org/wiki/Commodore_64) almost reached a
-beta status and most of the tested programs work just fine (if they do not
-exploit obscure video/timing tricks or trigger some bug ;).
+#### [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
 
-See the [releases](#releases) section below.
+The emulation of the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
+almost reached a beta status and most of the tested programs work just fine
+(if they do not exploit obscure video/timing tricks or trigger some bug ;).
 
 ![c64](images/c64.gif "caio c64")
 ![gyruss](images/gyruss.gif "Gyruss")
@@ -27,6 +25,16 @@ See the [releases](#releases) section below.
 ![uridium](images/uridium.gif "Uridium")
 ![giana](images/giana.gif "Great Giana Sisters")
 [![zauberwald](images/zauberwald.png "Zauberwald")](https://csdb.dk/release/?id=188005)
+
+#### [Sinclair ZX80](https://en.wikipedia.org/wiki/ZX80)
+
+The implementation of the [ZX80](https://en.wikipedia.org/wiki/ZX80) is under
+development and it is not currently working.
+
+
+## Supported host platforms
+
+At the moment the supported host platforms are Linux and macOS.
 
 
 ## Compile, install and packaging
@@ -67,15 +75,9 @@ For more information read the
 
 ## Usage & Configuration
 
-There are three ways to launch the emulator, two of them from the console:
-
+To launch caio, from a console:
 ```
     $ caio c64 --help
-```
-or
-
-```
-    $ c64 --help
 ```
 
 All the command line options can be specified in a
@@ -88,23 +90,18 @@ up the emulated screen resolution 4 times (that is, a 320x200 screen is scaled
 up to 1280x800), loads and launches the cartridge named *gyruss*:
 
 ```
-    $ c64 --scanlines h --scale 4 --cart ./gyruss.crt
+    $ caio c64 --scanlines h --scale 4 --cart ./gyruss.crt
 ```
 
 The next command injects a `PRG` program into memory and launches it as soon
 as the basic is started:
 
 ```
-    $ c64 --prg ./rambo.prg
+    $ caio c64 --prg ./rambo.prg
 ```
 
 Note that this won't work for advanced or big program files that overwrite
 memory areas not configured as RAM.
-
-Under Linux, a third way the emulator can be launched is from a GUI
-(like a file manager), in this case the logs must not be sent to the terminal
-(there won't be one), if that happens the emulator is silently terminated as
-soon as it is started (see the `logfile` configuration file option).
 
 For more information about usage, keyboard mappings, joysticks, etc. read the
 [usage documentation](doc/usage.md).

@@ -79,6 +79,33 @@ public:
     }
 
     /**
+     * @see Device::peek()
+     */
+    uint8_t peek(addr_t addr) const {
+        return const_cast<ASpace*>(this)->read(addr, ReadMode::Peek);
+    }
+
+    /**
+     * Read the content of the data bus.
+     * This is usually the last value written to the data bus.
+     * @return The value present on the data bus.
+     */
+    uint8_t databus() const {
+        return _data;
+    }
+
+    /**
+     * Set the data bus.
+     * Usually the value on the data bus is the one that was last read or
+     * written to the address space. This value can be overrided by calling
+     * this method.
+     * @param data Data to set.
+     */
+    void databus(uint8_t data) {
+        _data = data;
+    }
+
+    /**
      * Dump the contents of the read and write mappings as human readable strings.
      * @param os Stream to dump to;
      */
@@ -122,6 +149,7 @@ private:
     addr_t    _bshift{};
     addrmap_t _rmaps{};
     addrmap_t _wmaps{};
+    uint8_t   _data{};
 };
 
 }

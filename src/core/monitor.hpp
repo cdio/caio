@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "aspace.hpp"
+#include "fs.hpp"
 #include "logger.hpp"
 #include "readline.hpp"
 #include "types.hpp"
@@ -35,28 +36,99 @@
 namespace caio {
 namespace monitor {
 
-class Monitor;
+using regs_cb       = std::function<std::string()>;
+using pc_cb         = std::function<addr_t&()>;
+using peek_cb       = std::function<uint8_t(addr_t)>;
+using write_cb      = std::function<void(addr_t, uint8_t)>;
+using disass_cb     = std::function<void(std::ostream&, addr_t, size_t, bool)>;
+using mmap_cb       = std::function<sptr_t<ASpace>()>;
+using ebreak_cb     = std::function<void()>;
+using load_cb       = std::function<std::pair<addr_t, addr_t>(const std::string&, addr_t)>;
+using save_cb       = std::function<void(const std::string&, addr_t, addr_t)>;
+using loglevel_cb   = std::function<Loglevel(const std::string&)>;
+using regvalue_cb   = std::function<uint16_t(const std::string&)>;
 
 /**
  * Monitored CPU.
  */
 struct MonitoredCPU {
-    std::function<std::ostream&(std::ostream&)>                             regs{};
-    std::function<addr_t&()>                                                pc{};
-    std::function<uint8_t(addr_t)>                                          peek{};
-    std::function<void(addr_t, uint8_t)>                                    write{};
-    std::function<void(std::ostream&, addr_t, size_t, bool)>                disass{};
-    std::function<sptr_t<ASpace>()>                                         mmap{};
-    std::function<void()>                                                   ebreak{};
-    std::function<std::pair<addr_t, addr_t>(const std::string&, addr_t)>    load{};
-    std::function<void(const std::string&, addr_t, addr_t)>                 save{};
-    std::function<Loglevel(const std::string&)>                             loglevel{};
-    std::function<uint16_t(const std::string&)>                             regvalue{};
+    regs_cb     regs{};
+    pc_cb       pc{};
+    peek_cb     peek{};
+    write_cb    write{};
+    disass_cb   disass{};
+    mmap_cb     mmap{};
+    ebreak_cb   ebreak{};
+    load_cb     load{};
+    save_cb     save{};
+    loglevel_cb loglevel{};
+    regvalue_cb regvalue{};
 
     operator bool() const {
         return (regs && pc && peek && write && disass && mmap && ebreak && load && save && loglevel && regvalue);
     }
 };
+
+/**
+ * Default monitored cpu methods.
+ */
+template<typename CPU>
+MonitoredCPU monitored_cpu_defaults(CPU* cpu)
+{
+    return MonitoredCPU{
+        .regs = [cpu]() {
+            return cpu->regs().to_string();
+        },
+
+        .peek = [cpu](addr_t addr) {
+            return cpu->peek(addr);
+        },
+
+        .write = [cpu](addr_t addr, uint8_t data) {
+            cpu->write(addr, data);
+        },
+
+        .disass = [cpu](std::ostream& os, addr_t addr, size_t count, bool show_pc) {
+            cpu->disass(os, addr, count, show_pc);
+        },
+
+        .ebreak = [cpu]() {
+            return cpu->ebreak();
+        },
+
+        .loglevel = [cpu](const std::string& lv) {
+            if (!empty(lv)) {
+                cpu->loglevel(lv);
+            }
+            return cpu->loglevel();
+        },
+
+        .load = [cpu](const std::string& fname, addr_t start) -> std::pair<addr_t, addr_t> {
+            auto buf = fs::load(fname);
+            addr_t addr = start;
+            for (auto c : buf) {
+                cpu->write(addr++, c);
+            }
+            return {start, buf.size()};
+        },
+
+        .save = [cpu](const std::string& fname, addr_t start, addr_t end) {
+            ssize_t size = end - start;
+            if (size > 0) {
+                std::vector<uint8_t> buf{};
+                for (auto addr = start; addr <= end; ++addr) {
+                    uint8_t c = cpu->read(addr);
+                    buf.push_back(c);
+                }
+                fs::save(fname, buf);
+            }
+        },
+
+        .pc = {},
+        .mmap = {},
+        .regvalue = {}
+    };
+}
 
 /**
  * Conditional breakpoint expression compiler.
@@ -109,7 +181,7 @@ private:
  */
 struct Command {
     using args_t = std::vector<std::string>;
-    using fn_t   = std::function<bool(Monitor&, const args_t&)>;
+    using fn_t   = std::function<bool(class Monitor&, const args_t&)>;
 
     std::string command{};
     std::string short_command{};
@@ -135,12 +207,9 @@ public:
      * @param ofd Output file descriptor used to communicate with the user;
      * @param cpu Monitored CPU.
      * @see MonitoredCPU
-     * TODO: replace with iostream and native_handle() (C++26)
+     * TODO: replace ifd and ofd with streams and native_handle() (C++26)
      */
-    Monitor(int ifd, int ofd, MonitoredCPU&& cpu)
-        : _rd{ifd, ofd},
-          _cpu{cpu} {
-    }
+    Monitor(int ifd, int ofd, MonitoredCPU&& cpu);
 
     /**
      * Enter this monitor.

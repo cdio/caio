@@ -54,8 +54,31 @@ void C64::run()
     connect_ui();
 
     if (_conf.monitor) {
-        //TODO _cpu->init_monitor(std::cin, std::cout); C++26
-        _cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO);
+        auto load = [this](const std::string& fname, addr_t start) -> std::pair<addr_t, addr_t>{
+            PrgFile prog{fname};
+            addr_t addr = prog.address();
+            if (start != 0) {
+                addr = start;
+                prog.address(start);
+             } else {
+                start = addr;
+                for (auto c : prog) {
+                    this->_cpu->write(addr++, c);
+                }
+            }
+            return {start, prog.size()};
+        };
+
+        auto save = [this](const std::string& fname, addr_t start, addr_t end) {
+            PrgFile prog{};
+            for (auto addr = start; addr <= end; ++addr) {
+                uint8_t c = this->_cpu->read(addr);
+                prog.push_back(c);
+            }
+            prog.save(fname, start);
+        };
+
+        _cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO, load, save);
     }
 
     start();

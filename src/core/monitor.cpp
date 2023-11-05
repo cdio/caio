@@ -21,6 +21,8 @@
 #include <algorithm>
 #include <sstream>
 
+#include <gsl/assert>
+
 #include "utils.hpp"
 
 
@@ -170,6 +172,14 @@ Command Monitor::commands[] = {
     { "help",     "?",  "",                     "",                                         Monitor::help           }
 };
 
+Monitor::Monitor(int ifd, int ofd, MonitoredCPU&& cpu)
+    : _rd{ifd, ofd},
+      _cpu{cpu}
+{
+    using namespace gsl;
+    Expects(_cpu);
+}
+
 bool Monitor::run()
 {
     _is_running = true;
@@ -259,8 +269,7 @@ std::string Monitor::prompt()
 
     if (_prev_fn == "s") {
         _cpu.disass(os, _cpu.pc(), 10, true);
-        _cpu.regs(os);
-        os << std::endl;
+        os << _cpu.regs() << std::endl;
     }
 
     os << PROMPT_PREFIX << "$" << utils::to_string(_cpu.pc()) << PROMPT_SUFFIX;
@@ -431,7 +440,7 @@ bool Monitor::registers(Monitor& mon, const Command::args_t& args)
      * registers, r
      */
     std::ostringstream os{};
-    mon._cpu.regs(os) << std::endl;
+    os << mon._cpu.regs() << std::endl;
     mon._rd.write(os.str());
     return false;
 }
