@@ -80,6 +80,9 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
             return cpu->regs().to_string();
         },
 
+        .pc = {
+        },
+
         .peek = [cpu](addr_t addr) {
             return cpu->peek(addr);
         },
@@ -92,15 +95,11 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
             cpu->disass(os, addr, count, show_pc);
         },
 
-        .ebreak = [cpu]() {
-            return cpu->ebreak();
+        .mmap = {
         },
 
-        .loglevel = [cpu](const std::string& lv) {
-            if (!empty(lv)) {
-                cpu->loglevel(lv);
-            }
-            return cpu->loglevel();
+        .ebreak = [cpu]() {
+            return cpu->ebreak();
         },
 
         .load = [cpu](const std::string& fname, addr_t start) -> std::pair<addr_t, addr_t> {
@@ -124,9 +123,15 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
             }
         },
 
-        .pc = {},
-        .mmap = {},
-        .regvalue = {}
+        .loglevel = [cpu](const std::string& lv) {
+            if (!empty(lv)) {
+                cpu->loglevel(lv);
+            }
+            return cpu->loglevel();
+        },
+
+        .regvalue = {
+        }
     };
 }
 

@@ -13,7 +13,7 @@ platforms are emulated.
 caio is currently in alpha state, it is **work-in-progress** and at the
 moment the following platforms are emulated:
 
-#### [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
+### Commodore 64
 
 The emulation of the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
 almost reached a beta status and most of the tested programs work just fine
@@ -26,7 +26,7 @@ almost reached a beta status and most of the tested programs work just fine
 ![giana](images/giana.gif "Great Giana Sisters")
 [![zauberwald](images/zauberwald.png "Zauberwald")](https://csdb.dk/release/?id=188005)
 
-#### [Sinclair ZX80](https://en.wikipedia.org/wiki/ZX80)
+### Sinclair ZX80
 
 The implementation of the [ZX80](https://en.wikipedia.org/wiki/ZX80) is under
 development and it is not currently working.
@@ -129,7 +129,7 @@ It is desired for future releases to provide emulation for:
 * [Sinclair ZX Spectrum](https://en.wikipedia.org/wiki/ZX_Spectrum)
 
 
-## Old hardware
+## Old Hardware
 
 If you have some old home computer and want to donate it, I will gladly accept
 it even if it is not working. Please let me know.
