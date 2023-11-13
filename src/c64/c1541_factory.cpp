@@ -25,6 +25,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c1541 {
 
 sptr_t<C1541> create(const std::string& path, uint8_t unit, const sptr_t<cbm_bus::Bus>& bus)
@@ -49,5 +50,6 @@ sptr_t<C1541> create(const std::string& path, uint8_t unit, const sptr_t<cbm_bus
     return drive;
 }
 
+}
 }
 }

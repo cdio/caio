@@ -26,6 +26,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /**
@@ -67,5 +68,6 @@ private:
     std::array<bank_t, BANKS> _wbanks{};
 };
 
+}
 }
 }

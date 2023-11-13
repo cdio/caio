@@ -26,6 +26,8 @@
 
 
 namespace caio {
+namespace commodore {
+namespace c64 {
 
 /**
  * PC64 P00 file.
@@ -82,4 +84,6 @@ private:
     P00Header _hdr{};
 };
 
+}
+}
 }

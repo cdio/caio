@@ -25,6 +25,8 @@
 
 
 namespace caio {
+namespace commodore {
+namespace c64 {
 
 void PrgFile::load(const std::string& fname)
 {
@@ -76,4 +78,6 @@ std::ostream& PrgFile::save(std::ostream& os, addr_t addr, const gsl::span<uint8
     return os;
 }
 
+}
+}
 }

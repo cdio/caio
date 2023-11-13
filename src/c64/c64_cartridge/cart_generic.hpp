@@ -22,6 +22,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /**
@@ -107,5 +108,6 @@ private:
     addr_t      _romh_offset{};
 };
 
+}
 }
 }

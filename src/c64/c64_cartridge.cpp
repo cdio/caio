@@ -35,6 +35,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 Cartridge::Cartridge(const std::string& type, const sptr_t<Crt>& crt)
@@ -233,5 +234,6 @@ sptr_t<Cartridge> Cartridge::create(const std::string& fname)
         crt->to_string()};
 }
 
+}
 }
 }

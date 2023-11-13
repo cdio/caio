@@ -27,6 +27,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /**
@@ -167,5 +168,6 @@ private:
     GameExromMode   _mode{};
 };
 
+}
 }
 }

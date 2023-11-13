@@ -24,6 +24,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /**
@@ -100,5 +101,6 @@ private:
     uint8_t  _reg{};
 };
 
+}
 }
 }

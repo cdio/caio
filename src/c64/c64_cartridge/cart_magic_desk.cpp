@@ -33,6 +33,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 void CartMagicDesk::reset()
@@ -226,5 +227,6 @@ size_t CartMagicDesk::cartsize() const
     return (_banks * ROM_SIZE);
 }
 
+}
 }
 }

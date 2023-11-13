@@ -23,9 +23,11 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 using main = caio::Main_<C64, C64Cmdline>;
 
+}
 }
 }

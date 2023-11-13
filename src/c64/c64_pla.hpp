@@ -27,6 +27,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /**
@@ -118,5 +119,6 @@ private:
     bank_t                    _wmaps{};         /* Current write mappings                                       */
 };
 
+}
 }
 }

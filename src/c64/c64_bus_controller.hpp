@@ -25,6 +25,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 class C64BusController : public cbm_bus::Controller {
@@ -57,5 +58,6 @@ private:
     uint8_t         _lastw{};   /* Last written value */
 };
 
+}
 }
 }

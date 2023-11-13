@@ -23,6 +23,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /*
@@ -431,5 +432,6 @@ void C64Keyboard::set_matrix(MatrixKey key, bool set)
     }
 }
 
+}
 }
 }

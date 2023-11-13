@@ -40,6 +40,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 constexpr static const char* KERNAL_FNAME         = "c64_kernal.901227-03.bin";
@@ -222,5 +223,6 @@ private:
     sptr_t<ui::Widget>          _wgamepad2{};
 };
 
+}
 }
 }

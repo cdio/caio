@@ -24,6 +24,8 @@
 
 
 namespace caio {
+namespace commodore {
+namespace c64 {
 
 void P00File::load(const std::string& fname)
 {
@@ -65,4 +67,6 @@ void P00File::save(const std::string& fname, addr_t addr)
     }
 }
 
+}
+}
 }

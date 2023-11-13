@@ -40,6 +40,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 void C64::run()
@@ -678,5 +679,6 @@ std::string C64::to_string() const
     return os.str();
 }
 
+}
 }
 }

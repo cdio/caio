@@ -26,6 +26,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 void Crt::open(const std::string& fname)
@@ -218,5 +219,6 @@ void Crt::to_host(Crt::Chip& ch)
     ch.rsiz = be16toh(ch.rsiz);
 }
 
+}
 }
 }

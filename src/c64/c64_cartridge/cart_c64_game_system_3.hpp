@@ -24,6 +24,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /**
@@ -102,5 +103,6 @@ private:
     std::array<devptr_t, MAX_BANKS> _roms{};
 };
 
+}
 }
 }

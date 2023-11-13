@@ -23,6 +23,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /**
@@ -115,5 +116,6 @@ private:
     devptr_t _ioexp{};
 };
 
+}
 }
 }

@@ -35,6 +35,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /*
@@ -367,5 +368,6 @@ size_t CartEasyFlash::cartsize() const
     return ((_romls + _romhs) * ROM_SIZE + (_ram ? _ram->size() : 0));
 }
 
+}
 }
 }

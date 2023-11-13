@@ -22,6 +22,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 void C64IO::reset()
@@ -176,5 +177,6 @@ std::ostream& C64IO::dump(std::ostream& os, addr_t base) const
     return os;
 }
 
+}
 }
 }

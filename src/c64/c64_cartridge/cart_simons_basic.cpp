@@ -33,6 +33,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 void CartSimonsBasic::reset()
@@ -173,5 +174,6 @@ size_t CartSimonsBasic::cartsize() const
     return ((_roml ? _roml->size() : 0) + (_romh ? _romh->size() : 0));
 }
 
+}
 }
 }

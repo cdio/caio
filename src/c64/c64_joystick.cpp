@@ -20,6 +20,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 C64Joystick::C64Joystick(const std::string& label)
@@ -68,5 +69,6 @@ uint8_t C64Joystick::port() const
     return _port;
 }
 
+}
 }
 }

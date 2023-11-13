@@ -33,6 +33,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 void CartOceanType1::reset()
@@ -231,5 +232,6 @@ size_t CartOceanType1::cartsize() const
     return (_banks * ROM_SIZE);
 }
 
+}
 }
 }

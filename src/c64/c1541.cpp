@@ -27,6 +27,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c1541 {
 
 std::array<C1541::DiskCommand, C1541::COMMANDS> C1541::commands{{
@@ -396,7 +397,6 @@ bool C1541::check_attached()
     return false;
 }
 
-
 void C1541::StatusChannel::reset(Status st, uint8_t track, uint8_t sector)
 {
     /*
@@ -447,5 +447,6 @@ std::string C1541::StatusChannel::to_string() const
     return os.str();
 }
 
+}
 }
 }

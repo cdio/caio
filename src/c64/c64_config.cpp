@@ -24,6 +24,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 static const config::Option c64_options[] = {
@@ -88,5 +89,6 @@ std::string C64Config::to_string() const
     return os.str();
 }
 
+}
 }
 }

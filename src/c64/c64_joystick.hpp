@@ -23,6 +23,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /**
@@ -90,5 +91,6 @@ private:
     uint8_t _port{JOY_PORT_PULLUP};
 };
 
+}
 }
 }

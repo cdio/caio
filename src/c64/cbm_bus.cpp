@@ -46,6 +46,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace cbm_bus {
 
 std::string BusData::to_string() const
@@ -771,5 +772,6 @@ bool Device::process_secondary(bool with_param)
     return false;
 }
 
+}
 }
 }

@@ -28,6 +28,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c1541 {
 
 using buf_t = cbm_bus::buf_t;
@@ -430,5 +431,6 @@ private:
     static std::array<DiskCommand, COMMANDS> commands;
 };
 
+}
 }
 }

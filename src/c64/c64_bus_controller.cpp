@@ -20,6 +20,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 C64BusController::C64BusController(const sptr_t<cbm_bus::Bus>& bus, const sptr_t<Mos6526>& cia2)
@@ -91,5 +92,6 @@ void C64BusController::bus_write(uint8_t addr, uint8_t value)
     }
 }
 
+}
 }
 }

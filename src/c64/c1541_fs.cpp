@@ -28,6 +28,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c1541 {
 
 void C1541Fs::attach(const std::string& path)
@@ -661,5 +662,6 @@ Status C1541Fs::initialize()
     return Status::OK;
 }
 
+}
 }
 }

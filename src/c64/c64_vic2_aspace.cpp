@@ -20,6 +20,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 Vic2ASpace::Vic2ASpace(const sptr_t<Mos6526>& cia2, const devptr_t& ram, const devptr_t& chargen)
@@ -88,5 +89,6 @@ inline void Vic2ASpace::bank(size_t bank)
     ASpace::reset(_rbanks[_bank], _wbanks[_bank], ADDR_MASK);
 }
 
+}
 }
 }

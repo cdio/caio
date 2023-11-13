@@ -32,6 +32,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace cbm_bus {
 
 using buf_t = std::vector<uint8_t>;
@@ -371,7 +372,6 @@ private:
     bool    _last{};
 };
 
-
 /**
  * Received command.
  */
@@ -431,7 +431,6 @@ private:
     buf_t   _param{};
 };
 
-
 /**
  * Byte read from a channel.
  */
@@ -460,7 +459,6 @@ public:
 private:
     int _value;
 };
-
 
 /**
  * CBM-BUS Device.
@@ -504,7 +502,6 @@ public:
 
     constexpr static const uint64_t TIMEOUT             = 1'000'000;    /* Timeout of 1s on blocking states */
 
-
     /*
      * Device operation mode.
      */
@@ -519,7 +516,6 @@ public:
         WAIT                /* Wait until ATN is disabled                       */
     };
 
-
     /*
      * Device role.
      */
@@ -528,7 +524,6 @@ public:
         LISTENER,           /* This device is a listener                        */
         TALKER              /* This device is a talker                          */
     };
-
 
     /**
      * Bit TX/RX state.
@@ -543,7 +538,6 @@ public:
         FRAME,
         FRAME_WAIT
     };
-
 
     /**
      * Initialise this CBM-BUS Device.
@@ -652,5 +646,6 @@ private:
     ByteTR   _bytetr{};
 };
 
+}
 }
 }

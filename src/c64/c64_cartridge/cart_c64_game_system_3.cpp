@@ -33,6 +33,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 void CartC64GameSystem3::reset()
@@ -183,5 +184,6 @@ size_t CartC64GameSystem3::cartsize() const
     return (_banks * ROM_SIZE);
 }
 
+}
 }
 }

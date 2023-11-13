@@ -32,6 +32,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /**
@@ -263,5 +264,6 @@ private:
     static std::map<std::string, MatrixKey> name_to_c64;
 };
 
+}
 }
 }

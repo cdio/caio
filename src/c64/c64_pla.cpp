@@ -23,6 +23,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, const devptr_t& chargen,
@@ -506,5 +507,6 @@ inline void PLA::remap()
     ASpace::reset(_rmaps, _wmaps, ADDR_MASK);
 }
 
+}
 }
 }

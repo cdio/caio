@@ -34,6 +34,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c1541 {
 
 /**
@@ -157,5 +158,6 @@ private:
     std::string     _last_file{};
 };
 
+}
 }
 }

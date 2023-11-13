@@ -29,6 +29,8 @@
 
 
 namespace caio {
+namespace commodore {
+namespace c64 {
 
 /**
  * PRG file.
@@ -125,4 +127,6 @@ private:
     PrgHeader _hdr{};
 };
 
+}
+}
 }

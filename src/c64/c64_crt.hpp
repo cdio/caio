@@ -26,6 +26,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 /**
@@ -327,5 +328,6 @@ private:
     std::vector<devptr_t> _roms{};
 };
 
+}
 }
 }

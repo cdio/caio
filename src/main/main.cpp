@@ -73,7 +73,7 @@ int main(int argc, const char** argv)
     }
 
     if (name == "c64") {
-        c64::main(argc, argv);
+        commodore::c64::main(argc, argv);
     }
 
     if (name == "zx80") {

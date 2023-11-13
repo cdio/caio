@@ -22,6 +22,7 @@
 
 
 namespace caio {
+namespace commodore {
 namespace c64 {
 
 constexpr static const char* SEC_C64            = "c64";
@@ -64,5 +65,6 @@ struct C64Config : public config::Config {
     std::string to_string() const override;
 };
 
+}
 }
 }
