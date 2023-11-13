@@ -47,7 +47,9 @@ CXXSRCS+=	c64.cpp \
 		c64_joystick.cpp \
 		c64_keyboard.cpp \
 		c64_pla.cpp \
-		c64_vic2_aspace.cpp
+		c64_vic2_aspace.cpp \
+		p00file.cpp \
+		prgfile.cpp
 
 INCS+=		c64.hpp \
 		c64_bus_controller.hpp \
@@ -58,7 +60,9 @@ INCS+=		c64.hpp \
 		c64_joystick.hpp \
 		c64_keyboard.hpp \
 		c64_pla.hpp \
-		c64_vic2_aspace.hpp
+		c64_vic2_aspace.hpp \
+		p00file.hpp \
+		prgfile.hpp
 
 CXXSRCS+=	c64_cartridge/cart_generic.cpp \
 		c64_cartridge/cart_simons_basic.cpp \

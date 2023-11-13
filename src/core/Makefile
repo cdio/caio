@@ -37,8 +37,6 @@ CXXSRCS=	aspace.cpp \
 		logger.cpp \
 		monitor.cpp \
 		name.cpp \
-		p00file.cpp \
-		prgfile.cpp \
 		readline.cpp \
 		rgb.cpp \
 		signal.cpp \
@@ -68,8 +66,6 @@ INCS=		aspace.hpp \
 		monitor.hpp \
 		name.hpp \
 		nibble_ram.hpp \
-		p00file.hpp \
-		prgfile.hpp \
 		pin.hpp \
 		pullup.hpp \
 		readline.hpp \
