@@ -367,10 +367,25 @@ void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb& load, const
         throw InvalidArgument{};
     };
 
+    auto bpdoc = [](const std::string& cmd) -> std::string {
+        return {
+            cmd + " help | h | ?\n" +
+            cmd + " <addr> [<cond>]\n\n"
+            "<cond> = <val> <op> <val>\n"
+            "<val>  = [*]{[#][$]<u16>| ra | rx | ry | rs | rp | rp.n | rp.v | rp.b | rp.i | rp.z | rp.c}\n"
+            "<op>   = '<' | '>' | '<=' | '>=' | '==' | '!=' | '&' | '|'\n\n"
+            "examples:\n"
+            "  b $8009 *$fd20 >= #$f0\n"
+            "  b $8010 rx >= 80\n"
+            "  b $4100 rp.n == 1\n"
+        };
+    };
+
     MonitoredCPU monitor_funcs = monitor::monitored_cpu_defaults(this);
     monitor_funcs.pc = pc;
     monitor_funcs.mmap = mmap;
     monitor_funcs.regvalue = regvalue;
+    monitor_funcs.bpdoc = bpdoc;
 
     if (load) {
         monitor_funcs.load = load;

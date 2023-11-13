@@ -46,28 +46,7 @@ void ZX80::run()
     connect_ui();
 
     if (_conf.monitor) {
-        auto load = [this](const std::string& fname, addr_t start) -> std::pair<addr_t, addr_t> {
-            OFile ofile{fname};
-            if (start == 0) {
-                start = OFile::LOAD_ADDR;
-            }
-            addr_t addr = start;
-            for (uint8_t c : ofile) {
-                this->_cpu->write(addr++, c);
-            }
-            return {start, ofile.size()};
-        };
-
-        auto save = [this](const std::string& fname, addr_t start, addr_t end) {
-            OFile ofile{};
-            for (auto addr = start; addr <= end; ++addr) {
-                uint8_t c = this->_cpu->read(addr);
-                ofile.push_back(c);
-            }
-            ofile.save(fname);
-        };
-
-        this->_cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO, load, save);
+        this->_cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO, {}, {});
     }
 
     start();

@@ -34,10 +34,10 @@ const std::pair<std::string, Expr::ex_t> Expr::operators[] = {
     { ">=", [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) >= b(*cpu); }},
     { "==", [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) == b(*cpu); }},
     { "!=", [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) != b(*cpu); }},
-    { "<",  [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) < b(*cpu); }},
-    { ">",  [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) > b(*cpu); }},
-    { "&",  [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) & b(*cpu); }},
-    { "|",  [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) | b(*cpu); }}
+    { "<",  [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) < b(*cpu);  }},
+    { ">",  [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) > b(*cpu);  }},
+    { "&",  [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) & b(*cpu);  }},
+    { "|",  [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) | b(*cpu);  }}
 };
 
 Expr::fn_t Expr::compile_argument(MonitoredCPU& cpu, const std::string& line)
@@ -163,8 +163,8 @@ Command Monitor::commands[] = {
     { "bplist",   "bl", "",                     "List breakpoints",                         Monitor::bp_list        },
     { "go",       "g",  ".|$addr",              "Run program at $addr",                     Monitor::go             },
     { "si",       "s",  "[.|$addr]",            "Execute single instruction at $addr",      Monitor::step           },
-    { "load",     "l",  "fname [$addr]",        "Load binary or PRG file",                  Monitor::load           },
-    { "save",     "w",  "fname $start $end",    "Create PRG file",                          Monitor::save           },
+    { "load",     "l",  "fname [$addr]",        "Load a binary file",                       Monitor::load           },
+    { "save",     "w",  "fname $start $end",    "Create a binary file",                     Monitor::save           },
     { "loglevel", "lv", "loglevel",             "Set the CPU loglevel",                     Monitor::loglevel       },
     { "fc",       "fc", "",                     "Show command history",                     Monitor::history        },
     { "quit",     "q",  "[code]",               "Terminate the emulator with exit code",    Monitor::quit           },
@@ -188,15 +188,7 @@ bool Monitor::run()
         _rd.write(prompt());
 
         std::string line = _rd.getline();
-        if (line.empty()) {
-//XXX breaks monitor test scripts
-#if 1
-            line = _prev_line;
-#endif
-        } else {
-            line = utils::trim(line);
-        }
-
+        line = (line.empty() ? _prev_line : utils::trim(line));
         if (line.empty() || line[0] == '#') {
             continue;
         }
@@ -483,21 +475,7 @@ bool Monitor::bp_add(Monitor& mon, const Command::args_t& args)
      * Help.
      */
     if (args[1] == "h" || args[1] == "?" || args[1] == "help") {
-        std::ostringstream os{};
-//FIXME XXX
-        os << args[0] << " help | h | ?" << std::endl
-           << args[0] << " <addr> [<cond>]" << std::endl
-           << std::endl
-           << "<cond> = <val> <op> <val>" << std::endl
-           << "<val>  = [*]{[#][$]<u16>| ra | rx | ry | rs | rp | rp.n | rp.v | rp.b | rp.i | rp.z | rp.c}"
-           << std::endl
-           << "<op>   = '<' | '>' | '<=' | '>=' | '==' | '!=' | '&' | '|'" << std::endl
-           << std::endl
-           << "examples:" << std::endl
-           << "  b $8009 *$fd20 >= #$f0" << std::endl
-           << "  b $8010 rx >= 80" << std::endl
-           << "  b $4100 rp.n == 1" << std::endl;
-        mon._rd.write(os.str());
+        mon._rd.write(mon._cpu.bpdoc(args[0]));
         return false;
     }
 

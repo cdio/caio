@@ -474,10 +474,30 @@ void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb& load, const mon
         throw InvalidArgument{};
     };
 
+    auto bpdoc = [](const std::string& cmd) -> std::string {
+        return {
+            cmd + " help | h | ?\n" +
+            cmd + " <addr> [<cond>]\n\n"
+            "<cond> = <val> <op> <val>\n"
+            "<val>  = [*]{[#][$]<u16> |\n"
+            "         ra | rf | raf | rb | rc | rbc | rd | re | rde | rh | rl | rhl |\n"
+            "         ra' | rf' | raf' | rb' | rc' | rbc' | rd' | re' | rde' | rh' | rl' | rhl' |\n"
+            "         ri | rr | rx | rsp | rpc |\n"
+            "         rf.s | rf.z | rf.z | rf.h | rf.v | rf.n | rf.c |\n"
+            "         rf'.s | rf'.z | rf'.z | rf'.h | rf'.v | rf'.n | rf'.c}\n"
+            "<op>   = '<' | '>' | '<=' | '>=' | '==' | '!=' | '&' | '|'\n\n"
+            "examples:\n"
+            "  b $8009 *$fd20 >= #$f0\n"
+            "  b $8010 ra >= 80\n"
+            "  b $4100 rf.c == 1\n"
+        };
+    };
+
     MonitoredCPU monitor_funcs = monitor::monitored_cpu_defaults(this);
     monitor_funcs.pc = pc;
     monitor_funcs.mmap = mmap;
     monitor_funcs.regvalue = regvalue;
+    monitor_funcs.bpdoc = bpdoc;
 
     if (load) {
         monitor_funcs.load = load;

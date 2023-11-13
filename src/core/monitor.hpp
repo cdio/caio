@@ -47,6 +47,7 @@ using load_cb       = std::function<std::pair<addr_t, addr_t>(const std::string&
 using save_cb       = std::function<void(const std::string&, addr_t, addr_t)>;
 using loglevel_cb   = std::function<Loglevel(const std::string&)>;
 using regvalue_cb   = std::function<uint16_t(const std::string&)>;
+using bpdoc_cb      = std::function<std::string(const std::string&)>;
 
 /**
  * Monitored CPU.
@@ -63,9 +64,11 @@ struct MonitoredCPU {
     save_cb     save{};
     loglevel_cb loglevel{};
     regvalue_cb regvalue{};
+    bpdoc_cb    bpdoc{};
 
     operator bool() const {
-        return (regs && pc && peek && write && disass && mmap && ebreak && load && save && loglevel && regvalue);
+        return (regs && pc && peek && write && disass && mmap &&
+            ebreak && load && save && loglevel && regvalue && bpdoc);
     }
 };
 
@@ -131,6 +134,10 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
         },
 
         .regvalue = {
+        },
+
+        .bpdoc = [](const std::string&) {
+            return "";
         }
     };
 }
@@ -248,7 +255,7 @@ public:
 
 private:
     /**
-     * @return The next prompt string.
+     * @return The prompt string.
      */
     std::string prompt();
 
