@@ -173,7 +173,7 @@ public:
     /**
      * Find a section.
      * @param sname Name of the section (case insensitive).
-     * @return An iterator to the section; or end() if the section does not exists.
+     * @return An iterator to the section; or end() if the section does not exist.
      */
     std::map<std::string, Section>::const_iterator find(const std::string& sname) const;
 
@@ -198,14 +198,14 @@ enum class Arg {
  * Command line option.
  */
 struct Option {
-    using callback_t = std::function<bool(class Confile&, const Option&, const std::string&)>;
+    using set_cb = std::function<bool(class Confile&, const Option&, const std::string&)>;
 
     std::string name{};     /* Command line option without the "--" prefix  */
     std::string sname{};    /* Section name                                 */
     std::string key{};      /* Key name                                     */
     std::string dvalue{};   /* Default value                                */
     Arg         type{};     /* Argument requisites                          */
-    callback_t  fn{};       /* Value setter                                 */
+    set_cb      fn{};       /* Value setter                                 */
 };
 
 bool set_value(Confile&, const Option&, const std::string&);

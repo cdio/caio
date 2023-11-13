@@ -187,7 +187,7 @@ std::vector<uint8_t> load(const std::string& fname, size_t maxsiz)
         errmsg = err.what();
     }
 
-    throw IOError{"Can't load: " + fname + ": " + (errmsg.empty() ? Error::to_string(): errmsg)};
+    throw IOError{"Can't load: " + fname + ": " + (errmsg.empty() ? Error::to_string() : errmsg)};
 }
 
 std::vector<uint8_t> load(std::istream& is, size_t maxsiz)
