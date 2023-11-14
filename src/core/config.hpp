@@ -22,6 +22,7 @@
 #include <map>
 #include <string>
 
+#include "keyboard.hpp"
 #include "logger.hpp"
 
 #ifndef D_PREFIX
@@ -90,6 +91,12 @@ constexpr static const char* KEY_DELAY          = "delay";
 constexpr static const char* KEY_MONITOR        = "monitor";
 constexpr static const char* KEY_LOGFILE        = "logfile";
 constexpr static const char* KEY_LOGLEVEL       = "loglevel";
+constexpr static const char* KEY_VJOY           = "vjoy";
+constexpr static const char* KEY_VJOY_UP        = "vjoy_up";
+constexpr static const char* KEY_VJOY_DOWN      = "vjoy_down";
+constexpr static const char* KEY_VJOY_LEFT      = "vjoy_left";
+constexpr static const char* KEY_VJOY_RIGHT     = "vjoy_right";
+constexpr static const char* KEY_VJOY_FIRE      = "vjoy_fire";
 
 constexpr static const char* DEFAULT_ROMDIR     = ROMDIR;
 constexpr static const char* DEFAULT_PALETTEDIR = PALETTEDIR;
@@ -107,6 +114,12 @@ constexpr static const char* DEFAULT_DELAY      = "1";
 constexpr static const char* DEFAULT_MONITOR    = "no";
 constexpr static const char* DEFAULT_LOGFILE    = Logger::DEFAULT_LOGFILE;
 constexpr static const char* DEFAULT_LOGLEVEL   = Logger::DEFAULT_LOGLEVEL;
+constexpr static const char* DEFAULT_VJOY       = "no";
+constexpr static const char* DEFAULT_VJOY_UP    = "KEY_CURSOR_UP";
+constexpr static const char* DEFAULT_VJOY_DOWN  = "KEY_CURSOR_DOWN";
+constexpr static const char* DEFAULT_VJOY_LEFT  = "KEY_CURSOR_LEFT";
+constexpr static const char* DEFAULT_VJOY_RIGHT = "KEY_CURSOR_RIGHT";
+constexpr static const char* DEFAULT_VJOY_FIRE  = "KEY_SPACE";
 
 /**
  * Configuration file section.
@@ -118,8 +131,8 @@ using Section = std::map<std::string, std::string>;
  * Configuration file.
  * A Configuration file is conformed by one or more sections.
  * Section names are case insensitive. Key names are case sensitive.
- * <pre>
  * File format:
+ * <pre>
  *      [section_name_1]
  *      key1 = value1
  *      key2 = value2
@@ -293,6 +306,23 @@ private:
 Section parse(int argc, const char** argv, Cmdline& cmdline);
 
 /**
+ * Virtual joystick configuration.
+ */
+struct VJoyConfig : public VJoyKeys {
+    bool enabled{};
+
+    VJoyConfig() {
+    }
+
+    /**
+     * Initialise this virtual joystick configuration structure.
+     * @param sec Section containing configuration key-value pairs.
+     * @exception InvalidArgument
+     */
+    VJoyConfig(Section& sec);
+};
+
+/**
  * Generic configuration.
  */
 struct Config {
@@ -311,6 +341,7 @@ struct Config {
     bool        monitor{};
     std::string logfile{};
     std::string loglevel{};
+    VJoyConfig  vjoy{};
 
     /**
      * Initialise this configuration structure.

@@ -43,7 +43,7 @@ namespace caio {
 namespace ui {
 namespace sdl2 {
 
-static std::atomic<Keyboard::Key> signal_key{Keyboard::KEY_NONE};
+static std::atomic<keyboard::Key> signal_key{keyboard::KEY_NONE};
 
 static void signal_handler(int signo)
 {
@@ -61,7 +61,7 @@ static void signal_handler(int signo)
         break;
 
     case SIGINT:
-        signal_key = Keyboard::KEY_CTRL_C;
+        signal_key = keyboard::KEY_CTRL_C;
         break;
 
     default:;
@@ -235,7 +235,7 @@ void UI::hotkeys(const hotkeys_cb_t& hotkeys_cb)
     _hotkeys_cb = hotkeys_cb;
 }
 
-void UI::hotkeys(Keyboard::Key key)
+void UI::hotkeys(keyboard::Key key)
 {
     if (_hotkeys_cb) {
         _hotkeys_cb(key);
@@ -505,9 +505,9 @@ void UI::event_loop()
 
         render_screen();
 
-        if (signal_key != Keyboard::KEY_NONE) {
+        if (signal_key != keyboard::KEY_NONE) {
             hotkeys(signal_key);
-            signal_key = Keyboard::KEY_NONE;
+            signal_key = keyboard::KEY_NONE;
         }
 
         delay = _fps_time - utils::now() + start;
@@ -565,21 +565,28 @@ void UI::kbd_event(const SDL_Event& event)
                 /*
                  * Swap Joysticks.
                  */
-                hotkeys(Keyboard::KEY_ALT_J);
+                hotkeys(keyboard::KEY_ALT_J);
+                break;
+
+            case SDLK_k:
+                /*
+                 * Toggle virtual joystick/keyboard.
+                 */
+                hotkeys(keyboard::KEY_ALT_K);
                 break;
 
             case SDLK_m:
                 /*
                  * Enter Monitor.
                  */
-                hotkeys(Keyboard::KEY_ALT_M);
+                hotkeys(keyboard::KEY_ALT_M);
                 break;
 
             case SDLK_p:
                 /*
                  * Toggle Pause mode.
                  */
-                hotkeys(Keyboard::KEY_PAUSE);
+                hotkeys(keyboard::KEY_PAUSE);
                 break;
 
             case SDLK_v:
@@ -596,7 +603,7 @@ void UI::kbd_event(const SDL_Event& event)
             /*
              * Toggle Pause mode.
              */
-            hotkeys(Keyboard::KEY_PAUSE);
+            hotkeys(keyboard::KEY_PAUSE);
 
         } else if (_kbd) {
             /*
@@ -650,7 +657,7 @@ void UI::joy_event(const SDL_Event& event)
 
     case SDL_JOYBUTTONDOWN:
         jid = event.jbutton.which;
-        ejoy = joystick(jid);
+        ejoy = find_joystick(jid);
         if (ejoy) {
             auto pos = ejoy->position() | Joystick::JOY_FIRE;
             ejoy->position(pos);
@@ -659,7 +666,7 @@ void UI::joy_event(const SDL_Event& event)
 
     case SDL_JOYBUTTONUP:
         jid = event.jbutton.which;
-        ejoy = joystick(jid);
+        ejoy = find_joystick(jid);
         if (ejoy) {
             auto pos = ejoy->position() & ~Joystick::JOY_FIRE;
             ejoy->position(pos);
@@ -668,7 +675,7 @@ void UI::joy_event(const SDL_Event& event)
 
     case SDL_JOYHATMOTION:
         jid = event.jhat.which;
-        ejoy = joystick(jid);
+        ejoy = find_joystick(jid);
 //        log.debug("ui: joy: %d, hat: %d, value: %d\n", jid, event.jhat.hat, event.jhat.value);
         if (ejoy) {
             uint8_t pos{Joystick::JOY_NONE};
@@ -707,7 +714,7 @@ void UI::joy_event(const SDL_Event& event)
 
     case SDL_JOYAXISMOTION:
         jid = event.jaxis.which;
-        ejoy = joystick(jid);
+        ejoy = find_joystick(jid);
 //        log.debug("ui: joy: %d, axis: %d, value: %d\n", jid, event.jaxis.axis, event.jaxis.value);
         if (ejoy) {
             /*
@@ -1010,7 +1017,7 @@ void UI::render_screen()
         /*
          * The horizontal and vertical scanlines effect generate fake scanlines
          * by changing the alpha value of valid scanlines (see postrender_effects()).
-         * Pixel values are increased to compensate for the los of luminosity due to
+         * Pixel values are increased to compensate for the loss of luminosity due to
          * these fake scanlines.
          */
         std::transform(_screen_raw.begin(), _screen_raw.end(), dst, [](const Rgba& px) {
@@ -1088,21 +1095,26 @@ void UI::render_screen()
     SDL_RenderPresent(_renderer);
 }
 
-UI::joyptr_t UI::joystick(unsigned jid)
+inline UI::joyptr_t UI::find_joystick(unsigned jid)
 {
-    if (jid < _joys.size()) {
-        return _joys[jid];
-    }
+    auto it = std::find_if(_joys.begin(), _joys.end(), [jid](const joyptr_t& joy) {
+        return (joy->joyid() == jid);
+    });
 
-    return {};
+    return (it == _joys.end() ? joyptr_t{} : *it);
 }
 
 void UI::joy_add(int32_t jid)
 {
-    joyptr_t ejoy = joystick(jid);
+    auto ejoy = find_joystick(jid);
+    if (ejoy) {
+        log.debug("ui: Game controlled already handled, id: %d.\n", jid);
+        return;
+    }
+
+    ejoy = find_joystick(Joystick::JOYID_UNASSIGNED);
     if (!ejoy) {
-        log.debug("ui: No space for a new game controller, id: %d. New controller ignored.\n",
-            jid);
+        log.debug("ui: No space for a new game controller, id: %d. New controller ignored.\n", jid);
         return;
     }
 
@@ -1123,7 +1135,7 @@ void UI::joy_add(int32_t jid)
 
 void UI::joy_del(int32_t jid)
 {
-    joyptr_t ejoy = joystick(jid);
+    auto ejoy = find_joystick(jid);
     if (!ejoy) {
         /*
          * The game controller was never associated to an emulated joystick.

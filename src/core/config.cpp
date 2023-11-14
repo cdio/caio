@@ -73,6 +73,35 @@ Section parse(int argc, const char** argv, Cmdline& cmdline)
     return merged;
 }
 
+VJoyConfig::VJoyConfig(Section& sec)
+    : VJoyKeys{.up    = keyboard::to_key(sec[KEY_VJOY_UP]),
+               .down  = keyboard::to_key(sec[KEY_VJOY_DOWN]),
+               .left  = keyboard::to_key(sec[KEY_VJOY_LEFT]),
+               .right = keyboard::to_key(sec[KEY_VJOY_RIGHT]),
+               .fire  = keyboard::to_key(sec[KEY_VJOY_FIRE])},
+      enabled{is_true(sec[KEY_VJOY])}
+{
+    if (up == keyboard::KEY_NONE) {
+        throw InvalidArgument{"Invalid virtual joystick up key: " + sec[KEY_VJOY_UP]};
+    }
+
+    if (down == keyboard::KEY_NONE) {
+        throw InvalidArgument{"Invalid virtual joystick down key: " + sec[KEY_VJOY_DOWN]};
+    }
+
+    if (left == keyboard::KEY_NONE) {
+        throw InvalidArgument{"Invalid virtual joystick left key: " + sec[KEY_VJOY_LEFT]};
+    }
+
+    if (right == keyboard::KEY_NONE) {
+        throw InvalidArgument{"Invalid virtual joystick right key: " + sec[KEY_VJOY_RIGHT]};
+    }
+
+    if (fire == keyboard::KEY_NONE) {
+        throw InvalidArgument{"Invalid virtual joystick fire key: " + sec[KEY_VJOY_FIRE]};
+    }
+}
+
 Config::Config(Section& sec, const std::string& prefix)
     : title{"caio"},
       romdir{sec[KEY_ROMDIR]},
@@ -88,7 +117,8 @@ Config::Config(Section& sec, const std::string& prefix)
       delay{static_cast<float>(std::atof(sec[KEY_DELAY].c_str()))},
       monitor{is_true(sec[KEY_MONITOR])},
       logfile{sec[KEY_LOGFILE]},
-      loglevel{sec[KEY_LOGLEVEL]}
+      loglevel{sec[KEY_LOGLEVEL]},
+      vjoy{sec}
 {
     if (scale < 1) {
         scale = 1;
@@ -122,21 +152,27 @@ std::string Config::to_string() const
 {
     std::ostringstream os{};
 
-    os << "  Title:              " << std::quoted(title)            << std::endl
-       << "  ROMs path:          " << std::quoted(romdir)           << std::endl
-       << "  Palette:            " << std::quoted(palette)          << std::endl
-       << "  Keymaps:            " << std::quoted(keymaps)          << std::endl
-       << "  Cartridge:          " << std::quoted(cartridge)        << std::endl
-       << "  FPS:                " << fps                           << std::endl
-       << "  Scale:              " << scale << "x"                  << std::endl
-       << "  Scanlines effect:   " << scanlines                     << std::endl
-       << "  Fullscreen:         " << (fullscreen ? "yes" : "no")   << std::endl
-       << "  Smooth resize:      " << (sresize ? "yes" : "no")      << std::endl
-       << "  Audio enabled:      " << (audio ? "yes" : "no")        << std::endl
-       << "  Clock delay:        " << delay << "x"                  << std::endl
-       << "  CPU Monitor:        " << (monitor ? "yes" : "no")      << std::endl
-       << "  Log file:           " << std::quoted(logfile)          << std::endl
-       << "  Log level:          " << loglevel;
+    os << "  Title:              " << std::quoted(title)              << std::endl
+       << "  ROMs path:          " << std::quoted(romdir)             << std::endl
+       << "  Palette:            " << std::quoted(palette)            << std::endl
+       << "  Keymaps:            " << std::quoted(keymaps)            << std::endl
+       << "  Cartridge:          " << std::quoted(cartridge)          << std::endl
+       << "  FPS:                " << fps                             << std::endl
+       << "  Scale:              " << scale << "x"                    << std::endl
+       << "  Scanlines effect:   " << scanlines                       << std::endl
+       << "  Fullscreen:         " << (fullscreen ? "yes" : "no")     << std::endl
+       << "  Smooth resize:      " << (sresize ? "yes" : "no")        << std::endl
+       << "  Audio enabled:      " << (audio ? "yes" : "no")          << std::endl
+       << "  Clock delay:        " << delay << "x"                    << std::endl
+       << "  CPU Monitor:        " << (monitor ? "yes" : "no")        << std::endl
+       << "  Log file:           " << std::quoted(logfile)            << std::endl
+       << "  Log level:          " << loglevel                        << std::endl
+       << "  Virtual Joystick:   " << (vjoy.enabled ? "yes" : "no")   << std::endl
+       << "                up:   " << keyboard::to_string(vjoy.up)    << std::endl
+       << "              down:   " << keyboard::to_string(vjoy.down)  << std::endl
+       << "              left:   " << keyboard::to_string(vjoy.left)  << std::endl
+       << "             right:   " << keyboard::to_string(vjoy.right) << std::endl
+       << "              fire:   " << keyboard::to_string(vjoy.fire);
 
     return os.str();
 }

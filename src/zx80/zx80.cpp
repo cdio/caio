@@ -212,7 +212,7 @@ void ZX80::connect_ui()
      * Connect Pause and Reset widgets.
      */
     auto do_pause = [this](bool suspend) {
-        hotkeys(Keyboard::KEY_PAUSE);
+        hotkeys(keyboard::KEY_PAUSE);
     };
 
     auto is_paused = [this]() {
@@ -236,7 +236,7 @@ void ZX80::connect_ui()
     /*
      * Connect the keyboard.
      */
-    auto hotkeys = [this](Keyboard::Key key) {
+    auto hotkeys = [this](keyboard::Key key) {
         this->hotkeys(key);
     };
 
@@ -244,17 +244,17 @@ void ZX80::connect_ui()
     _ui->keyboard(_kbd);
 }
 
-void ZX80::hotkeys(Keyboard::Key key)
+void ZX80::hotkeys(keyboard::Key key)
 {
     /*
      * This methods is called within the context of the UI thread
      * (see connect_ui()).
      */
     switch (key) {
-    case Keyboard::KEY_ALT_J:
+    case keyboard::KEY_ALT_J:
         break;
 
-    case Keyboard::KEY_ALT_M:
+    case keyboard::KEY_ALT_M:
         /*
          * Enter monitor on the next clock tick only if it is active.
          */
@@ -264,7 +264,7 @@ void ZX80::hotkeys(Keyboard::Key key)
 
         /* PASSTHROUGH */
 
-    case Keyboard::KEY_CTRL_C:
+    case keyboard::KEY_CTRL_C:
         /*
          * Enter monitor on the next clock tick.
          * CTRL-C forces resume from pause.
@@ -276,7 +276,7 @@ void ZX80::hotkeys(Keyboard::Key key)
 
         /* PASSTHROUGH */
 
-    case Keyboard::KEY_PAUSE:
+    case keyboard::KEY_PAUSE:
         log.debug("System %spaused\n", (_ui->paused() ? "un" : ""));
         _clk->pause(_clk->paused() ^ true);
         break;

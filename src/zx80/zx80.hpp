@@ -136,7 +136,7 @@ private:
      * Process hot-keys.
      * This method is indirectly called by the user interface.
      */
-    void hotkeys(Keyboard::Key key);
+    void hotkeys(keyboard::Key key);
 
     ZX80Config           _conf;
     devptr_t             _ram{};

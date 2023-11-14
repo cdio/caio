@@ -57,7 +57,7 @@ public:
 
     using keybptr_t     = sptr_t<Keyboard>;
     using joyptr_t      = sptr_t<Joystick>;
-    using hotkeys_cb_t  = std::function<void(Keyboard::Key)>;
+    using hotkeys_cb_t  = std::function<void(keyboard::Key)>;
 
     /**
      * @return The only instance to the user interface.
@@ -243,7 +243,7 @@ private:
      * Call the hotkeys callback with the specified key.
      * @param key Key.
      */
-    void hotkeys(Keyboard::Key key);
+    void hotkeys(keyboard::Key key);
 
     /**
      * Toggle the fullscreen mode.
@@ -312,11 +312,11 @@ private:
     void joy_del(int32_t jid);
 
     /**
-     * Get an emulated joystick.
-     * @param jid Joystick ID.
+     * Find an emulated joystick given its identifier.
+     * @param jid Emulated joystick or game controller ID.
      * @return The requested joystick on success; nullptr if the specified joystick does not exist.
      */
-    joyptr_t joystick(unsigned jid);
+    joyptr_t find_joystick(unsigned jid);
 
     Config                      _conf{};                /* UI configuration                                   */
     uint64_t                    _fps_time{};            /* FPS in microseconds                                */

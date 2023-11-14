@@ -23,128 +23,138 @@
 #include <regex>
 #include <sstream>
 
-#include "types.hpp"
 #include "utils.hpp"
 
 
 namespace caio {
+namespace keyboard {
 
-std::map<std::string, Keyboard::Key> Keyboard::name_to_key{
-    { "KEY_ESC",                Keyboard::KEY_ESC               },
-    { "KEY_F1",                 Keyboard::KEY_F1                },
-    { "KEY_F2",                 Keyboard::KEY_F2                },
-    { "KEY_F3",                 Keyboard::KEY_F3                },
-    { "KEY_F4",                 Keyboard::KEY_F4                },
-    { "KEY_F5",                 Keyboard::KEY_F5                },
-    { "KEY_F6",                 Keyboard::KEY_F6                },
-    { "KEY_F7",                 Keyboard::KEY_F7                },
-    { "KEY_F8",                 Keyboard::KEY_F8                },
-    { "KEY_F9",                 Keyboard::KEY_F9                },
-    { "KEY_F10",                Keyboard::KEY_F10               },
-    { "KEY_F11",                Keyboard::KEY_F11               },
-    { "KEY_F12",                Keyboard::KEY_F12               },
-    { "KEY_PAUSE",              Keyboard::KEY_PAUSE             },
+static std::map<std::string, Key> name_to_key{
+    { "KEY_ESC",                keyboard::KEY_ESC               },
+    { "KEY_F1",                 keyboard::KEY_F1                },
+    { "KEY_F2",                 keyboard::KEY_F2                },
+    { "KEY_F3",                 keyboard::KEY_F3                },
+    { "KEY_F4",                 keyboard::KEY_F4                },
+    { "KEY_F5",                 keyboard::KEY_F5                },
+    { "KEY_F6",                 keyboard::KEY_F6                },
+    { "KEY_F7",                 keyboard::KEY_F7                },
+    { "KEY_F8",                 keyboard::KEY_F8                },
+    { "KEY_F9",                 keyboard::KEY_F9                },
+    { "KEY_F10",                keyboard::KEY_F10               },
+    { "KEY_F11",                keyboard::KEY_F11               },
+    { "KEY_F12",                keyboard::KEY_F12               },
+    { "KEY_PAUSE",              keyboard::KEY_PAUSE             },
 
-    { "KEY_GRAVE_ACCENT",       Keyboard::KEY_GRAVE_ACCENT      },
-    { "KEY_1",                  Keyboard::KEY_1                 },
-    { "KEY_2",                  Keyboard::KEY_2                 },
-    { "KEY_3",                  Keyboard::KEY_3                 },
-    { "KEY_4",                  Keyboard::KEY_4                 },
-    { "KEY_5",                  Keyboard::KEY_5                 },
-    { "KEY_6",                  Keyboard::KEY_6                 },
-    { "KEY_7",                  Keyboard::KEY_7                 },
-    { "KEY_8",                  Keyboard::KEY_8                 },
-    { "KEY_9",                  Keyboard::KEY_9                 },
-    { "KEY_0",                  Keyboard::KEY_0                 },
-    { "KEY_MINUS",              Keyboard::KEY_MINUS             },
-    { "KEY_EQUAL",              Keyboard::KEY_EQUAL             },
-    { "KEY_BACKSPACE",          Keyboard::KEY_BACKSPACE         },
+    { "KEY_GRAVE_ACCENT",       keyboard::KEY_GRAVE_ACCENT      },
+    { "KEY_1",                  keyboard::KEY_1                 },
+    { "KEY_2",                  keyboard::KEY_2                 },
+    { "KEY_3",                  keyboard::KEY_3                 },
+    { "KEY_4",                  keyboard::KEY_4                 },
+    { "KEY_5",                  keyboard::KEY_5                 },
+    { "KEY_6",                  keyboard::KEY_6                 },
+    { "KEY_7",                  keyboard::KEY_7                 },
+    { "KEY_8",                  keyboard::KEY_8                 },
+    { "KEY_9",                  keyboard::KEY_9                 },
+    { "KEY_0",                  keyboard::KEY_0                 },
+    { "KEY_MINUS",              keyboard::KEY_MINUS             },
+    { "KEY_EQUAL",              keyboard::KEY_EQUAL             },
+    { "KEY_BACKSPACE",          keyboard::KEY_BACKSPACE         },
 
-    { "KEY_TAB",                Keyboard::KEY_TAB               },
-    { "KEY_Q",                  Keyboard::KEY_Q                 },
-    { "KEY_W",                  Keyboard::KEY_W                 },
-    { "KEY_E",                  Keyboard::KEY_E                 },
-    { "KEY_R",                  Keyboard::KEY_R                 },
-    { "KEY_T",                  Keyboard::KEY_T                 },
-    { "KEY_Y",                  Keyboard::KEY_Y                 },
-    { "KEY_U",                  Keyboard::KEY_U                 },
-    { "KEY_I",                  Keyboard::KEY_I                 },
-    { "KEY_O",                  Keyboard::KEY_O                 },
-    { "KEY_P",                  Keyboard::KEY_P                 },
-    { "KEY_OPEN_BRACKET",       Keyboard::KEY_OPEN_BRACKET      },
-    { "KEY_CLOSE_BRACKET",      Keyboard::KEY_CLOSE_BRACKET     },
-    { "KEY_BACKSLASH",          Keyboard::KEY_BACKSLASH         },
+    { "KEY_TAB",                keyboard::KEY_TAB               },
+    { "KEY_Q",                  keyboard::KEY_Q                 },
+    { "KEY_W",                  keyboard::KEY_W                 },
+    { "KEY_E",                  keyboard::KEY_E                 },
+    { "KEY_R",                  keyboard::KEY_R                 },
+    { "KEY_T",                  keyboard::KEY_T                 },
+    { "KEY_Y",                  keyboard::KEY_Y                 },
+    { "KEY_U",                  keyboard::KEY_U                 },
+    { "KEY_I",                  keyboard::KEY_I                 },
+    { "KEY_O",                  keyboard::KEY_O                 },
+    { "KEY_P",                  keyboard::KEY_P                 },
+    { "KEY_OPEN_BRACKET",       keyboard::KEY_OPEN_BRACKET      },
+    { "KEY_CLOSE_BRACKET",      keyboard::KEY_CLOSE_BRACKET     },
+    { "KEY_BACKSLASH",          keyboard::KEY_BACKSLASH         },
 
-    { "KEY_A",                  Keyboard::KEY_A                 },
-    { "KEY_S",                  Keyboard::KEY_S                 },
-    { "KEY_D",                  Keyboard::KEY_D                 },
-    { "KEY_F",                  Keyboard::KEY_F                 },
-    { "KEY_G",                  Keyboard::KEY_G                 },
-    { "KEY_H",                  Keyboard::KEY_H                 },
-    { "KEY_J",                  Keyboard::KEY_J                 },
-    { "KEY_K",                  Keyboard::KEY_K                 },
-    { "KEY_L",                  Keyboard::KEY_L                 },
-    { "KEY_SEMICOLON",          Keyboard::KEY_SEMICOLON         },
-    { "KEY_APOSTROPHE",         Keyboard::KEY_APOSTROPHE        },
-    { "KEY_ENTER",              Keyboard::KEY_ENTER             },
+    { "KEY_A",                  keyboard::KEY_A                 },
+    { "KEY_S",                  keyboard::KEY_S                 },
+    { "KEY_D",                  keyboard::KEY_D                 },
+    { "KEY_F",                  keyboard::KEY_F                 },
+    { "KEY_G",                  keyboard::KEY_G                 },
+    { "KEY_H",                  keyboard::KEY_H                 },
+    { "KEY_J",                  keyboard::KEY_J                 },
+    { "KEY_K",                  keyboard::KEY_K                 },
+    { "KEY_L",                  keyboard::KEY_L                 },
+    { "KEY_SEMICOLON",          keyboard::KEY_SEMICOLON         },
+    { "KEY_APOSTROPHE",         keyboard::KEY_APOSTROPHE        },
+    { "KEY_ENTER",              keyboard::KEY_ENTER             },
 
-    { "KEY_Z",                  Keyboard::KEY_Z                 },
-    { "KEY_X",                  Keyboard::KEY_X                 },
-    { "KEY_C",                  Keyboard::KEY_C                 },
-    { "KEY_V",                  Keyboard::KEY_V                 },
-    { "KEY_B",                  Keyboard::KEY_B                 },
-    { "KEY_N",                  Keyboard::KEY_N                 },
-    { "KEY_M",                  Keyboard::KEY_M                 },
-    { "KEY_COMMA",              Keyboard::KEY_COMMA             },
-    { "KEY_DOT",                Keyboard::KEY_DOT               },
-    { "KEY_SLASH",              Keyboard::KEY_SLASH             },
+    { "KEY_Z",                  keyboard::KEY_Z                 },
+    { "KEY_X",                  keyboard::KEY_X                 },
+    { "KEY_C",                  keyboard::KEY_C                 },
+    { "KEY_V",                  keyboard::KEY_V                 },
+    { "KEY_B",                  keyboard::KEY_B                 },
+    { "KEY_N",                  keyboard::KEY_N                 },
+    { "KEY_M",                  keyboard::KEY_M                 },
+    { "KEY_COMMA",              keyboard::KEY_COMMA             },
+    { "KEY_DOT",                keyboard::KEY_DOT               },
+    { "KEY_SLASH",              keyboard::KEY_SLASH             },
 
-    { "KEY_SPACE",              Keyboard::KEY_SPACE             },
+    { "KEY_SPACE",              keyboard::KEY_SPACE             },
 
-    { "KEY_INSERT",             Keyboard::KEY_INSERT            },
-    { "KEY_DELETE",             Keyboard::KEY_DELETE            },
-    { "KEY_HOME",               Keyboard::KEY_HOME              },
-    { "KEY_END",                Keyboard::KEY_END               },
-    { "KEY_PAGE_UP",            Keyboard::KEY_PAGE_UP           },
-    { "KEY_PAGE_DOWN",          Keyboard::KEY_PAGE_DOWN         },
+    { "KEY_INSERT",             keyboard::KEY_INSERT            },
+    { "KEY_DELETE",             keyboard::KEY_DELETE            },
+    { "KEY_HOME",               keyboard::KEY_HOME              },
+    { "KEY_END",                keyboard::KEY_END               },
+    { "KEY_PAGE_UP",            keyboard::KEY_PAGE_UP           },
+    { "KEY_PAGE_DOWN",          keyboard::KEY_PAGE_DOWN         },
 
-    { "KEY_CURSOR_UP",          Keyboard::KEY_CURSOR_UP         },
-    { "KEY_CURSOR_DOWN",        Keyboard::KEY_CURSOR_DOWN       },
-    { "KEY_CURSOR_LEFT",        Keyboard::KEY_CURSOR_LEFT       },
-    { "KEY_CURSOR_RIGHT",       Keyboard::KEY_CURSOR_RIGHT      },
+    { "KEY_CURSOR_UP",          keyboard::KEY_CURSOR_UP         },
+    { "KEY_CURSOR_DOWN",        keyboard::KEY_CURSOR_DOWN       },
+    { "KEY_CURSOR_LEFT",        keyboard::KEY_CURSOR_LEFT       },
+    { "KEY_CURSOR_RIGHT",       keyboard::KEY_CURSOR_RIGHT      },
 
-    { "KEY_LT",                 Keyboard::KEY_LT                },
+    { "KEY_LT",                 keyboard::KEY_LT                },
 
-    { "KEY_NUMPAD_SLASH",       Keyboard::KEY_NUMPAD_SLASH      },
-    { "KEY_NUMPAD_ASTERISK",    Keyboard::KEY_NUMPAD_ASTERISK   },
-    { "KEY_NUMPAD_MINUS",       Keyboard::KEY_NUMPAD_MINUS      },
-    { "KEY_NUMPAD_PLUS",        Keyboard::KEY_NUMPAD_PLUS       },
-    { "KEY_NUMPAD_ENTER",       Keyboard::KEY_NUMPAD_ENTER      },
-    { "KEY_NUMPAD_DOT",         Keyboard::KEY_NUMPAD_DOT        },
-    { "KEY_NUMPAD_1",           Keyboard::KEY_NUMPAD_1          },
-    { "KEY_NUMPAD_2",           Keyboard::KEY_NUMPAD_2          },
-    { "KEY_NUMPAD_3",           Keyboard::KEY_NUMPAD_3          },
-    { "KEY_NUMPAD_4",           Keyboard::KEY_NUMPAD_4          },
-    { "KEY_NUMPAD_5",           Keyboard::KEY_NUMPAD_5          },
-    { "KEY_NUMPAD_6",           Keyboard::KEY_NUMPAD_6          },
-    { "KEY_NUMPAD_7",           Keyboard::KEY_NUMPAD_7          },
-    { "KEY_NUMPAD_8",           Keyboard::KEY_NUMPAD_8          },
-    { "KEY_NUMPAD_9",           Keyboard::KEY_NUMPAD_9          },
-    { "KEY_NUMPAD_0",           Keyboard::KEY_NUMPAD_0          },
+    { "KEY_NUMPAD_SLASH",       keyboard::KEY_NUMPAD_SLASH      },
+    { "KEY_NUMPAD_ASTERISK",    keyboard::KEY_NUMPAD_ASTERISK   },
+    { "KEY_NUMPAD_MINUS",       keyboard::KEY_NUMPAD_MINUS      },
+    { "KEY_NUMPAD_PLUS",        keyboard::KEY_NUMPAD_PLUS       },
+    { "KEY_NUMPAD_ENTER",       keyboard::KEY_NUMPAD_ENTER      },
+    { "KEY_NUMPAD_DOT",         keyboard::KEY_NUMPAD_DOT        },
+    { "KEY_NUMPAD_1",           keyboard::KEY_NUMPAD_1          },
+    { "KEY_NUMPAD_2",           keyboard::KEY_NUMPAD_2          },
+    { "KEY_NUMPAD_3",           keyboard::KEY_NUMPAD_3          },
+    { "KEY_NUMPAD_4",           keyboard::KEY_NUMPAD_4          },
+    { "KEY_NUMPAD_5",           keyboard::KEY_NUMPAD_5          },
+    { "KEY_NUMPAD_6",           keyboard::KEY_NUMPAD_6          },
+    { "KEY_NUMPAD_7",           keyboard::KEY_NUMPAD_7          },
+    { "KEY_NUMPAD_8",           keyboard::KEY_NUMPAD_8          },
+    { "KEY_NUMPAD_9",           keyboard::KEY_NUMPAD_9          },
+    { "KEY_NUMPAD_0",           keyboard::KEY_NUMPAD_0          },
 
-    { "KEY_LEFT_SHIFT",         Keyboard::KEY_LEFT_SHIFT        },
-    { "KEY_RIGHT_SHIFT",        Keyboard::KEY_RIGHT_SHIFT       },
-    { "KEY_LEFT_CTRL" ,         Keyboard::KEY_LEFT_CTRL         },
-    { "KEY_RIGHT_CTRL",         Keyboard::KEY_RIGHT_CTRL        },
-    { "KEY_LEFT_ALT"  ,         Keyboard::KEY_LEFT_ALT          },
-    { "KEY_RIGHT_ALT" ,         Keyboard::KEY_RIGHT_ALT         },
-    { "KEY_FN" ,                Keyboard::KEY_FN                }
+    { "KEY_LEFT_SHIFT",         keyboard::KEY_LEFT_SHIFT        },
+    { "KEY_RIGHT_SHIFT",        keyboard::KEY_RIGHT_SHIFT       },
+    { "KEY_LEFT_CTRL" ,         keyboard::KEY_LEFT_CTRL         },
+    { "KEY_RIGHT_CTRL",         keyboard::KEY_RIGHT_CTRL        },
+    { "KEY_LEFT_ALT"  ,         keyboard::KEY_LEFT_ALT          },
+    { "KEY_RIGHT_ALT" ,         keyboard::KEY_RIGHT_ALT         },
+    { "KEY_FN" ,                keyboard::KEY_FN                }
 };
 
-Keyboard::Key Keyboard::to_key(const std::string& name)
+Key to_key(const std::string& name)
 {
     auto it = name_to_key.find(name);
     return (it == name_to_key.end() ? Key::KEY_NONE : it->second);
+}
+
+std::string to_string(Key key)
+{
+    auto it = std::find_if(name_to_key.begin(), name_to_key.end(),
+        [key](const std::pair<std::string, Key>& pair) {
+            return (pair.second == key);
+    });
+
+    return (it == name_to_key.end() ? "" : it->first);
 }
 
 void Keyboard::load(const std::string& fname)
@@ -205,4 +215,54 @@ void Keyboard::load(const std::string& fname)
     is.close();
 }
 
+void Keyboard::vjoystick(const VJoyKeys& vjoykeys, const sptr_t<Joystick>& vjoy)
+{
+    if (_vjoy) {
+        _vjoy->reset();
+    }
+
+    _vjoy = vjoy;
+    if (_vjoy) {
+        _vjoy->reset(Joystick::JOYID_VIRTUAL);
+        _vjoykeys = vjoykeys;
+    }
+}
+
+void Keyboard::key_pressed(Key key)
+{
+    if (_vjoymode) {
+        uint8_t pos = _vjoy->position();
+
+        pos |= (key == _vjoykeys.up    ? Joystick::JOY_UP :
+               (key == _vjoykeys.down  ? Joystick::JOY_DOWN :
+               (key == _vjoykeys.left  ? Joystick::JOY_LEFT :
+               (key == _vjoykeys.right ? Joystick::JOY_RIGHT :
+               (key == _vjoykeys.fire  ? Joystick::JOY_FIRE : 0)))));
+
+        _vjoy->position(pos);
+
+    } else {
+        pressed(key);
+    }
+}
+
+void Keyboard::key_released(Key key)
+{
+    if (_vjoymode) {
+        uint8_t pos = _vjoy->position();
+
+        pos &= ~(key == _vjoykeys.up    ? Joystick::JOY_UP :
+                (key == _vjoykeys.down  ? Joystick::JOY_DOWN :
+                (key == _vjoykeys.left  ? Joystick::JOY_LEFT :
+                (key == _vjoykeys.right ? Joystick::JOY_RIGHT :
+                (key == _vjoykeys.fire  ? Joystick::JOY_FIRE : 0)))));
+
+        _vjoy->position(pos);
+
+    } else {
+        released(key);
+    }
+}
+
+}
 }

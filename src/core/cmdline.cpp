@@ -87,7 +87,13 @@ static Option generic_options[] = {
     { "delay",      SEC_GENERIC,    KEY_DELAY,          DEFAULT_DELAY,      Arg::Required,  set_value   },
     { "monitor",    SEC_GENERIC,    KEY_MONITOR,        DEFAULT_MONITOR,    Arg::None,      set_true    },
     { "logfile",    SEC_GENERIC,    KEY_LOGFILE,        DEFAULT_LOGFILE,    Arg::Required,  set_value   },
-    { "loglevel",   SEC_GENERIC,    KEY_LOGLEVEL,       DEFAULT_LOGLEVEL,   Arg::Required,  set_value   }
+    { "loglevel",   SEC_GENERIC,    KEY_LOGLEVEL,       DEFAULT_LOGLEVEL,   Arg::Required,  set_value   },
+    { "vjoy",       SEC_GENERIC,    KEY_VJOY,           DEFAULT_VJOY,       Arg::Required,  set_bool    },
+    { "vjoy-up",    SEC_GENERIC,    KEY_VJOY_UP,        DEFAULT_VJOY_UP,    Arg::Required,  set_value   },
+    { "vjoy-down",  SEC_GENERIC,    KEY_VJOY_DOWN,      DEFAULT_VJOY_DOWN,  Arg::Required,  set_value   },
+    { "vjoy-left",  SEC_GENERIC,    KEY_VJOY_LEFT,      DEFAULT_VJOY_LEFT,  Arg::Required,  set_value   },
+    { "vjoy-right", SEC_GENERIC,    KEY_VJOY_RIGHT,     DEFAULT_VJOY_RIGHT, Arg::Required,  set_value   },
+    { "vjoy-fire",  SEC_GENERIC,    KEY_VJOY_FIRE,      DEFAULT_VJOY_FIRE,  Arg::Required,  set_value   }
 };
 
 std::string Cmdline::usage() const
@@ -96,30 +102,36 @@ std::string Cmdline::usage() const
 
         // 0         1         2         3         4         5         6         7
         // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
-    os << "usage: " << _progname << " <options>"                                                        << std::endl
-       << "where <options> are:"                                                                        << std::endl
-       << " --conf <cfile>          Configuration file"                                                 << std::endl
-       << " --romdir <romdir>       ROMs directory"                                                     << std::endl
-       << " --palettedir <pdir>     Colour palette directory"                                           << std::endl
-       << " --palette <palette>     Colour palette name or filename"                                    << std::endl
-       << " --keymapsdir <kdir>     Key mappings directory"                                             << std::endl
-       << " --keymaps <keymaps>     Key mappings name or filename"                                      << std::endl
-       << " --cart <cfile>          Cartridge filename"                                                 << std::endl
-       << " --fps <rate>            Frame rate (default is " << DEFAULT_FPS << ")"                      << std::endl
-       << " --scale <scale>         Window scale factor (default is " << DEFAULT_SCALE << ")"           << std::endl
-       << " --scanlines <n|h|v|H|V> Scanlines effect: (n)one, (h)orizontal, (v)ertical,"                << std::endl
-       << "                         advanced (H)orizontal, advanced (V)ertical"                         << std::endl
-       << "                         (default is " << DEFAULT_SCANLINES << ")"                           << std::endl
-       << " --fullscreen            Start in fullscreen mode"                                           << std::endl
-       << " --sresize <yes|no>      Smooth window resize (default is " << DEFAULT_SRESIZE << ")"        << std::endl
-       << " --audio <yes|no>        Enable audio (default is " << DEFAULT_AUDIO << ")"                  << std::endl
-       << " --delay <delay>         Clock delay factor (default is " << DEFAULT_DELAY << ")"            << std::endl
-       << " --monitor               Activate the CPU monitor during boot"                               << std::endl
-       << " --logfile <file>        Send log information to the specified destination"                  << std::endl
-       << "                         (default is " << DEFAULT_LOGFILE << ")"                             << std::endl
-       << " --loglevel <lv>         Loglevel, bitwise combination of: "                                 << std::endl
-       << "                         error|warn|info|debug|all (default is " << DEFAULT_LOGLEVEL << ")"  << std::endl
-       << " -v|--version            Show version information and exit"                                  << std::endl
+    os << "usage: " << _progname << " <options>"                                                          << std::endl
+       << "where <options> are:"                                                                          << std::endl
+       << " --conf <cfile>          Configuration file"                                                   << std::endl
+       << " --romdir <romdir>       ROMs directory"                                                       << std::endl
+       << " --palettedir <pdir>     Colour palette directory"                                             << std::endl
+       << " --palette <palette>     Colour palette name or filename"                                      << std::endl
+       << " --keymapsdir <kdir>     Key mappings directory"                                               << std::endl
+       << " --keymaps <keymaps>     Key mappings name or filename"                                        << std::endl
+       << " --cart <cfile>          Cartridge filename"                                                   << std::endl
+       << " --fps <rate>            Frame rate (default is " << DEFAULT_FPS << ")"                        << std::endl
+       << " --scale <scale>         Window scale factor (default is " << DEFAULT_SCALE << ")"             << std::endl
+       << " --scanlines <n|h|v|H|V> Scanlines effect: (n)one, (h)orizontal, (v)ertical,"                  << std::endl
+       << "                         advanced (H)orizontal, advanced (V)ertical"                           << std::endl
+       << "                         (default is " << DEFAULT_SCANLINES << ")"                             << std::endl
+       << " --fullscreen            Start in fullscreen mode"                                             << std::endl
+       << " --sresize <yes|no>      Smooth window resize (default is " << DEFAULT_SRESIZE << ")"          << std::endl
+       << " --audio <yes|no>        Enable audio (default is " << DEFAULT_AUDIO << ")"                    << std::endl
+       << " --delay <delay>         Clock delay factor (default is " << DEFAULT_DELAY << ")"              << std::endl
+       << " --monitor               Activate the CPU monitor during boot"                                 << std::endl
+       << " --logfile <file>        Send log information to the specified destination"                    << std::endl
+       << "                         (default is " << DEFAULT_LOGFILE << ")"                               << std::endl
+       << " --loglevel <lv>         Loglevel, bitwise combination of: "                                   << std::endl
+       << "                         error|warn|info|debug|all (default is " << DEFAULT_LOGLEVEL << ")"    << std::endl
+       << " --vjoy <yes|no>         Enable virtual joystick (default is " << DEFAULT_VJOY << ")"          << std::endl
+       << " --vjoy-up <keyname>     Virtual joystick UP key (default is " << DEFAULT_VJOY_UP << ")"       << std::endl
+       << " --vjoy-down <keyname>   Virtual joystick DOWN key (default is " << DEFAULT_VJOY_DOWN << ")"   << std::endl
+       << " --vjoy-left <keyname>   Virtual joystick LEFT key (default is " << DEFAULT_VJOY_LEFT << ")"   << std::endl
+       << " --vjoy-right <keyname>  Virtual joystick RIGHT key (default is " << DEFAULT_VJOY_RIGHT << ")" << std::endl
+       << " --vjoy-fire <keyname>   Virtual joystick FIRE key (default is " << DEFAULT_VJOY_FIRE << ")"   << std::endl
+       << " -v|--version            Show version information and exit"                                    << std::endl
        << " -h|--help               Print this message and exit";
 
     return os.str();

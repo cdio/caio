@@ -33,8 +33,10 @@ namespace caio {
  */
 class Joystick : public Name {
 public:
-    constexpr static const char* TYPE       = "JOY";
-    constexpr static unsigned JOYID_INVALID = static_cast<unsigned>(-1);
+    constexpr static const char* TYPE          = "JOY";
+    constexpr static unsigned JOYID_INVALID    = static_cast<unsigned>(-1);
+    constexpr static unsigned JOYID_UNASSIGNED = JOYID_INVALID;
+    constexpr static unsigned JOYID_VIRTUAL    = 255;
 
     enum JoyPosition {
         JOY_NONE  = 0x00,
@@ -89,6 +91,13 @@ public:
      */
     bool is_connected() const {
         return (_joyid != JOYID_INVALID);
+    }
+
+    /**
+     * @return The joystick id.
+     */
+    unsigned joyid() const {
+        return _joyid;
     }
 
 private:

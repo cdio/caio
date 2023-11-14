@@ -28,7 +28,7 @@
 - UI:       Windowed pseudo-terminals (logs and monitor, WxWidgets?)
 - UI:       Fix disk widget activity when C1541 is in error condition.
 - UI:       Floppy widget: Disk progress
-- UI:       Virtual joystick (keypad)
+- UI:       Virtual joystick widget
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
 - CBMBUS:   Refactor using pullups

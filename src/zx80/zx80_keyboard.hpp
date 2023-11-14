@@ -36,6 +36,7 @@ namespace zx80 {
 
 /**
  * ZX80 Keyboard.
+ * ZX80 4K ROM keyboard layout:
  * <pre>
  * +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
  * | not   | and   | then  | to    | left  | down  | up    | right | home  | rubout|
@@ -59,7 +60,7 @@ namespace zx80 {
  * +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
  * </pre>
  *
- * ZX80 8K ROM Keyboard.
+ * ZX80 8K ROM keyboard layout:
  * <pre>
  * +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
  * | edit  | and   | then  | to    | left  | down  | up    | right |graphic| rubout|
@@ -105,7 +106,7 @@ namespace zx80 {
  * </pre>
  * The read address specifies the row to scan (0), the returned value is the matrix column.
  */
-class ZX80Keyboard : public Keyboard {
+class ZX80Keyboard : public keyboard::Keyboard {
 public:
     constexpr static const unsigned MATRIX_ROWS = 8;
 
@@ -173,12 +174,12 @@ public:
     /**
      * @see Keyboard::key_pressed()
      */
-    void key_pressed(Key key) override;
+    void pressed(keyboard::Key key) override;
 
     /**
      * @see Keyboard::key_released()
      */
-    void key_released(Key key) override;
+    void released(keyboard::Key key) override;
 
     /**
      * @see Keyboard::read()
@@ -248,18 +249,18 @@ private:
      * Multiple keys can be pressed at once, this variable
      * tracks all of them in order to release them properly.
      */
-    std::list<std::tuple<Key, bool, bool>> _prev_keys{};
+    std::list<std::tuple<keyboard::Key, bool, bool>> _prev_keys{};
 
     /**
      * Conversion table from Key to ZX80 matrix code.
      */
-    std::map<std::tuple<Key, bool, bool>, std::pair<MatrixKey, bool>> _key_to_zx80;
+    std::map<std::tuple<keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> _key_to_zx80;
 
     /**
      * Default conversion table from Key to ZX80 matrix code.
      * The default conversion table translates from US-ANSI keyboard to ZX80 keyboard.
      */
-    static std::map<std::tuple<Key, bool, bool>, std::pair<MatrixKey, bool>> default_key_to_zx80;
+    static std::map<std::tuple<keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> default_key_to_zx80;
 
     /**
      * Conversion table from a ZX80 matrix name to a ZX80 matrix code.

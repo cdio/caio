@@ -64,12 +64,12 @@ extern std::string sdl_error();
 extern void throw_sdl_uierror(const std::string& reason);
 
 /**
- * Convert a SDL scan code to Keyboard::Key code.
+ * Convert a SDL scan code to keyboard::Key code.
  * @param code SDL scan code.
  * @return Keyboard::Key code.
  * @see sdl_to_key
  */
-extern Keyboard::Key to_key(SDL_Scancode code);
+extern keyboard::Key to_key(SDL_Scancode code);
 
 /**
  * Detect whether a coordinate belongs to a rectangle.

@@ -57,7 +57,7 @@ namespace c64 {
  * </pre>
  * @see <https://www.c64-wiki.com/wiki/Keyboard>
  */
-class C64Keyboard : public Keyboard {
+class C64Keyboard : public keyboard::Keyboard {
 public:
     constexpr static const unsigned MATRIX_ROWS = 8;
 
@@ -158,14 +158,14 @@ public:
     void reset() override;
 
     /**
-     * @see Keyboard::key_pressed()
+     * @see Keyboard::pressed()
      */
-    void key_pressed(Key key) override;
+    void pressed(keyboard::Key key) override;
 
     /**
-     * @see Keyboard::key_released()
+     * @see Keyboard::released()
      */
-    void key_released(Key key) override;
+    void released(keyboard::Key key) override;
 
     /**
      * @see Keyboard::read()
@@ -245,18 +245,18 @@ private:
      * Multiple keys can be pressed at once, this variable
      * tracks all of them in order to release them properly.
      */
-    std::list<std::tuple<Key, bool, bool>> _prev_keys{};
+    std::list<std::tuple<keyboard::Key, bool, bool>> _prev_keys{};
 
     /**
      * Conversion table from Key to C64 matrix code.
      */
-    std::map<std::tuple<Key, bool, bool>, std::pair<MatrixKey, bool>> _key_to_c64;
+    std::map<std::tuple<keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> _key_to_c64;
 
     /**
      * Default conversion table from Key to C64 matrix code.
      * The default conversion table translates from US-ANSI keyboards to C64 keyboard.
      */
-    static std::map<std::tuple<Key, bool, bool>, std::pair<MatrixKey, bool>> default_key_to_c64;
+    static std::map<std::tuple<keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> default_key_to_c64;
 
     /**
      * Conversion table from a C64 matrix name to a C64 matrix code.

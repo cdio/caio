@@ -20,11 +20,8 @@ CXXFLAGS+=	-I${ROOT}/lib
 
 CXXFLAGS+=	${UI_CXXFLAGS}
 
-LDADD+=		${ROOT}/src/ui_sdl2/libcaio_ui_sdl2.a \
-		${UI_LDADD} \
+LDADD+=		${UI_LDADD} \
 		-lpthread
-
-EXTRA_DEPS+=	${ROOT}/src/ui_sdl2/libcaio_ui_sdl2.a
 
 CLEANFILES+=	${BIN} \
 		${LN_BINS}
@@ -37,13 +34,6 @@ all:
 debug:
 	${MAKE} ${MAKEARGS} -j DEBUG=yes _all
 
-${LIB}: ${LIBRESID}
-	${MAKE} ${MAKEARGS} -j -C${dir $@} ${notdir $@}
-
-${LIBRESID}:
-	${MAKE} ${MAKEARGS} -j -C${ROOT}/3rdparty
-
-#XXX debug targets
 ${EXTRA_DEPS}:
 	${MAKE} ${MAKEARGS} -j -C${dir $@} ${notdir $@}
 
@@ -51,6 +41,8 @@ _all: ${BIN}
 
 include ${ROOT}/mk/obj.mk
 
-${BIN}: ${OBJS} ${LIB} ${EXTRA_DEPS}
-	${LD} ${LDFLAGS} -o $@ $^ ${LDADD}
+${BIN}: ${OBJS} ${EXTRA_DEPS}
+	${LD} ${LDFLAGS} -o $@ ${OBJS} ${LDADD}
+ifneq (${DEBUG}, yes)
 	${STRIP} $@
+endif

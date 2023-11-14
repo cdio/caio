@@ -307,6 +307,10 @@ void C64::create_devices()
     _kbd  = std::make_shared<C64Keyboard>("KBD");
     _joy1 = std::make_shared<C64Joystick>("JOY1");
     _joy2 = std::make_shared<C64Joystick>("JOY2");
+
+    if (_conf.vjoy.enabled) {
+        _kbd->vjoystick(_conf.vjoy, _joy1);
+    }
 }
 
 void C64::connect_devices()
@@ -540,7 +544,7 @@ void C64::make_widgets()
         /*
          * Click on a gamepad widget swaps joysticks.
          */
-        hotkeys(Keyboard::KEY_ALT_J);
+        hotkeys(keyboard::KEY_ALT_J);
     };
 
     gamepad1->action(swapj_action);
@@ -559,7 +563,7 @@ void C64::connect_ui()
      * Connect Pause and Reset widgets.
      */
     auto do_pause = [this](bool suspend) {
-        hotkeys(Keyboard::KEY_PAUSE);
+        hotkeys(keyboard::KEY_PAUSE);
     };
 
     auto is_paused = [this]() {
@@ -590,7 +594,7 @@ void C64::connect_ui()
     /*
      * Connect keyboard and joysticks.
      */
-    auto hotkeys = [this](Keyboard::Key key) {
+    auto hotkeys = [this](keyboard::Key key) {
         this->hotkeys(key);
     };
 
@@ -599,14 +603,14 @@ void C64::connect_ui()
     _ui->joystick({_joy1, _joy2});
 }
 
-void C64::hotkeys(Keyboard::Key key)
+void C64::hotkeys(keyboard::Key key)
 {
     /*
      * This methods is called in the context of the UI thread
      * (see connect_ui()).
      */
     switch (key) {
-    case Keyboard::KEY_ALT_J:
+    case keyboard::KEY_ALT_J:
         /*
          * Swap joysticks.
          */
@@ -614,7 +618,20 @@ void C64::hotkeys(Keyboard::Key key)
         log.debug("Joysticks %sswapped\n", (_conf.swapj ? "" : "un"));
         break;
 
-    case Keyboard::KEY_ALT_M:
+    case keyboard::KEY_ALT_K:
+        /*
+         * Toggle virtual joystick/keyboard.
+         */
+        if (_conf.vjoy.enabled) {
+            bool mode = _kbd->vjoymode() ^ true;
+            _kbd->vjoymode(mode);
+            log.debug("Virtual joystick %s, Keyboard %s\n",
+                (mode ? "active"   : "disabled"),
+                (mode ? "disabled" : "active"));
+        }
+        break;
+
+    case keyboard::KEY_ALT_M:
         /*
          * Enter monitor on the next clock tick only if it is active.
          */
@@ -624,7 +641,7 @@ void C64::hotkeys(Keyboard::Key key)
 
         /* PASSTHROUGH */
 
-    case Keyboard::KEY_CTRL_C:
+    case keyboard::KEY_CTRL_C:
         /*
          * Enter monitor on the next clock tick.
          * CTRL-C forces resume from pause.
@@ -636,7 +653,7 @@ void C64::hotkeys(Keyboard::Key key)
 
         /* PASSTHROUGH */
 
-    case Keyboard::KEY_PAUSE:
+    case keyboard::KEY_PAUSE:
         log.debug("System %spaused\n", (_ui->paused() ? "un" : ""));
         _clk->pause(_clk->paused() ^ true);
         break;

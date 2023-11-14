@@ -37,6 +37,9 @@ caio accepts the following key combinations:
 
 * `ALT-J` swaps joysticks #1 and #2.
 
+* `ALT-K` toggles virtual joystick vs. keyboard (only one can be active at a
+  time).
+
 * `ALT-M` enters the CPU monitor (if it is active). Like `CTRL-C`
   on the terminal.
 
@@ -91,9 +94,18 @@ platforms):
                          (default is /dev/tty)
  --loglevel <lv>         Loglevel, bitwise combination of:
                          error|warn|info|debug|all (default is none)
+ --vjoy <yes|no>         Enable virtual joystick (default is no)
+ --vjoy-up <keyname>     Virtual joystick UP key (default is KEY_CURSOR_UP)
+ --vjoy-down <keyname>   Virtual joystick DOWN key (default is KEY_CURSOR_DOWN)
+ --vjoy-left <keyname>   Virtual joystick LEFT key (default is KEY_CURSOR_LEFT)
+ --vjoy-right <keyname>  Virtual joystick RIGHT key (default is KEY_CURSOR_RIGHT)
+ --vjoy-fire <keyname>   Virtual joystick FIRE key (default is KEY_SPACE)
  -v|--version            Show version information and exit
  -h|--help               Print this message and exit
 ```
+
+Platforms are not required to support all the generic options, unsuppoprted
+options are ignored.
 
 ### Commodore 64 specific
 
@@ -159,8 +171,25 @@ For more information see the `--8` and `--9` command line options.
 
 #### Joysticks
 
-Up to two gamepads should work (tested using only one Logitech F710).
-The PS3 controller is known to work.
+* Gamepads or real joysticks:
+
+  Up to two gamepads should work (tested using only one Logitech F710).
+  The PS3 controller is known to work.
+
+* Virtual Joystick:
+
+  A virtual joystick is available and it can be enabled using the `vjoy`
+  configuration option.
+
+  The virtual joystick maps keyboard keys to joystick directions so when the
+  virtual joystick is active the keyboard as such is disabled, and vice versa.
+
+  The `ALT-K` key combination toggles between virtual joystick and keyboard
+  modes.
+
+  The virtual joystick key mappgins can be configured using the following
+  configuration options: `vjoy_up`, `vjoy_down`, `vjoy_left`, `vjoy_right`,
+  and `vjoy_fire`.
 
 #### Examples:
 
