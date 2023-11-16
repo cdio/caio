@@ -11,43 +11,6 @@ c64
 zx80
 ```
 
-### Info Panel
-
-The Info Panel is a primitive control panel containing widgets that allow
-minimal settings during runtime. It can be made visible/invisible with a
-mouse right click. The default widgets are:
-
-* Toggle Fullscreen mode
-* Suspend/Resume emulation
-* Platform reset
-* Audio Volume control
-
-There are other widgets that depend on the specifc emulated platform such as:
-
-* Joystick status
-* Disk activity
-
-### Hot-Keys
-
-caio accepts the following key combinations:
-
-* `ALT-F` toggles between *windowed* and *fullscreen* modes.
-
-* `PAUSE` or `ALT-P` toggles between *pause* and *running* modes.
-
-* `ALT-J` swaps joysticks #1 and #2.
-
-* `ALT-K` toggles virtual joystick vs. keyboard (only one can be active at a
-  time).
-
-* `ALT-M` enters the CPU monitor (if it is active). Like `CTRL-C`
-  on the terminal.
-
-* `CTRL-C` on the terminal enters the CPU monitor (if the monitor is not
-  active the emulation is terminated).
-
-* `ALT-V` toggles the visibility of the info panel.
-
 ### Caio generic configuration
 
 Configuration values can be set as command line options or in a
@@ -95,17 +58,56 @@ platforms):
  --loglevel <lv>         Loglevel, bitwise combination of:
                          error|warn|info|debug|all (default is none)
  --vjoy <yes|no>         Enable virtual joystick (default is no)
- --vjoy-up <keyname>     Virtual joystick UP key (default is KEY_CURSOR_UP)
- --vjoy-down <keyname>   Virtual joystick DOWN key (default is KEY_CURSOR_DOWN)
- --vjoy-left <keyname>   Virtual joystick LEFT key (default is KEY_CURSOR_LEFT)
- --vjoy-right <keyname>  Virtual joystick RIGHT key (default is KEY_CURSOR_RIGHT)
- --vjoy-fire <keyname>   Virtual joystick FIRE key (default is KEY_SPACE)
+ --vjoy-up <keyname>     Virtual joystick UP key (default is KEY_NUMPAD_8)
+ --vjoy-down <keyname>   Virtual joystick DOWN key (default is KEY_NUMPAD_2)
+ --vjoy-left <keyname>   Virtual joystick LEFT key (default is KEY_NUMPAD_4)
+ --vjoy-right <keyname>  Virtual joystick RIGHT key (default is KEY_NUMPAD_6)
+ --vjoy-fire <keyname>   Virtual joystick FIRE key (default is KEY_NUMPAD_5)
  -v|--version            Show version information and exit
  -h|--help               Print this message and exit
 ```
 
 Platforms are not required to support all the generic options, unsuppoprted
 options are ignored.
+
+### Hot-Keys
+
+caio accepts the following key combinations at runtime:
+
+* `ALT-F` toggles between *windowed* and *fullscreen* modes.
+
+* `PAUSE` or `ALT-P` toggles between *pause* and *running* modes.
+
+* `ALT-J` swaps joysticks #1 and #2.
+
+* `ALT-K` toggles the status of the keyboard (active/inactive).
+
+* `ALT-M` enters the CPU monitor (if it is active). Like `CTRL-C`
+  on the terminal.
+
+* `CTRL-C` on the terminal enters the CPU monitor (if the monitor is not
+  active the emulation is terminated).
+
+* `ALT-V` toggles the visibility of the info panel.
+
+MAC users must replace the `ALT` key with `COMMAND`.
+
+### Info Panel
+
+The Info Panel is a basic control panel containing widgets that allow
+minimal settings during runtime. It can be made visible/invisible with a
+mouse right click or through the `ALT-V` key combination.
+The default panel widgets are:
+
+* Toggle Fullscreen mode
+* Platform reset
+* Suspend/Resume emulation
+* Audio Volume control
+
+There are other widgets that depend on the specifc emulated platform such as:
+
+* Joystick status
+* Disk drives
 
 ### Commodore 64 specific
 
@@ -180,16 +182,29 @@ For more information see the `--8` and `--9` command line options.
 
   A virtual joystick is available and it can be enabled using the `vjoy`
   configuration option.
+  The default mappings are:
+    - UP: `KEY_NUMPAD_8`
+    - DOWN: `KEY_NUMPAD_2`
+    - LEFT: `KEY_NUMPAD_4`
+    - RIGHT: `KEY_NUMPAD_3`
+    - FIRE: `KEY_NUMPAD_5`
 
-  The virtual joystick maps keyboard keys to joystick directions so when the
-  virtual joystick is active the keyboard as such is disabled, and vice versa.
+  These mappings can be changed using the following configuration options:
+    - `vjoy_up`
+    - `vjoy_down`
+    - `vjoy_left`
+    - `vjoy_right`
+    - `vjoy_fire`
 
-  The `ALT-K` key combination toggles between virtual joystick and keyboard
-  modes.
+  Unexpected results can occur when the same key is shared by both the
+  emulated keyboard and the virtual joystick (both will process the keystroke).
+  To help deal with this situation the state of the emulated keyboard can be
+  toggled (activated/deactivated) at runtime using the `ALT-K` key combination.
 
-  The virtual joystick key mappgins can be configured using the following
-  configuration options: `vjoy_up`, `vjoy_down`, `vjoy_left`, `vjoy_right`,
-  and `vjoy_fire`.
+  Games or other applications that use the keyboard in conjunction with the
+  joystick should never share the same keys. If the default joystick keys are
+  not available or just difficult to use, the user is always free to redefine
+  both the keyboard keys and the virtual joystick ones as desired.
 
 #### Examples:
 

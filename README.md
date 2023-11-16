@@ -7,6 +7,8 @@ The goal of caio is to provide a single core architecture able to emulate
 several different hardware platforms. To do that, the chip-set used by those
 platforms are emulated.
 
+Usage information [here](doc/usage.md).
+
 
 ## Status
 

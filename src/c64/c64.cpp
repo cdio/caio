@@ -620,14 +620,12 @@ void C64::hotkeys(keyboard::Key key)
 
     case keyboard::KEY_ALT_K:
         /*
-         * Toggle virtual joystick/keyboard.
+         * Toggle virtual joystick active status.
          */
         if (_conf.vjoy.enabled) {
-            bool mode = _kbd->vjoymode() ^ true;
-            _kbd->vjoymode(mode);
-            log.debug("Virtual joystick %s, Keyboard %s\n",
-                (mode ? "active"   : "disabled"),
-                (mode ? "disabled" : "active"));
+            bool kact = _kbd->active() ^ true;
+            _kbd->active(kact);
+            log.debug("Keyboard %s\n", (kact ? "active" : "inactive"));
         }
         break;
 

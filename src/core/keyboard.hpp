@@ -215,18 +215,20 @@ public:
     void vjoystick(const VJoyKeys& vjoykeys, const sptr_t<Joystick>& vjoy);
 
     /**
-     * @return The virtual joystick/keyboard mode (true = virtual joystick active; false = keyboard active).
+     * @return The status of this keyboard (true if active, false if inactive).
+     * @see active(bool)
      */
-    bool vjoymode() const {
-        return _vjoymode;
+    bool active() const {
+        return _kbd_active;
     }
 
     /**
-     * Set the virtual joystick/keyboard mode.
-     * @param mode true to activate the virtual joystick; false to activate the keyboard.
+     * Set the status of this keyboard.
+     * Note that the status of the keyboard does not affect the virtual joystick.
+     * @param act true to activate the keyboard; false to deactivate it.
      */
-    void vjoymode(bool mode) {
-        _vjoymode = mode;
+    void active(bool act) {
+        _kbd_active = act;
     }
 
     /**
@@ -301,7 +303,7 @@ protected:
 private:
     VJoyKeys            _vjoykeys{};
     sptr_t<Joystick>    _vjoy{};
-    bool                _vjoymode{};
+    bool                _kbd_active{true};
 };
 
 }

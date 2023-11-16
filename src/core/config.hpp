@@ -115,11 +115,11 @@ constexpr static const char* DEFAULT_MONITOR    = "no";
 constexpr static const char* DEFAULT_LOGFILE    = Logger::DEFAULT_LOGFILE;
 constexpr static const char* DEFAULT_LOGLEVEL   = Logger::DEFAULT_LOGLEVEL;
 constexpr static const char* DEFAULT_VJOY       = "no";
-constexpr static const char* DEFAULT_VJOY_UP    = "KEY_CURSOR_UP";
-constexpr static const char* DEFAULT_VJOY_DOWN  = "KEY_CURSOR_DOWN";
-constexpr static const char* DEFAULT_VJOY_LEFT  = "KEY_CURSOR_LEFT";
-constexpr static const char* DEFAULT_VJOY_RIGHT = "KEY_CURSOR_RIGHT";
-constexpr static const char* DEFAULT_VJOY_FIRE  = "KEY_SPACE";
+constexpr static const char* DEFAULT_VJOY_UP    = "KEY_NUMPAD_8";
+constexpr static const char* DEFAULT_VJOY_DOWN  = "KEY_NUMPAD_2";
+constexpr static const char* DEFAULT_VJOY_LEFT  = "KEY_NUMPAD_4";
+constexpr static const char* DEFAULT_VJOY_RIGHT = "KEY_NUMPAD_6";
+constexpr static const char* DEFAULT_VJOY_FIRE  = "KEY_NUMPAD_5";
 
 /**
  * Configuration file section.
