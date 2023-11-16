@@ -238,7 +238,7 @@ void Readline::write(const std::string& msg) const
 void Readline::write(const gsl::span<const char>& data) const
 {
     if (data.size() != 0) {
-        auto wr = ::write(_ofd, data.data(), data.size());
+        size_t wr = ::write(_ofd, data.data(), data.size());
         if (wr != data.size()) {
             throw IOError{"Readline", "Can't write: " + Error::to_string(errno)};
         }

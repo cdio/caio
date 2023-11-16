@@ -41,6 +41,18 @@ namespace sdl2 {
 using Scanline = std::vector<Rgba>;
 
 /**
+ * @return The command key under the host platform (COMMAND under mac, ALT under PC).
+ */
+constexpr uint16_t command_key()
+{
+#ifdef __APPLE__
+    return KMOD_GUI;    /* Command key on mac */
+#else
+    return KMOD_ALT;    /* ALT key on PC */
+#endif
+}
+
+/**
  * @return The SDL2 library version.
  */
 constexpr const char* sdl_version()

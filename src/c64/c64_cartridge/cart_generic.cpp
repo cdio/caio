@@ -116,7 +116,7 @@ void CartGeneric::write(addr_t addr, uint8_t data)
 
 std::string CartGeneric::to_string() const
 {
-    const char* modestr;
+    const char* modestr{};
 
     switch (_generic_mode) {
     case GenericMode::NORMAL_8K:

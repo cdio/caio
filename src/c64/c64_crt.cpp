@@ -76,7 +76,7 @@ void Crt::open(std::istream& is)
             }
 
             case CHIP_TYPE_RAM: {
-                auto ram = std::make_shared<DeviceRAM>(ch.rsiz);
+                auto ram = std::make_shared<DeviceRAM>(+ch.rsiz);
                 ram->label(name() + ", chip " + std::to_string(i + 1));
                 _roms.push_back(ram);
                 _chips.push_back(ch);

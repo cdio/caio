@@ -287,13 +287,13 @@ ZX80ASpace::ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr
 void ZX80ASpace::interrupt_req()
 {
     _cpu->int_pin(true);
-    _int = true;
+    _intreq = true;
 }
 
 void ZX80ASpace::interrupt_ack()
 {
     _cpu->int_pin(false);
-    _int = false;
+    _intreq = false;
     _video->hsync();
     _counter = (_counter + 1) % 8;
 }
@@ -324,11 +324,11 @@ inline uint8_t ZX80ASpace::character_bitmap(addr_t base)
 uint8_t ZX80ASpace::read(addr_t addr, ReadMode mode)
 {
     if (mode == ReadMode::Peek) {
-        return (_cpu->iorq_pin() ? io_read(addr) : ASpace::read(addr, mode));
+        return ASpace::read(addr, mode);
     }
 
     if (_cpu->iorq_pin()) {
-        if (_int) {
+        if (_intreq) {
             /*
              * Interrupt acknowledged by the CPU:
              * Generate the video HSYNC signal and
@@ -399,13 +399,13 @@ uint8_t ZX80ASpace::read(addr_t addr, ReadMode mode)
          * CPU's /INT pin so when this bit is cleared an interrupt request must be triggered.
          */
         bool irq = ((addr & INTERRUPT_ADDR_MASK) == 0);
-        if (irq && !_int) {
+        if (irq && !_intreq) {
             /*
              * Interrupt request.
              */
             interrupt_req();
 
-        } else if (!irq && _int) {
+        } else if (!irq && _intreq) {
             /*
              * Interrupt acknowledged by the CPU:
              * Generate the video HSYNC signal and

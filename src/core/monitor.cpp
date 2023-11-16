@@ -29,6 +29,8 @@
 namespace caio {
 namespace monitor {
 
+using namespace std::literals::string_literals;
+
 const std::pair<std::string, Expr::ex_t> Expr::operators[] = {
     { "<=", [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) <= b(*cpu); }},
     { ">=", [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) >= b(*cpu); }},
@@ -307,7 +309,7 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
     auto [ifd, ofd] = mon._rd.fds();
     Readline editor{ifd, ofd};
     while (true) {
-        editor.write("$" + utils::to_string(addr) + ": ");
+        editor.write("$"s + utils::to_string(addr) + ": "s);
 
         std::string line = editor.getline();
         line = utils::trim(line);

@@ -100,7 +100,7 @@ private:
     sptr_t<ZX80Video>       _video;
     sptr_t<ZX80Keyboard>    _kbd;
     bank_t                  _mmap;
-    bool                    _int{};         /* Interrupt request flag           */
+    bool                    _intreq{};      /* Interrupt request flag           */
     addr_t                  _chcode{};      /* Current character code           */
     addr_t                  _counter{};     /* Current character line counter   */
     bool                    _vsync{};       /* VSYNC flag                       */

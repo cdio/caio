@@ -19,6 +19,7 @@
 #include "mos_6581.hpp"
 
 #include <algorithm>
+#include <cmath>
 
 #include "logger.hpp"
 #include "ui.hpp"
@@ -201,7 +202,7 @@ float Oscillator::tick()
     if (_sync) {
         _t = _syncos.time();
         if (_t >= _T) {
-            _t = std::abs(std::remainder(_t, _T));
+            _t = std::fabs(std::remainder(_t, _T));
         }
     }
 

@@ -549,7 +549,7 @@ void UI::kbd_event(const SDL_Event& event)
             break;
         }
 
-        if (key.mod & (KMOD_LALT | KMOD_RALT)) {
+        if (key.mod & command_key()) {
             /*
              * Handle ALT-xx hotkeys.
              */

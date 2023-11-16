@@ -189,9 +189,10 @@ public:
     void clear_key_map() override;
 
     /**
-     * Convert a string to a KeyMatrix.
-     * @param name Name of the KeyMatrix key.
-     * @return The KeyMatrix code (KeyMatrix::NONE if the key name is invalid).
+     * Convert a string to a MatrixKey.
+     * @param name Name of the MatrixKey key.
+     * @return The MatrixKey code (MatrixKey::NONE if the key name is invalid).
+     * @see MatrixKey
      * @see name_to_c64
      */
     static MatrixKey to_c64(const std::string& name);
@@ -248,12 +249,12 @@ private:
     std::list<std::tuple<keyboard::Key, bool, bool>> _prev_keys{};
 
     /**
-     * Conversion table from Key to C64 matrix code.
+     * Conversion table from keyboard::Key to C64 matrix code.
      */
     std::map<std::tuple<keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> _key_to_c64;
 
     /**
-     * Default conversion table from Key to C64 matrix code.
+     * Default conversion table from keyboard::Key to C64 matrix code.
      * The default conversion table translates from US-ANSI keyboards to C64 keyboard.
      */
     static std::map<std::tuple<keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> default_key_to_c64;

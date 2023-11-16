@@ -110,7 +110,7 @@ void Panel::render(int width, int height)
         int wc_width = WIDTH_RATIO * width;
 
         int ww = wc_width / N;
-        if (ww > Widget::WIDTH) {
+        if (ww > static_cast<int>(Widget::WIDTH)) {
             ww = Widget::WIDTH;
         }
 

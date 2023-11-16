@@ -62,7 +62,7 @@ struct Rgba {
      * Initialise a colour from a 32 bits value.
      * @param rgba A 32 bits colour value in host endian order (default is black, no transparency).
      */
-    constexpr Rgba(uint32_t rgba = 0x000000FF)
+    Rgba(uint32_t rgba = 0x000000FF)
         : u32{htobe32(rgba)} {
     }
 

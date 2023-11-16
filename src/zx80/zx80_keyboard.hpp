@@ -104,7 +104,15 @@ namespace zx80 {
  * | A7 |                   B     N     M     .     SPACE   |
  * +----+---------------------------------------------------+
  * </pre>
- * The read address specifies the row to scan (0), the returned value is the matrix column.
+ * The real rows are connected to address lines A8-A15 but this class needs them to be shifted to A0-A7.
+ * The read address specifies the (negated) row to scan, the returned value is the (negated) matrix column.
+ *
+ * A0-A7: Row to scan (0->Scan, 1->Do not scan)
+ * D0-D4: Keyboard columns (0->Pressed, 1->Released)
+ * D5-D7: 0
+ *
+ * The ZX80Keyboard::write(uint8_t) method sets the (negated) row to scan.
+ * The ZX80Keyboard::read() method returns the (negated) columns associated to the specified row.
  */
 class ZX80Keyboard : public keyboard::Keyboard {
 public:
@@ -172,12 +180,12 @@ public:
     void reset() override;
 
     /**
-     * @see Keyboard::key_pressed()
+     * @see Keyboard::pressed()
      */
     void pressed(keyboard::Key key) override;
 
     /**
-     * @see Keyboard::key_released()
+     * @see Keyboard::released()
      */
     void released(keyboard::Key key) override;
 
@@ -203,9 +211,10 @@ public:
     void clear_key_map() override;
 
     /**
-     * Convert a string to a KeyMatrix.
-     * @param name Name of the KeyMatrix key.
-     * @return The KeyMatrix code (KeyMatrix::NONE if the key name is invalid).
+     * Convert a string to a MatrixKey.
+     * @param name Name of the MatrixKey key.
+     * @return The MatrixKey code (MatrixKey::NONE if the key name is invalid).
+     * @see MatrixKey
      * @see name_to_zx80
      */
     static MatrixKey to_zx80(const std::string& name);
@@ -252,12 +261,12 @@ private:
     std::list<std::tuple<keyboard::Key, bool, bool>> _prev_keys{};
 
     /**
-     * Conversion table from Key to ZX80 matrix code.
+     * Conversion table from keyboard::Key to ZX80 matrix code.
      */
     std::map<std::tuple<keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> _key_to_zx80;
 
     /**
-     * Default conversion table from Key to ZX80 matrix code.
+     * Default conversion table from keyboard::Key to ZX80 matrix code.
      * The default conversion table translates from US-ANSI keyboard to ZX80 keyboard.
      */
     static std::map<std::tuple<keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> default_key_to_zx80;

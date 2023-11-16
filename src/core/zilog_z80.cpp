@@ -755,8 +755,9 @@ size_t Z80::m1_cycle()
         }
 
         _tx = Cycle::T1;
-        return 1;
     }
+
+    return 1;
 }
 
 size_t Z80::m1_cycle_interrupt()
@@ -939,8 +940,8 @@ size_t Z80::execute(const Z80::Instruction* ins, uint8_t opcode, bool forced)
         break;
 
     case ArgType::A16:
-        arg = read(++_regs.PC) | (static_cast<addr_t>(read(++_regs.PC)) << 8);
-        ++_regs.PC;
+        arg = read(_regs.PC + 1) | (static_cast<addr_t>(read(_regs.PC + 2)) << 8);
+        _regs.PC += 3;;
         break;
 
     case ArgType::None:

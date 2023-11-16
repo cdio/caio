@@ -19,7 +19,6 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "fs.hpp"
 #include "utils.hpp"
 
 #include "c64_main.hpp"
@@ -62,7 +61,7 @@ int main(int argc, const char** argv)
     std::string name{};
 
     if (argc > 1) {
-        name = utils::tolow(fs::basename(argv[1]));
+        name = utils::tolow(argv[1]);
         --argc;
         ++argv;
     }

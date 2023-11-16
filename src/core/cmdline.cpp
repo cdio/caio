@@ -162,7 +162,7 @@ Confile Cmdline::parse(int argc, const char** argv)
     /*
      * Process special cases --help and --version.
      */
-    for (size_t i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; ++i) {
         const std::string arg{argv[i]};
         if (arg == "?" || arg == "-?" || arg == "--?" || arg == "-h" || arg == "--h" ||
             arg == "-help" || arg == "--help") {
@@ -181,7 +181,7 @@ Confile Cmdline::parse(int argc, const char** argv)
     /*
      * No special cases, parse the command line normally.
      */
-    for (size_t i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; ++i) {
         if (argv[i] == nullptr) {
             break;
         }
