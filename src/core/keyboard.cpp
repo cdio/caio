@@ -231,15 +231,17 @@ void Keyboard::vjoystick(const VJoyKeys& vjoykeys, const sptr_t<Joystick>& vjoy)
 
 void Keyboard::key_pressed(Key key)
 {
-    uint8_t pos = _vjoy->position();
+    if (_vjoy) {
+        uint8_t pos = _vjoy->position();
 
-    pos |= (key == _vjoykeys.up    ? Joystick::JOY_UP :
-           (key == _vjoykeys.down  ? Joystick::JOY_DOWN :
-           (key == _vjoykeys.left  ? Joystick::JOY_LEFT :
-           (key == _vjoykeys.right ? Joystick::JOY_RIGHT :
-           (key == _vjoykeys.fire  ? Joystick::JOY_FIRE : 0)))));
+        pos |= (key == _vjoykeys.up    ? Joystick::JOY_UP :
+               (key == _vjoykeys.down  ? Joystick::JOY_DOWN :
+               (key == _vjoykeys.left  ? Joystick::JOY_LEFT :
+               (key == _vjoykeys.right ? Joystick::JOY_RIGHT :
+               (key == _vjoykeys.fire  ? Joystick::JOY_FIRE : 0)))));
 
-    _vjoy->position(pos);
+        _vjoy->position(pos);
+    }
 
     if (_kbd_active) {
         pressed(key);
@@ -248,15 +250,17 @@ void Keyboard::key_pressed(Key key)
 
 void Keyboard::key_released(Key key)
 {
-    uint8_t pos = _vjoy->position();
+    if (_vjoy) {
+        uint8_t pos = _vjoy->position();
 
-    pos &= ~(key == _vjoykeys.up    ? Joystick::JOY_UP :
-            (key == _vjoykeys.down  ? Joystick::JOY_DOWN :
-            (key == _vjoykeys.left  ? Joystick::JOY_LEFT :
-            (key == _vjoykeys.right ? Joystick::JOY_RIGHT :
-            (key == _vjoykeys.fire  ? Joystick::JOY_FIRE : 0)))));
+        pos &= ~(key == _vjoykeys.up    ? Joystick::JOY_UP :
+                (key == _vjoykeys.down  ? Joystick::JOY_DOWN :
+                (key == _vjoykeys.left  ? Joystick::JOY_LEFT :
+                (key == _vjoykeys.right ? Joystick::JOY_RIGHT :
+                (key == _vjoykeys.fire  ? Joystick::JOY_FIRE : 0)))));
 
-    _vjoy->position(pos);
+        _vjoy->position(pos);
+    }
 
     if (_kbd_active) {
         released(key);
