@@ -26,12 +26,12 @@ almost reached a beta status and most of the tested programs work just fine
 ![q-bert](images/q-bert.gif "Q*Bert")
 ![uridium](images/uridium.gif "Uridium")
 ![giana](images/giana.gif "Great Giana Sisters")
-[![zauberwald](images/zauberwald.png "Zauberwald")](https://csdb.dk/release/?id=188005)
+![turrican](images/turrican.gif "Turrican")
 
 ### Sinclair ZX80
 
 The implementation of the [ZX80](https://en.wikipedia.org/wiki/ZX80) is under
-development and it is not currently working.
+development and it is currently not working.
 
 
 ## Supported host platforms
