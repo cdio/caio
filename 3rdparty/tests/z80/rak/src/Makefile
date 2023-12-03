@@ -7,24 +7,22 @@ include ${ROOT}/mk/config.mk
 
 SJASM=		${TOOLS_BINDIR}/sjasm
 NAME=		z80test
-VERSION=	1.2
-PKG=		$(NAME)-$(VERSION)
 
-PROGS=		z80full \
-		z80flags \
-		z80doc \
-		z80docflags \
-		z80ccf \
-		z80memptr \
-		z80ccfscr
+SRCS=		z80full.asm \
+		z80flags.asm \
+		z80doc.asm \
+		z80docflags.asm \
+		z80ccf.asm \
+		z80memptr.asm \
+		z80ccfscr.asm
 
-SRCS=		${PROGS:%=%.asm}
+PROGS=		${SRCS:%.asm=%.out}
 
-OBJS=		${SRCS:%.asm=%.out}
+CLEANFILES=	*.lst
 
-CLEANFILES=	*.out *.lst ${PROGS} ${OBJS}
+DISTCLEANFILES=	${PROGS}
 
-all: ${SJASM} ${OBJS}
+all: ${SJASM} ${PROGS}
 
 debug: all
 
