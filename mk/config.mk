@@ -96,7 +96,7 @@ ARFLAGS=		crs
 
 LDFLAGS?=
 
-MKDEP_FLAGS=		-MM
+MKDEP_FLAGS=		-MMD
 
 LN_FLAGS?=		-sf
 

@@ -38,7 +38,6 @@ ${_CXXSRCS}: ${EXTRA_DEPS}
 -include ${HDEPS}
 
 %.o: %.cpp
-	${MKDEP} ${CPPFLAGS} ${CXXFLAGS} ${MKDEP_FLAGS} $< > ${@:.o=.d}
-	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o $@ $<
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} ${MKDEP_FLAGS} -c -o $@ $<
 
 include ${ROOT}/mk/clean.mk

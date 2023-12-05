@@ -89,7 +89,6 @@ ${LIB}: ${OBJS}
 	${SAMP2SRC} ${@:%.cc=%} $< $@
 
 %.o: %.cc
-	${CXX} ${CPPFLAGS} ${CXXFLAGS} -c -o $@ $<
-	${MKDEP} ${MKDEP_FLAGS} ${CPPFLAGS} ${CXXFLAGS} $< > ${@:.o=.d}
+	${CXX} ${CPPFLAGS} ${CXXFLAGS} ${MKDEP_FLAGS} -c -o $@ $<
 
 include ${ROOT}/mk/clean.mk
