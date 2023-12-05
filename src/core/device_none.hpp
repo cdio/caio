@@ -23,8 +23,11 @@
 
 namespace caio {
 
+extern devptr_t device_none;
+
 /**
- * The none device does nothing.
+ * The device none does nothing.
+ * A read operation returns a user defined default value.
  */
 class DeviceNone : public Device {
 public:
@@ -32,9 +35,12 @@ public:
 
     /**
      * Initialise None Device.
+     * @param dvalue Value returned by a read operation (default is 0).
+     * @see read(addr_t, ReadMode)
      */
-    DeviceNone()
-        : Device{TYPE, TYPE} {
+    DeviceNone(uint8_t dvalue = 0)
+        : Device{TYPE, TYPE},
+          _dvalue{dvalue} {
     }
 
     virtual ~DeviceNone() {
@@ -55,10 +61,11 @@ public:
 
     /**
      * This method does nothing.
-     * @return 0.
+     * @return The default value.
+     * @see DeviceNone(uint8_t dvalue)
      */
     uint8_t read(addr_t, ReadMode) override {
-        return 0;
+        return _dvalue;
     }
 
     /**
@@ -75,8 +82,9 @@ public:
     std::ostream& dump(std::ostream& os, addr_t = 0) const override {
         return os;
     }
-};
 
-extern devptr_t device_none;
+private:
+    uint8_t _dvalue;
+};
 
 }

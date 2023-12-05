@@ -2792,7 +2792,7 @@ static const Rgba icon_data[] = {
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
 };
 
-const Image &icon()
+const Image& icon()
 {
     static const Image caio_icon32 = {
         .width  = ICON_WIDTH,

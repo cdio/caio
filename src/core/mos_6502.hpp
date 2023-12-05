@@ -134,7 +134,7 @@ public:
      * @param load Monitor load callback (empty for default);
      * @param save Monitor save calblack (empty for default).
      */
-    void init_monitor(int ifd, int ofd, const monitor::load_cb& load = {}, const monitor::save_cb& save = {});
+    void init_monitor(int ifd, int ofd, const monitor::load_cb_t& load = {}, const monitor::save_cb_t& save = {});
 
     /**
      * Set the single-step log level.
@@ -187,7 +187,7 @@ public:
     /**
      * Add a breakpoint on a memory address.
      * @param addr Address;
-     * @parma cb   Method to call when the breakpoint hits.
+     * @param cb   Method to call when the breakpoint hits.
      */
     void bpadd(addr_t addr, const breakpoint_cb_t& cb, void* arg);
 
@@ -198,7 +198,8 @@ public:
     void bpdel(addr_t addr);
 
     /**
-     * @return The register values.
+     * Read access to the CPU registers.
+     * @return A const reference to the register values.
      */
     const Registers& regs() const;
 

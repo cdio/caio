@@ -44,7 +44,8 @@ using AudioBuffer = DispatcherT<samples_i16>;
  */
 class AudioStream {
 public:
-    constexpr static float DEFAULT_VOLUME = 0.5f;
+    constexpr static const float DEFAULT_VOLUME = 0.5f;
+    constexpr static const size_t AUDIO_BUFFERS = 4;
 
     /**
      * Initialise an audio stream.
@@ -71,39 +72,42 @@ public:
     void stop();
 
     /**
-     * Start playing.
+     * Start audio streaming.
      */
     void play();
 
     /**
-     * Pause playing;
+     * Pause audio streaming.
      */
     void pause();
 
     /**
-     * @return true if this audio stream is paused; flase otherwise.
+     * @return true if this audio stream is paused; false otherwise.
      */
     bool is_paused() const;
 
     /**
-     * Set the output volume;
-     * @param vol Volume (between 0 and 1);
+     * Set the output volume.
+     * @param vol Volume (between 0 and 1).
      */
     void volume(float vol);
 
     /**
-     * @return The current auto stream volume.
+     * @return The current volume.
      */
     float volume() const;
 
     /**
      * Get a free audio buffer.
-     * The audio buffer must be filled with audio samples and then dispatched (returned back).
-     * When dispatched, the audio buffer automatically enqueues the* buffer into the playing
-     * queue of this audio stream instance.
-     * @return An AudioBuffer
-     * @see AudioBuffer
+     * A free audio buffer is retrieved from the free queue and returned back to the caller.
+     * The caller must fill the buffer with audio samples and then dispatch or destroy it.
+     * The act of dispatching (or destroying) the received buffer makes it to be
+     * automatically enqueued inside the playing queue of this audio stream instance.
+     * @return An AudioBuffer.
+     * @see _free_queue
+     * @see _playing_queue
      * @see stream_data()
+     * @see AudioBuffer
      */
     AudioBuffer buffer();
 
@@ -124,7 +128,6 @@ private:
     LockedQueue<samples_i16> _playing_queue{};
     float                    _volume{DEFAULT_VOLUME};
 
-    constexpr static const size_t AUDIO_BUFFERS = 4;
     std::vector<int16_t> _buffers[AUDIO_BUFFERS] = {};
 };
 

@@ -36,44 +36,57 @@
 namespace caio {
 namespace monitor {
 
-using regs_cb       = std::function<std::string()>;
-using pc_cb         = std::function<addr_t&()>;
-using peek_cb       = std::function<uint8_t(addr_t)>;
-using write_cb      = std::function<void(addr_t, uint8_t)>;
-using disass_cb     = std::function<void(std::ostream&, addr_t, size_t, bool)>;
-using mmap_cb       = std::function<sptr_t<ASpace>()>;
-using ebreak_cb     = std::function<void()>;
-using load_cb       = std::function<std::pair<addr_t, addr_t>(const std::string&, addr_t)>;
-using save_cb       = std::function<void(const std::string&, addr_t, addr_t)>;
-using loglevel_cb   = std::function<Loglevel(const std::string&)>;
-using regvalue_cb   = std::function<uint16_t(const std::string&)>;
-using bpdoc_cb      = std::function<std::string(const std::string&)>;
+using regs_cb_t     = std::function<std::string()>;
+using getpc_cb_t    = std::function<addr_t()>;
+using setpc_cb_t    = std::function<void(addr_t)>;
+using peek_cb_t     = std::function<uint8_t(addr_t)>;
+using write_cb_t    = std::function<void(addr_t, uint8_t)>;
+using disass_cb_t   = std::function<void(std::ostream&, addr_t, size_t, bool)>;
+using mmap_cb_t     = std::function<sptr_t<ASpace>()>;
+using ebreak_cb_t   = std::function<void()>;
+using load_cb_t     = std::function<std::pair<addr_t, addr_t>(const std::string&, addr_t)>;
+using save_cb_t     = std::function<void(const std::string&, addr_t, addr_t)>;
+using loglevel_cb_t = std::function<Loglevel(const std::string&)>;
+using regvalue_cb_t = std::function<uint16_t(const std::string&)>;
+using bpdoc_cb_t    = std::function<std::string(const std::string&)>;
 
 /**
  * Monitored CPU.
+ * Set of callbacks that must be provided
+ * by any CPU that wants to be monitored.
  */
 struct MonitoredCPU {
-    regs_cb     regs{};
-    pc_cb       pc{};
-    peek_cb     peek{};
-    write_cb    write{};
-    disass_cb   disass{};
-    mmap_cb     mmap{};
-    ebreak_cb   ebreak{};
-    load_cb     load{};
-    save_cb     save{};
-    loglevel_cb loglevel{};
-    regvalue_cb regvalue{};
-    bpdoc_cb    bpdoc{};
+    regs_cb_t     regs{};       /* Registers as string                      */
+    getpc_cb_t    getpc{};      /* Retrieve the program counter             */
+    setpc_cb_t    setpc{};      /* Set the program counter                  */
+    peek_cb_t     peek{};       /* Peek memory                              */
+    write_cb_t    write{};      /* Write memory                             */
+    disass_cb_t   disass{};     /* Disassembly a memory address             */
+    mmap_cb_t     mmap{};       /* Get the memory mappings (address space)  */
+    ebreak_cb_t   ebreak{};     /* Set a breakpoint on next insturction     */
+    load_cb_t     load{};       /* Inject content of a file into memory     */
+    save_cb_t     save{};       /* Save a memory area as a file             */
+    loglevel_cb_t loglevel{};   /* Set/Receive the loglevel                 */
+    regvalue_cb_t regvalue{};   /* Get a register's value given its name    */
+    bpdoc_cb_t    bpdoc{};      /* Documentation on how to set breakpoints  */
 
     operator bool() const {
-        return (regs && pc && peek && write && disass && mmap &&
+        return (regs && getpc && setpc && peek && write && disass && mmap &&
             ebreak && load && save && loglevel && regvalue && bpdoc);
     }
 };
 
 /**
- * Default monitored cpu methods.
+ * Default monitored CPU methods.
+ * This method returns a MonitoredCPU structure filled
+ * with default callbacks.
+ * The CPU *must* provide the following callbacks (which are not set):
+ * - getpc
+ * - setpc
+ * - mmap
+ * - regvalue
+ * @return A monitored cpu structure with default callbacks.
+ * @see MonitoredCPU
  */
 template<typename CPU>
 MonitoredCPU monitored_cpu_defaults(CPU* cpu)
@@ -83,7 +96,16 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
             return cpu->regs().to_string();
         },
 
-        .pc = {
+        .getpc = {
+            /*
+             * CPU dependent.
+             */
+        },
+
+        .setpc = {
+            /*
+             * CPU dependent.
+             */
         },
 
         .peek = [cpu](addr_t addr) {
@@ -99,6 +121,9 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
         },
 
         .mmap = {
+            /*
+             * CPU (Platform) dependent.
+             */
         },
 
         .ebreak = [cpu]() {
@@ -134,6 +159,9 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
         },
 
         .regvalue = {
+            /*
+             * CPU dependent.
+             */
         },
 
         .bpdoc = [](const std::string&) {
@@ -154,9 +182,9 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
  *   Register pointers retrieve the content at the address specified by the register.
  *
  * Examples of a breakpoint using the monitor command line:
- *  b $8011 ra >= $20       Breakpoint at $8011 only when the value of register A is greater than $20
+ *  b $8011 ra > $20        Breakpoint at $8011 only when the value of register A is greater than hexadecimal 20.
  *  b $8011 *d020 >= #15    Breakpoint at $8011 only when the content of memory address $D020 is greater
- *                          or equal to 15.
+ *                          or equal to decimal 15.
  */
 class Expr {
 public:
@@ -225,7 +253,7 @@ public:
 
     /**
      * Enter this monitor.
-     * @return true if the system must be terminated; otherwise false.
+     * @return true to continue the CPU; false to terminate the CPU.
      */
     bool run();
 
@@ -240,7 +268,7 @@ public:
 
     /**
      * Remove a breakpoint.
-     * @param addr Addres to remove from the breakpoint list.
+     * @param addr Address to remove from the breakpoint list.
      */
     void del_breakpoint(addr_t addr) {
         _breakpoints.erase(addr);

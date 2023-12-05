@@ -28,11 +28,18 @@ namespace caio {
 
 /**
  * Address Space.
- * This class implements the interface used to access a system's memory mappings.
- * The address space (addr_t) is separated into a number of fixed size banks,
- * each range of addresses inside a bank must be handled by a single device.
+ * Address space is the interface used to access the memory mappings of a system,
+ * that is, anything that involves the address bus and/or the data bus should
+ * be handled by an object dervied from this class.
+ * </br>
+ * The entire range of addresses (2^(8*sizeof(addr_t))) must be divided into a
+ * number of fixed size banks, each bank contains a range of addresses that must
+ * be associated to (handled by) a single device.
+ * </br>
  * There are two sets of address space mappings, one for reading and another for writing.
  * @see addr_t
+ * @see ASpace::devmap_t
+ * @see ASpace::addrmap_t
  * @see Device
  */
 class ASpace {
@@ -41,15 +48,15 @@ public:
 
     /**
      * Device mappings type.
-     * The device mappings type binds a device instance to a memory bank.
+     * The device mappings type binds a device to a memory bank.
      * The first element is a pointer to the device and the second element
-     * is the offset within the addr_t address space of the memory bank.
+     * is the starting address of the associated bank.
      *
-     * The device must handle the entire set of addresses of a bank starting
-     * at the specified offset: offset + bank_size <= device.size().
+     * The device must handle the entire set of addresses of the specified bank:
+     * offset + bank_size <= device.size().
      *
-     * When a read or a write is delivered the device receives a relative
-     * address from the starting offset.
+     * When a read or a write operation is delivered to the device, it receives
+     * a relative address from the specified bank's start address.
      *
      * @see devptr_t
      */
@@ -58,7 +65,10 @@ public:
     /**
      * Address mappings type.
      * The address mappings type defines the device mappings for an entire address space.
-     * It must not contain holes (unmapped addresses): The entire addr_t set must be mapped.
+     * It must not contain holes (unmapped addresses): The entire range of addresses
+     * supported by the addr_t type must be mapped (2^(8*sizeof(addr_t))).
+     * @see addr_t
+     * @see devmap_t
      */
     using addrmap_t = gsl::span<devmap_t>;
 
@@ -87,27 +97,48 @@ public:
 
     /**
      * Read the content of the data bus.
-     * This is usually the last value written to the data bus.
+     * This is usually the last value written to or read from the address space.
      * @return The value present on the data bus.
      */
-    uint8_t databus() const {
-        return _data;
+    uint8_t data_bus() const {
+        return _data_bus;
     }
 
     /**
-     * Set the data bus.
-     * Usually the value on the data bus is the one that was last read or
-     * written to the address space. This value can be overrided by calling
+     * Set a value on the data bus.
+     * The value on the data bus is the one that was last read from or
+     * written to the address space; this value can be overrided by calling
      * this method.
      * @param data Data to set.
      */
-    void databus(uint8_t data) {
-        _data = data;
+    void data_bus(uint8_t data) {
+        _data_bus = data;
     }
 
     /**
-     * Dump the contents of the read and write mappings as human readable strings.
-     * @param os Stream to dump to;
+     * Read the content of the address bus.
+     * This is usually the last address written to or read from the address space.
+     * @return The value present on the address bus.
+     */
+    addr_t address_bus() const {
+        return _address_bus;
+    }
+
+    /**
+     * Set a value on the address bus.
+     * The value on the address bus is the last address written to
+     * or read from the address space; this value can be overrided by calling
+     * this method.
+     * @param addr Address to set.
+     */
+    void address_bus(addr_t addr) {
+        _address_bus = addr;
+    }
+
+    /**
+     * Dump the contents of the read and write memory mappings as human readable strings.
+     * @param os Stream to dump to.
+     * @return os.
      */
     std::ostream& dump(std::ostream& os) const;
 
@@ -120,7 +151,7 @@ protected:
      * @param rmaps Address mappings for read operations (it must have the same size as the write map);
      * @param wmaps Address mappings for write operations (it must have the same size as the read map);
      * @param amask Address space mask (addresses are ANDed with this mask).
-     * @note It is expected that all parameters are correct.
+     * @warning The process is terminated on invalid arguments.
      * @see reset()
      */
     ASpace(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask) {
@@ -136,7 +167,7 @@ protected:
      * @param rmaps Address mappings for read operations;
      * @param wmaps Address mappings for write operations;
      * @param amask Address space mask (addresses are ANDed with this mask).
-     * @note It is expected that all parameters are correct.
+     * @warning The process is terminated on invalid arguments.
      */
     void reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask);
 
@@ -149,7 +180,8 @@ private:
     addr_t    _bshift{};
     addrmap_t _rmaps{};
     addrmap_t _wmaps{};
-    uint8_t   _data{};
+    uint8_t   _data_bus{};
+    addr_t    _address_bus{};
 };
 
 }

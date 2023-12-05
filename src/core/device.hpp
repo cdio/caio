@@ -32,15 +32,15 @@ using devptr_t = sptr_t<class Device>;
 
 /**
  * Generic device.
- * This class implements a hardware device that exposes an
- * address range where data can be written to or read from.
+ * This class implements a hardware device that exposes an address
+ * (or register) range where data can be written to or read from.
  * This class must be derived by the actual emulated device.
  */
 class Device : public Name {
 public:
     enum class ReadMode {
-        Peek,           /* After read the internal state of the device is not changed   */
-        Read            /* After read the internal state of the device could change     */
+        Peek,       /**< A read operation never changes the internal state of the device.   */
+        Read        /**< A read operation could change the internal state of the device.    */
     };
 
     /**
@@ -54,35 +54,35 @@ public:
     virtual void reset() = 0;
 
     /**
-     * Read from an address.
+     * Read from an address or device register.
      * @param addr Address to read from;
-     * @param mode Read mode (Peek or Read, default is Read).
+     * @param mode Read mode (default is ReadMode::Read).
      * @return The data stored at the specified address.
-     * @note It is expected the specified address is handled by this device.
+     * @warning If the device does not handle the specified address the process is terminated.
      * @see ReadMode
      */
     virtual uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) = 0;
 
     /**
-     * Read from an address wihtout changing the device internal state.
+     * Read from an address or register without changing the device's internal state.
      * @param addr Address to read from;
      * @return The data stored at the specified address.
-     * @note It is expected the specified address is handled by this device.
+     * @warning If the device does not handle the specified address the process is terminated.
      */
     uint8_t peek(addr_t addr) const {
         return const_cast<Device*>(this)->read(addr, ReadMode::Peek);
     }
 
     /**
-     * Write into an address.
-     * @param addr Address to write into;
+     * Write a value to an address or register.
+     * @param addr Address to write to;
      * @param data Data to write.
-     * @note It is expected the specified address is handled by this device.
+     * @warning If the device does not handle the specified address the process is terminated.
      */
     virtual void write(addr_t addr, uint8_t data) = 0;
 
     /**
-     * @return The address range of this device.
+     * @return The number of addresses (registers) of this device.
      */
     virtual size_t size() const = 0;
 

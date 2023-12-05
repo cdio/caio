@@ -262,11 +262,11 @@ std::string Monitor::prompt()
     std::stringstream os{};
 
     if (_prev_fn == "s") {
-        _cpu.disass(os, _cpu.pc(), 10, true);
+        _cpu.disass(os, _cpu.getpc(), 10, true);
         os << _cpu.regs() << std::endl;
     }
 
-    os << PROMPT_PREFIX << "$" << utils::to_string(_cpu.pc()) << PROMPT_SUFFIX;
+    os << PROMPT_PREFIX << "$" << utils::to_string(_cpu.getpc()) << PROMPT_SUFFIX;
 
     return os.str();
 }
@@ -293,7 +293,7 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
      * assemble [<addr>|.]
      * a [<addr>|.]
      */
-    addr_t addr = mon._cpu.pc();
+    addr_t addr = mon._cpu.getpc();
     for (auto it = args.begin() + 1; it != args.end(); ++it) {
         try {
             addr = mon.to_addr(*it, addr);
@@ -368,7 +368,7 @@ bool Monitor::disassemble(Monitor& mon, const Command::args_t& args)
      * disass [<addr> [<count>]]
      * d [<addr> [<count>]]
      */
-    addr_t addr = mon._cpu.pc();
+    addr_t addr = mon._cpu.getpc();
     size_t count = 16;
 
     try {
@@ -394,7 +394,7 @@ bool Monitor::dump(Monitor& mon, const Command::args_t& args)
      * dump [<addr> [<count>]]
      * x [<addr> [<count>]]
      */
-    addr_t addr = mon._cpu.pc();
+    addr_t addr = mon._cpu.getpc();
     size_t count = 16;
 
     try {
@@ -507,7 +507,7 @@ bool Monitor::bp_add(Monitor& mon, const Command::args_t& args)
      * Add breakpoint.
      */
     try {
-        auto addr = static_cast<addr_t>(mon.to_addr(args[1], mon._cpu.pc()));
+        auto addr = static_cast<addr_t>(mon.to_addr(args[1], mon._cpu.getpc()));
         mon.add_breakpoint(addr, cond);
 
     } catch (const InvalidNumber&) {
@@ -526,9 +526,9 @@ bool Monitor::bp_del(Monitor& mon, const Command::args_t& args)
      */
     for (auto it = args.begin() + 1; it != args.end(); ++it) {
         try {
-            addr_t addr = mon.to_addr(*it, mon._cpu.pc());
+            addr_t addr = mon.to_addr(*it, mon._cpu.getpc());
             mon.del_breakpoint(addr);
-        } catch (const InvalidNumber &) {
+        } catch (const InvalidNumber&) {
             /* Error shown. Continue with the next argument */
             ;
         }
@@ -554,10 +554,10 @@ bool Monitor::bp_list(Monitor& mon, const Command::args_t& args)
     std::ostringstream os{};
 
     for (const auto& kv : mon._breakpoints) {
-        auto &addr = kv.first;
-        auto &cond = kv.second;
-        auto &cfn  = cond.first;
-        auto &cstr = cond.second;
+        auto& addr = kv.first;
+        auto& cond = kv.second;
+        auto& cfn  = cond.first;
+        auto& cstr = cond.second;
 
         os << "$" << utils::to_string(addr);
 
@@ -565,7 +565,7 @@ bool Monitor::bp_list(Monitor& mon, const Command::args_t& args)
             os << " " << cstr;
         }
 
-        os << ((addr == mon._cpu.pc() )? " <" : "") << std::endl;
+        os << ((addr == mon._cpu.getpc() )? " <" : "") << std::endl;
     }
 
     mon._rd.write(os.str());
@@ -580,8 +580,8 @@ bool Monitor::go(Monitor& mon, const Command::args_t& args)
      */
     try {
         if (args.size() > 1) {
-            addr_t addr = static_cast<addr_t>(mon.to_addr(args[1], mon._cpu.pc()));
-            mon._cpu.pc() = addr;
+            addr_t addr = static_cast<addr_t>(mon.to_addr(args[1], mon._cpu.getpc()));
+            mon._cpu.setpc(addr);
         }
 
         mon._prev_line = "g";
@@ -602,15 +602,16 @@ bool Monitor::step(Monitor& mon, const Command::args_t& args)
      */
     try {
         if (args.size() > 1) {
-            addr_t addr = static_cast<addr_t>(mon.to_addr(args[1], mon._cpu.pc()));
-            mon._cpu.pc() = addr;
+            addr_t addr = static_cast<addr_t>(mon.to_addr(args[1], mon._cpu.getpc()));
+            mon._cpu.setpc(addr);
         }
 
         mon._cpu.ebreak();
+        mon._prev_line = "s";
         return true;
 
     } catch (const std::exception&) {
-        mon._rd.write(std::string{"Invalid address: "} + args[1] + "\n");
+        mon._rd.write("Invalid address: "s + args[1] + "\n");
     }
 
     return false;
@@ -653,7 +654,7 @@ bool Monitor::save(Monitor& mon, const Command::args_t& args)
             throw InvalidArgument{"Invalid number of arguments"};
         }
 
-        const std::string &fname = args[1];
+        const std::string& fname = args[1];
         addr_t start = utils::to_number<addr_t>(args[2]);
         addr_t end = utils::to_number<addr_t>(args[3]);
 

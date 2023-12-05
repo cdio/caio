@@ -44,7 +44,7 @@ std::string home();
  * Set a the proper home path.
  * If the specified path starts with '~' it is replaced
  * with the value of the HOME environment variable.
- * @parma path Path to fix.
+ * @param path Path to fix.
  * @return The fixed path.
  */
 std::string fix_home(const std::string& path);

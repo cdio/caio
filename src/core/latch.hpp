@@ -84,8 +84,8 @@ public:
 
     /**
      * Bitwise AND assignment.
-     * @parma value Value to AND to this latch register.
-     * @return this
+     * @param value Value to AND to this latch register.
+     * @return A reference to this latch.
      */
     Latch_& operator&=(T value) {
         _reg &= value;
@@ -95,7 +95,7 @@ public:
     /**
      * Bitwise OR assignment.
      * @param value Value to OR to this latch register.
-     * @return this
+     * @return A reference to this latch.
      */
     Latch_& operator|=(T value) {
         _reg |= value;

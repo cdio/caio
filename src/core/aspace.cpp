@@ -32,8 +32,12 @@ uint8_t ASpace::read(addr_t addr, ReadMode mode)
     if (bank < _rmaps.size()) {
         auto& dev = _rmaps[bank];
         auto addr = dev.second + offset;
-        _data = dev.first->read(addr, mode);
-        return _data;
+        uint8_t data = dev.first->read(addr, mode);
+        if (mode != ReadMode::Peek) {
+            _address_bus = addr;
+            _data_bus = data;
+        }
+        return data;
     }
 
     log.fatal("ASpace: Invalid read address: %04x\n", addr);
@@ -45,9 +49,9 @@ void ASpace::write(addr_t addr, uint8_t value)
     const auto [bank, offset] = decode(addr);
     if (bank < _wmaps.size()) {
         auto& dev = _wmaps[bank];
-        auto addr = dev.second + offset;
-        _data = value;
-        dev.first->write(addr, value);
+        _address_bus = dev.second + offset;
+        _data_bus = value;
+        dev.first->write(_address_bus, value);
     } else {
         log.fatal("ASpace: Invalid write address: %04x\n", addr);
         /* NOTREACHED */
@@ -71,7 +75,8 @@ void ASpace::reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask)
     _bsize = bsize;
     _bmask = bmask;
     for (_bshift = 0; bmask != 0; bmask >>= 1, ++_bshift);
-    _data = 0;
+    _data_bus = 0;
+    _address_bus = 0;
 }
 
 inline std::pair<addr_t, addr_t> ASpace::decode(addr_t addr) const

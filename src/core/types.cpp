@@ -41,7 +41,7 @@ std::string stacktrace()
     } else {
         os << "Stack Trace:" << std::endl;
 
-        char **symbols = ::backtrace_symbols(buffer.begin(), size);
+        char** symbols = ::backtrace_symbols(buffer.begin(), size);
         if (symbols == nullptr) {
             os << "Unable to retreive symbols: " << Error::to_string(errno) << std::endl << "--" << std::endl;
         }
@@ -51,7 +51,7 @@ std::string stacktrace()
             if (symbols) {
                 os << "  " << symbols[i] << std::endl;
             } else {
-                os << "  0x" << std::hex << std::setfill('0') << std::setw(sizeof(void *) * 2)
+                os << "  0x" << std::hex << std::setfill('0') << std::setw(sizeof(void*) * 2)
                    << reinterpret_cast<long>(buffer[i]) << std::endl;
             }
         }

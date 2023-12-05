@@ -301,7 +301,6 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
     { "ISC $^, X",      Mos6502::i_ISC,         MODE_ABS_X, 7,  3   }   /* FF */
 }};
 
-
 std::string Mos6502::Registers::to_string(Mos6502::Flags fl)
 {
     std::ostringstream ss{};
@@ -332,13 +331,17 @@ std::string Mos6502::Registers::to_string() const
     return ss.str();
 }
 
-void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb& load, const monitor::save_cb& save)
+void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const monitor::save_cb_t& save)
 {
     using namespace gsl;
     Expects(ifd >= 0 && ofd >= 0);
 
-    auto pc = [this]() -> addr_t& {
-        return this->_regs.PC;
+    auto getpc = [this]() -> addr_t {
+        return _regs.PC;
+    };
+
+    auto setpc = [this](addr_t addr) {
+        _regs.PC = addr;
     };
 
     auto mmap = [this]() {
@@ -371,8 +374,8 @@ void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb& load, const
         return {
             cmd + " help | h | ?\n" +
             cmd + " <addr> [<cond>]\n\n"
-            "<cond> = <val> <op> <val>\n"
-            "<val>  = [*]{[#][$]<u16>| ra | rx | ry | rs | rp | rp.n | rp.v | rp.b | rp.i | rp.z | rp.c}\n"
+            "<cond> = <val> <op> <val>\n\n"
+            "<val>  = [*] { [#][$]<u16>| ra | rx | ry | rs | rp | rp.n | rp.v | rp.b | rp.i | rp.z | rp.c }\n\n"
             "<op>   = '<' | '>' | '<=' | '>=' | '==' | '!=' | '&' | '|'\n\n"
             "examples:\n"
             "  b $8009 *$fd20 >= #$f0\n"
@@ -382,7 +385,8 @@ void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb& load, const
     };
 
     MonitoredCPU monitor_funcs = monitor::monitored_cpu_defaults(this);
-    monitor_funcs.pc = pc;
+    monitor_funcs.getpc = getpc;
+    monitor_funcs.setpc = setpc;
     monitor_funcs.mmap = mmap;
     monitor_funcs.regvalue = regvalue;
     monitor_funcs.bpdoc = bpdoc;
@@ -453,7 +457,7 @@ void Mos6502::ebreak()
     _break = true;
 }
 
-void Mos6502::bpadd(addr_t addr, const breakpoint_cb_t& cb, void* arg)
+void Mos6502::bpadd(addr_t addr, const breakpoint_cb& cb, void* arg)
 {
     _breakpoints[addr] = {cb, arg};
 }

@@ -74,12 +74,11 @@ std::ostream& stacktrace(std::ostream& os);
 
 /**
  * Base error.
- * All the exceptions thrown by any emulator component have error as base class.
  */
 class Error : public std::exception {
 public:
     /**
-     * Initialise and error excpetion.
+     * Initialise this error exception.
      * @param elem   Name of the element that generated this error;
      * @param reason Reason for this error.
      */
@@ -89,7 +88,7 @@ public:
     }
 
     /**
-     * Initialise an error exception.
+     * Initialise this error exception.
      * @param reason Reason for this error.
      */
     Error(const std::string& reason = {})
@@ -97,7 +96,7 @@ public:
     }
 
     /**
-     * Initialise an error exception.
+     * Initialise this error exception.
      * @param ex Exception.
      */
     Error(const std::exception& ex)

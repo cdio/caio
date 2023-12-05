@@ -137,7 +137,6 @@ static std::map<SDL_Scancode, keyboard::Key> sdl_to_key{
     { SDL_SCANCODE_RALT,            keyboard::KEY_RIGHT_ALT         }
 
 #if 0
-    SDL_SCANCODE_BACKSLASH = 49,    // Backslash key on ISO keyboards and at the right on ANSI keyboards.
     SDL_SCANCODE_NONUSHASH = 50,    // ISO USB keyboards actually use this code instead of 49 for the same key
                                     // OSes I've seen treat the two codes identically.
     SDL_SCANCODE_CAPSLOCK = 57,

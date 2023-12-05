@@ -219,17 +219,17 @@ public:
     }
 
     /**
-     * @see Mos6581I::reset()
+     * @see Mos6581_::reset()
      */
     void reset() override;
 
     /**
-     * @see Mos6581I::read()
+     * @see Mos6581_::read()
      */
     uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
-     * @see Mos6581I::write()
+     * @see Mos6581_::write()
      */
     void write(addr_t addr, uint8_t value) override;
 
