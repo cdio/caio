@@ -33,6 +33,8 @@
 namespace caio {
 namespace fs {
 
+constexpr static const size_t LOAD_MAXSIZ = 65536;
+
 /**
  * @return A string with the value of the HOME environment variable.
  */
@@ -139,26 +141,27 @@ std::vector<std::pair<std::string, uint64_t>> directory(const std::string& path,
 /**
  * Load the contents of a file into memory.
  * @param fname  File name;
- * @param maxsiz Maximum number of bytes to read.
+ * @param maxsiz Maximum number of bytes to read (0 means LOAD_MAXSIZ).
  * @return A buffer with the contents of the file.
  * @exception IOError
  * @see load(std::istream&)
  * @see save(const std::string&, const gsl::span<uint8_t>&, std::ios_base::openmode)
  * @see save(std::ostream&, const gsl::span<uint8_t>&)
+ * @see LOAD_MAXSIZ
  */
-std::vector<uint8_t> load(const std::string& fname, size_t maxsiz = 65536);
+std::vector<uint8_t> load(const std::string& fname, size_t maxsiz = 0);
 
 /**
  * Read data from an input stream and create a memory buffer.
  * @param is     Input stream;
- * @param maxsiz Maximum number of bytes to read.
+ * @param maxsiz Maximum number of bytes to read (0 means LOAD_MAXSIZ).
  * @return A buffer with the data read from the input stream.
  * @exception IOError
  * @see load(const std::string&)
  * @see save(const std::string&, const gsl::span<uint8_t>&, std::ios_base::openmode)
  * @see save(std::ostream&, const gsl::span<uint8_t>&)
  */
-std::vector<uint8_t> load(std::istream& is, size_t maxsiz = 65536);
+std::vector<uint8_t> load(std::istream& is, size_t maxsiz = 0);
 
 /**
  * Save a buffer to a file.

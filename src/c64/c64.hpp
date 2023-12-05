@@ -20,9 +20,9 @@
 
 #include "clock.hpp"
 #include "device.hpp"
-#include "device_ram.hpp"
-#include "device_rom.hpp"
 #include "nibble_ram.hpp"
+#include "ram.hpp"
+#include "rom.hpp"
 #include "ui.hpp"
 
 #include "mos_6510.hpp"
@@ -50,7 +50,8 @@ constexpr static const char* CHARGEN_FNAME        = "c64_characters.901225-01.bi
 constexpr static const size_t KERNAL_SIZE         = 8192;
 constexpr static const size_t BASIC_SIZE          = 8192;
 constexpr static const size_t CHARGEN_SIZE        = 4096;
-constexpr static const size_t VCOLOR_SIZE         = 1024;
+constexpr static const size_t VRAM_SIZE           = 1024;
+constexpr static const size_t RAM_SIZE            = 65536;
 
 constexpr static const addr_t BASIC_READY_ADDR    = 0xA474;     /* Basic waiting for user commands              */
 constexpr static const addr_t BASIC_PRG_START     = 0x0801;     /* Start address of basic programs              */
@@ -162,13 +163,6 @@ private:
     std::string rompath(const std::string& fname);
 
     /**
-     * Initialise RAM memory using a specific pattern.
-     * @param pattern Initialisation patter;
-     * @param data    RAM to initialise.
-     */
-    void ram_init(uint64_t pattern, gsl::span<uint64_t>& data);
-
-    /**
      * Attach a cartridge image file.
      * Load a .crt image and associate it to an I/O expansion device.
      * @return An I/O expansion device (Cartridge) attached to the specified image;
@@ -199,7 +193,7 @@ private:
     devptr_t                    _basic{};
     devptr_t                    _kernal{};
     devptr_t                    _chargen{};
-    devptr_t                    _vcolor{};
+    devptr_t                    _vram{};
     devptr_t                    _io{};
     sptr_t<PLA>                 _pla{};
     sptr_t<Mos6510>             _cpu{};

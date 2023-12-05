@@ -50,26 +50,26 @@ public:
 
     constexpr static const addr_t VIC2_ADDR     = 0x0000;
     constexpr static const addr_t SID_ADDR      = 0x0400;
-    constexpr static const addr_t VCOLOR_ADDR   = 0x0800;
+    constexpr static const addr_t VRAM_ADDR     = 0x0800;
     constexpr static const addr_t CIA1_ADDR     = 0x0C00;
     constexpr static const addr_t CIA2_ADDR     = 0x0D00;
     constexpr static const addr_t IOEXP_ADDR    = 0x0E00;
 
     /**
      * Initialise this C64-IO device.
-     * @param vic2   Video controller device;
-     * @param sid    Audio controller device;
-     * @param vcolor Video colour RAM;
-     * @param cia1   CIA#1 device;
-     * @param cia2   CIA#2 device;
-     * @param ioexp  I/O expansion device.
+     * @param vic2  Video controller device;
+     * @param sid   Audio controller device;
+     * @param vram  Video colour RAM;
+     * @param cia1  CIA#1 device;
+     * @param cia2  CIA#2 device;
+     * @param ioexp I/O expansion device.
      */
-    C64IO(const devptr_t& vic2, const devptr_t& sid, const devptr_t& vcolor, const devptr_t& cia1,
+    C64IO(const devptr_t& vic2, const devptr_t& sid, const devptr_t& vram, const devptr_t& cia1,
         const devptr_t& cia2, const devptr_t& ioexp)
         : Device{TYPE, TYPE},
           _vic2{vic2},
           _sid{sid},
-          _vcolor{vcolor},
+          _vram{vram},
           _cia1{cia1},
           _cia2{cia2},
           _ioexp{ioexp} {
@@ -110,7 +110,7 @@ public:
 private:
     devptr_t _vic2{};
     devptr_t _sid{};
-    devptr_t _vcolor{};
+    devptr_t _vram{};
     devptr_t _cia1{};
     devptr_t _cia2{};
     devptr_t _ioexp{};

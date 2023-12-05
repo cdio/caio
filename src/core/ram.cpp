@@ -16,46 +16,62 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "device_rom.hpp"
+#include "ram.hpp"
 
-#include <fstream>
 #include <gsl/assert>
 
+#include "types.hpp"
 #include "fs.hpp"
-#include "logger.hpp"
+#include "utils.hpp"
 
 
 namespace caio {
 
-DeviceROM::DeviceROM(const std::string& fname, const std::string& label, size_t size)
+RAM::RAM(size_t size, const std::string& label)
     : Device{TYPE, label},
-      _data{fs::load(fname, size + 1)}
+      _data(size)
 {
-    if (size && _data.size() != size) {
-        throw IOError{*this, "Invalid file size: " + fname + ": It must be " + std::to_string(size)};
-    }
 }
 
-DeviceROM::DeviceROM(std::istream& is, size_t size)
+RAM::RAM(const std::string& fname, size_t count, const std::string& label)
+    : Device{TYPE, label},
+      _data{fs::load(fname, count)}
+{
+}
+
+RAM::RAM(std::istream& is, size_t count)
     : Device{TYPE, {}},
-      _data{fs::load(is, size)}
+      _data{fs::load(is, count)}
 {
 }
 
-uint8_t DeviceROM::read(addr_t addr, ReadMode)
+RAM::RAM(RAM&& other, const std::string& label)
+    : Device{TYPE, (label.empty() ? std::move(other.label()) : label)},
+      _data{std::move(other._data)}
+{
+}
+
+RAM::~RAM()
+{
+}
+
+uint8_t RAM::read(addr_t addr, ReadMode)
 {
     using namespace gsl;
     Expects(addr < _data.size());
     return _data[addr];
 }
 
-void DeviceROM::write(addr_t addr, uint8_t data)
+void RAM::write(addr_t addr, uint8_t data)
 {
     using namespace gsl;
     Expects(addr < _data.size());
+    _data[addr] = data;
+}
 
-    log.warn("%s(%s): Write attempt, address $%04x, data $%02x\n",
-        type().c_str(), label().c_str(), addr, data);
+std::ostream& RAM::dump(std::ostream& os, addr_t base) const
+{
+    return utils::dump(os, _data, base);
 }
 
 }

@@ -178,6 +178,10 @@ std::vector<uint8_t> load(const std::string& fname, size_t maxsiz)
 {
     std::string errmsg{};
 
+    if (maxsiz == 0) {
+        maxsiz = LOAD_MAXSIZ;
+    }
+
     try {
         std::ifstream is{fname, std::ios::in};
         if (is) {
@@ -194,6 +198,10 @@ std::vector<uint8_t> load(std::istream& is, size_t maxsiz)
 {
     std::vector<uint8_t> buf{};
     uint8_t c{};
+
+    if (maxsiz == 0) {
+        maxsiz = LOAD_MAXSIZ;
+    }
 
     while (buf.size() < maxsiz) {
         if (!is.read(reinterpret_cast<char*>(&c), sizeof(c))) {

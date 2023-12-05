@@ -29,7 +29,7 @@ void C64IO::reset()
 {
     _vic2->reset();
     _sid->reset();
-    _vcolor->reset();
+    _vram->reset();
     _cia1->reset();
     _cia2->reset();
 
@@ -49,7 +49,7 @@ uint8_t C64IO::read(addr_t addr, ReadMode mode)
         return ((addr < _vic2->size()) ? _vic2->read(addr, mode) : 255);
     }
 
-    if (addr < VCOLOR_ADDR) {
+    if (addr < VRAM_ADDR) {
         /*
          * SID.
          */
@@ -60,7 +60,7 @@ uint8_t C64IO::read(addr_t addr, ReadMode mode)
         /*
          * Colour RAM.
          */
-        return _vcolor->read(addr - VCOLOR_ADDR, mode);
+        return _vram->read(addr - VRAM_ADDR, mode);
     }
 
     if (addr < CIA2_ADDR) {
@@ -101,7 +101,7 @@ void C64IO::write(addr_t addr, uint8_t value)
         return;
     }
 
-    if (addr < VCOLOR_ADDR) {
+    if (addr < VRAM_ADDR) {
         /*
          * SID.
          */
@@ -112,7 +112,7 @@ void C64IO::write(addr_t addr, uint8_t value)
         /*
          * Colour RAM.
          */
-        _vcolor->write(addr - VCOLOR_ADDR, value);
+        _vram->write(addr - VRAM_ADDR, value);
         return;
     }
 
@@ -169,7 +169,7 @@ std::ostream& C64IO::dump(std::ostream& os, addr_t base) const
         _sid->dump(os, base + SID_ADDR + offset);
     }
 
-    _vcolor->dump(os, base + VCOLOR_ADDR);
+    _vram->dump(os, base + VRAM_ADDR);
     _cia1->dump(os, base + CIA1_ADDR);
     _cia2->dump(os, base + CIA2_ADDR);
     _ioexp->dump(os, base + IOEXP_ADDR);

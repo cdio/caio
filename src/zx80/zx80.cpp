@@ -121,33 +121,15 @@ std::string ZX80::rompath(const std::string& fname) const
     return path;
 }
 
-void ZX80::ram_init(uint64_t pattern, gsl::span<uint64_t>& data)
-{
-    std::for_each(data.begin(), data.end(), [&pattern](uint64_t& value) {
-        value = pattern;
-        pattern ^= static_cast<uint64_t>(-1);
-
-        /* Put some random values */
-        if (std::rand() % 100 < 20) {
-            reinterpret_cast<uint8_t *>(&value)[std::rand() % 8] = std::rand() % 256;
-        }
-    });
-}
-
 void ZX80::create_devices()
 {
-    auto ram_init = [this](gsl::span<uint8_t>& data) {
-        gsl::span<uint64_t> data64{reinterpret_cast<uint64_t*>(data.data()), data.size() / sizeof(uint64_t)};
-        this->ram_init(RAM_INIT_PATTERN, data64);
-    };
-
     size_t ramsiz  = (_conf.ram16 ? EXTERNAL_RAM_SIZE : INTERNAL_RAM_SIZE);
     size_t romsiz  = (_conf.rom8 ? ROM8_SIZE  : ROM4_SIZE);
     auto   romfile = (_conf.rom8 ? ROM8_FNAME : ROM4_FNAME);
 
     _cpu   = std::make_shared<Z80>(Z80::TYPE, "CPU");
-    _ram   = std::make_shared<DeviceRAM>("RAM", ramsiz, ram_init);
-    _rom   = std::make_shared<DeviceROM>(rompath(romfile), "ROM", romsiz);
+    _ram   = std::make_shared<RAM>(ramsiz, RAM_INIT_PATTERN, true, "RAM");
+    _rom   = std::make_shared<ROM>(rompath(romfile), romsiz, "ROM");
     _video = std::make_shared<ZX80Video>("VID");
     _kbd   = std::make_shared<ZX80Keyboard>("KBD");
     _mmap  = std::make_shared<ZX80ASpace>(_cpu, _ram, _rom, _video, _kbd);

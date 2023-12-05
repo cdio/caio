@@ -20,8 +20,8 @@
 
 #include "clock.hpp"
 #include "device.hpp"
-#include "device_ram.hpp"
-#include "device_rom.hpp"
+#include "ram.hpp"
+#include "rom.hpp"
 #include "ui.hpp"
 #include "zilog_z80.hpp"
 
@@ -124,13 +124,6 @@ private:
      * @exception IOError if the ROM file is not found.
      */
     std::string rompath(const std::string& fname) const;
-
-    /**
-     * Initialise RAM memory using a specific pattern.
-     * @param pattern Initialisation patter;
-     * @param data    RAM to initialise.
-     */
-    void ram_init(uint64_t pattern, gsl::span<uint64_t>& data);
 
     /**
      * Process hot-keys.

@@ -142,7 +142,7 @@ void C64::reset()
         _cpu->write(1, 0);
         _pla->reset();
 
-        _io->reset();       /* Resets: VIC2, SID, VCOLOR, CIA1, CIA2 and Cartridge */
+        _io->reset();       /* Resets: VIC2, SID, VRAM, CIA1, CIA2 and Cartridge */
 
         _cpu->reset();      /* The CPU is reset after IO and PLA otherwise it could take the wrong reset vector */
 
@@ -245,31 +245,13 @@ void C64::attach_prg()
     }
 }
 
-void C64::ram_init(uint64_t pattern, gsl::span<uint64_t>& data)
-{
-    std::for_each(data.begin(), data.end(), [&pattern](uint64_t& value) {
-        value = pattern;
-        pattern ^= static_cast<uint64_t>(-1);
-
-        /* Put some random values */
-        if (std::rand() % 100 < 20) {
-            reinterpret_cast<uint8_t*>(&value)[std::rand() % 8] = std::rand() % 256;
-        }
-    });
-}
-
 void C64::create_devices()
 {
-    auto ram_init = [this](gsl::span<uint8_t>& data) {
-        gsl::span<uint64_t> data64{reinterpret_cast<uint64_t*>(data.data()), data.size() / sizeof(uint64_t)};
-        this->ram_init(RAM_INIT_PATTERN1, data64);
-    };
-
-    _ram = std::make_shared<DeviceRAM>("RAM", 65536, ram_init);
-    _basic = std::make_shared<DeviceROM>(rompath(BASIC_FNAME), "BASIC", BASIC_SIZE);
-    _kernal = std::make_shared<DeviceROM>(rompath(KERNAL_FNAME), "KERNAL", KERNAL_SIZE);
-    _chargen = std::make_shared<DeviceROM>(rompath(CHARGEN_FNAME), "CHARGEN", CHARGEN_SIZE);
-    _vcolor = std::make_shared<NibbleRAM>("COLOR-RAM", VCOLOR_SIZE);
+    _ram = std::make_shared<RAM>(RAM_SIZE, RAM_INIT_PATTERN1, true, "RAM");
+    _basic = std::make_shared<ROM>(rompath(BASIC_FNAME), BASIC_SIZE, "BASIC");
+    _kernal = std::make_shared<ROM>(rompath(KERNAL_FNAME), KERNAL_SIZE,  "KERNAL");
+    _chargen = std::make_shared<ROM>(rompath(CHARGEN_FNAME), CHARGEN_SIZE, "CHARGEN");
+    _vram = std::make_shared<NibbleRAM>(VRAM_SIZE, "VRAM");
 
     if (_conf.resid) {
         _sid = std::make_shared<Mos6581Resid>(Mos6581Resid::version(), CLOCK_FREQ_PAL);
@@ -284,10 +266,10 @@ void C64::create_devices()
     _busdev = std::make_shared<C64BusController>(_bus, _cia2);
 
     auto vic2_mmap = std::make_shared<Vic2ASpace>(_cia2, _ram, _chargen);
-    _vic2 = std::make_shared<Mos6569>("VIC2", vic2_mmap, _vcolor);
+    _vic2 = std::make_shared<Mos6569>("VIC2", vic2_mmap, _vram);
 
     _ioexp = attach_cartridge();
-    _io = std::make_shared<C64IO>(_vic2, _sid, _vcolor, _cia1, _cia2, _ioexp);
+    _io = std::make_shared<C64IO>(_vic2, _sid, _vram, _cia1, _cia2, _ioexp);
 
     _pla = std::make_shared<PLA>(_ram, _basic, _kernal, _chargen, _io);
     _cpu = std::make_shared<Mos6510>(_pla);
@@ -674,7 +656,7 @@ std::string C64::to_string() const
        << "  " << _cia2->to_string()    << std::endl
        << "  " << _sid->to_string()     << std::endl
        << "  " << _ram->to_string()     << std::endl
-       << "  " << _vcolor->to_string()  << std::endl
+       << "  " << _vram->to_string()    << std::endl
        << "  " << _basic->to_string()   << std::endl
        << "  " << _kernal->to_string()  << std::endl
        << "  " << _chargen->to_string() << std::endl;

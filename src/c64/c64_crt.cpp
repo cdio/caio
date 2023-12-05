@@ -18,10 +18,9 @@
  */
 #include "c64_crt.hpp"
 
-
-#include "device_ram.hpp"
-#include "device_rom.hpp"
 #include "endian.hpp"
+#include "ram.hpp"
+#include "rom.hpp"
 #include "utils.hpp"
 
 
@@ -76,7 +75,7 @@ void Crt::open(std::istream& is)
             }
 
             case CHIP_TYPE_RAM: {
-                auto ram = std::make_shared<DeviceRAM>(+ch.rsiz);
+                auto ram = std::make_shared<RAM>(+ch.rsiz);
                 ram->label(name() + ", chip " + std::to_string(i + 1));
                 _roms.push_back(ram);
                 _chips.push_back(ch);
@@ -173,7 +172,7 @@ void Crt::load_chip(std::istream& is, Chip& ch)
 
 devptr_t Crt::load_rom(std::istream& is, const Chip& ch)
 {
-    return std::make_shared<DeviceROM>(is, ch.rsiz);
+    return std::make_shared<ROM>(is, ch.rsiz);
 }
 
 std::string Crt::to_string(const Crt::Header& hdr)

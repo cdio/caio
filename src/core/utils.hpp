@@ -22,6 +22,7 @@
 #include <cctype>
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <iomanip>
 #include <limits>
 #include <ostream>
@@ -34,6 +35,7 @@
 #include <gsl/span>
 
 #include "types.hpp"
+#include "endian.hpp"
 
 
 namespace caio {
@@ -357,6 +359,25 @@ void convert_01_10_to_11(C& bytes)
     std::for_each(bytes.begin(), bytes.end(), [](uint8_t& byte) {
         byte = convert_01_10_to_11(byte);
     });
+}
+
+/**
+ * Fill a buffer with a pattern and optional random values.
+ * The pattern is repeated until the entire destination buffer is filled.
+ * @param dst     Destination buffer;
+ * @param pattern Pattern;
+ * @param random  If true, contaminate the destination buffer with some random values.
+ */
+template<typename T>
+void fill(gsl::span<uint8_t>& dst, T pattern, bool random)
+{
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    std::reverse(reinterpret_cast<uint8_t*>(&pattern), reinterpret_cast<uint8_t*>(&pattern) + sizeof(pattern));
+#endif
+    gsl::span<uint8_t> pt{reinterpret_cast<uint8_t*>(&pattern), sizeof(T)};
+    for (size_t pos = 0; pos < dst.size(); ++pos) {
+        dst[pos] = ((random && ((std::rand() % 100) < 2)) ? (std::rand() % 256) : pt[pos % pt.size()]);
+    }
 }
 
 /**

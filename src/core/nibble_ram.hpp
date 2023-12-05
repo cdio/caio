@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "device_ram.hpp"
+#include "ram.hpp"
 
 
 namespace caio {
@@ -27,12 +27,12 @@ namespace caio {
  * Nibble RAM.
  * The lower nibble of a byte can be set; the higher nibble of a byte is fixed to 1111b.
  */
-class NibbleRAM : public DeviceRAM {
+class NibbleRAM : public RAM {
 public:
     constexpr static const char* TYPE = "4-BIT RAM";
 
-    NibbleRAM(const std::string& label, size_t size)
-        : DeviceRAM{label, size} {
+    NibbleRAM(size_t size, const std::string& label)
+        : RAM{size, label} {
         type(TYPE);
     }
 
@@ -40,10 +40,10 @@ public:
     }
 
     /**
-     * @see DeviceRAM::write()
+     * @see RAM::write()
      */
     void write(addr_t addr, uint8_t value) override {
-        DeviceRAM::write(addr, 0xf0 | value);
+        RAM::write(addr, 0xF0 | value);
     }
 };
 

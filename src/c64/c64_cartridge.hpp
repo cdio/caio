@@ -139,7 +139,6 @@ protected:
     Cartridge(const std::string& type, const sptr_t<Crt>& crt);
 
     /**
-     * Set a new GAME/EXROM mode.
      * Set a new GAME/EXROM mode and propagate it.
      * @param mode Mode to set.
      * @see GameExromMode

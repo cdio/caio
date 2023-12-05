@@ -29,8 +29,8 @@ CXXSRCS=	aspace.cpp \
 		confile.cpp \
 		device.cpp \
 		device_none.cpp \
-		device_ram.cpp \
-		device_rom.cpp \
+		ram.cpp \
+		rom.cpp \
 		fs.cpp \
 		icon.cpp \
 		keyboard.cpp \
@@ -50,8 +50,8 @@ INCS=		aspace.hpp \
 		config.hpp \
 		device.hpp \
 		device_none.hpp \
-		device_ram.hpp \
-		device_rom.hpp \
+		ram.hpp \
+		rom.hpp \
 		dispatcher.hpp \
 		endian.hpp \
 		fs.hpp \
