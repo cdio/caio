@@ -18,6 +18,8 @@
  */
 #include "zilog_z80.hpp"
 
+#include <algorithm>
+
 
 namespace caio {
 namespace zilog {
@@ -25,63 +27,47 @@ namespace zilog {
 int Z80::i_EX_AF_sAF(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * EX AF, AF'
+     * EX AF, AF'   - 08
      * Swap AF, AF'
      */
-    uint16_t aAF = self._regs.aAF();
-    self._regs.aAF(self._regs.AF());
-    self._regs.AF(aAF);
+    std::swap(self._regs.aAF, self._regs.AF);
     return 0;
 }
 
 int Z80::i_EX_DE_HL(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * EX HL, DE
-     * Swap HL, DE
+     * EX DE, HL    - EB
+     * Swap DE, HL
      */
-    uint16_t HL = self._regs.HL();
-    self._regs.HL(self._regs.DE());
-    self._regs.DE(HL);
+    std::swap(self._regs.HL, self._regs.DE);
     return 0;
 }
 
 int Z80::i_EXX(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * EXX
+     * EXX          - D9
      * Swap BC, BC'
      * Swap DE, DE'
      * Swap HL, HL'
      */
-    uint16_t tmp = self._regs.aBC();
-    self._regs.aBC(self._regs.BC());
-    self._regs.BC(tmp);
-
-    tmp = self._regs.aDE();
-    self._regs.aDE(self._regs.DE());
-    self._regs.DE(tmp);
-
-    tmp = self._regs.aHL();
-    self._regs.aHL(self._regs.HL());
-    self._regs.HL(tmp);
-
+    std::swap(self._regs.aBC, self._regs.BC);
+    std::swap(self._regs.aDE, self._regs.DE);
+    std::swap(self._regs.aHL, self._regs.HL);
     return 0;
 }
 
 int Z80::i_EX_mSP_HL(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * EX (SP), HL
+     * EX (SP), HL  - E3
      * Swap *SP, HL
      */
-    uint8_t lo = self.read(self._regs.SP);
-    uint8_t hi = self.read(self._regs.SP + 1);
-    self.write(self._regs.SP, self._regs.L);
-    self.write(self._regs.SP + 1, self._regs.H);
-    self._regs.L = lo;
-    self._regs.H = hi;
-    self._regs.memptr = self._regs.HL();
+    uint16_t val = self.read_addr(self._regs.SP);
+    std::swap(val, self._regs.HL);
+    self.write_addr(self._regs.SP, val);
+    self._regs.memptr = self._regs.HL;
     return 0;
 }
 

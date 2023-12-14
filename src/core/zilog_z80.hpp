@@ -18,15 +18,14 @@
  */
 #pragma once
 
-#include <array>
 #include <atomic>
 #include <functional>
 #include <map>
-#include <memory>
 #include <utility>
 
 #include "aspace.hpp"
 #include "clock.hpp"
+#include "endian.hpp"
 #include "latch.hpp"
 #include "logger.hpp"
 #include "monitor.hpp"
@@ -40,61 +39,69 @@ namespace zilog {
 
 /**
  * Zilog Z80 emulator.
+ * @see Z80 CPU User Manual UM008011-0816
+ * @see The Undocumented Z80 Documented - Sean Young
  */
 class Z80 : public Clockable, public Name {
 public:
-    constexpr static const char* TYPE    = "Z80";
-    constexpr static const char* LABEL   = "CPU";
+    constexpr static const char* TYPE               = "Z80";
+    constexpr static const char* LABEL              = "CPU";
 
-    constexpr static const addr_t vRESET = 0x0000;
-    constexpr static const addr_t vNMI   = 0x0066;
-    constexpr static const addr_t vINT   = 0x0038;
+    constexpr static const addr_t RESET_ADDR        = 0x0000;
+    constexpr static const addr_t NMI_ADDR          = 0x0066;
+    constexpr static const addr_t INT_ADDR          = 0x0038;
 
-    constexpr static const uint8_t I_BIT = 0xCB;
-    constexpr static const uint8_t I_IX  = 0xDD;
-    constexpr static const uint8_t I_MI  = 0xED;
-    constexpr static const uint8_t I_IY  = 0xFD;
+    constexpr static const uint8_t I_CB             = 0xCB;
+    constexpr static const uint8_t I_IX             = 0xDD;
+    constexpr static const uint8_t I_ED             = 0xED;
+    constexpr static const uint8_t I_IY             = 0xFD;
+    constexpr static const uint8_t I_NOP            = 0x00;
+    constexpr static const uint8_t I_EI             = 0xFB;
 
-    constexpr static const uint8_t I_NOP = 0x00;
-    constexpr static const uint8_t I_EI  = 0xFB;
+    constexpr static const size_t CALL_CYCLES       = 17;       /* Cycles required to perform a CALL <addr> */
+    constexpr static const size_t NOP_CYCLES        = 4;        /* Cycles required to perform a NOP         */
+
+    constexpr static const bool FORCED_INSTRUCTION  = true;
+    constexpr static const bool FETCH_FROM_DATABUS  = true;
 
     using breakpoint_cb_t = std::function<void(Z80&, void*)>;
 
     enum class Cycle {
         T1,
         T2,
+        Tw1,
+        Tw2,
         T3,
-        Tn
+        T4
+    };
+
+    enum class IMode {
+        M0,                 /* Device puts instruction on data bus                  */
+        M1,                 /* ISR at $0038 (vINT)                                  */
+        M2                  /* Device provides LO 8 bits of interrupt vector table  */
     };
 
     enum class ArgType {
-        None,
-        A8,
-        A16,
-        Bit,
+        None,               /* Instruction without arguments                        */
+        GW,                 /* Instruction gateway (changes lookup table)           */
+        A8,                 /* Instruction with an 8 bits argument                  */
+        A16,                /* Instruction with a 16 bits arguemnt                  */
+        A8_Inv              /* IX/IY Bit instruction (inverted opcode-argument)     */
+    };
+
+    enum class FetchState {
+        Init = 0,
         IX,
-        IXBit,
         IY,
-        IYBit,
-        MI,
-        Inv
+        IX_Bit,
+        IY_Bit,
+        Opcode
     };
 
-    enum InterruptMode {
-        IMODE_0,            /* Device puts 8-bit instruction on data bus            */
-        IMODE_1,            /* ISR at $0038 (vINT)                                  */
-        IMODE_2             /* Device provides LO 8 bits of interrupt vector table  */
-    };
-
-    enum Flags {
-        S = 0x80,           /* Sign             */
-        Z = 0x40,           /* Zero             */
-        Y = 0x20,           /* Y or F5          */
-        H = 0x10,           /* Half Carry       */
-        X = 0x08,           /* X or F3          */
-        V = 0x04,           /* Parity/Overflow  */
-        N = 0x02,           /* Add/Substract    */
-        C = 0x01            /* Carry            */
+    enum class Prefix : uint8_t {
+        None = 0x00,
+        IX   = 0xDD,
+        IY   = 0xFD
     };
 
     struct Instruction {
@@ -105,75 +112,186 @@ public:
         size_t size;                            /* Size of the instruction (bytes)  */
     };
 
+    enum Flags : uint8_t {
+        S = 0x80,           /* Sign             */
+        Z = 0x40,           /* Zero             */
+        Y = 0x20,           /* Y or F5 (undoc)  */
+        H = 0x10,           /* Half Carry       */
+        X = 0x08,           /* X or F3 (undoc)  */
+        V = 0x04,           /* Parity/Overflow  */
+        N = 0x02,           /* Add/Substract    */
+        C = 0x01            /* Carry            */
+    };
+
     struct Registers {
-        uint8_t A;
-        uint8_t B;
-        uint8_t C;
-        uint8_t D;
-        uint8_t E;
-        uint8_t H;
-        uint8_t L;
-        uint8_t F;
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+        union {
+            struct {
+                uint8_t F;
+                uint8_t A;
+            } __attribute__((packed));
+            uint16_t AF __attribute__((packed));
+        };
 
-        uint8_t aA;
-        uint8_t aB;
-        uint8_t aC;
-        uint8_t aD;
-        uint8_t aE;
-        uint8_t aH;
-        uint8_t aL;
-        uint8_t aF;
+        union {
+            struct {
+                uint8_t C;
+                uint8_t B;
+            } __attribute__((packed));
+            uint16_t BC __attribute__((packed));
+        };
 
-        uint8_t  I;             /* Interrupt vector */
-        uint8_t  R;             /* Memory refresh   */
-        uint16_t IX;            /* Index X          */
-        uint16_t IY;            /* Index Y          */
-        uint16_t SP;            /* Stack Pointer    */
-        uint16_t PC;            /* Program Counter  */
+        union {
+            struct {
+                uint8_t E;
+                uint8_t D;
+            } __attribute__((packed));
+            uint16_t DE __attribute__((packed));
+        };
 
+        union {
+            struct {
+                uint8_t L;
+                uint8_t H;
+            } __attribute__((packed));
+            uint16_t HL __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t aF;
+                uint8_t aA;
+            } __attribute__((packed));
+            uint16_t aAF __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t aC;
+                uint8_t aB;
+            } __attribute__((packed));
+            uint16_t aBC __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t aE;
+                uint8_t aD;
+            } __attribute__((packed));
+            uint16_t aDE __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t aL;
+                uint8_t aH;
+            } __attribute__((packed));
+            uint16_t aHL __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t IXl;
+                uint8_t IXh;
+            } __attribute__((packed));
+            uint16_t IX __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t IYl;
+                uint8_t IYh;
+            } __attribute__((packed));
+            uint16_t IY __attribute__((packed));
+        };
+
+#else   /* BIG ENDIAN */
+        union {
+            struct {
+                uint8_t A;
+                uint8_t F;
+            } __attribute__((packed));
+            uint16_t AF __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t B;
+                uint8_t C;
+            } __attribute__((packed));
+            uint16_t BC __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t D;
+                uint8_t E;
+            } __attribute__((packed));
+            uint16_t DE __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t H;
+                uint8_t L;
+            } __attribute__((packed));
+            uint16_t HL __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t aA;
+                uint8_t aF;
+            } __attribute__((packed));
+            uint16_t aAF __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t aB;
+                uint8_t aC;
+            } __attribute__((packed));
+            uint16_t aBC __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t aD;
+                uint8_t aE;
+            } __attribute__((packed));
+            uint16_t aDE __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t aH;
+                uint8_t aL;
+            } __attribute__((packed));
+            uint16_t aHL __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t IXh;
+                uint8_t IXl;
+            } __attribute__((packed));
+            uint16_t IX __attribute__((packed));
+        };
+
+        union {
+            struct {
+                uint8_t IYh;
+                uint8_t IYl;
+            } __attribute__((packed));
+            uint16_t IY __attribute__((packed));
+        };
+#endif
+
+        uint8_t  I;             /* Interrupt vector             */
+        uint8_t  R;             /* Memory refresh               */
+        uint16_t SP;            /* Stack Pointer                */
+        uint16_t PC;            /* Program Counter              */
         uint16_t memptr;        /* Undocumented pseudo register */
-
-        uint16_t AF() const {
-            return ((static_cast<uint16_t>(A) << 8) | F);
-        }
-
-        uint16_t BC() const {
-            return ((static_cast<uint16_t>(B) << 8) | C);
-        }
-
-        uint16_t DE() const {
-            return ((static_cast<uint16_t>(D) << 8) | E);
-        }
-
-        uint16_t HL() const {
-            return ((static_cast<uint16_t>(H) << 8) | L);
-        }
-
-        uint16_t aAF() const {
-            return ((static_cast<uint16_t>(aA) << 8) | aF);
-        }
-
-        uint16_t aBC() const {
-            return ((static_cast<uint16_t>(aB) << 8) | aC);
-        }
-
-        uint16_t aDE() const {
-            return ((static_cast<uint16_t>(aD) << 8) | aE);
-        }
-
-        uint16_t aHL() const {
-            return ((static_cast<uint16_t>(aH) << 8) | aL);
-        }
-
-        void AF(uint16_t);
-        void BC(uint16_t);
-        void DE(uint16_t);
-        void HL(uint16_t);
-
-        void aAF(uint16_t);
-        void aBC(uint16_t);
-        void aDE(uint16_t);
-        void aHL(uint16_t);
 
         std::string to_string() const;
 
@@ -185,9 +303,7 @@ public:
      * @param type  CPU type;
      * @param label CPU label.
      */
-    Z80(const std::string& type = TYPE, const std::string& label = LABEL)
-        : Name{type, (label.empty() ? LABEL : label)} {
-    }
+    Z80(const std::string& type = TYPE, const std::string& label = LABEL);
 
     /**
      * Initialise this CPU.
@@ -196,10 +312,9 @@ public:
      * @param label CPU label.
      * @see ASpace
      */
-    Z80(const sptr_t<ASpace>& mmap, const std::string& type = TYPE, const std::string& label = LABEL)
-        : Name{type, (label.empty() ? LABEL : label)} {
-        init(mmap);
-    }
+    Z80(const sptr_t<ASpace>& mmap, const std::string& type = TYPE, const std::string& label = LABEL);
+
+    virtual ~Z80();
 
     /**
      * Initialise a monitor for this CPU.
@@ -208,21 +323,24 @@ public:
      * the monitor takes control as soon as this CPU is started.
      * @param is   Input stream used to communicate with the user;
      * @param os   Output stream used to communicate with the user;
-     * @param load Monitor load callback (empty for default);
-     * @param save Monitor save calblack (empty for default).
-     * @see reset()
+     * @param load Monitor load callback (empty to use the default);
+     * @param save Monitor save calblack (empty to use the  default).
+     * @see init()
+     * @see monitor::monitored_cpu_defaults()
+     * @see monitor::MonitoredCPU
+     * @warning If one of the input/output stream parameters are invalid the process is terminated.
      */
-    void init_monitor(int ifd, int ofd, const monitor::load_cb& load, const monitor::save_cb& save);
+    void init_monitor(int ifd, int ofd, const monitor::load_cb_t& load = {}, const monitor::save_cb_t& save = {});
 
     /**
-     * Set the single-step log level.
-     * @param lvs Log level string to set.
+     * Set the loglevel for single-step execution.
+     * @param lvs Loglevel string to set.
      * @see Logger::loglevel(const std::string&)
      */
     void loglevel(const std::string& lvs);
 
     /**
-     * @return The current single-step log level.
+     * @return The current single-step loglevel.
      */
     Loglevel loglevel() const;
 
@@ -233,28 +351,28 @@ public:
 
     /**
      * Set the /HALT output pin callback.
-     * This callback is called each time the CPU is halted.
+     * This callback is called when the /HALT output pin is changed.
      * @param halt_cb Callback.
      */
     void halt_pin(const OutputPinCb& halt_cb);
 
     /**
      * Set the /IORQ output pin callback.
-     * This callback is called each time the /IORQ output pin is changed.
+     * This callback is called when the /IORQ output pin is changed.
      * @param iorq_cb Callback.
      */
     void iorq_pin(const OutputPinCb& iorq_cb);
 
     /**
      * Set the /M1 output pin callback.
-     * This callback is called each time the /M1 output pin is changed.
+     * This callback is called when the /M1 output pin is changed.
      * @param m1_cb Callback.
      */
     void m1_pin(const OutputPinCb& m1_cb);
 
     /**
      * Set the /RFSH output pin callback.
-     * This callback is called each time the /RFSH output pin is changed.
+     * This callback is called when the /RFSH output pin is changed.
      * @param rfsh_cb Callback.
      */
     void rfsh_pin(const OutputPinCb& rfsh_cb);
@@ -285,16 +403,16 @@ public:
     bool wait_pin() const;
 
     /**
-     * Trigger an IRQ.
-     * This method must be called twice by external peripherals, the first time to activate
+     * Trigger a maskable interrupt (INT).
+     * This method must be called twice by external devices, the first time to activate
      * the /INT input pin and a second time to de-activate it when the interrupt is served.
      * @param active true to generate an interrupt; false to de-activate a previous interrupt request.
      */
     void int_pin(bool active);
 
     /**
-     * Trigger an NMI interrupt.
-     * This method must be called twice by external peripherals, the first time to activate
+     * Trigger a non maskable interrupt (NMI).
+     * This method must be called twice by external devices, the first time to activate
      * the /NMI input pin and a second time to de-activate it when the interrupt is served.
      * @param active true to generate an interrupt; false to de-activate.
      */
@@ -302,7 +420,7 @@ public:
 
     /**
      * Trigger a CPU reset.
-     * This method must be called twice by external peripherals, the first time to activate
+     * This method must be called twice by external devices, the first time to activate
      * the /RESET input pin and a second time to de-active it.
      * As soon as this pin is deactivated the reset cycle is started.
      * @param active true to trigger a reset; false otherwise.
@@ -311,7 +429,7 @@ public:
 
     /**
      * Trigger a wait state.
-     * This method must be called twice by external peripherals, the first time to activate
+     * This method must be called twice by external devices, the first time to activate
      * the /WAIT input pin and a second time to de-activate it when the device is ready.
      * @param active true or false.
      */
@@ -321,8 +439,7 @@ public:
      * External breakpoint.
      * Force a return back to the monitor on the next M1 cycle.
      * If the monitor is not active a system halt is requested.
-     * This method is intended to be used by a cpu monitor to implement
-     * a single-step command.
+     * This method is used by a CPU monitor to implement the single-step command.
      * @see MonitoredCPU
      */
     void ebreak();
@@ -330,8 +447,8 @@ public:
     /**
      * Add a breakpoint on a memory address.
      * @param addr Address;
-     * @parma cb   Method to call when the breakpoint hits;
-     * @param arg  Argument sent to the callback.
+     * @param cb   Method to call when the breakpoint is hit;
+     * @param arg  Generic argument sent to the callback.
      */
     void bpadd(addr_t addr, const breakpoint_cb_t& cb, void* arg);
 
@@ -342,7 +459,7 @@ public:
     void bpdel(addr_t addr);
 
     /**
-     * @return The register values.
+     * @return A constant reference to the registers.
      */
     const Registers& regs() const;
 
@@ -350,8 +467,8 @@ public:
      * Disassembler.
      * @param os      Output stream;
      * @param addr    Start address with the machine code to disassemble;
-     * @param count   Number of instructions to disassemble.
-     * @param show_pc true if the position of the PC must be marked in the disassembled code; false otherwise (default).
+     * @param count   Number of instructions to disassemble;
+     * @param show_pc true if the position of the PC must be shown in the disassembled code; false otherwise (default).
      * @see MonitoredCPU
      */
     void disass(std::ostream& os, addr_t start, size_t count, bool show_pc = false);
@@ -392,21 +509,21 @@ public:
     void write(addr_t addr, uint8_t data);
 
     /**
-     * @return A string containing a human readable string with the status of this CPU (regsiters and other values).
+     * @return A human readable string with the status of this CPU (regsiters and other values).
      */
     std::string status() const;
 
     /**
      * Initialise this CPU.
      * @param mmap System mappings.
+     * @warning mmap must be a parameter otherwise the process is terminated.
      */
-//XXX
-    void init(const sptr_t<ASpace>& mmap = {});
+    void init(const sptr_t<ASpace>& mmap);
 
 private:
     /**
      * Set the status of the /HALT output pin.
-     * Set the status of the /HALT output pin and, if defined, call the user defined callback.
+     * Set the status of the /HALT output pin and call the user defined callback (if defined).
      * @param active true to activate the pin, false to de-activate it.
      * @see halt_pin(const OutputPinCb&)
      */
@@ -414,7 +531,7 @@ private:
 
     /**
      * Set the status of the /IORQ output pin.
-     * Set the status of the /IORQ output pin and, if defined, call the user defined callback.
+     * Set the status of the /IORQ output pin and call the user defined callback (if defined).
      * @param active true to activate the pin, false to de-activate it.
      * @see iorq_pin(const OutputPinCb&)
      */
@@ -422,7 +539,7 @@ private:
 
     /**
      * Set the status of the /RFSH output pin.
-     * Set the status of the /RFSH output pin and, if defined, call the user defined callback.
+     * Set the status of the /RFSH output pin and call the user defined callback (if defined).
      * @param active true to activate the pin, false to de-activate it.
      * @see rfsh_pin(const OutputPinCb&)
      */
@@ -430,7 +547,7 @@ private:
 
     /**
      * Set the status of the /M1 output pin.
-     * Set the status of the /M1 output pin and, if defined, call the user defined callback.
+     * Set the status of the /M1 output pin and call the user defined callback (if defined).
      * @param active true to activate the pin, false to de-activate it.
      * @see m1_pin(const OutputPinCb&)
      */
@@ -438,8 +555,8 @@ private:
 
     /**
      * Tick event method.
-     * This method is called by the clock and executes an instruction cycle.
-     * If the monitor is not running the current instruction cycle is executed.
+     * This method is called by the clock and executes a CPU cycle.
+     * If the monitor is not running a CPU cycle is executed.
      * If the monitor is running and a monitor-breakpoint is set on the current PC address
      * the monitor's run method is called instead.
      * @param clk The caller clock.
@@ -452,12 +569,12 @@ private:
 
     /**
      * Tick event method.
-     * If the CPU is halted this methods returns immediately.
-     * If an interrupt occured an interrupt M1 cycle is started/continued; otherwise a
+     * If the reset pin is active this method returns immediately.
+     * If an interrupt occured a special M1 cycle is started/continued; otherwise a
      * normal M1 cycle is started/continued.
      * @return The number of clock cycles consumed (the clock will call this method again after
      * this number of cycles have passed); Clockable::HALT if the clock must be terminated.
-     * @see halt_pin()
+     * @see reset_pin()
      * @see m1_cycle()
      * @see m1_cycle_interrupt()
      */
@@ -473,6 +590,16 @@ private:
     size_t m1_cycle();
 
     /**
+     * Opcode fetch and instruction decoding state machine.
+     * @param read_bus true to fetch the opcode sampling the data bus; false to fetch the opcode from memory.
+     * @see _fstate
+     * @see _opcode
+     * @see _iprefix
+     * @see _instr_set
+     */
+    void opcode_fetch(bool read_bus = false);
+
+    /**
      * Start/continue an interrupt M1 cycle.
      * This method contains a state machine that implements an M1 cycle that process
      * maskable and non-maskable interrupts. An M1 cycle consists of various steps
@@ -485,10 +612,11 @@ private:
     /**
      * Execute an instruction.
      * If the opcode is not forced it must be fetched from the address specified by the PC register.
-     * @param opcode First opcode of the instruction to execute;
+     * @param opcode Opcode of the instruction to execute;
      * @param forced true if the opcode is forced (not fetched from any memory address); false otherwise.
      * @return The number of clock cycles consumed by the instruction.
-     * @see execute(const Instruction *ins, uint8_t opcode, bool forced = false)
+     * @see execute(const Instruction& ins, uint8_t opcode, bool forced = false)
+     * @see Prefix
      */
     size_t execute(uint8_t opcode, bool forced = false);
 
@@ -500,7 +628,7 @@ private:
      * @param forced true if the opcode is forced (not fetched from any memory address); false otherwise.
      * @return The number of clock cycles consumed by the instruction.
      */
-    size_t execute(const Instruction* ins, uint8_t opcode, bool forced = false);
+    size_t execute(const Instruction& ins, uint8_t opcode, bool forced = false);
 
     /**
      * Disassemble a single instruction located at a specified address.
@@ -511,6 +639,20 @@ private:
      * @return A string with the disassembled instruction.
      */
     std::string disass(addr_t& addr, bool show_pc = false);
+
+    /**
+     * Enter the HALT state.
+     * If the system is not halted, activate the /HALT pin and
+     * decrement the program counter by 1.
+     */
+    void halt();
+
+    /**
+     * Exit from HALT state.
+     * If the system is halted, deactivate the /HALT pin and
+     * increment the program counter by 1.
+     */
+    void unhalt();
 
     /**
      * IN helper.
@@ -630,14 +772,14 @@ private:
     uptr_t<Monitor>  _monitor{};
     bool             _IFF1{};
     bool             _IFF2{};
-    InterruptMode    _imode{IMODE_0};
+    IMode            _imode{};
     Registers        _regs{};
     sptr_t<ASpace>   _mmap{};
     IRQPin           _int_pin{};
     IRQPin           _nmi_pin{};
     PullUp           _reset_pin{};
     PullUp           _wait_pin{};
-    bool             _halted{};
+    bool             _halt_pin{};
     OutputPinCb      _halt_cb{};
     bool             _iorq_pin{};
     OutputPinCb      _iorq_cb{};
@@ -645,19 +787,25 @@ private:
     OutputPinCb      _m1_cb{};
     bool             _rfsh_pin{};
     OutputPinCb      _rfsh_cb{};
-    bool             _is_int{};
-    bool             _is_nmi{};
-    Cycle            _tx{Cycle::T1};
+    bool             _int{};
+    bool             _nmi{};
+    Cycle            _tx{};
+    uint8_t          _opcode{};
     std::atomic_bool _break{};
     std::map<addr_t, std::pair<breakpoint_cb_t, void*>> _breakpoints{};
 
-    static const std::array<Instruction, 256> instr_set;
-    static const std::array<Instruction, 256> bit_instr_set;
-    static const std::array<Instruction, 256> ix_instr_set;
-    static const std::array<Instruction, 256> ix_bit_instr_set;
-    static const std::array<Instruction, 256> mi_instr_set;
-    static const std::array<Instruction, 256> iy_instr_set;
-    static const std::array<Instruction, 256> iy_bit_instr_set;
+    static const Instruction main_instr_set[256];
+    static const Instruction bit_instr_set[256];
+    static const Instruction ed_instr_set[256];
+    static const Instruction ix_instr_set[256];
+    static const Instruction iy_instr_set[256];
+    static const Instruction ix_bit_instr_set[256];
+
+    const Instruction*  _instr_set{main_instr_set};     /* Current istruction set lookup table  */
+    Prefix              _iprefix{Prefix::None};         /* Instruction prefix                   */
+    addr_t              _iaddr{};                       /* Instruction address                  */
+    uint8_t             _bit_displ{};                   /* Bit displacement argument            */
+    FetchState          _fstate{FetchState::Init};      /* Fetch state                          */
 
     void take_branch(int8_t rel, bool memptr = true) {
         _regs.PC += rel;
@@ -699,6 +847,18 @@ private:
     }
 
     uint8_t& reg8_code(uint8_t code, uint8_t& noreg) {
+        /*
+         * XXXXXrrr
+         *      |||
+         *      000 = B
+         *      001 = C
+         *      010 = D
+         *      011 = E
+         *      100 = H
+         *      101 = L
+         *      110 = noreg
+         *      111 = A
+         */
         switch (code) {
         case 0x00: return _regs.B;
         case 0x01: return _regs.C;
@@ -712,6 +872,18 @@ private:
     }
 
     uint8_t& reg8_from_opcode(uint8_t op, uint8_t& noreg) {
+        /*
+         * XXrrrXXX
+         *   |||
+         *   000 = B
+         *   001 = C
+         *   010 = D
+         *   011 = E
+         *   100 = H
+         *   101 = L
+         *   110 = noreg
+         *   111 = A
+         */
         constexpr static uint8_t REG8_MASK = 0x07;
         constexpr static uint8_t REG8_SHIFT = 3;
         uint8_t rcode = (op >> REG8_SHIFT) & REG8_MASK;
@@ -725,8 +897,7 @@ private:
 
     uint8_t& reg8_src_from_opcode(uint8_t op, uint8_t& noreg) {
         constexpr static uint8_t REG8_MASK = 0x07;
-        uint8_t rcode = op & REG8_MASK;
-        return reg8_code(rcode, noreg);
+        return reg8_code(op & REG8_MASK, noreg);
     }
 
     uint8_t& reg8_src_from_opcode(uint8_t op) {
@@ -734,30 +905,32 @@ private:
         return reg8_src_from_opcode(op, dummy);
     }
 
-    std::pair<std::function<uint16_t()>, std::function<void(uint16_t)>>
-    reg16_from_opcode(uint8_t op, bool nosp = false) {
+    uint16_t& reg16_from_opcode(uint8_t op, bool nosp = false) {
+        /*
+         * XXddXXXX
+         *   ||
+         *   00 = BC
+         *   01 = DE
+         *   10 = HL
+         *   11 = AF | SP
+         */
         constexpr static uint8_t REG16_MASK = 0x30;
         switch (op & REG16_MASK) {
-        case 0x00:
-            return {{[this]() { return _regs.BC(); }}, {[this](uint16_t val) { _regs.BC(val); }}};
-        case 0x10:
-            return {{[this]() { return _regs.DE(); }}, {[this](uint16_t val) { _regs.DE(val); }}};
-        case 0x20:
-            return {{[this]() { return _regs.HL(); }}, {[this](uint16_t val) { _regs.HL(val); }}};
-        case 0x30:
-        default:
-            if (nosp) {
-                return {{[this]() { return _regs.AF(); }}, {[this](uint16_t val) { _regs.AF(val); }}};
-            } else {
-                return {{[this]() { return _regs.SP; }}, {[this](uint16_t val) { _regs.SP = val; }}};
-            }
+        case 0x00: return _regs.BC;
+        case 0x10: return _regs.DE;
+        case 0x20: return _regs.HL;
+        case 0x30: default: return (nosp ? _regs.AF : _regs.SP);
         }
+    }
+
+    int call(addr_t addr) {
+        push_addr(_regs.PC);
+        _regs.PC = addr;
+        return 0;
     }
 
     bool test_cond_from_opcode(uint8_t op);
     uint8_t bit_from_opcode(uint8_t);
-
-    int call(addr_t addr);
 
     uint8_t add8(uint8_t v1, uint8_t v2, uint8_t carry);
     uint8_t sub8(uint8_t v1, uint8_t v2, bool borrow);
@@ -879,6 +1052,7 @@ private:
     /*
      * Instruction callbacks: Branch/Jump operations.
      */
+    static int i_HALT       (Z80& self, uint8_t op, addr_t arg);
     static int i_NOP        (Z80& self, uint8_t op, addr_t arg);
     static int i_DJNZ       (Z80& self, uint8_t op, addr_t arg);
     static int i_JR         (Z80& self, uint8_t op, addr_t arg);
@@ -904,13 +1078,13 @@ private:
     /*
      * Instruction callbacks: Flags.
      */
-    static int i_HALT       (Z80& self, uint8_t op, addr_t arg);
     static int i_DI         (Z80& self, uint8_t op, addr_t arg);
     static int i_EI         (Z80& self, uint8_t op, addr_t arg);
 
     /*
      * Bit Instructions (CB).
      */
+    static int i_bit        (Z80& self, uint8_t op, addr_t arg);
     static int i_bit_sr     (Z80& self, uint8_t op, addr_t arg);
     static int i_bit_b      (Z80& self, uint8_t op, addr_t arg);
 

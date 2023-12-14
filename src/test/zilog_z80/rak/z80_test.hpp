@@ -22,9 +22,9 @@
 #include <string>
 
 #include "clock.hpp"
+#include "ram.hpp"
+#include "rom.hpp"
 #include "zilog_z80.hpp"
-#include "device_ram.hpp"
-#include "device_rom.hpp"
 
 #include "z80_test_aspace.hpp"
 
@@ -42,6 +42,10 @@ public:
     Z80Test(const std::string& fname);
 
     void run(bool autostart);
+
+    sptr_t<Z80>& cpu() {
+        return _cpu;
+    }
 
 private:
     sptr_t<Clock>         _clk{};

@@ -27,7 +27,7 @@ CXXSRCS=	z80_test.cpp \
 
 EXTRA_DEPS+=	${ROOT}/src/core/libcaio_core.a
 
-LDADD+=		${EXTRA_DEPS}
+LDADD=		${EXTRA_DEPS}
 
 # Do not change order
 TESTS=		z80docflags.out \
@@ -39,22 +39,12 @@ TESTS=		z80docflags.out \
 
 # XXX		z80ccfscr.out \
 
-CLEANFILES+=	${BIN}
-
 .PHONY: all clean debug install test
 
-all: ${BIN}
-
-debug:
-	${MAKE} ${MAKEARGS} DEBUG=yes all
+include ${ROOT}/mk/bin.mk
 
 test: ${BIN}
 	${BIN} -b ${TESTS}
 
 install:
-
-include ${ROOT}/mk/obj.mk
-
-${BIN}: ${OBJS} ${LIB} ${EXTRA_DEPS}
-	${LD} ${LDFLAGS} -o $@ $^ ${LDADD}
 

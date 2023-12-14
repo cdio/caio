@@ -22,41 +22,63 @@
 namespace caio {
 namespace zilog {
 
-int Z80::i_NOP(Z80& self, uint8_t op, addr_t arg)
+int Z80::i_HALT(Z80& self, uint8_t, addr_t)
 {
+    /*
+     * HALT         - 76
+     */
+    if (self._halt_pin) {
+        /*
+         * The CPU is already halted but the PC points to the
+         * next instruction: Make it point to the HALT opcode.
+         */
+        --self._regs.PC;
+    } else {
+        self.halt();
+    }
+    return 0;
+}
+
+int Z80::i_NOP(Z80&, uint8_t, addr_t)
+{
+    /*
+     * NOP          - 00
+     */
     return 0;
 }
 
 int Z80::i_DJNZ(Z80& self, uint8_t op, addr_t arg)
 {
     /*
+     * DJNZ $rel    - 10
+     *
      * B = B - 1
-     * If B = 0, continue
-     * If B !- 0, PC = PC + arg
+     * If B != 0: PC = PC + arg
      */
     --self._regs.B;
-    if (self._regs.B == 0) {
-        return 0x00020008;  /* 2 M cycles, 8 T states */
+    if (self._regs.B != 0) {
+        self.take_branch(arg);
+        return 0;
     }
-
-    self.take_branch(static_cast<int8_t>(arg & 0xFF));
-    return 0;
+    return 0x00020008;  /* 2 M cycles, 8 T states */
 }
 
 int Z80::i_JR(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * JR $rel
+     * JR $rel      - 18
      */
-    self._regs.memptr = arg;
-    self.take_branch(static_cast<int8_t>(arg & 0xFF));
+    self.take_branch(arg);
     return 0;
 }
 
 int Z80::i_JR_NZ(Z80& self, uint8_t op, addr_t arg)
 {
+    /*
+     * JR NZ, $rel  - 20
+     */
     if (!self.test_Z()) {
-        self.take_branch(static_cast<int8_t>(arg & 0xFF));
+        self.take_branch(arg);
         return 0;
     }
     return 0x00020007;
@@ -64,8 +86,11 @@ int Z80::i_JR_NZ(Z80& self, uint8_t op, addr_t arg)
 
 int Z80::i_JR_Z(Z80& self, uint8_t op, addr_t arg)
 {
+    /*
+     * JR Z, $rel   - 28
+     */
     if (self.test_Z()) {
-        self.take_branch(static_cast<int8_t>(arg & 0xFF));
+        self.take_branch(arg);
         return 0;
     }
     return 0x00020007;
@@ -73,8 +98,11 @@ int Z80::i_JR_Z(Z80& self, uint8_t op, addr_t arg)
 
 int Z80::i_JR_NC(Z80& self, uint8_t op, addr_t arg)
 {
+    /*
+     * JR NC, $rel  - 30
+     */
     if (!self.test_C()) {
-        self.take_branch(static_cast<int8_t>(arg & 0xFF));
+        self.take_branch(arg);
         return 0;
     }
     return 0x00020007;
@@ -82,8 +110,11 @@ int Z80::i_JR_NC(Z80& self, uint8_t op, addr_t arg)
 
 int Z80::i_JR_C(Z80& self, uint8_t op, addr_t arg)
 {
+    /*
+     * JR C, $rel   - 38
+     */
     if (self.test_C()) {
-        self.take_branch(static_cast<uint8_t>(arg & 0xFF));
+        self.take_branch(arg);
         return 0;
     }
     return 0x00020007;
@@ -91,6 +122,18 @@ int Z80::i_JR_C(Z80& self, uint8_t op, addr_t arg)
 
 bool Z80::test_cond_from_opcode(uint8_t op)
 {
+    /*
+     * XXcccXXX
+     *   |||
+     *   000 = NZ  (Non Zero)
+     *   001 =  Z  (Zero)
+     *   010 = NC  (No Carry)
+     *   011 =  C  (Carry)
+     *   100 = PO  (Parity Odd)
+     *   101 = PE  (Parity Even)
+     *   110 = P   (sign positive)
+     *   111 = M   (sign negative)
+     */
     constexpr static uint8_t COND_MASK = 0x38;
     switch (op & COND_MASK) {
     case 0x00:  /* NZ */
@@ -123,7 +166,7 @@ bool Z80::test_cond_from_opcode(uint8_t op)
 int Z80::i_RET(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * RET
+     * RET          - C9
      */
     self._regs.PC = self.pop_addr();
     self._regs.memptr = self._regs.PC;
@@ -141,10 +184,22 @@ int Z80::i_RET_cc(Z80& self, uint8_t op, addr_t arg)
      * RET PE
      * RET P
      * RET M
+     *
+     * 11ccc000
+     *   |||
+     *   000 = NZ  (Non Zero)
+     *   001 =  Z  (Zero)
+     *   010 = NC  (No Carry)
+     *   011 =  C  (Carry)
+     *   100 = PO  (Parity Odd)
+     *   101 = PE  (Parity Even)
+     *   110 = P   (sign positive)
+     *   111 = M   (sign negative)
      */
     bool cond = self.test_cond_from_opcode(op);
     if (cond) {
         self._regs.PC = self.pop_addr();
+        self._regs.memptr = self._regs.PC;
         return 0;
     }
 
@@ -153,8 +208,11 @@ int Z80::i_RET_cc(Z80& self, uint8_t op, addr_t arg)
 
 int Z80::i_JP_nn(Z80& self, uint8_t op, addr_t arg)
 {
-    self._regs.PC = arg;
+    /*
+     * JP nn        - C3
+     */
     self._regs.memptr = arg;
+    self._regs.PC = arg;
     return 0;
 }
 
@@ -169,6 +227,17 @@ int Z80::i_JP_cc_nn(Z80& self, uint8_t op, addr_t arg)
      * JP PE nn
      * JP P  nn
      * JP M  nn
+     *
+     * 11ccc010 LLLLLLLL HHHHHHHH
+     *   |||
+     *   000 = NZ  (Non Zero)
+     *   001 =  Z  (Zero)
+     *   010 = NC  (No Carry)
+     *   011 =  C  (Carry)
+     *   100 = PO  (Parity Odd)
+     *   101 = PE  (Parity Even)
+     *   110 = P   (sign positive)
+     *   111 = M   (sign negative)
      */
     self._regs.memptr = arg;
     bool cond = self.test_cond_from_opcode(op);
@@ -181,19 +250,18 @@ int Z80::i_JP_cc_nn(Z80& self, uint8_t op, addr_t arg)
 
 int Z80::i_JP_HL(Z80& self, uint8_t op, addr_t arg)
 {
-    self._regs.PC = self._regs.HL();
-    return 0;
-}
-
-inline int Z80::call(addr_t addr)
-{
-    push_addr(_regs.PC);
-    _regs.PC = addr;
+    /*
+     * JP HL        - E9
+     */
+    self._regs.PC = self._regs.HL;
     return 0;
 }
 
 int Z80::i_CALL_nn(Z80& self, uint8_t op, addr_t arg)
 {
+    /*
+     * CALL nn          - CD
+     */
     self._regs.memptr = arg;
     return self.call(arg);
 }
@@ -209,6 +277,17 @@ int Z80::i_CALL_cc_nn(Z80& self, uint8_t op, addr_t addr)
      * CALL PE nn
      * CALL P  nn
      * CALL M  nn
+     *
+     * 11ccc100 LLLLLLLL HHHHHHHH
+     *   |||
+     *   000 = NZ  (Non Zero)
+     *   001 =  Z  (Zero)
+     *   010 = NC  (No Carry)
+     *   011 =  C  (Carry)
+     *   100 = PO  (Parity Odd)
+     *   101 = PE  (Parity Even)
+     *   110 = P   (sign positive)
+     *   111 = M   (sign negative)
      */
     self._regs.memptr = addr;
     bool cond = self.test_cond_from_opcode(op);
@@ -223,21 +302,20 @@ int Z80::i_CALL_cc_nn(Z80& self, uint8_t op, addr_t addr)
 int Z80::i_RST_p(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * RST 00
-     * RST 08
-     * RST 10
-     * RST 18
-     * RST 20
-     * RST 28
-     * RST 30
-     * RST 38
+     * RST $00      - C7
+     * RST $08      - CF
+     * RST $10      - D7
+     * RST $18      - DF
+     * RST $20      - E7
+     * RST $28      - EF
+     * RST $30      - F7
+     * RST $38      - FF
+     *
+     * RST $n       - 11nnn111
      */
     constexpr static uint8_t RST_ADDR_MASK = 0x38;
     addr_t addr = op & RST_ADDR_MASK;
-    self.push_addr(self._regs.PC + 1);
-    self._regs.PC = addr;
-    self._regs.memptr = addr;
-    return 0;
+    return i_CALL_nn(self, op, addr);
 }
 
 }

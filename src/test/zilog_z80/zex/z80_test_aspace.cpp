@@ -87,7 +87,7 @@ void Z80TestASpace::write(addr_t addr, uint8_t value)
             /*
              * CPM BDOS call replaced by out (0), A
              */
-            bdos(_cpu->regs().C, _cpu->regs().DE());
+            bdos(_cpu->regs().C, _cpu->regs().DE);
             break;
 
         default:

@@ -19,8 +19,12 @@
 #include "z80_test.hpp"
 
 #include <unistd.h>
+
+#include <algorithm>
+#include <csignal>
 #include <cstdio>
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 #include "logger.hpp"
@@ -33,12 +37,12 @@ namespace test {
 
 Z80Test::Z80Test(const std::string &fname)
     : _clk{std::make_shared<Clock>("clk", CLOCK_FREQ, 0)},
-      _ram{std::make_shared<DeviceRAM>("ram", 65536)},
-      _rom{std::make_shared<DeviceROM>(fname, "rom")},
+      _ram{std::make_shared<RAM>(65536, "ram")},
+      _rom{std::make_shared<ROM>(fname, 0, "rom")},
       _cpu{std::make_shared<Z80>()},
       _mmap{std::make_shared<Z80TestASpace>(_cpu, _ram, _rom, std::cout)}
 {
-    _ram->copy(*_rom, 0x100);
+    std::copy(_rom->begin(), _rom->end(), _ram->begin() + 0x100);
     _cpu->init(_mmap);
     _clk->add(_cpu);
 }
@@ -71,10 +75,10 @@ void Z80Test::run(bool autostart)
             /* NOTREACHED */
         }
 
-        _cpu->init_monitor(fds[0], STDOUT_FILENO);
+        _cpu->init_monitor(fds[0], STDOUT_FILENO, {}, {});
 
     } else {
-        _cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO);
+        _cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO, {}, {});
     }
 #endif
 
@@ -86,10 +90,21 @@ void Z80Test::run(bool autostart)
 }
 }
 
+static caio::uptr_t<caio::test::Z80Test> test{};
+
+void signal_handler(int signo)
+{
+    if (signo == SIGINT && test) {
+        test->cpu()->ebreak();
+    }
+}
+
 int main(int argc, char **argv)
 {
     bool autostart = false;
     int pos = 1;
+
+    std::signal(SIGINT, signal_handler);
 
     if (argc > 1 && argv[1] == std::string{"-b"}) {
         /*
@@ -102,8 +117,8 @@ int main(int argc, char **argv)
     try {
         while (pos < argc) {
             std::cout << "==> Running test: " << argv[pos] << "\n";
-            caio::test::Z80Test test{argv[pos]};
-            test.run(autostart);
+            test = std::make_unique<caio::test::Z80Test>(argv[pos]);
+            test->run(autostart);
             ++pos;
         }
     } catch (const std::exception &err) {

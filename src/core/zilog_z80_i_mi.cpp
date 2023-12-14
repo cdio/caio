@@ -22,284 +22,279 @@
 namespace caio {
 namespace zilog {
 
-/*
- * Most of the information in the following tables come from:
- * - Z80 CPU User Manual UM008011-0816.
- * - https://clrhome.org/table/
- */
-const std::array<Z80::Instruction, 256> Z80::mi_instr_set{{
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 00 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 01 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 02 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 03 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 04 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 05 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 06 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 07 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 08 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 09 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 0A */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 0B */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 0C */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 0D */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 0E */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 0F */
+const Z80::Instruction Z80::ed_instr_set[256] = {
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 00 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 01 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 02 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 03 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 04 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 05 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 06 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 07 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 08 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 09 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 0A */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 0B */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 0C */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 0D */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 0E */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 0F */
 
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 10 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 11 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 12 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 13 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 14 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 15 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 16 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 17 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 18 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 19 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 1A */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 1B */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 1C */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 1D */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 1E */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 1F */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 10 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 11 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 12 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 13 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 14 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 15 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 16 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 17 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 18 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 19 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 1A */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 1B */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 1C */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 1D */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 1E */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 1F */
 
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 20 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 21 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 22 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 23 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 24 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 25 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 26 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 27 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 28 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 29 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 2A */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 2B */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 2C */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 2D */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 2E */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 2F */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 20 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 21 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 22 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 23 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 24 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 25 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 26 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 27 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 28 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 29 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 2A */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 2B */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 2C */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 2D */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 2E */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 2F */
 
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 30 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 31 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 32 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 33 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 34 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 35 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 36 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 37 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 38 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 39 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 3A */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 3B */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 3C */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 3D */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 3E */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 3F */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 30 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 31 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 32 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 33 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 34 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 35 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 36 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 37 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 38 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 39 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 3A */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 3B */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 3C */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 3D */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 3E */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 3F */
 
-    { "IN B, (C)",      Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 40 */
-    { "OUT (C), B",     Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 41 */
-    { "SBC HL, BC",     Z80::i_mi_adcsbc,   ArgType::None,  15, 2   },  /* ED 42 */
-    { "LD ($^), BC",    Z80::i_mi_LD_m_rr,  ArgType::A16,   20, 4   },  /* ED 43 */
-    { "NEG",            Z80::i_mi_NEG,      ArgType::None,  8,  2   },  /* ED 44 */
-    { "RETN",           Z80::i_mi_RETN,     ArgType::None,  14, 2   },  /* ED 45 */
-    { "IM 0",           Z80::i_mi_IM_x,     ArgType::None,  8,  2   },  /* ED 46 */
-    { "LD I, A",        Z80::i_mi_LD_x_A,   ArgType::None,  9,  2   },  /* ED 47 */
-    { "IN C, (C)",      Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 48 */
-    { "OUT (C), C",     Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 49 */
-    { "ADC HL, BC",     Z80::i_mi_adcsbc,   ArgType::None,  15, 2   },  /* ED 4A */
-    { "LD BC, ($^)",    Z80::i_mi_LD_rr_m,  ArgType::A16,   20, 4   },  /* ED 4B */
-    { "NEG",            Z80::i_mi_NEG,      ArgType::None,  8,  2   },  /* ED 4C */ /* Undocumented */
-    { "RETI",           Z80::i_mi_RETI,     ArgType::None,  14, 2   },  /* ED 4D */
-    { "IM 0",           Z80::i_mi_IM_x,     ArgType::None,  8,  2   },  /* ED 4E */ /* Undocumented */
-    { "LD R, A",        Z80::i_mi_LD_x_A,   ArgType::None,  9,  2   },  /* ED 4F */
+    { "IN B, (C)",      Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 40 */
+    { "OUT (C), B",     Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 41 */
+    { "SBC HL, BC",     Z80::i_mi_adcsbc,   Z80::ArgType::None,  11, 1   },  /* ED 42 */
+    { "LD ($^), BC",    Z80::i_mi_LD_m_rr,  Z80::ArgType::A16,   16, 3   },  /* ED 43 */
+    { "NEG",            Z80::i_mi_NEG,      Z80::ArgType::None,  4,  1   },  /* ED 44 */
+    { "RETN",           Z80::i_mi_RETN,     Z80::ArgType::None,  10, 1   },  /* ED 45 */
+    { "IM 0",           Z80::i_mi_IM_x,     Z80::ArgType::None,  4,  1   },  /* ED 46 */
+    { "LD I, A",        Z80::i_mi_LD_x_A,   Z80::ArgType::None,  5,  1   },  /* ED 47 */
+    { "IN C, (C)",      Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 48 */
+    { "OUT (C), C",     Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 49 */
+    { "ADC HL, BC",     Z80::i_mi_adcsbc,   Z80::ArgType::None,  11, 1   },  /* ED 4A */
+    { "LD BC, ($^)",    Z80::i_mi_LD_rr_m,  Z80::ArgType::A16,   16, 3   },  /* ED 4B */
+    { "NEG",            Z80::i_mi_NEG,      Z80::ArgType::None,  4,  1   },  /* ED 4C */
+    { "RETI",           Z80::i_mi_RETI,     Z80::ArgType::None,  10, 1   },  /* ED 4D */
+    { "IM 0",           Z80::i_mi_IM_x,     Z80::ArgType::None,  4,  1   },  /* ED 4E */
+    { "LD R, A",        Z80::i_mi_LD_x_A,   Z80::ArgType::None,  5,  1   },  /* ED 4F */
 
-    { "IN D, (C)",      Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 50 */
-    { "OUT (C), D",     Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 51 */
-    { "SBC HL, DE",     Z80::i_mi_adcsbc,   ArgType::None,  15, 2   },  /* ED 52 */
-    { "LD ($^), DE",    Z80::i_mi_LD_m_rr,  ArgType::A16,   20, 4   },  /* ED 53 */
-    { "NEG",            Z80::i_mi_NEG,      ArgType::None,  8,  2   },  /* ED 54 */ /* Undocumented */
-    { "RETN",           Z80::i_mi_RETN,     ArgType::None,  14, 2   },  /* ED 55 */ /* Undocumented */
-    { "IM 1",           Z80::i_mi_IM_x,     ArgType::None,  8,  2   },  /* ED 56 */
-    { "LD A, I",        Z80::i_mi_LD_A_x,   ArgType::None,  9,  2   },  /* ED 57 */
-    { "IN E, (C)",      Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 58 */
-    { "OUT (C), E",     Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 59 */
-    { "ADC HL, DE",     Z80::i_mi_adcsbc,   ArgType::None,  15, 2   },  /* ED 5A */
-    { "LD DE, ($^)",    Z80::i_mi_LD_rr_m,  ArgType::A16,   20, 4   },  /* ED 5B */
-    { "NEG",            Z80::i_mi_NEG,      ArgType::None,  8,  2   },  /* ED 5C */ /* Undocumented */
-    { "RETN",           Z80::i_mi_RETN,     ArgType::None,  14, 2   },  /* ED 5D */ /* Undocumented */
-    { "IM 2",           Z80::i_mi_IM_x,     ArgType::None,  8,  2   },  /* ED 5E */
-    { "LD A, R",        Z80::i_mi_LD_A_x,   ArgType::None,  9,  2   },  /* ED 5F */
+    { "IN D, (C)",      Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 50 */
+    { "OUT (C), D",     Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 51 */
+    { "SBC HL, DE",     Z80::i_mi_adcsbc,   Z80::ArgType::None,  11, 1   },  /* ED 52 */
+    { "LD ($^), DE",    Z80::i_mi_LD_m_rr,  Z80::ArgType::A16,   16, 3   },  /* ED 53 */
+    { "NEG",            Z80::i_mi_NEG,      Z80::ArgType::None,  4,  1   },  /* ED 54 */
+    { "RETN",           Z80::i_mi_RETN,     Z80::ArgType::None,  14, 1   },  /* ED 55 */
+    { "IM 1",           Z80::i_mi_IM_x,     Z80::ArgType::None,  8,  1   },  /* ED 56 */
+    { "LD A, I",        Z80::i_mi_LD_A_x,   Z80::ArgType::None,  9,  1   },  /* ED 57 */
+    { "IN E, (C)",      Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 58 */
+    { "OUT (C), E",     Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 59 */
+    { "ADC HL, DE",     Z80::i_mi_adcsbc,   Z80::ArgType::None,  11, 1   },  /* ED 5A */
+    { "LD DE, ($^)",    Z80::i_mi_LD_rr_m,  Z80::ArgType::A16,   16, 3   },  /* ED 5B */
+    { "NEG",            Z80::i_mi_NEG,      Z80::ArgType::None,  4,  1   },  /* ED 5C */
+    { "RETN",           Z80::i_mi_RETN,     Z80::ArgType::None,  10, 1   },  /* ED 5D */
+    { "IM 2",           Z80::i_mi_IM_x,     Z80::ArgType::None,  4,  1   },  /* ED 5E */
+    { "LD A, R",        Z80::i_mi_LD_A_x,   Z80::ArgType::None,  5,  1   },  /* ED 5F */
 
-    { "IN H, (C)",      Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 60 */
-    { "OUT (C), H",     Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 61 */
-    { "SBC HL, HL",     Z80::i_mi_adcsbc,   ArgType::None,  15, 2   },  /* ED 62 */
-    { "LD ($^), HL",    Z80::i_mi_LD_m_rr,  ArgType::A16,   20, 4   },  /* ED 63 */ /* Undocumented */
-    { "NEG",            Z80::i_mi_NEG,      ArgType::None,  8,  2   },  /* ED 64 */ /* Undocumented */
-    { "RETN",           Z80::i_mi_RETN,     ArgType::None,  14, 2   },  /* ED 65 */ /* Undocumented */
-    { "IM 0",           Z80::i_mi_IM_x,     ArgType::None,  8,  2   },  /* ED 66 */ /* Undocumented */
-    { "RRD",            Z80::i_mi_RRD,      ArgType::None,  18, 2   },  /* ED 67 */
-    { "IN L, (C)",      Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 68 */
-    { "OUT (C), L",     Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 69 */
-    { "ADC HL, HL",     Z80::i_mi_adcsbc,   ArgType::None,  15, 2   },  /* ED 6A */
-    { "LD HL, ($^)",    Z80::i_mi_LD_rr_m,  ArgType::A16,   20, 4   },  /* ED 6B */ /* Undocumented */
-    { "NEG",            Z80::i_mi_NEG,      ArgType::None,  8,  2   },  /* ED 6C */ /* Undocumented */
-    { "RETN",           Z80::i_mi_RETN,     ArgType::None,  14, 2   },  /* ED 6D */ /* Undocumented */
-    { "IM 0",           Z80::i_mi_IM_x,     ArgType::None,  8,  2   },  /* ED 6E */ /* Undocumented */
-    { "RLD",            Z80::i_mi_RLD,      ArgType::None,  18, 2   },  /* ED 6F */
+    { "IN H, (C)",      Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 60 */
+    { "OUT (C), H",     Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 61 */
+    { "SBC HL, HL",     Z80::i_mi_adcsbc,   Z80::ArgType::None,  11, 1   },  /* ED 62 */
+    { "LD ($^), HL",    Z80::i_mi_LD_m_rr,  Z80::ArgType::A16,   16, 3   },  /* ED 63 */
+    { "NEG",            Z80::i_mi_NEG,      Z80::ArgType::None,  4,  1   },  /* ED 64 */
+    { "RETN",           Z80::i_mi_RETN,     Z80::ArgType::None,  10, 1   },  /* ED 65 */
+    { "IM 0",           Z80::i_mi_IM_x,     Z80::ArgType::None,  4,  1   },  /* ED 66 */
+    { "RRD",            Z80::i_mi_RRD,      Z80::ArgType::None,  14, 1   },  /* ED 67 */
+    { "IN L, (C)",      Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 68 */
+    { "OUT (C), L",     Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 69 */
+    { "ADC HL, HL",     Z80::i_mi_adcsbc,   Z80::ArgType::None,  11, 1   },  /* ED 6A */
+    { "LD HL, ($^)",    Z80::i_mi_LD_rr_m,  Z80::ArgType::A16,   16, 3   },  /* ED 6B */
+    { "NEG",            Z80::i_mi_NEG,      Z80::ArgType::None,  4,  1   },  /* ED 6C */
+    { "RETN",           Z80::i_mi_RETN,     Z80::ArgType::None,  10, 1   },  /* ED 6D */
+    { "IM 0",           Z80::i_mi_IM_x,     Z80::ArgType::None,  4,  1   },  /* ED 6E */
+    { "RLD",            Z80::i_mi_RLD,      Z80::ArgType::None,  14, 1   },  /* ED 6F */
 
-    { "IN (C)",         Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 70 */ /* Undocumented */
-    { "OUT (C), 0",     Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 71 */ /* Undocumented */
-    { "SBC HL, SP",     Z80::i_mi_adcsbc,   ArgType::None,  15, 2   },  /* ED 72 */
-    { "LD ($^), SP",    Z80::i_mi_LD_m_rr,  ArgType::A16,   20, 4   },  /* ED 73 */
-    { "NEG",            Z80::i_mi_NEG,      ArgType::None,  8,  2   },  /* ED 74 */ /* Undocumented */
-    { "RETN",           Z80::i_mi_RETN,     ArgType::None,  14, 2   },  /* ED 75 */ /* Undocumented */
-    { "IM 1",           Z80::i_mi_IM_x,     ArgType::None,  8,  2   },  /* ED 76 */ /* Undocumented */
-    { "NOP",            Z80::i_NOP,         ArgType::None,  4,  2   },  /* ED 77 */ /* Undocumented */
-    { "IN A, (C)",      Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 78 */
-    { "OUT (C), A",     Z80::i_mi_io,       ArgType::None,  12, 2   },  /* ED 79 */
-    { "ADC HL, SP",     Z80::i_mi_adcsbc,   ArgType::None,  15, 2   },  /* ED 7A */
-    { "LD SP, ($^)",    Z80::i_mi_LD_rr_m,  ArgType::A16,   20, 4   },  /* ED 7B */
-    { "NEG",            Z80::i_mi_NEG,      ArgType::None,  8,  2   },  /* ED 7C */ /* Undocumented */
-    { "RETN",           Z80::i_mi_RETN,     ArgType::None,  14, 2   },  /* ED 7D */ /* Undocumented */
-    { "IM 2",           Z80::i_mi_IM_x,     ArgType::None,  8,  2   },  /* ED 7E */ /* Undocumented */
-    { "NOP",            Z80::i_NOP,         ArgType::None,  4,  2   },  /* ED 7F */ /* Undocumented */
+    { "IN (C)",         Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 70 */
+    { "OUT (C), 0",     Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 71 */
+    { "SBC HL, SP",     Z80::i_mi_adcsbc,   Z80::ArgType::None,  11, 1   },  /* ED 72 */
+    { "LD ($^), SP",    Z80::i_mi_LD_m_rr,  Z80::ArgType::A16,   16, 3   },  /* ED 73 */
+    { "NEG",            Z80::i_mi_NEG,      Z80::ArgType::None,  4,  1   },  /* ED 74 */
+    { "RETN",           Z80::i_mi_RETN,     Z80::ArgType::None,  10, 1   },  /* ED 75 */
+    { "IM 1",           Z80::i_mi_IM_x,     Z80::ArgType::None,  4,  1   },  /* ED 76 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 77 */
+    { "IN A, (C)",      Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 78 */
+    { "OUT (C), A",     Z80::i_mi_io,       Z80::ArgType::None,  8,  1   },  /* ED 79 */
+    { "ADC HL, SP",     Z80::i_mi_adcsbc,   Z80::ArgType::None,  11, 1   },  /* ED 7A */
+    { "LD SP, ($^)",    Z80::i_mi_LD_rr_m,  Z80::ArgType::A16,   16, 3   },  /* ED 7B */
+    { "NEG",            Z80::i_mi_NEG,      Z80::ArgType::None,  4,  1   },  /* ED 7C */
+    { "RETN",           Z80::i_mi_RETN,     Z80::ArgType::None,  10, 1   },  /* ED 7D */
+    { "IM 2",           Z80::i_mi_IM_x,     Z80::ArgType::None,  4,  1   },  /* ED 7E */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 7F */
 
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 80 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 81 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 82 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 83 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 84 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 85 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 86 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 87 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 88 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 89 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 8A */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 8B */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 8C */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 8D */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 8E */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 8F */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 80 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 81 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 82 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 83 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 84 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 85 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 86 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 87 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 88 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 89 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 8A */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 8B */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 8C */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 8D */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 8E */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 8F */
 
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 90 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 91 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 92 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 93 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 94 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 95 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 96 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 97 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 98 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 99 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 9A */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 9B */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 9C */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 9D */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 9E */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED 9F */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 90 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 91 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 92 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 93 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 94 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 95 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 96 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 97 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 98 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 99 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 9A */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 9B */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 9C */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 9D */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 9E */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED 9F */
 
-    { "LDI",            Z80::i_mi_copy,     ArgType::None,  16, 2   },  /* ED A0 */
-    { "CPI",            Z80::i_mi_cmp,      ArgType::None,  16, 2   },  /* ED A1 */
-    { "INI",            Z80::i_mi_in,       ArgType::None,  16, 2   },  /* ED A2 */
-    { "OUTI",           Z80::i_mi_out,      ArgType::None,  16, 2   },  /* ED A3 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED A4 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED A5 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED A6 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED A7 */
-    { "LDD",            Z80::i_mi_copy,     ArgType::None,  16, 2   },  /* ED A8 */
-    { "CPD",            Z80::i_mi_cmp,      ArgType::None,  16, 2   },  /* ED A9 */
-    { "IND",            Z80::i_mi_in,       ArgType::None,  16, 2   },  /* ED AA */
-    { "OUTD",           Z80::i_mi_out,      ArgType::None,  16, 2   },  /* ED AB */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED AC */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED AD */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED AE */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED AF */
+    { "LDI",            Z80::i_mi_copy,     Z80::ArgType::None,  12, 1   },  /* ED A0 */
+    { "CPI",            Z80::i_mi_cmp,      Z80::ArgType::None,  12, 1   },  /* ED A1 */
+    { "INI",            Z80::i_mi_in,       Z80::ArgType::None,  12, 1   },  /* ED A2 */
+    { "OUTI",           Z80::i_mi_out,      Z80::ArgType::None,  12, 1   },  /* ED A3 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED A4 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED A5 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED A6 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED A7 */
+    { "LDD",            Z80::i_mi_copy,     Z80::ArgType::None,  12, 1   },  /* ED A8 */
+    { "CPD",            Z80::i_mi_cmp,      Z80::ArgType::None,  12, 1   },  /* ED A9 */
+    { "IND",            Z80::i_mi_in,       Z80::ArgType::None,  12, 1   },  /* ED AA */
+    { "OUTD",           Z80::i_mi_out,      Z80::ArgType::None,  12, 1   },  /* ED AB */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED AC */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED AD */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED AE */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED AF */
 
-    { "LDIR",           Z80::i_mi_copy,     ArgType::None,  21, 2   },  /* ED B0 */
-    { "CPIR",           Z80::i_mi_cmp,      ArgType::None,  21, 2   },  /* ED B1 */
-    { "INIR",           Z80::i_mi_in,       ArgType::None,  21, 2   },  /* ED B2 */
-    { "OTIR",           Z80::i_mi_out,      ArgType::None,  21, 2   },  /* ED B3 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED B4 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED B5 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED B6 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED B7 */
-    { "LDDR",           Z80::i_mi_copy,     ArgType::None,  21, 2   },  /* ED B8 */
-    { "CPDR",           Z80::i_mi_cmp,      ArgType::None,  21, 2   },  /* ED B9 */
-    { "INDR",           Z80::i_mi_in,       ArgType::None,  21, 2   },  /* ED BA */
-    { "OTDR",           Z80::i_mi_out,      ArgType::None,  21, 2   },  /* ED BB */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED BC */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED BD */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED BE */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED BF */
+    { "LDIR",           Z80::i_mi_copy,     Z80::ArgType::None,  17, 1   },  /* ED B0 */
+    { "CPIR",           Z80::i_mi_cmp,      Z80::ArgType::None,  17, 1   },  /* ED B1 */
+    { "INIR",           Z80::i_mi_in,       Z80::ArgType::None,  17, 1   },  /* ED B2 */
+    { "OTIR",           Z80::i_mi_out,      Z80::ArgType::None,  17, 1   },  /* ED B3 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED B4 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED B5 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED B6 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED B7 */
+    { "LDDR",           Z80::i_mi_copy,     Z80::ArgType::None,  17, 1   },  /* ED B8 */
+    { "CPDR",           Z80::i_mi_cmp,      Z80::ArgType::None,  17, 1   },  /* ED B9 */
+    { "INDR",           Z80::i_mi_in,       Z80::ArgType::None,  17, 1   },  /* ED BA */
+    { "OTDR",           Z80::i_mi_out,      Z80::ArgType::None,  17, 1   },  /* ED BB */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED BC */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED BD */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED BE */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED BF */
 
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED C0 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED C1 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED C2 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED C3 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED C4 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED C5 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED C6 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED C7 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED C8 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED C9 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED CA */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED CB */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED CC */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED CD */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED CE */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED CF */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED C0 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED C1 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED C2 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED C3 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED C4 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED C5 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED C6 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED C7 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED C8 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED C9 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED CA */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED CB */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED CC */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED CD */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED CE */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED CF */
 
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED D0 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED D1 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED D2 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED D3 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED D4 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED D5 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED D6 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED D7 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED D8 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED D9 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED DA */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED DB */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED DC */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED DD */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED DE */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED DF */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED D0 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED D1 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED D2 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED D3 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED D4 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED D5 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED D6 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED D7 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED D8 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED D9 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED DA */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED DB */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED DC */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED DD */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED DE */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED DF */
 
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED E0 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED E1 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED E2 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED E3 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED E4 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED E5 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED E6 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED E7 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED E8 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED E9 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED EA */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED EB */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED EC */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED ED */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED EE */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED EF */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED E0 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED E1 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED E2 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED E3 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED E4 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED E5 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED E6 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED E7 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED E8 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED E9 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED EA */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED EB */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED EC */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED ED */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED EE */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED EF */
 
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED F0 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED F1 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED F2 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED F3 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED F4 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED F5 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED F6 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED F7 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED F8 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED F9 */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED FA */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED FB */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED FC */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED FD */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED FE */
-    { "",               Z80::i_NOP,         ArgType::None,  8,  2   },  /* ED FF */
-}};
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED F0 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED F1 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED F2 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED F3 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED F4 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED F5 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED F6 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED F7 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED F8 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED F9 */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED FA */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED FB */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED FC */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED FD */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED FE */
+    { "NOP",            Z80::i_NOP,         Z80::ArgType::None,  4,  1   },  /* ED FF */
+};
 
 int Z80::i_mi_io(Z80& self, uint8_t op, addr_t)
 {
@@ -317,10 +312,10 @@ int Z80::i_mi_io(Z80& self, uint8_t op, addr_t)
      * OUT (C), 0
      *
      * b7 b6 b5 b4 b3 b2 b1 b0
-     * 0  1  r  r  r  0  0  0  => IN  (C), r
+     * 0  1  r  r  r  0  0  0  => IN r, (C)
      * 0  1  r  r  r  0  0  1  => OUT (C), r
      *
-     * rrr = 0x06 => (IN only affect flags, OUT writes 0) - Undocumented
+     * rrr = 0x06 => IN only affect flags, OUT writes 0 - Undocumented
      */
     constexpr static const uint8_t OP_MASK = 0xC7;
     constexpr static const uint8_t IN_OP   = 0x40;
@@ -328,7 +323,8 @@ int Z80::i_mi_io(Z80& self, uint8_t op, addr_t)
 
     uint8_t data{};
     uint8_t& reg = self.reg8_from_opcode(op, data);
-    addr_t port = self._regs.BC();
+    uint16_t prev = static_cast<uint16_t>(reg) << 8;
+    addr_t port = self._regs.BC;
 
     switch (op & OP_MASK) {
     case IN_OP:
@@ -340,22 +336,20 @@ int Z80::i_mi_io(Z80& self, uint8_t op, addr_t)
         self.flag_N(0);
         self.flag_Y(reg & Flags::Y);
         self.flag_X(reg & Flags::X);
-        if (op == 0x78 /* IN A, (C) */) {
-            self._regs.memptr = port + 1;
-        }
         break;
 
     case OUT_OP:
         self.io_out(port, reg);
-        if (op == 0x79 /* OUT (C), A */) {
-            self._regs.memptr = port + 1;
-        }
         break;
 
     default:
-        log.error("Z80: MI: Unrecognised IN/OUT opcode: ED %02X, addr: $04X\n", op, self._regs.PC);
+        prev = self._iaddr;
+        log.error("Z80: MI: Unrecognised IN/OUT opcode: ED %02X, addr: $%04X\n%s\n",
+            op, self._iaddr, self.disass(prev).c_str());
+        return 0;
     }
 
+    self._regs.memptr = port + 1;
     return 0;
 }
 
@@ -385,8 +379,8 @@ void Z80::add16(uint16_t& reg, uint16_t value, bool carry)
     flag_H(hc);
     flag_N(0);
     flag_C(c);
-    flag_Y(reg & (1 << 13));
-    flag_X(reg & (1 << 11));
+    flag_Y(reg & (static_cast<uint16_t>(Flags::Y) << 8));
+    flag_X(reg & (static_cast<uint16_t>(Flags::X) << 8));
 }
 
 void Z80::adc16(uint16_t& reg, uint16_t value)
@@ -450,22 +444,22 @@ int Z80::i_mi_adcsbc(Z80& self, uint8_t op, addr_t arg)
     constexpr static const uint8_t OP_ADC  = 0x4A;
     constexpr static const uint8_t OP_SBC  = 0x42;
 
-    auto [rget, rset] = self.reg16_from_opcode(op);
-    uint16_t result = self._regs.HL();
+    auto src_reg = self.reg16_from_opcode(op);
+    uint16_t result = self._regs.HL;
     self._regs.memptr = result + 1;
 
     switch (op & OP_MASK) {
     case OP_ADC:
-        self.adc16(result, rget());
+        self.adc16(result, src_reg);
         break;
     case OP_SBC:
-        self.sbc16(result, rget());
+        self.sbc16(result, src_reg);
         break;
     default:
         log.error("Z80: MI: Unrecognised ADC/SBC opcode: ED %02X, addr: %04X\n", op, self._regs.PC);
     }
 
-    self._regs.HL(result);
+    self._regs.HL = result;
     return 0;
 }
 
@@ -477,10 +471,9 @@ int Z80::i_mi_LD_m_rr(Z80& self, uint8_t op, addr_t arg)
      * LD (nn), HL
      * LD (nn), SP
      */
-    auto [rget, rset] = self.reg16_from_opcode(op);
-    uint16_t data = rget();
-    self.write_addr(arg, data);
-    self._regs.memptr = data + 1;
+    auto src_reg = self.reg16_from_opcode(op);
+    self.write_addr(arg, src_reg);
+    self._regs.memptr = src_reg + 1;
     return 0;
 }
 
@@ -492,9 +485,9 @@ int Z80::i_mi_LD_rr_m(Z80& self, uint8_t op, addr_t arg)
      * LD HL, (nn)
      * LD SP, (nn)
      */
-    auto [rget, rset] = self.reg16_from_opcode(op);
+    auto& dst_reg = self.reg16_from_opcode(op);
     uint16_t data = self.read_addr(arg);
-    rset(data);
+    dst_reg = data;
     self._regs.memptr = data + 1;
     return 0;
 }
@@ -552,15 +545,15 @@ int Z80::i_mi_IM_x(Z80& self, uint8_t op, addr_t arg)
     case 0x4E:
     case 0x66:
     case 0x6E:
-        self._imode = IMODE_0;
+        self._imode = IMode::M0;
         break;
     case 0x56:
     case 0x76:
-        self._imode = IMODE_1;
+        self._imode = IMode::M1;
         break;
     case 0x5E:
     case 0x7E:
-        self._imode = IMODE_2;
+        self._imode = IMode::M2;
         break;
     default:
         log.error("Z80: MI: Unrecognised MI X opcode: ED %02X, addr: %04X\n", op, self._regs.PC);
@@ -585,8 +578,8 @@ int Z80::i_mi_RETI(Z80& self, uint8_t op, addr_t arg)
 int Z80::i_mi_LD_x_A(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * LD I, A - 47
-     * LD R, A - 4F
+     * LD I, A - ED 47
+     * LD R, A - ED 4F
      */
     uint8_t& reg = (op == 0x47 ? self._regs.I : self._regs.R);
     reg = self._regs.A;
@@ -596,8 +589,8 @@ int Z80::i_mi_LD_x_A(Z80& self, uint8_t op, addr_t arg)
 int Z80::i_mi_LD_A_x(Z80& self, uint8_t op, addr_t arg)
 {
     /*
-     * LD A, I - 57
-     * LD A, R - 5F
+     * LD A, I - ED 57
+     * LD A, R - ED 5F
      * S is set if the I/R Register is negative; otherwise, it is reset.
      * Z is set if the I/R Register is 0; otherwise, it is reset.
      * H is reset.
@@ -642,7 +635,7 @@ int Z80::i_mi_RRD(Z80& self, uint8_t op, addr_t arg)
      * *HL.7654 = A.3210
      * A.3210   = prev *HL.3210
      */
-    addr_t addr = self._regs.HL();
+    addr_t addr = self._regs.HL;
     uint8_t mem = self.read(addr);
     uint8_t tmp = (mem & 0x0F);
     mem = (self._regs.A << 4) | (mem >> 4);
@@ -685,7 +678,7 @@ int Z80::i_mi_RLD(Z80& self, uint8_t op, addr_t arg)
      * (*HL) |= A & 15
      * A = (A & 0xF0) | hi
      */
-    addr_t addr = self._regs.HL();
+    addr_t addr = self._regs.HL;
     uint8_t mem = self.read(addr);
     uint8_t hl_hi = mem >> 4;
     mem = (mem << 4) | (self._regs.A & 0x0F);
@@ -719,30 +712,31 @@ int Z80::i_mi_copy(Z80& self, uint8_t op, addr_t arg)
      */
     constexpr static const uint8_t DEC_OP = 0x08;
     constexpr static const uint8_t REP_OP = 0x10;
+
     int16_t inc = ((op & DEC_OP) == DEC_OP ? -1 : 1);
 
-    uint8_t value = self.read(self._regs.HL());
-    self.write(self._regs.DE(), value);
+    uint8_t value = self.read(self._regs.HL);
+    self.write(self._regs.DE, value);
 
-    self._regs.HL(self._regs.HL() + inc);
-    self._regs.DE(self._regs.DE() + inc);
-    self._regs.BC(self._regs.BC() - 1);
+    self._regs.HL += inc;
+    self._regs.DE += inc;
+    --self._regs.BC;
 
-    self.flag_V(self._regs.BC());
+    self.flag_V(self._regs.BC);
     self.flag_H(0);
     self.flag_N(0);
 
     uint8_t n = self._regs.A + value;
     self.flag_Y(n & 0x02);
-    self.flag_X(n & 0x08);
+    self.flag_X(n & Flags::X);
 
     if (op & REP_OP) {
-        if (self._regs.BC() == 0) {
-            return 0x00040010; /* M4 T16 */
+        if (self._regs.BC == 0) {
+            return 0x00040010;  /* M4 T16 */
         }
 
         self._regs.PC -= 2;
-        self._regs.memptr = self._regs.PC;// + 1; XXX
+        self._regs.memptr = self._regs.PC + 1;
     }
 
     return 0;
@@ -786,25 +780,24 @@ int Z80::i_mi_cmp(Z80& self, uint8_t op, addr_t arg)
 
     bool C = self.test_C();
 
-    uint8_t value = self.read(self._regs.HL());
+    uint8_t value = self.read(self._regs.HL);
     uint8_t result = self.sub8(self._regs.A, value, 0);
 
-    self._regs.HL(self._regs.HL() + inc);
-    self._regs.BC(self._regs.BC() - 1);
+    self._regs.HL += inc;
+    --self._regs.BC;
 
     self.flag_C(C);
-    self.flag_V(self._regs.BC());
+    self.flag_V(self._regs.BC);
 
     uint8_t n = result - self.test_H();
     self.flag_Y(n & 0x02);
-    self.flag_X(n & 0x08);
+    self.flag_X(n & Flags::X);
 
     self._regs.memptr += inc;
 
     if (op & REP_OP) {
-        if (self._regs.BC() == 0 || result == 0) {
-            self._regs.memptr = self._regs.PC;
-            return 0x00040010; /* M4 T16 */
+        if (self._regs.BC == 0 || result == 0) {
+            return 0x00040010;  /* M4 T16 */
         }
 
         self._regs.PC -= 2;
@@ -860,10 +853,11 @@ int Z80::i_mi_in(Z80& self, uint8_t op, addr_t arg)
     constexpr static const uint8_t REP_OP = 0x10;
     int16_t inc = ((op & DEC_OP) == DEC_OP ? -1 : 1);
 
-    uint8_t data = self.io_in(self._regs.C);
-    self.write(self._regs.HL(), data);
+    addr_t port = self._regs.BC;
+    uint8_t data = self.io_in(port);
+    self.write(self._regs.HL, data);
 
-    self._regs.HL(self._regs.HL() + inc);
+    self._regs.HL += inc;
     self._regs.B = self.sub8(self._regs.B, 1, 0);
 
     self.flag_N(data & 0x80);
@@ -873,11 +867,11 @@ int Z80::i_mi_in(Z80& self, uint8_t op, addr_t arg)
     self.flag_C(k > 255);
     self.flag_V(self.parity((k & 7) ^ self._regs.B));
 
-    self._regs.memptr = self._regs.BC() + inc;
+    self._regs.memptr = port + inc;
 
     if (op & REP_OP) {
         if (self._regs.B == 0) {
-            return 0x00040010; /* M4 T16 */
+            return 0x00040010;  /* M4 T16 */
         }
 
         self._regs.PC -= 2;
@@ -931,10 +925,11 @@ int Z80::i_mi_out(Z80& self, uint8_t op, addr_t arg)
     constexpr static const uint8_t REP_OP = 0x10;
     int16_t inc = ((op & DEC_OP) == DEC_OP ? -1 : 1);
 
-    uint8_t data = self.read(self._regs.HL());
-    self.io_out(self._regs.C, data);
+    addr_t port = self._regs.BC;
+    uint8_t data = self.read(self._regs.HL);
+    self.io_out(port, data);
 
-    self._regs.HL(self._regs.HL() + inc);
+    self._regs.HL += inc;
     self._regs.B = self.sub8(self._regs.B, 1, 0);
 
     uint16_t k = self._regs.L + data;
@@ -944,11 +939,11 @@ int Z80::i_mi_out(Z80& self, uint8_t op, addr_t arg)
 
     self.flag_N(data & 0x80);
 
-    self._regs.memptr = self._regs.BC() + inc;
+    self._regs.memptr = port + inc;
 
     if (op & REP_OP) {
         if (self._regs.B == 0) {
-            return 0x00040010; /* M4 T16 */
+            return 0x00040010;  /* M4 T16 */
         }
 
         self._regs.PC -= 2;

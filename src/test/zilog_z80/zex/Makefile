@@ -39,16 +39,10 @@ CLEANFILES+=	${BIN}
 
 all: ${BIN}
 
-debug:
-	${MAKE} ${MAKEARGS} DEBUG=yes all
-
 test: ${BIN}
 	${BIN} -b ${TESTS}
 
 install:
 
-include ${ROOT}/mk/obj.mk
-
-${BIN}: ${OBJS} ${LIB} ${EXTRA_DEPS}
-	${LD} ${LDFLAGS} -o $@ $^ ${LDADD}
+include ${ROOT}/mk/bin.mk
 

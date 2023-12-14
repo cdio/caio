@@ -18,8 +18,8 @@
 #
 ROOT=		${abspath ../..}
 
-DIRS=		mos_6502 \
-		zilog_z80
+#DIRS=		mos_6502
+DIRS=		zilog_z80
 
 CLEANDIRS=	${DIRS}
 

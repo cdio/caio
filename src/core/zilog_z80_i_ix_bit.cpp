@@ -22,289 +22,284 @@
 namespace caio {
 namespace zilog {
 
-/*
- * Most of the information in the following tables come from:
- * - Z80 CPU User Manual UM008011-0816.
- * - https://clrhome.org/table/
- */
-const std::array<Z80::Instruction, 256> Z80::ix_bit_instr_set{{
-    { "RLC (IX%), B",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 00 */ /* Undocumented */
-    { "RLC (IX%), C",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 01 */ /* Undocumented */
-    { "RLC (IX%), D",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 02 */ /* Undocumented */
-    { "RLC (IX%), E",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 03 */ /* Undocumented */
-    { "RLC (IX%), H",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 04 */ /* Undocumented */
-    { "RLC (IX%), L",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 05 */ /* Undocumented */
-    { "RLC (IX%)",      Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 06 */
-    { "RLC (IX%), A",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 07 */ /* Undocumented */
-    { "RRC (IX%), B",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 08 */ /* Undocumented */
-    { "RRC (IX%), C",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 09 */ /* Undocumented */
-    { "RRC (IX%), D",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 0A */ /* Undocumented */
-    { "RRC (IX%), E",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 0B */ /* Undocumented */
-    { "RRC (IX%), H",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 0C */ /* Undocumented */
-    { "RRC (IX%), L",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 0D */ /* Undocumented */
-    { "RRC (IX%)",      Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 0E */
-    { "RRC (IX%), A",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 0F */ /* Undocumented */
+const Z80::Instruction Z80::ix_bit_instr_set[256] = {
+    { "RLC (IX%), B",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 00 */
+    { "RLC (IX%), C",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 01 */
+    { "RLC (IX%), D",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 02 */
+    { "RLC (IX%), E",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 03 */
+    { "RLC (IX%), H",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 04 */
+    { "RLC (IX%), L",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 05 */
+    { "RLC (IX%)",          Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 06 */
+    { "RLC (IX%), A",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 07 */
+    { "RRC (IX%), B",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 08 */
+    { "RRC (IX%), C",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 09 */
+    { "RRC (IX%), D",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 0A */
+    { "RRC (IX%), E",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 0B */
+    { "RRC (IX%), H",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 0C */
+    { "RRC (IX%), L",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 0D */
+    { "RRC (IX%)",          Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 0E */
+    { "RRC (IX%), A",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 0F */
 
-    { "RL (IX%), B",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 10 */ /* Undocumented */
-    { "RL (IX%), C",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 11 */ /* Undocumented */
-    { "RL (IX%), D",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 12 */ /* Undocumented */
-    { "RL (IX%), E",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 13 */ /* Undocumented */
-    { "RL (IX%), H",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 14 */ /* Undocumented */
-    { "RL (IX%), L",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 15 */ /* Undocumented */
-    { "RL (IX%)",       Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 16 */
-    { "RL (IX%), A",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 17 */ /* Undocumented */
-    { "RR (IX%), B",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 18 */ /* Undocumented */
-    { "RR (IX%), C",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 19 */ /* Undocumented */
-    { "RR (IX%), D",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 1A */ /* Undocumented */
-    { "RR (IX%), E",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 1B */ /* Undocumented */
-    { "RR (IX%), H",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 1C */ /* Undocumented */
-    { "RR (IX%), L",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 1D */ /* Undocumented */
-    { "RR (IX%)",       Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 1E */
-    { "RR (IX%), A",    Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 1F */ /* Undocumented */
+    { "RL (IX%), B",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 10 */
+    { "RL (IX%), C",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 11 */
+    { "RL (IX%), D",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 12 */
+    { "RL (IX%), E",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 13 */
+    { "RL (IX%), H",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 14 */
+    { "RL (IX%), L",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 15 */
+    { "RL (IX%)",           Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 16 */
+    { "RL (IX%), A",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 17 */
+    { "RR (IX%), B",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 18 */
+    { "RR (IX%), C",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 19 */
+    { "RR (IX%), D",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 1A */
+    { "RR (IX%), E",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 1B */
+    { "RR (IX%), H",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 1C */
+    { "RR (IX%), L",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 1D */
+    { "RR (IX%)",           Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 1E */
+    { "RR (IX%), A",        Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 1F */
 
-    { "SLA (IX%), B",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 20 */ /* Undocumented */
-    { "SLA (IX%), C",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 21 */ /* Undocumented */
-    { "SLA (IX%), D",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 22 */ /* Undocumented */
-    { "SLA (IX%), E",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 23 */ /* Undocumented */
-    { "SLA (IX%), H",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 24 */ /* Undocumented */
-    { "SLA (IX%), L",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 25 */ /* Undocumented */
-    { "SLA (IX%)",      Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 26 */
-    { "SLA (IX%), A",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 27 */ /* Undocumented */
-    { "SRA (IX%), B",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 28 */ /* Undocumented */
-    { "SRA (IX%), C",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 29 */ /* Undocumented */
-    { "SRA (IX%), D",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 2A */ /* Undocumented */
-    { "SRA (IX%), E",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 2B */ /* Undocumented */
-    { "SRA (IX%), H",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 2C */ /* Undocumented */
-    { "SRA (IX%), L",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 2D */ /* Undocumented */
-    { "SRA (IX%)",      Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 2E */
-    { "SRA (IX%), A",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 2F */ /* Undocumented */
+    { "SLA (IX%), B",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 20 */
+    { "SLA (IX%), C",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 21 */
+    { "SLA (IX%), D",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 22 */
+    { "SLA (IX%), E",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 23 */
+    { "SLA (IX%), H",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 24 */
+    { "SLA (IX%), L",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 25 */
+    { "SLA (IX%)",          Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 26 */
+    { "SLA (IX%), A",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 27 */
+    { "SRA (IX%), B",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 28 */
+    { "SRA (IX%), C",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 29 */
+    { "SRA (IX%), D",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 2A */
+    { "SRA (IX%), E",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 2B */
+    { "SRA (IX%), H",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 2C */
+    { "SRA (IX%), L",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 2D */
+    { "SRA (IX%)",          Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 2E */
+    { "SRA (IX%), A",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 2F */
 
-    { "SLL (IX%), B",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 30 */ /* Undocumented */
-    { "SLL (IX%), C",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 31 */ /* Undocumented */
-    { "SLL (IX%), D",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 32 */ /* Undocumented */
-    { "SLL (IX%), E",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 33 */ /* Undocumented */
-    { "SLL (IX%), H",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 34 */ /* Undocumented */
-    { "SLL (IX%), L",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 35 */ /* Undocumented */
-    { "SLL (IX%)",      Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 36 */ /* Undocumented */
-    { "SLL (IX%), A",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 37 */ /* Undocumented */
-    { "SRL (IX%), B",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 38 */ /* Undocumented */
-    { "SRL (IX%), C",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 39 */ /* Undocumented */
-    { "SRL (IX%), D",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 3A */ /* Undocumented */
-    { "SRL (IX%), E",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 3B */ /* Undocumented */
-    { "SRL (IX%), H",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 3C */ /* Undocumented */
-    { "SRL (IX%), L",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 3D */ /* Undocumented */
-    { "SRL (IX%)",      Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 3E */
-    { "SRL (IX%), A",   Z80::i_ix_bit_sr,   ArgType::A8,    23, 4   },  /* DD CB 3F */ /* Undocumented */
+    { "SLL (IX%), B",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 30 */
+    { "SLL (IX%), C",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 31 */
+    { "SLL (IX%), D",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 32 */
+    { "SLL (IX%), E",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 33 */
+    { "SLL (IX%), H",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 34 */
+    { "SLL (IX%), L",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 35 */
+    { "SLL (IX%)",          Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 36 */
+    { "SLL (IX%), A",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 37 */
+    { "SRL (IX%), B",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 38 */
+    { "SRL (IX%), C",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 39 */
+    { "SRL (IX%), D",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 3A */
+    { "SRL (IX%), E",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 3B */
+    { "SRL (IX%), H",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 3C */
+    { "SRL (IX%), L",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 3D */
+    { "SRL (IX%)",          Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 3E */
+    { "SRL (IX%), A",       Z80::i_ix_bit_sr,   ArgType::A8_Inv,   15, 2   },  /* DD CB DD 3F */
 
-    { "BIT 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 40 */ /* Undocumented */
-    { "BIT 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 41 */ /* Undocumented */
-    { "BIT 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 42 */ /* Undocumented */
-    { "BIT 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 43 */ /* Undocumented */
-    { "BIT 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 44 */ /* Undocumented */
-    { "BIT 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 45 */ /* Undocumented */
-    { "BIT 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 46 */
-    { "BIT 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 47 */ /* Undocumented */
-    { "BIT 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 48 */ /* Undocumented */
-    { "BIT 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 49 */ /* Undocumented */
-    { "BIT 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 4A */ /* Undocumented */
-    { "BIT 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 4B */ /* Undocumented */
-    { "BIT 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 4C */ /* Undocumented */
-    { "BIT 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 4D */ /* Undocumented */
-    { "BIT 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 4E */
-    { "BIT 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 4F */ /* Undocumented */
+    { "BIT 0, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 40 */
+    { "BIT 0, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 41 */
+    { "BIT 0, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 42 */
+    { "BIT 0, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 43 */
+    { "BIT 0, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 44 */
+    { "BIT 0, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 45 */
+    { "BIT 0, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 46 */
+    { "BIT 0, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 47 */
+    { "BIT 1, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 48 */
+    { "BIT 1, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 49 */
+    { "BIT 1, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 4A */
+    { "BIT 1, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 4B */
+    { "BIT 1, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 4C */
+    { "BIT 1, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 4D */
+    { "BIT 1, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 4E */
+    { "BIT 1, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 4F */
 
-    { "BIT 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 50 */ /* Undocumented */
-    { "BIT 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 51 */ /* Undocumented */
-    { "BIT 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 52 */ /* Undocumented */
-    { "BIT 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 53 */ /* Undocumented */
-    { "BIT 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 54 */ /* Undocumented */
-    { "BIT 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 55 */ /* Undocumented */
-    { "BIT 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 56 */
-    { "BIT 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 57 */ /* Undocumented */
-    { "BIT 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 58 */ /* Undocumented */
-    { "BIT 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 59 */ /* Undocumented */
-    { "BIT 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 5A */ /* Undocumented */
-    { "BIT 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 5B */ /* Undocumented */
-    { "BIT 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 5C */ /* Undocumented */
-    { "BIT 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 5D */ /* Undocumented */
-    { "BIT 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 5E */
-    { "BIT 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 5F */ /* Undocumented */
+    { "BIT 2, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 50 */
+    { "BIT 2, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 51 */
+    { "BIT 2, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 52 */
+    { "BIT 2, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 53 */
+    { "BIT 2, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 54 */
+    { "BIT 2, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 55 */
+    { "BIT 2, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 56 */
+    { "BIT 2, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 57 */
+    { "BIT 3, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 58 */
+    { "BIT 3, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 59 */
+    { "BIT 3, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 5A */
+    { "BIT 3, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 5B */
+    { "BIT 3, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 5C */
+    { "BIT 3, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 5D */
+    { "BIT 3, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 5E */
+    { "BIT 3, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 5F */
 
-    { "BIT 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 60 */ /* Undocumented */
-    { "BIT 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 61 */ /* Undocumented */
-    { "BIT 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 62 */ /* Undocumented */
-    { "BIT 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 63 */ /* Undocumented */
-    { "BIT 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 64 */ /* Undocumented */
-    { "BIT 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 65 */ /* Undocumented */
-    { "BIT 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 66 */
-    { "BIT 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 67 */ /* Undocumented */
-    { "BIT 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 68 */ /* Undocumented */
-    { "BIT 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 69 */ /* Undocumented */
-    { "BIT 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 6A */ /* Undocumented */
-    { "BIT 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 6B */ /* Undocumented */
-    { "BIT 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 6C */ /* Undocumented */
-    { "BIT 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 6D */ /* Undocumented */
-    { "BIT 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 6E */
-    { "BIT 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 6F */ /* Undocumented */
+    { "BIT 4, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 60 */
+    { "BIT 4, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 61 */
+    { "BIT 4, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 62 */
+    { "BIT 4, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 63 */
+    { "BIT 4, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 64 */
+    { "BIT 4, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 65 */
+    { "BIT 4, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 66 */
+    { "BIT 4, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 67 */
+    { "BIT 5, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 68 */
+    { "BIT 5, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 69 */
+    { "BIT 5, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 6A */
+    { "BIT 5, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 6B */
+    { "BIT 5, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 6C */
+    { "BIT 5, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 6D */
+    { "BIT 5, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 6E */
+    { "BIT 5, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 6F */
 
-    { "BIT 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 70 */ /* Undocumented */
-    { "BIT 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 71 */ /* Undocumented */
-    { "BIT 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 72 */ /* Undocumented */
-    { "BIT 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 73 */ /* Undocumented */
-    { "BIT 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 74 */ /* Undocumented */
-    { "BIT 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 75 */ /* Undocumented */
-    { "BIT 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 76 */
-    { "BIT 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 77 */ /* Undocumented */
-    { "BIT 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 78 */ /* Undocumented */
-    { "BIT 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 79 */ /* Undocumented */
-    { "BIT 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 7A */ /* Undocumented */
-    { "BIT 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 7B */ /* Undocumented */
-    { "BIT 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 7C */ /* Undocumented */
-    { "BIT 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 7D */ /* Undocumented */
-    { "BIT 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 7E */
-    { "BIT 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    20, 4   },  /* DD CB 7F */ /* Undocumented */
+    { "BIT 6, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 70 */
+    { "BIT 6, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 71 */
+    { "BIT 6, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 72 */
+    { "BIT 6, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 73 */
+    { "BIT 6, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 74 */
+    { "BIT 6, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 75 */
+    { "BIT 6, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 76 */
+    { "BIT 6, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 77 */
+    { "BIT 7, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 78 */
+    { "BIT 7, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 79 */
+    { "BIT 7, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 7A */
+    { "BIT 7, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 7B */
+    { "BIT 7, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 7C */
+    { "BIT 7, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 7D */
+    { "BIT 7, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 7E */
+    { "BIT 7, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   12, 2   },  /* DD CB DD 7F */
 
-    { "RES 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 80 */ /* Undocumented */
-    { "RES 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 81 */ /* Undocumented */
-    { "RES 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 82 */ /* Undocumented */
-    { "RES 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 83 */ /* Undocumented */
-    { "RES 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 84 */ /* Undocumented */
-    { "RES 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 85 */ /* Undocumented */
-    { "RES 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 86 */
-    { "RES 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 87 */ /* Undocumented */
-    { "RES 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 88 */ /* Undocumented */
-    { "RES 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 89 */ /* Undocumented */
-    { "RES 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 8A */ /* Undocumented */
-    { "RES 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 8B */ /* Undocumented */
-    { "RES 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 8C */ /* Undocumented */
-    { "RES 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 8D */ /* Undocumented */
-    { "RES 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 8E */
-    { "RES 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 8F */ /* Undocumented */
+    { "RES 0, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 80 */
+    { "RES 0, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 81 */
+    { "RES 0, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 82 */
+    { "RES 0, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 83 */
+    { "RES 0, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 84 */
+    { "RES 0, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 85 */
+    { "RES 0, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 86 */
+    { "RES 0, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 87 */
+    { "RES 1, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 88 */
+    { "RES 1, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 89 */
+    { "RES 1, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 8A */
+    { "RES 1, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 8B */
+    { "RES 1, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 8C */
+    { "RES 1, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 8D */
+    { "RES 1, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 8E */
+    { "RES 1, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 8F */
 
-    { "RES 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 90 */ /* Undocumented */
-    { "RES 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 91 */ /* Undocumented */
-    { "RES 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 92 */ /* Undocumented */
-    { "RES 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 93 */ /* Undocumented */
-    { "RES 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 94 */ /* Undocumented */
-    { "RES 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 95 */ /* Undocumented */
-    { "RES 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 96 */
-    { "RES 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 97 */ /* Undocumented */
-    { "RES 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 98 */ /* Undocumented */
-    { "RES 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 99 */ /* Undocumented */
-    { "RES 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 9A */ /* Undocumented */
-    { "RES 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 9B */ /* Undocumented */
-    { "RES 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 9C */ /* Undocumented */
-    { "RES 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 9D */ /* Undocumented */
-    { "RES 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 9E */
-    { "RES 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB 9F */ /* Undocumented */
+    { "RES 2, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 90 */
+    { "RES 2, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 91 */
+    { "RES 2, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 92 */
+    { "RES 2, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 93 */
+    { "RES 2, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 94 */
+    { "RES 2, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 95 */
+    { "RES 2, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 96 */
+    { "RES 2, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 97 */
+    { "RES 3, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 98 */
+    { "RES 3, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 99 */
+    { "RES 3, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 9A */
+    { "RES 3, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 9B */
+    { "RES 3, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 9C */
+    { "RES 3, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 9D */
+    { "RES 3, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 9E */
+    { "RES 3, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD 9F */
 
-    { "RES 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB A0 */ /* Undocumented */
-    { "RES 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB A1 */ /* Undocumented */
-    { "RES 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB A2 */ /* Undocumented */
-    { "RES 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB A3 */ /* Undocumented */
-    { "RES 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB A4 */ /* Undocumented */
-    { "RES 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB A5 */ /* Undocumented */
-    { "RES 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB A6 */
-    { "RES 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB A7 */ /* Undocumented */
-    { "RES 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB A8 */ /* Undocumented */
-    { "RES 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB A9 */ /* Undocumented */
-    { "RES 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB AA */ /* Undocumented */
-    { "RES 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB AB */ /* Undocumented */
-    { "RES 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB AC */ /* Undocumented */
-    { "RES 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB AD */ /* Undocumented */
-    { "RES 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB AE */
-    { "RES 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB AF */ /* Undocumented */
+    { "RES 4, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD A0 */
+    { "RES 4, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD A1 */
+    { "RES 4, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD A2 */
+    { "RES 4, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD A3 */
+    { "RES 4, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD A4 */
+    { "RES 4, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD A5 */
+    { "RES 4, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD A6 */
+    { "RES 4, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD A7 */
+    { "RES 5, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD A8 */
+    { "RES 5, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD A9 */
+    { "RES 5, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD AA */
+    { "RES 5, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD AB */
+    { "RES 5, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD AC */
+    { "RES 5, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD AD */
+    { "RES 5, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD AE */
+    { "RES 5, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD AF */
 
-    { "RES 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB B0 */ /* Undocumented */
-    { "RES 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB B1 */ /* Undocumented */
-    { "RES 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB B2 */ /* Undocumented */
-    { "RES 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB B3 */ /* Undocumented */
-    { "RES 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB B4 */ /* Undocumented */
-    { "RES 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB B5 */ /* Undocumented */
-    { "RES 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB B6 */
-    { "RES 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB B7 */ /* Undocumented */
-    { "RES 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB B8 */ /* Undocumented */
-    { "RES 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB B9 */ /* Undocumented */
-    { "RES 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB BA */ /* Undocumented */
-    { "RES 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB BB */ /* Undocumented */
-    { "RES 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB BC */ /* Undocumented */
-    { "RES 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB BD */ /* Undocumented */
-    { "RES 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB BE */
-    { "RES 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB BF */ /* Undocumented */
+    { "RES 6, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD B0 */
+    { "RES 6, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD B1 */
+    { "RES 6, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD B2 */
+    { "RES 6, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD B3 */
+    { "RES 6, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD B4 */
+    { "RES 6, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD B5 */
+    { "RES 6, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD B6 */
+    { "RES 6, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD B7 */
+    { "RES 7, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD B8 */
+    { "RES 7, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD B9 */
+    { "RES 7, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD BA */
+    { "RES 7, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD BB */
+    { "RES 7, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD BC */
+    { "RES 7, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD BD */
+    { "RES 7, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD BE */
+    { "RES 7, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD BF */
 
-    { "SET 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB C0 */ /* Undocumented */
-    { "SET 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB C1 */ /* Undocumented */
-    { "SET 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB C2 */ /* Undocumented */
-    { "SET 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB C3 */ /* Undocumented */
-    { "SET 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB C4 */ /* Undocumented */
-    { "SET 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB C5 */ /* Undocumented */
-    { "SET 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB C6 */
-    { "SET 0, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB C7 */ /* Undocumented */
-    { "SET 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB C8 */ /* Undocumented */
-    { "SET 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB C9 */ /* Undocumented */
-    { "SET 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB CA */ /* Undocumented */
-    { "SET 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB CB */ /* Undocumented */
-    { "SET 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB CC */ /* Undocumented */
-    { "SET 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB CD */ /* Undocumented */
-    { "SET 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB CE */
-    { "SET 1, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB CF */ /* Undocumented */
+    { "SET 0, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD C0 */
+    { "SET 0, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD C1 */
+    { "SET 0, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD C2 */
+    { "SET 0, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD C3 */
+    { "SET 0, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD C4 */
+    { "SET 0, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD C5 */
+    { "SET 0, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD C6 */
+    { "SET 0, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD C7 */
+    { "SET 1, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD C8 */
+    { "SET 1, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD C9 */
+    { "SET 1, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD CA */
+    { "SET 1, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD CB */
+    { "SET 1, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD CC */
+    { "SET 1, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD CD */
+    { "SET 1, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD CE */
+    { "SET 1, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD CF */
 
-    { "SET 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB D0 */ /* Undocumented */
-    { "SET 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB D1 */ /* Undocumented */
-    { "SET 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB D2 */ /* Undocumented */
-    { "SET 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB D3 */ /* Undocumented */
-    { "SET 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB D4 */ /* Undocumented */
-    { "SET 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB D5 */ /* Undocumented */
-    { "SET 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB D6 */
-    { "SET 2, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB D7 */ /* Undocumented */
-    { "SET 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB D8 */ /* Undocumented */
-    { "SET 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB D9 */ /* Undocumented */
-    { "SET 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB DA */ /* Undocumented */
-    { "SET 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB DB */ /* Undocumented */
-    { "SET 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB DC */ /* Undocumented */
-    { "SET 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB DD */ /* Undocumented */
-    { "SET 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB DE */
-    { "SET 3, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB DF */ /* Undocumented */
+    { "SET 2, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD D0 */
+    { "SET 2, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD D1 */
+    { "SET 2, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD D2 */
+    { "SET 2, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD D3 */
+    { "SET 2, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD D4 */
+    { "SET 2, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD D5 */
+    { "SET 2, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD D6 */
+    { "SET 2, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD D7 */
+    { "SET 3, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD D8 */
+    { "SET 3, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD D9 */
+    { "SET 3, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD DA */
+    { "SET 3, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD DB */
+    { "SET 3, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD DC */
+    { "SET 3, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD DD */
+    { "SET 3, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD DE */
+    { "SET 3, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD DF */
 
-    { "SET 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB E0 */ /* Undocumented */
-    { "SET 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB E1 */ /* Undocumented */
-    { "SET 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB E2 */ /* Undocumented */
-    { "SET 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB E3 */ /* Undocumented */
-    { "SET 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB E4 */ /* Undocumented */
-    { "SET 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB E5 */ /* Undocumented */
-    { "SET 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB E6 */
-    { "SET 4, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB E7 */ /* Undocumented */
-    { "SET 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB E8 */ /* Undocumented */
-    { "SET 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB E9 */ /* Undocumented */
-    { "SET 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB EA */ /* Undocumented */
-    { "SET 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB EB */ /* Undocumented */
-    { "SET 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB EC */ /* Undocumented */
-    { "SET 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB ED */ /* Undocumented */
-    { "SET 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB EE */
-    { "SET 5, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB EF */ /* Undocumented */
+    { "SET 4, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD E0 */
+    { "SET 4, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD E1 */
+    { "SET 4, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD E2 */
+    { "SET 4, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD E3 */
+    { "SET 4, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD E4 */
+    { "SET 4, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD E5 */
+    { "SET 4, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD E6 */
+    { "SET 4, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD E7 */
+    { "SET 5, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD E8 */
+    { "SET 5, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD E9 */
+    { "SET 5, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD EA */
+    { "SET 5, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD EB */
+    { "SET 5, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD EC */
+    { "SET 5, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD ED */
+    { "SET 5, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD EE */
+    { "SET 5, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD EF */
 
-    { "SET 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB F0 */ /* Undocumented */
-    { "SET 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB F1 */ /* Undocumented */
-    { "SET 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB F2 */ /* Undocumented */
-    { "SET 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB F3 */ /* Undocumented */
-    { "SET 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB F4 */ /* Undocumented */
-    { "SET 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB F5 */ /* Undocumented */
-    { "SET 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB F6 */
-    { "SET 6, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB F7 */ /* Undocumented */
-    { "SET 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB F8 */ /* Undocumented */
-    { "SET 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB F9 */ /* Undocumented */
-    { "SET 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB FA */ /* Undocumented */
-    { "SET 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB FB */ /* Undocumented */
-    { "SET 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB FC */ /* Undocumented */
-    { "SET 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB FD */ /* Undocumented */
-    { "SET 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB FE */
-    { "SET 7, (IX%)",   Z80::i_ix_bit,      ArgType::A8,    23, 4   },  /* DD CB FF */ /* Undocumented */
-}};
+    { "SET 6, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD F0 */
+    { "SET 6, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD F1 */
+    { "SET 6, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD F2 */
+    { "SET 6, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD F3 */
+    { "SET 6, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD F4 */
+    { "SET 6, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD F5 */
+    { "SET 6, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD F6 */
+    { "SET 6, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD F7 */
+    { "SET 7, (IX%), B",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD F8 */
+    { "SET 7, (IX%), C",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD F9 */
+    { "SET 7, (IX%), D",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD FA */
+    { "SET 7, (IX%), E",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD FB */
+    { "SET 7, (IX%), H",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD FC */
+    { "SET 7, (IX%), L",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD FD */
+    { "SET 7, (IX%)",       Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD FE */
+    { "SET 7, (IX%), A",    Z80::i_ix_bit,      ArgType::A8_Inv,   15, 2   },  /* DD CB DD FF */
+};
 
 int Z80::xx_bit_sr(uint16_t& reg, uint8_t op, addr_t arg)
 {
     /*
-     * RLC (IX/IY+d), r
+     * RLC (IX/IY+d), r     - DD/FD CB dddddddd ooooorrr
      * RRC (IX/IY+d), r
      * RL  (IX/IY+d), r
      * RR  (IX/IY+d), r
@@ -325,14 +320,14 @@ int Z80::xx_bit_sr(uint16_t& reg, uint8_t op, addr_t arg)
      * b7 b6 b5 b4 b3 b2 b1 b0
      * ------+------- ---+----
      *       |           +-----> Source register:
-     *       |                   000 = 0x00 => B    => Undocumented
-     *       |                   001 = 0x01 => C    => Undocumented
-     *       |                   010 = 0x02 => D    => Undocumented
-     *       |                   011 = 0x03 => E    => Undocumented
-     *       |                   100 = 0x04 => H    => Undocumented
-     *       |                   101 = 0x05 => L    => Undocumented
+     *       |                   000 = 0x00 => B    Undocumented
+     *       |                   001 = 0x01 => C    Undocumented
+     *       |                   010 = 0x02 => D    Undocumented
+     *       |                   011 = 0x03 => E    Undocumented
+     *       |                   100 = 0x04 => H    Undocumented
+     *       |                   101 = 0x05 => L    Undocumented
      *       |                   110 = 0x06 => No source register
-     *       |                   111 = 0x07 => A    => Undocumented
+     *       |                   111 = 0x07 => A    Undocumented
      *       |
      *       +-----------------> OP:
      *                           00000 = 0x00 => RLC
@@ -341,7 +336,7 @@ int Z80::xx_bit_sr(uint16_t& reg, uint8_t op, addr_t arg)
      *                           00011 = 0x18 => RR
      *                           00100 = 0x20 => SLA
      *                           00101 = 0x28 => SRA
-     *                           00110 = 0x30 => SLL  => Undocumented operation
+     *                           00110 = 0x30 => SLL    Undocumented
      *                           00111 = 0x38 => SRL
      */
     constexpr static uint8_t OP_MASK = 0xF8;
@@ -391,34 +386,38 @@ int Z80::xx_bit_sr(uint16_t& reg, uint8_t op, addr_t arg)
         break;
 
     default:
-        log.error("Z80: IX/IY_BIT_sr: Unrecognised opcode: DD/FD CB %02X, addr: $04X\n", op, _regs.PC);
+        addr = _iaddr;
+        log.error("Z80: BIT_sr: A8_Invalid opcode: %s CB %02X, addr: $04X\n",
+            (_iprefix == Prefix::IX ? "DD " : (_iprefix == Prefix::IY ? "FD " : "")),
+            op, addr, disass(addr).c_str(), disass(addr).c_str(), disass(addr).c_str());
+        return 0;
     }
 
     write(addr, data);
-
-    if ((op & 0x07) != 0x06) {
-        /*
-         * Undocumented: Put result in the specified source register.
-         */
-        uint8_t dummy{};
-        uint8_t& rr = reg8_src_from_opcode(op, dummy);
-        rr = data;
-    }
-
+    uint8_t& rr = reg8_src_from_opcode(op);
+    rr = data;
     return 0;
 }
 
 int Z80::xx_bit(uint16_t& reg, uint8_t op, addr_t arg)
 {
     /*
-     * BIT b, (IX/IY+d)
-     * RES b, (IX/IY+d)
-     * SET b, (IX/IY+d)
+     * BIT b, (IX/IY+d), [{A,B,C,D,E,H,L}]  - DD/FD CB dddddddd 01bbbrrr
+     * RES b, (IX/IY+d), [{A,B,C,D,E,H,L}]  - DD/FD CB dddddddd 10bbbrrr
+     * SET b, (IX/IY+d), [{A,B,C,D,E,H,L}]  - DD/FD CB dddddddd 11bbbrrr
      *
      * b7 b6 b5 b4 b3 b2 b1 b0
      * --+-- ---+---- ----+---
-     *   |      |         +----> 110 = 0x06 => OP b, (IX/IY+d)
-     *   |      |                Other combinations produce the same effect but are undocumented.
+     *   |      |         |
+     *   |      |         +----> Destination register:
+     *   |      |                000 = 0x00 => B    Undocumented
+     *   |      |                001 = 0x01 => C    Undocumented
+     *   |      |                010 = 0x02 => D    Undocumented
+     *   |      |                011 = 0x03 => E    Undocumented
+     *   |      |                100 = 0x04 => H    Undocumented
+     *   |      |                101 = 0x05 => L    Undocumented
+     *   |      |                110 = 0x06 => No register
+     *   |      |                111 = 0x07 => A    Undocumented
      *   |      |
      *   |      +--------------> Bit no: b = 0..7
      *   |
@@ -445,8 +444,8 @@ int Z80::xx_bit(uint16_t& reg, uint8_t op, addr_t arg)
         flag_H(1);
         flag_V(result == 0);
         flag_N(0);
-        flag_Y(addr & (Flags::Y << 8));
-        flag_X(addr & (Flags::X << 8));
+        flag_Y(addr & (static_cast<addr_t>(Flags::Y) << 8));
+        flag_X(addr & (static_cast<addr_t>(Flags::X) << 8));
         return 0;
         /* NOTREACHED */
 
@@ -459,31 +458,29 @@ int Z80::xx_bit(uint16_t& reg, uint8_t op, addr_t arg)
         break;
 
     default:
-        log.error("Z80: IX/IY_BIT: Unrecognised opcode: DD/FD CB %02X, addr: $04X\n", op, _regs.PC);
+        addr = _iaddr;
+        log.error("Z80: xx_bit: A8_Invalid opcode: %sCB %02X, addr: $%04X\n%s\n",
+            (_iprefix == Prefix::IX ? "DD " : (_iprefix == Prefix::IY ? "FD " : "")),
+            op, addr, disass(addr).c_str());
+        return 0;
     }
 
     write(addr, data);
-
-    if ((op & 0x07) != 0x06) {
-        /*
-         * Undocumented: Put result in the specified source register.
-         */
-        uint8_t dummy{};
-        uint8_t& rr = reg8_src_from_opcode(op, dummy);
-        rr = data;
-    }
-
+    uint8_t& rr = reg8_src_from_opcode(op);
+    rr = data;
     return 0;
 }
 
 int Z80::i_ix_bit_sr(Z80& self, uint8_t op, addr_t arg)
 {
-    return self.xx_bit_sr(self._regs.IX, op, arg);
+    auto& reg = (self._iprefix == Prefix::IX ? self._regs.IX : self._regs.IY);
+    return self.xx_bit_sr(reg, op, arg);
 }
 
 int Z80::i_ix_bit(Z80& self, uint8_t op, addr_t arg)
 {
-    return self.xx_bit(self._regs.IX, op, arg);
+    auto& reg = (self._iprefix == Prefix::IX ? self._regs.IX : self._regs.IY);
+    return self.xx_bit(reg, op, arg);
 }
 
 }

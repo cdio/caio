@@ -111,8 +111,9 @@ public:
      * this method.
      * @param data Data to set.
      */
-    void data_bus(uint8_t data) {
+    uint8_t data_bus(uint8_t data) {
         _data_bus = data;
+        return _data_bus;
     }
 
     /**
@@ -131,7 +132,7 @@ public:
      * this method.
      * @param addr Address to set.
      */
-    void address_bus(addr_t addr) {
+    virtual void address_bus(addr_t addr) {
         _address_bus = addr;
     }
 
@@ -140,7 +141,7 @@ public:
      * @param os Stream to dump to.
      * @return os.
      */
-    std::ostream& dump(std::ostream& os) const;
+    virtual std::ostream& dump(std::ostream& os) const;
 
 protected:
     ASpace() {

@@ -22,14 +22,11 @@
 namespace caio {
 namespace zilog {
 
-int Z80::i_HALT(Z80& self, uint8_t op, addr_t arg)
-{
-    self.halt_pin(true);
-    return 0;
-}
-
 int Z80::i_DI(Z80& self, uint8_t op, addr_t arg)
 {
+    /*
+     * DI           - F3
+     */
     self._IFF1 = false;
     self._IFF2 = false;
     return 0;
@@ -37,6 +34,9 @@ int Z80::i_DI(Z80& self, uint8_t op, addr_t arg)
 
 int Z80::i_EI(Z80& self, uint8_t op, addr_t arg)
 {
+    /*
+     * EI           - FB
+     */
     self._IFF1 = true;
     self._IFF2 = true;
     return 0;

@@ -22,8 +22,7 @@ namespace caio {
 namespace test {
 
 //FIXME
-static const std::string
-spectrum_to_utf8(char spec)
+static const std::string spectrum_to_utf8(char spec)
 {
     switch (spec) {
     case 0x0D: return "\r\n";
@@ -56,10 +55,10 @@ Z80TestASpace::Z80TestASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const 
       _rom{rom},
       _out{out},
       _mmap{{
-        { _ram,     0x0000 },
-        { _ram,     0x4000 },
-        { _rom,     0x0000 },
-        { _ram,     0xC000 }
+        { _ram, 0x0000 },
+        { _ram, 0x4000 },
+        { _rom, 0x0000 },
+        { _ram, 0xC000 }
       }}
 {
     ASpace::reset(_mmap, _mmap, 0xFFFF);
@@ -80,7 +79,7 @@ uint8_t Z80TestASpace::read(addr_t addr, ReadMode rmode)
 void Z80TestASpace::write(addr_t addr, uint8_t value)
 {
     if (_cpu->iorq_pin()) {
-        if (addr == 255) {
+        if ((addr & 255) == 255) {
             /*
              * out (ff), A
              */

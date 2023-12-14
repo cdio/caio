@@ -24,21 +24,26 @@ namespace zilog {
 
 uint8_t Z80::io_in(addr_t port)
 {
+    auto prev = iorq_pin();
     iorq_pin(true);
     auto value = read(port);
-    iorq_pin(false);
+    iorq_pin(prev);
     return value;
 }
 
 void Z80::io_out(addr_t port, uint8_t value)
 {
+    auto prev = iorq_pin();
     iorq_pin(true);
     write(port, value);
-    iorq_pin(false);
+    iorq_pin(prev);
 }
 
 int Z80::i_IN_A_n(Z80& self, uint8_t op, addr_t arg)
 {
+    /*
+     * IN A, (port)
+     */
     addr_t port = (static_cast<uint16_t>(self._regs.A) << 8) | (arg & 255);
     self._regs.memptr = port + 1;
     self._regs.A = self.io_in(port);
@@ -47,8 +52,11 @@ int Z80::i_IN_A_n(Z80& self, uint8_t op, addr_t arg)
 
 int Z80::i_OUT_n_A(Z80& self, uint8_t op, addr_t arg)
 {
+    /*
+     * OUT (port), A
+     */
     addr_t port = (static_cast<uint16_t>(self._regs.A) << 8) + (arg & 255);
-    self._regs.memptr = (port & 0xFF) | ((arg + 1) & 255);      //XXX check this
+    self._regs.memptr = (port & 0xFF00) | ((arg + 1) & 255);
     self.io_out(port, self._regs.A);
     return 0;
 }

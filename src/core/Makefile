@@ -107,7 +107,6 @@ CXXSRCS+=	zilog_z80.cpp \
 		zilog_z80_i_ix.cpp \
 		zilog_z80_i_ix_bit.cpp \
 		zilog_z80_i_iy.cpp \
-		zilog_z80_i_iy_bit.cpp \
 		zilog_z80_i_mi.cpp \
 		zilog_z80_i_port.cpp \
 		zilog_z80_i_shift.cpp \

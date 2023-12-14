@@ -18,27 +18,20 @@
  */
 #include "zilog_z80.hpp"
 
-#include "fs.hpp"
-
-
-using namespace std::literals::string_literals;
 
 namespace caio {
 namespace zilog {
 
-/*
- * Most of the information in the following table come from:
- * - Z80 CPU User Manual UM008011-0816.
- * - https://clrhome.org/table/
- */
-const std::array<Z80::Instruction, 256> Z80::instr_set{{
+using namespace std::literals::string_literals;
+
+const Z80::Instruction Z80::main_instr_set[256] = {
     { "NOP",            Z80::i_NOP,         ArgType::None,  4,  1   },  /* 00 */
     { "LD BC, $^",      Z80::i_LD_rr_nn,    ArgType::A16,   10, 3   },  /* 01 */
     { "LD (BC), A",     Z80::i_LD_mdd_A,    ArgType::None,  7,  1   },  /* 02 */
     { "INC BC",         Z80::i_INC_rr,      ArgType::None,  6,  1   },  /* 03 */
     { "INC B",          Z80::i_INC_r,       ArgType::None,  4,  1   },  /* 04 */
     { "DEC B",          Z80::i_DEC_r,       ArgType::None,  4,  1   },  /* 05 */
-    { "LD B, $*",       Z80::i_LD_r_n,      ArgType::A8,    7,  1   },  /* 06 */
+    { "LD B, $*",       Z80::i_LD_r_n,      ArgType::A8,    7,  2   },  /* 06 */
     { "RLCA",           Z80::i_RLCA,        ArgType::None,  4,  2   },  /* 07 */
     { "EX AF, AF'",     Z80::i_EX_AF_sAF,   ArgType::None,  4,  1   },  /* 08 */
     { "ADD HL, BC",     Z80::i_ADD_HL_rr,   ArgType::None,  11, 1   },  /* 09 */
@@ -247,7 +240,7 @@ const std::array<Z80::Instruction, 256> Z80::instr_set{{
     { "RET Z",          Z80::i_RET_cc,      ArgType::None,  11, 1   },  /* C8 */
     { "RET",            Z80::i_RET,         ArgType::None,  10, 1   },  /* C9 */
     { "JP Z, $^",       Z80::i_JP_cc_nn,    ArgType::A16,   10, 3   },  /* CA */
-    { "",               {},                 ArgType::Bit,   0,  0   },  /* CB */
+    { "",               {},                 ArgType::GW,    4,  1   },  /* CB */
     { "CALL Z, $^",     Z80::i_CALL_cc_nn,  ArgType::A16,   17, 3   },  /* CC */
     { "CALL $^",        Z80::i_CALL_nn,     ArgType::A16,   17, 3   },  /* CD */
     { "ADC A, $*",      Z80::i_ADC_A_n,     ArgType::A8,    7,  2   },  /* CE */
@@ -266,7 +259,7 @@ const std::array<Z80::Instruction, 256> Z80::instr_set{{
     { "JP C, $^",       Z80::i_JP_cc_nn,    ArgType::A16,   10, 3   },  /* DA */
     { "IN A, ($*)",     Z80::i_IN_A_n,      ArgType::A8,    11, 2   },  /* DB */
     { "CALL C, $^",     Z80::i_CALL_cc_nn,  ArgType::A16,   17, 3   },  /* DC */
-    { "",               {},                 ArgType::IX,    0,  0   },  /* DD */
+    { "",               {},                 ArgType::GW,    4,  1   },  /* DD */
     { "SBC A, $*",      Z80::i_SBC_A_n,     ArgType::A8,    7,  2   },  /* DE */
     { "RST $18",        Z80::i_RST_p,       ArgType::None,  11, 1   },  /* DF */
 
@@ -283,7 +276,7 @@ const std::array<Z80::Instruction, 256> Z80::instr_set{{
     { "JP PE, $^",      Z80::i_JP_cc_nn,    ArgType::A16,   10, 3   },  /* EA */
     { "EX DE, HL",      Z80::i_EX_DE_HL,    ArgType::None,  4,  1   },  /* EB */
     { "CALL PE, $^",    Z80::i_CALL_cc_nn,  ArgType::A16,   17, 3   },  /* EC */
-    { "",               {},                 ArgType::MI,    0,  0   },  /* ED */
+    { "",               {},                 ArgType::GW,    4,  1   },  /* ED */
     { "XOR $*",         Z80::i_XOR_A_n,     ArgType::A8,    7,  2   },  /* EE */
     { "RST $28",        Z80::i_RST_p,       ArgType::None,  11, 1   },  /* EF */
 
@@ -300,58 +293,10 @@ const std::array<Z80::Instruction, 256> Z80::instr_set{{
     { "JP M, $^",       Z80::i_JP_cc_nn,    ArgType::A16,   10, 3   },  /* FA */
     { "EI",             Z80::i_EI,          ArgType::None,  4,  1   },  /* FB */
     { "CALL M, $^",     Z80::i_CALL_cc_nn,  ArgType::A16,   17, 3   },  /* FC */
-    { "",               {},                 ArgType::IY,    0,  0   },  /* FD */
+    { "",               {},                 ArgType::GW,    4,  1   },  /* FD */
     { "CP $*",          Z80::i_CP_A_n,      ArgType::A8,    7,  2   },  /* FE */
     { "RST $38",        Z80::i_RST_p,       ArgType::None,  11, 1   },  /* FF */
-}};
-
-void Z80::Registers::AF(uint16_t val)
-{
-    A = val >> 8;
-    F = val & 255;
-}
-
-void Z80::Registers::BC(uint16_t val)
-{
-    B = val >> 8;
-    C = val & 255;
-}
-
-void Z80::Registers::DE(uint16_t val)
-{
-    D = val >> 8;
-    E = val & 255;
-}
-
-void Z80::Registers::HL(uint16_t val)
-{
-    H = val >> 8;
-    L = val & 255;
-}
-
-void Z80::Registers::aAF(uint16_t val)
-{
-    aA = val >> 8;
-    aF = val & 255;
-}
-
-void Z80::Registers::aBC(uint16_t val)
-{
-    aB = val >> 8;
-    aC = val & 255;
-}
-
-void Z80::Registers::aDE(uint16_t val)
-{
-    aD = val >> 8;
-    aE = val & 255;
-}
-
-void Z80::Registers::aHL(uint16_t val)
-{
-    aH = val >> 8;
-    aL = val & 255;
-}
+};
 
 std::string Z80::Registers::to_string(Z80::Flags fl)
 {
@@ -373,14 +318,14 @@ std::string Z80::Registers::to_string() const
 {
     std::ostringstream ss{};
 
-    ss << "   A="    << utils::to_string(A)
-       << "  B="     << utils::to_string(B)
-       << "  C="     << utils::to_string(C)
-       << "  D="     << utils::to_string(D)
-       << "  E="     << utils::to_string(E)
-       << "  H="     << utils::to_string(H)
-       << "  L="     << utils::to_string(L)
-       << "  F="     << utils::to_string(F)  << " " << to_string(static_cast<Flags>(F)) << std::endl
+    ss << "  A ="    << utils::to_string(A)
+       << " B ="     << utils::to_string(B)
+       << " C ="     << utils::to_string(C)
+       << " D ="     << utils::to_string(D)
+       << " E ="     << utils::to_string(E)
+       << " H ="     << utils::to_string(H)
+       << " L ="     << utils::to_string(L)
+       << " F ="     << utils::to_string(F)  << " " << to_string(static_cast<Flags>(F)) << std::endl
        << "  A'="    << utils::to_string(aA)
        << " B'="     << utils::to_string(aB)
        << " C'="     << utils::to_string(aC)
@@ -389,83 +334,102 @@ std::string Z80::Registers::to_string() const
        << " H'="     << utils::to_string(aH)
        << " L'="     << utils::to_string(aL)
        << " F'="     << utils::to_string(aF) << " " << to_string(static_cast<Flags>(aF)) << std::endl
-       << "  I="     << utils::to_string(I)
-       << " R="      << utils::to_string(R)
+       << "  I ="    << utils::to_string(I)
+       << " R ="     << utils::to_string(R)
        << " IX="     << utils::to_string(IX)
        << " IY="     << utils::to_string(IY)
        << " SP="     << utils::to_string(SP)
        << " PC="     << utils::to_string(PC)
-       << " memptr=" << utils::to_string(memptr);
+       << " MEMPTR=" << utils::to_string(memptr);
 
     return ss.str();
 }
 
+Z80::Z80(const std::string& type, const std::string& label)
+    : Name{type, (label.empty() ? LABEL : label)}
+{
+}
+
+Z80::Z80(const sptr_t<ASpace>& mmap, const std::string& type, const std::string& label)
+    : Name{type, (label.empty() ? LABEL : label)}
+{
+    init(mmap);
+}
+
+Z80::~Z80()
+{
+}
+
 void Z80::init(const sptr_t<ASpace>& mmap)
 {
-    if (mmap) {
-        _mmap = mmap;
-    }
+    using namespace gsl;
+    Expects(mmap);
 
+    _mmap = mmap;
     Z80::reset();
 }
 
-void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb& load, const monitor::save_cb& save)
+void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const monitor::save_cb_t& save)
 {
     using namespace gsl;
     Expects(ifd >= 0 && ofd >= 0);
 
-    auto pc = [this]() -> addr_t& {
-        return this->_regs.PC;
+    auto getpc = [this]() -> addr_t {
+        return _regs.PC;
+    };
+
+    auto setpc = [this](addr_t addr) {
+        _regs.PC = _iaddr = addr;
     };
 
     auto mmap = [this]() {
-        return this->_mmap;
+        return _mmap;
     };
 
     auto regvalue = [this](const std::string& rname) -> uint16_t {
         static std::map<std::string, std::function<int(const Z80&)>> regvals{
-            { "ra",    [](const Z80& cpu) { return cpu._regs.A;        }},
-            { "rf",    [](const Z80& cpu) { return cpu._regs.F;        }},
-            { "raf",   [](const Z80& cpu) { return cpu._regs.AF();     }},
-            { "rb",    [](const Z80& cpu) { return cpu._regs.B;        }},
-            { "rc",    [](const Z80& cpu) { return cpu._regs.C;        }},
-            { "rbc",   [](const Z80& cpu) { return cpu._regs.BC();     }},
-            { "rd",    [](const Z80& cpu) { return cpu._regs.D;        }},
-            { "re",    [](const Z80& cpu) { return cpu._regs.E;        }},
-            { "rde",   [](const Z80& cpu) { return cpu._regs.DE();     }},
-            { "rh",    [](const Z80& cpu) { return cpu._regs.H;        }},
-            { "rl",    [](const Z80& cpu) { return cpu._regs.L;        }},
-            { "rhl",   [](const Z80& cpu) { return cpu._regs.HL();     }},
-            { "ra'",   [](const Z80& cpu) { return cpu._regs.aA;       }},
-            { "rf'",   [](const Z80& cpu) { return cpu._regs.aF;       }},
-            { "raf'",  [](const Z80& cpu) { return cpu._regs.aAF();    }},
-            { "rb'",   [](const Z80& cpu) { return cpu._regs.aB;       }},
-            { "rc'",   [](const Z80& cpu) { return cpu._regs.aC;       }},
-            { "rbc'",  [](const Z80& cpu) { return cpu._regs.aBC();    }},
-            { "rd'",   [](const Z80& cpu) { return cpu._regs.aD;       }},
-            { "re'",   [](const Z80& cpu) { return cpu._regs.aE;       }},
-            { "rde'",  [](const Z80& cpu) { return cpu._regs.aDE();    }},
-            { "rh'",   [](const Z80& cpu) { return cpu._regs.aH;       }},
-            { "rl'",   [](const Z80& cpu) { return cpu._regs.aL;       }},
-            { "rhl'",  [](const Z80& cpu) { return cpu._regs.aHL();    }},
-            { "ri",    [](const Z80& cpu) { return cpu._regs.I;        }},
-            { "rr",    [](const Z80& cpu) { return cpu._regs.R;        }},
-            { "rx",    [](const Z80& cpu) { return cpu._regs.IX;       }},
-            { "ry",    [](const Z80& cpu) { return cpu._regs.IY;       }},
-            { "rsp",   [](const Z80& cpu) { return cpu._regs.SP;       }},
-            { "rpc",   [](const Z80& cpu) { return cpu._regs.PC;       }},
-            { "rf.s",  [](const Z80& cpu) { return cpu.test_S();       }},
-            { "rf.z",  [](const Z80& cpu) { return cpu.test_Z();       }},
-            { "rf.h",  [](const Z80& cpu) { return cpu.test_H();       }},
-            { "rf.v",  [](const Z80& cpu) { return cpu.test_V();       }},
-            { "rf.n",  [](const Z80& cpu) { return cpu.test_N();       }},
-            { "rf.c",  [](const Z80& cpu) { return cpu.test_C();       }},
-            { "rf'.s", [](const Z80& cpu) { return cpu.test_aS();      }},
-            { "rf'.z", [](const Z80& cpu) { return cpu.test_aZ();      }},
-            { "rf'.h", [](const Z80& cpu) { return cpu.test_aH();      }},
-            { "rf'.v", [](const Z80& cpu) { return cpu.test_aV();      }},
-            { "rf'.n", [](const Z80& cpu) { return cpu.test_aN();      }},
-            { "rf'.c", [](const Z80& cpu) { return cpu.test_aC();      }}
+            { "ra",    [](const Z80& cpu) { return cpu._regs.A;     }},
+            { "rf",    [](const Z80& cpu) { return cpu._regs.F;     }},
+            { "raf",   [](const Z80& cpu) { return cpu._regs.AF;    }},
+            { "rb",    [](const Z80& cpu) { return cpu._regs.B;     }},
+            { "rc",    [](const Z80& cpu) { return cpu._regs.C;     }},
+            { "rbc",   [](const Z80& cpu) { return cpu._regs.BC;    }},
+            { "rd",    [](const Z80& cpu) { return cpu._regs.D;     }},
+            { "re",    [](const Z80& cpu) { return cpu._regs.E;     }},
+            { "rde",   [](const Z80& cpu) { return cpu._regs.DE;    }},
+            { "rh",    [](const Z80& cpu) { return cpu._regs.H;     }},
+            { "rl",    [](const Z80& cpu) { return cpu._regs.L;     }},
+            { "rhl",   [](const Z80& cpu) { return cpu._regs.HL;    }},
+            { "ra'",   [](const Z80& cpu) { return cpu._regs.aA;    }},
+            { "rf'",   [](const Z80& cpu) { return cpu._regs.aF;    }},
+            { "raf'",  [](const Z80& cpu) { return cpu._regs.aAF;   }},
+            { "rb'",   [](const Z80& cpu) { return cpu._regs.aB;    }},
+            { "rc'",   [](const Z80& cpu) { return cpu._regs.aC;    }},
+            { "rbc'",  [](const Z80& cpu) { return cpu._regs.aBC;   }},
+            { "rd'",   [](const Z80& cpu) { return cpu._regs.aD;    }},
+            { "re'",   [](const Z80& cpu) { return cpu._regs.aE;    }},
+            { "rde'",  [](const Z80& cpu) { return cpu._regs.aDE;   }},
+            { "rh'",   [](const Z80& cpu) { return cpu._regs.aH;    }},
+            { "rl'",   [](const Z80& cpu) { return cpu._regs.aL;    }},
+            { "rhl'",  [](const Z80& cpu) { return cpu._regs.aHL;   }},
+            { "ri",    [](const Z80& cpu) { return cpu._regs.I;     }},
+            { "rr",    [](const Z80& cpu) { return cpu._regs.R;     }},
+            { "rx",    [](const Z80& cpu) { return cpu._regs.IX;    }},
+            { "ry",    [](const Z80& cpu) { return cpu._regs.IY;    }},
+            { "rsp",   [](const Z80& cpu) { return cpu._regs.SP;    }},
+            { "rpc",   [](const Z80& cpu) { return cpu._regs.PC;    }},
+            { "rf.s",  [](const Z80& cpu) { return cpu.test_S();    }},
+            { "rf.z",  [](const Z80& cpu) { return cpu.test_Z();    }},
+            { "rf.h",  [](const Z80& cpu) { return cpu.test_H();    }},
+            { "rf.v",  [](const Z80& cpu) { return cpu.test_V();    }},
+            { "rf.n",  [](const Z80& cpu) { return cpu.test_N();    }},
+            { "rf.c",  [](const Z80& cpu) { return cpu.test_C();    }},
+            { "rf'.s", [](const Z80& cpu) { return cpu.test_aS();   }},
+            { "rf'.z", [](const Z80& cpu) { return cpu.test_aZ();   }},
+            { "rf'.h", [](const Z80& cpu) { return cpu.test_aH();   }},
+            { "rf'.v", [](const Z80& cpu) { return cpu.test_aV();   }},
+            { "rf'.n", [](const Z80& cpu) { return cpu.test_aN();   }},
+            { "rf'.c", [](const Z80& cpu) { return cpu.test_aC();   }}
         };
         auto it = regvals.find(rname);
         if (it != regvals.end()) {
@@ -478,13 +442,13 @@ void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb& load, const mon
         return {
             cmd + " help | h | ?\n" +
             cmd + " <addr> [<cond>]\n\n"
-            "<cond> = <val> <op> <val>\n"
-            "<val>  = [*]{[#][$]<u16> |\n"
+            "<cond> = <val> <op> <val>\n\n"
+            "<val>  = [*] { [#][$]<u16> |\n"
             "         ra | rf | raf | rb | rc | rbc | rd | re | rde | rh | rl | rhl |\n"
             "         ra' | rf' | raf' | rb' | rc' | rbc' | rd' | re' | rde' | rh' | rl' | rhl' |\n"
             "         ri | rr | rx | rsp | rpc |\n"
             "         rf.s | rf.z | rf.z | rf.h | rf.v | rf.n | rf.c |\n"
-            "         rf'.s | rf'.z | rf'.z | rf'.h | rf'.v | rf'.n | rf'.c}\n"
+            "         rf'.s | rf'.z | rf'.z | rf'.h | rf'.v | rf'.n | rf'.c }\n\n"
             "<op>   = '<' | '>' | '<=' | '>=' | '==' | '!=' | '&' | '|'\n\n"
             "examples:\n"
             "  b $8009 *$fd20 >= #$f0\n"
@@ -494,7 +458,8 @@ void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb& load, const mon
     };
 
     MonitoredCPU monitor_funcs = monitor::monitored_cpu_defaults(this);
-    monitor_funcs.pc = pc;
+    monitor_funcs.getpc = getpc;
+    monitor_funcs.setpc = setpc;
     monitor_funcs.mmap = mmap;
     monitor_funcs.regvalue = regvalue;
     monitor_funcs.bpdoc = bpdoc;
@@ -508,13 +473,13 @@ void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb& load, const mon
     }
 
     _monitor = std::make_unique<Monitor>(ifd, ofd, std::move(monitor_funcs));
-    _monitor->add_breakpoint(vRESET);
+    _monitor->add_breakpoint(RESET_ADDR);
 }
 
-void Z80::loglevel(const std::string& lvs)
+void Z80::loglevel(const std::string& ll)
 {
-    if (!empty(lvs)) {
-        _log.loglevel(lvs);
+    if (!empty(ll)) {
+        _log.loglevel(ll);
     }
 }
 
@@ -595,17 +560,17 @@ inline bool Z80::wait_pin() const
 
 void Z80::halt_pin(bool active)
 {
-    if (active != _halted) {
-        _halted = active;
+    if (active != _halt_pin) {
+        _halt_pin = active;
         if (_halt_cb) {
-            _halt_cb(_halted);
+            _halt_cb(_halt_pin);
         }
     }
 }
 
 bool Z80::halt_pin() const
 {
-    return _halted;
+    return _halt_pin;
 }
 
 void Z80::int_pin(bool active)
@@ -634,127 +599,224 @@ void Z80::wait_pin(bool active)
     _wait_pin = active;
 }
 
+void Z80::halt()
+{
+    if (!_halt_pin) {
+        --_regs.PC;
+        halt_pin(true);
+    }
+}
+
+void Z80::unhalt()
+{
+    if (_halt_pin) {
+        ++_regs.PC;
+        halt_pin(false);
+    }
+}
+
 void Z80::reset()
 {
-    _imode = IMODE_0;
-    _IFF1  = false;
-    _IFF2  = false;
-
-    _regs = {
-        .A  = 0xFF,
-        .F  = 0xFF,
-        .I  = 0,
-        .R  = 0,
-        .SP = 0xFFFF,
-        .PC = vRESET,
-    };
-
     halt_pin(false);
     m1_pin(false);
     rfsh_pin(false);
+    iorq_pin(false);
+
+    _regs = {
+        .AF = 0xFFFF,
+        .I  = 0,
+        .R  = 0,
+        .SP = 0xFFFF,
+        .PC = RESET_ADDR,
+        .memptr = RESET_ADDR,
+    };
+
+    _imode = IMode::M0;
+    _IFF1 = false;
+    _IFF2 = false;
+    _int = false;
+    _nmi = false;
+
+    _iaddr = RESET_ADDR;
+    _fstate = FetchState::Init;
 
     _tx = Cycle::T1;
 }
 
+void Z80::opcode_fetch(bool read_bus)
+{
+    if (read_bus) {
+        _opcode = _mmap->data_bus();
+
+    } else {
+        _opcode = read(_regs.PC);
+        ++_regs.PC;
+    }
+
+    switch (_fstate) {
+    case FetchState::Init:
+        switch (_opcode) {
+        case I_CB:
+            _iprefix = Prefix::None;
+            _instr_set = bit_instr_set;
+            _fstate = FetchState::Opcode;
+            break;
+        case I_ED:
+            _iprefix = Prefix::None;
+            _instr_set = ed_instr_set;
+            _fstate = FetchState::Opcode;
+            break;
+        case I_IX:
+            _iprefix = Prefix::IX;
+            _instr_set = ix_instr_set;
+            _fstate = FetchState::IX;
+            break;
+        case I_IY:
+            _iprefix = Prefix::IY;
+            _instr_set = iy_instr_set;
+            _fstate = FetchState::IY;
+            break;
+        default:
+            _iprefix = Prefix::None;
+            _instr_set = main_instr_set;
+        }
+        break;
+
+    case FetchState::IX:
+        switch (_opcode) {
+        case I_CB:
+            _instr_set = ix_bit_instr_set;
+            _fstate = FetchState::IX_Bit;
+            break;
+        case I_ED:
+            _instr_set = ed_instr_set;
+            _fstate = FetchState::Opcode;
+            break;
+        case I_IX:
+            break;
+        case I_IY:
+            _instr_set = iy_instr_set;
+            _iprefix = Prefix::IY;
+            _fstate = FetchState::IY;
+            break;
+        default:
+            _fstate = FetchState::Init;
+        }
+        break;
+
+    case FetchState::IY:
+        switch (_opcode) {
+        case I_CB:
+            _instr_set = ix_bit_instr_set;
+            _fstate = FetchState::IY_Bit;
+            break;
+        case I_ED:
+            _instr_set = ed_instr_set;
+            _fstate = FetchState::Opcode;
+            break;
+        case I_IX:
+            _instr_set = ix_instr_set;
+            _iprefix = Prefix::IX;
+            _fstate = FetchState::IX;
+            break;
+        case I_IY:
+            break;
+        default:
+            _fstate = FetchState::Init;
+        }
+        break;
+
+    case FetchState::IX_Bit:
+    case FetchState::IY_Bit:
+        _bit_displ = _opcode;
+        _fstate = FetchState::Opcode;
+        break;
+
+    case FetchState::Opcode:
+        _fstate = FetchState::Init;
+    }
+}
+
 size_t Z80::m1_cycle()
 {
-    size_t cycles{};
     addr_t rfsh_addr{};
-    uint8_t opcode{};
-    bool forced{};
 
     switch (_tx) {
     case Cycle::T1:
-        /*
-         * Initiate the M1 cycle.
-         */
-        m1_pin(true);
-        rfsh_pin(false);
+        rfsh_pin(false);    /* Finish the previous refresh cycle */
+        m1_pin(true);       /* Start the M1 cycle (opcode fetch) */
         _tx = Cycle::T2;
-        return 1;
+        break;
 
     case Cycle::T2:
         /*
-         * Add wait-states (if requested by external devices).
+         * Add wait-states if requested by external devices.
          */
         if (wait_pin()) {
             _log.debug("Wait state\n");
         } else {
             _tx = Cycle::T3;
         }
-        return 1;
+        break;
 
     case Cycle::T3:
         /*
-         * Fetch the opcode.
+         * Opcode fetch and instruction decode.
          */
-        if (_halted) {
-            opcode = I_NOP; /* NOP operation forced on halt state */
-            forced = true;
-        } else {
-            opcode = read(_regs.PC);
-            forced = false;
-        }
+        opcode_fetch();
 
         /*
-         * End the M1 cycle.
+         * Finish the M1 cycle.
          */
         m1_pin(false);
 
         /*
-         * The R register is incremented after the opcode is fetched.
-         * (Bit 8 remains untouched).
+         * Increment the R register and start the refresh cycle
+         * (Bit 8 of the R register remains untouched).
          */
         _regs.R = (_regs.R & 0x80) | (((_regs.R & 0x7F) + 1) & 0x7F);
-
-        /* The Undocumented Z80 Documented, p23 */
-        if (opcode == I_BIT || opcode == I_IX || opcode == I_MI || opcode == I_IY) {
-            _regs.R = (_regs.R & 0x80) | (((_regs.R & 0x7F) + 1) & 0x7F);
-        }
-
-        /*
-         * Execute the fetched instruction.
-         */
-        cycles = execute(opcode, forced);
-        if (cycles == 0) {
-            return 0;
-        }
-
-        /*
-         * Start the refresh cycle.
-         */
-        rfsh_pin(true);
         rfsh_addr = (static_cast<addr_t>(_regs.I) << 8) | _regs.R;
-        read(rfsh_addr);    /* Force rfsh_addr on the address bus */
+        _mmap->address_bus(rfsh_addr);
+        rfsh_pin(true);
 
-        /*
-         * The cycles variable include the timing for T1, T2 and Tn.
-         * Times for T1 and T2 have been consumed by the clock.
-         * Tn takes place during the next call to this method and its time will be consumed separately.
-         * But,
-         * "When an EI instruction is executed, any pending interrupt request is not accepted
-         * until after the instruction following EI is executed. This single instruction delay
-         * is necessary when the next instruction is a return instruction." (z80cpu_um.pdf p18).
-         */
-        if (opcode == I_EI) {
-            _tx = Cycle::T1;
-            return (cycles - 2);
-        }
+        _tx = Cycle::T4;
+        break;
 
-        _tx = Cycle::Tn;
-        return (cycles - 3);
-
-    case Cycle::Tn:
-        /*
-         * Inpterrupt pins sampled on last instruction cycle.
-         */
-        if (_nmi_pin) {
-            _is_nmi = true;
-        } else if (_IFF1 && _int_pin) {
-            _is_int = true;
-        }
-
+    case Cycle::T4:
         _tx = Cycle::T1;
+
+        if (_fstate == FetchState::Init) {
+            /*
+             * Execute the decoded instruction.
+             */
+            size_t cycles = execute(_opcode);
+            if (cycles == 0) {
+                return 0;
+            }
+
+            /*
+             * "When an EI instruction is executed any pending interrupt request is not accepted
+             * until after the instruction following EI is executed. This single instruction delay
+             * is necessary when the next instruction is a return instruction."
+             * (z80cpu_um.pdf p18).
+             */
+            if (!(_opcode == I_EI && _instr_set == main_instr_set)) {
+                /*
+                 * Interrupt pins sampled on last instruction cycle.
+                 */
+                if (_nmi_pin) {
+                    _nmi = true;
+                } else if (_IFF1 && _int_pin) {
+                    _int = true;
+                }
+            }
+
+            cycles -= 3;
+            return cycles;
+        }
+        break;
+
+    default:;
     }
 
     return 1;
@@ -762,238 +824,220 @@ size_t Z80::m1_cycle()
 
 size_t Z80::m1_cycle_interrupt()
 {
+    addr_t rfsh_addr{};
+
     switch (_tx) {
     case Cycle::T1:
+        unhalt();
+
+        rfsh_pin(false);    /* Finish the previous refresh cycle */
+        m1_pin(true);       /* Start the special M1 cycle */
+
+        _tx = (_nmi ? Cycle::T3 : Cycle::Tw1);
+        return 2;   /* T1, T2 */
+
+    case Cycle::Tw1:
         /*
-         * Initiate the special M1 cycle.
+         * INT
          */
-        m1_pin(true);
-        rfsh_pin(false);
-        halt_pin(false);
+        //FIXME: M0 multibyte instruction: /IORQ active only during 1st fetch?
+        iorq_pin(true);     /* Interrupt acknowledge */
+        _tx = Cycle::Tw2;
+        break;
 
-        if (_is_int) {
-            iorq_pin(true);
-        }
-
-        _tx = Cycle::T2;
-        return 1;
-
-    case Cycle::T2:
-        /*
-         * Add wait-states for /INT (if requested by external devices).
-         */
-        if (_is_int && wait_pin()) {
+    case Cycle::Tw2:
+        if (wait_pin()) {
             _log.debug("INT wait state\n");
         } else {
             _tx = Cycle::T3;
         }
-        return 1;
+        break;
 
     case Cycle::T3:
-    default:
         /*
-         * End the special M1 cycle.
+         * Fetch an instruction or an interrupt vector.
          */
+        if (!_nmi) {
+            /*
+             * M0: Retrieve an instruction from the data bus (could be multibyte).
+             * M1: Retrieve a value from the data bus and then discard it.
+             * M2: Retrieve an interrupt vector from the data bus.
+             */
+            opcode_fetch(FETCH_FROM_DATABUS);
+            iorq_pin(false);
+        }
+
         m1_pin(false);
 
         /*
-         * The R register is incremented at T3 (bit 8 remains untouched).
+         * Increment the R register and start the refresh cycle
+         * (Bit 8 of the R register remains untouched).
          */
         _regs.R = (_regs.R & 0x80) | (((_regs.R & 0x7F) + 1) & 0x7F);
+        rfsh_addr = (static_cast<addr_t>(_regs.I) << 8) | _regs.R;
+        _mmap->address_bus(rfsh_addr);
+        rfsh_pin(true);
+
+        _tx = Cycle::T4;
         break;
-    }
 
-    size_t cycles = 0;
+    case Cycle::T4:
+        _tx = Cycle::T1;
 
-    if (_is_nmi) {
-        /*
-         * Process NMI.
-         */
-        _IFF2 = _IFF1;
-        _IFF1 = false;
-        push_addr(_regs.PC);
-        _regs.PC = vNMI;
-        _regs.memptr = vNMI;
-        _log.debug("Detected NMI interrupt, PC: $%04X\n", _regs.PC);
-        cycles += 17;  /* CALL vNMI */
+        if (_nmi || (!_nmi && _imode != IMode::M0) || _fstate == FetchState::Init) {
+            size_t cycles{};
 
-    } else {
-        /*
-         * Process INT.
-         */
-        _IFF1 = false;
-        _IFF2 = false;
+            if (_nmi) {
+                /*
+                 * Process NMI.
+                 */
+                _IFF2 = _IFF1;
+                _IFF1 = false;
+                _nmi = false;
 
-        uint8_t vec = _mmap->databus();
-        iorq_pin(false);
+                call(NMI_ADDR);
+                _regs.memptr = NMI_ADDR;
+                _iaddr = NMI_ADDR;
 
-        switch (_imode) {
-        case IMODE_0:
-            /*
-             * The device provides the 8-bits instruction.
-             */
-            _log.debug("Detected INT interrupt, mode: 0, opcode: $%02X \"%s\"\n", vec, instr_set[vec].format);
-            cycles = execute(vec, true);
-            if (cycles == 0) {
-                return 0;
+                _log.debug("Processing NMI interrupt, PC: $%04X\n", _regs.PC);
+                cycles = CALL_CYCLES;
+
+            } else {
+                /*
+                 * Process INT.
+                 */
+                _IFF1 = false;
+                _IFF2 = false;
+                _int = false;
+
+                switch (_imode) {
+                case IMode::M0:
+                    /*
+                     * The interrupting device provided the instruction to execute.
+                     */
+                    _log.debug("Processing INT interrupt M0\n");
+                    cycles = execute(_opcode, FORCED_INSTRUCTION);
+                    if (cycles == 0) {
+                        return 0;
+                    }
+                    break;
+
+                case IMode::M1:
+                    /*
+                     * ISR at INT_ADDR ($0038).
+                     */
+                    call(INT_ADDR);
+                    _regs.memptr = INT_ADDR;
+                    _iaddr = INT_ADDR;
+                    _log.debug("Processing INT interrupt M1, PC: $%04X\n", _regs.PC);
+                    cycles = CALL_CYCLES;
+                    break;
+
+                case IMode::M2:
+                    /*
+                     * The interrupting device provides an 8-bits vector used to address an ISR table.
+                     */
+                    addr_t isr_table = static_cast<addr_t>(_regs.I) << 8;
+                    addr_t isr_addr = isr_table | _opcode;
+                    push_addr(_regs.PC);
+                    _regs.PC = read_addr(isr_addr);
+                    _regs.memptr = _regs.PC;
+                    _iaddr = _regs.PC;
+                    _log.debug("Processing INT interrupt M2, ISR table: $%04X, vector: $%02X, ISR: $%04X\n",
+                        isr_table, _opcode, _regs.PC);
+
+                    /*
+                     * 7 cycles to fetch the lower eight bits from the interrupting device,
+                     * 6 cycles to save the program counter, and
+                     * 6 cycles to obtain the jump address.
+                     */
+                    cycles = 7 + 6 + 6;
+                    break;
+                }
             }
-            break;
 
-        case IMODE_1:
-            /*
-             * ISR at vINT ($0038).
-             */
-            push_addr(_regs.PC);
-            _regs.PC = vINT;
-            _regs.memptr = vINT;
-            _log.debug("Detected INT interrupt, mode: 1, PC: $%04X\n", _regs.PC);
-            cycles += 17;  /* CALL vINT */
-            break;
-
-        case IMODE_2:
-        default:
-            /*
-             * The interrupting device provides an 8-bits vector used to address an ISR table.
-             */
-            addr_t isr_table = static_cast<addr_t>(_regs.I) << 8;
-            addr_t isr_ptr = isr_table | vec;
-            push_addr(_regs.PC);
-            _regs.PC = read_addr(isr_ptr);
-            _regs.memptr = _regs.PC;
-            _log.debug("Detected INT interrupt, mode: 2, ISR table: $%04X, vector: $%02X, ISR: $%04X\n",
-                isr_table, vec, _regs.PC);
-
-            /*
-             * 7 cycles to fetch the lower eight bits from the interrupting device,
-             * 6 cycles to save the program counter, and
-             * 6 cycles to obtain the jump address.
-             */
-            cycles += 7 + 6 + 6;
-            break;
+            _fstate = FetchState::Init;
+            cycles -= 3;
+            return cycles;
         }
+        break;
+
+    case Cycle::T2:;
     }
 
-    /*
-     * Start the refresh cycle.
-     */
-    rfsh_pin(true);
-    addr_t rfsh_addr = (static_cast<addr_t>(_regs.I) << 8) | _regs.R;
-    read(rfsh_addr);    /* Force rfsh_addr on the address bus */
-
-    _tx = Cycle::T1;
-    _is_nmi = false;
-    _is_int = false;
-
-    /*
-     * The cycles variable include T1 and T2, both already consumed by the system clock.
-     */
-    return (cycles - 2);
+    return 1;
 }
 
 size_t Z80::execute(uint8_t opcode, bool forced)
 {
     std::string line{};
-    auto& ins = instr_set[opcode];
 
-    if (_log.is_debug()) {
-        if (forced) {
-            line = "Forced instruction: "s + ins.format;
-        } else {
-            addr_t addr = _regs.PC;
-            line = disass(addr);
-        }
+    const auto& ins = _instr_set[opcode];
+
+    if (!ins.fn) {
+        log.fatal("Empty callback: %s\n%s\n", ins.format, status().c_str());
+        /* NOTREACHED */
     }
 
-    size_t cycles = execute(&ins, opcode, forced);
+    if (_log.is_debug()) {
+        addr_t addr = _iaddr;
+        line = (forced ? "Forced instruction: "s + ins.format : disass(addr));
+    }
+
+    size_t cycles = execute(ins, opcode, forced);
 
     if (_log.is_debug()) {
-        std::ostringstream msg{};
-        msg << std::setw(35) << std::left << line << "  cycles=" << cycles << std::endl
-            << status() << std::endl;
-        _log.debug(msg.str());
+        _log.debug("%35s  cycles=%d\n%s\n", line.c_str(), cycles, status().c_str());
     }
 
     return cycles;
 }
 
-size_t Z80::execute(const Z80::Instruction* ins, uint8_t opcode, bool forced)
+size_t Z80::execute(const Z80::Instruction& ins, uint8_t opcode, bool forced)
 {
-    size_t cycles{};
     addr_t arg{};
 
     /*
      * If forced is false:
-     *   At input, the PC regsiter must point to the specified opcode;
+     *   At input, the PC register points to the instruction arguments or to the next instruction.
      *   At exit, the PC register points to the next instruction.
      *
      * If forced is true:
-     *   If the opcode is a single-byte instruction the PC register is left unchanged;
-     *   If the opcode is a multi-byte instruction the PC register is changed and the behaviour
-     *   of the execution is unpredictable.
-     *
-     * Forced opcodes MUST be single-byte instructions.
+     *   If the opcode is a single-byte instruction, the PC register is left unchanged;
+     *   Forced opcodes should be single-byte instructions.
      */
-    switch (ins->type) {
+    switch (ins.type) {
+    case ArgType::None:
+        break;
+
     case ArgType::A8:
-        arg = static_cast<addr_t>(read(++_regs.PC));
+        arg = read(_regs.PC);
         ++_regs.PC;
+        break;
+
+    case ArgType::A8_Inv:
+        arg = static_cast<uint8_t>(_bit_displ);
         break;
 
     case ArgType::A16:
-        arg = read(_regs.PC + 1) | (static_cast<addr_t>(read(_regs.PC + 2)) << 8);
-        _regs.PC += 3;;
+        arg = read(_regs.PC) | (static_cast<addr_t>(read(_regs.PC + 1)) << 8);
+        _regs.PC += 2;
         break;
-
-    case ArgType::None:
-        if (!forced) {
-            ++_regs.PC;
-        }
-        break;
-
-    case ArgType::Bit:
-        opcode = read(++_regs.PC);
-        ins = &bit_instr_set[opcode];
-        return execute(ins, opcode);
-
-    case ArgType::IX:
-        opcode = read(++_regs.PC);
-        ins = &ix_instr_set[opcode];
-        return execute(ins, opcode);
-
-    case ArgType::IY:
-        opcode = read(++_regs.PC);
-        ins = &iy_instr_set[opcode];
-        return execute(ins, opcode);
-
-    case ArgType::IXBit:
-        opcode = read(_regs.PC + 2);
-        ins = &ix_bit_instr_set[opcode];
-        cycles = execute(ins, opcode);
-        ++_regs.PC;
-        return cycles;
-
-    case ArgType::IYBit:
-        opcode = read(_regs.PC + 2);
-        ins = &iy_bit_instr_set[opcode];
-        cycles = execute(ins, opcode);
-        ++_regs.PC;
-        return cycles;
-
-    case ArgType::MI:
-        opcode = read(++_regs.PC);
-        ins = &mi_instr_set[opcode];
-        return execute(ins, opcode);
 
     default:
-        //FIXME
-        log.error("Invalid instruction $%02X at $%04X, argtype %d\n", opcode, _regs.PC, ins->type);
+        arg = _iaddr;
+        log.error("Invalid opcode $%02X at $%04X, argtype %d\n%s\n%s\n%s\n",
+            opcode, _regs.PC, ins.type, disass(arg).c_str(), disass(arg).c_str(), disass(arg).c_str());
         ebreak();
-        return 4;
+        return NOP_CYCLES;
     }
 
-    int c = ins->fn(*this, opcode, arg);
+    auto c = ins.fn(*this, opcode, arg);
     c &= 0x0000FFFF;
-    return (c == 0 ? ins->cycles : c);
+
+    _iaddr = _regs.PC;
+
+    return (c == 0 ? ins.cycles : c);
 }
 
 inline size_t Z80::tick()
@@ -1005,7 +1049,7 @@ inline size_t Z80::tick()
         return 1;
     }
 
-    auto cycles = ((_is_int || _is_nmi) ? m1_cycle_interrupt() : m1_cycle());
+    auto cycles = ((_int || _nmi) ? m1_cycle_interrupt() : m1_cycle());
     return cycles;
 }
 
@@ -1015,33 +1059,37 @@ size_t Z80::tick(const Clock& clk)
         /*
          * Break hot-key but monitor not active.
          */
-        log.debug("System halt requested from breakpoint\n");
+        log.debug("System halt requested from user\n");
         return Clockable::HALT;
     }
 
-    /*
-     * Break hot-key or breakpoint from monitor.
-     */
-    if (_monitor && _tx == Cycle::T1 && (_break || _monitor->is_breakpoint(_regs.PC))) {
-        addr_t pc{};
-        do {
-            _break = false;
-            pc = _regs.PC;
-            if (!_monitor->run()) {
-                log.debug("System halt requested from monitor\n");
-                return Clockable::HALT;
-            }
-        } while (pc != _regs.PC && _monitor->is_breakpoint(_regs.PC));
-    }
+    if (_tx == Cycle::T1) {
+        /*
+         * Break hot-key or breakpoint from monitor.
+         */
+        if (_monitor && _iaddr == _regs.PC && (_break || _monitor->is_breakpoint(_regs.PC))) {
+            addr_t pc{};
+            do {
+                _break = false;
+                pc = _regs.PC;
+                if (!_monitor->run()) {
+                    log.debug("System halt requested from monitor\n");
+                    return Clockable::HALT;
+                }
 
-    /*
-     * System breakpoints (from some part of the emulator).
-     */
-    auto bp = _breakpoints.find(_regs.PC);
-    if (bp != _breakpoints.end()) {
-        auto& fn = bp->second.first;
-        auto* arg = bp->second.second;
-        fn(*this, arg);
+                _iaddr = _regs.PC;
+            } while (pc != _regs.PC && _monitor->is_breakpoint(_regs.PC));
+        }
+
+        /*
+         * System breakpoints (from some part of the emulator).
+         */
+        auto bp = _breakpoints.find(_regs.PC);
+        if (bp != _breakpoints.end()) {
+            auto& fn = bp->second.first;
+            auto* arg = bp->second.second;
+            fn(*this, arg);
+        }
     }
 
     size_t cycles = tick();
@@ -1060,9 +1108,9 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
 {
     /*
      * Output format:
-     *  8000: 00 00        LD  A(HL)
-     *  8002: 00 00 00 00  AND A
-     *  8005: 00           RET
+     * 0000: 21 FF 7F      LD HL, $7FFF
+     * 0003: 3E 3F         LD A, $3F
+     * 0005: C3 61 02      JP $0261
      *
      *  0         1         2         3
      *  012345678901234567890123456789012345
@@ -1071,8 +1119,9 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
     constexpr static const size_t MNE_SIZE = 20;
 
     addr_t faddr = addr;
-    auto* iset = &instr_set;
+    auto* iset = main_instr_set;
 
+    Prefix prefix{Prefix::None};
     const Instruction* ins{};
     uint8_t oplo{}, ophi{};
     uint8_t opcode{};
@@ -1085,52 +1134,64 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
     hex << utils::to_string(addr) << ":";
 
     /*
-     * Print opcode[s].
+     * Print opcode.
      */
     bool multibyte{true};
     do {
         opcode = peek(addr++);
         hex << " " << utils::to_string(opcode);
 
-        ins = &iset->operator[](opcode);
-        switch (ins->type) {
-        case ArgType::MI:
-            iset = &mi_instr_set;
-            break;
-        case ArgType::Bit:
-            iset = &bit_instr_set;
-            break;
-        case ArgType::IX:
-            iset = &ix_instr_set;
-            break;
-        case ArgType::IY:
-            iset = &iy_instr_set;
-            break;
-        case ArgType::IXBit:
-            oplo = peek(addr++);
-            has_oplo = true;
-            hex << " " << utils::to_string(oplo);
-            iset = &ix_bit_instr_set;
-            break;
-        case ArgType::IYBit:
-            oplo = peek(addr++);
-            has_oplo = true;
-            hex << " " << utils::to_string(oplo);
-            iset = &iy_bit_instr_set;
-            break;
-        default:
+        ins = &iset[opcode];
+        if (ins->type == ArgType::GW) {
+            switch (opcode) {
+            case I_CB:
+                if (prefix == Prefix::None) {
+                    iset = bit_instr_set;
+                } else {
+                    iset = ix_bit_instr_set;
+                    oplo = peek(addr++);
+                    has_oplo = true;
+                    hex << " " << utils::to_string(oplo);
+                }
+                break;
+            case I_IX:
+                iset = ix_instr_set;
+                prefix = Prefix::IX;
+                break;
+            case I_IY:
+                iset = iy_instr_set;
+                prefix = Prefix::IY;
+                break;
+            case I_ED:
+                iset = ed_instr_set;
+                break;
+            default:
+                log.fatal("Invalid gateway prefix: $%02X at $%04X\n", opcode, addr - 1);
+                /* NOTREACHED */
+            }
+
+        } else {
             multibyte = false;
         }
+
     } while (multibyte);
 
     /*
      * Get the instruction operators based on the format string.
      */
     std::string format{ins->format};
+
+    if (prefix == Prefix::IY) {
+        auto pos = format.find("IX");
+        if (pos != std::string::npos) {
+            format = format.replace(pos, 2, "IY");
+        }
+    }
+
     auto pos = format.find_first_of("*^%+");
     if (pos != std::string::npos) {
         /*
-         * '^', '%', '*', '+' is present in the format string: Find the operands.
+         * '^', '%', '*', '+' is present in the format string, find the operands.
          */
         char v = format[pos];
 
@@ -1184,7 +1245,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
              * (that is, the next byte is printed as sign+hexadecimal, and the second byte as hexadecimal).
              */
             if (oplo & 0x80) {
-                oplo -= oplo;
+                oplo = -static_cast<int8_t>(oplo);
                 sign = '-';
             } else {
                 sign = '+';
@@ -1192,6 +1253,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
 
             switch (ins->type) {
             case ArgType::A8:
+            case ArgType::A8_Inv:
                 displ << sign << "$" << utils::to_string(oplo);
                 format.replace(pos, 1, displ.str());
                 break;
@@ -1244,16 +1306,16 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
 
 addr_t Z80::read_addr(size_t addr)
 {
-    uint8_t lo = read(addr);
-    uint8_t hi = read(addr + 1);
+    uint16_t lo = read(addr);
+    uint16_t hi = read(addr + 1);
 
-    return (static_cast<addr_t>(hi) << 8 | lo);
+    return ((hi << 8) | lo);
 }
 
 void Z80::write_addr(addr_t addr, addr_t data)
 {
-    uint8_t lo = static_cast<uint8_t>(data & 0xFF);
-    uint8_t hi = static_cast<uint8_t>(data >> 8);
+    uint8_t lo = data & 255;
+    uint8_t hi = data >> 8;
 
     write(addr, lo);
     write(addr + 1, hi);
@@ -1284,7 +1346,7 @@ void Z80::bpdel(addr_t addr)
     _breakpoints.erase(addr);
 }
 
-const Z80::Registers &Z80::regs() const
+const Z80::Registers& Z80::regs() const
 {
     return _regs;
 }
@@ -1293,11 +1355,11 @@ std::string Z80::status() const
 {
     std::ostringstream os{};
 
-    os << this->_regs.to_string() << std::endl
-       << "  IFF1=" << this->_IFF1
-       << " IFF2="  << this->_IFF2
-       << " MI="    << this->_imode
-       << " HALT="  << this->_halted;
+    os << _regs.to_string() << std::endl
+       << "  IFF1=" << _IFF1
+       << " IFF2="  << _IFF2
+       << " MI="    << static_cast<unsigned>(_imode)
+       << " HALT="  << _halt_pin;
 
     return os.str();
 }
