@@ -72,7 +72,7 @@ C64Config::C64Config(config::Section& sec)
       unit8{sec[KEY_UNIT_8]},
       unit9{sec[KEY_UNIT_9]}
 {
-    title += " - C64";
+    title += " - Commodore C64";
 }
 
 std::string C64Config::to_string() const
