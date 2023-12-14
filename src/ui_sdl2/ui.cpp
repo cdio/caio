@@ -586,7 +586,7 @@ void UI::kbd_event(const SDL_Event& event)
                 /*
                  * Toggle Pause mode.
                  */
-                hotkeys(keyboard::KEY_PAUSE);
+                pause(paused() ^ true);
                 break;
 
             case SDLK_v:
