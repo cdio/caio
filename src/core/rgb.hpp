@@ -35,12 +35,19 @@ namespace caio {
  */
 struct Rgba {
     union {
-        uint32_t u32;
+        uint32_t u32 __attribute__((packed));
         struct {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+            uint8_t a;
+            uint8_t b;
+            uint8_t g;
+            uint8_t r;
+#else
             uint8_t r;
             uint8_t g;
             uint8_t b;
             uint8_t a;
+#endif
         } __attribute__((packed));
     };
 
@@ -52,18 +59,15 @@ struct Rgba {
      * @param alpha Alpha component (default is 255, no transparency).
      */
     constexpr Rgba(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255)
-        : r{red},
-          g{green},
-          b{blue},
-          a{alpha} {
+        : Rgba{static_cast<uint32_t>((red << 24) | (green << 16) | (blue << 8) | alpha)} {
     }
 
     /**
      * Initialise a colour from a 32 bits value.
      * @param rgba A 32 bits colour value in host endian order (default is black, no transparency).
      */
-    Rgba(uint32_t rgba = 0x000000FF)
-        : u32{htobe32(rgba)} {
+    constexpr Rgba(uint32_t rgba = 0x000000FF)
+        : u32{rgba} {
     }
 
     /**
@@ -90,13 +94,6 @@ struct Rgba {
         }
 
         return *this;
-    }
-
-    /**
-     * @return This colour enconded as a host endian 32 bits integer.
-     */
-    uint32_t to_host_u32() const {
-        return be32toh(u32);
     }
 
     /**

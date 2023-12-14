@@ -1008,7 +1008,7 @@ void UI::render_screen()
     switch (_conf.video.sleffect) {
     case SLEffect::None:
         std::transform(_screen_raw.begin(), _screen_raw.end(), dst, [](const Rgba& px) {
-            return px.to_host_u32();
+            return px.u32;
         });
         break;
 
@@ -1021,7 +1021,7 @@ void UI::render_screen()
          * these fake scanlines.
          */
         std::transform(_screen_raw.begin(), _screen_raw.end(), dst, [](const Rgba& px) {
-            return (px * SCANLINE_LUMINOSITY).to_host_u32();
+            return (px * SCANLINE_LUMINOSITY).u32;
         });
         break;
 
@@ -1038,12 +1038,12 @@ void UI::render_screen()
             std::for_each(it, it + _conf.video.width, [&dst, &line, this](const Rgba& px) {
                 Rgba pixel{px * ADV_SCANLINE_LUMINOSITY};
                 Rgba refle{px * ADV_SCANLINE_REFLECTION};
-                *dst = pixel.to_host_u32();
+                *dst = pixel.u32;
                 if (line + 1 < _conf.video.height) {
-                    dst[_tex_width] = refle.to_host_u32();
+                    dst[_tex_width] = refle.u32;
                 }
                 if (line > 0) {
-                    dst[-_tex_width] = (Rgba{dst[-_tex_width]} + refle).to_host_u32();
+                    dst[-_tex_width] = (Rgba{dst[-_tex_width]} + refle).u32;
                 }
                 ++dst;
             });
@@ -1065,12 +1065,12 @@ void UI::render_screen()
             std::for_each(it, it + _conf.video.width, [&dst, &x, this](const Rgba& px) {
                 Rgba pixel{px * ADV_SCANLINE_LUMINOSITY};
                 Rgba refle{px * ADV_SCANLINE_REFLECTION};
-                *dst = pixel.to_host_u32();
+                *dst = pixel.u32;
                 if (x + 1 < _conf.video.width) {
-                    dst[1] = refle.to_host_u32();
+                    dst[1] = refle.u32;
                 }
                 if (x > 0) {
-                    dst[-1] = (Rgba{dst[-1]} + refle).to_host_u32();
+                    dst[-1] = (Rgba{dst[-1]} + refle).u32;
                 }
                 dst += 2;
             });
