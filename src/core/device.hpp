@@ -34,7 +34,7 @@ using devptr_t = sptr_t<class Device>;
  * Generic device.
  * This class implements a hardware device that exposes an address
  * (or register) range where data can be written to or read from.
- * This class must be derived by the actual emulated device.
+ * This class must be derived by an actual emulated device.
  */
 class Device : public Name {
 public:
@@ -44,7 +44,8 @@ public:
     };
 
     /**
-     * @return A human readable string representing this device.
+     * Return a human readable string representing this device.
+     * @return A string representing this device.
      */
     std::string to_string() const override;
 
@@ -82,7 +83,8 @@ public:
     virtual void write(addr_t addr, uint8_t data) = 0;
 
     /**
-     * @return The number of addresses (registers) of this device.
+     * Return the number of addresses (or registers) handled by this device.
+     * @return The number of addresses handled by this device.
      */
     virtual size_t size() const = 0;
 

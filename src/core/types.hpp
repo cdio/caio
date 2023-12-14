@@ -78,9 +78,9 @@ std::ostream& stacktrace(std::ostream& os);
 class Error : public std::exception {
 public:
     /**
-     * Initialise this error exception.
+     * Initialise this error.
      * @param elem   Name of the element that generated this error;
-     * @param reason Reason for this error.
+     * @param reason Reason of description of this error.
      */
     Error(const std::string& elem, const std::string& reason)
         : std::exception{},
@@ -88,31 +88,32 @@ public:
     }
 
     /**
-     * Initialise this error exception.
-     * @param reason Reason for this error.
+     * Initialise this error.
+     * @param reason The reason or description of this error.
      */
     Error(const std::string& reason = {})
         : Error{{}, reason} {
     }
 
     /**
-     * Initialise this error exception.
-     * @param ex Exception.
+     * Initialise this error.
+     * @param ex Standard exception associated to this error.
      */
     Error(const std::exception& ex)
         : Error{{}, ex.what()} {
     }
 
     /**
-     * @return The reason for this error.
+     * Return a null terminated string with the description of this error.
+     * @return The null terminated string description of this error.
      */
     const char* what() const noexcept override {
         return _reason.c_str();
     }
 
     /**
-     * Set the reason for this error.
-     * @param reason Reason for this error.
+     * Set the reason or description of this error.
+     * @param reason Reason or description of this error.
      * @return A reference to this error.
      */
     Error& operator=(const std::string& reason) {
@@ -121,12 +122,15 @@ public:
     }
 
     /**
-     * @return A human readable string of the specified error code.
+     * Return an error message that corresponds to the specified system error code.
+     * @param err System error code.
+     * @return The error message.
      */
     static std::string to_string(int err);
 
     /**
-     * @return A human readable string of the current errno code.
+     * Return an error message that corresponds to the current errno value.
+     * @return The error message.
      */
     static std::string to_string() {
         return to_string(errno);
@@ -136,7 +140,7 @@ private:
     std::string _reason{};
 };
 
-#define ERROR_CLASS(cname)      class cname : public Error { using Error::Error; }
+#define ERROR_CLASS(cname)      class cname : public Error { public: using Error::Error; }
 
 ERROR_CLASS(ConfigError);
 ERROR_CLASS(InvalidArgument);

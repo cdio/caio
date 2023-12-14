@@ -42,7 +42,7 @@ using IRQPin = PullUp;
 /**
  * Output Pin Callback.
  * An output pin is implemented as a callback function that
- * connects that output pin to one or more input pins.
+ * connects an output pin to one or more input pins.
  * In other words: When an output pin is "set" what is set
  * are the input pins connected to that output, this is done
  * by the callback.

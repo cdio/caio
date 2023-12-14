@@ -84,6 +84,7 @@ public:
     }
 
     /**
+     * Return the status of this dispatcher.
      * @return true if this dispatcher is valid; false otherwise.
      */
     operator bool() const {
@@ -91,6 +92,7 @@ public:
     }
 
     /**
+     * Return the status of this dispatcher.
      * @return true if this dispatcher is invalid; false otherwise.
      */
     bool operator!() const {

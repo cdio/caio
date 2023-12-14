@@ -34,7 +34,7 @@ public:
     constexpr static const char* TYPE = "NONE";
 
     /**
-     * Initialise None Device.
+     * Initialise this device.
      * @param dvalue Value returned by a read operation (default is 0).
      * @see read(addr_t, ReadMode)
      */
@@ -62,7 +62,6 @@ public:
     /**
      * This method does nothing.
      * @return The default value.
-     * @see DeviceNone(uint8_t dvalue)
      */
     uint8_t read(addr_t, ReadMode) override {
         return _dvalue;

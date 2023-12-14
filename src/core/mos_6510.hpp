@@ -60,6 +60,9 @@ public:
         : Mos6502{mmap, type, label} {
     }
 
+    virtual ~Mos6510() {
+    }
+
     /**
      * Add an input callback.
      * @param ior  Input callback;

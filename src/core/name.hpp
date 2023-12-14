@@ -30,12 +30,12 @@ class Name {
 public:
     constexpr static const char* TYPE_UNKNOWN = "UNK";
 
-    Name() {
-    }
-
-    Name(const std::string& type, const std::string& label = {})
+    Name(const std::string& type = {}, const std::string& label = {})
         : _type{(type.empty() ? TYPE_UNKNOWN : type)},
           _label{(label.empty() ? "" : label)} {
+    }
+
+    virtual ~Name() {
     }
 
     /**

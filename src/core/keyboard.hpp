@@ -166,22 +166,22 @@ struct VJoyKeys {
 };
 
 /**
- * Convert a Key name to a Key code.
+ * Convert a key name to a key code.
  * @param name Key name.
- * @return The Key code (Key::KEY_NONE if the key name is invalid).
+ * @return The key code (Key::KEY_NONE if the key name is invalid).
  */
 Key to_key(const std::string& name);
 
 /**
- * Convert a Key code to a human readable string.
+ * Convert a key code to a key name.
  * @param key Key code.
- * @return The Key name ("" if the key code is invalid).
+ * @return The key name (an empty string if the key code is invalid).
  */
 std::string to_string(Key key);
 
 /**
  * Emulated keyboard.
- * This class must be derived by the specific emulated keyboard.
+ * This class must be derived by an actual emulated keyboard.
  */
 class Keyboard : public Name {
 public:
@@ -196,8 +196,8 @@ public:
     }
 
     /**
-     * Load a key mapping table from a file.
-     * Previous key mappings within this instance are cleared.
+     * Load a key mappings table from a file.
+     * Previous key mappings within this instance are removed.
      * @param fname Name of the file containing the key mappings.
      * @exception IOError
      * @see add_key_map()
@@ -207,7 +207,10 @@ public:
 
     /**
      * Assign a virtual joystick to an emulated joystick.
-     * @param vjoykeys Virtual Joystick keys;
+     * An emulated joystick is connected to the platform under emulation.
+     * What this method does is to make the emulated platform detect the
+     * virtual joystick implemented by this keyboard.
+     * @param vjoykeys Virtual joystick keys;
      * @param vjoy     Emulated joystick.
      * @see Joystick
      * @see VJoyKeys
@@ -215,6 +218,7 @@ public:
     void vjoystick(const VJoyKeys& vjoykeys, const sptr_t<Joystick>& vjoy);
 
     /**
+     * Return the status of this keyboard.
      * @return The status of this keyboard (true if active, false if inactive).
      * @see active(bool)
      */
@@ -233,7 +237,7 @@ public:
 
     /**
      * Key pressed event.
-     * This method must be called by the ui each time
+     * This method must be called by the UI each time
      * a key press event is received from the user.
      * @param key Key code.
      */
@@ -241,14 +245,14 @@ public:
 
     /**
      * Key released event.
-     * This method must be called by the ui each time
+     * This method must be called by the UI each time
      * a key release event es received from the user.
      * @param key Key code.
      */
     void key_released(Key key);
 
     /**
-     * Reset the keyboard.
+     * Reset this keyboard.
      */
     virtual void reset() = 0;
 
@@ -265,22 +269,25 @@ public:
     virtual void released(Key key) = 0;
 
     /**
-     * Read the column associated to the current scan-row.
-     * @return The (negated) column values for the current row.
+     * Scan the current row (read the column associated to the current row).
+     * @return The (negated) column values for the current scanned row.
+     * @see write(uint8_t)
      */
     virtual uint8_t read() = 0;
 
     /**
-     * Set the scan-row.
+     * Set the row to scan.
      * @param row Negated row to scan.
      */
     virtual void write(uint8_t row) = 0;
 
     /**
      * Add a new translation code.
-     * @param key_name   Name of the Key code;
-     * @param key_shift  true if Key code must be shifted, false otherwise;
-     * @param key_altgr  true if Key code is an ALT-GR combination; false otherwise:
+     * A translation code is used to translate between key combinations
+     * to the specific emulated keyboard key combinations.
+     * @param key_name   Name of the key code;
+     * @param key_shift  true if the key code must be shifted, false otherwise;
+     * @param key_altgr  true if key code is an ALT-GR combination; false otherwise:
      * @param impl_name  Name of the specific keyboard implementation code;
      * @param impl_shift true the specific keyboard implementation code must be shifted, false otherwise.
      * @exception InvalidArgument if the key_name or the impl_name is not valid.
@@ -290,7 +297,7 @@ public:
         bool impl_shift) = 0;
 
     /**
-     * Clear the key mappings.
+     * Clear (remove) the key mappings.
      * @see add_key_map()
      */
     virtual void clear_key_map() = 0;

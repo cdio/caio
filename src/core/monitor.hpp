@@ -57,16 +57,16 @@ using bpdoc_cb_t    = std::function<std::string(const std::string&)>;
  */
 struct MonitoredCPU {
     regs_cb_t     regs{};       /* Registers as string                      */
-    getpc_cb_t    getpc{};      /* Retrieve the program counter             */
+    getpc_cb_t    getpc{};      /* Get the program counter                  */
     setpc_cb_t    setpc{};      /* Set the program counter                  */
     peek_cb_t     peek{};       /* Peek memory                              */
     write_cb_t    write{};      /* Write memory                             */
     disass_cb_t   disass{};     /* Disassembly a memory address             */
     mmap_cb_t     mmap{};       /* Get the memory mappings (address space)  */
-    ebreak_cb_t   ebreak{};     /* Set a breakpoint on next insturction     */
+    ebreak_cb_t   ebreak{};     /* Set a breakpoint on next instruction     */
     load_cb_t     load{};       /* Inject content of a file into memory     */
     save_cb_t     save{};       /* Save a memory area as a file             */
-    loglevel_cb_t loglevel{};   /* Set/Receive the loglevel                 */
+    loglevel_cb_t loglevel{};   /* Set/get the loglevel                     */
     regvalue_cb_t regvalue{};   /* Get a register's value given its name    */
     bpdoc_cb_t    bpdoc{};      /* Documentation on how to set breakpoints  */
 
@@ -85,6 +85,7 @@ struct MonitoredCPU {
  * - setpc
  * - mmap
  * - regvalue
+ * @param cpu A raw pointer to the actual monitored CPU.
  * @return A monitored cpu structure with default callbacks.
  * @see MonitoredCPU
  */
@@ -283,6 +284,7 @@ public:
 
 private:
     /**
+     * Return the current prompt string.
      * @return The prompt string.
      */
     std::string prompt();

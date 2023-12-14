@@ -457,7 +457,7 @@ void Mos6502::ebreak()
     _break = true;
 }
 
-void Mos6502::bpadd(addr_t addr, const breakpoint_cb& cb, void* arg)
+void Mos6502::bpadd(addr_t addr, const breakpoint_cb_t& cb, void* arg)
 {
     _breakpoints[addr] = {cb, arg};
 }

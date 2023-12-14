@@ -148,7 +148,7 @@ class Confile {
 public:
     /**
      * Initialise this configuration file.
-     * @param fname Name of the configuration file to read or empty string.
+     * @param fname Name of the configuration file to read or an empty string.
      * @exception ConfigError
      * @exception IOError
      * @see load(const std::string&)
@@ -160,16 +160,16 @@ public:
 
     /**
      * Load a configuration file.
-     * This configuration is overrided with the new data (existing sections are extended
+     * This configuration is merged with the new data (existing sections are extended
      * with new values and existing values are replaced with new ones).
-     * @param fname Name of the configuration file to load or empty string.
+     * @param fname Name of the configuration file to load or an empty string.
      * @exception ConfigError
      * @exception IOError
      */
     void load(const std::string& fname);
 
     /**
-     * Retrieve a configuration section.
+     * Return a configuration section.
      * If the specified section does not exit an empty one is created.
      * @param sname Name of the section (case insensitive).
      * @return The requested section.
@@ -187,11 +187,13 @@ public:
      * Find a section.
      * @param sname Name of the section (case insensitive).
      * @return An iterator to the section; or end() if the section does not exist.
+     * @see end()
      */
     std::map<std::string, Section>::const_iterator find(const std::string& sname) const;
 
     /**
-     * @return An iterator to the last section plus one.
+     * Return an interator following the last section of this configuration file.
+     * @return An iterator following the last section.
      */
     std::map<std::string, Section>::const_iterator end() const;
 
@@ -211,14 +213,14 @@ enum class Arg {
  * Command line option.
  */
 struct Option {
-    using set_cb = std::function<bool(class Confile&, const Option&, const std::string&)>;
+    using set_cb_t = std::function<bool(class Confile&, const Option&, const std::string&)>;
 
     std::string name{};     /* Command line option without the "--" prefix  */
     std::string sname{};    /* Section name                                 */
     std::string key{};      /* Key name                                     */
     std::string dvalue{};   /* Default value                                */
     Arg         type{};     /* Argument requisites                          */
-    set_cb      fn{};       /* Value setter                                 */
+    set_cb_t    fn{};       /* Value setter                                 */
 };
 
 bool set_value(Confile&, const Option&, const std::string&);
@@ -226,11 +228,13 @@ bool set_bool(Confile&, const Option&, const std::string&);
 bool set_true(Confile&, const Option&, const std::string&);
 
 /**
+ * Detect a "yes" string.
  * @return true if the specified string is equal to "yes", "ye", or "y"; false otherwise.
  */
 bool is_true(const std::string&);
 
 /**
+ * Detect a "no" string.
  * @return true if the specified string is equal to "no" or "n"; false otherwise.
  */
 bool is_false(const std::string&);
@@ -240,9 +244,6 @@ bool is_false(const std::string&);
  */
 class Cmdline {
 public:
-    /**
-     * Setup this commmand line parser.
-     */
     Cmdline() {
     }
 
@@ -254,7 +255,9 @@ public:
     }
 
     /**
-     * @return Default configuration values.
+     * Build a configuration file with default values.
+     * @return A configuration file with the default values.
+     * @see Confile
      */
     Confile defaults();
 
@@ -264,7 +267,7 @@ public:
      * @param argv argv as received by the main() function.
      * @return A configuration file with all the parsed values.
      * @exception InvalidArgument if an unknown command line option is detected or
-     * a required argument is missing.
+     * a mandatory argument is missing.
      * @see Confile
      * @see options()
      * @see usage()
@@ -272,16 +275,23 @@ public:
     Confile parse(int argc, const char** argv);
 
     /**
+     * Return a vector with the command line options.
+     * This method must be re-implemented by platforms in order to add new command line options.
      * @return A vector with all the command line options.
+     * @see Option
      */
     virtual std::vector<Option> options() const;
 
     /**
+     * Return the command line usage string.
+     * This method must be re-implemented by platforms in order to add new usgae information.
      * @return A string with usage information.
      */
     virtual std::string usage() const;
 
     /**
+     * Return the platform's section name.
+     * This method must be implemented by the specific emulated platform.
      * @return The platform's section name.
      */
     virtual std::string sname() const = 0;
@@ -358,7 +368,8 @@ struct Config {
     }
 
     /**
-     * @return A human readable string representation of this configuration.
+     * Return a human readable string representation of this configuration.
+     * @return A string representation of this configuration.
      */
     virtual std::string to_string() const;
 
@@ -369,7 +380,7 @@ private:
      * @param path   Directory where the file is intended to be;
      * @param prefix Platform prefix;
      * @param ext    File extension.
-     * @return The fullpath if the file is found (name or path + "/" + prefix + name + ext).
+     * @return The resolved fullpath if the file is found (name or path + "/" + prefix + name + ext).
      * @exception IOError if the file does not exist in the specified path.
      */
     std::string resolve(const std::string& name, const std::string& path, const std::string& prefix,

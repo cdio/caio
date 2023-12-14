@@ -124,6 +124,9 @@ public:
         init(mmap);
     }
 
+    virtual ~Mos6502() {
+    }
+
     /**
      * Initialise a monitor for this CPU.
      * This CPU must be properly initialised (system mappings set) before this method can be called.

@@ -101,7 +101,8 @@ public:
     }
 
     /**
-     * @return The frequency (in Hz) of this clock.
+     * Return the frequency of this clock in Hz.
+     * @return The frequency of this clock in Hz.
      * @see freq(size_t)
      */
     size_t freq() const {
@@ -118,6 +119,7 @@ public:
     }
 
     /**
+     * Return the speed delay for this clock.
      * @return The speed delay for this clock (1.0 is normal speed, 2.0 is half the speed. etc.).
      * @see delay(float)
      */
@@ -227,7 +229,8 @@ public:
     }
 
     /**
-     * @return A human readable string representation of this clock.
+     * Return a human readable string representation of this clock.
+     * @return A string representation of this clock.
      */
     std::string to_string() const override;
 

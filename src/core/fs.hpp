@@ -36,6 +36,7 @@ namespace fs {
 constexpr static const size_t LOAD_MAXSIZ = 65536;
 
 /**
+ * Return the value of the HOME environment variable.
  * @return A string with the value of the HOME environment variable.
  */
 std::string home();

@@ -50,6 +50,7 @@ public:
     }
 
     /**
+     * Return the status of this latch.
      * @return true if at least one of the bits of this latch register is active; false otherwise.
      */
     operator bool() const {

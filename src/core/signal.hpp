@@ -66,7 +66,8 @@ enum class ConvShape {
 };
 
 /**
- * @return A positive random value between 0.0 and 1.0.
+ * Return a random value within the range [0.0, 1.0].
+ * @return A random value within [0.0, 1.0].
  */
 __attribute__((always_inline))
 static inline float prand()
@@ -75,7 +76,8 @@ static inline float prand()
 }
 
 /**
- * @return A random value between -1.0 and 1.0.
+ * Return ad random values within the range [-1.0, 1.0].
+ * @return A random value within [-1.0, 1.0].
  */
 __attribute__((always_inline))
 static inline float rand()
@@ -376,7 +378,10 @@ static inline int16_t to_i16(float value)
 }
 
 /**
+ * Generate an octave campatible statement containing a set of samples.
+ * @param samples Buffer with samples.
  * @return An octave compatible representation of a samples buffer.
+ * @see https://octave.org
  */
 template<typename T, typename = std::enable_if<utils::is_container<T>::value>>
 std::string to_string(const T& samples)
@@ -395,7 +400,7 @@ std::string to_string(const T& samples)
 }
 
 /**
- * Send the content of a samples container to an output stream formatted as an octave structure.
+ * Send the content of a samples buffer to an output stream formatted as an octave structure.
  * @param os      The output stream;
  * @param name    Name for the structure;
  * @param samples Samples;
@@ -404,10 +409,10 @@ std::string to_string(const T& samples)
  * @param fc2     Cutoff frequency 2 or 0;
  * @param Q       Q factor or 0.
  * @return os.
+ * @see https://octave.org
  */
 std::ostream& dump(std::ostream& os, const samples_fp& samples, const std::string& name, float fs, float fc1,
     float fc2, float Q);
-
 }
 
 using samples_fp = signal::samples_fp;
