@@ -1,17 +1,11 @@
-- ZX80:     Make it work
-- Z80:      Refactor Z80 + undocumented instructions
-            Eliminate callback tables ("If CB or ED is encountered, that byte
-            plus the next make up an instruction. FD or DD should be seen as
-            preﬁx setting a ﬂag which says “use IX or IY in stead of HL”, and
-            not an instruction. In a large sequence of DD and FD bytes, it is
-            the last one that counts. Also any other byte (or instruction)
-            resets this ﬂag.")
-- c64:      commodore namespace
+- ZX80:     prg for 8K rom
+- ZX80:     joystick
+- ZX80:     chroma-80
+- vjoy:     move ALT-K handling from c64 to ui
 - signal:   Test all methods specially filters and kernels
 - signal:   Fast filters, fast convolution?
 - Monitor:  Monitor always active, use config value to enter it during boot.
 - Monitor:  bpadd remove void* arg, use template or variant
-- 6502:     Do not terminate on illegal instructions
 - 6502:     Tests suite
 - 6502:     Tests that don't work:
             VICE-testprogs/SCPU/scputest
@@ -29,16 +23,17 @@
 - UI:       Fix disk widget activity when C1541 is in error condition.
 - UI:       Floppy widget: Disk progress
 - UI:       Virtual joystick widget
+- UI:       Keyboard enabled/disabled widget
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
 - CBMBUS:   Refactor using pullups
 - C64:      C64 EasyFlash cartridge: eeprom support
+- ZX80:     Cassette interface + widget
 - misc:     Brew package for macos, rpm for opensuse, freebsd port
 - misc:     Improve entire architecture
 - misc:     Use std::format (C++23)
 - misc:     Use fstream::native_handle() (C++26)
 - misc:     Port to Cpp2?
-- mk:       Fix bin.mk and shlib.mk mess
 - Apple2
 - BBC Micro
 - Daewoo DPC-200

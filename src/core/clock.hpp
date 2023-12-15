@@ -79,11 +79,7 @@ public:
      * @param delay The speed delay (1.0f is normal speed).
      * @see delay(float)
      */
-    Clock(const std::string& label = {}, size_t freq = {}, float delay = 1.0f)
-        : Name{TYPE, label},
-          _freq{freq},
-          _delay{delay} {
-    }
+    Clock(const std::string& label = {}, size_t freq = {}, float delay = 1.0f);
 
     /**
      * Initialise this clock.
@@ -91,11 +87,7 @@ public:
      * @param delay The speed delay (1.0f is normal speed).
      * @see delay(float)
      */
-    explicit Clock(size_t freq, float delay = 1.0f)
-        : Name{TYPE, {}},
-          _freq{freq},
-          _delay{delay} {
-    }
+    Clock(size_t freq, float delay = 1.0f);
 
     virtual ~Clock() {
     }
@@ -253,6 +245,13 @@ public:
     }
 
     /**
+     * Return the elapsed emulated time since the clock was started (in microseconds).
+     * @return The elapsed time in microseconds.
+     * @see run()
+     */
+    uint64_t time() const;
+
+    /**
      * Get the number of clock cycles correspoinding to a given time interval.
      * @param secs Time interval (seconds);
      * @param freq Clock frequency (Hz).
@@ -275,6 +274,7 @@ public:
 private:
     size_t                        _freq;
     float                         _delay;
+    uint64_t                      _ticks{};
     std::atomic_bool              _stop{};
     std::atomic_bool              _suspend{};
     std::vector<clockable_pair_t> _clockables{};

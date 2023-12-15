@@ -28,6 +28,7 @@ namespace zx80 {
 
 /*
  * ZX80 Keyboard:
+ * 4K ROM:
  * +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
  * | not   | and   | then  | to    | left  | down  | up    | right | home  | rubout|
  * |       |       |       |       |       |       |       |       |       |       |
@@ -49,7 +50,7 @@ namespace zx80 {
  * | SHIFT |   Z   |   X   |   C   |   V   |   B   |   N   |   M   |   .   | SPACE |
  * +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
  *
- * Keyboard Matrix:
+ * Keyboard Matrix (as expected by this implementation):
  * +----+---------------------------------------------------+
  * |    | D7    D6    D5    D4    D3    D2    D1    D0      |
  * |    | 80    40    20    10    08    04    02    01      |
@@ -66,10 +67,10 @@ namespace zx80 {
  *
  * A0-A7: Row to scan (0->Scan, 1->Do not scan)
  * D0-D4: Keyboard columns (0->Pressed, 1->Released)
- * D5-D7: 0
+ * D5-D7: Unused
  *
- * The write(uint8_t) method sets the (negated) row to scan.
- * The read() method returns the (negated) columns associated to the specified row.
+ * The ZX80Keyboard::write(uint8_t) method sets the row to scan.
+ * The ZX80Keyboard::read() method returns the columns associated to the scanned row.
  */
 using MatrixKey = ZX80Keyboard::MatrixKey;
 
@@ -116,7 +117,7 @@ std::map<std::string, MatrixKey> ZX80Keyboard::name_to_zx80{
     { "KEY_N",          MatrixKey::KEY_N        },
     { "KEY_M",          MatrixKey::KEY_M        },
     { "KEY_DOT",        MatrixKey::KEY_DOT      },
-    { "KEY_SPACE",      MatrixKey::KEY_SPACE    },
+    { "KEY_SPACE",      MatrixKey::KEY_SPACE    }
 };
 
 std::map<std::tuple<keyboard::Key, bool, bool>, std::pair<MatrixKey, bool>> ZX80Keyboard::default_key_to_zx80{
@@ -292,34 +293,12 @@ uint8_t ZX80Keyboard::read()
 
 void ZX80Keyboard::write(uint8_t row)
 {
-    switch (static_cast<uint8_t>(~row)) {
-    case 0x01:
-        _scanrow = 0;
-        break;
-    case 0x02:
-        _scanrow = 1;
-        break;
-    case 0x04:
-        _scanrow = 2;
-        break;
-    case 0x08:
-        _scanrow = 3;
-        break;
-    case 0x10:
-        _scanrow = 4;
-        break;
-    case 0x20:
-        _scanrow = 5;
-        break;
-    case 0x40:
-        _scanrow = 6;
-        break;
-    case 0x80:
-        _scanrow = 7;
-        break;
-    default:
-        /* Don't accept attempts to read more than one row at a time */
-        _scanrow = 255;
+    _scanrow = 255;
+    for (uint8_t bit = 0; bit < 8; ++bit) {
+        if ((row & (1 << bit)) == 0) {
+            _scanrow = bit;
+            break;
+        }
     }
 }
 

@@ -36,6 +36,8 @@ namespace caio {
 class RAM : public Device {
 public:
     constexpr static const char* TYPE = "RAM";
+    constexpr static const bool PUT_RANDOM_VALUES = true;
+    constexpr static const bool NO_RANDOM_VALUES = false;
 
     /**
      * Initialise this RAM with zeros.
@@ -48,12 +50,14 @@ public:
      * Initialise this RAM with a repeating pattern.
      * @param size    Size of this RAM;
      * @param pattern Pattern;
-     * @param random  If true, contaminate this RAM with some random values;
+     * @param random  If true contaminate this RAM with some random values;
      * @param label   Label assigned to this RAM.
+     * @see NO_RANDOM_VALUES
+     * @see PUT_RANDOM_VALUES
      * @see utils::fill()
      */
     template<typename T>
-    RAM(size_t size, T pattern, bool random = false, const std::string& label = {})
+    RAM(size_t size, T pattern, bool random = NO_RANDOM_VALUES, const std::string& label = {})
         : Device{TYPE, label},
           _data(size) {
         gsl::span<uint8_t> dst{_data.data(), _data.size()};

@@ -22,16 +22,23 @@ almost reached a beta status and most of the tested programs work just fine
 (if they do not exploit obscure video/timing tricks or trigger some bug ;).
 
 ![c64](images/c64.gif "caio c64")
-![gyruss](images/gyruss.gif "Gyruss")
-![q-bert](images/q-bert.gif "Q*Bert")
-![uridium](images/uridium.gif "Uridium")
-![giana](images/giana.gif "Great Giana Sisters")
-![turrican](images/turrican.gif "Turrican")
+![c64-gyruss](images/gyruss.gif "C64 - Gyruss")
+![c64-q-bert](images/q-bert.gif "C64 - Q*Bert")
+![c64-uridium](images/uridium.gif "C64 - Uridium")
+![c64-giana](images/giana.gif "C64 - Great Giana Sisters")
+![c64-turrican](images/turrican.gif "C64 - Turrican")
 
 ### Sinclair ZX80
 
-The implementation of the [ZX80](https://en.wikipedia.org/wiki/ZX80) is under
-development and it is currently not working.
+The emulation of the [ZX80](https://en.wikipedia.org/wiki/ZX80) is in alpha
+state, some features are missing such as program injection for the 8K ROM.
+
+That said, it works fine.
+
+![zx80-4K-space-invaders](images/zx80-4K-space-invaders.gif "ZX80 - Space Invaders")
+![zx80-4K-double-breakout](images/zx80-4K-double-breakout.gif "ZX80 - Double Breakout")
+![zx80-4K-pacman](images/zx80-4K-pacman.gif "ZX80 - Pacman")
+![zx80-4K-kong](images/zx80-4K-kong.gif "ZX80 - Kong")
 
 
 ## Supported host platforms
@@ -52,8 +59,8 @@ At the moment the supported host platforms are Linux and macOS.
 
 #### macOS:
 
-[xcode](https://developer.apple.com/xcode), xcode command line tools, and
-[brew](https://brew.sh) must be installed.
+[xcode](https://developer.apple.com/xcode), xcode command line tools,
+and [brew](https://brew.sh) must be installed and updated.
 
 ```
    $ brew install pkg-config sdl2 sdl2_image

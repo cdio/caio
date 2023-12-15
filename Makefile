@@ -28,9 +28,21 @@ DISTCLEANDIRS=	${DIRS}
 
 DISTCLEANFILES=	build
 
-.PHONY: distclean %-package
+.PHONY: distclean %-package test dtest _test
 
 include ${ROOT}/mk/dir.mk
 
 %-package:
 	${MAKE} ${MAKEARGS} ROOT=${ROOT} -f mk/package.mk $@
+
+dtest: TARGET=debug
+dtest: _test
+
+test: TARGET=all
+test: _test
+
+_test:
+	${MAKE} ${MAKEARGS} -C 3rdparty/tests
+	${MAKE} ${MAKEARGS} -C src ${TARGET}
+	${MAKE} ${MAKEARGS} -C src/test ${TARGET}
+	${MAKE} ${MAKEARGS} -C src/test test

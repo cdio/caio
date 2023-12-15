@@ -16,67 +16,100 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include <iostream>
 #include <cstdlib>
+#include <exception>
+#include <iostream>
+#include <functional>
+#include <map>
 
+#include "types.hpp"
+#include "config.hpp"
+#include "logger.hpp"
 #include "utils.hpp"
+#include "version.hpp"
 
-#include "c64_main.hpp"
-#include "zx80_main.hpp"
+#include "c64.hpp"
+#include "zx80.hpp"
 
 
 using namespace caio;
 
-static std::terminate_handler prev_terminate{};
+template<class MACHINE, class CMDLINE>
+void machine_main(int argc, const char** argv)
+{
+    try {
+        CMDLINE cmdline{};
+        auto sec = config::parse(argc, argv, cmdline);
 
-std::string progname{};
+        caio::log.logfile(sec[config::KEY_LOGFILE]);
+        caio::log.loglevel(sec[config::KEY_LOGLEVEL]);
+
+        MACHINE machine{sec};
+        machine.run();
+
+        std::exit(EXIT_SUCCESS);
+
+    } catch (const std::exception& err) {
+        std::cerr << MACHINE::name() << ": Error: " << err.what() << std::endl;
+    }
+
+    std::exit(EXIT_FAILURE);
+}
+
+#define MACHINE_ENTRY(nm, type)         { CAIO_STR(type), machine_main<nm::type, nm::type ## Cmdline> }
+
+static std::map<std::string, std::function<void(int, const char**)>> machines = {
+    MACHINE_ENTRY(commodore::c64, C64),
+    MACHINE_ENTRY(sinclair::zx80, ZX80)
+};
 
 [[noreturn]]
 static void terminate()
 {
     stacktrace(std::cerr);
-    prev_terminate();
     std::exit(EXIT_FAILURE);
 }
 
 [[noreturn]]
-static void usage()
+static void usage(const std::string& progname)
 {
     std::cerr << "usage: " << progname << " <arch> [--help]" << std::endl
-              << "where arch is one of: "                    << std::endl
-              << "c64"                                       << std::endl
-              << "zx80"                                      << std::endl
-              << std::endl;
+              << "where arch is one of: "                    << std::endl;
+
+    std::for_each(machines.begin(), machines.end(), [](const auto& entry) {
+        std::cerr << entry.first << std::endl;
+    });
+
+    std::cerr << std::endl;
 
     std::exit(EXIT_FAILURE);
 }
 
 int main(int argc, const char** argv)
 {
-    prev_terminate = std::get_terminate();
     std::set_terminate(terminate);
-
-    progname = *argv;
+    std::string progname = *argv;
 
     std::string name{};
-
     if (argc > 1) {
-        name = utils::tolow(argv[1]);
+        name = argv[1];
         --argc;
         ++argv;
     }
 
     if (name == "" || name == "--help" || name == "-h" || name == "-?") {
-        usage();
+        usage(progname);
         /* NOTREACHED */
     }
 
-    if (name == "c64") {
-        commodore::c64::main(argc, argv);
+    if (name == "-v" || name == "--version") {
+        std::cerr << full_version() << std::endl;
+        std::exit(EXIT_SUCCESS);
     }
 
-    if (name == "zx80") {
-        sinclair::zx80::main(argc, argv);
+    auto it = machines.find(utils::toup(name));
+    if (it != machines.end()) {
+        it->second(argc, argv);
     }
 
     std::cerr << "Unknown emulator: " << name << std::endl;

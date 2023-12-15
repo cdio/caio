@@ -1,5 +1,4 @@
-/*
- * Copyright (C) 2020 Claudio Castiglia
+/* * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -31,6 +30,20 @@
 namespace caio {
 
 using namespace std::chrono_literals;
+
+Clock::Clock(const std::string& label, size_t freq, float delay)
+    : Name{TYPE, label},
+      _freq{freq},
+      _delay{delay}
+{
+}
+
+Clock::Clock(size_t freq, float delay)
+    : Name{TYPE, {}},
+      _freq{freq},
+      _delay{delay}
+{
+}
 
 void Clock::add(const sptr_t<Clockable>& clkb)
 {
@@ -72,6 +85,8 @@ void Clock::run()
             std::this_thread::sleep_for(200ms);
             start = utils::now();
         }
+
+        ++_ticks;
 
         if (tick() == Clockable::HALT) {
             return;
@@ -170,6 +185,11 @@ std::string Clock::to_string() const
        << ", delay " << std::setprecision(3) << _delay;
 
     return os.str();
+}
+
+uint64_t Clock::time() const
+{
+    return (time(_ticks) * 1'000'000);
 }
 
 }

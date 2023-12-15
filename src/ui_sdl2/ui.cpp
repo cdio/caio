@@ -339,6 +339,11 @@ void UI::render_line(unsigned line, const Scanline& sline)
     std::copy(sline.begin(), sline.end(), _screen_raw.begin() + line * _conf.video.width);
 }
 
+void UI::clear_screen(const Rgba& color)
+{
+    std::fill(_screen_raw.begin(), _screen_raw.end(), color);
+}
+
 void UI::stop()
 {
     _stop = true;

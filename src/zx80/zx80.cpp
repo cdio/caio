@@ -43,6 +43,7 @@ void ZX80::run()
 
     create_devices();
     connect_devices();
+    attach_prg();
     connect_ui();
 
     if (_conf.monitor) {
@@ -97,14 +98,14 @@ void ZX80::reset()
          */
         _clk->pause_wait(true);
 
-        /*
-         * This method does not emulate a real hardware reset,
-         * it re-launches the emulator instead.
-         */
         _ram->reset();
         _rom->reset();
         _cpu->reset();
         _kbd->reset();
+        _mmap->reset();
+        _cpu->reset();
+
+        attach_prg();
 
         _clk->reset();
         _clk->pause(false);
@@ -121,42 +122,82 @@ std::string ZX80::rompath(const std::string& fname) const
     return path;
 }
 
+void ZX80::attach_prg()
+{
+    if (_conf.prgfile.empty()) {
+        return;
+    }
+
+    std::string fname{fs::search(_conf.prgfile)};
+    if (fname.empty()) {
+        throw IOError{"Can't load program: " + _conf.prgfile + ": " + Error::to_string()};
+    }
+
+    log.debug("Opening program: " + fname + "\n");
+
+    OFile* prog{};
+    addr_t bpaddr{};
+
+    if (_rom->size() == ROM_SIZE) {
+        prog = new OFile{};
+        bpaddr = MAIN_EXEC_ADDR;
+    } else {
+#if 0 // XXX FIXME
+        prog = new PFile{};
+        bpaddr = MAIN_EXEC_ADDR_ROM8;
+#else
+        throw IOError{"Program injection not supported with 8K ROM"};
+#endif
+    }
+
+    prog->load(fname);
+
+    log.debug("Loading program: %s, load address: $%04X, size: %d ($%04X)\n",
+        fname.c_str(), prog->load_address(), prog->size(), prog->size());
+
+    _cpu->bpadd(bpaddr, [bpaddr](Z80& cpu, void* arg) {
+        /*
+         * Inject .o or .p into memory.
+         */
+        uptr_t<OFile> prog{static_cast<OFile*>(arg)};
+        addr_t addr = prog->load_address();
+
+        for (auto value : *prog) {
+            cpu.write(addr++, value);
+        }
+
+        cpu.bpdel(bpaddr);
+
+    }, prog);
+}
+
 void ZX80::create_devices()
 {
-    size_t ramsiz  = (_conf.ram16 ? EXTERNAL_RAM_SIZE : INTERNAL_RAM_SIZE);
-    size_t romsiz  = (_conf.rom8 ? ROM8_SIZE  : ROM4_SIZE);
-    auto   romfile = (_conf.rom8 ? ROM8_FNAME : ROM4_FNAME);
+    _ram = (_conf.ram16 ? std::make_shared<RAM>(EXTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES, "RAM16") :
+                          std::make_shared<RAM>(INTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES, "RAM1"));
 
+    _rom = (_conf.rom8 ? std::make_shared<ROM>(rompath(ROM8_FNAME), ROM8_SIZE, "ROM8") :
+                         std::make_shared<ROM>(rompath(ROM_FNAME), ROM_SIZE, "ROM4"));
+
+    _clk   = std::make_shared<Clock>("CLK", CLOCK_FREQ, _conf.delay);
     _cpu   = std::make_shared<Z80>(Z80::TYPE, "CPU");
-    _ram   = std::make_shared<RAM>(ramsiz, RAM_INIT_PATTERN, true, "RAM");
-    _rom   = std::make_shared<ROM>(rompath(romfile), romsiz, "ROM");
-    _video = std::make_shared<ZX80Video>("VID");
+    _video = std::make_shared<ZX80Video>(_clk, "VID");
     _kbd   = std::make_shared<ZX80Keyboard>("KBD");
     _mmap  = std::make_shared<ZX80ASpace>(_cpu, _ram, _rom, _video, _kbd);
-    _clk   = std::make_shared<Clock>("CLK", CLOCK_FREQ, _conf.delay);
 
     _cpu->init(_mmap);
 }
 
 void ZX80::connect_devices()
 {
-    /*
-     * Load the colour palette.
-     */
     if (!_conf.palette.empty()) {
         _video->palette(_conf.palette);
     }
 
-    /*
-     * Load the keyboard mappings.
-     */
     if (!_conf.keymaps.empty()) {
         _kbd->load(_conf.keymaps);
     }
 
-    /*
-     * Connect clockable devices to the system clock.
-     */
     _clk->add(_cpu);
 }
 
@@ -213,6 +254,10 @@ void ZX80::connect_ui()
      */
     _video->render_line([this](unsigned line, const ui::Scanline& scanline) {
         _ui->render_line(line, scanline);
+    });
+
+    _video->clear_screen([this](const Rgba& color) {
+        _ui->clear_screen(color);
     });
 
     /*

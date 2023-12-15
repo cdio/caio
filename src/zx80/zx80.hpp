@@ -35,6 +35,8 @@ namespace caio {
 namespace sinclair {
 namespace zx80 {
 
+constexpr static const addr_t MAIN_EXEC_ADDR = 0x0283;  /* Main routine (4K ROM) */
+
 /**
  * Sinclair ZX80 emulator.
  */
@@ -60,15 +62,17 @@ public:
     void run();
 
     /**
-     * @return A human-readable string representation of this ZX80.
+     * Return a human-readable stirng representation of this ZX80.
+     * @return A string representation of this ZX80.
      */
     std::string to_string() const;
 
     /**
+     * Return the name of this platform.
      * @return The name of this platform.
      */
     constexpr static const char* name() {
-        return "ZX80";
+        return "Sinclair ZX80";
     }
 
 private:
@@ -94,7 +98,7 @@ private:
     void create_devices();
 
     /**
-     * Connect the devices and build a ZX80.
+     * Connect the devices and buildup a ZX80.
      * @see create_devices()
      */
     void connect_devices();
@@ -118,12 +122,20 @@ private:
     void connect_ui();
 
     /**
-     * Get the full pathname for a ROM file.
+     * Return the full pathname of a ROM file.
      * @param fname ROM file name.
-     * @return The full path.
+     * @return The full pathname.
      * @exception IOError if the ROM file is not found.
      */
     std::string rompath(const std::string& fname) const;
+
+    /**
+     * Attach a .o program file.
+     * If a .o file is specified in the configuration, load (inject)
+     * it into the RAM as soon as the basic is ready.
+     * @exception IOError if the specified file cannot be loaded.
+     */
+    void attach_prg();
 
     /**
      * Process hot-keys.

@@ -26,8 +26,9 @@ namespace sinclair {
 namespace zx80 {
 
 static const config::Option zx80_options[] = {
-    { "ram16",  SEC_ZX80,   KEY_RAM_16K,    DEFAULT_RAM_16K,    config::Arg::None,  config::set_true    },
-    { "rom8",   SEC_ZX80,   KEY_ROM_8K,     DEFAULT_ROM_8K,     config::Arg::None,  config::set_true    }
+    { "ram16",  SEC_ZX80,   KEY_RAM_16K,    DEFAULT_RAM_16K,    config::Arg::None,      config::set_true    },
+    { "rom8",   SEC_ZX80,   KEY_ROM_8K,     DEFAULT_ROM_8K,     config::Arg::None,      config::set_true    },
+    { "prg",    SEC_ZX80,   KEY_PRGFILE,    DEFAULT_PRGFILE,    config::Arg::Required,  config::set_value   }
 };
 
 std::string ZX80Cmdline::usage() const
@@ -37,7 +38,8 @@ std::string ZX80Cmdline::usage() const
     os << config::Cmdline::usage() << std::endl << std::endl
        << "Sinclair ZX80 specific:" << std::endl
        << " --ram16                 Attach a 16K RAM instead of the default 1K RAM" << std::endl
-       << " --rom8                  Attach the 8K ROM instead of the default 4K ROM";
+       << " --rom8                  Attach the 8K ROM instead of the default 4K ROM" << std::endl
+       << " --prg <prg.o>           Load a .o file as soon as the basic is ready";
 
     return os.str();
 }
@@ -57,18 +59,20 @@ std::string ZX80Cmdline::sname() const
 ZX80Config::ZX80Config(config::Section& sec)
     : Config{sec, "zx80_"},
       ram16{config::is_true(sec[KEY_RAM_16K])},
-      rom8{config::is_true(sec[KEY_ROM_8K])}
+      rom8{config::is_true(sec[KEY_ROM_8K])},
+      prgfile{sec[KEY_PRGFILE]}
 {
-    title += " - ZX80";
+    title += " - Sinclair ZX80";
 }
 
 std::string ZX80Config::to_string() const
 {
     std::ostringstream os{};
 
-    os << Config::to_string()                                   << std::endl
-       << "  16K RAM:            " << (ram16 ? "yes" : "no")    << std::endl
-       << "  8K ROM:             " << (rom8  ? "yes" : "no");
+    os << Config::to_string() << std::endl
+       << "  16K RAM:            " << (ram16 ? "yes" : "no") << std::endl
+       << "  8K ROM:             " << (rom8  ? "yes" : "no") << std::endl
+       << "  Attached PRG:       " << std::quoted(prgfile);
 
     return os.str();
 }

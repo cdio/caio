@@ -18,7 +18,12 @@
  */
 #include "zx80_video.hpp"
 
+#include <gsl/assert>
+
+#include "clock.hpp"
 #include "logger.hpp"
+#include "types.hpp"
+#include "utils.hpp"
 
 
 namespace caio {
@@ -27,14 +32,17 @@ namespace zx80 {
 
 RgbaTable ZX80Video::builtin_palette{
     0x202020FF,
-    0xA0A0A0FF
+    0xCFCFCFFF
 };
 
-ZX80Video::ZX80Video(const std::string& label)
+ZX80Video::ZX80Video(const sptr_t<Clock>& clk, const std::string& label)
     : Name{TYPE, label},
+      _clk{clk},
       _palette{builtin_palette},
       _scanline(WIDTH, _palette[WHITE])
 {
+    using namespace gsl;
+    Expects(clk);
 }
 
 void ZX80Video::palette(const std::string& fname)
@@ -46,10 +54,33 @@ void ZX80Video::palette(const std::string& fname)
     std::fill(_scanline.begin(), _scanline.end(), _palette[WHITE]);
 }
 
+void ZX80Video::palette(const RgbaTable& plt)
+{
+    _palette = plt;
+}
+
+void ZX80Video::render_line(const renderer_t& rl)
+{
+    _renderline_cb = rl;
+}
+
 inline void ZX80Video::render_line()
 {
-    if (_line >= VISIBLE_Y_START && _line < VISIBLE_Y_END && _renderline_cb) {
-        _renderline_cb(_line - VISIBLE_Y_START, _scanline);
+    auto line = _line - _lineoff - SCANLINE_VISIBLE_START;
+    if (line >= 0 && line < VISIBLE_HEIGHT && _renderline_cb) {
+        _renderline_cb(line, _scanline);
+    }
+}
+
+void ZX80Video::clear_screen(const cls_t& cls)
+{
+    _cls_cb = cls;
+}
+
+inline void ZX80Video::clear_screen()
+{
+    if (_cls_cb) {
+        _cls_cb(_palette[BLACK]);
     }
 }
 
@@ -76,16 +107,30 @@ void ZX80Video::hsync()
     render_line();
     std::fill(_scanline.begin(), _scanline.end(), _palette[WHITE]);
     _column = LBORDER_START;
-    if (_line < FRAME_HEIGHT) {
-        ++_line;
-    }
+    ++_line;
 }
 
-void ZX80Video::vsync()
+void ZX80Video::vsync(bool on)
 {
-    hsync();
-    _line = 0;
-    _column = LBORDER_START;
+    if (on) {
+        /*
+         * Simulate the out-of-sync signal.
+         */
+        ++_vsync_count;
+        if (_vsync_count > 9) {
+            clear_screen();
+            _lineoff = 10;
+        } else {
+            _lineoff = 0;
+        }
+    } else {
+        /*
+         * VSYNC terminated.
+         */
+        _vsync_count = 0;
+        _line = 0;
+        _column = LBORDER_START;
+    }
 }
 
 }

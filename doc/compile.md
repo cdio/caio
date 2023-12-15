@@ -43,7 +43,7 @@ Required dependencies:
 
 * [SDL2](https://libsdl.org).
 
-To install xcode and brew follow the instructions
+To install xcode, xcode command line tools, and brew follow the instructions
 [here](https://developer.apple.com/xcode) and [here](https://brew.sh).
 
 ```
@@ -52,6 +52,7 @@ To install xcode and brew follow the instructions
    $ brew install pkg-config sdl2 sdl2_image
    ...
 ```
+These packages must be up-to-date.
 
 ```
     $ make PREFIX=/usr/local

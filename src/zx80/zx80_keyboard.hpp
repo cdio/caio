@@ -36,7 +36,7 @@ namespace zx80 {
 
 /**
  * ZX80 Keyboard.
- * ZX80 4K ROM keyboard layout:
+ * ZX80 keyboard layout (4K ROM):
  * <pre>
  * +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
  * | not   | and   | then  | to    | left  | down  | up    | right | home  | rubout|
@@ -60,7 +60,7 @@ namespace zx80 {
  * +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
  * </pre>
  *
- * ZX80 8K ROM keyboard layout:
+ * ZX80 keyboard layout (8K ROM):
  * <pre>
  * +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
  * | edit  | and   | then  | to    | left  | down  | up    | right |graphic| rubout|
@@ -104,18 +104,18 @@ namespace zx80 {
  * | A7 |                   B     N     M     .     SPACE   |
  * +----+---------------------------------------------------+
  * </pre>
- * The real rows are connected to address lines A8-A15 but this class needs them to be shifted to A0-A7.
- * The read address specifies the (negated) row to scan, the returned value is the (negated) matrix column.
+ * Rows are actually connected to address lines A8-A15 but this implementation needs them to be shifted to A0-A7.
  *
- * A0-A7: Row to scan (0->Scan, 1->Do not scan)
- * D0-D4: Keyboard columns (0->Pressed, 1->Released)
- * D5-D7: 0
+ * A0-A7: Row to scan (0=Scan, 1=Do not scan)
+ * D0-D4: Keyboard columns (0=Pressed, 1=Released)
+ * D5-D7: Unused
  *
- * The ZX80Keyboard::write(uint8_t) method sets the (negated) row to scan.
- * The ZX80Keyboard::read() method returns the (negated) columns associated to the specified row.
+ * The ZX80Keyboard::write(uint8_t) method sets the row to scan.
+ * The ZX80Keyboard::read() method returns the columns associated to the scanned row.
  */
 class ZX80Keyboard : public keyboard::Keyboard {
 public:
+    constexpr static const uint8_t COLUMN_MASK  = 0x1F;
     constexpr static const unsigned MATRIX_ROWS = 8;
 
     enum class MatrixKey : uint16_t {
@@ -229,7 +229,7 @@ private:
     void set_matrix(MatrixKey key, bool set = true);
 
     /**
-     * (Negated) row being scanned.
+     * (Negated) row to scan.
      */
     uint8_t _scanrow{255};
 

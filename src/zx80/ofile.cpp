@@ -29,16 +29,22 @@ namespace zx80 {
 void OFile::load(const std::string& fname)
 {
     *static_cast<std::vector<uint8_t>*>(this) = fs::load(fname);
+    addr_t laddr = load_address();
+    addr_t sizoff = size_offset();
 
-    uint16_t size = le16toh(*reinterpret_cast<uint16_t*>(data() + SIZE_OFFSET));
-    if (size < LOAD_ADDR) {
-        throw IOError{"Invalid cassette file: " + fname};
+    if (sizoff + 2 < size()) {
+        uint16_t size = le16toh(*reinterpret_cast<uint16_t*>(data() + sizoff));
+        if (size > laddr) {
+            size -= laddr;
+            if (size > MAX_SIZE) {
+                throw IOError{"Invalid cassette file size: " + fname + ": " + std::to_string(size)};
+            }
+
+            return;
+        }
     }
 
-    size -= LOAD_ADDR;
-    if (size > MAX_SIZE) {
-        throw IOError{"Invalid cassette file size: " + fname + ": " + std::to_string(size)};
-    }
+    throw IOError{"Invalid cassette file: " + fname};
 }
 
 void OFile::save(const std::string& fname)

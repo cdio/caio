@@ -32,24 +32,15 @@ namespace sinclair {
 namespace zx80 {
 
 /**
- * .o (.80) cassette file image.
+ * .o cassette file image.
  */
 class OFile : public std::vector<uint8_t> {
 public:
-    constexpr static const addr_t SIZE_OFFSET   = 10;
-    constexpr static const addr_t LOAD_ADDR     = 0x4000;
-    constexpr static const addr_t MAX_SIZE      = 16384;
+    constexpr static const addr_t SIZE_OFFSET = 10;
+    constexpr static const addr_t LOAD_ADDR   = 0x4000;
+    constexpr static const addr_t MAX_SIZE    = 16384;
 
     OFile() {
-    }
-
-    /**
-     * Load a cassette image file.
-     * @param fname Name of the cassette file.
-     * @exception IOError
-     */
-    OFile(const std::string& fname) {
-        load(fname);
     }
 
     /**
@@ -61,6 +52,22 @@ public:
     }
 
     virtual ~OFile() {
+    }
+
+    /**
+     * Get the load address of this .o file.
+     * @return The load address.
+     */
+    virtual addr_t load_address() const {
+        return LOAD_ADDR;
+    }
+
+    /**
+     * Get the position containing the size of this file (little-endian).
+     * @return The offset to the size of this .o file.
+     */
+    virtual addr_t size_offset() const {
+        return SIZE_OFFSET;
     }
 
     /**
@@ -77,6 +84,45 @@ public:
      * @exception IOError
      */
     void save(const std::string& fname);
+};
+
+/**
+ * .p cassette file image.
+ */
+class PFile : public OFile {
+public:
+    constexpr static const addr_t SIZE_OFFSET = 11;
+    constexpr static const addr_t LOAD_ADDR   = 0x4009;
+
+    PFile() {
+    }
+
+    /**
+     * Create a cassette file from a data buffer.
+     * @param buf Data buffer.
+     */
+    PFile(std::vector<uint8_t>&& buf)
+        : OFile{std::move(buf)} {
+    }
+
+    virtual ~PFile() {
+    }
+
+    /**
+     * Get the load address of this .p file.
+     * @return The load address.
+     */
+    addr_t load_address() const override {
+        return PFile::LOAD_ADDR;
+    }
+
+    /**
+     * Get the position containing the size of this file (little-endian).
+     * @return The offset to the size of this .p file.
+     */
+    addr_t size_offset() const override {
+        return PFile::SIZE_OFFSET;
+    }
 };
 
 }

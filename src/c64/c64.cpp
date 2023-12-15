@@ -190,64 +190,69 @@ sptr_t<Cartridge> C64::attach_cartridge()
 
 void C64::attach_prg()
 {
+    if (_conf.prgfile.empty()) {
+        return;
+    }
+
     std::string prgfile{fs::search(_conf.prgfile)};
+    if (prgfile.empty()) {
+        throw IOError{"Can't load program: " + _conf.prgfile + ": " + Error::to_string()};
+    }
 
-    if (!prgfile.empty()) {
+    try {
+        PrgFile* prog{};
+        const char* format{};
+
+        log.debug("Preloading program: " + prgfile + "\n");
+
         try {
-            PrgFile* prog{};
-            const char* format{};
+            prog = new P00File{prgfile};
+            format = "P00";
+        } catch (const IOError&) {
+            prog = new PrgFile{prgfile};
+            format = "PRG";
+        }
 
-            log.debug("Preloading program: " + prgfile + "\n");
+        log.debug("Detected format: %s, start address: $%04X, size: %d ($%04X)\n", format, prog->address(),
+            prog->size(), prog->size());
 
-            try {
-                prog = new P00File{prgfile};
-                format = "P00";
-            } catch (const IOError&) {
-                prog = new PrgFile{prgfile};
-                format = "PRG";
+        _cpu->bpadd(BASIC_READY_ADDR, [](Mos6510& cpu, void* arg) {
+            /*
+             * Load PRG into memory.
+             */
+            uptr_t<PrgFile> prog{static_cast<PrgFile*>(arg)};
+            for (size_t i = 0; i < prog->size(); ++i) {
+                cpu.write(prog->address() + i, (*prog)[i]);
             }
 
-            log.debug("Detected format: %s, start address: $%04X, size: %d ($%04X)\n", format, prog->address(),
-                prog->size(), prog->size());
+            /*
+             * If it is visible from BASIC, run it.
+             */
+            if (prog->address() == BASIC_PRG_START) {
+                addr_t end = BASIC_PRG_START + prog->size();
+                cpu.write_addr(BASIC_TXTTAB, BASIC_PRG_START);
+                cpu.write_addr(BASIC_VARTAB, end);
+                cpu.write_addr(BASIC_ARYTAB, end);
+                cpu.write_addr(BASIC_STREND, end);
 
-            _cpu->bpadd(BASIC_READY_ADDR, [](Mos6510& cpu, void* arg) {
-                /*
-                 * Load PRG into memory.
-                 */
-                uptr_t<PrgFile> prog{static_cast<PrgFile*>(arg)};
-                for (size_t i = 0; i < prog->size(); ++i) {
-                    cpu.write(prog->address() + i, (*prog)[i]);
-                }
+                cpu.write(BASIC_KEYB_BUFF + 0, 'R');
+                cpu.write(BASIC_KEYB_BUFF + 1, 'U');
+                cpu.write(BASIC_KEYB_BUFF + 2, 'N');
+                cpu.write(BASIC_KEYB_BUFF + 3, '\r');
+                cpu.write(BASIC_KEYB_BUFF_POS, 4);
+            }
 
-                /*
-                 * If it is visible from BASIC, run it.
-                 */
-                if (prog->address() == BASIC_PRG_START) {
-                    addr_t end = BASIC_PRG_START + prog->size();
-                    cpu.write_addr(BASIC_TXTTAB, BASIC_PRG_START);
-                    cpu.write_addr(BASIC_VARTAB, end);
-                    cpu.write_addr(BASIC_ARYTAB, end);
-                    cpu.write_addr(BASIC_STREND, end);
+            cpu.bpdel(BASIC_READY_ADDR);
+        }, prog);
 
-                    cpu.write(BASIC_KEYB_BUFF + 0, 'R');
-                    cpu.write(BASIC_KEYB_BUFF + 1, 'U');
-                    cpu.write(BASIC_KEYB_BUFF + 2, 'N');
-                    cpu.write(BASIC_KEYB_BUFF + 3, '\r');
-                    cpu.write(BASIC_KEYB_BUFF_POS, 4);
-                }
-
-                cpu.bpdel(BASIC_READY_ADDR);
-            }, prog);
-
-        } catch (const std::exception& err) {
-            throw IOError{err};
-        }
+    } catch (const std::exception& err) {
+        throw IOError{err};
     }
 }
 
 void C64::create_devices()
 {
-    _ram = std::make_shared<RAM>(RAM_SIZE, RAM_INIT_PATTERN1, true, "RAM");
+    _ram = std::make_shared<RAM>(RAM_SIZE, RAM_INIT_PATTERN1, RAM::PUT_RANDOM_VALUES, "RAM");
     _basic = std::make_shared<ROM>(rompath(BASIC_FNAME), BASIC_SIZE, "BASIC");
     _kernal = std::make_shared<ROM>(rompath(KERNAL_FNAME), KERNAL_SIZE,  "KERNAL");
     _chargen = std::make_shared<ROM>(rompath(CHARGEN_FNAME), CHARGEN_SIZE, "CHARGEN");

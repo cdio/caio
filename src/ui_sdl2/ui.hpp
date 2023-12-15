@@ -131,6 +131,7 @@ public:
     bool paused() const;
 
     /**
+     * Get the audio status.
      * @return true if audio is enabled; false otherwise.
      */
     bool audio_enabled() const;
@@ -194,6 +195,13 @@ public:
     void render_line(unsigned line, const Scanline& sline);
 
     /**
+     * Fill the screen with a colour.
+     * @param color Colour (default is CRT_COLOR).
+     * @see CRT_COLOR
+     */
+    void clear_screen(const Rgba& color = CRT_COLOR);
+
+    /**
      * Stop the main loop.
      * This method returns immediatly, it does not wait
      * for the main loop thread to leave the run() method.
@@ -202,17 +210,20 @@ public:
     void stop();
 
     /**
-     * @return A human-readable string showing the libraries used by this user interface.
+     * Return a human readable string describing the backend libraries used by this user interface.
+     * @return The string showing the libraries used by this user interface.
      */
     std::string to_string() const;
 
     /**
-     * @return The UI panel.
+     * Get a pointer to the UI panel.
+     * @return A pointer to the UI panel.
      */
     sptr_t<Panel> panel();
 
     /**
-     * @return The renderer.
+     * Get the backend renderer.
+     * @return A raw pointer to the backend renderer.
      */
     SDL_Renderer* renderer();
 
@@ -224,8 +235,17 @@ private:
      */
     UI(const ui::Config& conf);
 
-    //XXX
+    /**
+     * Set the size of the screen based on the configured scanline effect.
+     * @param scale The screen scale.
+     * @see _screen_width
+     * @see _screen_height
+     */
     void screen_sizes(float scale);
+
+    /**
+     * Apply post-rendering special effects.
+     */
     void postrender_effects();
 
     /**

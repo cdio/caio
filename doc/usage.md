@@ -10,8 +10,10 @@ where arch is one of:
 c64
 zx80
 ```
+<details>
+<summary>Generic configuration</summary>
 
-### Caio generic configuration
+### Generic configuration
 
 Configuration values can be set as command line options or in a
 [configuration file](../src/main/caio.conf).
@@ -90,7 +92,7 @@ caio accepts the following key combinations at runtime:
 
 * `ALT-V` toggles the visibility of the info panel.
 
-MAC users must replace the `ALT` key with `COMMAND`.
+MAC users must replace the `ALT` key with the command key &#8984;.
 
 ### Info Panel
 
@@ -109,7 +111,11 @@ There are other widgets that depend on the specifc emulated platform such as:
 * Joystick status
 * Disk drives
 
-### Commodore 64 specific
+</details>
+<details>
+<summary>Commodore 64</summary>
+
+### Commodore 64
 
 ```
 $ caio c64 --help
@@ -236,11 +242,15 @@ basic is started:
     $ caio c64 --prg /sid/fanatics/music.prg --resid yes
 ```
 
-The program is injected directly into RAM before the actual emulator is
-started, this means that the previous command won't work for advanced or
-big files that are expected to overwrite memory areas not configured as RAM.
+The program is injected directly into RAM with the emulator suspended,
+this means that the previous command won't work for advanced or big files
+that are expected to overwrite memory areas not configured as RAM.
 
-### Sinclair ZX80 specific
+</details>
+<details>
+<summary>Sinclair ZX80</summary>
+
+### Sinclair ZX80
 ```
 $ caio zx80 --help
 usage: caio z80 <options>
@@ -249,10 +259,29 @@ where <options> are:
 Sinclair ZX80 specific:
  --ram16                 Attach a 16K RAM instead of the default 1K RAM
  --rom8                  Attach the 8K ROM instead of the default 4K ROM
+ --prg <prg.o>           Load a .o file as soon as the basic is ready
 ```
+
+Note that programs for the 4K ROM (*.o* files) can be injected using the
+``prg`` option. This will be fixed soon.
 
 #### Keyboard
 
-Only the [positional](https://www.homecomputermuseum.nl/wp-content/uploads/2020/09/ZX80-1200x896.jpg)
-keyboard layout is available for the ZX80 and it is used as default.
+The default keyboard layout depends on the installed ROM:
 
+##### 4K ROM keyboard layout:
+
+<img src="../images/zx80-4K-layout.jpg" width="640">
+
+##### 8K ROM keyboard layout:
+
+<img src="../images/zx80-8K-layout.jpg" width="640">
+
+#### Software
+
+The following site has not only good information about the internals
+of the machine but it is also the main site of really beautiful games
+that exploit the flicker-free technique:
+<a href="http://www.fruitcake.plus.com/Sinclair/ZX80/FlickerFree/ZX80_DisplayMechanism.htm" target="_blank">ZX Resource Centre</a>
+
+</details>

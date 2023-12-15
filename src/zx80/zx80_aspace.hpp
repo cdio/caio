@@ -32,39 +32,42 @@ namespace sinclair {
 namespace zx80 {
 
 /**
- * The ZX80 Address Space implements the logic that
- * connect all the devices that make a ZX80 including I/O.
+ * The ZX80 address space implements the logic that
+ * connect all the devices that make a ZX80.
  * @see ASpace
+ * @see https://problemkaputt.de/zx80-sch.gif
+ * @see https://problemkaputt.de/zxdocs.htm
+ * @see http://searle.x10host.com/zx80/zx80.html
  */
 class ZX80ASpace : public ASpace {
 public:
-    constexpr static const addr_t ADDR_MASK             = 0xFFFF;
-    constexpr static const addr_t VIDEO_ADDR_MASK       = A15;
-    constexpr static const addr_t KEYBOARD_ADDR_MASK    = A0;
-    constexpr static const addr_t INTERRUPT_ADDR_MASK   = A6;
-    constexpr static const addr_t BITMAP_ADDR_MASK      = 0x1E00;
-    constexpr static const uint8_t VIDEO_RATE_50HZ      = D6;
-    constexpr static const uint8_t VIDEO_INVERT         = D7;
-    constexpr static const uint8_t VIDEO_HALT           = D6;
-    constexpr static const uint8_t CHCODE_MASK          = 0x3F;
-    constexpr static const uint8_t CHCODE_BLANK         = 0x00;
-    constexpr static const size_t BLOCKS                = 64;
-
-    using bank_t = std::array<devmap_t, BLOCKS>;
+    constexpr static const addr_t ROM_MASK          = ROM_SIZE - 1;
+    constexpr static const addr_t ROM8_MASK         = ROM8_SIZE - 1;
+    constexpr static const addr_t INTERNAL_RAM_MASK = INTERNAL_RAM_SIZE - 1;
+    constexpr static const addr_t EXTERNAL_RAM_MASK = EXTERNAL_RAM_SIZE - 1;
+    constexpr static const addr_t VRAM_ADDR_MASK    = A15;
+    constexpr static const addr_t RAM_ADDR_MASK     = A14;
+    constexpr static const addr_t BITMAP_ADDR_MASK  = 0x1E00;
+    constexpr static const addr_t KBD_SCAN_MASK     = ZX80Keyboard::COLUMN_MASK;
+    constexpr static const uint8_t ENABLE_BLANK     = D6;
+    constexpr static const uint8_t BITMAP_INVERT    = D7;
+    constexpr static const uint8_t VIDEO_RATE_50HZ  = D6;
+    constexpr static const uint8_t CHCODE_MASK      = 0x3F;
+    constexpr static const uint8_t CAS_IN           = D7;
 
     /**
-     * Initialise this ZX80 Address Space.
+     * Initialise this ZX80 address space.
      * @param cpu   CPU;
-     * @param ram   Internal RAM (1K or 16K);
-     * @param rom   Internal ROM (4K or 8K);
-     * @param video Video device;
-     * @param kbd   Keyboard device.
+     * @param ram   RAM (1K or 16K);
+     * @param rom   ROM (4K);
+     * @param video Video interface;
+     * @param kbd   Keyboard.
+     * @warning All the parameters must be valid otherwise the process is terminated.
      */
     ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr_t& rom, const sptr_t<ZX80Video>& video,
         const sptr_t<ZX80Keyboard>& kbd);
 
-    virtual ~ZX80ASpace() {
-    }
+    virtual ~ZX80ASpace();
 
     /**
      * @see ASpace::read()
@@ -76,34 +79,51 @@ public:
      */
     void write(addr_t addr, uint8_t value) override;
 
-private:
-    void interrupt_req();
-
-    void interrupt_ack();
-
-    uint8_t io_read(addr_t addr);
+    /**
+     * @see ASpace::reset()
+     */
+    void reset() override;
 
     /**
-     * Retrieve bitmap data.
-     * Retrieve the bitmap data that corresponds to the current
-     * characater line for the current character code and invert
-     * it if necessary.
-     * @param base Base address of the character bitmap data within the ROM.
-     * @return The bitmap data.
-     * @see _chcode
-     * @see _counter
+     * @see ASpace::address_bus()
      */
-    uint8_t character_bitmap(addr_t base);
+    void address_bus(addr_t addr) override;
+
+    /**
+     * @see ASpace::dump()
+     */
+    std::ostream& dump(std::ostream& os) const override;
+
+private:
+    enum class AccessType {
+        RAM,
+        ROM,
+        IO
+    };
+
+    AccessType access_type(addr_t addr) const;
+
+    void vsync(bool on);
+
+    void hsync();
+
+    void rfsh_cycle();
+
+    uint8_t io_read(addr_t port);
 
     sptr_t<Z80>             _cpu;
+    devptr_t                _ram;
+    addr_t                  _ram_mask;
     devptr_t                _rom;
+    addr_t                  _rom_mask;
     sptr_t<ZX80Video>       _video;
     sptr_t<ZX80Keyboard>    _kbd;
-    bank_t                  _mmap;
-    bool                    _intreq{};      /* Interrupt request flag           */
+
     addr_t                  _chcode{};      /* Current character code           */
     addr_t                  _counter{};     /* Current character line counter   */
-    bool                    _vsync{};       /* VSYNC flag                       */
+    bool                    _blank{};       /* Blank scanline                   */
+    bool                    _intpin{};      /* Status of /INT pin               */
+    bool                    _intreq{};      /* Interrupt request flag           */
 };
 
 }

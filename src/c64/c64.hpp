@@ -175,7 +175,7 @@ private:
     sptr_t<Cartridge> attach_cartridge();
 
     /**
-     * Attach A PRG file.
+     * Attach a PRG file.
      * If a PRG file is specified in the configuration, load (inject)
      * it into the system RAM and prepare the BASIC and the CPU to run it.
      * @exception IOError if the PRG file cannot be loaded.
