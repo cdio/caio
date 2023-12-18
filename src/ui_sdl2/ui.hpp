@@ -60,6 +60,7 @@ public:
     using hotkeys_cb_t  = std::function<void(keyboard::Key)>;
 
     /**
+     * Get the instance to the user interface.
      * @return The only instance to the user interface.
      */
     static sptr_t<UI> instance(const Config& conf);
@@ -169,6 +170,7 @@ public:
     void audio_volume(float vol);
 
     /**
+     * Get the audio volume.
      * @return The current audio volume.
      * @see audio_volume(float)
      */

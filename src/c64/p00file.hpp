@@ -58,6 +58,7 @@ public:
     }
 
     /**
+     * The the header of this P00 file.
      * @return The raw header of this P00 file.
      */
     const P00Header& header() const {

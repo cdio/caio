@@ -153,6 +153,7 @@ public:
     void del(class Controller* dev);
 
     /**
+     * Get the cbm data bus.
      * @return A reference to this bus' data lines.
      */
     const BusData& data() const {
@@ -166,7 +167,8 @@ public:
     void propagate();
 
     /**
-     * @return The name of this bus and the list of devices connected to it.
+     * Get a string describing this bus and the devices connected to it.
+     * @return A string containing the name of this bus and the list of devices connected to it.
      * @see cbm_bus::Device::to_string()
      */
     std::string to_string() const override;
@@ -286,6 +288,7 @@ public:
     }
 
     /**
+     * Get the byte being transmetted or received.
      * @return The byte being transmitted or received.
      */
     uint8_t byte() const {
@@ -293,6 +296,7 @@ public:
     }
 
     /**
+     * Get the transmission status.
      * @return True if this is the last byte to be transmitted or received; false otherwise.
      */
     bool last() const {
@@ -300,6 +304,7 @@ public:
     }
 
     /**
+     * Get the transmission status of this byte.
      * @return True if this byte is ready to be transmitted or it is fully received
      * and the state machine is ready for another byte; false otherwise.
      */
@@ -308,6 +313,7 @@ public:
     }
 
     /**
+     * Get the transmission status of this byte.
      * @return True if the transmission or reception of this byte is completed
      * but the state machine is not ready for another byte; false otherwise.
      */
@@ -357,7 +363,8 @@ public:
     }
 
     /**
-     * @return The next bit to transmit (true is 1, false is 0).
+     * Get the next bit to transmit.
+     * @return The next bit to transmit.
      */
     bool bit() {
         bool b = _byte & _curbit;

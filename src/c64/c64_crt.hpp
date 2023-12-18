@@ -199,6 +199,7 @@ public:
     void open(const std::string& fname);
 
     /**
+     * Get the hardware type of this CRT file.
      * @return The hardware type of this CRT file.
      */
     const HardwareType type() const {
@@ -206,28 +207,31 @@ public:
     }
 
     /**
-     * @return The EXROM pin status of this CRT file.
+     * Get the status of the EXROM pin of this CRT.
+     * @return The status of the EXROM pin.
      */
     bool exrom() const {
         return _hdr.exrom;
     }
 
     /**
-     * @return The GAME pin status of this CRT file.
+     * Get the status of the GAME pin of this CRT.
+     * @return The status of the GAME pin.
      */
     bool game() const {
         return _hdr.game;
     }
 
     /**
-     * @return The number of CHIP sections in this CRT.
+     * Get the number of chips embedded in this CRT.
+     * @return The number of chip sections in this CRT.
      */
     size_t chips() const {
         return _chips.size();
     }
 
     /**
-     * Get a CHIP entry.
+     * Get a chip entry.
      * @param index The entry index.
      * @return A reference to the chip header and a pointer to its content.
      * @exception InvalidArgument If the specified index is not valid.
@@ -235,11 +239,13 @@ public:
     std::pair<const Chip&, devptr_t> operator[](size_t index) const;
 
     /**
-     * @return A human readable description of this CRT.
+     * Get a string describing this CRT.
+     * @return A string with the description of this CRT.
      */
     std::string to_string() const;
 
     /**
+     * Get the name of this CRT.
      * @return The name of this CRT.
      */
     std::string name() const;
@@ -259,19 +265,23 @@ public:
     static bool is_valid(const Header& hdr);
 
     /**
-     * Detect whether a CHIP header is valid.
-     * @param ch CHIP header.
+     * Detect whether a chip's header is valid.
+     * @param ch Chip's header.
      * @return true if valid; false otherwise.
      */
     static bool is_valid(const Chip& ch);
 
     /**
-     * @return A human readable description of a CRT header.
+     * Get a string describing a CRT's header.
+     * @param hdr CRT's header.
+     * @return A string with the description the specified CRT's header.
      */
     static std::string to_string(const Header& hdr);
 
     /**
-     * @return A human readable description of a CHIP header.
+     * Get a string describing a specific chip.
+     * @param ch Chip.
+     * @return A string with the description of the specified chip.
      */
     static std::string to_string(const Chip& ch);
 
@@ -293,7 +303,7 @@ private:
     static void load_header(std::istream& is, Header& hdr);
 
     /**
-     * Load a CRT CHIP section header from an input stream.
+     * Load a CRT chip section header from an input stream.
      * The loaded data is translated to host endian order.
      * @param is  Input stream;
      * @param hdr Destination buffer.
@@ -302,7 +312,7 @@ private:
     static void load_chip(std::istream& is, Chip& hdr);
 
     /**
-     * Load a CRT CHIP data from an input stream.
+     * Load a CRT chip data from an input stream.
      * @param is Input stream;
      * @param ch Information about the data to read.
      * @return A pointer to a rom device with the loaded data.
@@ -317,7 +327,7 @@ private:
     static void to_host(Header& hdr);
 
     /**
-     * Convert a CHIP header to the host endianness.
+     * Convert a chip header to the host endianness.
      * @param ch Header to convert.
      */
     static void to_host(Chip& ch);

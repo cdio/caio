@@ -62,14 +62,16 @@ public:
     ROM(std::istream& is, size_t count = 0);
 
     /**
-     * @return An iterator to the first element of this RAM.
+     * Get an iterator to the first element of this ROM.
+     * @return An iterator to the first element.
      */
     std::vector<uint8_t>::const_iterator begin() const {
         return _data.cbegin();
     }
 
     /**
-     * @return An iterator to the last element of this RAM +1.
+     * Get an iterator to the last element of this ROM + 1..
+     * @return An iterator to the last element +1.
      */
     std::vector<uint8_t>::const_iterator end() const {
         return _data.cend();

@@ -39,6 +39,7 @@ public:
     }
 
     /**
+     * Get the type of this instance.
      * @return The type of this instance.
      */
     const std::string& type() const {
@@ -54,6 +55,7 @@ public:
     }
 
     /**
+     * Get the label assigned to this instance.
      * @return The label of this instance.
      */
     const std::string& label() const {
@@ -69,7 +71,8 @@ public:
     }
 
     /**
-     * @return A string representation of this instance.
+     * Get a string with the representation of this instance.
+     * @return A string with the representation of this instance.
      */
     virtual std::string to_string() const;
 

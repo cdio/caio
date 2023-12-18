@@ -147,6 +147,7 @@ public:
     void loglevel(const std::string& lvs);
 
     /**
+     * Get the log level for the single-step operation.
      * @return The current single-step log level.
      */
     Loglevel loglevel() const;

@@ -83,6 +83,7 @@ public:
     void position(uint8_t pos) override;
 
     /**
+     * Get the status of this C64 joystick port.
      * @return The status of this C64 joystick port.
      */
     uint8_t port() const;

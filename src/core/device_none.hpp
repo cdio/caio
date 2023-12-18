@@ -53,6 +53,7 @@ public:
     }
 
     /**
+     * Return 0.
      * @return 0.
      */
     size_t size() const override {

@@ -84,7 +84,8 @@ public:
     void forward();
 
     /**
-     * @return The entire history as a string, each entry on its own line.
+     * Return a string containing all the history values (each entry on its own line).
+     * @return The entire history as a string.
      */
     std::string to_string() const;
 
@@ -145,11 +146,13 @@ public:
     Readline& operator=(Readline&& other);
 
     /**
+     * Retrieve an input line from the user.
      * @return An input line from the user.
      */
     std::string getline();
 
     /**
+     * Retrieve the complete history as a string.
      * @return The entire history as a string.
      * @see History::to_string()
      */
@@ -179,6 +182,7 @@ public:
     void write(const gsl::span<const char>& data) const;
 
     /**
+     * Get input and output file descriptors.
      * @return The input and output file descriptors respectively.
      */
     std::pair<int, int> fds() const {

@@ -212,6 +212,7 @@ public:
     }
 
     /**
+     * Get the running status of this clock.
      * @return true if this clock is suspended; false otherwise.
      * @see pause()
      * @see toggle_pause()

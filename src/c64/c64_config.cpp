@@ -46,8 +46,8 @@ std::string C64Cmdline::usage() const
        << " --prg <prg>             Load a PRG file as soon as the basic is ready"                      << std::endl
        << " --resid <yes|no>        Use the MOS6581 reSID library (default is " << DEFAULT_RESID << ")" << std::endl
        << " --swapj                 Swap Joysticks"                                                     << std::endl
-       << " --8 <path>              Attach a disk drive unit 8"                                         << std::endl
-       << " --9 <path>              Attach a disk drive unit 9";
+       << " --8 <path>              Attach a disk drive as unit 8"                                      << std::endl
+       << " --9 <path>              Attach a disk drive as unit 9";
 
     return os.str();
 }

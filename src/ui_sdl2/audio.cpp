@@ -127,7 +127,7 @@ float AudioStream::volume() const
 
 AudioBuffer AudioStream::buffer()
 {
-    static auto dispatcher = [this](samples_i16&& buf) {
+    auto dispatcher = [this](samples_i16&& buf) {
         _playing_queue.push(std::move(buf));
     };
 

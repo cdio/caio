@@ -89,7 +89,9 @@ static inline std::uintmax_t file_size(const std::string& path)
 std::string search(const std::string& fname, const std::initializer_list<std::string>& spath = {}, bool cwd = false);
 
 /**
- * @return The base name given a full path name.
+ * Retrieve the basename of a full path.
+ * @param fullpath Full path name.
+ * @return The basename.
  */
 std::string basename(const std::string& fullpath);
 

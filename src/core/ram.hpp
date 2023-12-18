@@ -105,14 +105,16 @@ public:
     virtual ~RAM();
 
     /**
-     * @return An iterator to the first element of this RAM.
+     * Get an iterator to the first element of this RAM.
+     * @return An iterator to the first element.
      */
     std::vector<uint8_t>::iterator begin() {
         return _data.begin();
     }
 
     /**
-     * @return An iterator to the last element of this RAM +1.
+     * Get an iterator to the last element of this RAM +1.
+     * @return An iterator to the last element +1.
      */
     std::vector<uint8_t>::iterator end() {
         return _data.end();

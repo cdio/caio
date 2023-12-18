@@ -251,6 +251,7 @@ public:
     void reset() override;
 
     /**
+     * Get the attached path.
      * @return A reference to the attached path.
      */
     const std::string& attached_path() const {
@@ -258,6 +259,7 @@ public:
     }
 
     /**
+     * Get the status of this disk drive.
      * @return True if this disk drive is attached; false otherwise.
      */
     bool is_attached() const {

@@ -126,11 +126,13 @@ public:
     virtual std::pair<ASpace::devmap_t, ASpace::devmap_t> getdev(addr_t addr, bool romh, bool roml) = 0;
 
     /**
+     * Get the total size of this cartridge.
      * @return The total size of this cartridge ROMs.
      */
     virtual size_t cartsize() const = 0;
 
     /**
+     * Get the current GAME/EXROM mode.
      * @return The current GAME/EXROM mode.
      */
     GameExromMode mode() const;
@@ -154,7 +156,8 @@ protected:
     virtual void propagate(bool force = false);
 
     /**
-     * @return A reference to the embedded CRT file.
+     * Get the CRT file backing this cartridge.
+     * @return A reference to the backing CRT file.
      * @see Crt
      */
     const Crt& crt() const;

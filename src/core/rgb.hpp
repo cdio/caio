@@ -71,11 +71,13 @@ struct Rgba {
     }
 
     /**
-     * @return A string representation of this colour formatted as "rrggbbaa".
+     * Get a string with this colour formatted as "rrbbggaa".
+     * @return A string with this colour.
      */
     std::string to_string() const;
 
     /**
+     * Get the transparency status of this colour.
      * @return true if this colour is transparent; false otherwise.
      */
     bool is_transparent() const {

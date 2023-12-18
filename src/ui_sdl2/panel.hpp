@@ -73,7 +73,8 @@ public:
     void visible(bool is_visible);
 
     /**
-     * @return Panel visibility.
+     * Get the panel visibility.
+     * @return true if the panel is visible; false otherwise.
      */
     bool visible() const;
 

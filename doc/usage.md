@@ -15,14 +15,14 @@ zx80
 
 ### Generic configuration
 
-Configuration values can be set as command line options or in a
+Configuration values can be specified as command line options or as values in a
 [configuration file](../src/main/caio.conf).
-The configuration file contains two types of sections: One _generic_ section
-whose values are inherited by all the platforms, and one _specific_ section
-for each of the emulated platform.
+The configuration file contains two types of sections: One ***generic***
+section whose values are inherited by all platforms, and one ***specific***
+section for each emulated platform.
 
-If a parameter is specified twice (as a platform specific and as a generic
-one) the platform specific value takes the precedence.
+If a parameter is specified twice (as a platform specific and generic), the
+platform specific value takes the precedence.
 
 The configuration file is searched in the following directories (stop at
 first match):
@@ -34,8 +34,7 @@ first match):
 Command line options take precedence over those defined in the
 configuration file.
 
-The following list shows the generic command line options (valid for all
-platforms):
+The following list shows the generic command line options:
 
 ```
  --conf <cfile>          Configuration file
@@ -69,8 +68,8 @@ platforms):
  -h|--help               Print this message and exit
 ```
 
-Platforms are not required to support all the generic options, unsuppoprted
-options are ignored.
+Platforms are not required to support all these options, unsupported options
+are ignored.
 
 ### Hot-Keys
 
@@ -106,10 +105,10 @@ The default panel widgets are:
 * Suspend/Resume emulation
 * Audio Volume control
 
-There are other widgets that depend on the specifc emulated platform such as:
+There are other widgets that depend on the specifc platform such as:
 
 * Joystick status
-* Disk drives
+* Disk drives status
 
 </details>
 <details>
@@ -126,8 +125,8 @@ Commodore C64 specific:
  --prg <prg>             Load a PRG file as soon as the basic is ready
  --resid <yes|no>        Use the MOS6581 reSID library (default is no)
  --swapj                 Swap Joysticks
- --8 <path>              Attach a disk drive unit 8
- --9 <path>              Attach a disk drive unit 9
+ --8 <path>              Attach a disk drive as unit 8
+ --9 <path>              Attach a disk drive as unit 9
 ```
 
 #### Keyboard
@@ -262,8 +261,8 @@ Sinclair ZX80 specific:
  --prg <prg.o>           Load a .o file as soon as the basic is ready
 ```
 
-Note that programs for the 4K ROM (*.o* files) can be injected using the
-``prg`` option. This will be fixed soon.
+Note that it is not possible to load programs using the ``prg`` option when
+the 8K ROM is attached. This will be fixed soon.
 
 #### Keyboard
 
@@ -282,6 +281,6 @@ The default keyboard layout depends on the installed ROM:
 The following site has not only good information about the internals
 of the machine but it is also the main site of really beautiful games
 that exploit the flicker-free technique:
-<a href="http://www.fruitcake.plus.com/Sinclair/ZX80/FlickerFree/ZX80_DisplayMechanism.htm" target="_blank">ZX Resource Centre</a>
+[ZX Resource Centre](http://www.fruitcake.plus.com/Sinclair/ZX80/FlickerFree/ZX80_DisplayMechanism.htm "ZX Resource Centre")
 
 </details>

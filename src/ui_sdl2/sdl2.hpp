@@ -41,7 +41,8 @@ namespace sdl2 {
 using Scanline = std::vector<Rgba>;
 
 /**
- * @return The command key under the host platform (COMMAND under mac, ALT under PC).
+ * Get the SDL command key under the host platform.
+ * @return COMMAND key under mac, ALT key under PC.
  */
 constexpr uint16_t command_key()
 {
@@ -53,7 +54,8 @@ constexpr uint16_t command_key()
 }
 
 /**
- * @return The SDL2 library version.
+ * Get a string with the version number of the SDL library in use.
+ * @return A string showing the SDL library version.
  */
 constexpr const char* sdl_version()
 {
@@ -63,6 +65,7 @@ constexpr const char* sdl_version()
 }
 
 /**
+ * Get the last SDL error.
  * @return Last SDL error.
  */
 extern std::string sdl_error();
@@ -87,7 +90,7 @@ extern keyboard::Key to_key(SDL_Scancode code);
  * Detect whether a coordinate belongs to a rectangle.
  * @param x    X coordinate;
  * @param y    Y coordinate;
- * @para  rect Rectangle.
+ * @param rect Rectangle.
  * @return True if the coordinates fall inside the rectangle; false otherwise.
  */
 extern bool in_rect(int x, int y, const SDL_Rect& rect);

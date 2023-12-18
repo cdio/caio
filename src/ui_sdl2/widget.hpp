@@ -77,6 +77,7 @@ public:
     void action();
 
     /**
+     * Get the status of this widget.
      * @return True (default) if this widget is enabled; false otherwise.
      */
     virtual bool enabled() const;

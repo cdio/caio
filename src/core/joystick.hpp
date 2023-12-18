@@ -79,6 +79,7 @@ public:
     }
 
     /**
+     * Get the joystick positions.
      * @return A bitwise combination of the current joystick positions.
      * @see JoyPosition
      */
@@ -87,6 +88,7 @@ public:
     }
 
     /**
+     * Get the connection status of this joystick.
      * @return True if there is a real game controller behind this joystick; false otherwise
      */
     bool is_connected() const {
@@ -94,6 +96,7 @@ public:
     }
 
     /**
+     * Return the identifier of this joystick.
      * @return The joystick id.
      */
     unsigned joyid() const {

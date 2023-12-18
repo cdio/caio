@@ -52,8 +52,9 @@ public:
     }
 
     /**
+     * Get the status of this pull-up.
      * @return true if this pull-up is active (it is being driven
-     * low by at least one connected output); false otherwise.
+     * low by at least one connected device); false otherwise.
      */
     operator bool() const {
         return _count;

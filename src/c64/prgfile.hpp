@@ -56,7 +56,8 @@ public:
     }
 
     /**
-     * @return The start address of this PRG file.
+     * Get the start address of this PRG file.
+     * @return The start address.
      */
     addr_t address() const {
         return _hdr.addr;

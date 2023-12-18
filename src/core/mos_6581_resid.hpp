@@ -47,7 +47,8 @@ public:
     void write(addr_t addr, uint8_t value) override;
 
     /**
-     * @return The reSID library version.
+     * Get a string with reSID library version.
+     * @return A string with the reSID library version.
      */
     static const std::string version();
 

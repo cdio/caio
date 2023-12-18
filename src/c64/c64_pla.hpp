@@ -85,7 +85,8 @@ public:
     void mode(uint8_t pins, uint8_t mask, bool force = false);
 
     /**
-     * @return The status of the PLA input pins.
+     * Get the status of the input pins of this PLA.
+     * @return The status of the input pins.
      */
     uint8_t mode() const;
 

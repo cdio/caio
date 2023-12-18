@@ -97,11 +97,13 @@ public:
     void run();
 
     /**
-     * @return A human-readable string representation of this C64.
+     * Get a string describing the components that build this C64.
+     * @return A string representation of this C64.
      */
     std::string to_string() const;
 
     /**
+     * Get the name of this platform.
      * @return The name of this platform.
      */
     constexpr static const char* name() {

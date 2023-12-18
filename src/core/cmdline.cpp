@@ -124,7 +124,7 @@ std::string Cmdline::usage() const
        << " --logfile <file>        Send log information to the specified destination"                    << std::endl
        << "                         (default is " << DEFAULT_LOGFILE << ")"                               << std::endl
        << " --loglevel <lv>         Loglevel, bitwise combination of: "                                   << std::endl
-       << "                         error|warn|info|debug|all (default is " << DEFAULT_LOGLEVEL << ")"    << std::endl
+       << "                         none|error|warn|info|debug|all (default is " << DEFAULT_LOGLEVEL << ")" << std::endl
        << " --vjoy <yes|no>         Enable virtual joystick (default is " << DEFAULT_VJOY << ")"          << std::endl
        << " --vjoy-up <keyname>     Virtual joystick UP key (default is " << DEFAULT_VJOY_UP << ")"       << std::endl
        << " --vjoy-down <keyname>   Virtual joystick DOWN key (default is " << DEFAULT_VJOY_DOWN << ")"   << std::endl

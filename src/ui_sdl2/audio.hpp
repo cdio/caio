@@ -82,6 +82,7 @@ public:
     void pause();
 
     /**
+     * Get the running status of this audio stream.
      * @return true if this audio stream is paused; false otherwise.
      */
     bool is_paused() const;
@@ -93,6 +94,7 @@ public:
     void volume(float vol);
 
     /**
+     * Get the volume of this audio stream.
      * @return The current volume.
      */
     float volume() const;
