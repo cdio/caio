@@ -33,7 +33,7 @@ namespace zx80 {
 
 /**
  * The ZX80 address space implements the logic that
- * connect all the devices that make a ZX80.
+ * connects all the devices that make a ZX80.
  * @see ASpace
  * @see https://problemkaputt.de/zx80-sch.gif
  * @see https://problemkaputt.de/zxdocs.htm
@@ -124,6 +124,7 @@ private:
     bool                    _blank{};       /* Blank scanline                   */
     bool                    _intpin{};      /* Status of /INT pin               */
     bool                    _intreq{};      /* Interrupt request flag           */
+    bool                    _vsync{};       /* VSYNC flag                       */
 };
 
 }

@@ -107,14 +107,17 @@ void ZX80ASpace::address_bus(addr_t addr)
 
 void ZX80ASpace::vsync(bool on)
 {
+    _vsync = on;
     _video->vsync(on);
     _counter = 0;
 }
 
 void ZX80ASpace::hsync()
 {
-    _video->hsync();
-    _counter = (_counter + 1) & 7;
+    if (!_vsync) {
+        _video->hsync();
+        _counter = (_counter + 1) & 7;
+    }
 }
 
 void ZX80ASpace::rfsh_cycle()

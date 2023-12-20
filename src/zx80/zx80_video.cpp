@@ -18,10 +18,12 @@
  */
 #include "zx80_video.hpp"
 
+#include <numbers>
 #include <gsl/assert>
 
 #include "clock.hpp"
 #include "logger.hpp"
+#include "signal.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 
@@ -66,7 +68,7 @@ void ZX80Video::render_line(const renderer_t& rl)
 
 inline void ZX80Video::render_line()
 {
-    auto line = _line - _lineoff - SCANLINE_VISIBLE_START;
+    auto line = _line + _lineoff - SCANLINE_VISIBLE_START;
     if (line >= 0 && line < VISIBLE_HEIGHT && _renderline_cb) {
         _renderline_cb(line, _scanline);
     }
@@ -119,9 +121,8 @@ void ZX80Video::vsync(bool on)
         ++_vsync_count;
         if (_vsync_count > 9) {
             clear_screen();
-            _lineoff = 10;
-        } else {
-            _lineoff = 0;
+            _A = _vsync_count;
+            _t = 0.0f;
         }
     } else {
         /*
@@ -131,6 +132,27 @@ void ZX80Video::vsync(bool on)
         _line = 0;
         _column = LBORDER_START;
     }
+
+    /*
+     * Out-of-sync disturbance propagation.
+     */
+    if (_t != -1.0f) {
+        _lineoff = disturbance(_A, _t);
+        if (_t > 0.5f) {
+            _t = -1.0f;
+            _lineoff = 0;
+        }
+    }
+}
+
+inline int ZX80Video::disturbance(float A, float& t)
+{
+    constexpr static const float T = 1.0f;
+    constexpr static const float F = 6.0f;
+    constexpr static const float D = 0.01f;
+    int value = signal::exp(0.0f, A, t, T) * std::cos(2 * std::numbers::pi * F * t);
+    t += D;
+    return value;
 }
 
 }

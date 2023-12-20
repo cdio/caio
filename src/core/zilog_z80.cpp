@@ -1004,7 +1004,7 @@ size_t Z80::execute(const Z80::Instruction& ins, uint8_t opcode, bool forced)
      *
      * If forced is true:
      *   If the opcode is a single-byte instruction, the PC register is left unchanged;
-     *   Forced opcodes should be single-byte instructions.
+     *   Forced opcodes should be instructions without arguments.
      */
     switch (ins.type) {
     case ArgType::None:
@@ -1346,7 +1346,7 @@ void Z80::bpdel(addr_t addr)
     _breakpoints.erase(addr);
 }
 
-const Z80::Registers& Z80::regs() const
+Z80::Registers& Z80::regs()
 {
     return _regs;
 }

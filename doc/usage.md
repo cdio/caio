@@ -258,11 +258,8 @@ where <options> are:
 Sinclair ZX80 specific:
  --ram16                 Attach a 16K RAM instead of the default 1K RAM
  --rom8                  Attach the 8K ROM instead of the default 4K ROM
- --prg <prg.o>           Load a .o file as soon as the basic is ready
+ --prg <.o|.p>           Load a .o/.p file as soon as the basic is started
 ```
-
-Note that it is not possible to load programs using the ``prg`` option when
-the 8K ROM is attached. This will be fixed soon.
 
 #### Keyboard
 

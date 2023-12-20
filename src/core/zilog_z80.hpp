@@ -77,7 +77,7 @@ public:
 
     enum class IMode {
         M0,                 /* Device puts instruction on data bus                  */
-        M1,                 /* ISR at $0038 (vINT)                                  */
+        M1,                 /* ISR at $0038 (INT_ADDR)                              */
         M2                  /* Device provides LO 8 bits of interrupt vector table  */
     };
 
@@ -340,7 +340,8 @@ public:
     void loglevel(const std::string& lvs);
 
     /**
-     * @return The current single-step loglevel.
+     * Get the log level for the single-step operation.
+     * @return The current single-step log level.
      */
     Loglevel loglevel() const;
 
@@ -378,26 +379,31 @@ public:
     void rfsh_pin(const OutputPinCb& rfsh_cb);
 
     /**
+     * Get the status of hte /HALT output pin.
      * @return The status of the /HALT output pin.
      */
     bool halt_pin() const;
 
     /**
+     * Get the status of the /IORQ output pin.
      * @return The status of the /IORQ output pin.
      */
     bool iorq_pin() const;
 
     /**
+     * Get the status of the /M1 output pin.
      * @return The status of the /M1 output pin.
      */
     bool m1_pin() const;
 
     /**
+     * Get the status of the /RFSH output pin.
      * @return The status of the /RFSH output pin.
      */
     bool rfsh_pin() const;
 
     /**
+     * Get the status of the /WAIT input pin.
      * @return The status of the /WAIT input pin.
      */
     bool wait_pin() const;
@@ -459,9 +465,10 @@ public:
     void bpdel(addr_t addr);
 
     /**
-     * @return A constant reference to the registers.
+     * Get a reference to the registers.
+     * @return A reference to the registers.
      */
-    const Registers& regs() const;
+    Registers& regs();
 
     /**
      * Disassembler.
@@ -509,7 +516,8 @@ public:
     void write(addr_t addr, uint8_t data);
 
     /**
-     * @return A human readable string with the status of this CPU (regsiters and other values).
+     * Get a string with the status of this CPU (regsiters and other values).
+     * @return A string with the status of this CPU.
      */
     std::string status() const;
 

@@ -35,7 +35,15 @@ namespace caio {
 namespace sinclair {
 namespace zx80 {
 
-constexpr static const addr_t MAIN_EXEC_ADDR = 0x0283;  /* Main routine (4K ROM) */
+constexpr static const addr_t ROM4_MAIN_EXEC        = 0x0283;
+constexpr static const addr_t ROM8_MAIN_EXEC        = 0x0419;
+constexpr static const addr_t ROM8_SLOW_FAST        = 0x0207;
+constexpr static const addr_t ROM8_NEXTLINE         = 0x066C;
+constexpr static const addr_t ROM8_NEXTLINE_10      = ROM8_NEXTLINE + 10;
+constexpr static const addr_t ROM8_SYSVAR_ERR_NR    = 0x4000;
+constexpr static const addr_t ROM8_SYSVAR_FLAGS     = 0x4001;
+constexpr static const addr_t RAMTOP_16K            = 0x8000;
+constexpr static const addr_t RAMTOP_1K             = 0x4000;
 
 /**
  * Sinclair ZX80 emulator.
@@ -62,7 +70,7 @@ public:
     void run();
 
     /**
-     * Return a human-readable stirng representation of this ZX80.
+     * Return a human-readable string representation of this ZX80.
      * @return A string representation of this ZX80.
      */
     std::string to_string() const;

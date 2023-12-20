@@ -39,7 +39,7 @@ std::string ZX80Cmdline::usage() const
        << "Sinclair ZX80 specific:" << std::endl
        << " --ram16                 Attach a 16K RAM instead of the default 1K RAM" << std::endl
        << " --rom8                  Attach the 8K ROM instead of the default 4K ROM" << std::endl
-       << " --prg <prg.o>           Load a .o file as soon as the basic is ready";
+       << " --prg <.o|.p>           Load a .o/.p file as soon as the basic is started";
 
     return os.str();
 }

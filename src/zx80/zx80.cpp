@@ -140,14 +140,10 @@ void ZX80::attach_prg()
 
     if (_rom->size() == ROM_SIZE) {
         prog = new OFile{};
-        bpaddr = MAIN_EXEC_ADDR;
+        bpaddr = ROM4_MAIN_EXEC;
     } else {
-#if 0 // XXX FIXME
         prog = new PFile{};
-        bpaddr = MAIN_EXEC_ADDR_ROM8;
-#else
-        throw IOError{"Program injection not supported with 8K ROM"};
-#endif
+        bpaddr = ROM8_MAIN_EXEC;
     }
 
     prog->load(fname);
@@ -155,12 +151,22 @@ void ZX80::attach_prg()
     log.debug("Loading program: %s, load address: $%04X, size: %d ($%04X)\n",
         fname.c_str(), prog->load_address(), prog->size(), prog->size());
 
-    _cpu->bpadd(bpaddr, [bpaddr](Z80& cpu, void* arg) {
+    _cpu->bpadd(bpaddr, [this, bpaddr](Z80& cpu, void* arg) {
         /*
          * Inject .o or .p into memory.
          */
         uptr_t<OFile> prog{static_cast<OFile*>(arg)};
         addr_t addr = prog->load_address();
+
+        if (addr == PFile::LOAD_ADDR) {
+            addr_t ramtop = (_conf.ram16 ? RAMTOP_16K : RAMTOP_1K);
+            addr_t stackp = ramtop - 4;
+            cpu.regs().SP = stackp;
+            cpu.regs().PC = ROM8_SLOW_FAST;
+            cpu.write(ROM8_SYSVAR_ERR_NR, 0xFF);
+            cpu.write(ROM8_SYSVAR_FLAGS, 0x80);
+            cpu.write_addr(stackp, ROM8_NEXTLINE_10);
+        }
 
         for (auto value : *prog) {
             cpu.write(addr++, value);

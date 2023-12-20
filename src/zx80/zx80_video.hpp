@@ -166,15 +166,26 @@ private:
      */
     void paint_byte(unsigned start, uint8_t bitmap);
 
+    /**
+     * Retrieve the next line disturbance value after an out-of-sync.
+     * @param A Maximum amplitude;
+     * @param t Time (at exit it is updated with the new time value).
+     * @return The next line disturbance value.
+     */
+    int disturbance(float A, float& t);
+
     sptr_t<Clock> _clk;                     /* System clock                 */
     RgbaTable     _palette;                 /* Colour palette               */
     ui::Scanline  _scanline;                /* Current scanline pixel data  */
     renderer_t    _renderline_cb{};         /* Renderer callback            */
     cls_t         _cls_cb{};                /* Clear screen callback        */
-    unsigned      _line{};                  /* Current raster line          */
-    unsigned      _lineoff{};               /* VSync hack                   */
+    int           _line{};                  /* Current raster line          */
+    int           _lineoff{};               /* VSync hack                   */
     unsigned      _column{LBORDER_START};   /* Current horizontal position  */
     size_t        _vsync_count{};           /* Number of vsync pulses       */
+
+    float         _A{};                     /* Out-of-sync amplitude        */
+    float         _t{};                     /* Out-of-sync time             */
 
     static RgbaTable builtin_palette;       /* Default colour palette       */
 };

@@ -31,7 +31,8 @@ almost reached a beta status and most of the tested programs work just fine
 ### Sinclair ZX80
 
 The emulation of the [ZX80](https://en.wikipedia.org/wiki/ZX80) is in alpha
-state, some features are missing such as program injection for the 8K ROM.
+state, some features are missing such as support for load/save operations
+from the basic.
 
 That said, it works fine.
 
