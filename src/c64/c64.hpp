@@ -210,8 +210,8 @@ private:
     sptr_t<cbm_bus::Device>     _unit9{};
     sptr_t<Clock>               _clk{};
     sptr_t<C64Keyboard>         _kbd{};
-    sptr_t<C64Joystick>         _joy1{};
-    sptr_t<C64Joystick>         _joy2{};
+    sptr_t<Joystick>            _joy1{};
+    sptr_t<Joystick>            _joy2{};
     sptr_t<ui::UI>              _ui{};
     sptr_t<ui::Widget>          _wfloppy8{};
     sptr_t<ui::Widget>          _wfloppy9{};

@@ -664,7 +664,7 @@ void UI::joy_event(const SDL_Event& event)
         jid = event.jbutton.which;
         ejoy = find_joystick(jid);
         if (ejoy) {
-            auto pos = ejoy->position() | Joystick::JOY_FIRE;
+            auto pos = ejoy->position() | ejoy->port().fire;
             ejoy->position(pos);
         }
         break;
@@ -673,7 +673,7 @@ void UI::joy_event(const SDL_Event& event)
         jid = event.jbutton.which;
         ejoy = find_joystick(jid);
         if (ejoy) {
-            auto pos = ejoy->position() & ~Joystick::JOY_FIRE;
+            auto pos = ejoy->position() & ~ejoy->port().fire;
             ejoy->position(pos);
         }
         break;
@@ -683,31 +683,32 @@ void UI::joy_event(const SDL_Event& event)
         ejoy = find_joystick(jid);
 //        log.debug("ui: joy: %d, hat: %d, value: %d\n", jid, event.jhat.hat, event.jhat.value);
         if (ejoy) {
-            uint8_t pos{Joystick::JOY_NONE};
+            uint8_t pos{};
+            const auto& jport = ejoy->port();
             switch (event.jhat.value) {
             case SDL_HAT_UP:
-                pos = Joystick::JOY_UP;
+                pos = jport.up;
                 break;
             case SDL_HAT_RIGHT:
-                pos = Joystick::JOY_RIGHT;
+                pos = jport.right;
                 break;
             case SDL_HAT_DOWN:
-                pos = Joystick::JOY_DOWN;
+                pos = jport.down;
                 break;
             case SDL_HAT_LEFT:
-                pos = Joystick::JOY_LEFT;
+                pos = jport.left;
                 break;
             case SDL_HAT_RIGHTUP:
-                pos = Joystick::JOY_RIGHT | Joystick::JOY_UP;
+                pos = jport.right | jport.up;
                 break;
             case SDL_HAT_RIGHTDOWN:
-                pos = Joystick::JOY_RIGHT | Joystick::JOY_DOWN;
+                pos = jport.right | jport.down;
                 break;
             case SDL_HAT_LEFTUP:
-                pos = Joystick::JOY_LEFT | Joystick::JOY_UP;
+                pos = jport.left | jport.up;
                 break;
             case SDL_HAT_LEFTDOWN:
-                pos = Joystick::JOY_LEFT | Joystick::JOY_DOWN;
+                pos = jport.left | jport.down;
                 break;
             case SDL_HAT_CENTERED:
             default:
@@ -781,13 +782,14 @@ void UI::joy_event(const SDL_Event& event)
                 return;
             }
 #endif
-            uint8_t pos = ejoy->position() & Joystick::JOY_FIRE;
+            const auto& jport = ejoy->port();
+            uint8_t pos = ejoy->position() & jport.fire;
 
-            pos |= (ix < -12452 ? Joystick::JOY_LEFT :
-                   (ix >  12452 ? Joystick::JOY_RIGHT : 0));
+            pos |= (ix < -12452 ? jport.left :
+                   (ix >  12452 ? jport.right : 0));
 
-            pos |= (iy < -12452 ? Joystick::JOY_UP :
-                   (iy >  12452 ? Joystick::JOY_DOWN : 0));
+            pos |= (iy < -12452 ? jport.up :
+                   (iy >  12452 ? jport.down : 0));
 
             ejoy->position(pos);
         }

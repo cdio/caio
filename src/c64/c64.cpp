@@ -292,8 +292,8 @@ void C64::create_devices()
     }
 
     _kbd  = std::make_shared<C64Keyboard>("KBD");
-    _joy1 = std::make_shared<C64Joystick>("JOY1");
-    _joy2 = std::make_shared<C64Joystick>("JOY2");
+    _joy1 = std::make_shared<Joystick>(joystick_port, "JOY1");
+    _joy2 = std::make_shared<Joystick>(joystick_port, "JOY2");
 
     if (_conf.vjoy.enabled) {
         _kbd->vjoystick(_conf.vjoy, _joy1);
@@ -398,10 +398,10 @@ void C64::connect_devices()
     auto kbd_read = [this](uint8_t addr) -> uint8_t {
         switch (addr) {
         case Mos6526::PRA:
-            return (_conf.swapj ? _joy1->port() : _joy2->port());
+            return ~(_conf.swapj ? _joy1->position() : _joy2->position());
 
         case Mos6526::PRB:
-            return (_kbd->read() & (_conf.swapj ? _joy2->port() : _joy1->port()));
+            return (_kbd->read() & ~(_conf.swapj ? _joy2->position() : _joy1->position()));
 
         default:;
         }
