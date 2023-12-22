@@ -91,7 +91,7 @@ caio accepts the following key combinations at runtime:
 
 * `ALT-V` toggles the visibility of the info panel.
 
-MAC users must replace the `ALT` key with the command key &#8984;.
+Under MAC, the `ALT` key is equivalent of the option key &#8997;.
 
 ### Info Panel
 
