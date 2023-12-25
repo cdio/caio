@@ -206,7 +206,8 @@ private:
  */
 enum class Arg {
     None,
-    Required
+    Required,
+    Optional
 };
 
 /**
@@ -215,12 +216,13 @@ enum class Arg {
 struct Option {
     using set_cb_t = std::function<bool(class Confile&, const Option&, const std::string&)>;
 
-    std::string name{};     /* Command line option without the "--" prefix  */
-    std::string sname{};    /* Section name                                 */
-    std::string key{};      /* Key name                                     */
-    std::string dvalue{};   /* Default value                                */
-    Arg         type{};     /* Argument requisites                          */
-    set_cb_t    fn{};       /* Value setter                                 */
+    std::string name{};     /* Command line option without the "--" prefix              */
+    std::string sname{};    /* Section name                                             */
+    std::string key{};      /* Key name                                                 */
+    std::string dvalue{};   /* Default value                                            */
+    Arg         type{};     /* Argument requisites                                      */
+    set_cb_t    fn{};       /* Value setter                                             */
+    std::string optval{};   /* Value to set when an optional argument is not provided   */
 };
 
 bool set_value(Confile&, const Option&, const std::string&);

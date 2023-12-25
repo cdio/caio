@@ -26,10 +26,10 @@ namespace sinclair {
 namespace zx80 {
 
 static const config::Option zx80_options[] = {
-    { "ram16",  SEC_ZX80,   KEY_RAM_16K,    DEFAULT_RAM_16K,    config::Arg::None,      config::set_true    },
-    { "rom8",   SEC_ZX80,   KEY_ROM_8K,     DEFAULT_ROM_8K,     config::Arg::None,      config::set_true    },
-    { "rvideo", SEC_ZX80,   KEY_RVIDEO,     DEFAULT_RVIDEO,     config::Arg::None,      config::set_true    },
-    { "prg",    SEC_ZX80,   KEY_PRGFILE,    DEFAULT_PRGFILE,    config::Arg::Required,  config::set_value   }
+    { "ram16",  SEC_ZX80,   KEY_RAM_16K,    DEFAULT_RAM_16K,    config::Arg::Optional,  config::set_bool,   "yes"   },
+    { "rom8",   SEC_ZX80,   KEY_ROM_8K,     DEFAULT_ROM_8K,     config::Arg::Optional,  config::set_bool,   "yes"   },
+    { "rvideo", SEC_ZX80,   KEY_RVIDEO,     DEFAULT_RVIDEO,     config::Arg::Optional,  config::set_bool,   "yes"   },
+    { "prg",    SEC_ZX80,   KEY_PRGFILE,    DEFAULT_PRGFILE,    config::Arg::Required,  config::set_value           }
 };
 
 std::string ZX80Cmdline::usage() const
@@ -37,11 +37,10 @@ std::string ZX80Cmdline::usage() const
     std::ostringstream os{};
 
     os << config::Cmdline::usage() << std::endl << std::endl
-       << "Sinclair ZX80 specific:" << std::endl
-       << " --ram16                 Attach a 16K RAM instead of the default 1K RAM"     << std::endl
-       << "                         (forced when Chroma-80 is attached)"                << std::endl
-       << " --rom8                  Attach the 8K ROM instead of the default 4K ROM"    << std::endl
-       << " --rvideo                Reverse video output"                               << std::endl
+       << "Sinclair ZX80 specific:"                                                     << std::endl
+       << " --ram16 [yes|no]        Attach a 16K RAM instead of the default 1K RAM"     << std::endl
+       << " --rom8 [yes|no]         Attach the 8K ROM instead of the default 4K ROM"    << std::endl
+       << " --rvideo [yes|no]       Reverse video output"                               << std::endl
        << " --prg <.o|.p>           Load a .o/.p file as soon as the basic is started"  << std::endl;
 
     return os.str();

@@ -28,11 +28,11 @@ namespace commodore {
 namespace c64 {
 
 static const config::Option c64_options[] = {
-    { "prg",    SEC_C64,  KEY_PRGFILE,  DEFAULT_PRGFILE,    config::Arg::Required,  config::set_value   },
-    { "resid",  SEC_C64,  KEY_RESID,    DEFAULT_RESID,      config::Arg::Required,  config::set_bool    },
-    { "swapj",  SEC_C64,  KEY_SWAPJOY,  DEFAULT_SWAPJOY,    config::Arg::None,      config::set_true    },
-    { "8",      SEC_C64,  KEY_UNIT_8,   DEFAULT_UNIT_8,     config::Arg::Required,  config::set_value   },
-    { "9",      SEC_C64,  KEY_UNIT_9,   DEFAULT_UNIT_9,     config::Arg::Required,  config::set_value   }
+    { "prg",    SEC_C64,  KEY_PRGFILE,  DEFAULT_PRGFILE,    config::Arg::Required,  config::set_value           },
+    { "resid",  SEC_C64,  KEY_RESID,    DEFAULT_RESID,      config::Arg::Optional,  config::set_bool,   "yes"   },
+    { "swapj",  SEC_C64,  KEY_SWAPJOY,  DEFAULT_SWAPJOY,    config::Arg::Optional,  config::set_bool,   "yes"   },
+    { "8",      SEC_C64,  KEY_UNIT_8,   DEFAULT_UNIT_8,     config::Arg::Required,  config::set_value           },
+    { "9",      SEC_C64,  KEY_UNIT_9,   DEFAULT_UNIT_9,     config::Arg::Required,  config::set_value           }
 };
 
 std::string C64Cmdline::usage() const
@@ -44,8 +44,8 @@ std::string C64Cmdline::usage() const
     os << config::Cmdline::usage() << std::endl << std::endl
        << "Commodore C64 specific:"                                                                     << std::endl
        << " --prg <prg>             Load a PRG file as soon as the basic is ready"                      << std::endl
-       << " --resid <yes|no>        Use the MOS6581 reSID library (default is " << DEFAULT_RESID << ")" << std::endl
-       << " --swapj                 Swap Joysticks"                                                     << std::endl
+       << " --resid [yes|no]        Use the MOS6581 reSID library (default is " << DEFAULT_RESID << ")" << std::endl
+       << " --swapj [yes|no]        Swap Joysticks (default is " << DEFAULT_SWAPJOY << ")"              << std::endl
        << " --8 <path>              Attach a disk drive as unit 8"                                      << std::endl
        << " --9 <path>              Attach a disk drive as unit 9";
 

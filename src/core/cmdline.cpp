@@ -71,29 +71,29 @@ bool set_bool(Confile& cf, const Option& opt, const std::string& value)
 }
 
 static Option generic_options[] = {
-    { "conf",       SEC_GENERIC,    KEY_CONFIG_FILE,    CONFIG_FILE,        Arg::Required,  set_value   },
-    { "romdir",     SEC_GENERIC,    KEY_ROMDIR,         DEFAULT_ROMDIR,     Arg::Required,  set_value   },
-    { "palettedir", SEC_GENERIC,    KEY_PALETTEDIR,     DEFAULT_PALETTEDIR, Arg::Required,  set_value   },
-    { "keymapsdir", SEC_GENERIC,    KEY_KEYMAPSDIR,     DEFAULT_KEYMAPSDIR, Arg::Required,  set_value   },
-    { "palette",    SEC_GENERIC,    KEY_PALETTE,        DEFAULT_PALETTE,    Arg::Required,  set_value   },
-    { "keymaps",    SEC_GENERIC,    KEY_KEYMAPS,        DEFAULT_KEYMAPS,    Arg::Required,  set_value   },
-    { "cart",       SEC_GENERIC,    KEY_CARTRIDGE,      DEFAULT_CARTRIDGE,  Arg::Required,  set_value   },
-    { "fps",        SEC_GENERIC,    KEY_FPS,            DEFAULT_FPS,        Arg::Required,  set_value   },
-    { "scale",      SEC_GENERIC,    KEY_SCALE,          DEFAULT_SCALE,      Arg::Required,  set_value   },
-    { "scanlines",  SEC_GENERIC,    KEY_SCANLINES,      DEFAULT_SCANLINES,  Arg::Required,  set_value   },
-    { "fullscreen", SEC_GENERIC,    KEY_FULLSCREEN,     DEFAULT_FULLSCREEN, Arg::None,      set_true    },
-    { "sresize",    SEC_GENERIC,    KEY_SRESIZE,        DEFAULT_SRESIZE,    Arg::Required,  set_bool    },
-    { "audio",      SEC_GENERIC,    KEY_AUDIO,          DEFAULT_AUDIO,      Arg::Required,  set_bool    },
-    { "delay",      SEC_GENERIC,    KEY_DELAY,          DEFAULT_DELAY,      Arg::Required,  set_value   },
-    { "monitor",    SEC_GENERIC,    KEY_MONITOR,        DEFAULT_MONITOR,    Arg::None,      set_true    },
-    { "logfile",    SEC_GENERIC,    KEY_LOGFILE,        DEFAULT_LOGFILE,    Arg::Required,  set_value   },
-    { "loglevel",   SEC_GENERIC,    KEY_LOGLEVEL,       DEFAULT_LOGLEVEL,   Arg::Required,  set_value   },
-    { "vjoy",       SEC_GENERIC,    KEY_VJOY,           DEFAULT_VJOY,       Arg::Required,  set_bool    },
-    { "vjoy-up",    SEC_GENERIC,    KEY_VJOY_UP,        DEFAULT_VJOY_UP,    Arg::Required,  set_value   },
-    { "vjoy-down",  SEC_GENERIC,    KEY_VJOY_DOWN,      DEFAULT_VJOY_DOWN,  Arg::Required,  set_value   },
-    { "vjoy-left",  SEC_GENERIC,    KEY_VJOY_LEFT,      DEFAULT_VJOY_LEFT,  Arg::Required,  set_value   },
-    { "vjoy-right", SEC_GENERIC,    KEY_VJOY_RIGHT,     DEFAULT_VJOY_RIGHT, Arg::Required,  set_value   },
-    { "vjoy-fire",  SEC_GENERIC,    KEY_VJOY_FIRE,      DEFAULT_VJOY_FIRE,  Arg::Required,  set_value   }
+    { "conf",       SEC_GENERIC,    KEY_CONFIG_FILE,    CONFIG_FILE,        Arg::Required,  set_value           },
+    { "romdir",     SEC_GENERIC,    KEY_ROMDIR,         DEFAULT_ROMDIR,     Arg::Required,  set_value           },
+    { "palettedir", SEC_GENERIC,    KEY_PALETTEDIR,     DEFAULT_PALETTEDIR, Arg::Required,  set_value           },
+    { "keymapsdir", SEC_GENERIC,    KEY_KEYMAPSDIR,     DEFAULT_KEYMAPSDIR, Arg::Required,  set_value           },
+    { "palette",    SEC_GENERIC,    KEY_PALETTE,        DEFAULT_PALETTE,    Arg::Required,  set_value           },
+    { "keymaps",    SEC_GENERIC,    KEY_KEYMAPS,        DEFAULT_KEYMAPS,    Arg::Required,  set_value           },
+    { "cart",       SEC_GENERIC,    KEY_CARTRIDGE,      DEFAULT_CARTRIDGE,  Arg::Required,  set_value           },
+    { "fps",        SEC_GENERIC,    KEY_FPS,            DEFAULT_FPS,        Arg::Required,  set_value           },
+    { "scale",      SEC_GENERIC,    KEY_SCALE,          DEFAULT_SCALE,      Arg::Required,  set_value           },
+    { "scanlines",  SEC_GENERIC,    KEY_SCANLINES,      DEFAULT_SCANLINES,  Arg::Required,  set_value           },
+    { "fullscreen", SEC_GENERIC,    KEY_FULLSCREEN,     DEFAULT_FULLSCREEN, Arg::Optional,  set_bool,   "yes"   },
+    { "sresize",    SEC_GENERIC,    KEY_SRESIZE,        DEFAULT_SRESIZE,    Arg::Optional,  set_bool,   "yes"   },
+    { "audio",      SEC_GENERIC,    KEY_AUDIO,          DEFAULT_AUDIO,      Arg::Optional,  set_bool,   "yes"   },
+    { "delay",      SEC_GENERIC,    KEY_DELAY,          DEFAULT_DELAY,      Arg::Required,  set_value           },
+    { "monitor",    SEC_GENERIC,    KEY_MONITOR,        DEFAULT_MONITOR,    Arg::Optional,  set_bool,   "yes"   },
+    { "logfile",    SEC_GENERIC,    KEY_LOGFILE,        DEFAULT_LOGFILE,    Arg::Required,  set_value           },
+    { "loglevel",   SEC_GENERIC,    KEY_LOGLEVEL,       DEFAULT_LOGLEVEL,   Arg::Required,  set_value           },
+    { "vjoy",       SEC_GENERIC,    KEY_VJOY,           DEFAULT_VJOY,       Arg::Optional,  set_bool,   "yes"   },
+    { "vjoy-up",    SEC_GENERIC,    KEY_VJOY_UP,        DEFAULT_VJOY_UP,    Arg::Required,  set_value           },
+    { "vjoy-down",  SEC_GENERIC,    KEY_VJOY_DOWN,      DEFAULT_VJOY_DOWN,  Arg::Required,  set_value           },
+    { "vjoy-left",  SEC_GENERIC,    KEY_VJOY_LEFT,      DEFAULT_VJOY_LEFT,  Arg::Required,  set_value           },
+    { "vjoy-right", SEC_GENERIC,    KEY_VJOY_RIGHT,     DEFAULT_VJOY_RIGHT, Arg::Required,  set_value           },
+    { "vjoy-fire",  SEC_GENERIC,    KEY_VJOY_FIRE,      DEFAULT_VJOY_FIRE,  Arg::Required,  set_value           }
 };
 
 std::string Cmdline::usage() const
@@ -116,16 +116,16 @@ std::string Cmdline::usage() const
        << " --scanlines <n|h|v|H|V> Scanlines effect: (n)one, (h)orizontal, (v)ertical,"                  << std::endl
        << "                         advanced (H)orizontal, advanced (V)ertical"                           << std::endl
        << "                         (default is " << DEFAULT_SCANLINES << ")"                             << std::endl
-       << " --fullscreen            Start in fullscreen mode"                                             << std::endl
-       << " --sresize <yes|no>      Smooth window resize (default is " << DEFAULT_SRESIZE << ")"          << std::endl
-       << " --audio <yes|no>        Enable audio (default is " << DEFAULT_AUDIO << ")"                    << std::endl
+       << " --fullscreen [yes|no]   Start in fullscreen mode"                                             << std::endl
+       << " --sresize [yes|no]      Smooth window resize (default is " << DEFAULT_SRESIZE << ")"          << std::endl
+       << " --audio [yes|no]        Enable audio (default is " << DEFAULT_AUDIO << ")"                    << std::endl
        << " --delay <delay>         Clock delay factor (default is " << DEFAULT_DELAY << ")"              << std::endl
-       << " --monitor               Activate the CPU monitor during boot"                                 << std::endl
+       << " --monitor [yes|no]      Activate the CPU monitor (default is " << DEFAULT_MONITOR << ")"      << std::endl
        << " --logfile <file>        Send log information to the specified destination"                    << std::endl
        << "                         (default is " << DEFAULT_LOGFILE << ")"                               << std::endl
        << " --loglevel <lv>         Loglevel, bitwise combination of: "                                   << std::endl
        << "                         none|error|warn|info|debug|all (default is " << DEFAULT_LOGLEVEL << ")" << std::endl
-       << " --vjoy <yes|no>         Enable virtual joystick (default is " << DEFAULT_VJOY << ")"          << std::endl
+       << " --vjoy [yes|no]         Enable virtual joystick (default is " << DEFAULT_VJOY << ")"          << std::endl
        << " --vjoy-up <keyname>     Virtual joystick UP key (default is " << DEFAULT_VJOY_UP << ")"       << std::endl
        << " --vjoy-down <keyname>   Virtual joystick DOWN key (default is " << DEFAULT_VJOY_DOWN << ")"   << std::endl
        << " --vjoy-left <keyname>   Virtual joystick LEFT key (default is " << DEFAULT_VJOY_LEFT << ")"   << std::endl
@@ -196,6 +196,7 @@ Confile Cmdline::parse(int argc, const char** argv)
             throw InvalidArgument{"Invalid command line option: " + optstr};
         }
 
+        std::string optval{};
         const auto& useropt = optstr.substr(pos);
         size_t j = 0;
         while (j < opts.size()) {
@@ -204,6 +205,18 @@ Confile Cmdline::parse(int argc, const char** argv)
                 switch (opt.type) {
                 case Arg::None:
                     opt.fn(cf, opt, "");
+                    break;
+                case Arg::Optional:
+                    if ((i + 1 >= argc) || std::string{argv[i + 1]}.starts_with("--")) {
+                        optval = opt.optval;
+                    } else {
+                        ++i;
+                        optval = argv[i];
+                    }
+                    if (!opt.fn(cf, opt, optval)) {
+                        throw InvalidArgument{"Invalid optional parameter: option " + optstr + ", parameter " +
+                            optval};
+                    }
                     break;
                 case Arg::Required:
                     if (i + 1 >= argc) {
