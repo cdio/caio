@@ -40,10 +40,13 @@ constexpr static const size_t EXTERNAL_RAM_SIZE  = 16384;
 constexpr static const char* SEC_ZX80            = "zx80";
 constexpr static const char* KEY_RAM_16K         = "ram16";
 constexpr static const char* KEY_ROM_8K          = "rom8";
+constexpr static const char* KEY_RVIDEO          = "rvideo";
+constexpr static const char* KEY_CHROMA          = "chroma";
 constexpr static const char* KEY_PRGFILE         = "prg";
 
 constexpr static const char* DEFAULT_RAM_16K     = "no";
 constexpr static const char* DEFAULT_ROM_8K      = "no";
+constexpr static const char* DEFAULT_RVIDEO      = "no";
 constexpr static const char* DEFAULT_PRGFILE     = "";
 
 class ZX80Cmdline : public config::Cmdline {
@@ -61,6 +64,7 @@ public:
 struct ZX80Config : public config::Config {
     bool        ram16{};
     bool        rom8{};
+    bool        rvideo{};
     std::string prgfile{};
 
     ZX80Config(config::Section& sec);

@@ -83,7 +83,7 @@ void ZX80ASpace::reset()
     }
 }
 
-inline ZX80ASpace::AccessType ZX80ASpace::access_type(addr_t addr) const
+ZX80ASpace::AccessType ZX80ASpace::access_type(addr_t addr) const
 {
     return (_cpu->iorq_pin() ? AccessType::IO : ((addr & RAM_ADDR_MASK) ? AccessType::RAM : AccessType::ROM));
 }
@@ -137,13 +137,12 @@ void ZX80ASpace::rfsh_cycle()
          */
         addr_t rfsh_addr = ASpace::address_bus();
         addr_t base = rfsh_addr & BITMAP_ADDR_MASK;
-        addr_t offset = static_cast<addr_t>(_chcode & CHCODE_MASK) << 3;
-        addr_t bitmap_addr = base | offset | _counter;
+        addr_t offset = (static_cast<addr_t>(_chcode & CHCODE_MASK) << 3) | _counter;
 
         uint8_t invert = ((_chcode & BITMAP_INVERT) ? 255 : 0);
-        uint8_t bitmap = _rom->read(bitmap_addr) ^ invert;
+        uint8_t bdata = _rom->read(base + offset) ^ invert;
 
-        _video->bitmap(bitmap);
+        _video->bitmap(bdata);
     }
 }
 
@@ -176,7 +175,7 @@ uint8_t ZX80ASpace::io_read(addr_t port)
      *     VSYNC period started
      */
     if ((port & A0) == A0) {
-        return 255;
+        return data_bus();
     }
 
     /*
@@ -223,7 +222,7 @@ uint8_t ZX80ASpace::read(addr_t addr, ReadMode mode)
         break;
     }
 
-    bool video_access = (addr & VRAM_ADDR_MASK);
+    bool video_access = (addr & VIDEO_ACCESS_MASK);
     bool enable_blank = (data & ENABLE_BLANK);
 
     _blank = !video_access || enable_blank || _cpu->halt_pin();
@@ -232,8 +231,8 @@ uint8_t ZX80ASpace::read(addr_t addr, ReadMode mode)
 
     if (force_nop) {
         /*
-         * The data is a character code,
-         * latch this value and make the CPU see a NOP opcode.
+         * Data is a character code, latch this
+         * value and make the CPU see a NOP opcode.
          */
         _chcode = data;
         data = Z80::I_NOP;

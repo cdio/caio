@@ -33,15 +33,16 @@ namespace sinclair {
 namespace zx80 {
 
 RgbaTable ZX80Video::builtin_palette{
-    0x202020FF,
+    0x101010FF,
     0xCFCFCFFF
 };
 
-ZX80Video::ZX80Video(const sptr_t<Clock>& clk, const std::string& label)
+ZX80Video::ZX80Video(const sptr_t<Clock>& clk, bool rvideo, const std::string& label)
     : Name{TYPE, label},
       _clk{clk},
+      _rvideo{rvideo},
       _palette{builtin_palette},
-      _scanline(WIDTH, _palette[WHITE])
+      _scanline(WIDTH)
 {
     using namespace gsl;
     Expects(clk);
@@ -52,8 +53,6 @@ void ZX80Video::palette(const std::string& fname)
     if (!fname.empty()) {
         _palette.load(fname);
     }
-
-    std::fill(_scanline.begin(), _scanline.end(), _palette[WHITE]);
 }
 
 void ZX80Video::palette(const RgbaTable& plt)
@@ -89,11 +88,11 @@ inline void ZX80Video::clear_screen()
 void ZX80Video::paint_byte(unsigned start, uint8_t bitmap)
 {
     if (start < _scanline.size()) {
-        const auto& fg_color = _palette[BLACK];
-        const auto& bg_color = _palette[WHITE];
+        const auto& fg = fg_colour();
+        const auto& bg = bg_colour();
         uint8_t bit = 128;
         for (auto it = _scanline.begin() + start; bit != 0 && it != _scanline.end(); ++it, bit >>= 1) {
-            it->set((bitmap & bit) ? fg_color : bg_color);
+            it->set((bitmap & bit) ? fg : bg);
         }
     }
 }
@@ -104,11 +103,21 @@ void ZX80Video::bitmap(uint8_t vdata)
     _column += 8;
 }
 
+inline const Rgba& ZX80Video::bg_colour() const
+{
+    return (_rvideo ? _palette[BLACK] : _palette[WHITE]);
+}
+
+inline const Rgba& ZX80Video::fg_colour() const
+{
+    return (_rvideo ? _palette[WHITE] : _palette[BLACK]);
+}
+
 void ZX80Video::hsync()
 {
     render_line();
-    std::fill(_scanline.begin(), _scanline.end(), _palette[WHITE]);
-    _column = LBORDER_START;
+    std::fill(_scanline.begin(), _scanline.end(), bg_colour());
+    _column = LBORDER_END;
     ++_line;
 }
 
@@ -130,7 +139,7 @@ void ZX80Video::vsync(bool on)
          */
         _vsync_count = 0;
         _line = 0;
-        _column = LBORDER_START;
+        _column = LBORDER_END;
     }
 
     /*
@@ -150,7 +159,8 @@ inline int ZX80Video::disturbance(float A, float& t)
     constexpr static const float T = 1.0f;
     constexpr static const float F = 6.0f;
     constexpr static const float D = 0.01f;
-    int value = signal::exp(0.0f, A, t, T) * std::cos(2 * std::numbers::pi * F * t);
+    constexpr static const float W = 2.0f * std::numbers::pi * F;
+    int value = signal::exp(0.0f, A, t, T) * std::cos(W * t);
     t += D;
     return value;
 }

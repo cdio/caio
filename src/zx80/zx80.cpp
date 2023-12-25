@@ -187,7 +187,7 @@ void ZX80::create_devices()
 
     _clk   = std::make_shared<Clock>("CLK", CLOCK_FREQ, _conf.delay);
     _cpu   = std::make_shared<Z80>(Z80::TYPE, "CPU");
-    _video = std::make_shared<ZX80Video>(_clk, "VID");
+    _video = std::make_shared<ZX80Video>(_clk, _conf.rvideo, "VID");
     _kbd   = std::make_shared<ZX80Keyboard>("KBD");
     _mmap  = std::make_shared<ZX80ASpace>(_cpu, _ram, _rom, _video, _kbd);
 

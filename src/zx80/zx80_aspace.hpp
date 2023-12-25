@@ -45,7 +45,7 @@ public:
     constexpr static const addr_t ROM8_MASK         = ROM8_SIZE - 1;
     constexpr static const addr_t INTERNAL_RAM_MASK = INTERNAL_RAM_SIZE - 1;
     constexpr static const addr_t EXTERNAL_RAM_MASK = EXTERNAL_RAM_SIZE - 1;
-    constexpr static const addr_t VRAM_ADDR_MASK    = A15;
+    constexpr static const addr_t VIDEO_ACCESS_MASK = A15;
     constexpr static const addr_t RAM_ADDR_MASK     = A14;
     constexpr static const addr_t BITMAP_ADDR_MASK  = 0x1E00;
     constexpr static const addr_t KBD_SCAN_MASK     = ZX80Keyboard::COLUMN_MASK;
@@ -59,7 +59,7 @@ public:
      * Initialise this ZX80 address space.
      * @param cpu   CPU;
      * @param ram   RAM (1K or 16K);
-     * @param rom   ROM (4K);
+     * @param rom   ROM (4K or 8K);
      * @param video Video interface;
      * @param kbd   Keyboard.
      * @warning All the parameters must be valid otherwise the process is terminated.
@@ -118,7 +118,6 @@ private:
     addr_t                  _rom_mask;
     sptr_t<ZX80Video>       _video;
     sptr_t<ZX80Keyboard>    _kbd;
-
     addr_t                  _chcode{};      /* Current character code           */
     addr_t                  _counter{};     /* Current character line counter   */
     bool                    _blank{};       /* Blank scanline                   */

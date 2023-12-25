@@ -18,8 +18,8 @@ moment the following platforms are emulated:
 ### Commodore 64
 
 The emulation of the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
-almost reached a beta status and most of the tested programs work just fine
-(if they do not exploit obscure video/timing tricks or trigger some bug ;).
+reached beta status and most of the tested programs work just fine
+(there are some issues with games exploiting some obscure video/timing tricks).
 
 ![c64](images/c64.gif "caio c64")
 ![c64-gyruss](images/gyruss.gif "C64 - Gyruss")
@@ -32,9 +32,7 @@ almost reached a beta status and most of the tested programs work just fine
 
 The emulation of the [ZX80](https://en.wikipedia.org/wiki/ZX80) is in alpha
 state, some features are missing such as support for load/save operations
-from the basic.
-
-That said, it works fine.
+from basic, other than that it seems to work fine.
 
 ![zx80-4K-space-invaders](images/zx80-4K-space-invaders.gif "ZX80 - Space Invaders")
 ![zx80-4K-double-breakout](images/zx80-4K-double-breakout.gif "ZX80 - Double Breakout")

@@ -61,20 +61,30 @@ public:
      *    |- - - - - - - - - - - - - - - - - - - - - - -|       -+-         > 56     -+-
      *    |         NOT-VISIBLE BOTTOM BORDER           |        | 9       |
      *    +---------------------------------------------+       -+-       -+-
-     *
-     * Sync lines not shown.
      */
-    constexpr static unsigned VISIBLE_UBORDER        = 47;
-    constexpr static unsigned VISIBLE_BBORDER        = 47;
-    constexpr static unsigned VISIBLE_DISPLAY        = 192;
-    constexpr static unsigned VISIBLE_HEIGHT         = VISIBLE_UBORDER + VISIBLE_DISPLAY + VISIBLE_BBORDER - 9;
-    constexpr static unsigned LBORDER_START          = 32;
+    constexpr static unsigned LBORDER_WIDTH          = 32;
+    constexpr static unsigned RBORDER_WIDTH          = 32;
+    constexpr static unsigned UBORDER_HEIGHT         = 47;
+    constexpr static unsigned BBORDER_HEIGHT         = 47 - 9;
     constexpr static unsigned DISPLAY_WIDTH          = 256;
-    constexpr static unsigned VISIBLE_WIDTH          = DISPLAY_WIDTH + 2 * LBORDER_START;
-    constexpr static unsigned WIDTH                  = VISIBLE_WIDTH;
-    constexpr static unsigned HEIGHT                 = VISIBLE_HEIGHT;
+    constexpr static unsigned DISPLAY_HEIGHT         = 192;
+
+    constexpr static unsigned VISIBLE_WIDTH          = LBORDER_WIDTH + DISPLAY_WIDTH + LBORDER_WIDTH;
+    constexpr static unsigned VISIBLE_HEIGHT         = UBORDER_HEIGHT + DISPLAY_HEIGHT + BBORDER_HEIGHT;
+
     constexpr static unsigned SCANLINE_VISIBLE_START = 9;
     constexpr static unsigned SCANLINE_VISIBLE_END   = SCANLINE_VISIBLE_START + VISIBLE_HEIGHT;
+
+    constexpr static unsigned LBORDER_START          = 0;
+    constexpr static unsigned LBORDER_END            = LBORDER_START + LBORDER_WIDTH;
+    constexpr static unsigned RBORDER_START          = LBORDER_END + DISPLAY_WIDTH;
+    constexpr static unsigned RBORDER_END            = RBORDER_START + RBORDER_WIDTH;
+    constexpr static unsigned UBORDER_START          = 0;
+    constexpr static unsigned UBORDER_END            = UBORDER_START + UBORDER_HEIGHT;
+    constexpr static unsigned BBORDER_START          = UBORDER_END + DISPLAY_HEIGHT;;
+    constexpr static unsigned BBORDER_END            = SCANLINE_VISIBLE_END;
+    constexpr static unsigned WIDTH                  = VISIBLE_WIDTH;
+    constexpr static unsigned HEIGHT                 = VISIBLE_HEIGHT;
 
     using renderer_t = std::function<void(unsigned, const ui::Scanline&)>;
     using cls_t      = std::function<void(const Rgba&)>;
@@ -87,11 +97,12 @@ public:
     /**
      * Initialise this video controller.
      * @param clk   System's clock;
+     * @param rvideo True to reverse video, false otherwise;
      * @param label Label assigned to this device.
      * @warning If the clk parameter is not valid the process is terminated.
      * @see render_line(const std::function<void(unsigned, const ui::Scanline&)>&);
      */
-    ZX80Video(const sptr_t<Clock>& clk, const std::string& label);
+    ZX80Video(const sptr_t<Clock>& clk, bool rvideo, const std::string& label);
 
     virtual ~ZX80Video() {
     }
@@ -127,6 +138,30 @@ public:
     void palette(const RgbaTable& plt);
 
     /**
+     * Clear the screen.
+     * @see clear_screen(const cls_t&)
+     */
+    void clear_screen();
+
+    /**
+     * Paint 8 pixels in the current scanline.
+     * Set bits (1) are painted using the ink colour and
+     * cleared bits (0) are painted using the paper colour.
+     * @param start  Starting horizontal position within the scanline;
+     * @param bitmap Bitmap to pain.
+     * @see ink(uint8_t)
+     * @see paper(uint8_t)
+     */
+    void paint_byte(unsigned start, uint8_t bitmap);
+
+    /**
+     * Paint 8 pixels at the current position in the scanline.
+     * @param vdata Bitmap to paint.
+     * @see paint_byte(unsigned, uint8_t)
+     */
+    void bitmap(uint8_t vdata);
+
+    /**
      * Horizontal Synchronisation.
      * Render the current scanline and prepare to start the next one.
      */
@@ -138,13 +173,6 @@ public:
      */
     void vsync(bool on);
 
-    /**
-     * Paint 8 pixels at the current position in the scanline.
-     * @param vdata Bitmap to paint.
-     * @see paint_byte(unsigned, uint8_t)
-     */
-    void bitmap(uint8_t vdata);
-
 private:
     /**
      * Render the current scanline.
@@ -153,18 +181,18 @@ private:
     void render_line();
 
     /**
-     * Clear the screen.
-     * @see clear_screen(const cls_t&)
+     * Get the background colour.
+     * @return The background colour.
+     * @see _rvideo
      */
-    void clear_screen();
+    const Rgba& bg_colour() const;
 
     /**
-     * Paint 8 pixels in the current scanline.
-     * Set bits (1) are painted as WHITE, cleared bits (0) are painted as BLACK.
-     * @param start  Starting horizontal position within the scanline;
-     * @param bitmap Bitmap to pain.
+     * Get the foreground colour.
+     * @return The foreground colour.
+     * @see _rvideo
      */
-    void paint_byte(unsigned start, uint8_t bitmap);
+    const Rgba& fg_colour() const;
 
     /**
      * Retrieve the next line disturbance value after an out-of-sync.
@@ -174,20 +202,21 @@ private:
      */
     int disturbance(float A, float& t);
 
-    sptr_t<Clock> _clk;                     /* System clock                 */
-    RgbaTable     _palette;                 /* Colour palette               */
-    ui::Scanline  _scanline;                /* Current scanline pixel data  */
-    renderer_t    _renderline_cb{};         /* Renderer callback            */
-    cls_t         _cls_cb{};                /* Clear screen callback        */
-    int           _line{};                  /* Current raster line          */
-    int           _lineoff{};               /* VSync hack                   */
-    unsigned      _column{LBORDER_START};   /* Current horizontal position  */
-    size_t        _vsync_count{};           /* Number of vsync pulses       */
+    sptr_t<Clock> _clk;                     /* System clock                     */
+    bool          _rvideo;                  /* Reverse video flag               */
+    RgbaTable     _palette;                 /* Colour palette                   */
+    ui::Scanline  _scanline;                /* Current scanline pixel data      */
 
-    float         _A{};                     /* Out-of-sync amplitude        */
-    float         _t{};                     /* Out-of-sync time             */
+    renderer_t    _renderline_cb{};         /* Renderer callback                */
+    cls_t         _cls_cb{};                /* Clear screen callback            */
+    int           _line{};                  /* Current raster line              */
+    unsigned      _column{LBORDER_START};   /* Current horizontal position      */
+    size_t        _vsync_count{};           /* Number of vsync pulses           */
+    int           _lineoff{};               /* Out-of-sync scanline variation   */
+    float         _A{};                     /* Out-of-sync amplitude            */
+    float         _t{};                     /* Out-of-sync time                 */
 
-    static RgbaTable builtin_palette;       /* Default colour palette       */
+    static RgbaTable builtin_palette;       /* Default colour palette           */
 };
 
 }
