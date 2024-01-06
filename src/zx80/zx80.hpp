@@ -23,27 +23,20 @@
 #include "ram.hpp"
 #include "rom.hpp"
 #include "ui.hpp"
+
 #include "zilog_z80.hpp"
 
 #include "zx80_aspace.hpp"
+#include "zx80_cassette.hpp"
 #include "zx80_config.hpp"
 #include "zx80_keyboard.hpp"
+#include "zx80_params.hpp"
 #include "zx80_video.hpp"
 
 
 namespace caio {
 namespace sinclair {
 namespace zx80 {
-
-constexpr static const addr_t ROM4_MAIN_EXEC        = 0x0283;
-constexpr static const addr_t ROM8_MAIN_EXEC        = 0x0419;
-constexpr static const addr_t ROM8_SLOW_FAST        = 0x0207;
-constexpr static const addr_t ROM8_NEXTLINE         = 0x066C;
-constexpr static const addr_t ROM8_NEXTLINE_10      = ROM8_NEXTLINE + 10;
-constexpr static const addr_t ROM8_SYSVAR_ERR_NR    = 0x4000;
-constexpr static const addr_t ROM8_SYSVAR_FLAGS     = 0x4001;
-constexpr static const addr_t RAMTOP_16K            = 0x8000;
-constexpr static const addr_t RAMTOP_1K             = 0x4000;
 
 /**
  * Sinclair ZX80 emulator.
@@ -151,15 +144,17 @@ private:
      */
     void hotkeys(keyboard::Key key);
 
-    ZX80Config           _conf;
-    devptr_t             _ram{};
-    devptr_t             _rom{};
-    sptr_t<ZX80ASpace>   _mmap{};
-    sptr_t<Z80>          _cpu{};
-    sptr_t<ZX80Video>    _video{};
-    sptr_t<ZX80Keyboard> _kbd{};
-    sptr_t<Clock>        _clk{};
-    sptr_t<ui::UI>       _ui{};
+    ZX80Config              _conf;
+
+    devptr_t                _ram{};
+    devptr_t                _rom{};
+    sptr_t<ZX80ASpace>      _mmap{};
+    sptr_t<Z80>             _cpu{};
+    sptr_t<ZX80Video>       _video{};
+    sptr_t<ZX80Keyboard>    _kbd{};
+    sptr_t<ZX80Cassette>    _cass{};
+    sptr_t<Clock>           _clk{};
+    sptr_t<ui::UI>          _ui{};
 };
 
 }

@@ -1,6 +1,3 @@
-- ZX80:     prg for 8K rom
-- ZX80:     joystick
-- ZX80:     chroma-80
 - vjoy:     move ALT-K handling from c64 to ui
 - signal:   Test all methods specially filters and kernels
 - signal:   Fast filters, fast convolution?

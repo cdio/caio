@@ -26,10 +26,11 @@ namespace sinclair {
 namespace zx80 {
 
 static const config::Option zx80_options[] = {
-    { "ram16",  SEC_ZX80,   KEY_RAM_16K,    DEFAULT_RAM_16K,    config::Arg::Optional,  config::set_bool,   "yes"   },
-    { "rom8",   SEC_ZX80,   KEY_ROM_8K,     DEFAULT_ROM_8K,     config::Arg::Optional,  config::set_bool,   "yes"   },
-    { "rvideo", SEC_ZX80,   KEY_RVIDEO,     DEFAULT_RVIDEO,     config::Arg::Optional,  config::set_bool,   "yes"   },
-    { "prg",    SEC_ZX80,   KEY_PRGFILE,    DEFAULT_PRGFILE,    config::Arg::Required,  config::set_value           }
+    { KEY_RAM_16K, SEC_ZX80, KEY_RAM_16K, DEFAULT_RAM_16K, config::Arg::Optional, config::set_bool, "yes" },
+    { KEY_ROM_8K,  SEC_ZX80, KEY_ROM_8K,  DEFAULT_ROM_8K,  config::Arg::Optional, config::set_bool, "yes" },
+    { KEY_RVIDEO,  SEC_ZX80, KEY_RVIDEO,  DEFAULT_RVIDEO,  config::Arg::Optional, config::set_bool, "yes" },
+    { KEY_CASSDIR, SEC_ZX80, KEY_CASSDIR, DEFAULT_CASSDIR, config::Arg::Required, config::set_value       },
+    { KEY_PRGFILE, SEC_ZX80, KEY_PRGFILE, DEFAULT_PRGFILE, config::Arg::Required, config::set_value       }
 };
 
 std::string ZX80Cmdline::usage() const
@@ -37,11 +38,12 @@ std::string ZX80Cmdline::usage() const
     std::ostringstream os{};
 
     os << config::Cmdline::usage() << "\n\n"
-          "Sinclair ZX80 specific:\n"
-          " --ram16 [yes|no]        Attach a 16K RAM instead of the default 1K RAM\n"
-          " --rom8 [yes|no]         Attach the 8K ROM instead of the default 4K ROM\n"
-          " --rvideo [yes|no]       Reverse video output\n"
-          " --prg <.o|.p>           Load a .o/.p file as soon as the basic is started";
+        "Sinclair ZX80 specific:\n"
+        " --ram16 [yes|no]        Attach a 16K RAM instead of the default 1K RAM\n"
+        " --rom8 [yes|no]         Attach the 8K ROM instead of the default 4K ROM\n"
+        " --rvideo [yes|no]       Reverse video output\n"
+        " --cassdir <dir>         Set the basic save/load directory (default is " << DEFAULT_CASSDIR << ")\n"
+        " --prg <.o|.p>           Load a .o/.p file as soon as the basic is started";
 
     return os.str();
 }
@@ -63,9 +65,10 @@ ZX80Config::ZX80Config(config::Section& sec)
       ram16{config::is_true(sec[KEY_RAM_16K])},
       rom8{config::is_true(sec[KEY_ROM_8K])},
       rvideo{config::is_true(sec[KEY_RVIDEO])},
+      cassdir{sec[KEY_CASSDIR]},
       prgfile{sec[KEY_PRGFILE]}
 {
-    title += " - Sinclair ZX80";
+    title += " - Sinclair ZX-80";
 }
 
 std::string ZX80Config::to_string() const
@@ -73,10 +76,11 @@ std::string ZX80Config::to_string() const
     std::ostringstream os{};
 
     os << Config::to_string() << "\n"
-          "  16K RAM:            " << (ram16  ? "yes" : "no") << "\n"
-          "  8K ROM:             " << (rom8   ? "yes" : "no") << "\n"
-          "  Reverse video:      " << (rvideo ? "yes" : "no") << "\n"
-          "  Attached PRG:       " << std::quoted(prgfile);
+        "  16K RAM:            " << (ram16  ? "yes" : "no") << "\n"
+        "  8K ROM:             " << (rom8   ? "yes" : "no") << "\n"
+        "  Reverse video:      " << (rvideo ? "yes" : "no") << "\n"
+        "  Cassette directory: " << std::quoted(cassdir)    << "\n"
+        "  Attached PRG:       " << std::quoted(prgfile);
 
     return os.str();
 }

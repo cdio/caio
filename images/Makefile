@@ -20,12 +20,18 @@ ROOT=		${abspath ..}
 
 include ${ROOT}/mk/config.mk
 
-IMAGES=		c64.gif \
-		compopicasso.png \
-		gyruss.gif \
-		q-bert.gif \
-		C64keyboard.gif \
-		zauberwald.png
+IMAGES=		c64-basic.gif \
+		c64-giana.gif \
+		c64-gyruss.gif \
+		c64-q-bert.gif \
+		c64-turrican.gif \
+		c64-uridium.gif \
+		zx80-4K-breakout.gif \
+		zx80-4K-layout.jpg \
+		zx80-4K-space-invaders.gif \
+		zx80-8K-kong.gif \
+		zx80-8K-layout.jpg \
+		zx80-8K-pacman.gif
 
 README=		${ROOT}/README.md
 

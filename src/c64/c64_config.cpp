@@ -28,11 +28,11 @@ namespace commodore {
 namespace c64 {
 
 static const config::Option c64_options[] = {
-    { "prg",    SEC_C64,  KEY_PRGFILE,  DEFAULT_PRGFILE,    config::Arg::Required,  config::set_value           },
-    { "resid",  SEC_C64,  KEY_RESID,    DEFAULT_RESID,      config::Arg::Optional,  config::set_bool,   "yes"   },
-    { "swapj",  SEC_C64,  KEY_SWAPJOY,  DEFAULT_SWAPJOY,    config::Arg::Optional,  config::set_bool,   "yes"   },
-    { "8",      SEC_C64,  KEY_UNIT_8,   DEFAULT_UNIT_8,     config::Arg::Required,  config::set_value           },
-    { "9",      SEC_C64,  KEY_UNIT_9,   DEFAULT_UNIT_9,     config::Arg::Required,  config::set_value           }
+    { KEY_PRGFILE,  SEC_C64, KEY_PRGFILE, DEFAULT_PRGFILE, config::Arg::Required, config::set_value         },
+    { KEY_RESID,    SEC_C64, KEY_RESID,   DEFAULT_RESID,   config::Arg::Optional, config::set_bool, "yes"   },
+    { KEY_SWAPJOY,  SEC_C64, KEY_SWAPJOY, DEFAULT_SWAPJOY, config::Arg::Optional, config::set_bool, "yes"   },
+    { KEY_UNIT_8,   SEC_C64, KEY_UNIT_8,  DEFAULT_UNIT_8,  config::Arg::Required, config::set_value         },
+    { KEY_UNIT_9,   SEC_C64, KEY_UNIT_9,  DEFAULT_UNIT_9,  config::Arg::Required, config::set_value         }
 };
 
 std::string C64Cmdline::usage() const
@@ -46,8 +46,8 @@ std::string C64Cmdline::usage() const
           " --prg <prg>             Load a PRG file as soon as the basic is ready\n"
           " --resid [yes|no]        Use the MOS6581 reSID library (default is " << DEFAULT_RESID << ")\n"
           " --swapj [yes|no]        Swap Joysticks (default is " << DEFAULT_SWAPJOY << ")\n"
-          " --8 <path>              Attach a disk drive as unit 8\n"
-          " --9 <path>              Attach a disk drive as unit 9";
+          " --unit8 <dir>           Attach a disk drive as unit 8\n"
+          " --unit9 <dir>           Attach a disk drive as unit 9";
 
     return os.str();
 }
@@ -72,7 +72,7 @@ C64Config::C64Config(config::Section& sec)
       unit8{sec[KEY_UNIT_8]},
       unit9{sec[KEY_UNIT_9]}
 {
-    title += " - Commodore C64";
+    title += " - Commodore 64";
 }
 
 std::string C64Config::to_string() const

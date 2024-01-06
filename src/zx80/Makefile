@@ -22,12 +22,10 @@ include ${ROOT}/mk/config.mk
 
 LIB=		libcaio_zx80.a
 
-#
-# Sinclair ZX80 Specifics
-#
 CXXSRCS=	ofile.cpp \
 		zx80.cpp \
 		zx80_aspace.cpp \
+		zx80_cassette.cpp \
 		zx80_config.cpp \
 		zx80_keyboard.cpp \
 		zx80_video.cpp
@@ -35,8 +33,10 @@ CXXSRCS=	ofile.cpp \
 INCS=		ofile.hpp \
 		zx80.hpp \
 		zx80_aspace.hpp \
+		zx80_cassette.hpp \
 		zx80_config.hpp \
 		zx80_keyboard.hpp \
+		z80_params.hpp \
 		zx80_video.hpp
 
 include ${ROOT}/mk/lib.mk

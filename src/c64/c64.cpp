@@ -87,7 +87,7 @@ void C64::run()
 
 void C64::start()
 {
-    log.info("Starting caio v" + caio::version() + " - Commodore C64\n" + to_string() + "\n");
+    log.info("Starting caio v%s - %s\n%s\n", caio::version().c_str(), _conf.title.c_str(), to_string().c_str());
 
     /*
      * The emulator runs on its own thread.

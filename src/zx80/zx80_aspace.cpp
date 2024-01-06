@@ -28,7 +28,7 @@ namespace sinclair {
 namespace zx80 {
 
 ZX80ASpace::ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr_t& rom,
-    const sptr_t<ZX80Video>& video, const sptr_t<ZX80Keyboard>& kbd)
+    const sptr_t<ZX80Video>& video, const sptr_t<ZX80Keyboard>& kbd, const sptr_t<ZX80Cassette>& cass)
     : ASpace{},
       _cpu{cpu},
       _ram{ram},
@@ -36,10 +36,11 @@ ZX80ASpace::ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr
       _rom{rom},
       _rom_mask{ROM_MASK},
       _video{video},
-      _kbd{kbd}
+      _kbd{kbd},
+      _cass{cass}
 {
     using namespace gsl;
-    Expects(_cpu && _ram && _rom && _video && _kbd &&
+    Expects(_cpu && _ram && _rom && _video && _kbd && _cass &&
         (_ram->size() == INTERNAL_RAM_SIZE || _ram->size() == EXTERNAL_RAM_SIZE) &&
         (_rom->size() == ROM_SIZE || _rom->size() == ROM8_SIZE));
 
@@ -60,7 +61,7 @@ ZX80ASpace::ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr
     _cpu->iorq_pin([this](bool on) {
         if (on && _cpu->m1_pin() && _intreq) {
             /*
-             * HSYNC started when an interrupt
+             * HSync started when an interrupt request
              * is acknowledged by the CPU.
              */
             hsync();
@@ -157,14 +158,14 @@ uint8_t ZX80ASpace::io_read(addr_t port)
      *     +-----+---------------------------------------------------+
      *     |     | D7    D6    D5    D4    D3    D2    D1    D0      |
      *     +-----+---------------------------------------------------+
-     *     | A8  |                   V     C     X     Z     SHIFT   |
-     *     | A9  |                   G     F     D     S     A       |
-     *     | A10 |                   T     R     E     W     Q       |
-     *     | A11 |                   5     4     3     2     1       |
-     *     | A12 |                   6     7     8     9     0       |
-     *     | A13 |                   Y     U     I     O     P       |
-     *     | A14 |                   H     J     K     L     NEWLINE |
-     *     | A15 |                   B     N     M     .     SPACE   |
+     *     | A8  | c     1     1     V     C     X     Z     SHIFT   |
+     *     | A9  | c     1     1     G     F     D     S     A       |
+     *     | A10 | c     1     1     T     R     E     W     Q       |
+     *     | A11 | c     1     1     5     4     3     2     1       |
+     *     | A12 | c     1     1     6     7     8     9     0       |
+     *     | A13 | c     1     1     Y     U     I     O     P       |
+     *     | A14 | c     1     1     H     J     K     L     NEWLINE |
+     *     | A15 | c     1     1     B     N     M     .     SPACE   |
      *     +-----+---------------------------------------------------+
      *     A8-A16: Keyboard row to scan (0=Scan, 1=Do not scan)
      *      D0-D4: Keyboard columns (0=Pressed, 1=Released)
@@ -172,14 +173,15 @@ uint8_t ZX80ASpace::io_read(addr_t port)
      *         D6: 0=60Hz, 1=50Hz
      *         D7: Cassette input (0=None, 1=Pulse)
      *
-     *     VSYNC period started
+     *     VSync period started
+     *     Cassette output forced to 0
      */
     if ((port & A0) == A0) {
         return data_bus();
     }
 
     /*
-     * Start the VSYNC period.
+     * Start the VSync period.
      */
     vsync(true);
 
@@ -190,11 +192,51 @@ uint8_t ZX80ASpace::io_read(addr_t port)
     uint8_t data = _kbd->read() & KBD_SCAN_MASK;
 
     /*
-     * Ports automatically read during a keyboard scan.
+     * Cassette output forced low.
+     */
+    _cass->write(0);
+
+    /*
+     * The ZX80 does not have a motor control mechanism so the
+     * user must press "play" after a LOAD command is delivered.
+     * The code below is used to detect when the LOAD procedure
+     * is being executed and automatially press "play" by calling
+     * the cassette read() method.
+     */
+    addr_t pc = _cpu->regs().PC;
+    if (_rom->size() == ROM_SIZE) {
+        switch (pc) {
+        case ROM4_LOAD_2_4:
+        case ROM4_LOAD_4_4:
+        case ROM4_LOAD_6_3:
+            data |= (_cass->read() ? CAS_IN : 0);
+            break;
+        case ROM4_SAVE_5_6:
+        case ROM4_SAVE_1_4:
+            /* Check for abort during save operation. Do not restart the cassette */
+            break;
+        default:
+            _cass->restart();
+        }
+    } else {
+        switch (pc) {
+        case ROM8_IN_BYTE_8:
+        case ROM8_GET_BIT_8:
+            data |= (_cass->read() ? CAS_IN : 0);
+            break;
+        case ROM8_BREAK_1_4:
+            /* Check for abort during save operation. Do not restart the cassette */
+            break;
+        default:
+            _cass->restart();
+        }
+    }
+
+    /*
+     * Other ports.
      */
     data |= VIDEO_RATE_50HZ;
     data |= D5;                 /* D5 unused */
-    data &= ~CAS_IN;
 
     return data;
 }
@@ -248,7 +290,8 @@ void ZX80ASpace::write(addr_t addr, uint8_t value)
 
     switch (access_type(addr)) {
     case AccessType::IO:
-        vsync(false);
+        vsync(false);       /* VSync period terminated */
+        _cass->write(1);    /* Cassette output forced high */
         break;
 
     case AccessType::RAM:

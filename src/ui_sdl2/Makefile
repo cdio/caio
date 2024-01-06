@@ -27,6 +27,7 @@ CXXSRCS+=	sdl2.cpp \
 		audio.cpp \
 		panel.cpp \
 		widget.cpp \
+		widget_cassette.cpp \
 		widget_empty.cpp \
 		widget_floppy.cpp \
 		widget_fullscreen.cpp \
@@ -40,6 +41,7 @@ INCS+=		sdl2.hpp \
 		audio.hpp \
 		panel.hpp \
 		widget.hpp \
+		widget_cassette.hpp \
 		widget_empty.hpp \
 		widget_floppy.hpp \
 		widget_fullscreen.hpp \

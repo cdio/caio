@@ -22,6 +22,7 @@
 
 #include "ui_sdl2/ui.hpp"
 #include "ui_sdl2/widget.hpp"
+#include "ui_sdl2/widget_cassette.hpp"
 #include "ui_sdl2/widget_empty.hpp"
 #include "ui_sdl2/widget_floppy.hpp"
 #include "ui_sdl2/widget_fullscreen.hpp"

@@ -30,6 +30,7 @@
 #include "version.hpp"
 
 #include "ofile.hpp"
+#include "zx80_params.hpp"
 
 
 namespace caio {
@@ -55,7 +56,7 @@ void ZX80::run()
 
 void ZX80::start()
 {
-    log.info("Starting caio v" + caio::version() + " - Sinclair ZX80\n" + to_string() + "\n");
+    log.info("Starting caio v%s - %s\n%s\n", caio::version().c_str(), _conf.title.c_str(), to_string().c_str());
 
     /*
      * The emulator runs on its own thread.
@@ -165,7 +166,7 @@ void ZX80::attach_prg()
             cpu.regs().PC = ROM8_SLOW_FAST;
             cpu.write(ROM8_SYSVAR_ERR_NR, 0xFF);
             cpu.write(ROM8_SYSVAR_FLAGS, 0x80);
-            cpu.write_addr(stackp, ROM8_NEXTLINE_10);
+            cpu.write_addr(stackp, ROM8_NEXT_LINE_10);
         }
 
         for (auto value : *prog) {
@@ -179,17 +180,24 @@ void ZX80::attach_prg()
 
 void ZX80::create_devices()
 {
-    _ram = (_conf.ram16 ? std::make_shared<RAM>(EXTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES, "RAM16") :
-                          std::make_shared<RAM>(INTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES, "RAM1"));
+    _ram = (_conf.ram16 ?
+        std::make_shared<RAM>(EXTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES, "RAM16") :
+        std::make_shared<RAM>(INTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES, "RAM1"));
 
-    _rom = (_conf.rom8 ? std::make_shared<ROM>(rompath(ROM8_FNAME), ROM8_SIZE, "ROM8") :
-                         std::make_shared<ROM>(rompath(ROM_FNAME), ROM_SIZE, "ROM4"));
+    _rom = (_conf.rom8 ?
+        std::make_shared<ROM>(rompath(ROM8_FNAME), ROM8_SIZE, "ROM8") :
+        std::make_shared<ROM>(rompath(ROM_FNAME), ROM_SIZE, "ROM4"));
 
     _clk   = std::make_shared<Clock>("CLK", CLOCK_FREQ, _conf.delay);
     _cpu   = std::make_shared<Z80>(Z80::TYPE, "CPU");
     _video = std::make_shared<ZX80Video>(_clk, _conf.rvideo, "VID");
     _kbd   = std::make_shared<ZX80Keyboard>("KBD");
-    _mmap  = std::make_shared<ZX80ASpace>(_cpu, _ram, _rom, _video, _kbd);
+
+    _cass = (_conf.rom8 ?
+        std::make_shared<ZX80CassetteP>(_clk, _conf.cassdir) :
+        std::make_shared<ZX80CassetteO>(_clk, _conf.cassdir));
+
+    _mmap  = std::make_shared<ZX80ASpace>(_cpu, _ram, _rom, _video, _kbd, _cass);
 
     _cpu->init(_mmap);
 }
@@ -233,6 +241,13 @@ void ZX80::create_ui()
 
 void ZX80::make_widgets()
 {
+    auto cassette = ui::make_widget<ui::widget::Cassette>(_ui, [this]() {
+        using Status = ui::widget::Cassette::Status;
+        return Status{ .is_enabled = true, .is_idle = _cass->is_idle() };
+    });
+
+    auto panel = _ui->panel();
+    panel->add(cassette);
 }
 
 void ZX80::connect_ui()
@@ -322,15 +337,15 @@ std::string ZX80::to_string() const
 {
     std::ostringstream os{};
 
-    os << _conf.to_string()                     << "\n\n"
-          "Connected devices:"                  << "\n"
-          "  " << _clk->to_string()             << "\n"
-          "  " << _cpu->to_string()             << "\n"
-          "  " << _ram->to_string()             << "\n"
-          "  " << _rom->to_string()             << "\n"
-          "  " << _kbd->to_string()             << "\n"
-          "  " << _video->to_string()           << "\n\n"
-          "UI backend: " << _ui->to_string()    << "\n";
+    os << _conf.to_string()                 << "\n\n"
+        "Connected devices:"                << "\n"
+        "  " << _clk->to_string()           << "\n"
+        "  " << _cpu->to_string()           << "\n"
+        "  " << _ram->to_string()           << "\n"
+        "  " << _rom->to_string()           << "\n"
+        "  " << _kbd->to_string()           << "\n"
+        "  " << _video->to_string()         << "\n\n"
+        "UI backend: " << _ui->to_string()  << "\n";
 
     return os.str();
 }

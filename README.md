@@ -1,144 +1,69 @@
-# caio - 8 bits home computers emulator
+# caio - 8-bit home computers emulator
 
-caio is an emulator of hardware platforms with a strong focus on old 8 bits
+caio is an emulator of hardware platforms with a strong focus on old 8-bit
 home computers.
 
-The goal of caio is to provide a single core architecture able to emulate
-several different hardware platforms. To do that, the chip-set used by those
-platforms are emulated.
+At the moment the following platforms are emulated:
 
-Usage information [here](doc/usage.md).
+- Commodore 64
+- Sinclair ZX-80
 
-
-## Status
-
-caio is currently in alpha state, it is **work-in-progress** and at the
-moment the following platforms are emulated:
 
 ### Commodore 64
 
 The emulation of the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
-reached beta status and most of the tested programs work just fine
-(there are some issues with games exploiting some obscure video/timing tricks).
+reached beta status and almost all of the tested programs work (there are
+still some issues with few advanced games that use some video/timing tricks).
 
-![c64](images/c64.gif "caio c64")
-![c64-gyruss](images/gyruss.gif "C64 - Gyruss")
-![c64-q-bert](images/q-bert.gif "C64 - Q*Bert")
-![c64-uridium](images/uridium.gif "C64 - Uridium")
-![c64-giana](images/giana.gif "C64 - Great Giana Sisters")
-![c64-turrican](images/turrican.gif "C64 - Turrican")
+![c64-basic](images/c64-basic.gif "C64 - Basic")
+![c64-gyruss](images/c64-gyruss.gif "C64 - Gyruss")
+![c64-q-bert](images/c64-q-bert.gif "C64 - Q*Bert")
+![c64-uridium](images/c64-uridium.gif "C64 - Uridium")
+![c64-giana](images/c64-giana.gif "C64 - Great Giana Sisters")
+![c64-turrican](images/c64-turrican.gif "C64 - Turrican")
 
-### Sinclair ZX80
 
-The emulation of the [ZX80](https://en.wikipedia.org/wiki/ZX80) is in alpha
-state, some features are missing such as support for load/save operations
-from basic, other than that it seems to work fine.
+### Sinclair ZX-80
+
+The emulation of the [Sinclair ZX-80](https://en.wikipedia.org/wiki/ZX80)
+is completed.<br>
+The original 4K ROM, 1K RAM is the default. Variants with 8K ROM and 16K RAM
+upgrades are supported.<br>
 
 ![zx80-4K-space-invaders](images/zx80-4K-space-invaders.gif "ZX80 - Space Invaders")
-![zx80-4K-double-breakout](images/zx80-4K-double-breakout.gif "ZX80 - Double Breakout")
-![zx80-4K-pacman](images/zx80-4K-pacman.gif "ZX80 - Pacman")
-![zx80-4K-kong](images/zx80-4K-kong.gif "ZX80 - Kong")
+![zx80-4K-breakout](images/zx80-4K-breakout.gif "ZX80 - Breakout")
+![zx80-8K-pacman](images/zx80-8K-pacman.gif "ZX80 - Pacman")
+![zx80-8K-kong](images/zx80-8K-kong.gif "ZX80 - Kong")
 
 
-## Supported host platforms
+## Host platforms
 
 At the moment the supported host platforms are Linux and macOS.
 
 
-## Compile, install and packaging
-
-### Dependencies
-
-#### Linux:
-
-```
-    $ sudo apt install clang pkg-config libsdl2-dev libsdl2-image-dev
-    ...
-```
-
-#### macOS:
-
-[xcode](https://developer.apple.com/xcode), xcode command line tools,
-and [brew](https://brew.sh) must be installed and updated.
-
-```
-   $ brew install pkg-config sdl2 sdl2_image
-   ...
-```
-
-### Compile
-
-```
-    $ make PREFIX=/usr/local all
-    ...
-    $ sudo make PREFIX=/usr/local install
-    ...
-```
-
-The default value for the `PREFIX` make variable is `/opt/caio`.
-
-For more information read the
-[compile, install and packaging documentation](doc/compile.md).
-
-
 ## Usage & Configuration
 
-To launch caio, from a console:
-```
-    $ caio c64 --help
-```
-
-All the command line options can be specified in a
-[configuration file](src/main/caio.conf).
-
-Examples:
-
-The following command activates the horizontal scanlines visual effect, scales
-up the emulated screen resolution 4 times (that is, a 320x200 screen is scaled
-up to 1280x800), loads and launches the cartridge named *gyruss*:
-
-```
-    $ caio c64 --scanlines h --scale 4 --cart ./gyruss.crt
-```
-
-The next command injects a `PRG` program into memory and launches it as soon
-as the basic is started:
-
-```
-    $ caio c64 --prg ./rambo.prg
-```
-
-Note that this won't work for advanced or big program files that overwrite
-memory areas not configured as RAM.
-
-For more information about usage, keyboard mappings, joysticks, etc. read the
-[usage documentation](doc/usage.md).
+Refer to the [Usage & Configuration](doc/usage.md) guide.
 
 
-## Releases
+## Compile & Install
 
-The first beta release will contain the following emulators:
+Refer to the [Compile & Install](doc/compile.md) guide.
+
+
+## Release
+
+The first release is underway and it includes the following platforms:
 
 * [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
-* [Sinclair ZX80](https://en.wikipedia.org/wiki/ZX80)
+* [Sinclair ZX-80](https://en.wikipedia.org/wiki/ZX80)
 
-There is no date for this release.
-
-There could be pre-releases containing alpha versions of the emulators under
-development. No dates for these.
-
-It is desired for future releases to provide emulation for:
+Desired for future releases:
 
 * [Amstrad CPC-464](https://en.wikipedia.org/wiki/Amstrad_CPC_464)
 * [Apple-2](https://en.wikipedia.org/wiki/Apple_II)
 * [BBC Micro](https://en.wikipedia.org/wiki/BBC_Micro)
 * [Daewoo DPC-200](https://www.msx.org/wiki/Daewoo_DPC-200)
 * [NEC PC-8001](https://en.wikipedia.org/wiki/PC-8000_series#PC-8001)
-* [Sinclair ZX Spectrum](https://en.wikipedia.org/wiki/ZX_Spectrum)
-
-
-## Old Hardware
-
-If you have some old home computer and want to donate it, I will gladly accept
-it even if it is not working. Please let me know.
+* [Sinclair ZX-Spectrum](https://en.wikipedia.org/wiki/ZX_Spectrum)
 

@@ -22,8 +22,10 @@
 #include "device.hpp"
 #include "zilog_z80.hpp"
 
+#include "zx80_cassette.hpp"
 #include "zx80_config.hpp"
 #include "zx80_keyboard.hpp"
+#include "zx80_params.hpp"
 #include "zx80_video.hpp"
 
 
@@ -61,11 +63,12 @@ public:
      * @param ram   RAM (1K or 16K);
      * @param rom   ROM (4K or 8K);
      * @param video Video interface;
-     * @param kbd   Keyboard.
+     * @param kbd   Keyboard;
+     * @param cass  Cassette interface.
      * @warning All parameters must be valid otherwise the process is terminated.
      */
     ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr_t& rom, const sptr_t<ZX80Video>& video,
-        const sptr_t<ZX80Keyboard>& kbd);
+        const sptr_t<ZX80Keyboard>& kbd, const sptr_t<ZX80Cassette>& cass);
 
     virtual ~ZX80ASpace();
 
@@ -118,12 +121,14 @@ private:
     addr_t                  _rom_mask;
     sptr_t<ZX80Video>       _video;
     sptr_t<ZX80Keyboard>    _kbd;
+    sptr_t<ZX80Cassette>    _cass;
+
     addr_t                  _chcode{};      /* Current character code           */
     addr_t                  _counter{};     /* Current character line counter   */
     bool                    _blank{};       /* Blank scanline                   */
     bool                    _intpin{};      /* Status of /INT pin               */
     bool                    _intreq{};      /* Interrupt request flag           */
-    bool                    _vsync{};       /* VSYNC flag                       */
+    bool                    _vsync{};       /* VSync flag                       */
 };
 
 }

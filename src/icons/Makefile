@@ -20,7 +20,8 @@ ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
-ICONS_PNG=	floppy_128x2.png \
+ICONS_PNG=	cassette_128x24.png \
+		floppy_128x2.png \
 		fullscreen_128x2.png \
 		gamepad_128x3.png \
 		pause_128x2.png \

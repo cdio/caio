@@ -31,45 +31,45 @@ namespace zx80 {
 
 /**
  * ZX80 video interface.
- * @see http://martin.hinner.info/vga/pal.html
+ * Screen resolution:
+ * <pre>
+ *    |<-------------------------- 352 -------------------------->|
+ *
+ *    |<- 48 ->|<----------------- 256 ----------------->|<- 48 ->|
+ *
+ *    +-----------------------------------------------------------+     -+-       -+-
+ *    |                   NOT-VISIBLE UPPER BORDER                |      | 9       |
+ *    |- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -|     -+-         > 56    -+-
+ *    |                    VISIBLE UPPER BORDER                   |      | 47      |         |
+ *    |        +-----------------------------------------+        |     -+-       -+-        |
+ *    |        |                                         |        |      |                   |
+ *    |        |              DISPLAY AREA               |        |      |                   |
+ *    |        |                                         |        |      |                   |
+ *    |        |                                         |        |      |                   |
+ *    |        |                                         |        |       > 192               > 286
+ *    |        |                                         |        |      |                   |
+ *    |        |                                         |        |      |                   |
+ *    |        |                                         |        |      |                   |
+ *    |        |                                         |        |      |                   |
+ *    |        +-----------------------------------------+        |     -+-       -+-        |
+ *    |                    VISIBLE BOTTOM BORDER                  |      | 47      |         |
+ *    |- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -|     -+-         > 56    -+-
+ *    |                  NOT-VISIBLE BOTTOM BORDER                |      | 9       |
+ *    +-----------------------------------------------------------+     -+-       -+-
+ * </pre>
  */
 class ZX80Video : public Name {
 public:
     constexpr static const char* TYPE = "ZX80-VID";
 
-    /*
-     * ZX80 screen resolution:
-     *
-     *    |<------------------- 320 ------------------->|
-     *         |<-------------- 256 -------------->|
-     *    +---------------------------------------------+       -+-       -+-
-     *    |          NOT-VISIBLE UPPER BORDER           |        | 9       |
-     *    |- - - - - - - - - - - - - - - - - - - - - - -|       -+-         > 56     -+-
-     *    |            VISIBLE UPPER BORDER             |        | 47      |          |
-     *    |    +-----------------------------------+    |       -+-       -+-         |
-     *    |    |                                   |    |        |                    |
-     *    |    |         DISPLAY AREA              |    |        |                    |
-     *    |    |                                   |    |        |                    |
-     *    |    |                                   |    |        |                    |
-     *    |    |                                   |    |         > 192                > 286
-     *    |    |                                   |    |        |                    |
-     *    |    |                                   |    |        |                    |
-     *    |    |                                   |    |        |                    |
-     *    |    |                                   |    |        |                    |
-     *    |    +-----------------------------------+    |       -+-       -+-         |
-     *    |           VISIBLE BOTTOM BORDER             |        | 47      |          |
-     *    |- - - - - - - - - - - - - - - - - - - - - - -|       -+-         > 56     -+-
-     *    |         NOT-VISIBLE BOTTOM BORDER           |        | 9       |
-     *    +---------------------------------------------+       -+-       -+-
-     */
-    constexpr static unsigned LBORDER_WIDTH          = 32;
-    constexpr static unsigned RBORDER_WIDTH          = 32;
+    constexpr static unsigned LBORDER_WIDTH          = 48;
+    constexpr static unsigned RBORDER_WIDTH          = 48;
     constexpr static unsigned UBORDER_HEIGHT         = 47;
     constexpr static unsigned BBORDER_HEIGHT         = 47 - 9;
     constexpr static unsigned DISPLAY_WIDTH          = 256;
     constexpr static unsigned DISPLAY_HEIGHT         = 192;
 
-    constexpr static unsigned VISIBLE_WIDTH          = LBORDER_WIDTH + DISPLAY_WIDTH + LBORDER_WIDTH;
+    constexpr static unsigned VISIBLE_WIDTH          = LBORDER_WIDTH + DISPLAY_WIDTH + RBORDER_WIDTH;
     constexpr static unsigned VISIBLE_HEIGHT         = UBORDER_HEIGHT + DISPLAY_HEIGHT + BBORDER_HEIGHT;
 
     constexpr static unsigned SCANLINE_VISIBLE_START = 9;
@@ -81,7 +81,7 @@ public:
     constexpr static unsigned RBORDER_END            = RBORDER_START + RBORDER_WIDTH;
     constexpr static unsigned UBORDER_START          = 0;
     constexpr static unsigned UBORDER_END            = UBORDER_START + UBORDER_HEIGHT;
-    constexpr static unsigned BBORDER_START          = UBORDER_END + DISPLAY_HEIGHT;;
+    constexpr static unsigned BBORDER_START          = UBORDER_END + DISPLAY_HEIGHT;
     constexpr static unsigned BBORDER_END            = SCANLINE_VISIBLE_END;
     constexpr static unsigned WIDTH                  = VISIBLE_WIDTH;
     constexpr static unsigned HEIGHT                 = VISIBLE_HEIGHT;
@@ -100,7 +100,7 @@ public:
      * @param rvideo True to reverse video, false otherwise;
      * @param label Label assigned to this device.
      * @warning If the clk parameter is not valid the process is terminated.
-     * @see render_line(const std::function<void(unsigned, const ui::Scanline&)>&);
+     * @see render_line(const renderer_t&)
      */
     ZX80Video(const sptr_t<Clock>& clk, bool rvideo, const std::string& label);
 
