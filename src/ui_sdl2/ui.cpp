@@ -27,6 +27,7 @@
 
 #include <SDL_image.h>
 
+#include "endian.hpp"
 #include "icon.hpp"
 #include "logger.hpp"
 #include "utils.hpp"
@@ -147,8 +148,13 @@ UI::UI(const ui::Config& conf)
 
     const Image& ico = icon();
 
+#ifdef __LITTLE_ENDIAN__
+    _icon = SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()), ico.width, ico.height, 32,
+        ico.width * 4, SDL_PIXELFORMAT_ABGR8888);
+#else
     _icon = SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()), ico.width, ico.height, 32,
         ico.width * 4, SDL_PIXELFORMAT_RGBA8888);
+#endif
 
     if (_icon == nullptr) {
         throw_sdl_uierror("Can't create main window icon");
