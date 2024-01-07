@@ -263,7 +263,7 @@ std::string Monitor::prompt()
 
     if (_prev_fn == "s") {
         _cpu.disass(os, _cpu.getpc(), 10, true);
-        os << _cpu.regs() << std::endl;
+        os << _cpu.regs() << "\n";
     }
 
     os << PROMPT_PREFIX << "$" << utils::to_string(_cpu.getpc()) << PROMPT_SUFFIX;
@@ -353,7 +353,7 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
              * Error, exit from edit mode.
              */
             std::ostringstream os{};
-            os << "Unexpected error: " << err.what() << std::endl << "Exiting edit mode." << std::endl;
+            os << "Unexpected error: " << err.what() << "\nExiting edit mode.\n";
             editor.write(os.str());
             break;
         }
@@ -423,7 +423,7 @@ bool Monitor::dump(Monitor& mon, const Command::args_t& args)
     });
 
     std::ostringstream os{};
-    utils::dump(os, data, addr) << std::endl;
+    utils::dump(os, data, addr) << "\n";
     mon._rd.write(os.str());
     return false;
 }
@@ -434,7 +434,7 @@ bool Monitor::registers(Monitor& mon, const Command::args_t& args)
      * registers, r
      */
     std::ostringstream os{};
-    os << mon._cpu.regs() << std::endl;
+    os << mon._cpu.regs() << "\n";
     mon._rd.write(os.str());
     return false;
 }
@@ -445,7 +445,7 @@ bool Monitor::mmap(Monitor& mon, const Command::args_t& args)
      * mmap, m
      */
     std::ostringstream os{};
-    mon._cpu.mmap()->dump(os) << std::endl;
+    mon._cpu.mmap()->dump(os) << "\n";
     mon._rd.write(os.str());
     return false;
 }
@@ -565,7 +565,7 @@ bool Monitor::bp_list(Monitor& mon, const Command::args_t& args)
             os << " " << cstr;
         }
 
-        os << ((addr == mon._cpu.getpc() )? " <" : "") << std::endl;
+        os << ((addr == mon._cpu.getpc() )? " <\n" : "\n");
     }
 
     mon._rd.write(os.str());
@@ -634,7 +634,7 @@ bool Monitor::load(Monitor& mon, const Command::args_t& args)
 
             std::ostringstream os{};
             os << "load: " << args[1] << " loaded at $" << utils::to_string(addr)
-               << ", size " << size << " ($" << utils::to_string(size) << ")" << std::endl;
+               << ", size " << size << " ($" << utils::to_string(size) << ")\n";
             mon._rd.write(os.str());
         }
     } catch (const std::exception& e) {
@@ -709,7 +709,7 @@ bool Monitor::quit(Monitor& mon, const Command::args_t& args)
     if (args.size() > 1) {
         std::ostringstream os{};
         int eval = std::atoi(args[1].c_str());
-        os << "Emulator terminated with exit code: " << eval << std::endl;
+        os << "Emulator terminated with exit code: " << eval << "\n";
         mon._rd.write(os.str());
         std::exit(eval);
     }
@@ -725,17 +725,17 @@ bool Monitor::help(Monitor& mon, const Command::args_t& args)
      */
     std::ostringstream os{};
 
-    os << "Monitor Commands: " << std::endl;
+    os << "Monitor Commands:\n";
 
     for (const auto& cmd : commands) {
         std::ostringstream oss{};
         oss << cmd.command << " " << cmd.args;
         os << std::setw(3) << std::right << cmd.short_command << " | "
-           << std::setw(24) << std::left << oss.str() << cmd.help << std::endl;
+           << std::setw(24) << std::left << oss.str() << cmd.help << "\n";
     }
 
-    os << "values without a prefix or prefixed by '$' are considered hexadecimal" << std::endl
-       << "values prefixed only by '#' are considered decimal numbers" << std::endl;
+    os << "values without a prefix or prefixed by '$' are considered hexadecimal\n"
+          "values prefixed only by '#' are considered decimal numbers\n";
 
     mon._rd.write(os.str());
 

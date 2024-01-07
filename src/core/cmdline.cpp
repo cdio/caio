@@ -102,37 +102,37 @@ std::string Cmdline::usage() const
 
         // 0         1         2         3         4         5         6         7
         // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
-    os << "usage: " << _progname << " <options>"                                                          << std::endl
-       << "where <options> are:"                                                                          << std::endl
-       << " --conf <cfile>          Configuration file"                                                   << std::endl
-       << " --romdir <romdir>       ROMs directory"                                                       << std::endl
-       << " --palettedir <pdir>     Colour palette directory"                                             << std::endl
-       << " --palette <palette>     Colour palette name or filename"                                      << std::endl
-       << " --keymapsdir <kdir>     Key mappings directory"                                               << std::endl
-       << " --keymaps <keymaps>     Key mappings name or filename"                                        << std::endl
-       << " --cart <cfile>          Cartridge filename"                                                   << std::endl
-       << " --fps <rate>            Frame rate (default is " << DEFAULT_FPS << ")"                        << std::endl
-       << " --scale <scale>         Window scale factor (default is " << DEFAULT_SCALE << ")"             << std::endl
-       << " --scanlines <n|h|v|H|V> Scanlines effect: (n)one, (h)orizontal, (v)ertical,"                  << std::endl
-       << "                         advanced (H)orizontal, advanced (V)ertical"                           << std::endl
-       << "                         (default is " << DEFAULT_SCANLINES << ")"                             << std::endl
-       << " --fullscreen [yes|no]   Start in fullscreen mode"                                             << std::endl
-       << " --sresize [yes|no]      Smooth window resize (default is " << DEFAULT_SRESIZE << ")"          << std::endl
-       << " --audio [yes|no]        Enable audio (default is " << DEFAULT_AUDIO << ")"                    << std::endl
-       << " --delay <delay>         Clock delay factor (default is " << DEFAULT_DELAY << ")"              << std::endl
-       << " --monitor [yes|no]      Activate the CPU monitor (default is " << DEFAULT_MONITOR << ")"      << std::endl
-       << " --logfile <file>        Send log information to the specified destination"                    << std::endl
-       << "                         (default is " << DEFAULT_LOGFILE << ")"                               << std::endl
-       << " --loglevel <lv>         Loglevel, bitwise combination of: "                                   << std::endl
-       << "                         none|error|warn|info|debug|all (default is " << DEFAULT_LOGLEVEL << ")" << std::endl
-       << " --vjoy [yes|no]         Enable virtual joystick (default is " << DEFAULT_VJOY << ")"          << std::endl
-       << " --vjoy-up <keyname>     Virtual joystick UP key (default is " << DEFAULT_VJOY_UP << ")"       << std::endl
-       << " --vjoy-down <keyname>   Virtual joystick DOWN key (default is " << DEFAULT_VJOY_DOWN << ")"   << std::endl
-       << " --vjoy-left <keyname>   Virtual joystick LEFT key (default is " << DEFAULT_VJOY_LEFT << ")"   << std::endl
-       << " --vjoy-right <keyname>  Virtual joystick RIGHT key (default is " << DEFAULT_VJOY_RIGHT << ")" << std::endl
-       << " --vjoy-fire <keyname>   Virtual joystick FIRE key (default is " << DEFAULT_VJOY_FIRE << ")"   << std::endl
-       << " -v|--version            Show version information and exit"                                    << std::endl
-       << " -h|--help               Print this message and exit";
+    os << "usage: " << _progname << " <options>\n"
+          "where <options> are:\n"
+          " --conf <cfile>          Configuration file\n"
+          " --romdir <romdir>       ROMs directory\n"
+          " --palettedir <pdir>     Colour palette directory\n"
+          " --palette <palette>     Colour palette name or filename\n"
+          " --keymapsdir <kdir>     Key mappings directory\n"
+          " --keymaps <keymaps>     Key mappings name or filename\n"
+          " --cart <cfile>          Cartridge filename\n"
+          " --fps <rate>            Frame rate (default is " << DEFAULT_FPS << ")\n"
+          " --scale <scale>         Window scale factor (default is " << DEFAULT_SCALE << ")\n"
+          " --scanlines <n|h|v|H|V> Scanlines effect: (n)one, (h)orizontal, (v)ertical,\n"
+          "                         advanced (H)orizontal, advanced (V)ertical\n"
+          "                         (default is " << DEFAULT_SCANLINES << ")\n"
+          " --fullscreen [yes|no]   Start in fullscreen mode\n"
+          " --sresize [yes|no]      Smooth window resize (default is " << DEFAULT_SRESIZE << ")\n"
+          " --audio [yes|no]        Enable audio (default is " << DEFAULT_AUDIO << ")\n"
+          " --delay <delay>         Clock delay factor (default is " << DEFAULT_DELAY << ")\n"
+          " --monitor [yes|no]      Activate the CPU monitor (default is " << DEFAULT_MONITOR << ")\n"
+          " --logfile <file>        Send log information to the specified destination\n"
+          "                         (default is " << DEFAULT_LOGFILE << ")\n"
+          " --loglevel <lv>         Loglevel, bitwise combination of:\n"
+          "                         none|error|warn|info|debug|all (default is " << DEFAULT_LOGLEVEL << ")\n"
+          " --vjoy [yes|no]         Enable virtual joystick (default is " << DEFAULT_VJOY << ")\n"
+          " --vjoy-up <keyname>     Virtual joystick UP key (default is " << DEFAULT_VJOY_UP << ")\n"
+          " --vjoy-down <keyname>   Virtual joystick DOWN key (default is " << DEFAULT_VJOY_DOWN << ")\n"
+          " --vjoy-left <keyname>   Virtual joystick LEFT key (default is " << DEFAULT_VJOY_LEFT << ")\n"
+          " --vjoy-right <keyname>  Virtual joystick RIGHT key (default is " << DEFAULT_VJOY_RIGHT << ")\n"
+          " --vjoy-fire <keyname>   Virtual joystick FIRE key (default is " << DEFAULT_VJOY_FIRE << ")\n"
+          " -v|--version            Show version information and exit\n"
+          " -h|--help               Print this message and exit";
 
     return os.str();
 }
@@ -166,13 +166,13 @@ Confile Cmdline::parse(int argc, const char** argv)
         const std::string arg{argv[i]};
         if (arg == "?" || arg == "-?" || arg == "--?" || arg == "-h" || arg == "--h" ||
             arg == "-help" || arg == "--help") {
-            std::cerr << usage() << std::endl;
+            std::cerr << usage() << "\n";
             std::exit(EXIT_FAILURE);
             /* NOTREACHED */
         }
 
         if (arg == "-v" || arg == "--v" || arg == "-version" || arg == "--version") {
-            std::cerr << full_version() << std::endl;
+            std::cerr << full_version() << "\n";
             std::exit(EXIT_SUCCESS);
             /* NOTREACHED */
         }

@@ -162,11 +162,18 @@ bool directory(const std::string& path, const std::string& pattern,
     return true;
 }
 
-std::vector<std::pair<std::string, uint64_t>> directory(const std::string& path, const std::string& pattern)
+dir_t directory(const std::string& path, const std::string& pattern, size_t limit)
 {
-    std::vector<std::pair<std::string, uint64_t>> entries{};
+    dir_t entries{};
+    bool limited = (limit != 0);
 
-    directory(path, pattern, [&entries](const std::string& entry, uint64_t size) -> bool {
+    directory(path, pattern, [&entries, &limit, limited](const std::string& entry, uint64_t size) -> bool {
+        if (limited) {
+            if (limit == 0) {
+                return false;
+            }
+            --limit;
+        }
         entries.push_back({entry, size});
         return true;
     });
@@ -225,6 +232,7 @@ void save(const std::string& fname, const gsl::span<uint8_t>& buf, std::ios_base
         std::ofstream os{fname, mode};
         if (os) {
             save(os, buf);
+            return;
         }
     } catch (const std::exception& err) {
         errmsg = err.what();

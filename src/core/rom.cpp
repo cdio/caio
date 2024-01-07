@@ -47,8 +47,10 @@ void ROM::write(addr_t addr, uint8_t data)
     using namespace gsl;
     Expects(addr < _data.size());
 
+#if 0
     log.warn("%s(%s): Write attempt at relative address $%04x, data $%02x. Ignored\n",
         type().c_str(), label().c_str(), addr, data);
+#endif
 }
 
 }

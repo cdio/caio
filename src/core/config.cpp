@@ -152,26 +152,26 @@ std::string Config::to_string() const
 {
     std::ostringstream os{};
 
-    os << "  Title:              " << std::quoted(title)              << std::endl
-       << "  ROMs path:          " << std::quoted(romdir)             << std::endl
-       << "  Palette:            " << std::quoted(palette)            << std::endl
-       << "  Keymaps:            " << std::quoted(keymaps)            << std::endl
-       << "  Cartridge:          " << std::quoted(cartridge)          << std::endl
-       << "  FPS:                " << fps                             << std::endl
-       << "  Scale:              " << scale << "x"                    << std::endl
-       << "  Scanlines effect:   " << scanlines                       << std::endl
-       << "  Fullscreen:         " << (fullscreen ? "yes" : "no")     << std::endl
-       << "  Smooth resize:      " << (sresize ? "yes" : "no")        << std::endl
-       << "  Audio enabled:      " << (audio ? "yes" : "no")          << std::endl
-       << "  Clock delay:        " << delay << "x"                    << std::endl
-       << "  CPU Monitor:        " << (monitor ? "yes" : "no")        << std::endl
-       << "  Log file:           " << std::quoted(logfile)            << std::endl
-       << "  Log level:          " << loglevel                        << std::endl
-       << "  Virtual Joystick:   " << (vjoy.enabled ? "yes" : "no")   << std::endl
-       << "                up:   " << keyboard::to_string(vjoy.up)    << std::endl
-       << "              down:   " << keyboard::to_string(vjoy.down)  << std::endl
-       << "              left:   " << keyboard::to_string(vjoy.left)  << std::endl
-       << "             right:   " << keyboard::to_string(vjoy.right) << std::endl
+    os << "  Title:              " << std::quoted(title)              << "\n"
+       << "  ROMs path:          " << std::quoted(romdir)             << "\n"
+       << "  Palette:            " << std::quoted(palette)            << "\n"
+       << "  Keymaps:            " << std::quoted(keymaps)            << "\n"
+       << "  Cartridge:          " << std::quoted(cartridge)          << "\n"
+       << "  FPS:                " << fps                             << "\n"
+       << "  Scale:              " << scale << "x"                    << "\n"
+       << "  Scanlines effect:   " << scanlines                       << "\n"
+       << "  Fullscreen:         " << (fullscreen ? "yes" : "no")     << "\n"
+       << "  Smooth resize:      " << (sresize ? "yes" : "no")        << "\n"
+       << "  Audio enabled:      " << (audio ? "yes" : "no")          << "\n"
+       << "  Clock delay:        " << delay << "x"                    << "\n"
+       << "  CPU Monitor:        " << (monitor ? "yes" : "no")        << "\n"
+       << "  Log file:           " << std::quoted(logfile)            << "\n"
+       << "  Log level:          " << loglevel                        << "\n"
+       << "  Virtual Joystick:   " << (vjoy.enabled ? "yes" : "no")   << "\n"
+       << "                up:   " << keyboard::to_string(vjoy.up)    << "\n"
+       << "              down:   " << keyboard::to_string(vjoy.down)  << "\n"
+       << "              left:   " << keyboard::to_string(vjoy.left)  << "\n"
+       << "             right:   " << keyboard::to_string(vjoy.right) << "\n"
        << "              fire:   " << keyboard::to_string(vjoy.fire);
 
     return os.str();

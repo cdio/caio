@@ -41,13 +41,13 @@ std::string C64Cmdline::usage() const
 
         // 0         1         2         3         4         5         6         7
         // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
-    os << config::Cmdline::usage() << std::endl << std::endl
-       << "Commodore C64 specific:"                                                                     << std::endl
-       << " --prg <prg>             Load a PRG file as soon as the basic is ready"                      << std::endl
-       << " --resid [yes|no]        Use the MOS6581 reSID library (default is " << DEFAULT_RESID << ")" << std::endl
-       << " --swapj [yes|no]        Swap Joysticks (default is " << DEFAULT_SWAPJOY << ")"              << std::endl
-       << " --8 <path>              Attach a disk drive as unit 8"                                      << std::endl
-       << " --9 <path>              Attach a disk drive as unit 9";
+    os << config::Cmdline::usage() << "\n\n"
+          "Commodore C64 specific:\n"
+          " --prg <prg>             Load a PRG file as soon as the basic is ready\n"
+          " --resid [yes|no]        Use the MOS6581 reSID library (default is " << DEFAULT_RESID << ")\n"
+          " --swapj [yes|no]        Swap Joysticks (default is " << DEFAULT_SWAPJOY << ")\n"
+          " --8 <path>              Attach a disk drive as unit 8\n"
+          " --9 <path>              Attach a disk drive as unit 9";
 
     return os.str();
 }
@@ -79,12 +79,12 @@ std::string C64Config::to_string() const
 {
     std::ostringstream os{};
 
-    os << Config::to_string()                                   << std::endl
-       << "  Swap Joysticks:     " << (swapj ? "yes" : "no")    << std::endl
-       << "  Attached PRG:       " << std::quoted(prgfile)      << std::endl
-       << "  Unit-8:             " << std::quoted(unit8)        << std::endl
-       << "  Unit-9:             " << std::quoted(unit9)        << std::endl
-       << "  Use reSID library:  " << (resid ? "yes" : "no");
+    os << Config::to_string()                                   << "\n"
+          "  Swap Joysticks:     " << (swapj ? "yes" : "no")    << "\n"
+          "  Attached PRG:       " << std::quoted(prgfile)      << "\n"
+          "  Unit-8:             " << std::quoted(unit8)        << "\n"
+          "  Unit-9:             " << std::quoted(unit9)        << "\n"
+          "  Use reSID library:  " << (resid ? "yes" : "no");
 
     return os.str();
 }

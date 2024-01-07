@@ -325,7 +325,7 @@ std::string Z80::Registers::to_string() const
        << " E ="     << utils::to_string(E)
        << " H ="     << utils::to_string(H)
        << " L ="     << utils::to_string(L)
-       << " F ="     << utils::to_string(F)  << " " << to_string(static_cast<Flags>(F)) << std::endl
+       << " F ="     << utils::to_string(F)  << " " << to_string(static_cast<Flags>(F)) << "\n"
        << "  A'="    << utils::to_string(aA)
        << " B'="     << utils::to_string(aB)
        << " C'="     << utils::to_string(aC)
@@ -333,7 +333,7 @@ std::string Z80::Registers::to_string() const
        << " E'="     << utils::to_string(aE)
        << " H'="     << utils::to_string(aH)
        << " L'="     << utils::to_string(aL)
-       << " F'="     << utils::to_string(aF) << " " << to_string(static_cast<Flags>(aF)) << std::endl
+       << " F'="     << utils::to_string(aF) << " " << to_string(static_cast<Flags>(aF)) << "\n"
        << "  I ="    << utils::to_string(I)
        << " R ="     << utils::to_string(R)
        << " IX="     << utils::to_string(IX)
@@ -1100,7 +1100,7 @@ void Z80::disass(std::ostream& os, addr_t start, size_t count, bool show_pc)
 {
     for (addr_t addr = start; count; --count) {
         const std::string& line = disass(addr, show_pc);
-        os << line << std::endl;
+        os << line << "\n";
     }
 }
 
@@ -1355,7 +1355,7 @@ std::string Z80::status() const
 {
     std::ostringstream os{};
 
-    os << _regs.to_string() << std::endl
+    os << _regs.to_string() << "\n"
        << "  IFF1=" << _IFF1
        << " IFF2="  << _IFF2
        << " MI="    << static_cast<unsigned>(_imode)

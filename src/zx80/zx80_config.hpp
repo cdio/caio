@@ -41,7 +41,6 @@ constexpr static const char* SEC_ZX80            = "zx80";
 constexpr static const char* KEY_RAM_16K         = "ram16";
 constexpr static const char* KEY_ROM_8K          = "rom8";
 constexpr static const char* KEY_RVIDEO          = "rvideo";
-constexpr static const char* KEY_CHROMA          = "chroma";
 constexpr static const char* KEY_PRGFILE         = "prg";
 
 constexpr static const char* DEFAULT_RAM_16K     = "no";

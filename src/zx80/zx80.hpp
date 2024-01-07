@@ -138,9 +138,9 @@ private:
     std::string rompath(const std::string& fname) const;
 
     /**
-     * Attach a .o program file.
-     * If a .o file is specified in the configuration, load (inject)
-     * it into the RAM as soon as the basic is ready.
+     * Attach a .o (4K ROM) or a .p (8K ROM) program file.
+     * If a .o (.p) file is specified in the configuration, load (inject)
+     * it into RAM as soon as the basic is started.
      * @exception IOError if the specified file cannot be loaded.
      */
     void attach_prg();

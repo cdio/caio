@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cerrno>
+#include <cinttypes>
 #include <cstdint>
 #include <cstring>
 #include <exception>

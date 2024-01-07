@@ -473,7 +473,7 @@ public:
     /**
      * Disassembler.
      * @param os      Output stream;
-     * @param addr    Start address with the machine code to disassemble;
+     * @param start   Start address with the machine code to disassemble;
      * @param count   Number of instructions to disassemble;
      * @param show_pc true if the position of the PC must be shown in the disassembled code; false otherwise (default).
      * @see MonitoredCPU

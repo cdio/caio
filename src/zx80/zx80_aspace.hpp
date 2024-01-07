@@ -62,7 +62,7 @@ public:
      * @param rom   ROM (4K or 8K);
      * @param video Video interface;
      * @param kbd   Keyboard.
-     * @warning All the parameters must be valid otherwise the process is terminated.
+     * @warning All parameters must be valid otherwise the process is terminated.
      */
     ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr_t& rom, const sptr_t<ZX80Video>& video,
         const sptr_t<ZX80Keyboard>& kbd);

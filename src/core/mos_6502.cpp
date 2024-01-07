@@ -476,7 +476,7 @@ void Mos6502::disass(std::ostream& os, addr_t start, size_t count, bool show_pc)
 {
     for (addr_t addr = start; count; --count) {
         const std::string& line = disass(addr, show_pc);
-        os << line << std::endl;
+        os << line << "\n";
     }
 }
 
@@ -712,7 +712,7 @@ size_t Mos6502::single_step()
 
     if (_log.is_debug()) {
         std::ostringstream msg{};
-        msg << std::setw(35) << std::left << line << _regs.to_string() << "  cycles=" << ins.cycles << std::endl;
+        msg << std::setw(35) << std::left << line << _regs.to_string() << "  cycles=" << ins.cycles << "\n";
         _log.debug(msg.str());
     }
 

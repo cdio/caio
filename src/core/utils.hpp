@@ -175,14 +175,14 @@ std::ostream& dump(std::ostream& os, const Iterator begin, const Iterator end, a
         str << (std::isprint(*it) ? static_cast<char>(*it) : '.');
 
         if ((count + 1) % ELEMS_PER_LINE == 0) {
-            os << hex.str() << " " << str.str() << std::endl;
+            os << hex.str() << " " << str.str() << "\n";
             hex = {};
             str = {};
         }
     }
 
     if (count % ELEMS_PER_LINE) {
-        os << std::setfill(' ') << std::setw(WIDTH) << std::left << hex.str() << " " << str.str() << std::endl;
+        os << std::setfill(' ') << std::setw(WIDTH) << std::left << hex.str() << " " << str.str() << "\n";
     }
 
     return os;

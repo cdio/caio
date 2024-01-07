@@ -36,23 +36,23 @@ std::string stacktrace()
     std::array<void*, 256> buffer{};
     size_t size = ::backtrace(buffer.begin(), buffer.size());
     if (size == 0) {
-        os << "Unable to retreive stack trace data" << std::endl;
+        os << "Unable to retreive stack trace data\n";
 
     } else {
-        os << "Stack Trace:" << std::endl;
+        os << "Stack Trace:\n";
 
         char** symbols = ::backtrace_symbols(buffer.begin(), size);
         if (symbols == nullptr) {
-            os << "Unable to retreive symbols: " << Error::to_string(errno) << std::endl << "--" << std::endl;
+            os << "Unable to retreive symbols: " << Error::to_string(errno) << "\n--\n";
         }
 
         //TODO std::format
         for (size_t i = 0; i < size; ++i) {
             if (symbols) {
-                os << "  " << symbols[i] << std::endl;
+                os << "  " << symbols[i] << "\n";
             } else {
                 os << "  0x" << std::hex << std::setfill('0') << std::setw(sizeof(void*) * 2)
-                   << reinterpret_cast<long>(buffer[i]) << std::endl;
+                   << reinterpret_cast<long>(buffer[i]) << "\n";
             }
         }
 

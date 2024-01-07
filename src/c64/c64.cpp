@@ -651,32 +651,29 @@ std::string C64::to_string() const
 {
     std::ostringstream os{};
 
-    os << _conf.to_string()             << std::endl
-       << std::endl
-       << "Connected devices:"          << std::endl
-       << "  " << _clk->to_string()     << std::endl
-       << "  " << _cpu->to_string()     << std::endl
-       << "  " << _vic2->to_string()    << std::endl
-       << "  " << _cia1->to_string()    << std::endl
-       << "  " << _cia2->to_string()    << std::endl
-       << "  " << _sid->to_string()     << std::endl
-       << "  " << _ram->to_string()     << std::endl
-       << "  " << _vram->to_string()    << std::endl
-       << "  " << _basic->to_string()   << std::endl
-       << "  " << _kernal->to_string()  << std::endl
-       << "  " << _chargen->to_string() << std::endl;
+    os << _conf.to_string() << "\n\n"
+          "Connected devices:\n"
+          "  " << _clk->to_string()     << "\n"
+          "  " << _cpu->to_string()     << "\n"
+          "  " << _vic2->to_string()    << "\n"
+          "  " << _cia1->to_string()    << "\n"
+          "  " << _cia2->to_string()    << "\n"
+          "  " << _sid->to_string()     << "\n"
+          "  " << _ram->to_string()     << "\n"
+          "  " << _vram->to_string()    << "\n"
+          "  " << _basic->to_string()   << "\n"
+          "  " << _kernal->to_string()  << "\n"
+          "  " << _chargen->to_string() << "\n";
 
     if (_ioexp) {
-       os << "  " << _ioexp->to_string() << std::endl;
+       os << "  " << _ioexp->to_string() << "\n";
     }
 
-    os << "  " << _kbd->to_string()     << std::endl
-       << "  " << _joy1->to_string()    << std::endl
-       << "  " << _joy2->to_string()    << std::endl
-       << "  " << _bus->to_string()     << std::endl
-       << std::endl;
-
-    os << "UI backend: " << _ui->to_string() << std::endl;
+    os << "  " << _kbd->to_string()             << "\n"
+          "  " << _joy1->to_string()            << "\n"
+          "  " << _joy2->to_string()            << "\n"
+          "  " << _bus->to_string()             << "\n\n"
+          "UI backend: " << _ui->to_string()    << "\n";
 
     return os.str();
 }

@@ -34,6 +34,10 @@ namespace caio {
 namespace fs {
 
 constexpr static const size_t LOAD_MAXSIZ = 65536;
+constexpr static size_t DIR_ENTRIES_LIMIT = 256;
+
+using dir_entry_t = std::pair<std::string, uint64_t>;
+using dir_t = std::vector<dir_entry_t>;
 
 /**
  * Return the value of the HOME environment variable.
@@ -59,6 +63,8 @@ bool exists(const std::string& path);
 
 /**
  * std::filesystem::is_directory() wrapper.
+ * @param path Pathname.
+ * @return True if the specified path is a directory; false otherwise.
  */
 static inline bool is_directory(const std::string& path)
 {
@@ -67,6 +73,8 @@ static inline bool is_directory(const std::string& path)
 
 /**
  * std::filesystem::file_size() wrapper.
+ * @param path Pathname.
+ * @return The file size.
  */
 static inline std::uintmax_t file_size(const std::string& path)
 {
@@ -116,17 +124,17 @@ bool unlink(const std::string& fname);
  * @param fname   File name;
  * @param pattern fnmatch(3) style pattern.
  * @return True if the file name matches the specified pattern; false otherwise.
- * @see ::fnmatch(3)
+ * @see Unix manpage fnmatch(3)
  */
 bool match(const std::string& path, const std::string& pattern);
 
 /**
  * Get a directory listing.
  * @param dirpath  Directory;
- * @param pattern  Matching pattern (see fs::match());
+ * @param pattern  Matching pattern;
  * @param callback User defined callback (return false to stop directory traversing).
  * @return False if the callback stopped the traversal; true otherwise.
- * @see fs::match()
+ * @see match(const std::string&, const std::string&)
  */
 bool directory(const std::string& path, const std::string& pattern,
     const std::function<bool(const std::string&, uint64_t)>& callback);
@@ -134,12 +142,14 @@ bool directory(const std::string& path, const std::string& pattern,
 /**
  * Get a directory listing.
  * @param dirpath Directory;
- * @param pattern Matching pattern.
+ * @param pattern Matching pattern;
+ * @param limit   Maximum number of entries (0 means no limits; default is DIR_ENTRIES_LIMIT).
  * @return The entries that match the specified pattern plus their size on disk.
- * @see directory(const std::string &, const std::string &, const std::function<void(const std::string &, uint64_t)> &)
- * @see fs::match()
+ * @see directory(const std::string&, const std::string&, const std::function<void(const std::string&, uint64_t)>&)
+ * @see match(const std::string&, const std::string&)
+ * @see DIR_ENTRIES_LIMIT
  */
-std::vector<std::pair<std::string, uint64_t>> directory(const std::string& path, const std::string& pattern);
+dir_t directory(const std::string& path, const std::string& pattern, size_t limit = DIR_ENTRIES_LIMIT);
 
 /**
  * Load the contents of a file into memory.
@@ -170,13 +180,14 @@ std::vector<uint8_t> load(std::istream& is, size_t maxsiz = 0);
  * Save a buffer to a file.
  * @param fname File name;
  * @param buf   Buffer to save;
- * @param mode  Open mode.
+ * @param mode  Open mode (by default, if the file exists it is truncated).
  * @exception IOError
  * @see load(const std::string&)
  * @see load(std::istream&)
  * @see save(std::ostream&, const gsl::span<uint8_t>&)
  */
-void save(const std::string& fname, const gsl::span<uint8_t>& buf, std::ios_base::openmode mode = std::ios_base::out);
+void save(const std::string& fname, const gsl::span<uint8_t>& buf,
+    std::ios_base::openmode mode = std::ios_base::out | std::ios_base::trunc);
 
 /**
  * Send a buffer to an output stream.

@@ -94,7 +94,7 @@ std::string History::to_string() const
     std::ostringstream os{};
 
     for (size_t p = 0; p < _current; ++p) {
-        os << _history[p] << (p == _cursor ? " <" : "") << std::endl;
+        os << _history[p] << (p == _cursor ? " <\n" : "\n");
     }
 
     return os.str();
@@ -139,7 +139,7 @@ void History::save()
         }
 
         for (size_t pos = 0; pos < _current; ++pos) {
-            os << _history[pos] << std::endl;
+            os << _history[pos] << "\n";
         }
 
         os.close();

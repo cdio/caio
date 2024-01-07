@@ -36,12 +36,12 @@ std::string ZX80Cmdline::usage() const
 {
     std::ostringstream os{};
 
-    os << config::Cmdline::usage() << std::endl << std::endl
-       << "Sinclair ZX80 specific:"                                                     << std::endl
-       << " --ram16 [yes|no]        Attach a 16K RAM instead of the default 1K RAM"     << std::endl
-       << " --rom8 [yes|no]         Attach the 8K ROM instead of the default 4K ROM"    << std::endl
-       << " --rvideo [yes|no]       Reverse video output"                               << std::endl
-       << " --prg <.o|.p>           Load a .o/.p file as soon as the basic is started"  << std::endl;
+    os << config::Cmdline::usage() << "\n\n"
+          "Sinclair ZX80 specific:\n"
+          " --ram16 [yes|no]        Attach a 16K RAM instead of the default 1K RAM\n"
+          " --rom8 [yes|no]         Attach the 8K ROM instead of the default 4K ROM\n"
+          " --rvideo [yes|no]       Reverse video output\n"
+          " --prg <.o|.p>           Load a .o/.p file as soon as the basic is started";
 
     return os.str();
 }
@@ -72,11 +72,11 @@ std::string ZX80Config::to_string() const
 {
     std::ostringstream os{};
 
-    os << Config::to_string() << std::endl
-       << "  16K RAM:            " << (ram16  ? "yes" : "no") << std::endl
-       << "  8K ROM:             " << (rom8   ? "yes" : "no") << std::endl
-       << "  Reverse video:      " << (rvideo ? "yes" : "no") << std::endl
-       << "  Attached PRG:       " << std::quoted(prgfile);
+    os << Config::to_string() << "\n"
+          "  16K RAM:            " << (ram16  ? "yes" : "no") << "\n"
+          "  8K ROM:             " << (rom8   ? "yes" : "no") << "\n"
+          "  Reverse video:      " << (rvideo ? "yes" : "no") << "\n"
+          "  Attached PRG:       " << std::quoted(prgfile);
 
     return os.str();
 }

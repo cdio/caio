@@ -117,7 +117,7 @@ void RgbaTable::save(const std::string& fname)
     }
 
     for (const auto& rgb : *this) {
-        os << rgb.to_string() << std::endl;
+        os << rgb.to_string() << "\n";
         if (!os) {
             throw IOError{"Can't write: " + fname + ": " + Error::to_string()};
         }

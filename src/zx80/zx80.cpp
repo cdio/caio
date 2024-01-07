@@ -47,7 +47,7 @@ void ZX80::run()
     connect_ui();
 
     if (_conf.monitor) {
-        this->_cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO, {}, {});
+        _cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO, {}, {});
     }
 
     start();
@@ -322,18 +322,15 @@ std::string ZX80::to_string() const
 {
     std::ostringstream os{};
 
-    os << _conf.to_string()           << std::endl
-       << std::endl
-       << "Connected devices:"        << std::endl
-       << "  " << _clk->to_string()   << std::endl
-       << "  " << _cpu->to_string()   << std::endl
-       << "  " << _ram->to_string()   << std::endl
-       << "  " << _rom->to_string()   << std::endl
-       << "  " << _kbd->to_string()   << std::endl
-       << "  " << _video->to_string() << std::endl
-       << std::endl;
-
-    os << "UI backend: " << _ui->to_string() << std::endl;
+    os << _conf.to_string()                     << "\n\n"
+          "Connected devices:"                  << "\n"
+          "  " << _clk->to_string()             << "\n"
+          "  " << _cpu->to_string()             << "\n"
+          "  " << _ram->to_string()             << "\n"
+          "  " << _rom->to_string()             << "\n"
+          "  " << _kbd->to_string()             << "\n"
+          "  " << _video->to_string()           << "\n\n"
+          "UI backend: " << _ui->to_string()    << "\n";
 
     return os.str();
 }
