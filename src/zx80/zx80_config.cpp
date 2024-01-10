@@ -38,7 +38,7 @@ std::string ZX80Cmdline::usage() const
     std::ostringstream os{};
 
     os << config::Cmdline::usage() << "\n\n"
-        "Sinclair ZX80 specific:\n"
+        "Sinclair ZX-80 specific:\n"
         " --ram16 [yes|no]        Attach a 16K RAM instead of the default 1K RAM\n"
         " --rom8 [yes|no]         Attach the 8K ROM instead of the default 4K ROM\n"
         " --rvideo [yes|no]       Reverse video output\n"

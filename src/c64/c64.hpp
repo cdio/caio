@@ -44,8 +44,13 @@ namespace commodore {
 namespace c64 {
 
 constexpr static const char* KERNAL_FNAME         = "c64_kernal.901227-03.bin";
+constexpr static const char* KERNAL_DIGEST        = "83C60D47047D7BEAB8E5B7BF6F67F80DAA088B7A6A27DE0D7E016F6484042721";
+
 constexpr static const char* BASIC_FNAME          = "c64_basic.901226-01.bin";
+constexpr static const char* BASIC_DIGEST         = "89878CEA0A268734696DE11C4BAE593EAAA506465D2029D619C0E0CBCCDFA62D";
+
 constexpr static const char* CHARGEN_FNAME        = "c64_characters.901225-01.bin";
+constexpr static const char* CHARGEN_DIGEST       = "FD0D53B8480E86163AC98998976C72CC58D5DD8EB824ED7B829774E74213B420";
 
 constexpr static const size_t KERNAL_SIZE         = 8192;
 constexpr static const size_t BASIC_SIZE          = 8192;

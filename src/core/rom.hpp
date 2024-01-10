@@ -44,20 +44,31 @@ public:
 
     /**
      * Initialise this ROM with data from a file.
-     * @param fname Name of the file;
-     * @param count Number of bytes to read (0 means fs::LOAD_MAXSIZ bytes);
-     * @param label Label assigned to this RAM.
-     * @exception IOError If the size of the file is not equal to the specified count.
-     * @see fs::LOAD_MAXSIZ
-     * @see fs::load()
+     * @param fname  Name of the file;
+     * @param digest Signature (SHA-256 digest the file must have);
+     * @param label  Label assigned to this ROM.
+     * @exception IOError If the specified signature is not equal to the calculated one.
+     * @see signature()
+     * @see RAM::RAM(const std::string&, size_t, const std::string&)
      */
-    ROM(const std::string& fname, size_t count = 0, const std::string& label = {});
+    ROM(const std::string& fname, const std::string& digest, const std::string& label = {});
+
+    /**
+     * Initialise this ROM with data from a file.
+     * @param fname  Name of the file;
+     * @param size   Size the file must have (0 not to check size);
+     * @param label  Label assigned to this ROM.
+     * @exception IOError If the size of the file is not equal to the specified size.
+     * @see RAM:RAM(const std::string&, size_t, const std::string&)
+     */
+    ROM(const std::string& fname, size_t size = 0, const std::string& label = {});
 
     /**
      * Initialise this ROM with data from an input stream.
      * @param is    Input stream to read from;
      * @param count Number of bytes to read (0 means fs::LOAD_MAXSIZ bytes);
      * @exception IOError If the input stream is emptied before the specified amount of bytes are read.
+     * @see RAM::RAM(std::istream&, size_t)
      */
     ROM(std::istream& is, size_t count = 0);
 
@@ -81,6 +92,12 @@ public:
      * This method does nothing.
      */
     void write(addr_t addr, uint8_t data) override;
+
+    /**
+     * Calculate the signature of this ROM.
+     * @return The SHA-256 digest of this ROM as a string.
+     */
+    std::string signature() const;
 };
 
 }

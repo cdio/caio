@@ -513,7 +513,7 @@ void Device::tick_tx()
          * Ready to send.
          */
         clk(INACTIVE);
-        CBMBUS_DEBUG_STATE("TX: IDLE -> INIT, time %lld, bus %s\n", _time, bus_data().to_string().c_str());
+        CBMBUS_DEBUG_STATE("TX: IDLE -> INIT, time %" PRIu64 ", bus %s\n", _time, bus_data().to_string().c_str());
         state(State::INIT);
         /* PASSTHROUGH */
 
@@ -525,7 +525,7 @@ void Device::tick_tx()
         /*
          * The listener is ready to receive.
          */
-        CBMBUS_DEBUG_STATE("TX: INIT -> READY, time %lld, bus %s\n", _time, bus_data().to_string().c_str());
+        CBMBUS_DEBUG_STATE("TX: INIT -> READY, time %" PRIu64 ", bus %s\n", _time, bus_data().to_string().c_str());
         state(State::READY);
         /* PASSTHROUGH */
 
@@ -541,7 +541,7 @@ void Device::tick_tx()
             /*
              * This is not the last byte we are sending: Transmit it normally.
              */
-            CBMBUS_DEBUG_STATE("TX: READY -> BIT_WAIT, time %lld\n", _time);
+            CBMBUS_DEBUG_STATE("TX: READY -> BIT_WAIT, time %" PRIu64 "\n", _time);
             clk(ACTIVE);
             state(State::BIT_WAIT);
             break;
@@ -555,7 +555,7 @@ void Device::tick_tx()
             break;
         }
 
-        CBMBUS_DEBUG_STATE("TX: READY -> EOI, time %lld\n", _time);
+        CBMBUS_DEBUG_STATE("TX: READY -> EOI, time %" PRIu64 "\n", _time);
         state(State::EOI);
         /* PASSTHROUGH */
 
@@ -567,7 +567,7 @@ void Device::tick_tx()
         /*
          * EOI handshake done.
          */
-        CBMBUS_DEBUG_STATE("TX: EOI -> BIT_WAIT, time %lld\n", _time);
+        CBMBUS_DEBUG_STATE("TX: EOI -> BIT_WAIT, time %" PRIu64 "\n", _time);
         clk(ACTIVE);
         dat(INACTIVE);
         state(State::BIT_WAIT);
@@ -583,7 +583,7 @@ void Device::tick_tx()
          */
         dat(_bytetr.bit());
         clk(INACTIVE);
-        CBMBUS_DEBUG_STATE("TX: BIT_WAIT -> BIT_DONE, bit %d, time %lld\n", _data.dat(), _time);
+        CBMBUS_DEBUG_STATE("TX: BIT_WAIT -> BIT_DONE, bit %d, time %" PRIu64 "\n", _data.dat(), _time);
         state(State::BIT_DONE);
         /* PASSTHROUGH */
 
@@ -598,7 +598,7 @@ void Device::tick_tx()
             /*
              * Bit transmitted. Go for the next one.
              */
-            CBMBUS_DEBUG_STATE("TX: BIT_DONE -> BIT_WAIT, time %lld\n", _time);
+            CBMBUS_DEBUG_STATE("TX: BIT_DONE -> BIT_WAIT, time %" PRIu64 "\n", _time);
             state(State::BIT_WAIT);
             break;
         }
@@ -606,14 +606,14 @@ void Device::tick_tx()
         /*
          * Byte completed: Frame handshake.
          */
-        CBMBUS_DEBUG_STATE("TX: BIT_DONE -> FRAME, time %lld\n", _time);
+        CBMBUS_DEBUG_STATE("TX: BIT_DONE -> FRAME, time %" PRIu64 "\n", _time);
         state(State::FRAME);
         /* PASSTHROUGH */
 
     case State::FRAME:
         if (_time > FRAME_TIMEOUT) {
             //FIXME abort() or something similar?
-            log.error("%s: %s: TX: FRAME timeout error. time %lld, bus %s\n", bus_name().c_str(), dev_name().c_str(),
+            log.error("%s: %s: TX: FRAME timeout error. time %" PRIu64 ", bus %s\n", bus_name().c_str(), dev_name().c_str(),
                 _time, bus_data().to_string().c_str());
             state(State::IDLE);
             release();
@@ -628,7 +628,7 @@ void Device::tick_tx()
         /*
          * (Frame) Byte acknowledged by listener.
          */
-        CBMBUS_DEBUG_STATE("TX: FRAME -> FRAME_WAIT, time %lld\n", _time);
+        CBMBUS_DEBUG_STATE("TX: FRAME -> FRAME_WAIT, time %" PRIu64 "\n", _time);
         state(State::FRAME_WAIT);
         /* PASSTHROUGH */
 
@@ -649,7 +649,8 @@ void Device::tick_tx()
             /*
              * Ready to transmit next byte.
              */
-            CBMBUS_DEBUG_STATE("TX: FRAME_WAIT -> IDLE, time %lld, bus %s\n", _time, bus_data().to_string().c_str());
+            CBMBUS_DEBUG_STATE("TX: FRAME_WAIT -> IDLE, time %" PRIu64 ", bus %s\n", _time,
+                bus_data().to_string().c_str());
             state(State::IDLE);
             break;
         }

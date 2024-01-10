@@ -185,8 +185,8 @@ void ZX80::create_devices()
         std::make_shared<RAM>(INTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES, "RAM1"));
 
     _rom = (_conf.rom8 ?
-        std::make_shared<ROM>(rompath(ROM8_FNAME), ROM8_SIZE, "ROM8") :
-        std::make_shared<ROM>(rompath(ROM_FNAME), ROM_SIZE, "ROM4"));
+        std::make_shared<ROM>(rompath(ROM8_FNAME), ROM8_DIGEST, "ROM8") :
+        std::make_shared<ROM>(rompath(ROM_FNAME), ROM_DIGEST, "ROM4"));
 
     _clk   = std::make_shared<Clock>("CLK", CLOCK_FREQ, _conf.delay);
     _cpu   = std::make_shared<Z80>(Z80::TYPE, "CPU");

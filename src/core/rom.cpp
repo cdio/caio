@@ -23,16 +23,27 @@
 
 #include "fs.hpp"
 #include "logger.hpp"
+#include "utils.hpp"
 
 
 namespace caio {
 
-ROM::ROM(const std::string& fname, size_t count, const std::string& label)
-    : RAM{fname, count, label}
+ROM::ROM(const std::string& fname, const std::string& digest, const std::string& label)
+    : RAM{fname, 0, label}
 {
     type(TYPE);
-    if (count > 0 && _data.size() != count) {
-        throw IOError{*this, "Invalid file size: " + fname + ": It must be " + std::to_string(count)};
+    auto sign = signature();
+    if (digest != sign) {
+        throw IOError{*this, fname + ": Invalid signature: Expected " + digest + ", Calculated: " + sign};
+    }
+}
+
+ROM::ROM(const std::string& fname, size_t size, const std::string& label)
+    : RAM{fname, size, label}
+{
+    type(TYPE);
+    if (size > 0 && _data.size() != size) {
+        throw IOError{*this, fname + ": Invalid file size: It must be " + std::to_string(size)};
     }
 }
 
@@ -51,6 +62,11 @@ void ROM::write(addr_t addr, uint8_t data)
     log.warn("%s(%s): Write attempt at relative address $%04x, data $%02x. Ignored\n",
         type().c_str(), label().c_str(), addr, data);
 #endif
+}
+
+std::string ROM::signature() const
+{
+    return utils::sha256(_data);
 }
 
 }

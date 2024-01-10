@@ -42,7 +42,7 @@ std::string C64Cmdline::usage() const
         // 0         1         2         3         4         5         6         7
         // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
     os << config::Cmdline::usage() << "\n\n"
-          "Commodore C64 specific:\n"
+          "Commodore 64 specific:\n"
           " --prg <prg>             Load a PRG file as soon as the basic is ready\n"
           " --resid [yes|no]        Use the MOS6581 reSID library (default is " << DEFAULT_RESID << ")\n"
           " --swapj [yes|no]        Swap Joysticks (default is " << DEFAULT_SWAPJOY << ")\n"

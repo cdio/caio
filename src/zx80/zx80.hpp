@@ -39,7 +39,7 @@ namespace sinclair {
 namespace zx80 {
 
 /**
- * Sinclair ZX80 emulator.
+ * Sinclair ZX-80 emulator.
  */
 class ZX80 {
 public:

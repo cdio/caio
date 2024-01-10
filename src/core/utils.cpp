@@ -20,6 +20,8 @@
 
 #include <thread>
 
+#include "sha2.h"
+
 
 namespace caio {
 namespace utils {
@@ -110,7 +112,7 @@ std::string to_string(const gsl::span<const uint8_t>& buf)
 {
     std::string str{};
 
-    for (auto& value : buf) {
+    for (uint8_t value : buf) {
         str.push_back(static_cast<char>(value));
     }
 
@@ -122,6 +124,22 @@ uint64_t sleep(uint64_t delay)
     uint64_t start = now();
     std::this_thread::sleep_for(std::chrono::microseconds{delay});
     return (now() - start);
+}
+
+std::string sha256(const gsl::span<const uint8_t>& buf)
+{
+    SHA2_CTX ctx{};
+    uint8_t md[SHA256_DIGEST_LENGTH];
+    SHA256Init(&ctx);
+    SHA256Update(&ctx, buf.data(), buf.size());
+    SHA256Final(md, &ctx);
+
+    std::ostringstream os{};
+    for (uint8_t value : md) {
+        os << to_string(value);
+    }
+
+    return os.str();
 }
 
 }

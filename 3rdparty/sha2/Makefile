@@ -20,58 +20,23 @@ ROOT=		${abspath ../../}
 
 include ${ROOT}/mk/config.mk
 
-LIB=		libresid.a
+LIB=		libsha2.a
 
-CXXSRCS=	envelope.cc \
-		extfilt.cc \
-		filter.cc \
-		pot.cc \
-		sid.cc \
-		version.cc \
-		voice.cc \
-		wave.cc
-
-INCS=		envelope.h \
-		extfilt.h \
-		filter.h \
-		pot.h \
-		siddefs.h \
-		sid.h \
-		siddefs.h \
-		spline.h \
-		voice.h \
-		wave.h
-
-DATA=		wave6581_PST.dat \
-		wave6581_PS_.dat \
-		wave6581_P_T.dat \
-		wave6581__ST.dat \
-		wave8580_PST.dat \
-		wave8580_PS_.dat \
-		wave8580_P_T.dat \
-		wave8580__ST.dat
-
-DATASRCS=	${DATA:%.dat=%.cc}
-
-CXXSRCS+=	${DATASRCS}
-
-OBJS=		${CXXSRCS:%.cc=%.o}
-
+SRCS=		sha2.c
+INCS=		sha2.h
+OBJS=		${SRCS:%.c=%.o}
 HDEPS=		${OBJS:%.o=%.d}
 
-CXXFLAGS=	-Wall \
+CPPFLAGS=	-I.
+
+CFLAGS=		-Wall \
 		-Werror \
-		-std=c++17 \
 		-fPIC \
-		-I. \
 		-O3
 
-SAMP2SRC=	${PERL} samp2src.pl
+override CC=	clang
 
 CLEANFILES+=	${LIB} ${OBJS} ${HDEPS}
-#CLEANFILES+=	${LIB} ${OBJS} ${HDEPS} ${DATASRCS}
-
-.SUFFIXES:	.cc .h .dat
 
 .PHONY:		_all all debug clean install
 
@@ -85,10 +50,7 @@ ${LIB}: ${OBJS}
 
 -include ${HDEPS}
 
-%.cc: %.dat
-	${SAMP2SRC} ${@:%.cc=%} $< $@
-
-%.o: %.cc
-	${CXX} ${CPPFLAGS} ${CXXFLAGS} ${MKDEP_FLAGS} -c -o $@ $<
+%.o: %.c
+	${CC} ${CPPFLAGS} ${CFLAGS} ${MKDEP_FLAGS} -c -o $@ $<
 
 include ${ROOT}/mk/clean.mk

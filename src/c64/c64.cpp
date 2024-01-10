@@ -253,9 +253,9 @@ void C64::attach_prg()
 void C64::create_devices()
 {
     _ram = std::make_shared<RAM>(RAM_SIZE, RAM_INIT_PATTERN1, RAM::PUT_RANDOM_VALUES, "RAM");
-    _basic = std::make_shared<ROM>(rompath(BASIC_FNAME), BASIC_SIZE, "BASIC");
-    _kernal = std::make_shared<ROM>(rompath(KERNAL_FNAME), KERNAL_SIZE,  "KERNAL");
-    _chargen = std::make_shared<ROM>(rompath(CHARGEN_FNAME), CHARGEN_SIZE, "CHARGEN");
+    _basic = std::make_shared<ROM>(rompath(BASIC_FNAME), BASIC_DIGEST, "BASIC");
+    _kernal = std::make_shared<ROM>(rompath(KERNAL_FNAME), KERNAL_DIGEST,  "KERNAL");
+    _chargen = std::make_shared<ROM>(rompath(CHARGEN_FNAME), CHARGEN_DIGEST, "CHARGEN");
     _vram = std::make_shared<NibbleRAM>(VRAM_SIZE, "VRAM");
 
     if (_conf.resid) {

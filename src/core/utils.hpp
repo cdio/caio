@@ -398,5 +398,12 @@ static inline uint64_t now()
  */
 uint64_t sleep(uint64_t delay);
 
+/**
+ * Calculate the SHA-256 value of a data buffer.
+ * @param buf Data buffer.
+ * @return The hash value as a string.
+ */
+std::string sha256(const gsl::span<const uint8_t>& buf);
+
 }
 }
