@@ -1309,7 +1309,7 @@ Mos6569::mib_bitmap(unsigned start, uint8_t byte1, uint8_t byte2, uint8_t byte3,
         mask = 0xFFFFFF0000000000UL;
     }
 
-    uint64_t background     = be64toh(*reinterpret_cast<uint64_t *>(&_collision_data[start_byte])) << start_bit;
+    uint64_t background     = be64toh(*reinterpret_cast<uint64_t*>(&_collision_data[start_byte])) << start_bit;
     uint64_t collision      = mask & background & bitmap;
     uint64_t visible_bitmap = ((collision && data_pri) ? (~collision & bitmap) : bitmap);
 
@@ -1323,7 +1323,7 @@ uint8_t Mos6569::update_collision_mib(uint8_t mib, unsigned start, bool mcm, uin
          * Multicolor sprites use 00 as transparent color (no content),
          * the following converts 01 and 10 to 11 so the proper collision data mask is generated.
          */
-        gsl::span data{reinterpret_cast<uint8_t *>(&bitmap), sizeof(bitmap)};
+        gsl::span data{reinterpret_cast<uint8_t*>(&bitmap), sizeof(bitmap)};
         utils::convert_01_10_to_11(data);
     }
 

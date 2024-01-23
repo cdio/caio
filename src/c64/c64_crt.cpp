@@ -117,8 +117,8 @@ std::string Crt::to_string() const
 
 std::string Crt::name() const
 {
-    return std::string{reinterpret_cast<const char *>(_hdr.name),
-        std::strlen(reinterpret_cast<const char *>(_hdr.name))};
+    return std::string{reinterpret_cast<const char*>(_hdr.name),
+        std::strlen(reinterpret_cast<const char*>(_hdr.name))};
 }
 
 bool Crt::is_crt(const std::string& fname)
@@ -138,14 +138,14 @@ bool Crt::is_crt(const std::string& fname)
 
 bool Crt::is_valid(const Crt::Header& hdr)
 {
-    std::string sign{reinterpret_cast<const char *>(hdr.sign), sizeof(hdr.sign)};
+    std::string sign{reinterpret_cast<const char*>(hdr.sign), sizeof(hdr.sign)};
 
     return (sign == HDRSIGN && hdr.size >= HDRMINSIZ);
 }
 
 bool Crt::is_valid(const Crt::Chip& ch)
 {
-    std::string sign{reinterpret_cast<const char *>(ch.sign), sizeof(ch.sign)};
+    std::string sign{reinterpret_cast<const char*>(ch.sign), sizeof(ch.sign)};
 
     return ((sign == CHIPSIGN) &&
         (ch.type == CHIP_TYPE_ROM || ch.type == CHIP_TYPE_RAM || ch.type == CHIP_TYPE_FLASH) &&
@@ -154,7 +154,7 @@ bool Crt::is_valid(const Crt::Chip& ch)
 
 void Crt::load_header(std::istream& is, Header& hdr)
 {
-    if (!is.read(reinterpret_cast<char *>(&hdr), sizeof(hdr))) {
+    if (!is.read(reinterpret_cast<char*>(&hdr), sizeof(hdr))) {
         throw IOError{"Can't read CRT header: " + Error::to_string()};
     }
 
@@ -163,7 +163,7 @@ void Crt::load_header(std::istream& is, Header& hdr)
 
 void Crt::load_chip(std::istream& is, Chip& ch)
 {
-    if (!is.read(reinterpret_cast<char *>(&ch), sizeof(ch))) {
+    if (!is.read(reinterpret_cast<char*>(&ch), sizeof(ch))) {
         throw IOError{"Can't read CHIP header: " + Error::to_string()};
     }
 
@@ -178,7 +178,7 @@ devptr_t Crt::load_rom(std::istream& is, const Chip& ch)
 std::string Crt::to_string(const Crt::Header& hdr)
 {
     std::ostringstream ss{};
-    std::string name{reinterpret_cast<const char *>(hdr.name), std::strlen(reinterpret_cast<const char *>(hdr.name))};
+    std::string name{reinterpret_cast<const char*>(hdr.name), std::strlen(reinterpret_cast<const char*>(hdr.name))};
 
     ss << "name "      << std::quoted(name)
        << ", size "    << hdr.size
