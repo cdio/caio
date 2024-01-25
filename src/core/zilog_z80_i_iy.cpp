@@ -556,7 +556,7 @@ int Z80::i_ADD_A_mIYd(Z80& self, uint8_t op, addr_t arg)
      * N is reset.
      * C is set if carry from bit 7; otherwise, it is reset.
      */
-    addr_t addr = self._regs.IY + static_cast<int16_t>(arg);
+    addr_t addr = self._regs.IY + static_cast<int8_t>(arg);
     uint8_t value = self.read(addr);
     int retval = self.add_A(value, 0);
     self._regs.memptr = addr;
@@ -575,7 +575,7 @@ int Z80::i_ADC_A_mIYd(Z80& self, uint8_t op, addr_t arg)
      * N is reset.
      * C is set if carry from bit 7; otherwise, it is reset.
      */
-    addr_t addr = self._regs.IY + arg;
+    addr_t addr = self._regs.IY + static_cast<int8_t>(arg);
     uint8_t value = self.read(addr);
     self._regs.memptr = addr;
     return self.add_A(value, self.test_C());
@@ -596,7 +596,7 @@ int Z80::i_SUB_A_mIYd(Z80& self, uint8_t op, addr_t arg)
     /*
      * SUB (IY+d)
      */
-    addr_t addr = self._regs.IY + arg;
+    addr_t addr = self._regs.IY + static_cast<int8_t>(arg);
     uint8_t value = self.read(addr);
     return self.sub_A(value, 0);
 }
@@ -616,7 +616,7 @@ int Z80::i_SBC_A_mIYd(Z80& self, uint8_t op, addr_t arg)
     /*
      * SBC (IY+d)
      */
-    addr_t addr = self._regs.IY + arg;
+    addr_t addr = self._regs.IY + static_cast<int8_t>(arg);
     uint8_t value = self.read(addr);
     return self.sub_A(value, self.test_C());
 }
@@ -635,7 +635,7 @@ int Z80::i_AND_A_mIYd(Z80& self, uint8_t op, addr_t arg)
     /*
      * AND (IY+d)
      */
-    addr_t addr = self._regs.IY + arg;
+    addr_t addr = self._regs.IY + static_cast<int8_t>(arg);
     uint8_t value = self.read(addr);
     return self.and_A(value);
 }
@@ -654,7 +654,7 @@ int Z80::i_XOR_A_mIYd(Z80& self, uint8_t op, addr_t arg)
     /*
      * XOR (IY+d)
      */
-    addr_t addr = self._regs.IY + arg;
+    addr_t addr = self._regs.IY + static_cast<int8_t>(arg);
     uint8_t value = self.read(addr);
     return self.xor_A(value);
 }
@@ -673,7 +673,7 @@ int Z80::i_OR_A_mIYd(Z80& self, uint8_t op, addr_t arg)
     /*
      * OR (IY+d)
      */
-    addr_t addr = self._regs.IY + arg;
+    addr_t addr = self._regs.IY + static_cast<int8_t>(arg);
     uint8_t value = self.read(addr);
     return self.or_A(value);
 }
@@ -692,7 +692,7 @@ int Z80::i_CP_A_mIYd(Z80& self, uint8_t op, addr_t arg)
     /*
      * CP (IY+d)
      */
-    addr_t addr = self._regs.IY + arg;
+    addr_t addr = self._regs.IY + static_cast<int8_t>(arg);
     uint8_t value = self.read(addr);
     return self.cp_A(value);
 }
