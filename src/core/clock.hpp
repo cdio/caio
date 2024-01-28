@@ -132,6 +132,24 @@ public:
     }
 
     /**
+     * Enable/disable full-speed mode.
+     * When the full-speed mode is enabled the clock runs at host speed
+     * (does not emulate the actual time expected from the emulated system).
+     * @param on true to activate; false to deactivate.
+     */
+    void fullspeed(bool on) {
+        _fullspeed = on;
+    }
+
+    /**
+     * Return the status of the full-speed mode.
+     * @return true if full-speed mode is active; false otherwise.
+     */
+    bool fullspeed() const {
+        return _fullspeed;
+    }
+
+    /**
      * Add a clockable to this clock.
      * @param clkb Clockable to register.
      * @see del()
@@ -275,6 +293,7 @@ public:
 private:
     size_t                        _freq;
     float                         _delay;
+    bool                          _fullspeed{};
     uint64_t                      _ticks{};
     std::atomic_bool              _stop{};
     std::atomic_bool              _suspend{};

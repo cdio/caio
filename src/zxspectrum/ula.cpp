@@ -16,19 +16,33 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "kempston.hpp"
+#include "ula.hpp"
+
+#include "zxsp_params.hpp"
 
 
 namespace caio {
-namespace kempston {
+namespace sinclair {
+namespace zxspectrum {
 
-JoystickPort joystick_port{
-    .up    = JOY_PORT_UP,
-    .down  = JOY_PORT_DOWN,
-    .left  = JOY_PORT_LEFT,
-    .right = JOY_PORT_RIGHT,
-    .fire  = JOY_PORT_FIRE
-};
+ULA::ULA(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, const sptr_t<ROM>& rom,
+    const sptr_t<ZXSpectrumKeyboard>& kbd, const sptr_t<Joystick>& joy, const sptr_t<ZXSpectrumTape>& tape)
+    : _audio{std::make_shared<ULAAudio>(CLOCK_FREQ, "audio")},
+      _video{std::make_shared<ULAVideo>(cpu, ram, "video")},
+      _aspace{std::make_shared<ULAASpace>(cpu, ram, rom, _audio, _video, kbd, joy, tape)}
+{
+}
 
+void ULA::reset()
+{
+    _aspace->reset();
+}
+
+std::string ULA::to_string() const
+{
+    return _audio->to_string() + "\n  " + _video->to_string();
+}
+
+}
 }
 }

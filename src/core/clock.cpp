@@ -93,6 +93,10 @@ void Clock::run()
             return;
         }
 
+        if (_fullspeed) {
+            continue;
+        }
+
         ++sched_cycle;
 
         if (sched_cycle == sync_cycles) {

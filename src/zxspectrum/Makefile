@@ -16,37 +16,36 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ../..}
+ROOT=		${abspath ../../}
 
 include ${ROOT}/mk/config.mk
 
-PALETTES=	c64_vice-rgb.plt \
-		c64_vice.plt \
-		c64_rgb-pal.plt \
-		c64_pepto.plt \
-		c64_godot.plt \
-		c64_frodo.plt \
-		c64_colodore.plt \
-		c64_c64-wiki.plt \
-		c64_arne.plt \
-		zx80_bw.plt \
-		zxspectrum_df.plt
+LIB=		libcaio_zxspectrum.a
 
-DST_PALETTEDIR=	${DST_DATADIR}/palette
+CXXSRCS=	snapshot.cpp \
+		snap_z80.cpp \
+		snap_sna.cpp \
+		tapfile.cpp \
+		ula.cpp \
+		ula_aspace.cpp \
+		ula_audio.cpp \
+		ula_video.cpp \
+		zxsp.cpp \
+		zxsp_config.cpp \
+		zxsp_keyboard.cpp \
+		zxsp_tape.cpp
 
-DST_PALETTES=	${PALETTES:%=${DST_PALETTEDIR}/%}
+INCS=		snapshot.hpp \
+		snap_sna.hpp \
+		snap_z80.hpp \
+		tapfile.hpp \
+		ula.hpp \
+		ula_aspace.hpp \
+		ula_audio.hpp \
+		ula_video.hpp \
+		zxsp.hpp \
+		zxsp_config.hpp \
+		zxsp_keyboard.hpp \
+		zxsp_tape.hpp
 
-.PHONY: _all all clean debug install
-
-_all all debug:
-
-install: ${DST_PALETTES}
-
-${DST_PALETTES}: ${DST_PALETTEDIR} ${notdir $@}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${notdir $@} $@
-
-${DST_PALETTEDIR}:
-	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
-
-clean distclean:
-
+include ${ROOT}/mk/lib.mk

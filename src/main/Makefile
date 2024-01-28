@@ -30,12 +30,15 @@ CXXSRCS=	main.cpp
 
 EXTRA_DEPS+=	${ROOT}/src/c64/libcaio_c64.a \
 		${ROOT}/src/zx80/libcaio_zx80.a \
+		${ROOT}/src/zxspectrum/libcaio_zxspectrum.a \
 		${ROOT}/src/ui_sdl2/libcaio_ui_sdl2.a \
 		${ROOT}/src/core/libcaio_core.a \
-		${ROOT}/3rdparty/resid/libresid.a
+		${ROOT}/3rdparty/resid/libresid.a \
+		${ROOT}/3rdparty/sha2/libsha2.a
 
 CPPFLAGS+=	-I${ROOT}/src/c64 \
-		-I${ROOT}/src/zx80
+		-I${ROOT}/src/zx80 \
+		-I${ROOT}/src/zxspectrum
 
 LDADD+=		${EXTRA_DEPS}
 

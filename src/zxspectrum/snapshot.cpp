@@ -16,19 +16,23 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "kempston.hpp"
+#include "snapshot.hpp"
 
 
 namespace caio {
-namespace kempston {
+namespace sinclair {
+namespace zxspectrum {
 
-JoystickPort joystick_port{
-    .up    = JOY_PORT_UP,
-    .down  = JOY_PORT_DOWN,
-    .left  = JOY_PORT_LEFT,
-    .right = JOY_PORT_RIGHT,
-    .fire  = JOY_PORT_FIRE
-};
+void Snapshot::throw_ioerror(const std::string& caller, const std::string& reason) const
+{
+    std::string msg{caller + ": Invalid snapshot file: " + _fname};
+    if (!reason.empty()) {
+        msg += ": " + reason;
+    }
 
+    throw IOError{msg};
+}
+
+}
 }
 }

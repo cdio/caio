@@ -643,6 +643,15 @@ void Z80::reset()
     _tx = Cycle::T1;
 }
 
+void Z80::reset(const Registers& regs, IMode im, bool iff1, bool iff2)
+{
+    reset();
+    _regs = regs;
+    _imode = im;
+    _IFF1 = iff1;
+    _IFF2 = iff2;
+}
+
 void Z80::opcode_fetch(bool read_bus)
 {
     if (read_bus) {

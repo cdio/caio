@@ -5,7 +5,7 @@
 ### Linux
 
 External dependencies:
-* [clang-10.0](https://clang.llvm.org) or later
+* [clang-14.0](https://clang.llvm.org) or later
 * [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config)
 * [SDL2](https://libsdl.org)
 

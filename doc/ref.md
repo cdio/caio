@@ -20,3 +20,6 @@
 
 [World of Spectrum](https://worldofspectrum.org/)
 
+[Bugs in the (Spectrum) ROM](http://www.nonowt.com/magfold/articfol/bugs_in.html)
+
+[Sinclair wiki](https://sinclair.wiki.zxnet.co.uk/wiki/Main_Page)

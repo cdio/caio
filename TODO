@@ -1,22 +1,25 @@
+- Spectrum: Test SNA snapshot format
+- Platform: Base platform
+- UI:       GUI using WxWidgets
+            Windowed pseudo-terminals (logs and monitor)
+            Configuration window
+            Avoid interference between ALT/CTRL+xx and OS
 - vjoy:     move ALT-K handling from c64 to ui
 - signal:   Test all methods specially filters and kernels
 - signal:   Fast filters, fast convolution?
 - Monitor:  Monitor always active, use config value to enter it during boot.
-- Monitor:  bpadd remove void* arg, use template or variant
 - 6502:     Tests suite
 - 6502:     Tests that don't work:
             VICE-testprogs/SCPU/scputest
             VICE-testprogs/CPU/kdormann
             VICE-testprogs/general/banking00
-- SID:      Fix saturation (ballad/pantheon_toggle)
 - SID:      Reverse engineer the real 8580 and implement it
-- SID:      Fix the internal implementation and remove reSID support
+- SID:      Fix saturation (ballad/pantheon_toggle) and remove reSID support
 - VICII:    Fix sprite position (batman, turrican)
 - VICII:    Fix border colour during open-border mode
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
 - C1541Fs:  Support for P00 files
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
-- UI:       Windowed pseudo-terminals (logs and monitor, WxWidgets?)
 - UI:       Fix disk widget activity when C1541 is in error condition.
 - UI:       Floppy widget: Disk progress
 - UI:       Virtual joystick widget
@@ -25,9 +28,8 @@
 - CBMBUS:   Timeout (to recover from external problems)
 - CBMBUS:   Refactor using pullups
 - C64:      C64 EasyFlash cartridge: eeprom support
-- ZX80:     Cassette interface + widget
-- misc:     Brew package for macos, rpm for opensuse, freebsd port
-- misc:     Improve entire architecture
+- Spectrum: .tzx
+- misc:     Release/Snapshots packages: brew, rpm, deb, freebsd port
 - misc:     Use std::format (C++23)
 - misc:     Use fstream::native_handle() (C++26)
 - misc:     Port to Cpp2?
@@ -36,4 +38,3 @@
 - Daewoo DPC-200
 - NEC PC-8001
 - Amstrad CPC-464
-- ZX Spectrum

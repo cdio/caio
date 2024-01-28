@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2022 Claudio Castiglia
+# Copyright (C) 2020 Claudio Castiglia
 #
 # This file is part of caio.
 #
@@ -31,7 +31,14 @@ IMAGES=		c64-basic.gif \
 		zx80-4K-space-invaders.gif \
 		zx80-8K-kong.gif \
 		zx80-8K-layout.jpg \
-		zx80-8K-pacman.gif
+		zx80-8K-pacman.gif \
+		zxspectrum-48k-extreme.gif \
+		zxspectrum-48k-jetset-willy.gif \
+		zxspectrum-48k-olli_n_lissa.gif \
+		zxspectrum-48k-starquake.gif
+
+# External
+IMAGES+=	640px-ZXSpectrum48k.jpg
 
 README=		${ROOT}/README.md
 

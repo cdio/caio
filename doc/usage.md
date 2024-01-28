@@ -5,18 +5,20 @@
 At the moment, the best way to launch caio is from the command line terminal:
 ```
 $ caio --help
-usage: caio <arch> [--help]
+usage: src/main/caio <arch> [--help]
 where arch is one of:
 c64
 zx80
+zxspectrum
 ```
-<details>
-<summary>Generic configuration</summary>
 
-### Generic configuration
+<details>
+<summary>Generic Configuration</summary>
+
+### Generic Configuration
 
 Configuration parameters can be specified as command line options or as
-key-value paris in a [configuration file](../src/main/caio.conf).<br>
+*key-value* pairs in a [configuration file](../src/main/caio.conf).<br>
 The configuration file contains two types of sections: One ***generic***
 section whose values are inherited by all platforms, and one ***specific***
 section for each emulated platform.<br>
@@ -103,6 +105,29 @@ There are other widgets that depend on the specifc platform, such as:
 * Disk drive status
 * Cassette status
 
+### Joysticks
+
+* Gamepads or real joysticks:
+  When a real gamepad is detected and the emulated platform supports a
+  joystick it is attached to it.
+
+* Virtual Joystick:
+  A virtual joystick is available and it can be enabled using the `vjoy`
+  configuration option.
+  The default mappings are:
+    - UP: `KEY_NUMPAD_8`
+    - DOWN: `KEY_NUMPAD_2`
+    - LEFT: `KEY_NUMPAD_4`
+    - RIGHT: `KEY_NUMPAD_3`
+    - FIRE: `KEY_NUMPAD_5`
+
+  These mappings can be changed using the following configuration parameters:
+    - `vjoy_up`
+    - `vjoy_down`
+    - `vjoy_left`
+    - `vjoy_right`
+    - `vjoy_fire`
+
 <hr>
 </details>
 <details>
@@ -153,6 +178,25 @@ Like the [VICE](https://en.wikipedia.org/wiki/VICE) emulator, the `RESTORE`
 key is mapped as `Page-Up`, `RUN/STOP` as `ESC`, `CTRL` as `TAB` and
 `CBM` as `LEFT-CTRL`.
 
+#### Joysticks
+
+The Commodore 64 has two joystick ports. If a gamepad is detected it is
+attached to one of those ports. If the virtual joystick is also enabled
+one joystick port is associated to the gamepad and the other to the
+virtual joystick.
+
+Unexpected results could occur when the same key is shared by both the
+emulated keyboard and the virtual joystick (both tries to process the
+keystroke). To help deal with this situation the state of the emulated
+keyboard can be toggled (activated/deactivated) at runtime using the
+`ALT-K` key combination.<br>
+Games or other applications that use the keyboard in conjunction with the
+joystick should never share the same keys. If the default joystick keys are
+not available or just difficult to use, the user is always free to redefine
+both the keyboard keys and the virtual joystick as desired.
+
+For more information refer to the Generic Configuration section.
+
 #### Disk drives
 
 There is an implementation of the
@@ -163,39 +207,6 @@ Configuration options `unit8` and `unit9` must be used to associate a host
 directory to a floppy disk.
 
 `D64` disk drive images are not supported yet.
-
-#### Joysticks
-
-* Gamepads or real joysticks:
-  Up to two gamepads should work (tested using only one Logitech F710).
-  The PS3 controller is known to work.
-
-* Virtual Joystick:
-  A virtual joystick is available and it can be enabled using the `vjoy`
-  configuration option.
-  The default mappings are:
-    - UP: `KEY_NUMPAD_8`
-    - DOWN: `KEY_NUMPAD_2`
-    - LEFT: `KEY_NUMPAD_4`
-    - RIGHT: `KEY_NUMPAD_3`
-    - FIRE: `KEY_NUMPAD_5`
-
-  These mappings can be changed using the following configuration parameters:
-    - `vjoy_up`
-    - `vjoy_down`
-    - `vjoy_left`
-    - `vjoy_right`
-    - `vjoy_fire`
-
-  Unexpected results could occur when the same key is shared by both the
-  emulated keyboard and the virtual joystick (both tries to process the
-  keystroke). To help deal with this situation the state of the emulated
-  keyboard can be toggled (activated/deactivated) at runtime using the `ALT-K`
-  key combination.<br>
-  Games or other applications that use the keyboard in conjunction with the
-  joystick should never share the same keys. If the default joystick keys are
-  not available or just difficult to use, the user is always free to redefine
-  both the keyboard keys and the virtual joystick as desired.
 
 #### Examples:
 
@@ -224,7 +235,7 @@ this means that the previous command won't work for advanced or big files
 that are expected to overwrite memory areas not configured as RAM. In that
 case configuration options `unit8` and `unit9` must be used as follows:
 ```
-    $ caio c64 --scale 3 --8 /games/c64
+    $ caio c64 --scale 3 --unit8 /games/c64
 ```
 then, from basic:
 ```
@@ -240,7 +251,7 @@ LOAD "RAMBO",8,1
 
 ```
 $ caio zx80 --help
-usage: caio z80 <options>
+usage: caio zx80 <options>
 where <options> are:
  ...
 Sinclair ZX80 specific:
@@ -265,17 +276,17 @@ The default keyboard layout depends on the installed ROM:
 
 ##### 4K ROM keyboard layout:
 
-<img src="../images/zx80-4K-layout.jpg" width="640">
+<img src="../images/zx80-4K-layout.jpg" width="430">
 
 ##### 8K ROM keyboard layout:
 
-<img src="../images/zx80-8K-layout.jpg" width="640">
+<img src="../images/zx80-8K-layout.jpg" width="430">
 
 #### Cassette interface
 
-The cassette interface is emulated (including its speed) and both cassette
-file formats ***.o*** (4K ROM) and ***.p*** (8K ROM) are supported.
-Audio files (WAV, PCM, etc.) are not supported.
+The cassette interface is emulated and both cassette file formats
+***.o*** (4K ROM) and ***.p*** (8K ROM) are supported. Audio files
+(WAV, PCM, etc.) are not supported.
 <br>
 The behaviour of basic commands `LOAD` and `SAVE` depend on the ROM being
 used:
@@ -303,6 +314,84 @@ of the machine but it is also the main site of really beautiful games
 that exploit the flicker-free technique:
 [ZX Resource Centre](http://www.fruitcake.plus.com/Sinclair/ZX80/FlickerFree/ZX80_DisplayMechanism.htm "ZX Resource Centre").
 
-</hr>
+<hr>
 </details>
+<details>
+<summary>Sinclair ZX-Spectrum 48K</summary>
 
+### Sinclair ZX-Spectrum 48K
+
+```
+$ caio zxspectrum --help
+usage: caio zxspectrum <options>
+where <options> are:
+...
+Sinclair ZX-Spectrum 48K specific:
+ --tape <fname|dir>      Set the input tape file (TAP) or directory
+ --otape <fname|dir>     Set the output tape file (TAP) or directory
+                         (default is ./)
+ --fastload [yes|no]     Fast tape loading (default is no)
+ --snap <fname>          Load a snapshot image (Z80 or SNA formats)
+```
+
+#### Keyboard
+
+The default is the positional keyboard layout:
+
+<a href="https://upload.wikimedia.org/wikipedia/commons/3/33/ZXSpectrum48k.jpg">
+<img src="../images/640px-ZXSpectrum48k.jpg" width=430
+title="ZX-Spectrum - Photo By Bill Bertram - Own work, CC BY-SA 2.5">
+</a>
+
+The `CAPS SHIFT` key is mapped as `SHIFT` and the `SYMBOL SHIFT` key
+is mapped as `CTRL`.
+
+#### Joysticks
+
+The [Kempston](https://en.wikipedia.org/wiki/Kempston_Micro_Electronics)
+joystick interface is supported.<br>
+If the virtual joystick is enabled (`vjoy` configuration option), the
+Kempston interface is automatically connected to it. If a gamepad is
+detected and the virtual joystick is **not** enabled then the Kempston
+interface is connected to it.
+
+For more information refer to the Generic Configuration section.
+
+#### Cassette interface
+
+The cassette interface is emulated and it only supports the ***TAP***
+file format. Audio files (WAV, PCM, etc.) are not supported.
+
+The cassette interface can be specified as a file or as a directory
+and there are two configuration options:
+
+- `tape`: Sets the input tape (*LOAD*)<br>
+If a directory is specified as input tape, the content of a number of *TAP*
+files found inside it are concatenated into a big virtual *TAP* which
+is then used as input tape.
+
+- `otape`: Sets the output tape (*SAVE*)<br>
+If a directory is specified as output tape, any SAVE operation creates
+a new *TAP* file inside it.<br>
+If a file is specified as output tape, any SAVE operation appends data
+to it.
+
+The following command launches the game called *Starquake* encoded as
+a *TAP* file, the `fastload` option is used to accelerate loading:
+```
+    $ caio zxspectrum --fastload --tape /games/spectrum/starquak.tap
+```
+
+#### Snapshots
+
+The `snap` option can be used to load a snapshot file.
+Supported formats are ***SNA*** and ***Z80***.<br>
+
+The following command launches the game called *Jet Set Willy* which is
+embedded inside a snapshot:
+```
+    $ caio zxspectrum --snap /games/spectrum/Jet.Set.Willy.z80
+```
+
+<hr>
+</details>

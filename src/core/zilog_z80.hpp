@@ -351,6 +351,17 @@ public:
     void reset();
 
     /**
+     * Restart this CPU with predefined state.
+     * @param regs Register values;
+     * @param im   Interrupt mode;
+     * @param iff1 IFF1 state;
+     * @param iff2 IFF2 state.
+     * @see Registers
+     * @see IMode
+     */
+    void reset(const Registers& regs, IMode im, bool iff1, bool iff2);
+
+    /**
      * Set the /HALT output pin callback.
      * This callback is called when the /HALT output pin is changed.
      * @param halt_cb Callback.

@@ -19,17 +19,26 @@
 #pragma once
 
 #include "joystick.hpp"
+#include "types.hpp"
 
 
 namespace caio {
 namespace kempston {
 
-constexpr static const uint8_t JOY_PORT_UP    = 0x08;
-constexpr static const uint8_t JOY_PORT_DOWN  = 0x04;
-constexpr static const uint8_t JOY_PORT_LEFT  = 0x02;
-constexpr static const uint8_t JOY_PORT_RIGHT = 0x01;
-constexpr static const uint8_t JOY_PORT_FIRE  = 0x10;
-constexpr static const uint8_t JOY_MASK       = 0x1F;
+/*
+ * Kempston joystick port:
+ * +-------+-------+-------+-------+-------+-------+-------+-------+
+ * |  D7   |  D6   |  D5   |  D4   |  D3   |  D2   |  D1   |  D0   |
+ * +-------+-------+-------+-------+-------+-------+-------+-------+
+ * |       |       |       | Fire  | Up    | Down  | Left  | Right |
+ * +-------+-------+-------+-------+-------+-------+-------+-------+
+ */
+constexpr static const uint8_t JOY_PORT_UP    = D3;
+constexpr static const uint8_t JOY_PORT_DOWN  = D2;
+constexpr static const uint8_t JOY_PORT_LEFT  = D1;
+constexpr static const uint8_t JOY_PORT_RIGHT = D0;
+constexpr static const uint8_t JOY_PORT_FIRE  = D4;
+constexpr static const uint8_t JOY_MASK       = D0 | D1 | D2 | D3 | D4;
 
 /**
  * Kempston interface joystick port.

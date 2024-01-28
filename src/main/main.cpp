@@ -30,6 +30,7 @@
 
 #include "c64.hpp"
 #include "zx80.hpp"
+#include "zxsp.hpp"
 
 
 using namespace caio;
@@ -50,17 +51,18 @@ void machine_main(int argc, const char** argv)
         std::exit(EXIT_SUCCESS);
 
     } catch (const std::exception& err) {
-        std::cerr << MACHINE::name() << ": Error: " << err.what() << std::endl;
+        std::cerr << MACHINE::name() << ": Error: " << err.what() << "\n";
     }
 
     std::exit(EXIT_FAILURE);
 }
 
-#define MACHINE_ENTRY(nm, type)         { CAIO_STR(type), machine_main<nm::type, nm::type ## Cmdline> }
+#define MACHINE_ENTRY(name, nm, type)         { name, machine_main<nm::type, nm::type ## Cmdline> }
 
 static std::map<std::string, std::function<void(int, const char**)>> machines = {
-    MACHINE_ENTRY(commodore::c64, C64),
-    MACHINE_ENTRY(sinclair::zx80, ZX80)
+    MACHINE_ENTRY("c64",        commodore::c64,         C64),
+    MACHINE_ENTRY("zx80",       sinclair::zx80,         ZX80),
+    MACHINE_ENTRY("zxspectrum", sinclair::zxspectrum,   ZXSpectrum)
 };
 
 [[noreturn]]
@@ -73,14 +75,14 @@ static void terminate()
 [[noreturn]]
 static void usage(const std::string& progname)
 {
-    std::cerr << "usage: " << progname << " <arch> [--help]" << std::endl
-              << "where arch is one of: "                    << std::endl;
+    std::cerr << "usage: " << progname << " <arch> [--help]\n"
+                 "where arch is one of:\n";
 
     std::for_each(machines.begin(), machines.end(), [](const auto& entry) {
-        std::cerr << entry.first << std::endl;
+        std::cerr << entry.first << "\n";
     });
 
-    std::cerr << std::endl;
+    std::cerr << "\n";
 
     std::exit(EXIT_FAILURE);
 }
@@ -103,15 +105,15 @@ int main(int argc, const char** argv)
     }
 
     if (name == "-v" || name == "--version") {
-        std::cerr << full_version() << std::endl;
+        std::cerr << full_version() << "\n";
         std::exit(EXIT_SUCCESS);
     }
 
-    auto it = machines.find(utils::toup(name));
+    auto it = machines.find(utils::tolow(name));
     if (it != machines.end()) {
         it->second(argc, argv);
     }
 
-    std::cerr << "Unknown emulator: " << name << std::endl;
+    std::cerr << "Unknown emulator: " << name << "\n";
     return EXIT_FAILURE;
 }
