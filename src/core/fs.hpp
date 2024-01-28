@@ -29,12 +29,16 @@
 
 #include <gsl/span>
 
+#include "types.hpp"
+
 
 namespace caio {
 namespace fs {
 
-constexpr static const size_t LOAD_MAXSIZ = 65536;
-constexpr static size_t DIR_ENTRIES_LIMIT = 256;
+constexpr static const size_t LOAD_MAXSIZ       = 65536;
+constexpr static size_t DIR_ENTRIES_LIMIT       = 256;
+constexpr static bool MATCH_CASE_INSENSITIVE    = true;
+constexpr static bool MATCH_CASE_SENSITIVE      = false;
 
 using dir_entry_t = std::pair<std::string, uint64_t>;
 using dir_t = std::vector<dir_entry_t>;
@@ -55,11 +59,15 @@ std::string home();
 std::string fix_home(const std::string& path);
 
 /**
- * Detect whether a file exists or not.
- * @param path Path to the file.
+ * std::filesystem::exists() wrapper
+ * @param path Pathname.
  * @return True if the specified file exists; false otherwise.
  */
-bool exists(const std::string& path);
+static inline bool exists(const std::string& path)
+{
+    std::error_code ec{};
+    return std::filesystem::exists(path, ec);
+}
 
 /**
  * std::filesystem::is_directory() wrapper.
@@ -68,17 +76,19 @@ bool exists(const std::string& path);
  */
 static inline bool is_directory(const std::string& path)
 {
-    return std::filesystem::is_directory(path);
+    std::error_code ec{};
+    return std::filesystem::is_directory(path, ec);
 }
 
 /**
  * std::filesystem::file_size() wrapper.
- * @param path Pathname.
- * @return The file size.
+ * @param path File name.
+ * @return The file size or -1 if the file does not exist or it is not a file.
  */
 static inline std::uintmax_t file_size(const std::string& path)
 {
-    return std::filesystem::file_size(path);
+    std::error_code ec{};
+    return std::filesystem::file_size(path, ec);
 }
 
 /**
@@ -100,8 +110,17 @@ std::string search(const std::string& fname, const std::initializer_list<std::st
  * Retrieve the basename of a full path.
  * @param fullpath Full path name.
  * @return The basename.
+ * @see dirname(const std::string&)
  */
 std::string basename(const std::string& fullpath);
+
+/**
+ * Retrieve the directory name of a full path.
+ * @param fullpath Full path name.
+ * @return The directory name.
+ * @see basename(const std::string&)
+ */
+std::string dirname(const std::string& fullpath);
 
 /**
  * Concatenate files.
@@ -122,34 +141,43 @@ bool unlink(const std::string& fname);
 /**
  * Match a file.
  * @param fname   File name;
- * @param pattern fnmatch(3) style pattern.
+ * @param pattern fnmatch(3) style pattern;
+ * @param icase   MATCH_CASE_INSENSITIVE or MATCH_CASE_SENSITIVE (default).
  * @return True if the file name matches the specified pattern; false otherwise.
+ * @see MATCH_CASE_INSENSITIVE
+ * @see MATCH_CASE_SENSITIVE
  * @see Unix manpage fnmatch(3)
  */
-bool match(const std::string& path, const std::string& pattern);
+bool match(const std::string& path, const std::string& pattern, bool icase = MATCH_CASE_SENSITIVE);
 
 /**
  * Get a directory listing.
  * @param dirpath  Directory;
  * @param pattern  Matching pattern;
+ * @param icase    MATCH_CASE_INSENSITIVE or MATCH_CASE_SENSITIVE;
  * @param callback User defined callback (return false to stop directory traversing).
  * @return False if the callback stopped the traversal; true otherwise.
  * @see match(const std::string&, const std::string&)
+ * @see MATCH_CASE_INSENSITIVE
+ * @see MATCH_CASE_SENSITIVE
  */
-bool directory(const std::string& path, const std::string& pattern,
+bool directory(const std::string& path, const std::string& pattern, bool icase,
     const std::function<bool(const std::string&, uint64_t)>& callback);
 
 /**
  * Get a directory listing.
  * @param dirpath Directory;
  * @param pattern Matching pattern;
+ * @param icase   MATCH_CASE_INSENSITIVE or MATCH_CASE_SENSITIVE;
  * @param limit   Maximum number of entries (0 means no limits; default is DIR_ENTRIES_LIMIT).
  * @return The entries that match the specified pattern plus their size on disk.
  * @see directory(const std::string&, const std::string&, const std::function<void(const std::string&, uint64_t)>&)
  * @see match(const std::string&, const std::string&)
  * @see DIR_ENTRIES_LIMIT
+ * @see MATCH_CASE_INSENSITIVE
+ * @see MATCH_CASE_SENSITIVE
  */
-dir_t directory(const std::string& path, const std::string& pattern, size_t limit = DIR_ENTRIES_LIMIT);
+dir_t directory(const std::string& path, const std::string& pattern, bool icase, size_t limit = DIR_ENTRIES_LIMIT);
 
 /**
  * Load the contents of a file into memory.
@@ -158,11 +186,12 @@ dir_t directory(const std::string& path, const std::string& pattern, size_t limi
  * @return A buffer with the contents of the file.
  * @exception IOError
  * @see load(std::istream&)
- * @see save(const std::string&, const gsl::span<uint8_t>&, std::ios_base::openmode)
- * @see save(std::ostream&, const gsl::span<uint8_t>&)
+ * @see save(const std::string&, const gsl::span<const uint8_t>&, std::ios_base::openmode)
+ * @see save(std::ostream&, const gsl::span<const uint8_t>&)
  * @see LOAD_MAXSIZ
+ * @see buffer_t
  */
-std::vector<uint8_t> load(const std::string& fname, size_t maxsiz = 0);
+buffer_t load(const std::string& fname, size_t maxsiz = 0);
 
 /**
  * Read data from an input stream and create a memory buffer.
@@ -171,10 +200,10 @@ std::vector<uint8_t> load(const std::string& fname, size_t maxsiz = 0);
  * @return A buffer with the data read from the input stream.
  * @exception IOError
  * @see load(const std::string&)
- * @see save(const std::string&, const gsl::span<uint8_t>&, std::ios_base::openmode)
- * @see save(std::ostream&, const gsl::span<uint8_t>&)
+ * @see save(const std::string&, const gsl::span<const uint8_t>&, std::ios_base::openmode)
+ * @see save(std::ostream&, const gsl::span<const uint8_t>&)
  */
-std::vector<uint8_t> load(std::istream& is, size_t maxsiz = 0);
+buffer_t load(std::istream& is, size_t maxsiz = 0);
 
 /**
  * Save a buffer to a file.
@@ -184,9 +213,9 @@ std::vector<uint8_t> load(std::istream& is, size_t maxsiz = 0);
  * @exception IOError
  * @see load(const std::string&)
  * @see load(std::istream&)
- * @see save(std::ostream&, const gsl::span<uint8_t>&)
+ * @see save(std::ostream&, const gsl::span<const uint8_t>&)
  */
-void save(const std::string& fname, const gsl::span<uint8_t>& buf,
+void save(const std::string& fname, const gsl::span<const uint8_t>& buf,
     std::ios_base::openmode mode = std::ios_base::out | std::ios_base::trunc);
 
 /**
@@ -195,9 +224,9 @@ void save(const std::string& fname, const gsl::span<uint8_t>& buf,
  * @param buf Buffer.
  * @see load(const std::string&)
  * @see load(std::istream&)
- * @see save(const std::string&, const gsl::span<uint8_t>&, std::ios_base::openmode)
+ * @see save(const std::string&, const gsl::span<const uint8_t>&, std::ios_base::openmode)
  */
-std::ostream& save(std::ostream& os, const gsl::span<uint8_t>& buf);
+std::ostream& save(std::ostream& os, const gsl::span<const uint8_t>& buf);
 
 }
 }

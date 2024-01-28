@@ -425,7 +425,7 @@ int ZX80CassetteP::receive(RxCmd cmd)
     if (cmd == RxCmd::Rewind) {
         log.debug("ZX80CassetteP: Loading filenames from directory: %s\n", _cassdir.c_str());
 
-        _entries = fs::directory(_cassdir, CASSETTE_PATTERN);
+        _entries = fs::directory(_cassdir, CASSETTE_PATTERN, fs::MATCH_CASE_INSENSITIVE);
         for (const auto& entry : _entries) {
             log.debug("ZX80CassetteP: Found: %s\n", entry.first.c_str());
         }

@@ -139,7 +139,7 @@ Status C1541Fs::open_dir(uint8_t ch, Channel& channel, const std::string& fname,
 
     ss << to_basic(addr, {}, 0);
 
-    fs::directory(attached_path(), pattern,
+    fs::directory(attached_path(), pattern, fs::MATCH_CASE_SENSITIVE,
         [this, &ss, &addr, &root_len](const std::string& entry, uint64_t size) -> bool {
             ss << to_basic(addr, entry.substr(root_len), size);
             return true;
@@ -219,10 +219,12 @@ Status C1541Fs::open_file(uint8_t ch, Channel& channel, const std::string& fname
              * loads the first file in the disk.
              */
             const std::string& pattern = attached_path() + c1541::pet_to_u8(fname) + ext;
-            fs::directory(attached_path(), pattern, [&fullpath](const std::string& entry, uint64_t size) -> bool {
-                fullpath = entry;
-                return false;
-            });
+            fs::directory(attached_path(), pattern, fs::MATCH_CASE_SENSITIVE,
+                [&fullpath](const std::string& entry, uint64_t size) -> bool {
+                    fullpath = entry;
+                    return false;
+                }
+            );
 
             if (fullpath.empty()) {
                 log.debug("%s: Can't open file: \"%s\": No match for pattern \"%s\"\n", name(ch).c_str(), fname.c_str(),
@@ -645,7 +647,7 @@ Status C1541Fs::scratch(const std::string& param)
         if (!fname.empty() && fs::exists(fname)) {
             success = remove(fname, 0);
         } else if (c1541::is_pattern(fname)) {
-            success = fs::directory(attached_path(), fname, remove);
+            success = fs::directory(attached_path(), fname, fs::MATCH_CASE_SENSITIVE, remove);
         }
 
         if (success) {

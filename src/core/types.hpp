@@ -28,6 +28,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <vector>
 
 #define CAIO_STR_(x)    #x
 #define CAIO_STR(x)     CAIO_STR_(x)
@@ -69,6 +70,9 @@ using sptr_t = std::shared_ptr<T>;
 
 template<typename T>
 using uptr_t = std::unique_ptr<T>;
+
+using buffer_t = std::vector<uint8_t>;
+using buffer_it_t = std::vector<uint8_t>::iterator;
 
 std::string stacktrace();
 std::ostream& stacktrace(std::ostream& os);

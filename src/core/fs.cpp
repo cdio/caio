@@ -52,13 +52,6 @@ std::string fix_home(const std::string& path)
     return path;
 }
 
-bool exists(const std::string& path)
-{
-    //TODO: use std::filesystem::exists() ?
-    struct ::stat st{};
-    return (::stat(path.c_str(), &st) == 0);
-}
-
 std::string search(const std::string& fname, const std::initializer_list<std::string>& spath, bool cwd)
 {
     if (fname.empty()) {
@@ -110,6 +103,12 @@ std::string basename(const std::string& fullpath)
     return (pos == std::string::npos ? fullpath : fullpath.substr(pos + 1));
 }
 
+std::string dirname(const std::string& fullpath)
+{
+    auto pos = fullpath.find_last_of("/");
+    return (pos == std::string::npos ? "./" : fullpath.substr(0, pos));
+}
+
 void concat(const std::string& dst, const std::string& src)
 {
     std::ifstream is{src, std::ios_base::in | std::ios_base::binary};
@@ -136,14 +135,14 @@ bool unlink(const std::string& fname)
     return (fname.empty() || !::unlink(fname.c_str()));
 }
 
-bool match(const std::string& path, const std::string& pattern)
+bool match(const std::string& path, const std::string& pattern, bool icase)
 {
     const char* cpath = path.c_str();
     const char* cpattern = pattern.c_str();
-    return (!::fnmatch(cpattern, cpath, FNM_NOESCAPE));
+    return (!::fnmatch(cpattern, cpath, FNM_NOESCAPE | (icase == MATCH_CASE_INSENSITIVE ? FNM_CASEFOLD : 0)));
 }
 
-bool directory(const std::string& path, const std::string& pattern,
+bool directory(const std::string& path, const std::string& pattern, bool icase,
     const std::function<bool(const std::string&, uint64_t)>& callback)
 {
     const auto& end = std::filesystem::end(std::filesystem::recursive_directory_iterator{});
@@ -151,7 +150,7 @@ bool directory(const std::string& path, const std::string& pattern,
 
     for (; it != end; ++it) {
         const auto& entry = it->path();
-        if (!std::filesystem::is_directory(entry) && fs::match(entry, pattern)) {
+        if (!std::filesystem::is_directory(entry) && fs::match(entry, pattern, icase)) {
             auto size = std::filesystem::file_size(entry);
             if (callback(entry, size) == false) {
                 return false;
@@ -162,12 +161,12 @@ bool directory(const std::string& path, const std::string& pattern,
     return true;
 }
 
-dir_t directory(const std::string& path, const std::string& pattern, size_t limit)
+dir_t directory(const std::string& path, const std::string& pattern, bool icase, size_t limit)
 {
     dir_t entries{};
     bool limited = (limit != 0);
 
-    directory(path, pattern, [&entries, &limit, limited](const std::string& entry, uint64_t size) -> bool {
+    directory(path, pattern, icase, [&entries, &limit, limited](const std::string& entry, uint64_t size) -> bool {
         if (limited) {
             if (limit == 0) {
                 return false;
@@ -181,7 +180,7 @@ dir_t directory(const std::string& path, const std::string& pattern, size_t limi
     return entries;
 }
 
-std::vector<uint8_t> load(const std::string& fname, size_t maxsiz)
+buffer_t load(const std::string& fname, size_t maxsiz)
 {
     std::string errmsg{};
 
@@ -201,9 +200,9 @@ std::vector<uint8_t> load(const std::string& fname, size_t maxsiz)
     throw IOError{"Can't load: " + fname + ": " + (errmsg.empty() ? Error::to_string() : errmsg)};
 }
 
-std::vector<uint8_t> load(std::istream& is, size_t maxsiz)
+buffer_t load(std::istream& is, size_t maxsiz)
 {
-    std::vector<uint8_t> buf{};
+    buffer_t buf{};
     uint8_t c{};
 
     if (maxsiz == 0) {
@@ -224,26 +223,19 @@ std::vector<uint8_t> load(std::istream& is, size_t maxsiz)
     return buf;
 }
 
-void save(const std::string& fname, const gsl::span<uint8_t>& buf, std::ios_base::openmode mode)
+void save(const std::string& fname, const gsl::span<const uint8_t>& buf, std::ios_base::openmode mode)
 {
-    std::string errmsg{};
-
-    try {
-        std::ofstream os{fname, mode};
-        if (os) {
-            save(os, buf);
-            return;
-        }
-    } catch (const std::exception& err) {
-        errmsg = err.what();
+    std::ofstream os{fname, mode};
+    if (!os) {
+        throw IOError{"Can't save: " + fname + ": " + Error::to_string()};
     }
 
-    throw IOError{"Can't save: " + fname + ": " + (errmsg.empty() ? Error::to_string() : errmsg)};
+    save(os, buf);
 }
 
-std::ostream& save(std::ostream& os, const gsl::span<uint8_t>& buf)
+std::ostream& save(std::ostream& os, const gsl::span<const uint8_t>& buf)
 {
-    if (!os.write(reinterpret_cast<char*>(buf.data()), buf.size())) {
+    if (!os.write(reinterpret_cast<const char*>(buf.data()), buf.size())) {
         throw IOError{"Can't write: " + Error::to_string()};
     }
 
