@@ -1165,7 +1165,7 @@ void UI::joy_del(int32_t jid)
         ejoy->reset();
         SDL_JoystickClose(sjoy);
         _sdl_joys.erase(jid);
-        log.debug("ui: Game controller deleted, id: %d, 0x%p\n", jid, sjoy);
+        log.debug("ui: Game controller deleted, id: %d, %p\n", jid, sjoy);
     }
 }
 
