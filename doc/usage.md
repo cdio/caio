@@ -5,7 +5,7 @@
 At the moment, the best way to launch caio is from the command line terminal:
 ```
 $ caio --help
-usage: src/main/caio <arch> [--help]
+usage: caio <arch> [--help]
 where arch is one of:
 c64
 zx80
@@ -181,12 +181,12 @@ key is mapped as `Page-Up`, `RUN/STOP` as `ESC`, `CTRL` as `TAB` and
 #### Joysticks
 
 The Commodore 64 has two joystick ports. If a gamepad is detected it is
-attached to one of those ports. If the virtual joystick is also enabled
-one joystick port is associated to the gamepad and the other to the
-virtual joystick.
+attached to one of these ports. If the virtual joystick is also enabled
+one port is associated to the gamepad and the other to the virtual
+joystick.
 
 Unexpected results could occur when the same key is shared by both the
-emulated keyboard and the virtual joystick (both tries to process the
+emulated keyboard and the virtual joystick (both try to process the
 keystroke). To help deal with this situation the state of the emulated
 keyboard can be toggled (activated/deactivated) at runtime using the
 `ALT-K` key combination.<br>
@@ -376,10 +376,17 @@ a new *TAP* file inside it.<br>
 If a file is specified as output tape, any SAVE operation appends data
 to it.
 
-The following command launches the game called *Starquake* encoded as
-a *TAP* file, the `fastload` option is used to accelerate loading:
+The following command specifies the file *starquak.tap* as input tape,
+this file contains the game *Starquake*; the `fastload` option is used
+to accelerate loading:
 ```
     $ caio zxspectrum --fastload --tape /games/spectrum/starquak.tap
+```
+
+In order to load and run the actual game the command shown below must be
+entered from *BASIC*:
+```
+    LOAD ""
 ```
 
 #### Snapshots

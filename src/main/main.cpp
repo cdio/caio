@@ -36,7 +36,7 @@
 using namespace caio;
 
 template<class MACHINE, class CMDLINE>
-void machine_main(int argc, const char** argv)
+[[noreturn]] void machine_main(int argc, const char** argv)
 {
     try {
         CMDLINE cmdline{};
@@ -72,7 +72,6 @@ static void terminate()
     std::exit(EXIT_FAILURE);
 }
 
-[[noreturn]]
 static void usage(const std::string& progname)
 {
     std::cerr << "usage: " << progname << " <arch> [--help]\n"
@@ -83,8 +82,6 @@ static void usage(const std::string& progname)
     });
 
     std::cerr << "\n";
-
-    std::exit(EXIT_FAILURE);
 }
 
 int main(int argc, const char** argv)
@@ -101,7 +98,7 @@ int main(int argc, const char** argv)
 
     if (name == "" || name == "--help" || name == "-h" || name == "-?") {
         usage(progname);
-        /* NOTREACHED */
+        std::exit(EXIT_FAILURE);
     }
 
     if (name == "-v" || name == "--version") {
@@ -112,6 +109,7 @@ int main(int argc, const char** argv)
     auto it = machines.find(utils::tolow(name));
     if (it != machines.end()) {
         it->second(argc, argv);
+        /* NOTREACHED */
     }
 
     std::cerr << "Unknown emulator: " << name << "\n";

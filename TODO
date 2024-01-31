@@ -1,5 +1,5 @@
+- Spectrum: Distorded audio signal
 - Spectrum: Test SNA snapshot format
-- Platform: Base platform
 - UI:       GUI using WxWidgets
             Windowed pseudo-terminals (logs and monitor)
             Configuration window
