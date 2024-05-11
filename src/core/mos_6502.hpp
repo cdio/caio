@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <array>
 #include <atomic>
 #include <functional>
 #include <iostream>
@@ -128,12 +127,18 @@ public:
     }
 
     /**
+     * Initialise this CPU.
+     * @param mmap System mappings.
+     */
+    void init(const sptr_t<ASpace>& mmap);
+
+    /**
      * Initialise a monitor for this CPU.
      * This CPU must be properly initialised (system mappings set) before this method can be called.
      * The CPU monitor is initialised and a breakpoint is added at the reset address (vRESET),
      * the monitor takes control as soon as this CPU is started.
-     * @param is   Input stream used to communicate with the user;
-     * @param os   Output stream used to communicate with the user.
+     * @param ifd  Input file descriptor used to communicate with the user;
+     * @param ofd  Output file descriptor used to communicate with the user.
      * @param load Monitor load callback (empty for default);
      * @param save Monitor save calblack (empty for default).
      */
@@ -251,13 +256,7 @@ public:
      */
     virtual void write(addr_t addr, uint8_t data);
 
-private:
-    /**
-     * Initialise this CPU.
-     * @param mmap System mappings.
-     */
-    void init(const sptr_t<ASpace>& mmap = {});
-
+protected:
     /**
      * Tick event method.
      * This method is called by the clock and executes a single CPU instruction.
@@ -411,7 +410,7 @@ private:
     std::atomic_bool _break{};
     std::map<addr_t, std::pair<breakpoint_cb_t, void*>> _breakpoints{};
 
-    static const std::array<Instruction, 256> instr_set;
+    static const Instruction instr_set[256];
 
     /**
      * Relative branch helper.

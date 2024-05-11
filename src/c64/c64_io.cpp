@@ -20,7 +20,6 @@
 
 #include "utils.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {
@@ -162,7 +161,7 @@ std::ostream& C64IO::dump(std::ostream& os, addr_t base) const
 
     for (addr_t offset = VIC2_ADDR; offset < SID_ADDR; offset += 0x40) {
         _vic2->dump(os, base + offset);
-        utils::dump(os, ff.begin(), ff.end(), base + offset + _cia2->size());
+        caio::dump(os, ff.begin(), ff.end(), base + offset + _cia2->size());
     }
 
     for (addr_t offset = 0; offset < 1024; offset += 32) {

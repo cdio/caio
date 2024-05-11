@@ -25,7 +25,6 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c1541 {
@@ -346,7 +345,7 @@ void C1541::write(uint8_t ch, const buf_t& buf)
         /*
          * PRINT#15, "<CMD>[\r]"
          */
-        auto cmd = utils::to_string(buf);
+        auto cmd = caio::to_string(buf);
         auto pos = cmd.rfind("\r");
         const auto& param = (pos == std::string::npos ? cmd : cmd.substr(0, pos));
         command(param);

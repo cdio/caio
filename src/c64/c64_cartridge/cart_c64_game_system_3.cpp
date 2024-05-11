@@ -31,7 +31,6 @@
 #define DEBUG(args...)
 #endif
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {
@@ -69,7 +68,7 @@ void CartC64GameSystem3::reset()
     const auto &cart = crt();
 
     if (mode() != GameExromMode::MODE_8K) {
-        throw_invalid_cartridge("Invalid GAME/EXROM mode $" + utils::to_string(static_cast<uint16_t>(mode())) +
+        throw_invalid_cartridge("Invalid GAME/EXROM mode $" + caio::to_string(static_cast<uint16_t>(mode())) +
             ", " + cart.to_string());
     }
 

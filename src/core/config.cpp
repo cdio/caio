@@ -74,11 +74,12 @@ Section parse(int argc, const char** argv, Cmdline& cmdline)
 }
 
 VJoyConfig::VJoyConfig(Section& sec)
-    : VJoyKeys{.up    = keyboard::to_key(sec[KEY_VJOY_UP]),
-               .down  = keyboard::to_key(sec[KEY_VJOY_DOWN]),
-               .left  = keyboard::to_key(sec[KEY_VJOY_LEFT]),
-               .right = keyboard::to_key(sec[KEY_VJOY_RIGHT]),
-               .fire  = keyboard::to_key(sec[KEY_VJOY_FIRE])},
+    : VJoyKeys{.up     = keyboard::to_key(sec[KEY_VJOY_UP]),
+               .down   = keyboard::to_key(sec[KEY_VJOY_DOWN]),
+               .left   = keyboard::to_key(sec[KEY_VJOY_LEFT]),
+               .right  = keyboard::to_key(sec[KEY_VJOY_RIGHT]),
+               .fire   = keyboard::to_key(sec[KEY_VJOY_FIRE_A]),
+               .fire_b = keyboard::to_key(sec[KEY_VJOY_FIRE_B])},
       enabled{is_true(sec[KEY_VJOY])}
 {
     if (up == keyboard::KEY_NONE) {
@@ -98,7 +99,11 @@ VJoyConfig::VJoyConfig(Section& sec)
     }
 
     if (fire == keyboard::KEY_NONE) {
-        throw InvalidArgument{"Invalid virtual joystick fire key: " + sec[KEY_VJOY_FIRE]};
+        throw InvalidArgument{"Invalid virtual joystick fire-A key: " + sec[KEY_VJOY_FIRE_A]};
+    }
+
+    if (fire_b == keyboard::KEY_NONE) {
+        throw InvalidArgument{"Invalid virtual joystick fire-B key: " + sec[KEY_VJOY_FIRE_B]};
     }
 }
 
@@ -172,7 +177,8 @@ std::string Config::to_string() const
        << "              down:   " << keyboard::to_string(vjoy.down)  << "\n"
        << "              left:   " << keyboard::to_string(vjoy.left)  << "\n"
        << "             right:   " << keyboard::to_string(vjoy.right) << "\n"
-       << "              fire:   " << keyboard::to_string(vjoy.fire);
+       << "            fire A:   " << keyboard::to_string(vjoy.fire)  << "\n"
+       << "            fire B:   " << keyboard::to_string(vjoy.fire_b);
 
     return os.str();
 }

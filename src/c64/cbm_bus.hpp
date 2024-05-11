@@ -30,7 +30,6 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace cbm_bus {
@@ -411,7 +410,7 @@ public:
     }
 
     std::string param_str() const {
-        return utils::to_string({_param.data(), _param.size()});
+        return caio::to_string({_param.data(), _param.size()});
     }
 
     void command(uint8_t cmd) {

@@ -37,7 +37,7 @@ public:
     constexpr static const char* FILE_PATTERN       = "*.tap";
     constexpr static const size_t FILE_SIZE_LIMIT   = 512000;
 
-    using Block = gsl::span<const uint8_t>;
+    using Block = std::span<const uint8_t>;
 
     /**
      * Load a TAP file or directory.

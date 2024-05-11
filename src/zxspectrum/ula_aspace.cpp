@@ -61,30 +61,32 @@ ULAASpace::~ULAASpace()
 uint8_t ULAASpace::read(addr_t addr, ReadMode mode)
 {
     if (!_cpu->iorq_pin() || mode == ReadMode::Peek) {
-        switch (_cpu->regs().PC) {
-        case LD_LOOK_H_ADDR:
-            /* Start the tape when a LOAD operation is started */
-            _tape->play();
-            break;
+        if (mode == ReadMode::Read) {
+            switch (_cpu->regs().PC) {
+            case LD_LOOK_H_ADDR:
+                /* Start the tape when a LOAD operation is started */
+                _tape->play();
+                break;
 
-        case LD_BYTES_ADDR:
-            /* Stop the tape after a data block is loaded */
-            _stop_tape = (_cpu->regs().A == tape::HeaderBlock::BLOCKTYPE_DATA);
-            break;
+            case LD_BYTES_ADDR:
+                /* Stop the tape after a data block is loaded */
+                _stop_tape = (_cpu->regs().A == tape::HeaderBlock::BLOCKTYPE_DATA);
+                break;
 
-        case SA_LD_RET_ADDR:
-            /* Block loaded */
-            if (!_stop_tape) {
+            case SA_LD_RET_ADDR:
+                /* Block loaded */
+                if (!_stop_tape) {
+                    break;
+                }
+
+                /* PASSTHROUGH */
+
+            case REPORT_Da_ADDR:    /* Break from user */
+                /* Force tape stop after a break from user */
+                _tape->stop();
+                _stop_tape = false;
                 break;
             }
-
-            /* PASSTHROUGH */
-
-        case REPORT_Da_ADDR:    /* Break from user */
-            /* Force tape stop after a break from user */
-            _tape->stop();
-            _stop_tape = false;
-            break;
         }
 
         return ASpace::read(addr, mode);

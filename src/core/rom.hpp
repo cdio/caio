@@ -37,7 +37,7 @@ public:
      * @param label Label assigned to this ROM.
      */
     template<typename Iterator>
-    ROM(Iterator first, Iterator last, const std::string& label = {})
+    ROM(Iterator first, Iterator last, const std::string& label)
         : RAM{first, last, label} {
         type(TYPE);
     }
@@ -51,7 +51,7 @@ public:
      * @see signature()
      * @see RAM::RAM(const std::string&, size_t, const std::string&)
      */
-    ROM(const std::string& fname, const std::string& digest, const std::string& label = {});
+    ROM(const std::string& fname, const std::string& digest, const std::string& label);
 
     /**
      * Initialise this ROM with data from a file.
@@ -61,7 +61,7 @@ public:
      * @exception IOError If the size of the file is not equal to the specified size.
      * @see RAM:RAM(const std::string&, size_t, const std::string&)
      */
-    ROM(const std::string& fname, size_t size = 0, const std::string& label = {});
+    ROM(const std::string& fname, size_t size, const std::string& label);
 
     /**
      * Initialise this ROM with data from an input stream.

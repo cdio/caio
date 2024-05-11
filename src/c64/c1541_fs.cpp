@@ -26,7 +26,6 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c1541 {
@@ -362,7 +361,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
     }
 
     if (channel.pos == 0) {
-        channel.elapsed = utils::now();
+        channel.elapsed = caio::now();
     }
 
     ++channel.pos;
@@ -376,7 +375,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
     }
 
     if (channel.pos == channel.size) {
-        channel.elapsed = utils::now() - channel.elapsed;
+        channel.elapsed = caio::now() - channel.elapsed;
         if (log.is_debug()) {
             if (channel.elapsed != 0) {
                 float speed = channel.size / (channel.elapsed / 1000000.0f);
@@ -420,7 +419,7 @@ Status C1541Fs::channel_write(uint8_t ch, const buf_t& buf)
         return Status::WRITE_ERROR;
     }
 
-    log.debug("%s: Write success, buffer size %d, data:\n%s\n", name(ch).c_str(), buf.size(), utils::dump(buf).c_str());
+    log.debug("%s: Write success, buffer size %d, data:\n%s\n", name(ch).c_str(), buf.size(), caio::dump(buf).c_str());
 
     return Status::OK;
 }
@@ -542,7 +541,7 @@ Status C1541Fs::copy(const std::string& param)
         return Status::FILE_EXISTS;
     }
 
-    auto catfiles = utils::split(result.str(2), ',');
+    auto catfiles = caio::split(result.str(2), ',');
     if (catfiles.size() == 0) {
         return Status::NO_FILE_GIVEN;
     }

@@ -25,7 +25,6 @@
 
 #include "utils.hpp"
 
-
 namespace caio {
 
 std::map<std::string, Logger::Level> Logger::loglevels = {
@@ -57,7 +56,7 @@ Logger::Level Logger::parse_loglevel(const std::string& levels)
     for (auto it = std::sregex_iterator(levels.begin(), levels.end(), re_loglevel);
         it != std::sregex_iterator(); ++it) {
 
-        const std::string& lstr = utils::trim(it->str());
+        const std::string& lstr = caio::trim(it->str());
         Level l = Logger::to_loglevel(lstr);
         if (l == Level::Invalid) {
             /*
@@ -137,7 +136,7 @@ Logger& Logger::log(Level lv, const std::string& msg)
 
 Logger& Logger::log(Level lv, const char* fmt, va_list ap)
 {
-    char buf[LINE_MAX];
+    char buf[8192];
 
     std::vsnprintf(buf, sizeof(buf), fmt, ap);
 

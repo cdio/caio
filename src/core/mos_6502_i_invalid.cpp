@@ -18,7 +18,6 @@
  */
 #include "mos_6502.hpp"
 
-
 namespace caio {
 
 int Mos6502::i_SLO(Mos6502& self, addr_t addr)
@@ -548,7 +547,7 @@ int Mos6502::i_KIL(Mos6502& self, addr_t addr)
      * alias: CIM
      */
     self._halted = true;
-    log.debug("KIL instruction at $" + utils::to_string(self._regs.PC) + ", CPU halted\n");
+    log.debug("KIL instruction at $" + caio::to_string(self._regs.PC) + ", CPU halted\n");
     return 0;
 }
 

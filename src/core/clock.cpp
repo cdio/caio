@@ -27,7 +27,6 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
-
 namespace caio {
 
 using namespace std::chrono_literals;
@@ -76,7 +75,7 @@ void Clock::run()
 {
     ssize_t sched_cycle = 0;
     ssize_t sync_cycles = cycles(SYNC_TIME / 1000000.0f);
-    int64_t start = utils::now();
+    int64_t start = caio::now();
 
     while (!_stop)  {
         while (_suspend && !_stop) {
@@ -84,7 +83,7 @@ void Clock::run()
              * The emulated system is paused, wait for 200ms and check again.
              */
             std::this_thread::sleep_for(200ms);
-            start = utils::now();
+            start = caio::now();
         }
 
         ++_ticks;
@@ -104,7 +103,7 @@ void Clock::run()
              * Calculate the time required for the host system
              * to execute sync_cycles emulated clock cycles.
              */
-            int64_t end = utils::now();
+            int64_t end = caio::now();
             int64_t elapsed = end - start;
             int64_t wait_time = SYNC_TIME - elapsed;
             if (wait_time < 0) {
@@ -117,7 +116,7 @@ void Clock::run()
                     -wait_time);
 #endif
                 sched_cycle = 0;
-                start = utils::now();
+                start = caio::now();
                 continue;
             }
 
@@ -132,7 +131,7 @@ void Clock::run()
              * this thread probably slept far more than requested.
              * Adjust for this situation.
              */
-            start = utils::now();
+            start = caio::now();
             ssize_t delayed_cycles = cycles((start - end) / (_delay * 1000000.0f));
             ssize_t wait_cycles = cycles(wait_time / 1000000.0f);
             ssize_t extra_cycles = delayed_cycles - wait_cycles;
@@ -186,8 +185,8 @@ std::string Clock::to_string() const
     std::stringstream os{};
 
     os << Name::to_string()
-       << ", freq " << _freq << "Hz"
-       << ", delay " << std::setprecision(3) << _delay;
+       << ", freq: " << _freq << "Hz"
+       << ", delay: " << std::setprecision(3) << _delay;
 
     return os.str();
 }

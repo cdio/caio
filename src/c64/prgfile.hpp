@@ -20,10 +20,9 @@
 
 #include <cstdint>
 #include <iostream>
+#include <span>
 #include <string>
 #include <vector>
-
-#include <gsl/span>
 
 #include "types.hpp"
 
@@ -112,7 +111,7 @@ public:
      * @param data  Data.
      * @exception IOError
      */
-    static void save(const std::string& fname, addr_t addr, const gsl::span<uint8_t>& data);
+    static void save(const std::string& fname, addr_t addr, const std::span<uint8_t>& data);
 
     /**
      * Save a PRG file.
@@ -122,7 +121,7 @@ public:
      * @return os.
      * @exception IOError
      */
-    static std::ostream& save(std::ostream& os, addr_t addr, const gsl::span<uint8_t>& data);
+    static std::ostream& save(std::ostream& os, addr_t addr, const std::span<uint8_t>& data);
 
 private:
     PrgHeader _hdr{};

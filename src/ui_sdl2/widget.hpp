@@ -20,9 +20,9 @@
 
 #include <functional>
 #include <memory>
+#include <span>
 #include <string>
 
-#include <gsl/span>
 #include <SDL.h>
 
 #include "rgb.hpp"
@@ -61,7 +61,7 @@ public:
      * @param data Image data.
      * @exception UIError
      */
-    void load(const gsl::span<const uint8_t>& data);
+    void load(const std::span<const uint8_t>& data);
 
     /**
      * Set the action callback.

@@ -29,19 +29,18 @@
 #include "utils.hpp"
 #include "version.hpp"
 
-
 namespace caio {
 namespace config {
 
 bool is_true(const std::string& value)
 {
-    auto val = utils::tolow(value);
+    auto val = caio::tolow(value);
     return (val == "yes" || val == "ye" || val == "y");
 }
 
 bool is_false(const std::string& value)
 {
-    auto val = utils::tolow(value);
+    auto val = caio::tolow(value);
     return (val == "no" || val == "n");
 }
 
@@ -71,29 +70,30 @@ bool set_bool(Confile& cf, const Option& opt, const std::string& value)
 }
 
 static Option generic_options[] = {
-    { "conf",       SEC_GENERIC,    KEY_CONFIG_FILE,    CONFIG_FILE,        Arg::Required,  set_value           },
-    { "romdir",     SEC_GENERIC,    KEY_ROMDIR,         DEFAULT_ROMDIR,     Arg::Required,  set_value           },
-    { "palettedir", SEC_GENERIC,    KEY_PALETTEDIR,     DEFAULT_PALETTEDIR, Arg::Required,  set_value           },
-    { "keymapsdir", SEC_GENERIC,    KEY_KEYMAPSDIR,     DEFAULT_KEYMAPSDIR, Arg::Required,  set_value           },
-    { "palette",    SEC_GENERIC,    KEY_PALETTE,        DEFAULT_PALETTE,    Arg::Required,  set_value           },
-    { "keymaps",    SEC_GENERIC,    KEY_KEYMAPS,        DEFAULT_KEYMAPS,    Arg::Required,  set_value           },
-    { "cart",       SEC_GENERIC,    KEY_CARTRIDGE,      DEFAULT_CARTRIDGE,  Arg::Required,  set_value           },
-    { "fps",        SEC_GENERIC,    KEY_FPS,            DEFAULT_FPS,        Arg::Required,  set_value           },
-    { "scale",      SEC_GENERIC,    KEY_SCALE,          DEFAULT_SCALE,      Arg::Required,  set_value           },
-    { "scanlines",  SEC_GENERIC,    KEY_SCANLINES,      DEFAULT_SCANLINES,  Arg::Required,  set_value           },
-    { "fullscreen", SEC_GENERIC,    KEY_FULLSCREEN,     DEFAULT_FULLSCREEN, Arg::Optional,  set_bool,   "yes"   },
-    { "sresize",    SEC_GENERIC,    KEY_SRESIZE,        DEFAULT_SRESIZE,    Arg::Optional,  set_bool,   "yes"   },
-    { "audio",      SEC_GENERIC,    KEY_AUDIO,          DEFAULT_AUDIO,      Arg::Optional,  set_bool,   "yes"   },
-    { "delay",      SEC_GENERIC,    KEY_DELAY,          DEFAULT_DELAY,      Arg::Required,  set_value           },
-    { "monitor",    SEC_GENERIC,    KEY_MONITOR,        DEFAULT_MONITOR,    Arg::Optional,  set_bool,   "yes"   },
-    { "logfile",    SEC_GENERIC,    KEY_LOGFILE,        DEFAULT_LOGFILE,    Arg::Required,  set_value           },
-    { "loglevel",   SEC_GENERIC,    KEY_LOGLEVEL,       DEFAULT_LOGLEVEL,   Arg::Required,  set_value           },
-    { "vjoy",       SEC_GENERIC,    KEY_VJOY,           DEFAULT_VJOY,       Arg::Optional,  set_bool,   "yes"   },
-    { "vjoy-up",    SEC_GENERIC,    KEY_VJOY_UP,        DEFAULT_VJOY_UP,    Arg::Required,  set_value           },
-    { "vjoy-down",  SEC_GENERIC,    KEY_VJOY_DOWN,      DEFAULT_VJOY_DOWN,  Arg::Required,  set_value           },
-    { "vjoy-left",  SEC_GENERIC,    KEY_VJOY_LEFT,      DEFAULT_VJOY_LEFT,  Arg::Required,  set_value           },
-    { "vjoy-right", SEC_GENERIC,    KEY_VJOY_RIGHT,     DEFAULT_VJOY_RIGHT, Arg::Required,  set_value           },
-    { "vjoy-fire",  SEC_GENERIC,    KEY_VJOY_FIRE,      DEFAULT_VJOY_FIRE,  Arg::Required,  set_value           }
+    { "conf",          SEC_GENERIC, KEY_CONFIG_FILE, CONFIG_FILE,         Arg::Required, set_value       },
+    { KEY_ROMDIR,      SEC_GENERIC, KEY_ROMDIR,      DEFAULT_ROMDIR,      Arg::Required, set_value       },
+    { KEY_PALETTEDIR,  SEC_GENERIC, KEY_PALETTEDIR,  DEFAULT_PALETTEDIR,  Arg::Required, set_value       },
+    { KEY_KEYMAPSDIR,  SEC_GENERIC, KEY_KEYMAPSDIR,  DEFAULT_KEYMAPSDIR,  Arg::Required, set_value       },
+    { KEY_PALETTE,     SEC_GENERIC, KEY_PALETTE,     DEFAULT_PALETTE,     Arg::Required, set_value       },
+    { KEY_KEYMAPS,     SEC_GENERIC, KEY_KEYMAPS,     DEFAULT_KEYMAPS,     Arg::Required, set_value       },
+    { KEY_CARTRIDGE,   SEC_GENERIC, KEY_CARTRIDGE,   DEFAULT_CARTRIDGE,   Arg::Required, set_value       },
+    { KEY_FPS,         SEC_GENERIC, KEY_FPS,         DEFAULT_FPS,         Arg::Required, set_value       },
+    { KEY_SCALE,       SEC_GENERIC, KEY_SCALE,       DEFAULT_SCALE,       Arg::Required, set_value       },
+    { KEY_SCANLINES,   SEC_GENERIC, KEY_SCANLINES,   DEFAULT_SCANLINES,   Arg::Required, set_value       },
+    { KEY_FULLSCREEN,  SEC_GENERIC, KEY_FULLSCREEN,  DEFAULT_FULLSCREEN,  Arg::Optional, set_bool, "yes" },
+    { KEY_SRESIZE,     SEC_GENERIC, KEY_SRESIZE,     DEFAULT_SRESIZE,     Arg::Optional, set_bool, "yes" },
+    { KEY_AUDIO,       SEC_GENERIC, KEY_AUDIO,       DEFAULT_AUDIO,       Arg::Optional, set_bool, "yes" },
+    { KEY_DELAY,       SEC_GENERIC, KEY_DELAY,       DEFAULT_DELAY,       Arg::Required, set_value       },
+    { KEY_MONITOR,     SEC_GENERIC, KEY_MONITOR,     DEFAULT_MONITOR,     Arg::Optional, set_bool, "yes" },
+    { KEY_LOGFILE,     SEC_GENERIC, KEY_LOGFILE,     DEFAULT_LOGFILE,     Arg::Required, set_value       },
+    { KEY_LOGLEVEL,    SEC_GENERIC, KEY_LOGLEVEL,    DEFAULT_LOGLEVEL,    Arg::Required, set_value       },
+    { KEY_VJOY,        SEC_GENERIC, KEY_VJOY,        DEFAULT_VJOY,        Arg::Optional, set_bool, "yes" },
+    { KEY_VJOY_UP,     SEC_GENERIC, KEY_VJOY_UP,     DEFAULT_VJOY_UP,     Arg::Required, set_value       },
+    { KEY_VJOY_DOWN,   SEC_GENERIC, KEY_VJOY_DOWN,   DEFAULT_VJOY_DOWN,   Arg::Required, set_value       },
+    { KEY_VJOY_LEFT,   SEC_GENERIC, KEY_VJOY_LEFT,   DEFAULT_VJOY_LEFT,   Arg::Required, set_value       },
+    { KEY_VJOY_RIGHT,  SEC_GENERIC, KEY_VJOY_RIGHT,  DEFAULT_VJOY_RIGHT,  Arg::Required, set_value       },
+    { KEY_VJOY_FIRE_A, SEC_GENERIC, KEY_VJOY_FIRE_A, DEFAULT_VJOY_FIRE_A, Arg::Required, set_value       },
+    { KEY_VJOY_FIRE_B, SEC_GENERIC, KEY_VJOY_FIRE_B, DEFAULT_VJOY_FIRE_B, Arg::Required, set_value       }
 };
 
 std::string Cmdline::usage() const
@@ -130,7 +130,8 @@ std::string Cmdline::usage() const
           " --vjoy-down <keyname>   Virtual joystick DOWN key (default is " << DEFAULT_VJOY_DOWN << ")\n"
           " --vjoy-left <keyname>   Virtual joystick LEFT key (default is " << DEFAULT_VJOY_LEFT << ")\n"
           " --vjoy-right <keyname>  Virtual joystick RIGHT key (default is " << DEFAULT_VJOY_RIGHT << ")\n"
-          " --vjoy-fire <keyname>   Virtual joystick FIRE key (default is " << DEFAULT_VJOY_FIRE << ")\n"
+          " --vjoy-fire <keyname>   Virtual joystick FIRE-A key (default is " << DEFAULT_VJOY_FIRE_A << ")\n"
+          " --vjoy-fire-b <keyname> Virtual joystick FIRE-B key (default is " << DEFAULT_VJOY_FIRE_B << ")\n"
           " -v|--version            Show version information and exit\n"
           " -h|--help               Print this message and exit";
 

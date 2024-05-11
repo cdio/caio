@@ -225,17 +225,17 @@ char Readline::getc()
 
 void Readline::write(char ch) const
 {
-    gsl::span<const char>buf{&ch, 1};
+    std::span<const char>buf{&ch, 1};
     write(buf);
 }
 
 void Readline::write(const std::string& msg) const
 {
-    gsl::span buf{msg.c_str(), msg.size()};
+    std::span buf{msg.c_str(), msg.size()};
     write(buf);
 }
 
-void Readline::write(const gsl::span<const char>& data) const
+void Readline::write(const std::span<const char>& data) const
 {
     if (data.size() != 0) {
         size_t wr = ::write(_ofd, data.data(), data.size());

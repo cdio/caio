@@ -26,30 +26,51 @@
 #include <iomanip>
 #include <limits>
 #include <ostream>
+#include <span>
 #include <sstream>
 #include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
-#include <gsl/span>
-
 #include "types.hpp"
 #include "endian.hpp"
 
-
 namespace caio {
-namespace utils {
 
-/*
- * Stack overflow tricks.
+/**
+ * Convert an integer value to floating point.
+ * @param value Value to convert;
+ * @return The floating point value.
  */
-template <typename Container>
-struct is_container : std::false_type{};
+template <typename T, typename = std::enable_if<std::is_integral<T>::value>>
+fp_t to_fp(T value)
+{
+    return static_cast<fp_t>(value) / static_cast<fp_t>(std::numeric_limits<T>::max());
+}
 
-template <typename... Ts> struct is_container<std::vector<Ts...>> : std::true_type{};
-template <typename... Ts> struct is_container<std::array<Ts...>> : std::true_type{};
-template <typename... Ts> struct is_container<gsl::span<Ts...>> : std::true_type{};
+/**
+ * Convert a floating point value to integer type.
+ * @param value Floating point value to convert ([0.0, 1.0] if T is unsigned or [-1.0, 1.0] if T is signed).
+ * @return The integer value.
+ */
+template <typename T, typename = std::enable_if<std::is_integral<T>::value>>
+T to_integer(fp_t value)
+{
+    return static_cast<T>(value * std::numeric_limits<T>::max());
+}
+
+/**
+ * Convert a floating point value to signed 16 bits.
+ * @param value Value to convert (between 0 and 1).
+ * @return The 16 bits unsigned value.
+ * @see to_integer()
+ */
+__attribute__((always_inline))
+static inline int16_t to_i16(fp_t value)
+{
+    return to_integer<int16_t>(value);
+}
 
 /**
  * Align a value to its type size.
@@ -125,7 +146,7 @@ bool is_power_of_two(T n)
  * @param buf Byte buffer to convert.
  * @return The string.
  */
-std::string to_string(const gsl::span<const uint8_t>& buf);
+std::string to_string(const std::span<const uint8_t>& buf);
 
 /**
  * Convert an integer value to uppercase hexadecimal string.
@@ -369,12 +390,12 @@ void convert_01_10_to_11(C& bytes)
  * @param random  If true, contaminate the destination buffer with some random values.
  */
 template<typename T>
-void fill(gsl::span<uint8_t>& dst, T pattern, bool random)
+void fill(std::span<uint8_t>& dst, T pattern, bool random = false)
 {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
     std::reverse(reinterpret_cast<uint8_t*>(&pattern), reinterpret_cast<uint8_t*>(&pattern) + sizeof(pattern));
 #endif
-    gsl::span<uint8_t> pt{reinterpret_cast<uint8_t*>(&pattern), sizeof(T)};
+    std::span<uint8_t> pt{reinterpret_cast<uint8_t*>(&pattern), sizeof(T)};
     for (size_t pos = 0; pos < dst.size(); ++pos) {
         dst[pos] = ((random && ((std::rand() % 100) < 2)) ? (std::rand() % 256) : pt[pos % pt.size()]);
     }
@@ -403,7 +424,6 @@ uint64_t sleep(uint64_t delay);
  * @param buf Data buffer.
  * @return The hash value as a string.
  */
-std::string sha256(const gsl::span<const uint8_t>& buf);
+std::string sha256(const std::span<const uint8_t>& buf);
 
-}
 }

@@ -85,7 +85,7 @@ public:
         None,               /* Instruction without arguments                        */
         GW,                 /* Instruction gateway (changes lookup table)           */
         A8,                 /* Instruction with an 8 bits argument                  */
-        A16,                /* Instruction with a 16 bits arguemnt                  */
+        A16,                /* Instruction with a 16 bits argument                  */
         A8_Inv              /* IX/IY Bit instruction (inverted opcode-argument)     */
     };
 
@@ -321,8 +321,8 @@ public:
      * This CPU must be properly initialised (system mappings set) before this method can be called.
      * The CPU monitor is initialised and a breakpoint is added at the reset address (vRESET),
      * the monitor takes control as soon as this CPU is started.
-     * @param is   Input stream used to communicate with the user;
-     * @param os   Output stream used to communicate with the user;
+     * @param ifd  Input file descriptor used to communicate with the user;
+     * @param ofd  Output file descriptor used to communicate with the user;
      * @param load Monitor load callback (empty to use the default);
      * @param save Monitor save calblack (empty to use the  default).
      * @see init()

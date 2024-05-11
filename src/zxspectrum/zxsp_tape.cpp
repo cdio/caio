@@ -62,7 +62,7 @@ void PulseBuffer::push_sync()
     push_back({0, _start});
 }
 
-void PulseBuffer::push_data(const gsl::span<const uint8_t>& buf)
+void PulseBuffer::push_data(const std::span<const uint8_t>& buf)
 {
     for (auto byte : buf) {
         for (uint8_t bit = 128; bit; bit >>= 1) {

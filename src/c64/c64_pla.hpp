@@ -50,7 +50,7 @@ public:
     constexpr static const size_t BANKS     = 32;
     constexpr static const size_t BLOCKS    = 16;
 
-    using bank_t = std::array<devmap_t, BLOCKS>;
+    using bank_t = ASpace::bank_t<BLOCKS>;
     using extmap_cb_t = std::function<std::pair<devmap_t, devmap_t>(addr_t, bool, bool)>;
 
     /**

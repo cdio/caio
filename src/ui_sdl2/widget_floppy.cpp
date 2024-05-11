@@ -20,7 +20,6 @@
 
 #include "utils.hpp"
 
-
 namespace caio {
 namespace ui {
 namespace sdl2 {
@@ -46,13 +45,13 @@ void Floppy::render(const SDL_Rect& dstrect)
 
     if (!st.is_idle) {
         if (_prev_idle != st.is_idle) {
-            _start = utils::now();
+            _start = caio::now();
         }
 
-        _elapsed = utils::now() - _start;
+        _elapsed = caio::now() - _start;
         rect = (_elapsed < 500000 ? SDL_Rect{0, 0, 128, 128} : SDL_Rect{128, 0, 128, 128});
         if (_elapsed >= 1000000) {
-            _start = utils::now();
+            _start = caio::now();
         }
     }
 

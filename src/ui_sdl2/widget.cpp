@@ -56,7 +56,7 @@ void Widget::load(const std::string& fname)
     }
 }
 
-void Widget::load(const gsl::span<const uint8_t>& data)
+void Widget::load(const std::span<const uint8_t>& data)
 {
     if (_texture != nullptr) {
         SDL_DestroyTexture(_texture);

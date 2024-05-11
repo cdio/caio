@@ -18,11 +18,10 @@
  */
 #pragma once
 
+#include <span>
 #include <string>
 #include <tuple>
 #include <vector>
-
-#include <gsl/span>
 
 #include "types.hpp"
 #include "zilog_z80.hpp"
@@ -73,7 +72,7 @@ public:
      * Get the uncompressed RAM.
      * @return The uncompressed RAM data.
      */
-    gsl::span<const uint8_t> ram() const {
+    std::span<const uint8_t> ram() const {
         return _data;
     }
 

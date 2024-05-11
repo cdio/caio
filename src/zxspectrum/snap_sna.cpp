@@ -24,7 +24,6 @@
 
 #include "zxsp_params.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {
@@ -42,7 +41,7 @@ SnapSNA::~SnapSNA()
 bool SnapSNA::seems_like(const std::string& fname)
 {
     auto fullpath = fs::fix_home(fname);
-    auto lowcase = utils::tolow(fname);
+    auto lowcase = caio::tolow(fname);
     return (fs::file_size(fullpath) == FILE_SIZE && lowcase.ends_with(FILE_EXTENSION));
 }
 

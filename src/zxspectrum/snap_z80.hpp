@@ -279,7 +279,7 @@ private:
     void load_v2(const buffer_t& raw);
     void uncompress_v1(const buffer_t& raw);
     void uncompress_v2(const buffer_t& raw, size_t rawoff);
-    buffer_t uncompress(const gsl::span<const uint8_t>& enc, bool v1);
+    buffer_t uncompress(const std::span<const uint8_t>& enc, bool v1);
 
     void throw_ioerror(const std::string& reason = {}) const;
 

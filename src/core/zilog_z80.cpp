@@ -18,6 +18,7 @@
  */
 #include "zilog_z80.hpp"
 
+#include <gsl/assert>
 
 namespace caio {
 namespace zilog {
@@ -318,29 +319,29 @@ std::string Z80::Registers::to_string() const
 {
     std::ostringstream ss{};
 
-    ss << "  A ="    << utils::to_string(A)
-       << " B ="     << utils::to_string(B)
-       << " C ="     << utils::to_string(C)
-       << " D ="     << utils::to_string(D)
-       << " E ="     << utils::to_string(E)
-       << " H ="     << utils::to_string(H)
-       << " L ="     << utils::to_string(L)
-       << " F ="     << utils::to_string(F)  << " " << to_string(static_cast<Flags>(F)) << "\n"
-       << "  A'="    << utils::to_string(aA)
-       << " B'="     << utils::to_string(aB)
-       << " C'="     << utils::to_string(aC)
-       << " D'="     << utils::to_string(aD)
-       << " E'="     << utils::to_string(aE)
-       << " H'="     << utils::to_string(aH)
-       << " L'="     << utils::to_string(aL)
-       << " F'="     << utils::to_string(aF) << " " << to_string(static_cast<Flags>(aF)) << "\n"
-       << "  I ="    << utils::to_string(I)
-       << " R ="     << utils::to_string(R)
-       << " IX="     << utils::to_string(IX)
-       << " IY="     << utils::to_string(IY)
-       << " SP="     << utils::to_string(SP)
-       << " PC="     << utils::to_string(PC)
-       << " MEMPTR=" << utils::to_string(memptr);
+    ss << "  A ="    << caio::to_string(A)
+       << " B ="     << caio::to_string(B)
+       << " C ="     << caio::to_string(C)
+       << " D ="     << caio::to_string(D)
+       << " E ="     << caio::to_string(E)
+       << " H ="     << caio::to_string(H)
+       << " L ="     << caio::to_string(L)
+       << " F ="     << caio::to_string(F)  << " " << to_string(static_cast<Flags>(F)) << "\n"
+       << "  A'="    << caio::to_string(aA)
+       << " B'="     << caio::to_string(aB)
+       << " C'="     << caio::to_string(aC)
+       << " D'="     << caio::to_string(aD)
+       << " E'="     << caio::to_string(aE)
+       << " H'="     << caio::to_string(aH)
+       << " L'="     << caio::to_string(aL)
+       << " F'="     << caio::to_string(aF) << " " << to_string(static_cast<Flags>(aF)) << "\n"
+       << "  I ="    << caio::to_string(I)
+       << " R ="     << caio::to_string(R)
+       << " IX="     << caio::to_string(IX)
+       << " IY="     << caio::to_string(IY)
+       << " SP="     << caio::to_string(SP)
+       << " PC="     << caio::to_string(PC)
+       << " MEMPTR=" << caio::to_string(memptr);
 
     return ss.str();
 }
@@ -1140,7 +1141,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
      * Print address.
      */
     std::ostringstream hex{};
-    hex << utils::to_string(addr) << ":";
+    hex << caio::to_string(addr) << ":";
 
     /*
      * Print opcode.
@@ -1148,7 +1149,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
     bool multibyte{true};
     do {
         opcode = peek(addr++);
-        hex << " " << utils::to_string(opcode);
+        hex << " " << caio::to_string(opcode);
 
         ins = &iset[opcode];
         if (ins->type == ArgType::GW) {
@@ -1160,7 +1161,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
                     iset = ix_bit_instr_set;
                     oplo = peek(addr++);
                     has_oplo = true;
-                    hex << " " << utils::to_string(oplo);
+                    hex << " " << caio::to_string(oplo);
                 }
                 break;
             case I_IX:
@@ -1215,7 +1216,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
 
         if (!has_oplo) {
             oplo = peek(addr++);
-            hex << " " << utils::to_string(oplo);
+            hex << " " << caio::to_string(oplo);
         }
 
         switch (v) {
@@ -1227,15 +1228,15 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
              */
             switch (ins->type) {
             case ArgType::A8:
-                ops << utils::to_string(oplo);
+                ops << caio::to_string(oplo);
                 format = format.replace(pos, 1, ops.str());
                 break;
 
             case ArgType::A16:
                 ophi = peek(addr++);
                 operand = (static_cast<addr_t>(ophi) << 8) | oplo;
-                hex << " " << utils::to_string(ophi);
-                ops << utils::to_string(operand);
+                hex << " " << caio::to_string(ophi);
+                ops << caio::to_string(operand);
                 format = format.replace(pos, 1, ops.str());
                 break;
 
@@ -1263,11 +1264,11 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
             switch (ins->type) {
             case ArgType::A8:
             case ArgType::A8_Inv:
-                displ << sign << "$" << utils::to_string(oplo);
+                displ << sign << "$" << caio::to_string(oplo);
                 format.replace(pos, 1, displ.str());
                 break;
             case ArgType::A16:
-                displ << sign << "$" << utils::to_string(oplo);
+                displ << sign << "$" << caio::to_string(oplo);
                 format.replace(pos, 1, displ.str());
                 pos = format.find_first_of("*");
                 if (pos == std::string::npos) {
@@ -1277,7 +1278,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
                     /* NOTREACHED */
                 }
                 ophi = peek(addr++);
-                ops << utils::to_string(ophi);
+                ops << caio::to_string(ophi);
                 format = format.replace(pos, 1, ops.str());
                 break;
             default:
@@ -1293,7 +1294,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
              * The argument is an 8 bits relative address: The disassembled string must show the absolute address.
              */
             operand = static_cast<int8_t>(oplo) + addr;
-            ops << utils::to_string(operand);
+            ops << caio::to_string(operand);
             format = format.replace(pos, 1, ops.str());
             break;
         }

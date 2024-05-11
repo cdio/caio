@@ -23,11 +23,12 @@ namespace caio {
 namespace kempston {
 
 JoystickPort joystick_port{
-    .up    = JOY_PORT_UP,
-    .down  = JOY_PORT_DOWN,
-    .left  = JOY_PORT_LEFT,
-    .right = JOY_PORT_RIGHT,
-    .fire  = JOY_PORT_FIRE
+    .up     = JOY_PORT_UP,
+    .down   = JOY_PORT_DOWN,
+    .left   = JOY_PORT_LEFT,
+    .right  = JOY_PORT_RIGHT,
+    .fire   = JOY_PORT_FIRE,
+    .fire_b = JOY_PORT_FIRE
 };
 
 }

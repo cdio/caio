@@ -223,7 +223,7 @@ buffer_t load(std::istream& is, size_t maxsiz)
     return buf;
 }
 
-void save(const std::string& fname, const gsl::span<const uint8_t>& buf, std::ios_base::openmode mode)
+void save(const std::string& fname, const std::span<const uint8_t>& buf, std::ios_base::openmode mode)
 {
     std::ofstream os{fname, mode};
     if (!os) {
@@ -233,7 +233,7 @@ void save(const std::string& fname, const gsl::span<const uint8_t>& buf, std::io
     save(os, buf);
 }
 
-std::ostream& save(std::ostream& os, const gsl::span<const uint8_t>& buf)
+std::ostream& save(std::ostream& os, const std::span<const uint8_t>& buf)
 {
     if (!os.write(reinterpret_cast<const char*>(buf.data()), buf.size())) {
         throw IOError{"Can't write: " + Error::to_string()};

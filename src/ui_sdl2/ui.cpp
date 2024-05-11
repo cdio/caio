@@ -39,7 +39,6 @@
 #include "ui_sdl2/widget_reset.hpp"
 #include "ui_sdl2/widget_volume.hpp"
 
-
 namespace caio {
 namespace ui {
 namespace sdl2 {
@@ -460,7 +459,7 @@ void UI::event_loop()
     int64_t delay{};
 
     while (!_stop) {
-        start = utils::now() - start;
+        start = caio::now() - start;
 
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -509,7 +508,7 @@ void UI::event_loop()
             _panel->event(event);
         }
 
-        if (_mouse_visible && (utils::now() - _mouse_active_time) > MOUSE_INACTIVE_TIME) {
+        if (_mouse_visible && (caio::now() - _mouse_active_time) > MOUSE_INACTIVE_TIME) {
             SDL_ShowCursor(SDL_DISABLE);
             _mouse_visible = false;
         }
@@ -521,8 +520,8 @@ void UI::event_loop()
             signal_key = keyboard::KEY_NONE;
         }
 
-        delay = _fps_time - utils::now() + start;
-        start = (delay > 0 ? utils::sleep(delay) - delay : 0);
+        delay = _fps_time - caio::now() + start;
+        start = (delay > 0 ? caio::sleep(delay) - delay : 0);
     }
 }
 
@@ -670,7 +669,8 @@ void UI::joy_event(const SDL_Event& event)
         jid = event.jbutton.which;
         ejoy = find_joystick(jid);
         if (ejoy) {
-            auto pos = ejoy->position() | ejoy->port().fire;
+            auto fire = ((event.jbutton.button & 1) ? ejoy->port().fire_b : ejoy->port().fire);
+            auto pos = ejoy->position() | fire;
             ejoy->position(pos);
         }
         break;
@@ -679,7 +679,8 @@ void UI::joy_event(const SDL_Event& event)
         jid = event.jbutton.which;
         ejoy = find_joystick(jid);
         if (ejoy) {
-            auto pos = ejoy->position() & ~ejoy->port().fire;
+            auto fire = ((event.jbutton.button & 1) ? ejoy->port().fire_b : ejoy->port().fire);
+            auto pos = ejoy->position() & ~fire;
             ejoy->position(pos);
         }
         break;
@@ -789,7 +790,7 @@ void UI::joy_event(const SDL_Event& event)
             }
 #endif
             const auto& jport = ejoy->port();
-            uint8_t pos = ejoy->position() & jport.fire;
+            uint8_t pos = ejoy->position() & (jport.fire | jport.fire_b);
 
             pos |= (ix < -12452 ? jport.left :
                    (ix >  12452 ? jport.right : 0));
@@ -839,7 +840,7 @@ void UI::mouse_event(const SDL_Event& event)
      */
     if (!_mouse_visible) {
         SDL_ShowCursor(SDL_ENABLE);
-        _mouse_active_time = utils::now();
+        _mouse_active_time = caio::now();
         _mouse_visible = true;
     }
 }

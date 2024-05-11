@@ -24,7 +24,6 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
-
 namespace caio {
 
 /*
@@ -556,7 +555,7 @@ std::ostream& Mos6569::dump(std::ostream& os, addr_t base) const
         peek(REG_MIB_7_COLOR)
     };
 
-    return utils::dump(os, regs, base);
+    return caio::dump(os, regs, base);
 }
 
 size_t Mos6569::tick(const Clock& clk)
@@ -1270,7 +1269,7 @@ inline void Mos6569::update_collision_data_mcm(unsigned start, uint8_t bitmap)
      * In multicolor mode 00 and 01 codes are considered background colours (not foreground);
      * the following converts 01 to 00 and 10 to 11 so the proper collision mask is generated.
      */
-    update_collision_data(start, utils::convert_01_10(bitmap));
+    update_collision_data(start, caio::convert_01_10(bitmap));
 }
 
 std::tuple<bool, uint64_t, uint64_t>
@@ -1286,13 +1285,13 @@ Mos6569::mib_bitmap(unsigned start, uint8_t byte1, uint8_t byte2, uint8_t byte3,
         uint16_t w1, w2, w3;
 
         if (mcm) {
-            w1 = utils::expand_dibits(byte1);
-            w2 = utils::expand_dibits(byte2);
-            w3 = utils::expand_dibits(byte3);
+            w1 = caio::expand_dibits(byte1);
+            w2 = caio::expand_dibits(byte2);
+            w3 = caio::expand_dibits(byte3);
         } else {
-            w1 = utils::expand_bits(byte1);
-            w2 = utils::expand_bits(byte2);
-            w3 = utils::expand_bits(byte3);
+            w1 = caio::expand_bits(byte1);
+            w2 = caio::expand_bits(byte2);
+            w3 = caio::expand_bits(byte3);
         }
 
         bitmap = (static_cast<uint64_t>(w1) << 48) |
@@ -1323,8 +1322,8 @@ uint8_t Mos6569::update_collision_mib(uint8_t mib, unsigned start, bool mcm, uin
          * Multicolor sprites use 00 as transparent color (no content),
          * the following converts 01 and 10 to 11 so the proper collision data mask is generated.
          */
-        gsl::span data{reinterpret_cast<uint8_t*>(&bitmap), sizeof(bitmap)};
-        utils::convert_01_10_to_11(data);
+        std::span data{reinterpret_cast<uint8_t*>(&bitmap), sizeof(bitmap)};
+        caio::convert_01_10_to_11(data);
     }
 
     _mib_bitmaps[mib] = bitmap;

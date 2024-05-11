@@ -43,7 +43,7 @@ public:
     constexpr static const size_t BLOCKS    = 4;
     constexpr static const addr_t ADDR_MASK = 0x3FFF;
 
-    using bank_t = std::array<devmap_t, BLOCKS>;
+    using bank_t = ASpace::bank_t<BLOCKS>;
 
     /**
      * Initialise this VIC2 Address Space.

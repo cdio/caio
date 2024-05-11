@@ -22,7 +22,6 @@
 
 #include "utils.hpp"
 
-
 namespace caio {
 namespace config {
 
@@ -66,7 +65,7 @@ void Confile::load(const std::string& fname)
             /*
              * Section detected.
              */
-            std::string sname{utils::tolow(result[1])};
+            std::string sname{caio::tolow(result[1])};
             cursect = &_sections[sname];
             continue;
         }
@@ -92,7 +91,7 @@ void Confile::load(const std::string& fname)
             throw ConfigError{ss.str()};
         }
 
-        const std::string& key = utils::tolow(result[1]);
+        const std::string& key = caio::tolow(result[1]);
         const std::string& value = result[2];
 
         (*cursect)[key] = value;
@@ -101,18 +100,18 @@ void Confile::load(const std::string& fname)
 
 Section& Confile::operator[](const std::string& sname)
 {
-    return _sections[utils::tolow(sname)];
+    return _sections[caio::tolow(sname)];
 }
 
 Section Confile::extract(const std::string& sname)
 {
-    auto nh = _sections.extract(utils::tolow(sname));
+    auto nh = _sections.extract(caio::tolow(sname));
     return (nh ? std::move(nh.mapped()) : Section{});
 }
 
 std::map<std::string, Section>::const_iterator Confile::find(const std::string& sname) const
 {
-    return _sections.find(utils::tolow(sname));
+    return _sections.find(caio::tolow(sname));
 }
 
 std::map<std::string, Section>::const_iterator Confile::end() const

@@ -23,7 +23,6 @@
 
 #include "zxsp_params.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {
@@ -41,7 +40,7 @@ SnapZ80::~SnapZ80()
 bool SnapZ80::seems_like(const std::string& fname)
 {
     auto fullpath = fs::fix_home(fname);
-    auto lowcase = utils::tolow(fname);
+    auto lowcase = caio::tolow(fname);
     return (fs::exists(fullpath) && lowcase.ends_with(FILE_EXTENSION));
 }
 
@@ -115,7 +114,7 @@ void SnapZ80::load_v2(const buffer_t& raw)
      * Only plain 48K is supported (no extra hardware).
      */
     if (hdr->hw_mode != SnapZ80HeaderV23::HW_MODE_48K) {
-        throw_ioerror("Hardware mode not supported: $" + utils::to_string(hdr->hw_mode));
+        throw_ioerror("Hardware mode not supported: $" + caio::to_string(hdr->hw_mode));
     }
 
     if (hdr->I_rom_paged != 0x00) {
@@ -139,7 +138,7 @@ void SnapZ80::load_v2(const buffer_t& raw)
     uncompress_v2(raw, sizeof(SnapZ80Header) + ext_size);
 }
 
-SnapZ80::buffer_t SnapZ80::uncompress(const gsl::span<const uint8_t>& enc, bool endmark)
+SnapZ80::buffer_t SnapZ80::uncompress(const std::span<const uint8_t>& enc, bool endmark)
 {
     buffer_t dst{};
     size_t i = 0;
@@ -187,7 +186,7 @@ void SnapZ80::uncompress_v1(const buffer_t& raw)
 
     size_t offset = sizeof(SnapZ80Header);
     size_t size = raw.size() - offset;
-    const gsl::span<const uint8_t> enc = { raw.data() + offset, size };
+    const std::span<const uint8_t> enc = { raw.data() + offset, size };
 
     bool compressed = (hdr->flags & SnapZ80Header::FLAGS_DATA_COMPRESSED);
 
@@ -228,7 +227,7 @@ void SnapZ80::uncompress_v2(const buffer_t& raw, size_t rawoff)
             break;
 
         default:
-            throw_ioerror("Block page not supported: $" + utils::to_string(block->page));
+            throw_ioerror("Block page not supported: $" + caio::to_string(block->page));
         }
 
         rawoff += sizeof(*block);
@@ -241,7 +240,7 @@ void SnapZ80::uncompress_v2(const buffer_t& raw, size_t rawoff)
         auto it = _data.begin() + dstoff;
 
         if (compressed) {
-            gsl::span<const uint8_t> enc{block->data, enc_size};
+            std::span<const uint8_t> enc{block->data, enc_size};
             auto dec = uncompress(enc, false);
 
             if (dec.size() > SnapZ80Block::UNCOMPRESSED_BLOCK_SIZE) {

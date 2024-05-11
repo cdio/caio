@@ -32,7 +32,6 @@
 #include "readline.hpp"
 #include "types.hpp"
 
-
 namespace caio {
 namespace monitor {
 
@@ -305,7 +304,7 @@ private:
      * @param str The string to convert.
      * @return The converted unsigned integner.
      * @exception InvalidNumber
-     * @see utils::to_number()
+     * @see caio::to_number()
      */
     //FIXME: move to utils
     size_t to_count(const std::string& str);

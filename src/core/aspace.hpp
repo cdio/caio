@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include <gsl/span>
+#include <array>
+#include <span>
 
 #include "device.hpp"
 #include "types.hpp"
@@ -30,12 +31,12 @@ namespace caio {
  * Address Space.
  * Address space is the interface used to access the memory mappings of a system,
  * that is, anything that involves the address bus and/or the data bus should
- * be handled by an object dervied from this class.
- * </br>
+ * be handled by an object derived from this class.
+ * <br>
  * The entire range of addresses (2^(8*sizeof(addr_t))) must be divided into a
  * number of fixed size banks, each bank contains a range of addresses that must
  * be associated to (handled by) a single device.
- * </br>
+ * <br>
  * There are two sets of address space mappings, one for reading and another for writing.
  * @see addr_t
  * @see ASpace::devmap_t
@@ -70,7 +71,13 @@ public:
      * @see addr_t
      * @see devmap_t
      */
-    using addrmap_t = gsl::span<devmap_t>;
+    using addrmap_t = std::span<devmap_t>;
+
+    /**
+     * Array of memory banks.
+     */
+    template <size_t BLOCKS>
+    using bank_t = std::array<devmap_t, BLOCKS>;
 
     /**
      * @see Device::read()

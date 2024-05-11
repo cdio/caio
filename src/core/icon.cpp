@@ -2797,7 +2797,7 @@ const Image& icon()
     static const Image caio_icon32 = {
         .width  = ICON_WIDTH,
         .height = ICON_HEIGHT,
-        .data   = gsl::span{icon_data, std::size(icon_data)}
+        .data   = std::span{icon_data, std::size(icon_data)}
     };
 
     return caio_icon32;

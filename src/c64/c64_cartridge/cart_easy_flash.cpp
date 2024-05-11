@@ -33,7 +33,6 @@
 #define DEBUG(args...)
 #endif
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {
@@ -128,7 +127,7 @@ void CartEasyFlash::add_rom(size_t entry, const Crt::Chip& chip, const devptr_t&
         break;
 
     default:
-        throw_invalid_cartridge("Invalid load address $" + utils::to_string(chip.addr), entry);
+        throw_invalid_cartridge("Invalid load address $" + caio::to_string(chip.addr), entry);
     }
 
     DEBUG("%s(\"%s\"): Chip %d: ROM device: %s\n", type().c_str(), name().c_str(), entry, Crt::to_string(chip).c_str());

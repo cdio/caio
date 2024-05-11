@@ -175,7 +175,7 @@ public:
     /**
      * Execute a clock tick cycle.
      * Tick all the registered clockables and return.
-     * @return Clockable::HALT if at least one of the clockables returned clockable::HALT.
+     * @return Clockable::HALT if at least one of the clockables returned Clockable::HALT.
      */
     size_t tick();
 
@@ -246,7 +246,7 @@ public:
     std::string to_string() const override;
 
     /**
-     * Get the number of clock cycles correspoinding to a given time interval.
+     * Get the number of clock cycles corresponding to a given time interval.
      * @param secs Time interval (seconds).
      * @return The clock cycles corresponding to the specified time interval.
      */

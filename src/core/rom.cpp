@@ -25,7 +25,6 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
-
 namespace caio {
 
 ROM::ROM(const std::string& fname, const std::string& digest, const std::string& label)
@@ -66,7 +65,7 @@ void ROM::write(addr_t addr, uint8_t data)
 
 std::string ROM::signature() const
 {
-    return utils::sha256(_data);
+    return caio::sha256(_data);
 }
 
 }

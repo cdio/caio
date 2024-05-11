@@ -23,11 +23,10 @@
 #include <functional>
 #include <initializer_list>
 #include <iostream>
+#include <span>
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <gsl/span>
 
 #include "types.hpp"
 
@@ -186,8 +185,8 @@ dir_t directory(const std::string& path, const std::string& pattern, bool icase,
  * @return A buffer with the contents of the file.
  * @exception IOError
  * @see load(std::istream&)
- * @see save(const std::string&, const gsl::span<const uint8_t>&, std::ios_base::openmode)
- * @see save(std::ostream&, const gsl::span<const uint8_t>&)
+ * @see save(const std::string&, const std::span<const uint8_t>&, std::ios_base::openmode)
+ * @see save(std::ostream&, const std::span<const uint8_t>&)
  * @see LOAD_MAXSIZ
  * @see buffer_t
  */
@@ -200,8 +199,8 @@ buffer_t load(const std::string& fname, size_t maxsiz = 0);
  * @return A buffer with the data read from the input stream.
  * @exception IOError
  * @see load(const std::string&)
- * @see save(const std::string&, const gsl::span<const uint8_t>&, std::ios_base::openmode)
- * @see save(std::ostream&, const gsl::span<const uint8_t>&)
+ * @see save(const std::string&, const std::span<const uint8_t>&, std::ios_base::openmode)
+ * @see save(std::ostream&, const std::span<const uint8_t>&)
  */
 buffer_t load(std::istream& is, size_t maxsiz = 0);
 
@@ -213,9 +212,9 @@ buffer_t load(std::istream& is, size_t maxsiz = 0);
  * @exception IOError
  * @see load(const std::string&)
  * @see load(std::istream&)
- * @see save(std::ostream&, const gsl::span<const uint8_t>&)
+ * @see save(std::ostream&, const std::span<const uint8_t>&)
  */
-void save(const std::string& fname, const gsl::span<const uint8_t>& buf,
+void save(const std::string& fname, const std::span<const uint8_t>& buf,
     std::ios_base::openmode mode = std::ios_base::out | std::ios_base::trunc);
 
 /**
@@ -224,9 +223,9 @@ void save(const std::string& fname, const gsl::span<const uint8_t>& buf,
  * @param buf Buffer.
  * @see load(const std::string&)
  * @see load(std::istream&)
- * @see save(const std::string&, const gsl::span<const uint8_t>&, std::ios_base::openmode)
+ * @see save(const std::string&, const std::span<const uint8_t>&, std::ios_base::openmode)
  */
-std::ostream& save(std::ostream& os, const gsl::span<const uint8_t>& buf);
+std::ostream& save(std::ostream& os, const std::span<const uint8_t>& buf);
 
 }
 }

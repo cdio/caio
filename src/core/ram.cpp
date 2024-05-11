@@ -22,8 +22,6 @@
 
 #include "types.hpp"
 #include "fs.hpp"
-#include "utils.hpp"
-
 
 namespace caio {
 
@@ -45,8 +43,8 @@ RAM::RAM(std::istream& is, size_t count)
 {
 }
 
-RAM::RAM(RAM&& other, const std::string& label)
-    : Device{TYPE, (label.empty() ? std::move(other.label()) : label)},
+RAM::RAM(RAM&& other)
+    : Device{TYPE, std::move(other.label())},
       _data{std::move(other._data)}
 {
 }
@@ -71,7 +69,7 @@ void RAM::write(addr_t addr, uint8_t data)
 
 std::ostream& RAM::dump(std::ostream& os, addr_t base) const
 {
-    return utils::dump(os, _data, base);
+    return caio::dump(os, _data, base);
 }
 
 }

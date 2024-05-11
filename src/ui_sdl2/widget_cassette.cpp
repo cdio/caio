@@ -20,7 +20,6 @@
 
 #include "utils.hpp"
 
-
 namespace caio {
 namespace ui {
 namespace sdl2 {
@@ -46,7 +45,7 @@ void Cassette::render(const SDL_Rect& dstrect)
 
     if (st.is_enabled && !st.is_idle) {
 
-        auto now = utils::now();
+        auto now = caio::now();
         auto elapsed = now - _start;
 
         if (elapsed >= 50'000) {

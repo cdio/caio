@@ -27,7 +27,6 @@
 
 #include "utils.hpp"
 
-
 namespace caio {
 
 std::string stacktrace()

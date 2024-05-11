@@ -23,7 +23,6 @@
 #include "rom.hpp"
 #include "utils.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {
@@ -75,7 +74,7 @@ void Crt::open(std::istream& is)
             }
 
             case CHIP_TYPE_RAM: {
-                auto ram = std::make_shared<RAM>(+ch.rsiz);
+                auto ram = std::make_shared<RAM>(+ch.rsiz, "");
                 ram->label(name() + ", chip " + std::to_string(i + 1));
                 _roms.push_back(ram);
                 _chips.push_back(ch);
@@ -83,7 +82,7 @@ void Crt::open(std::istream& is)
             }
 
             default:
-                throw Error{"Invalid CHIP type: $" + utils::to_string(ch.type)};
+                throw Error{"Invalid CHIP type: $" + caio::to_string(ch.type)};
             }
         }
 
@@ -182,7 +181,7 @@ std::string Crt::to_string(const Crt::Header& hdr)
 
     ss << "name "      << std::quoted(name)
        << ", size "    << hdr.size
-       << ", hwtype $" << utils::to_string(hdr.hwtype)
+       << ", hwtype $" << caio::to_string(hdr.hwtype)
        << ", exrom "   << +hdr.exrom
        << ", game "    << +hdr.game;
 
@@ -194,9 +193,9 @@ std::string Crt::to_string(const Crt::Chip& ch)
     std::ostringstream ss{};
 
     ss << "size "    << ch.size
-       << ", type $" << utils::to_string(ch.type)
-       << ", bank $" << utils::to_string(ch.bank)
-       << ", addr $" << utils::to_string(ch.addr)
+       << ", type $" << caio::to_string(ch.type)
+       << ", bank $" << caio::to_string(ch.bank)
+       << ", addr $" << caio::to_string(ch.addr)
        << ", rsiz "  << ch.rsiz;
 
     return ss.str();

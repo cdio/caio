@@ -24,10 +24,9 @@
 
 #include "monitor.hpp"
 
-
 namespace caio {
 
-const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
+const Mos6502::Instruction Mos6502::instr_set[256] = {
     { "BRK",            Mos6502::i_BRK,         MODE_NONE,  7,  1   },  /* 00 */
     { "ORA ($*, X)",    Mos6502::i_ORA,         MODE_IND_X, 6,  2   },  /* 01 */
     { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* 02 */
@@ -299,7 +298,7 @@ const std::array<Mos6502::Instruction, 256> Mos6502::instr_set{{
     { "SBC $^, X",      Mos6502::i_SBC,         MODE_ABS_X, 4,  3   },  /* FD */
     { "INC $^, X",      Mos6502::i_INC,         MODE_ABS_X, 7,  3   },  /* FE */
     { "ISC $^, X",      Mos6502::i_ISC,         MODE_ABS_X, 7,  3   }   /* FF */
-}};
+};
 
 std::string Mos6502::Registers::to_string(Mos6502::Flags fl)
 {
@@ -321,12 +320,12 @@ std::string Mos6502::Registers::to_string() const
 {
     std::ostringstream ss;
 
-    ss << "A=" << utils::to_string(A)
-       << "  X=" << utils::to_string(X)
-       << "  Y=" << utils::to_string(Y)
-       << "  P=" << utils::to_string(P) << " " << to_string(static_cast<Flags>(P))
-       << "  S=" << utils::to_string(S)
-       << "  PC=" << utils::to_string(PC);
+    ss << "A=" << caio::to_string(A)
+       << "  X=" << caio::to_string(X)
+       << "  Y=" << caio::to_string(Y)
+       << "  P=" << caio::to_string(P) << " " << to_string(static_cast<Flags>(P))
+       << "  S=" << caio::to_string(S)
+       << "  PC=" << caio::to_string(PC);
 
     return ss.str();
 }
@@ -508,7 +507,7 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
      * Print address and opcode.
      */
     std::ostringstream hex{};
-    hex << utils::to_string(addr) << ": " << utils::to_string(opcode);
+    hex << caio::to_string(addr) << ": " << caio::to_string(opcode);
     ++addr;
 
     /*
@@ -526,7 +525,7 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
             (v == '^' && ins.size != 3)) {
             std::ostringstream err{};
             err << "Invalid instruction encoding: "
-                << "opcode " << utils::to_string(opcode)
+                << "opcode " << caio::to_string(opcode)
                 << ", size " << ins.size
                 << ", fmt " << std::quoted(ins.format);
             log.fatal("%s: %s\n", Name::type().c_str(), err.str().c_str());
@@ -543,26 +542,26 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
 
         oplo = peek(addr++);
 
-        hex << " " << utils::to_string(oplo);
+        hex << " " << caio::to_string(oplo);
 
         switch (v) {
         case '*':
             /* Operand is an 8 bits value, must be disassembled as $00 or #$00 */
-            ops << utils::to_string(oplo);
+            ops << caio::to_string(oplo);
             break;
 
         case '^':
             /* Operand is a 16 bit value, must be disassembled as $0000 */
             ophi = peek(addr++);
             operand = (static_cast<addr_t>(ophi) << 8) | oplo;
-            hex << " " << utils::to_string(ophi);
-            ops << utils::to_string(operand);
+            hex << " " << caio::to_string(ophi);
+            ops << caio::to_string(operand);
             break;
 
         case '+':
             /* Operand is a relative address: The disassembled string must show the absolute address */
             operand = static_cast<int8_t>(oplo) + addr;
-            ops << utils::to_string(operand);
+            ops << caio::to_string(operand);
             break;
         }
 

@@ -20,13 +20,11 @@
 
 #include <functional>
 #include <iostream>
+#include <span>
 #include <vector>
-
-#include <gsl/span>
 
 #include "device.hpp"
 #include "utils.hpp"
-
 
 namespace caio {
 
@@ -44,7 +42,7 @@ public:
      * @param size  Size of this RAM;
      * @param label Label assigned to this RAM.
      */
-    RAM(size_t size, const std::string& label = {});
+    RAM(size_t size, const std::string& label);
 
     /**
      * Initialise this RAM with a repeating pattern.
@@ -54,14 +52,14 @@ public:
      * @param label   Label assigned to this RAM.
      * @see NO_RANDOM_VALUES
      * @see PUT_RANDOM_VALUES
-     * @see utils::fill()
+     * @see fill()
      */
     template<typename T>
-    RAM(size_t size, T pattern, bool random = NO_RANDOM_VALUES, const std::string& label = {})
+    RAM(size_t size, T pattern, bool random, const std::string& label)
         : Device{TYPE, label},
           _data(size) {
-        gsl::span<uint8_t> dst{_data.data(), _data.size()};
-        utils::fill(dst, pattern, random);
+        std::span<uint8_t> dst{_data.data(), _data.size()};
+        fill(dst, pattern, random);
     }
 
     /**
@@ -71,7 +69,7 @@ public:
      * @param label Label assigned to this RAM.
      */
     template<typename Iterator>
-    RAM(Iterator first, Iterator last, const std::string& label = {})
+    RAM(Iterator first, Iterator last, const std::string& label)
         : Device{TYPE, label},
           _data{first, last} {
     }
@@ -85,7 +83,7 @@ public:
      * @see fs::LOAD_MAXSIZ
      * @see fs::load()
      */
-    RAM(const std::string& fname, size_t count = 0, const std::string& label = {});
+    RAM(const std::string& fname, size_t count, const std::string& label);
 
     /**
      * Initialise this RAM with data from an input stream.
@@ -98,9 +96,8 @@ public:
     /**
      * Initialise this RAM moving another RAM.
      * @param other The RAM to move;
-     * @param label Label assigned to this RAM (if it is empty, the label of the other RAM is moved).
      */
-    RAM(RAM&& other, const std::string& label = {});
+    RAM(RAM&& other);
 
     virtual ~RAM();
 

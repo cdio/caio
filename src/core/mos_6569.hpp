@@ -35,7 +35,6 @@
 #include "ui.hpp"
 #include "utils.hpp"
 
-
 namespace caio {
 
 /**
@@ -639,7 +638,7 @@ private:
     /*
      * Bitmap scanline used to detect collisions between the background (data) and the sprites.
      */
-    std::array<uint8_t, utils::align(static_cast<uint64_t>(utils::ceil(WIDTH / 8.0f) + 8))> _collision_data{};
+    std::array<uint8_t, caio::align(static_cast<uint64_t>(caio::ceil(WIDTH / 8.0f) + 8))> _collision_data{};
 
     /*
      * Bitmap masks used to detect collisions between sprites.

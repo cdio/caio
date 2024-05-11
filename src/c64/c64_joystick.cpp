@@ -52,11 +52,12 @@ constexpr static const uint8_t JOY_PORT_RIGHT  = Mos6526::P3;
 constexpr static const uint8_t JOY_PORT_FIRE   = Mos6526::P4;
 
 JoystickPort joystick_port{
-    .up    = JOY_PORT_UP,
-    .down  = JOY_PORT_DOWN,
-    .left  = JOY_PORT_LEFT,
-    .right = JOY_PORT_RIGHT,
-    .fire  = JOY_PORT_FIRE
+    .up     = JOY_PORT_UP,
+    .down   = JOY_PORT_DOWN,
+    .left   = JOY_PORT_LEFT,
+    .right  = JOY_PORT_RIGHT,
+    .fire   = JOY_PORT_FIRE,
+    .fire_b = JOY_PORT_FIRE
 };
 
 }

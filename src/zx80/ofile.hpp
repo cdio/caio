@@ -21,8 +21,6 @@
 #include <string>
 #include <vector>
 
-#include <gsl/span>
-
 #include "fs.hpp"
 #include "types.hpp"
 

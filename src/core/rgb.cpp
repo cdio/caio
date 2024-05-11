@@ -23,7 +23,6 @@
 
 #include "utils.hpp"
 
-
 namespace caio {
 
 Rgba Rgba::transparent{0};
@@ -85,7 +84,7 @@ void RgbaTable::load(const std::string& fname)
     clear();
     std::string line{};
     while (std::getline(is, line)) {
-        line = utils::trim(line);
+        line = caio::trim(line);
 
         if (line.empty() || line[0] == '#') {
             continue;
@@ -99,7 +98,7 @@ void RgbaTable::load(const std::string& fname)
         }
 
         try {
-            auto value = utils::to_number<uint32_t>(line.c_str());
+            auto value = caio::to_number<uint32_t>(line.c_str());
             push_back(Rgba{value});
         } catch (const InvalidNumber&) {
             throw IOError{"Invalid line: " + line};

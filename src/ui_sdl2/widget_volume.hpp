@@ -36,7 +36,7 @@ public:
      * @param getvol   Callback to retrieve the current volume value;
      * @param setvol   Callback to set the current volume value.
      * @exception UIError
-     * @see Widget::load(const gsl::span<const uint8_t>&)
+     * @see Widget::load(const std::span<const uint8_t>&)
      */
     Volume(SDL_Renderer* renderer, const std::function<float()>& getvol, const std::function<void(float)>& setvol);
 

@@ -24,7 +24,6 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
-
 namespace caio {
 
 Mos6526::Timer::Timer(Mos6526& dev, uint8_t pbit)
@@ -172,16 +171,16 @@ Mos6526::Tod::TodData& Mos6526::Tod::TodData::operator++()
 
     if (tth == 10) {
         tth = 0;
-        auto bsec = utils::bcd_to_bin(sec) + 1;
+        auto bsec = caio::bcd_to_bin(sec) + 1;
 
         if (bsec == 60) {
             bsec = 0;
-            auto bmin = utils::bcd_to_bin(min) + 1;
+            auto bmin = caio::bcd_to_bin(min) + 1;
 
             if (bmin == 60) {
                 bmin = 0;
                 auto pm = ((hour & PM_BIT) ? 12 : 0);
-                auto bhour = utils::bcd_to_bin(hour & HOUR_MASK) + pm + 1;
+                auto bhour = caio::bcd_to_bin(hour & HOUR_MASK) + pm + 1;
 
                 if (bhour == 24) {
                     bhour = 0;
@@ -190,13 +189,13 @@ Mos6526::Tod::TodData& Mos6526::Tod::TodData::operator++()
                     pm = 12;
                 }
 
-                hour = utils::bin_to_bcd(bhour - pm) | (pm == 0 ? 0 : PM_BIT);
+                hour = caio::bin_to_bcd(bhour - pm) | (pm == 0 ? 0 : PM_BIT);
             }
 
-            min = utils::bin_to_bcd(bmin);
+            min = caio::bin_to_bcd(bmin);
         }
 
-        sec = utils::bin_to_bcd(bsec);
+        sec = caio::bin_to_bcd(bsec);
     }
 
     return *this;
@@ -520,7 +519,7 @@ std::ostream& Mos6526::dump(std::ostream& os, addr_t base) const
         peek(CRB)
     };
 
-    return utils::dump(os, regs, base);
+    return caio::dump(os, regs, base);
 }
 
 void Mos6526::irq(const OutputPinCb& irq_out)
@@ -573,7 +572,7 @@ bool Mos6526::tick(Timer& timer, TimerMode mode)
         case TimerMode::CNT:
         case TimerMode::TA_CNT:
         default:
-//          throw NotImplemented{*this, "Timer mode not implemented: $" + utils::to_string(static_cast<uint8_t>(mode))};
+//          throw NotImplemented{*this, "Timer mode not implemented: $" + caio::to_string(static_cast<uint8_t>(mode))};
             log.warn("%s: Timer mode not implemented: $%02X\n", Name::to_string().c_str(), static_cast<uint8_t>(mode));
         }
 

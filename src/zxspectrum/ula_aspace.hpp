@@ -58,8 +58,6 @@ public:
     constexpr static const uint8_t CAS_OUTPUT_BIT       = D3;
     constexpr static const uint8_t SPEAKER_OUTPUT_BIT   = D4;
 
-    using bank_t = std::array<devmap_t, BLOCKS>;
-
     /**
      * Initialise this ULA address space.
      * @param cpu   CPU;
@@ -96,7 +94,7 @@ private:
     sptr_t<ZXSpectrumKeyboard>  _kbd;
     sptr_t<Joystick>            _joy;
     sptr_t<ZXSpectrumTape>      _tape;
-    bank_t                      _mmap;
+    bank_t<BLOCKS>              _mmap;
 
     bool                        _stop_tape{};
 };

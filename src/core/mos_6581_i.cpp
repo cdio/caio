@@ -22,7 +22,6 @@
 
 #include "utils.hpp"
 
-
 namespace caio {
 namespace mos_6581 {
 
@@ -36,7 +35,7 @@ std::ostream& Mos6581_::dump(std::ostream& os, addr_t base) const
     regs[VOICE_3_OSC] = peek(VOICE_3_OSC);
     regs[VOICE_3_ENV] = peek(VOICE_3_ENV);
 
-    return utils::dump(os, regs, base);
+    return caio::dump(os, regs, base);
 }
 
 }

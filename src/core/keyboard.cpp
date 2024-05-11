@@ -29,7 +29,6 @@
 
 #define KEY_ENTRY(key)  { CAIO_STR(key), key }
 
-
 namespace caio {
 namespace keyboard {
 
@@ -190,7 +189,7 @@ void Keyboard::load(const std::string& fname)
         }
 
         try {
-            line = utils::toup(line);
+            line = caio::toup(line);
             if (!std::regex_match(line, result, re_line) || result.size() != 6) {
                 throw InvalidArgument{};
             }
@@ -238,11 +237,12 @@ void Keyboard::key_pressed(Key key)
         const auto& jport = _vjoy->port();
         uint8_t pos = _vjoy->position();
 
-        pos |= (key == _vjoykeys.up    ? jport.up :
-               (key == _vjoykeys.down  ? jport.down :
-               (key == _vjoykeys.left  ? jport.left :
-               (key == _vjoykeys.right ? jport.right :
-               (key == _vjoykeys.fire  ? jport.fire : 0)))));
+        pos |= (key == _vjoykeys.up     ? jport.up :
+               (key == _vjoykeys.down   ? jport.down :
+               (key == _vjoykeys.left   ? jport.left :
+               (key == _vjoykeys.right  ? jport.right :
+               (key == _vjoykeys.fire   ? jport.fire :
+               (key == _vjoykeys.fire_b ? jport.fire_b : 0))))));
 
         _vjoy->position(pos);
     }
@@ -258,11 +258,12 @@ void Keyboard::key_released(Key key)
         const auto& jport = _vjoy->port();
         uint8_t pos = _vjoy->position();
 
-        pos &= ~(key == _vjoykeys.up    ? jport.up :
-                (key == _vjoykeys.down  ? jport.down :
-                (key == _vjoykeys.left  ? jport.left :
-                (key == _vjoykeys.right ? jport.right :
-                (key == _vjoykeys.fire  ? jport.fire : 0)))));
+        pos &= ~(key == _vjoykeys.up     ? jport.up :
+                (key == _vjoykeys.down   ? jport.down :
+                (key == _vjoykeys.left   ? jport.left :
+                (key == _vjoykeys.right  ? jport.right :
+                (key == _vjoykeys.fire   ? jport.fire :
+                (key == _vjoykeys.fire_b ? jport.fire_b : 0))))));
 
         _vjoy->position(pos);
     }

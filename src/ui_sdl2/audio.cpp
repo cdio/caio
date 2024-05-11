@@ -150,7 +150,7 @@ void AudioStream::stream_data(AudioStream* self, uint8_t* stream, int len)
         return;
     }
 
-    const auto samples = self->_playing_queue.pop();
+    auto samples = self->_playing_queue.pop();
     int16_t* data = reinterpret_cast<int16_t*>(stream);
     size_t datasiz = std::min<size_t>(len >> 1, samples.size());
     if (datasiz < samples.size()) {

@@ -67,7 +67,7 @@ std::ostream& PrgFile::save(std::ostream& os, addr_t addr)
     return PrgFile::save(os, (addr == 0 ? address() : addr), {data(), size()});
 }
 
-std::ostream& PrgFile::save(std::ostream& os, addr_t addr, const gsl::span<uint8_t>& data)
+std::ostream& PrgFile::save(std::ostream& os, addr_t addr, const std::span<uint8_t>& data)
 {
     addr_t leaddr = htole16(addr);
     if (!os.write(reinterpret_cast<char*>(&leaddr), sizeof(leaddr)) ||

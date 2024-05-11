@@ -24,20 +24,39 @@
 #include <cstring>
 #include <exception>
 #include <iomanip>
+#include <numbers>
 #include <ostream>
 #include <memory>
+#include <span>
 #include <string>
 #include <sstream>
+#include <type_traits>
 #include <vector>
 
 #define CAIO_STR_(x)    #x
 #define CAIO_STR(x)     CAIO_STR_(x)
 
-
 namespace caio {
 
-using addr_t = uint16_t;
+using fp_t    = double;
+using addr_t  = uint16_t;
 using saddr_t = int16_t;
+
+template<typename T>
+using sptr_t = std::shared_ptr<T>;
+
+template<typename T>
+using uptr_t = std::unique_ptr<T>;
+
+using buffer_t    = std::vector<uint8_t>;
+using buffer_it_t = std::vector<uint8_t>::iterator;
+
+using samples_fp  = std::span<fp_t>;
+using samples_i16 = std::span<int16_t>;
+
+using p_coeffs = std::pair<samples_fp, samples_fp>;
+
+constexpr fp_t Pi = std::numbers::pi_v<fp_t>;
 
 constexpr static const uint8_t D0 = (1 << 0);
 constexpr static const uint8_t D1 = (1 << 1);
@@ -65,16 +84,27 @@ constexpr static const addr_t A13 = (1 << 13);
 constexpr static const addr_t A14 = (1 << 14);
 constexpr static const addr_t A15 = (1 << 15);
 
-template<typename T>
-using sptr_t = std::shared_ptr<T>;
+/*
+ * Stack overflow tricks.
+ */
+template <typename Container>
+struct is_container : std::false_type{};
 
-template<typename T>
-using uptr_t = std::unique_ptr<T>;
+template <typename... Ts> struct is_container<std::vector<Ts...>> : std::true_type{};
+template <typename... Ts> struct is_container<std::array<Ts...>> : std::true_type{};
+template <typename... Ts> struct is_container<std::span<Ts...>> : std::true_type{};
 
-using buffer_t = std::vector<uint8_t>;
-using buffer_it_t = std::vector<uint8_t>::iterator;
-
+/**
+ * Retrieve the stack trace.
+ * @return The stack trace.
+ */
 std::string stacktrace();
+
+/**
+ * Send the stack trace to an output stream.
+ * @param os Output stream.
+ * @return The output stream.
+ */
 std::ostream& stacktrace(std::ostream& os);
 
 /**
@@ -151,7 +181,9 @@ ERROR_CLASS(ConfigError);
 ERROR_CLASS(InvalidArgument);
 ERROR_CLASS(InvalidCartridge);
 ERROR_CLASS(InvalidNumber);
+ERROR_CLASS(InvalidPalette);
 ERROR_CLASS(IOError);
+ERROR_CLASS(SignalError);
 ERROR_CLASS(UIError);
 
 }

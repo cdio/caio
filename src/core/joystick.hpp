@@ -37,12 +37,11 @@ struct Port {
     uint8_t left{};
     uint8_t right{};
     uint8_t fire{};
+    uint8_t fire_b{};
 };
 
 /**
  * Emulated joystick.
- * This class implements the basics of a joystick and
- * it should be derived by a specific emulated joystick.
  */
 class Joystick : public Name {
 public:

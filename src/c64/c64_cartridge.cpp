@@ -33,7 +33,6 @@
 #include "c64_cartridge/cart_magic_desk.hpp"
 #include "c64_cartridge/cart_c64_game_system_3.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {
@@ -71,7 +70,7 @@ std::ostream& Cartridge::dump(std::ostream& os, addr_t base) const
         data[i] = peek(i);
     }
 
-    return utils::dump(os, data, base);
+    return caio::dump(os, data, base);
 }
 
 void Cartridge::add_ior(const Gpio::ior_t& ior, uint8_t mask)

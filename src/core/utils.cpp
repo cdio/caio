@@ -22,9 +22,7 @@
 
 #include "sha2.h"
 
-
 namespace caio {
-namespace utils {
 
 std::string tolow(const std::string& str)
 {
@@ -108,7 +106,7 @@ unsigned long long to_ulonglong(const std::string& str, size_t max)
     return val;
 }
 
-std::string to_string(const gsl::span<const uint8_t>& buf)
+std::string to_string(const std::span<const uint8_t>& buf)
 {
     std::string str{};
 
@@ -126,7 +124,7 @@ uint64_t sleep(uint64_t delay)
     return (now() - start);
 }
 
-std::string sha256(const gsl::span<const uint8_t>& buf)
+std::string sha256(const std::span<const uint8_t>& buf)
 {
     SHA2_CTX ctx{};
     uint8_t md[SHA256_DIGEST_LENGTH];
@@ -142,5 +140,4 @@ std::string sha256(const gsl::span<const uint8_t>& buf)
     return os.str();
 }
 
-}
 }

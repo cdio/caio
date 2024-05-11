@@ -22,7 +22,6 @@
 
 #include "logger.hpp"
 
-
 //#define CAIO_CBMBUS_DEBUG
 //#define CAIO_CBMBUS_DEBUG_STATE
 
@@ -43,7 +42,6 @@
 #else
 #define CBMBUS_DEBUG_STATE(...)
 #endif
-
 
 namespace caio {
 namespace commodore {

@@ -163,6 +163,7 @@ struct VJoyKeys {
     Key     left{};
     Key     right{};
     Key     fire{};
+    Key     fire_b{};
 };
 
 /**

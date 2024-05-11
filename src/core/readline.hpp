@@ -17,9 +17,8 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 #include <array>
+#include <span>
 #include <string>
-
-#include <gsl/span>
 
 #include "types.hpp"
 
@@ -179,7 +178,7 @@ public:
      * @param data Buffer to send.
      * @exception IOError
      */
-    void write(const gsl::span<const char>& data) const;
+    void write(const std::span<const char>& data) const;
 
     /**
      * Get input and output file descriptors.

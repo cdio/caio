@@ -83,7 +83,7 @@ public:
     void push_silence(uint64_t time);
     void push_pilot(size_t count);
     void push_sync();
-    void push_data(const gsl::span<const uint8_t>& buf);
+    void push_data(const std::span<const uint8_t>& buf);
     void push_block(const TAPFile::Block& block);
 
 private:

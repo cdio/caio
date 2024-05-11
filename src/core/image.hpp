@@ -19,7 +19,7 @@
 #pragma once
 
 #include <cstdint>
-#include <gsl/span>
+#include <span>
 
 #include "rgb.hpp"
 
@@ -29,7 +29,7 @@ namespace caio {
 struct Image {
     unsigned              width{};
     unsigned              height{};
-    gsl::span<const Rgba> data{};
+    std::span<const Rgba> data{};
 
     operator bool() const {
         return (data.size() != 0 && (width * height) == data.size());
