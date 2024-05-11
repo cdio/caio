@@ -24,28 +24,27 @@
 #include "logger.hpp"
 #include "ui.hpp"
 
-
 namespace caio {
 namespace mos_6581 {
 
 /*
  * Attack time table (seconds).
  */
-const std::array<float, 16> Envelope::attack_times = {
-    0.002f, 0.008f, 0.016f, 0.024f, 0.038f, 0.056f, 0.068f, 0.080f,
-    0.100f, 0.250f, 0.500f, 0.800f, 1.000f, 3.000f, 5.000f, 8.000f
+const std::array<fp_t, 16> Envelope::attack_times = {
+    0.002, 0.008, 0.016, 0.024, 0.038, 0.056, 0.068, 0.080,
+    0.100, 0.250, 0.500, 0.800, 1.000, 3.000, 5.000, 8.000
 };
 
 /*
  * Release/Decay time table (seconds).
  */
-const std::array<float, 16> Envelope::decay_times = {
-    0.006f, 0.024f, 0.048f, 0.072f, 0.114f, 0.168f,  0.204f,  0.240f,
-    0.300f, 0.750f, 1.500f, 2.400f, 3.000f, 9.000f, 15.000f, 24.000f
+const std::array<fp_t, 16> Envelope::decay_times = {
+    0.006, 0.024, 0.048, 0.072, 0.114, 0.168,  0.204,  0.240,
+    0.300, 0.750, 1.500, 2.400, 3.000, 9.000, 15.000, 24.000
 };
 
 Oscillator::Oscillator(unsigned clkf, Oscillator& syncos)
-    : _clkf{static_cast<float>(clkf)},
+    : _clkf{static_cast<fp_t>(clkf)},
       _syncos{syncos}
 {
     reset();
@@ -57,15 +56,15 @@ void Oscillator::reset()
     _ring   = false;;
     _test   = false;
     _sync   = false;
-    _ufreq  = 0.0f;
-    _freq   = 0.0f;
-    _T      = 0.0f;
+    _ufreq  = 0.0;
+    _freq   = 0.0;
+    _T      = 0.0;
     _uwidth = 0;
-    _width  = 0.0f;
+    _width  = 0.0;
     _ndelay = 0;
-    _nvalue = 0.0f;
-    _A      = 0.0f;
-    _t      = 0.0f;
+    _nvalue = 0.0;
+    _A      = 0.0;
+    _t      = 0.0;
     //_rreg   = RANDOM_IV;
     rand_reset();
 }
@@ -82,7 +81,8 @@ inline void Oscillator::freq_lo(uint8_t fl)
     setfreq();
 }
 
-inline float Oscillator::freq() const {
+inline fp_t Oscillator::freq() const
+{
     return _freq;
 }
 
@@ -98,7 +98,7 @@ inline void Oscillator::width_lo(uint8_t wl)
     setwidth();
 }
 
-inline float Oscillator::width() const
+inline fp_t Oscillator::width() const
 {
     return _width;
 }
@@ -128,25 +128,25 @@ inline bool Oscillator::is_test() const
     return _test;
 }
 
-inline float Oscillator::amplitude() const
+inline fp_t Oscillator::amplitude() const
 {
     return _A;
 }
 
-inline float Oscillator::time() const
+inline fp_t Oscillator::time() const
 {
     return _t;
 }
 
 inline void Oscillator::setfreq()
 {
-    _freq = static_cast<float>(_ufreq) * _clkf / 16777216.0f;
-    _T = 1.0f / _freq;
+    _freq = static_cast<fp_t>(_ufreq) * _clkf / 16777216.0;
+    _T = 1.0 / _freq;
 }
 
 inline void Oscillator::setwidth()
 {
-    _width = ((_uwidth == 0) ? 1.0f : static_cast<float>(_uwidth) / 4095.0f);
+    _width = ((_uwidth == 0) ? 1.0 : static_cast<fp_t>(_uwidth) / 4096.0);
 }
 
 inline void Oscillator::rand_reset()
@@ -177,14 +177,14 @@ uint8_t Oscillator::rand()
     return value;
 }
 
-float Oscillator::noise()
+fp_t Oscillator::noise()
 {
     /*
      * See http://www.sidmusic.org/sid/sidtech5.html.
      */
     if (_ndelay <= 0) {
         _ndelay += NOISE_DELAY / (_clkf / SAMPLING_RATE);
-        _nvalue = (rand() - 128.0f) / 128.0f;
+        _nvalue = (rand() - 128.0) / 128.0;
     }
 
     _ndelay -= _ufreq;
@@ -192,10 +192,12 @@ float Oscillator::noise()
     return _nvalue;
 }
 
-float Oscillator::tick()
+fp_t Oscillator::tick()
 {
+    constexpr fp_t ATT = 0.5;
+
     if (_test) {
-        _A = (_type == WAVE_PULSE ? 1.0f : 0.0f);
+        _A = (_type == WAVE_PULSE ? ATT : 0.0);
         return _A;
     }
 
@@ -207,38 +209,42 @@ float Oscillator::tick()
     }
 
     if (_type != WAVE_NONE) {
-        _A = 1.0f;
+        int16_t a = 0xFFFF;
 
         if (_type & WAVE_TRIANGLE) {
-            _A *= signal::triangle(_t, _T) * ((_ring) ? _syncos.amplitude() : 1.0f);
+            a &= caio::to_i16(signal::triangle(_t, _T) * ((_ring) ? _syncos.amplitude() : 1.0));
         }
 
         if (_type & WAVE_SAWTOOTH) {
-            _A *= signal::sawtooth(_t, _T);
+            a &= caio::to_i16(signal::sawtooth(_t, _T));
         }
 
         if (_type & WAVE_PULSE) {
-            _A *= signal::square(_t, _T * _width);
+            a &= caio::to_i16(signal::pulse(_t, _T * _width));
         }
 
         if (_type & WAVE_NOISE) {
-            _A *= noise();
+            a &= caio::to_i16(noise());
         }
+
+        _A = a / 32768.0;
     } else {
-        _A = 0.0f;
+        _A = 0.0;
     }
 
     _t += DT;
 
     if (_t >= _T) {
-        _t = 0.0f;
+        _t = 0.0;
     }
+
+    _A *= ATT;
 
     return _A;
 }
 
 Envelope::Envelope(unsigned clkf)
-    : _tadj{1000000.0f / static_cast<float>(clkf)}
+    : _tadj{1000000.0 / static_cast<fp_t>(clkf)}
 {
     reset();
 }
@@ -247,11 +253,11 @@ void Envelope::reset()
 {
     _attack_time  = attack_times[0];
     _decay_time   = decay_times[0];
-    _sustain      = 0.0f;
+    _sustain      = 0.0;
     _release_time = decay_times[0];
-    _release_A    = 0.0f;
-    _t            = 0.0f;
-    _A            = 0.0f;
+    _release_A    = 0.0;
+    _t            = 0.0;
+    _A            = 0.0;
     _gate         = false;
     _cycle        = CYCLE_NONE;
 }
@@ -268,7 +274,7 @@ inline void Envelope::decay(uint8_t value)
 
 inline void Envelope::sustain(uint8_t value)
 {
-    _sustain = static_cast<float>(value) / 15.0f;
+    _sustain = static_cast<fp_t>(value) / 16.0;
 }
 
 inline void Envelope::release(uint8_t value)
@@ -276,7 +282,7 @@ inline void Envelope::release(uint8_t value)
     _release_time = decay_times[value] * _tadj;
 }
 
-inline float Envelope::amplitude() const
+inline fp_t Envelope::amplitude() const
 {
     return _A;
 }
@@ -291,7 +297,7 @@ void Envelope::gate(bool gb)
     _gate = gb;
 }
 
-float Envelope::tick()
+fp_t Envelope::tick()
 {
     if (_gate) {
         /*
@@ -301,25 +307,25 @@ float Envelope::tick()
         case CYCLE_ATTACK:
             if (_t < _attack_time) {
                 _A += _t / _attack_time;
-                if (_A < 1.0f) {
+                if (_A < 1.0) {
                     break;
                 }
             }
 
-            _t = 0.0f;
-            _A = 1.0f;
+            _t = 0.0;
+            _A = 1.0;
             _cycle = CYCLE_DECAY;
             /* PASSTHROUGH */
 
         case CYCLE_DECAY:
             if (_t < _decay_time) {
-                _A = signal::exp(_sustain, 1.0f - _sustain, _t, _decay_time / 4.0f);
+                _A = 1.0 - _t * (1.0 - _sustain) / _decay_time;
                 if (_A > _sustain) {
                     break;
                 }
             }
 
-            _t = 0.0f;
+            _t = 0.0;
             _A = _sustain;
             _cycle = CYCLE_SUSTAIN;
             /* PASSTHROUGH */
@@ -337,19 +343,19 @@ float Envelope::tick()
         case CYCLE_ATTACK:
         case CYCLE_DECAY:
         case CYCLE_SUSTAIN:
-            _t = 0.0f;
+            _t = 0.0;
             _release_A = _A;
             _cycle = CYCLE_RELEASE;
             /* PASSTHROUGH */
 
         case CYCLE_RELEASE:
             if (_t < _release_time) {
-                _A = signal::exp(0.0f, _release_A, _t, _release_time / 4.0f);
+                _A = signal::exp(0.0, _release_A, _t, _release_time / 4.0);
                 break;
             }
 
-            _t = 0.0f;
-            _A = 0.0f;
+            _t = 0.0;
+            _A = 0.0;
             _cycle = CYCLE_NONE;
             /* PASSTHROUGH */
 
@@ -426,9 +432,9 @@ void Voice::control(uint8_t value)
     _env.gate(value & 1);
 }
 
-inline float Voice::tick()
+inline fp_t Voice::tick()
 {
-    return _osc.tick() * _env.tick() * 0.50f;
+    return _osc.tick() * _env.tick();
 }
 
 inline Oscillator& Voice::osc()
@@ -453,67 +459,40 @@ Filter::Filter()
 
 void Filter::reset()
 {
-    _ufc      = 0;
-    _pufc     = 0.0f;
-    _res      = 0;
-    _pres     = 0;
-    _lopass   = false;
-    _hipass   = false;
-    _bandpass = false;
-
-    _klo_data.fill(0.0f);
-    _khi_data.fill(0.0f);
-    _kba_data.fill(0.0f);
+    _ufc    = 0;
+    _pufc   = 0.0;
+    _res    = 0;
+    _pres   = 0;
+    _type   = FILTER_NONE;
 }
 
 inline void Filter::freq_hi(uint8_t hi)
 {
     _ufc = (_ufc & 7) | (static_cast<uint16_t>(hi) << 3);
+    generate();
 }
 
 inline void Filter::freq_lo(uint8_t lo)
 {
     _ufc = (_ufc & 0xFFF8) | (lo & 7);
+    generate();
 }
 
 inline void Filter::resonance(uint8_t rs)
 {
     _res = rs & 15;
+    generate();
 }
 
-inline void Filter::lopass(bool active)
+inline void Filter::type(uint8_t type)
 {
-    _lopass = active;
-}
-
-inline void Filter::hipass(bool active)
-{
-    _hipass = active;
-}
-
-inline void Filter::bandpass(bool active)
-{
-    _bandpass = active;
-}
-
-inline bool Filter::lopass() const
-{
-    return _lopass;
-}
-
-inline bool Filter::hipass() const
-{
-    return _hipass;
-}
-
-inline bool Filter::bandpass() const
-{
-    return _bandpass;
+    _type = static_cast<FilterType>(type & FILTER_MASK);
+    generate();
 }
 
 inline bool Filter::is_enabled() const
 {
-    return (_lopass || _hipass || _bandpass);
+    return (_type != FILTER_NONE);
 }
 
 inline bool Filter::is_disabled() const
@@ -521,96 +500,106 @@ inline bool Filter::is_disabled() const
     return (!is_enabled());
 }
 
-inline float Filter::frequency() const
+inline fp_t Filter::frequency() const
 {
     /*
-     * MOS-6581 does not follow the specs, MOS-8580 does, kind of.
-     *
-     *     fc = FC_MIN + (FC_MAX - FC_MIN) * static_cast<float>(_ufc) / 2048.0f;
-     *
-     * I don't have a physical C64 here so I am approximating the
-     * frequencies (found by the reSID v0.16 author through reverse
-     * engineering) using a Sigmoid function (see doc/sid.md).
+     * MOS-6581 does not follow the specs, MOS-8580 does:
+     *   fc = FC_MIN + (FC_MAX - FC_MIN) * _ufc / 2048;
      */
-    uint16_t m = 1024;
-    float s0{};
-    float sm{};
-    float b0{};
-    float b1{};
+    static constexpr fp_t m = 1024.0;
 
+    fp_t s0{};
+    fp_t sm{};
+    fp_t b0{};
+    fp_t b1{};
+
+    /* FIXME:
+     * this function approximates the lookup table
+     * from resid-0.16 but that one seems to be incorrect.
+     * Extract the proper frequency values from a real 6581.
+     */
     if (_ufc < 1024) {
-        s0 = 215.0f;
-        sm = 17000.0f;
-        b0 = -0.65f;
-        b1 = 0.0072f;
+        s0 = 215.0;
+        sm = 17000.0;
+        b0 = -0.65;
+        b1 = 0.0072;
     } else {
-        s0 = 1024.0f;
-        sm = 18200.0f;
-        b0 = -1.30f;
-        b1 = 0.0055f;
+        s0 = 1024.0;
+        sm = 18200.0;
+        b0 = -1.30;
+        b1 = 0.0055;
     }
 
-    float fc = s0 + (sm - s0) / (1 + std::exp(-b0 - b1 * (_ufc - m)));
+    fp_t fc = s0 + (sm - s0) / (1.0 + std::exp(-b0 - b1 * (_ufc - m)));
+
+//XXX    fc = 30.0 + (12000.0 - 30.0) * _ufc / 2048.0;
     return fc;
 }
 
-inline float Filter::Q() const
+inline fp_t Filter::Q() const
 {
     /*
-     * From reSID v1.0-pre:
-     * "In the MOS 6581, 1/Q is controlled linearly by res. From die photographs
-     *  of the resonance "resistor" ladder it follows that 1/Q ~ ~res/8
-     *  (assuming an ideal op-amp and ideal "resistors"). This implies that Q
-     *  ranges from 0.533 (res = 0) to 8 (res = E). For res = F, Q is actually
-     *  theoretically unlimited, which is quite unheard of in a filter circuit."
+     * Qmax limited to 2.5.
+     * Q = [ 0.707; 2.5 ]
+     * 1/Q = 1/Q0 + res / Qr = sqrt(2) + res / Qr
      */
-    auto nres = (~_res) & 15;
-    if (nres == 0) {
-        nres = 1;
-    }
-
-    float Q = 8.0f / nres;
-
+    const fp_t Q = 1.0 / (1.4143 - _res / 14.79);
     return Q;
+}
+
+inline fp_t Filter::operator()(fp_t v)
+{
+    return _flt(v) * _gain_comp;
 }
 
 void Filter::generate()
 {
-    if (_pufc != _ufc || _pres != _res) {
+    if (_pufc != _ufc || _pres != _res || _ptype != _type) {
         _pufc = _ufc;
         _pres = _res;
+        _ptype = _type;
 
-        float fc = frequency();
-        float Q = Filter::Q();
+        const fp_t fc = frequency();
+        const fp_t Q = Filter::Q();
 
-        _klo = samples_fp{_klo_data};
-        _klo = signal::lopass_40(_klo, fc, Q, SAMPLING_RATE);
+        _gain_comp = 1.0;
 
-        _khi = samples_fp{_khi_data};
-        _khi = signal::hipass_40(_khi, fc, Q, SAMPLING_RATE);
+//        log.debug("type: %x, fc=%f, Q=%f\n", _type, fc, Q);
 
-        _kba = samples_fp{_kba_data};
-        _kba = signal::bapass_20(_kba, fc, SAMPLING_RATE);
+        switch (_type) {
+        case FILTER_LO:
+            _flt = signal::iir_lopass40(fc, Q, SAMPLING_RATE);
+            break;
+        case FILTER_HI:
+            _flt = signal::iir_hipass40(fc, Q, SAMPLING_RATE);
+            break;
+        case FILTER_BA:
+            _gain_comp = 2.0;
+            _flt = signal::iir_bapass20(fc, Q, SAMPLING_RATE);
+            break;
+        case FILTER_LOHI:
+            _gain_comp = 2.0;
+            _flt = signal::iir_hipass40(fc, Q, SAMPLING_RATE) +
+                   signal::iir_lopass40(fc, Q, SAMPLING_RATE);
+            break;
+        case FILTER_LOBA:
+            _flt = signal::iir_lopass40(fc, Q, SAMPLING_RATE);
+            break;
+        case FILTER_HIBA:
+            _flt = signal::iir_hipass40(fc, Q, SAMPLING_RATE);
+            break;
+        case FILTER_LHBA:
+            _gain_comp = 3.0;
+            _flt = signal::iir_hipass40(fc, Q, SAMPLING_RATE) +
+                   signal::iir_lopass40(fc, Q, SAMPLING_RATE) +
+                   signal::iir_bapass20(fc, Q, SAMPLING_RATE);
+            break;
+        default:;
+        }
+
+//        log.debug("b=%s; a=%s;\n\n", signal::to_string(_flt.num).c_str(), signal::to_string(_flt.den).c_str());
+
     }
-}
-
-samples_fp Filter::apply(samples_fp& v)
-{
-    generate();
-
-    if (_lopass) {
-        v = signal::conv(v, v, _klo, signal::ConvShape::Central);
-    }
-
-    if (_hipass) {
-        v = signal::conv(v, v, _khi, signal::ConvShape::Central);
-    }
-
-    if (_bandpass) {
-        v = signal::conv(v, v, _kba, signal::ConvShape::Central);
-    }
-
-    return v;
 }
 
 Mos6581::Mos6581(const std::string& label, unsigned clkf)
@@ -630,18 +619,16 @@ void Mos6581::reset()
 
     _filter.reset();
 
-    _v1 = {};
-    _v2 = {};
-    _v3 = {};
-    _v4 = {};
+    _v.fill(0.0);
+    _v4.fill(0.0);
 
     _voice_1_filtered = false;
     _voice_2_filtered = false;
     _voice_3_filtered = false;
     _voice_3_off      = false;
 
-    _volume       = 0.0f;
-    _prev_volume  = 0.0f;
+    _volume       = 0.0;
+    _prev_volume  = 0.0;
     _sample_index = 0;
     _prev_index   = 0;
     _last_value   = 0;
@@ -656,10 +643,10 @@ uint8_t Mos6581::read(addr_t addr, ReadMode)
         break;
 
     case VOICE_3_OSC:
-        return (signal::to_i16(_voice_3.osc().amplitude()) >> 8);
+        return (to_i16(_voice_3.osc().amplitude()) >> 8);
 
     case VOICE_3_ENV:
-        return (signal::to_i16(_voice_3.env().amplitude()) >> 8);
+        return (to_i16(_voice_3.env().amplitude()) >> 8);
 
     default:;
     }
@@ -776,20 +763,18 @@ void Mos6581::write(addr_t addr, uint8_t value)
         _voice_1_filtered = (value & 1);
         _voice_2_filtered = (value & 2);
         _voice_3_filtered = (value & 4);
-        /* TODO: value & 8: External audio input. */
+        /* value & 8: External audio input not supported */
         break;
 
     case FILTER_MODE:
-        _volume = static_cast<float>(value & 15) / 15.0f;
-        _filter.lopass(value & 0x10);
-        _filter.bandpass(value & 0x20);
-        _filter.hipass(value & 0x40);
+        _volume = 0.8 * static_cast<fp_t>(value & 15) / 16.0;
         _voice_3_off = value & 0x80;
+        _filter.type(value);
 
         /* Volume bug or "fourth voice" */
         if (_prev_volume != _volume) {
             _prev_volume = _volume;
-            float value = _volume * 2.0f - 1.0f;
+            fp_t value = _volume * 2.0 - 1.0;
             if (_prev_index < _sample_index) {
                 std::fill_n(_v4.begin() + _prev_index, _sample_index - _prev_index, value);
             } else {
@@ -816,32 +801,31 @@ void Mos6581::write(addr_t addr, uint8_t value)
 size_t Mos6581::tick(const Clock& clk)
 {
     if (_audio_buffer) {
-        _v1[_sample_index] = _voice_1.tick();
-        _v2[_sample_index] = _voice_2.tick();
-        _v3[_sample_index] = _voice_3.tick();
+        fp_t att = 0.6 - 0.3 * is_v3_active();
+        fp_t s1 = _voice_1.tick() * att;
+        fp_t s2 = _voice_2.tick() * att;
+        fp_t s3 = _voice_3.tick() * att;
 
-        /*
-         * When a voice is filtered but the filter is disabled the sampled value is set to 0.
-         * This behaviour together with the oscillator test mode allows the generation of PWM signals.
-         */
+        fp_t fs = 0.0;
+
         if (_filter.is_disabled()) {
-            if (is_v1_filtered()) {
-                _v1[_sample_index] = 0.0f;
-            }
-
-            if (is_v2_filtered()) {
-                _v2[_sample_index] = 0.0f;
-            }
-
-            if (is_v3_filtered()) {
-                _v3[_sample_index] = 0.0f;
-            }
+            s1 *= !is_v1_filtered();
+            s2 *= !is_v2_filtered();
+            s3 *= !is_v3_filtered();
+        } else {
+            fs = s1 * is_v1_filtered() + s2 * is_v2_filtered() + s3 * is_v3_active();
+            fs = _filter(fs);
         }
+
+        fp_t us = s1 * (!is_v1_filtered()) + s2 * (!is_v2_filtered()) + s3 * (!is_v3_filtered());
+
+        _v[_sample_index] = fs + us;
 
         ++_sample_index;
         if (_sample_index == SAMPLES) {
-            _sample_index = 0;
             play();
+            _v4.fill(0.0);
+            _sample_index = 0;
         }
     }
 
@@ -850,63 +834,14 @@ size_t Mos6581::tick(const Clock& clk)
 
 void Mos6581::play()
 {
-    auto v = _audio_buffer();
-    if (v) {
-        samples_fp v1{_v1};
-        samples_fp v2{_v2};
-        samples_fp v3{_v3};
-
-        if (_filter.is_enabled()) {
-            /* FIXME: optimise */
-            if (is_v1_filtered()) {
-                v1 = _filter.apply(v1);
-            }
-
-            if (is_v2_filtered()) {
-                v2 = _filter.apply(v2);
-            }
-
-            if (is_v3_filtered()) {
-                v3 = _filter.apply(v3);
-            }
+    auto v16 = _audio_buffer();
+    if (v16) {
+        for (size_t i = 0; i < SAMPLES; ++i) {
+            fp_t value = _v[i] * _volume + _v4[i] * 0.3;
+            value = std::max(std::min(value, 0.8), -0.8);
+            v16[i] = caio::to_i16(value);
         }
-
-        auto it1 = v1.begin();
-        auto it2 = v2.begin();
-        auto it3 = v3.begin();
-
-        for (size_t i = 0; i < v.size(); ++i) {
-            float value1 = *it1++;
-            float value2 = *it2++;
-            float value3 = (is_v3_active() ? *it3++ : 0.0f);
-
-            float value = value1 + value2 + value3 + _v4[i];
-
-
-            //XXX FIXME
-#if 0
-    each signal level can reach Qmax, so the maximum level is not 1.
-    To have a final result of 1 the signal must be divided by Qmax
-
-    The final signal (if all voices are enabled) could reach 3*Qmax, that is
-    the factor the final value must divided by.
-#endif
-
-            value = std::max(std::min(value, 1.0f), -1.0f);
-
-            /*
-             * Audio output varies from 0.8 to 0.3 (typical values)
-             * depending on the active voices.
-             * (See MOS6581, Electrical characteristics, Audio Voltage Output).
-             * Here we just limit the volume using a fixed factor VOUT_MAX.
-             */
-            v[i] = signal::to_i16(value * _volume * VOUT_MAX);
-        }
-
-        v.dispatch();
     }
-
-    _v4.fill(0.0f);
 }
 
 inline bool Mos6581::is_v1_filtered() const
@@ -926,7 +861,7 @@ inline bool Mos6581::is_v3_filtered() const
 
 inline bool Mos6581::is_v3_active() const
 {
-    return (_voice_3_filtered || !_voice_3_off);
+    return !(_voice_3_filtered && _voice_3_off);
 }
 
 }
