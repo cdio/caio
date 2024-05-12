@@ -90,7 +90,6 @@ protected:
     /**
      * Initialise this cassette interface.
      * @param clk System clock.
-     * @warning The clock parameter must be valid otherwise the process is terminated.
      */
     ZX80Cassette(const sptr_t<Clock>& clk);
 
@@ -159,7 +158,6 @@ public:
      * @param clk     System clock;
      * @param cassdir Cassette directory.
      * @exception IOError if the specified cassette directory does not exist or it is not a directory.
-     * @warning The clock parameter must be valid otherwise the process is terminated.
      * @see ZX80Cassette(const sptr_t<Clock>&)
      */
     ZX80CassetteO(const sptr_t<Clock>& clk, const std::string& cassdir);
@@ -234,7 +232,6 @@ public:
      * @param clk     System clock;
      * @param cassdir Cassette directory.
      * @exception IOError if the specified cassette directory does not exist or it is not a directory.
-     * @warning The clock parameter must be valid otherwise the process is terminated.
      * @see ZX80CassetteO(const sptr_t<Clock>&, const std::string&)
      */
     ZX80CassetteP(const sptr_t<Clock>& clk, const std::string& cassdir);

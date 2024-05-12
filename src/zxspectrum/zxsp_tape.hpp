@@ -149,7 +149,6 @@ public:
      * @param otape    Output tape file (TAP) or directory;
      * @param fastload true to deactivate emulation of cassette speed; false otherwise.
      * @exception IOError
-     * @warning If the clock parameter is not valid the process is terminated.
      * @see load(const std::string&)
      * @see save(const std::string&)
      */

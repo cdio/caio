@@ -158,7 +158,6 @@ protected:
      * @param rmaps Address mappings for read operations (it must have the same size as the write map);
      * @param wmaps Address mappings for write operations (it must have the same size as the read map);
      * @param amask Address space mask (addresses are ANDed with this mask).
-     * @warning The process is terminated on invalid arguments.
      * @see reset()
      */
     ASpace(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask) {
@@ -174,7 +173,6 @@ protected:
      * @param rmaps Address mappings for read operations;
      * @param wmaps Address mappings for write operations;
      * @param amask Address space mask (addresses are ANDed with this mask).
-     * @warning The process is terminated on invalid arguments.
      */
     void reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask);
 

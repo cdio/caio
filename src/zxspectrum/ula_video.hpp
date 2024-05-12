@@ -285,7 +285,6 @@ public:
      * @param cpu   CPU;
      * @param ram   RAM containing the video memory;
      * @param label Label assigned to this device.
-     * @warning All parameters must be valid otherwise the process is terminated.
      * @see render_line(const renderer_t&)
      */
     ULAVideo(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, const std::string& label);

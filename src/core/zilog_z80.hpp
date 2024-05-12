@@ -327,7 +327,6 @@ public:
      * @see init()
      * @see monitor::monitored_cpu_defaults()
      * @see monitor::MonitoredCPU
-     * @warning If one of the input/output stream parameters are invalid the process is terminated.
      */
     void init_monitor(int ifd, int ofd, const monitor::load_cb_t& load = {}, const monitor::save_cb_t& save = {});
 
@@ -534,7 +533,6 @@ public:
     /**
      * Initialise this CPU.
      * @param mmap System mappings.
-     * @warning mmap must be a parameter otherwise the process is terminated.
      */
     void init(const sptr_t<ASpace>& mmap);
 

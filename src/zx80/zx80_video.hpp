@@ -98,7 +98,6 @@ public:
      * @param clk   System's clock;
      * @param rvideo True to reverse video, false otherwise;
      * @param label Label assigned to this device.
-     * @warning If the clk parameter is not valid the process is terminated.
      * @see render_line(const renderer_t&)
      */
     ZX80Video(const sptr_t<Clock>& clk, bool rvideo, const std::string& label);

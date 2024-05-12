@@ -58,7 +58,6 @@ public:
      * @param addr Address to read from;
      * @param mode Read mode (default is ReadMode::Read).
      * @return The data stored at the specified address.
-     * @warning If the device does not handle the specified address the process is terminated.
      * @see ReadMode
      */
     virtual uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) = 0;
@@ -67,7 +66,6 @@ public:
      * Read from an address or register without changing the device's internal state.
      * @param addr Address to read from;
      * @return The data stored at the specified address.
-     * @warning If the device does not handle the specified address the process is terminated.
      */
     uint8_t peek(addr_t addr) const {
         return const_cast<Device*>(this)->read(addr, ReadMode::Peek);
@@ -77,7 +75,6 @@ public:
      * Write a value to an address or register.
      * @param addr Address to write to;
      * @param data Data to write.
-     * @warning If the device does not handle the specified address the process is terminated.
      */
     virtual void write(addr_t addr, uint8_t data) = 0;
 

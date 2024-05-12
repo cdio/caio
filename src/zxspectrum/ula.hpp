@@ -54,7 +54,6 @@ public:
      * @param kbd  Keyboard;
      * @param joy  Kempston joystick;
      * @param tape Cassette interface.
-     * @warning All parameters must be valid otherwise the process is terminated.
      */
     ULA(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, const sptr_t<ROM>& rom,
         const sptr_t<ZXSpectrumKeyboard>& kbd, const sptr_t<Joystick>& joy,
