@@ -32,7 +32,6 @@
 #include "zx80.hpp"
 #include "zxsp.hpp"
 
-
 using namespace caio;
 
 template<class MACHINE, class CMDLINE>
@@ -106,7 +105,7 @@ int main(int argc, const char** argv)
         std::exit(EXIT_SUCCESS);
     }
 
-    auto it = machines.find(utils::tolow(name));
+    auto it = machines.find(caio::tolow(name));
     if (it != machines.end()) {
         it->second(argc, argv);
         /* NOTREACHED */
