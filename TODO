@@ -13,8 +13,7 @@
             VICE-testprogs/SCPU/scputest
             VICE-testprogs/CPU/kdormann
             VICE-testprogs/general/banking00
-- SID:      Reverse engineer the real 8580 and implement it
-- SID:      Fix saturation (ballad/pantheon_toggle) and remove reSID support
+- SID:      Remove 3rdpary reSID library
 - VICII:    Fix sprite position (batman, turrican)
 - VICII:    Fix border colour during open-border mode
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"

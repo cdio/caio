@@ -100,8 +100,10 @@ std::string Cmdline::usage() const
 
         // 0         1         2         3         4         5         6         7
         // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
-    os << "usage: " << _progname << " <options>\n"
-          "where <options> are:\n"
+    os << "usage: " << _progname << " <options> [<file>]\n"
+          "where <file> is the name of a program, cartridge or\n"
+          "snapshot to launch (the file format is auto-detected)\n"
+          "and <options> are:\n"
           " --conf <cfile>          Configuration file\n"
           " --romdir <romdir>       ROMs directory\n"
           " --palettedir <pdir>     Colour palette directory\n"
@@ -148,7 +150,7 @@ Confile Cmdline::defaults()
     return cf;
 }
 
-Confile Cmdline::parse(int argc, const char** argv)
+std::pair<Confile, std::string> Cmdline::parse(int argc, const char** argv)
 {
     CAIO_ASSERT(argc > 0 && argv != nullptr && *argv != nullptr);
 
@@ -156,6 +158,7 @@ Confile Cmdline::parse(int argc, const char** argv)
     const auto& opts = options();
 
     Confile cf{};
+    std::string pname{};
 
     /*
      * Process special cases --help and --version.
@@ -191,6 +194,10 @@ Confile Cmdline::parse(int argc, const char** argv)
         } else if (optstr.starts_with("-")) {
             pos = 1;
         } else {
+            if (i + 1 == argc) {
+                pname = argv[i];
+                continue;
+            }
             throw InvalidArgument{"Invalid command line option: " + optstr};
         }
 
@@ -237,7 +244,7 @@ Confile Cmdline::parse(int argc, const char** argv)
         }
     }
 
-    return cf;
+    return {cf, pname};
 }
 
 std::vector<Option> Cmdline::options() const

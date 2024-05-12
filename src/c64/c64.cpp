@@ -42,8 +42,10 @@ namespace caio {
 namespace commodore {
 namespace c64 {
 
-void C64::run()
+void C64::run(const std::string& pname)
 {
+    autorun(pname);
+
     create_ui();
     make_widgets();
 
@@ -82,6 +84,23 @@ void C64::run()
     }
 
     start();
+}
+
+void C64::autorun(const std::string& pname)
+{
+    if (!pname.empty()) {
+        if (Crt::is_crt(pname)) {
+            if (!_conf.cartridge.empty()) {
+                log.warn("Cartridge file overrided. From %s to %s\n", _conf.cartridge.c_str(), pname.c_str());
+            }
+            _conf.cartridge = pname;
+        } else {
+            if (!_conf.prgfile.empty()) {
+                log.warn("Program file overrided. From %s to %s\n", _conf.prgfile.c_str(), pname.c_str());
+            }
+            _conf.prgfile = pname;
+        }
+    }
 }
 
 void C64::start()
@@ -258,9 +277,9 @@ void C64::create_devices()
     _vram = std::make_shared<NibbleRAM>(VRAM_SIZE, "VRAM");
 
     if (_conf.resid) {
-        _sid = std::make_shared<Mos6581Resid>(Mos6581Resid::version(), CLOCK_FREQ_PAL);
+        _sid = std::make_shared<Mos6581Resid>(Mos6581Resid::version(), CLOCK_FREQ);
     } else {
-        _sid = std::make_shared<Mos6581>("SID", CLOCK_FREQ_PAL);
+        _sid = std::make_shared<Mos6581>("SID", CLOCK_FREQ);
     }
 
     _cia1 = std::make_shared<Mos6526>("CIA1");
@@ -278,7 +297,7 @@ void C64::create_devices()
     _pla = std::make_shared<PLA>(_ram, _basic, _kernal, _chargen, _io);
     _cpu = std::make_shared<Mos6510>(_pla);
 
-    _clk = std::make_shared<Clock>("CLK", CLOCK_FREQ_PAL, _conf.delay);
+    _clk = std::make_shared<Clock>("CLK", CLOCK_FREQ, _conf.delay);
 
     auto unit8 = fs::fix_home(_conf.unit8);
     if (!unit8.empty()) {

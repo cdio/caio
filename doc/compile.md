@@ -10,16 +10,13 @@ External dependencies:
 * [SDL2](https://libsdl.org)
 
 ```
-    $ sudo apt install clang pkg-config libsdl2-dev libsdl2-image-dev
-    ...
+    sudo apt install clang pkg-config libsdl2-dev libsdl2-image-dev
 ```
 ```
-    $ make PREFIX=/usr/local
-    ...
+    make PREFIX=/usr/local
 ```
 ```
-    $ sudo make PREFIX=/usr/local install
-    ...
+    sudo make PREFIX=/usr/local install
 ```
 The default `PREFIX` is `/opt/caio`.
 
@@ -36,20 +33,18 @@ To install xcode, xcode command line tools, and brew follow the instructions
 [here](https://developer.apple.com/xcode) and [here](https://brew.sh).
 
 ```
-   $ xcode-select --install
-   ...
-   $ brew install pkg-config sdl2 sdl2_image
-   ...
+   xcode-select --install
+```
+```
+   brew install pkg-config sdl2 sdl2_image
 ```
 Once these packages are installed and updated:
 
 ```
-    $ make PREFIX=/usr/local
-    ...
+    make PREFIX=/usr/local
 ```
 ```
-    $ sudo make PREFIX=/usr/local install
-    ...
+    sudo make PREFIX=/usr/local install
 ```
 The default `PREFIX` is `/opt/caio`.
 

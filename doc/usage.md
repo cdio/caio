@@ -137,8 +137,10 @@ There are other widgets that depend on the specifc platform, such as:
 
 ```
 $ caio c64 --help
-usage: caio c64 <options>
-where <options> are:
+usage: c64 <options> [<file>]
+where <file> is the name of a program, cartridge or
+snapshot to launch (the file format is auto-detected)
+and <options> are:
  ...
 Commodore C64 specific:
  --prg <prg>             Load a PRG file as soon as the basic is ready
@@ -251,8 +253,10 @@ LOAD "RAMBO",8,1
 
 ```
 $ caio zx80 --help
-usage: caio zx80 <options>
-where <options> are:
+usage: zx80 <options> [<file>]
+where <file> is the name of a program, cartridge or
+snapshot to launch (the file format is auto-detected)
+and <options> are:
  ...
 Sinclair ZX80 specific:
  --ram16 [yes|no]        Attach a 16K RAM instead of the default 1K RAM
@@ -323,8 +327,10 @@ that exploit the flicker-free technique:
 
 ```
 $ caio zxspectrum --help
-usage: caio zxspectrum <options>
-where <options> are:
+usage: zxspectrum <options> [<file>]
+where <file> is the name of a program, cartridge or
+snapshot to launch (the file format is auto-detected)
+and <options> are:
 ...
 Sinclair ZX-Spectrum 48K specific:
  --tape <fname|dir>      Set the input tape file (TAP) or directory

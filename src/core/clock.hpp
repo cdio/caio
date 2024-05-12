@@ -29,11 +29,6 @@
 namespace caio {
 
 /**
- * Clock frequency on PAL systems (Hz).
- */
-constexpr static const unsigned CLOCK_FREQ_PAL = 985248;
-
-/**
  * Clockable.
  * A clockable is implemented by any class that must be scheduled by a clock.
  */

@@ -28,10 +28,10 @@
 namespace caio {
 namespace config {
 
-Section parse(int argc, const char** argv, Cmdline& cmdline)
+std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdline)
 {
     Confile def{cmdline.defaults()};
-    Confile cline{cmdline.parse(argc, argv)};
+    auto [cline, pname] = cmdline.parse(argc, argv);
     Confile cfile{};
 
     const auto& gsec = cline[SEC_GENERIC];
@@ -69,7 +69,7 @@ Section parse(int argc, const char** argv, Cmdline& cmdline)
     merged.merge(def.extract(sname));
     merged.merge(def.extract(SEC_GENERIC));
 
-    return merged;
+    return {merged, pname};
 }
 
 VJoyConfig::VJoyConfig(Section& sec)

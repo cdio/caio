@@ -21,6 +21,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <utility>
 
 #include "keyboard.hpp"
 #include "logger.hpp"
@@ -268,14 +269,15 @@ public:
      * Parse the command line.
      * @param argc argc as received by the main() function;
      * @param argv argv as received by the main() function.
-     * @return A configuration file with all the parsed values.
+     * @return A pair containing: configuration file with all the parsed values,
+     * and a string containing the name of a program to launch (can be empty).
      * @exception InvalidArgument if an unknown command line option is detected or
      * a mandatory argument is missing.
      * @see Confile
      * @see options()
      * @see usage()
      */
-    Confile parse(int argc, const char** argv);
+    std::pair<Confile, std::string> parse(int argc, const char** argv);
 
     /**
      * Return a vector with the command line options.
@@ -307,16 +309,17 @@ private:
  * Configuration parser.
  * Parse the command line options and an eventual configuartion file
  * and generate a section containing all the configuration values.
- * The section is build using the following precedence:
+ * The section is built using the following precedence:
  *   1. Command line options
  *   2. Configuration file values
  *   3. Default values
  * @param argc    argc as received by main();
  * @param argv    argv as received by main();
  * @param cmdline Command line parser.
- * @return A section containing all the configuration values.
+ * @return A pair containing: A section with all the configuration values,
+ * and a string containing the name of a program to launch (can be empty).
  */
-Section parse(int argc, const char** argv, Cmdline& cmdline);
+std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdline);
 
 /**
  * Virtual joystick configuration.

@@ -59,6 +59,7 @@ INCS+=		c64.hpp \
 		c64_io.hpp \
 		c64_joystick.hpp \
 		c64_keyboard.hpp \
+		c64_params.hpp \
 		c64_pla.hpp \
 		c64_vic2_aspace.hpp \
 		p00file.hpp \

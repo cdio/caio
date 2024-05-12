@@ -36,8 +36,10 @@ namespace caio {
 namespace sinclair {
 namespace zx80 {
 
-void ZX80::run()
+void ZX80::run(const std::string& pname)
 {
+    autorun(pname);
+
     create_ui();
     make_widgets();
 
@@ -51,6 +53,16 @@ void ZX80::run()
     }
 
     start();
+}
+
+void ZX80::autorun(const std::string& pname)
+{
+    if (!pname.empty()) {
+        if (!_conf.prgfile.empty()) {
+            log.warn("Program file overrided. From %s to %s\n", _conf.prgfile.c_str(), pname.c_str());
+        }
+        _conf.prgfile = pname;
+    }
 }
 
 void ZX80::start()

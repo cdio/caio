@@ -57,9 +57,10 @@ public:
     /**
      * Build this ZX80 emulator and start it.
      * This method returns on error or when the user terminates the emulator through the UI.
+     * @param pname If not empty, name of the program to launch (its format is auto-detected).
      * @see start()
      */
-    void run();
+    void run(const std::string& pname);
 
     /**
      * Return a human-readable string representation of this ZX80.
@@ -76,6 +77,14 @@ public:
     }
 
 private:
+    /**
+     * Auto-detect the format of a file to launch and
+     * set the configuration options accordingly.
+     * @param pname File to launch.
+     * @exception IOError
+     */
+    void autorun(const std::string& pname);
+
     /**
      * Start this ZX80.
      * - Instantiate the UI and run it in the context of the calling thread.

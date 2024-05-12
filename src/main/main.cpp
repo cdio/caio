@@ -39,13 +39,13 @@ template<class MACHINE, class CMDLINE>
 {
     try {
         CMDLINE cmdline{};
-        auto sec = config::parse(argc, argv, cmdline);
+        auto [sec, pname] = config::parse(argc, argv, cmdline);
 
         caio::log.logfile(sec[config::KEY_LOGFILE]);
         caio::log.loglevel(sec[config::KEY_LOGLEVEL]);
 
         MACHINE machine{sec};
-        machine.run();
+        machine.run(pname);
 
         std::exit(EXIT_SUCCESS);
 

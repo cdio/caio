@@ -46,9 +46,11 @@ ZXSpectrum::~ZXSpectrum()
 {
 }
 
-void ZXSpectrum::run()
+void ZXSpectrum::run(const std::string& pname)
 {
     _title = _conf.title;
+
+    autorun(pname);
 
     create_devices();
     connect_devices();
@@ -63,6 +65,16 @@ void ZXSpectrum::run()
     }
 
     start();
+}
+
+void ZXSpectrum::autorun(const std::string& pname)
+{
+    if (!pname.empty()) {
+        if (!_conf.snap.empty()) {
+            log.warn("Snapshot file overrided. From %s to %s\n", _conf.snap.c_str(), pname.c_str());
+        }
+        _conf.snap = pname;
+    }
 }
 
 void ZXSpectrum::start()
