@@ -20,6 +20,7 @@
 
 #include <array>
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
