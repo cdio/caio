@@ -26,12 +26,10 @@
 #include "types.hpp"
 #include "cbm_bus.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c1541 {
 
-using buf_t = cbm_bus::buf_t;
 using ReadByte = cbm_bus::ReadByte;
 
 constexpr static const uint8_t MAX_CHANNELS    = cbm_bus::Device::MAX_CHANNELS;
@@ -325,7 +323,7 @@ protected:
      * @return A status code.
      * @see Status
      */
-    virtual Status channel_write(uint8_t ch, const buf_t& buf) = 0;
+    virtual Status channel_write(uint8_t ch, const buffer_t& buf) = 0;
 
     /**
      * Execute a DOS command.
@@ -407,7 +405,7 @@ private:
     /**
      * @see cbm_bus::Device::write()
      */
-    void write(uint8_t ch, const buf_t& buf) override;
+    void write(uint8_t ch, const buffer_t& buf) override;
 
     /**
      * Execute a command.

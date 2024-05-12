@@ -34,8 +34,6 @@ namespace caio {
 namespace commodore {
 namespace cbm_bus {
 
-using buf_t = std::vector<uint8_t>;
-
 /**
  * CBM-BUS data.
  */
@@ -405,7 +403,7 @@ public:
         return _chunit;
     }
 
-    buf_t& param() {
+    buffer_t& param() {
         return _param;
     }
 
@@ -432,9 +430,9 @@ public:
     }
 
 private:
-    uint8_t _cmd{};
-    uint8_t _chunit{};
-    buf_t   _param{};
+    uint8_t     _cmd{};
+    uint8_t     _chunit{};
+    buffer_t    _param{};
 };
 
 /**
@@ -599,7 +597,7 @@ public:
      * @param ch    Channel to write to:
      * @param value Buffer to write.
      */
-    virtual void write(uint8_t ch, const buf_t& buf) = 0;
+    virtual void write(uint8_t ch, const buffer_t& buf) = 0;
 
     /**
      * Get the device activity status.

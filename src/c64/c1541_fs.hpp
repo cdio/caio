@@ -32,7 +32,6 @@
 #include "fs.hpp"
 #include "c1541.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c1541 {
@@ -133,7 +132,7 @@ private:
     /**
      * @see C1541::channel_write()
      */
-    Status channel_write(uint8_t ch, const buf_t& buf) override;
+    Status channel_write(uint8_t ch, const buffer_t& buf) override;
 
     /**
      * @see C1541::command(DOSCommand, const std::string&)

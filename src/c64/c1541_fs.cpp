@@ -401,7 +401,7 @@ void C1541Fs::channel_push_back(uint8_t ch)
     }
 }
 
-Status C1541Fs::channel_write(uint8_t ch, const buf_t& buf)
+Status C1541Fs::channel_write(uint8_t ch, const buffer_t& buf)
 {
     auto& channel = _channels[ch];
 
