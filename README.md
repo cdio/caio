@@ -44,7 +44,8 @@ the 8K ROM.
 
 The emulation of the
 [Sinclair ZX-Spectrum 48K](https://en.wikipedia.org/wiki/ZX_Spectrum)
-reached beta status and almost all of the desired features are completed.
+reached beta status. Only the 48K version of this machine is emulated,
+it supports the cassette TAP file format and snapshot files Z80 and SNA.
 
 ![zxspectrum-48K-extreme](images/zxspectrum-48k-extreme.gif "ZX-Spectrum 48K - Extreme")
 ![zxspectrum-48K-jetset-willy](images/zxspectrum-48k-jetset-willy.gif "ZX-Spectrum 48K - JetSet Willy")
