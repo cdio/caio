@@ -25,7 +25,6 @@
 #include "gpio.hpp"
 #include "c64_crt.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

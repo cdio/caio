@@ -53,7 +53,6 @@
 #define D_KEYMAPSDIR        D_DATADIR "/keymaps"
 #endif
 
-
 namespace caio {
 namespace config {
 

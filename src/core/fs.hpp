@@ -30,7 +30,6 @@
 
 #include "types.hpp"
 
-
 namespace caio {
 namespace fs {
 

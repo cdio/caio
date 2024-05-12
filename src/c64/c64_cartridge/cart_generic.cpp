@@ -30,7 +30,6 @@
 #define DEBUG(args...)
 #endif
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

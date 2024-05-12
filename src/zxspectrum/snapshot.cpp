@@ -18,7 +18,6 @@
  */
 #include "snapshot.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {

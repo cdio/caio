@@ -18,7 +18,6 @@
  */
 #include "mos_6510.hpp"
 
-
 namespace caio {
 
 uint8_t Mos6510::read(addr_t addr, Device::ReadMode mode)

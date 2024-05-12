@@ -20,7 +20,6 @@
 
 #include <sstream>
 
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {

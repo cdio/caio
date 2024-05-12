@@ -25,7 +25,6 @@
 #include "name.hpp"
 #include "types.hpp"
 
-
 namespace caio {
 
 using devptr_t = sptr_t<class Device>;

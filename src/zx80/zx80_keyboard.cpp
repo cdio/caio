@@ -21,7 +21,6 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zx80 {

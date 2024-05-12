@@ -27,7 +27,6 @@
 #include "gpio.hpp"
 #include "pin.hpp"
 
-
 namespace caio {
 
 /**

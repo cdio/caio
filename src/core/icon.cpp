@@ -23,7 +23,6 @@
 #include "image.hpp"
 #include "rgb.hpp"
 
-
 namespace caio {
 
 constexpr static const unsigned ICON_WIDTH  = 160;

@@ -22,7 +22,6 @@
 
 #include "ui_sdl2/sdl2.hpp"
 
-
 namespace caio {
 namespace ui {
 namespace sdl2 {

@@ -30,7 +30,6 @@
 #include "ula_audio.hpp"
 #include "ula_video.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {

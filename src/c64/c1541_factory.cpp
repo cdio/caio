@@ -23,7 +23,6 @@
 
 #include "c1541_fs.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c1541 {

@@ -22,7 +22,6 @@
 
 #include "endian.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

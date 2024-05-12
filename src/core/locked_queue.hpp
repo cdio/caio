@@ -21,7 +21,6 @@
 #include <mutex>
 #include <queue>
 
-
 namespace caio {
 
 template<typename T>

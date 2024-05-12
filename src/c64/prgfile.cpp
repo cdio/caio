@@ -23,7 +23,6 @@
 #include "endian.hpp"
 #include "fs.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

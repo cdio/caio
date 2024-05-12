@@ -30,7 +30,6 @@
 #include "types.hpp"
 #include "version.hpp"
 
-
 namespace caio {
 namespace test {
 

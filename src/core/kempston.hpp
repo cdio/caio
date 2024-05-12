@@ -21,7 +21,6 @@
 #include "joystick.hpp"
 #include "types.hpp"
 
-
 namespace caio {
 namespace kempston {
 

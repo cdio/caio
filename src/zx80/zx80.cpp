@@ -32,7 +32,6 @@
 #include "ofile.hpp"
 #include "zx80_params.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zx80 {

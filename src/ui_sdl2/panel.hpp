@@ -26,7 +26,6 @@
 #include "rgb.hpp"
 #include "ui_sdl2/widget.hpp"
 
-
 namespace caio {
 namespace ui {
 namespace sdl2 {

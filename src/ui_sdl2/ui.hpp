@@ -36,7 +36,6 @@
 #include "ui_sdl2/audio.hpp"
 #include "ui_sdl2/panel.hpp"
 
-
 namespace caio {
 namespace ui {
 namespace sdl2 {

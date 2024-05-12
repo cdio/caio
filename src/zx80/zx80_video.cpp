@@ -18,15 +18,11 @@
  */
 #include "zx80_video.hpp"
 
-#include <numbers>
-#include <gsl/assert>
-
 #include "clock.hpp"
 #include "logger.hpp"
 #include "signal.hpp"
 #include "types.hpp"
 #include "utils.hpp"
-
 
 namespace caio {
 namespace sinclair {
@@ -44,8 +40,7 @@ ZX80Video::ZX80Video(const sptr_t<Clock>& clk, bool rvideo, const std::string& l
       _palette{builtin_palette},
       _scanline(WIDTH)
 {
-    using namespace gsl;
-    Expects(clk);
+    CAIO_ASSERT(clk.get() != nullptr);
 }
 
 void ZX80Video::palette(const std::string& fname)

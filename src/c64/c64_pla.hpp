@@ -25,7 +25,6 @@
 #include "aspace.hpp"
 #include "types.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

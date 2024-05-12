@@ -28,7 +28,6 @@
 #include "zx80_params.hpp"
 #include "zx80_video.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zx80 {

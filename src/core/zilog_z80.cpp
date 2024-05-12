@@ -18,8 +18,6 @@
  */
 #include "zilog_z80.hpp"
 
-#include <gsl/assert>
-
 namespace caio {
 namespace zilog {
 
@@ -363,8 +361,7 @@ Z80::~Z80()
 
 void Z80::init(const sptr_t<ASpace>& mmap)
 {
-    using namespace gsl;
-    Expects(mmap);
+    CAIO_ASSERT(mmap.get() != nullptr);
 
     _mmap = mmap;
     Z80::reset();
@@ -372,8 +369,7 @@ void Z80::init(const sptr_t<ASpace>& mmap)
 
 void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const monitor::save_cb_t& save)
 {
-    using namespace gsl;
-    Expects(ifd >= 0 && ofd >= 0);
+    CAIO_ASSERT(ifd >= 0 && ofd >= 0);
 
     auto getpc = [this]() -> addr_t {
         return _regs.PC;

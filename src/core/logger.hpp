@@ -26,7 +26,6 @@
 
 #include "types.hpp"
 
-
 namespace caio {
 
 class LoggerError : public Error {

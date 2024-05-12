@@ -18,7 +18,6 @@
  */
 #include "c64_bus_controller.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

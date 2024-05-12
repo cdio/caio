@@ -23,7 +23,6 @@
 #include "ui.hpp"
 #include "utils.hpp"
 
-
 namespace caio {
 namespace mos_6581 {
 

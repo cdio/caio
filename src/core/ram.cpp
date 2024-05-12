@@ -18,8 +18,6 @@
  */
 #include "ram.hpp"
 
-#include <gsl/assert>
-
 #include "types.hpp"
 #include "fs.hpp"
 
@@ -55,15 +53,11 @@ RAM::~RAM()
 
 uint8_t RAM::read(addr_t addr, ReadMode)
 {
-    using namespace gsl;
-    Expects(addr < _data.size());
     return _data[addr];
 }
 
 void RAM::write(addr_t addr, uint8_t data)
 {
-    using namespace gsl;
-    Expects(addr < _data.size());
     _data[addr] = data;
 }
 

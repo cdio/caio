@@ -22,7 +22,6 @@
 
 #include "types.hpp"
 
-
 namespace caio {
 namespace readline {
 

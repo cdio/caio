@@ -26,7 +26,6 @@
 #include "name.hpp"
 #include "types.hpp"
 
-
 namespace caio {
 namespace keyboard {
 

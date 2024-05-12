@@ -18,8 +18,6 @@
  */
 #include "aspace.hpp"
 
-#include <gsl/assert>
-
 #include "logger.hpp"
 #include "utils.hpp"
 
@@ -59,14 +57,12 @@ void ASpace::write(addr_t addr, uint8_t value)
 
 void ASpace::reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask)
 {
-    using namespace gsl;
-
     auto banks = wmaps.size();
-    Expects(banks != 0 && banks == rmaps.size());
+    CAIO_ASSERT(banks != 0 && banks == rmaps.size());
 
     auto bsize = (static_cast<size_t>(amask) + 1) / banks;
     auto bmask = bsize - 1;
-    Expects((bsize & bmask) == 0);
+    CAIO_ASSERT((bsize & bmask) == 0);
 
     _amask = amask;
     _rmaps = rmaps;

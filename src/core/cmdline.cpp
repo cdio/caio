@@ -22,8 +22,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <gsl/assert>
-
 #include "fs.hpp"
 #include "types.hpp"
 #include "utils.hpp"
@@ -152,8 +150,7 @@ Confile Cmdline::defaults()
 
 Confile Cmdline::parse(int argc, const char** argv)
 {
-    using namespace gsl;
-    Expects(argc > 0 && argv != nullptr && *argv != nullptr);
+    CAIO_ASSERT(argc > 0 && argv != nullptr && *argv != nullptr);
 
     _progname = fs::basename(argv[0]);
     const auto& opts = options();

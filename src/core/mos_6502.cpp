@@ -20,7 +20,6 @@
 
 #include <chrono>
 #include <iomanip>
-#include <gsl/assert>
 
 #include "monitor.hpp"
 
@@ -332,8 +331,7 @@ std::string Mos6502::Registers::to_string() const
 
 void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const monitor::save_cb_t& save)
 {
-    using namespace gsl;
-    Expects(ifd >= 0 && ofd >= 0);
+    CAIO_ASSERT(ifd >= 0 && ofd >= 0);
 
     auto getpc = [this]() -> addr_t {
         return _regs.PC;

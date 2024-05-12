@@ -18,15 +18,10 @@
  */
 #include "ula_video.hpp"
 
-#include <numbers>
-
-#include <gsl/assert>
-
 #include "logger.hpp"
 #include "signal.hpp"
 #include "types.hpp"
 #include "utils.hpp"
-
 
 namespace caio {
 namespace sinclair {
@@ -59,8 +54,7 @@ ULAVideo::ULAVideo(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, const std::st
       _palette{builtin_palette},
       _scanline(WIDTH)
 {
-    using namespace gsl;
-    Expects(_cpu && _ram && _ram->size() > VRAM_MIN_SIZE);
+    CAIO_ASSERT(_cpu && _ram && _ram->size() > VRAM_MIN_SIZE);
 }
 
 ULAVideo::~ULAVideo()

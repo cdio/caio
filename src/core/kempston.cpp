@@ -18,7 +18,6 @@
  */
 #include "kempston.hpp"
 
-
 namespace caio {
 namespace kempston {
 

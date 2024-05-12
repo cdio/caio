@@ -20,7 +20,6 @@
 
 #include "image.hpp"
 
-
 namespace caio {
 
 const Image& icon();

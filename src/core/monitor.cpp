@@ -21,8 +21,6 @@
 #include <algorithm>
 #include <sstream>
 
-#include <gsl/assert>
-
 #include "utils.hpp"
 
 namespace caio {
@@ -177,8 +175,6 @@ Monitor::Monitor(int ifd, int ofd, MonitoredCPU&& cpu)
     : _rd{ifd, ofd},
       _cpu{cpu}
 {
-    using namespace gsl;
-    Expects(_cpu);
 }
 
 bool Monitor::run()

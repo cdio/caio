@@ -18,7 +18,6 @@
  */
 #pragma once
 
-
 namespace caio {
 namespace sinclair {
 namespace zx80 {

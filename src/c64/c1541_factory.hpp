@@ -25,7 +25,6 @@
 #include "cbm_bus.hpp"
 #include "c1541.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c1541 {

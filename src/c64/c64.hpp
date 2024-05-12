@@ -38,7 +38,6 @@
 #include "c64_pla.hpp"
 #include "c64_vic2_aspace.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

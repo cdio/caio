@@ -18,7 +18,6 @@
  */
 #include "ula_audio.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {

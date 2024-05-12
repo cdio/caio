@@ -30,7 +30,6 @@
 #include "types.hpp"
 #include "keyboard.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

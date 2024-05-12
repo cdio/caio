@@ -18,8 +18,6 @@
  */
 #include "zx80_cassette.hpp"
 
-#include <gsl/assert>
-
 #include "logger.hpp"
 
 /* State machines debug */
@@ -31,7 +29,6 @@
 #define ZX80_CASS_DEBUG(fmt, args...)
 #endif
 
-
 namespace caio {
 namespace sinclair {
 namespace zx80 {
@@ -39,8 +36,7 @@ namespace zx80 {
 ZX80Cassette::ZX80Cassette(const sptr_t<Clock>& clk)
     : _clk{clk}
 {
-    using namespace gsl;
-    Expects(_clk);
+    CAIO_ASSERT(_clk.get() != nullptr);
 }
 
 ZX80Cassette::~ZX80Cassette()

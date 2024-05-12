@@ -18,7 +18,6 @@
  */
 #include "mos_6502.hpp"
 
-
 namespace caio {
 
 int Mos6502::i_CLC(Mos6502& self, addr_t)

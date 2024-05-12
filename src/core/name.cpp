@@ -21,7 +21,6 @@
 #include <iomanip>
 #include <sstream>
 
-
 namespace caio {
 
 std::string Name::to_string() const

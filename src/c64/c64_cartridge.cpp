@@ -20,7 +20,6 @@
 
 #include <array>
 #include <sstream>
-#include <gsl/assert>
 
 #include "logger.hpp"
 #include "types.hpp"
@@ -41,8 +40,7 @@ Cartridge::Cartridge(const std::string& type, const sptr_t<Crt>& crt)
     : Device{type, (crt ? crt->name() : "")},
       _crt{crt}
 {
-    using namespace gsl;
-    Expects(crt);
+    CAIO_ASSERT(crt.get() != nullptr);
 }
 
 std::string Cartridge::name() const

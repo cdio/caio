@@ -25,7 +25,6 @@
 #include "device.hpp"
 #include "zilog_z80.hpp"
 
-
 namespace caio {
 namespace test {
 

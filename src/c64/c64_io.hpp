@@ -21,7 +21,6 @@
 #include "types.hpp"
 #include "device.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

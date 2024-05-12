@@ -20,7 +20,6 @@
 
 #include <algorithm>
 
-
 namespace caio {
 namespace zilog {
 

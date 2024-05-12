@@ -18,8 +18,6 @@
  */
 #include "zxsp_tape.hpp"
 
-#include <gsl/assert>
-
 #include "endian.hpp"
 #include "logger.hpp"
 
@@ -31,7 +29,6 @@
 #else
 #define ZXSPECTRUM_TAPE_DEBUG(fmt, args...)
 #endif
-
 
 namespace caio {
 namespace sinclair {
@@ -99,8 +96,7 @@ Tape::Tape(const sptr_t<Clock>& clk, const std::string& itape, const std::string
     : _clk{clk},
       _fastload{fastload}
 {
-    using namespace gsl;
-    Expects(_clk);
+    CAIO_ASSERT(_clk.get() != nullptr);
 
     load(itape);
     save(otape);

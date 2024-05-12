@@ -23,7 +23,6 @@
 #include "latch.hpp"
 #include "pullup.hpp"
 
-
 namespace caio {
 
 /**

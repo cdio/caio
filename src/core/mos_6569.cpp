@@ -18,8 +18,6 @@
  */
 #include "mos_6569.hpp"
 
-#include <gsl/assert>
-
 #include "endian.hpp"
 #include "logger.hpp"
 #include "utils.hpp"
@@ -122,9 +120,6 @@ size_t Mos6569::size() const
 
 uint8_t Mos6569::read(addr_t addr, ReadMode mode)
 {
-    using namespace gsl;
-    Expects(addr < REGMAX);
-
     uint8_t data{};
 
     switch (addr) {
@@ -302,9 +297,6 @@ uint8_t Mos6569::read(addr_t addr, ReadMode mode)
 
 void Mos6569::write(addr_t addr, uint8_t data)
 {
-    using namespace gsl;
-    Expects(addr < REGMAX);
-
     switch (addr) {
     case REG_MIB_0_X:
         _mib_coord_x[0] = (_mib_coord_x[0] & 0x0100) | data;

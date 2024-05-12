@@ -18,7 +18,6 @@
  */
 #include "ui_sdl2/widget_volume.hpp"
 
-
 namespace caio {
 namespace ui {
 namespace sdl2 {

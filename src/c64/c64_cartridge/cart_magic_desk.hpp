@@ -22,7 +22,6 @@
 
 #include "../c64_cartridge.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

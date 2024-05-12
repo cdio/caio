@@ -23,7 +23,6 @@
 
 #include "rgb.hpp"
 
-
 namespace caio {
 
 struct Image {

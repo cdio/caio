@@ -31,7 +31,6 @@
 #include "zxsp_keyboard.hpp"
 #include "zxsp_tape.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {

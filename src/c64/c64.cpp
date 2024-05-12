@@ -38,7 +38,6 @@
 
 #include "c1541_factory.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

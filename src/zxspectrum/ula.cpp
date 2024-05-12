@@ -20,7 +20,6 @@
 
 #include "zxsp_params.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {

@@ -21,7 +21,6 @@
 #include "logger.hpp"
 #include "device_none.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

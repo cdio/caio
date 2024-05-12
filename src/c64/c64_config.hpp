@@ -20,7 +20,6 @@
 
 #include "config.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

@@ -25,7 +25,6 @@
 #include <utility>
 #include <vector>
 
-
 namespace caio {
 
 /**

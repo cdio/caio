@@ -21,7 +21,6 @@
 #include "endian.hpp"
 #include "logger.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {

@@ -22,11 +22,9 @@
 #include <initializer_list>
 #include <string>
 #include <vector>
-#include <gsl/assert>
 
 #include "endian.hpp"
 #include "types.hpp"
-
 
 namespace caio {
 
@@ -182,8 +180,7 @@ public:
     }
 
     const Rgba& operator[](size_t index) const {
-        using namespace gsl;
-        Expects(index < N);
+        CAIO_ASSERT(index < N);
         return _colors[index];
     }
 

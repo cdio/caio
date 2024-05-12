@@ -21,7 +21,6 @@
 #include "gpio.hpp"
 #include "mos_6502.hpp"
 
-
 namespace caio {
 
 /**

@@ -18,11 +18,8 @@
  */
 #include "ula_aspace.hpp"
 
-#include <gsl/assert>
-
 #include "logger.hpp"
 #include "zxsp_params.hpp"
-
 
 namespace caio {
 namespace sinclair {
@@ -47,8 +44,7 @@ ULAASpace::ULAASpace(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, const sptr_
       }}
 
 {
-    using namespace gsl;
-    Expects(_cpu && ram && rom && ram->size() == RAM_SIZE && rom->size() == ROM_SIZE &&
+    CAIO_ASSERT(_cpu && ram && rom && ram->size() == RAM_SIZE && rom->size() == ROM_SIZE &&
         _audio && _video && _kbd && _joy && _tape);
 
     ASpace::reset(_mmap, _mmap, ADDR_MASK);

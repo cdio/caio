@@ -20,7 +20,6 @@
 
 #include <string>
 
-
 namespace caio {
 namespace ui {
 

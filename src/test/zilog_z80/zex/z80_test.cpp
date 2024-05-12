@@ -31,7 +31,6 @@
 #include "utils.hpp"
 #include "version.hpp"
 
-
 namespace caio {
 namespace test {
 

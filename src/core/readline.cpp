@@ -29,7 +29,6 @@
 
 #include "logger.hpp"
 
-
 namespace caio {
 namespace readline {
 

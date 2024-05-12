@@ -186,4 +186,23 @@ ERROR_CLASS(IOError);
 ERROR_CLASS(SignalError);
 ERROR_CLASS(UIError);
 
+/**
+ * Argument check.
+ * @param cond Condition.
+ * @param emsg Error message.
+ * @execption InvalidArgument if the specified condition is not met.
+ */
+static inline void expects(bool cond, const std::string& emsg)
+{
+    if (!cond) {
+        throw InvalidArgument{emsg};
+    }
+}
+
+#ifdef D_DEBUG
+#define CAIO_ASSERT(cond)       caio::expects(cond, __PRETTY_FUNCTION__);
+#else
+#define CAIO_ASSERT(cond)
+#endif
+
 }

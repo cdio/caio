@@ -26,15 +26,12 @@
 #include <sstream>
 #include <thread>
 
-#include <gsl/assert>
-
 #include "version.hpp"
 #include "kempston.hpp"
 
 #include "zxsp_params.hpp"
 #include "snap_sna.hpp"
 #include "snap_z80.hpp"
-
 
 namespace caio {
 namespace sinclair {

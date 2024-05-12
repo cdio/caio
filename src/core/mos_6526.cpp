@@ -19,7 +19,6 @@
 #include "mos_6526.hpp"
 
 #include <array>
-#include <gsl/assert>
 
 #include "logger.hpp"
 #include "utils.hpp"
@@ -325,9 +324,6 @@ size_t Mos6526::size() const
 
 uint8_t Mos6526::read(addr_t addr, ReadMode mode)
 {
-    using namespace gsl;
-    Expects(addr < REGMAX);
-
     switch (addr) {
     case PRA:
         return ior(PRA);
@@ -396,9 +392,6 @@ uint8_t Mos6526::read(addr_t addr, ReadMode mode)
 
 void Mos6526::write(addr_t addr, uint8_t data)
 {
-    using namespace gsl;
-    Expects(addr < REGMAX);
-
     switch (addr) {
     case PRA:
         iow(PRA, (ior(addr) & ~_port_A_dir) | (data & _port_A_dir));

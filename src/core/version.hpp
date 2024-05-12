@@ -24,7 +24,6 @@
 #define D_VERSION   "0.0.0"
 #endif
 
-
 namespace caio {
 
 std::string version();

@@ -18,7 +18,6 @@
  */
 #include "version.hpp"
 
-
 namespace caio {
 
 static const char* VERSION = D_VERSION;

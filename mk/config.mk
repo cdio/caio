@@ -71,7 +71,6 @@ CPPFLAGS+=		-I${CWD} \
 			-I${ROOT} \
 			-I${ROOT}/src \
 			-I${ROOT}/src/core \
-			-I${ROOT}/3rdparty/GSL/include \
 			-I${ROOT}/3rdparty/sha2
 
 CXXFLAGS+=		${SYSDEP_CXXFLAGS}

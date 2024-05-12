@@ -20,7 +20,6 @@
 
 #include "device.hpp"
 
-
 namespace caio {
 
 extern devptr_t device_none;

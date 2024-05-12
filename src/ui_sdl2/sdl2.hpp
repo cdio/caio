@@ -26,7 +26,6 @@
 #include "keyboard.hpp"
 #include "rgb.hpp"
 
-
 namespace caio {
 namespace ui {
 namespace sdl2 {

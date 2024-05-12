@@ -20,7 +20,6 @@
 
 #include <map>
 
-
 namespace caio {
 namespace ui {
 namespace sdl2 {

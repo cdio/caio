@@ -23,7 +23,6 @@
 
 #include "name.hpp"
 
-
 namespace caio {
 namespace joystick {
 

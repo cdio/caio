@@ -24,7 +24,6 @@
 #include "rgb.hpp"
 #include "ui.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zx80 {

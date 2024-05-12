@@ -27,7 +27,6 @@
 #include "signal.hpp"
 #include "ui_config.hpp"
 
-
 namespace caio {
 namespace ui {
 namespace sdl2 {

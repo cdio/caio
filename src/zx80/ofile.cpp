@@ -21,7 +21,6 @@
 #include "endian.hpp"
 #include "fs.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zx80 {

@@ -20,7 +20,6 @@
 
 #include "ram.hpp"
 
-
 namespace caio {
 
 /**

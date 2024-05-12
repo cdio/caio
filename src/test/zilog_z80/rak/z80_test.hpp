@@ -28,7 +28,6 @@
 
 #include "z80_test_aspace.hpp"
 
-
 namespace caio {
 namespace test {
 

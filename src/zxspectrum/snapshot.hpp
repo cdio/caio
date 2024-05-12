@@ -26,7 +26,6 @@
 #include "types.hpp"
 #include "zilog_z80.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {

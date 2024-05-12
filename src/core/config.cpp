@@ -25,7 +25,6 @@
 #include "utils.hpp"
 #include "ui_config.hpp"
 
-
 namespace caio {
 namespace config {
 

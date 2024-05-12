@@ -18,8 +18,6 @@
  */
 #include "zx80_aspace.hpp"
 
-#include <gsl/assert>
-
 #include "logger.hpp"
 
 namespace caio {
@@ -38,8 +36,7 @@ ZX80ASpace::ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr
       _kbd{kbd},
       _cass{cass}
 {
-    using namespace gsl;
-    Expects(_cpu && _ram && _rom && _video && _kbd && _cass &&
+    CAIO_ASSERT(_cpu && _ram && _rom && _video && _kbd && _cass &&
         (_ram->size() == INTERNAL_RAM_SIZE || _ram->size() == EXTERNAL_RAM_SIZE) &&
         (_rom->size() == ROM_SIZE || _rom->size() == ROM8_SIZE));
 

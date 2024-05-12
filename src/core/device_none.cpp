@@ -20,7 +20,6 @@
 
 #include <memory>
 
-
 namespace caio {
 
 devptr_t device_none = std::make_shared<DeviceNone>();

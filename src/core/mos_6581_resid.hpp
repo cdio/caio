@@ -20,7 +20,6 @@
 
 #include "mos_6581_i.hpp"
 
-
 namespace caio {
 namespace mos_6581 {
 

@@ -24,7 +24,6 @@
 #include "device.hpp"
 #include "types.hpp"
 
-
 namespace caio {
 
 /**

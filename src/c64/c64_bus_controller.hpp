@@ -23,7 +23,6 @@
 #include "cbm_bus.hpp"
 #include "mos_6526.hpp"
 
-
 namespace caio {
 namespace commodore {
 namespace c64 {

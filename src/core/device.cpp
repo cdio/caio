@@ -18,7 +18,6 @@
  */
 #include "device.hpp"
 
-
 namespace caio {
 
 std::string Device::to_string() const

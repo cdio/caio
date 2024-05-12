@@ -24,7 +24,6 @@
 #include "fs.hpp"
 #include "types.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zx80 {

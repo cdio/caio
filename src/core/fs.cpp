@@ -31,7 +31,6 @@
 #include "logger.hpp"
 #include "types.hpp"
 
-
 namespace caio {
 namespace fs {
 

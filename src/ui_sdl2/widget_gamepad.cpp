@@ -18,7 +18,6 @@
  */
 #include "ui_sdl2/widget_gamepad.hpp"
 
-
 namespace caio {
 namespace ui {
 namespace sdl2 {

@@ -29,7 +29,6 @@
 #include "tapfile.hpp"
 #include "types.hpp"
 
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {

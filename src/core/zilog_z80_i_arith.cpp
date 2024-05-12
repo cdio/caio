@@ -18,7 +18,6 @@
  */
 #include "zilog_z80.hpp"
 
-
 namespace caio {
 namespace zilog {
 
