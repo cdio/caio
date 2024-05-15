@@ -88,7 +88,7 @@ void CartGeneric::reset()
             _generic_mode = GenericMode::ULTIMAX_16K;
             break;
         default:
-            throw InvalidCartridge{type(), "Invalid ROM size for Ultimax mode: " + cart.to_string()};
+            throw InvalidCartridge{"{}: Invalid ROM size for Ultimax mode: {}", type(), cart.to_string()};
         }
         break;
 

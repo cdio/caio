@@ -37,7 +37,7 @@ uint8_t ASpace::read(addr_t addr, ReadMode mode)
         return data;
     }
 
-    log.fatal("ASpace: Invalid read address: %04x\n", addr);
+    log.fatal("ASpace: Invalid read address: {:04x}\n", addr);
     /* NOTREACHED */
 }
 
@@ -50,7 +50,7 @@ void ASpace::write(addr_t addr, uint8_t value)
         _data_bus = value;
         dev.first->write(_address_bus, value);
     } else {
-        log.fatal("ASpace: Invalid write address: %04x\n", addr);
+        log.fatal("ASpace: Invalid write address: {:04x}\n", addr);
         /* NOTREACHED */
     }
 }

@@ -306,12 +306,12 @@ void ZX80Keyboard::add_key_map(const std::string& key_name, bool key_shift, bool
 {
     auto key = keyboard::to_key(key_name);
     if (key == keyboard::KEY_NONE) {
-        throw InvalidArgument{"Invalid key name: \"" + key_name + "\""};
+        throw InvalidArgument{"Invalid key name: \"{}\"", key_name};
     }
 
     MatrixKey impl_key = to_zx80(impl_name);
     if (impl_key == MatrixKey::KEY_NONE) {
-        throw InvalidArgument{"Invalid ZX80 key name: \"" + impl_name + "\""};
+        throw InvalidArgument{"Invalid ZX80 key name: \"{}\"", impl_name};
     }
 
     std::tuple pc_key{key, key_shift, key_altgr};
@@ -322,7 +322,7 @@ void ZX80Keyboard::add_key_map(const std::string& key_name, bool key_shift, bool
         /* Replace the existing definition */
         it.first->second = zx80_key;
 
-        log.warn("ZX80Keyboard: Key redefined: %s%s%s. Previous value has been replaced\n", key_name.c_str(),
+        log.warn("ZX80Keyboard: Key redefined: {}{}{}. Previous value has been replaced\n", key_name,
             (key_shift ? " SHIFT" : ""), (key_altgr ? " ALTGR" : ""));
     }
 }

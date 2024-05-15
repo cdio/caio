@@ -119,9 +119,7 @@ Expr::fn_t Expr::compile_argument(MonitoredCPU& cpu, const std::string& line)
     /*
      * The line does not contain a literal value or a register name.
      */
-    std::stringstream os{};
-    os << "Invalid argument expression: " << std::quoted(line);
-    throw InvalidArgument(os.str());
+    throw InvalidArgument{"Invalid argument expression: \"{}\"", line};
 }
 
 std::function<int()> Expr::compile(MonitoredCPU& cpu, const std::string& line)
@@ -142,9 +140,7 @@ std::function<int()> Expr::compile(MonitoredCPU& cpu, const std::string& line)
         }
     }
 
-    std::ostringstream os{};
-    os << "Invalid expression: " << std::quoted(line);
-    throw InvalidArgument{os.str()};
+    throw InvalidArgument{"Invalid expression: \"{}\"", line};
 }
 
 Command Monitor::commands[] = {

@@ -466,39 +466,40 @@ inline void PLA::remap()
 
             if (rdevmap.first) {
 #if 0
-                log.debug("PLA: Mode: %d ($%02X), New read device for addr $%04X, offset $%04X, dev %s\n",
+                log.debug("PLA: Mode: {} (${:02X}), New read device for addr ${:04X}, offset ${:04X}, dev {}\n",
                     _mode,
                     _mode,
                     addr,
                     rdevmap.second,
-                    rdevmap.first->to_string().c_str());
+                    rdevmap.first->to_string());
 #endif
 
                 _rmaps[bank] = rdevmap;
             } else {
-//                log.debug("PLA: Mode: %d, addr $%04X not mapped for read\n", _mode, addr);
+//                log.debug("PLA: Mode: {}, addr ${:04X} not mapped for read\n", _mode, addr);
             }
 
             if (wdevmap.first) {
-                log.debug("PLA: Mode: %d ($%02X), New write device for addr $%04X, offset $%04X, dev %s\n",
-                    _mode,
-                    _mode,
-                    addr,
-                    wdevmap.second,
-                    wdevmap.first->to_string().c_str());
-
+                if (log.is_debug()) {
+                    log.debug("PLA: Mode: {} (${:02X}), New write device for addr ${:04X}, offset ${:04X}, dev {}\n",
+                        _mode,
+                        _mode,
+                        addr,
+                        wdevmap.second,
+                        wdevmap.first->to_string());
+                }
                 _wmaps[bank] = wdevmap;
             } else {
-//                log.debug("PLA: Mode: %d, addr $%04X not mapped for write\n", _mode, addr);
+//                log.debug("PLA: Mode: {}, addr ${:04X} not mapped for write\n", _mode, addr);
             }
         }
     }
 
 #if 0
-    log.debug("PLA: Mappings for mode: %d ($%02X)\n", _mode, _mode);
+    log.debug("PLA: Mappings for mode: {} (${:02X})\n", _mode, _mode);
     for (size_t bank = 0; bank < rmaps.size(); ++bank) {
         auto &devmap = _rmaps[bank];
-        log.debug("  bank %d, device %s, addr $%04X, offset $%04X\n", bank, devmap.first->to_string().c_str(),
+        log.debug("  bank {}, device {}, addr ${:04X}, offset ${:04X}\n", bank, devmap.first->to_string(),
             bank * 0x1000, devmap.second);
     }
 #endif

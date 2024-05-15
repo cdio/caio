@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <chrono>
 #include <cinttypes>
-#include <sstream>
 #include <thread>
 
 #include "logger.hpp"
@@ -110,11 +109,7 @@ void Clock::run()
                 /*
                  * Slow host system.
                  */
-#if 0
-                log.warn("%s: Slow host system, delayed of %" PRIu64 "us\n",
-                    Name::to_string().c_str(),
-                    -wait_time);
-#endif
+//                log.warn("{}: Slow host system, delayed of {}us\n", Name::to_string(), -wait_time);
                 sched_cycle = 0;
                 start = caio::now();
                 continue;
@@ -182,13 +177,7 @@ void Clock::pause_wait(bool susp)
 
 std::string Clock::to_string() const
 {
-    std::stringstream os{};
-
-    os << Name::to_string()
-       << ", freq: " << _freq << "Hz"
-       << ", delay: " << std::setprecision(3) << _delay;
-
-    return os.str();
+    return std::format("{}, freq {} Hz, delay {:1.1f}", Name::to_string(), _freq, _delay);
 }
 
 uint64_t Clock::time() const

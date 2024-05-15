@@ -632,11 +632,11 @@ protected:
         return (_time >= timeout);
     }
 
-    const std::string bus_name() const {
+    std::string bus_name() const {
         return _bus->type();
     }
 
-    const std::string dev_name() const {
+    std::string dev_name() const {
         return label();
     }
 

@@ -20,7 +20,6 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <sstream>
 
 #include "fs.hpp"
 #include "types.hpp"
@@ -96,46 +95,59 @@ static Option generic_options[] = {
 
 std::string Cmdline::usage() const
 {
-    std::ostringstream os{};
-
-        // 0         1         2         3         4         5         6         7
-        // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
-    os << "usage: " << _progname << " <options> [<file>]\n"
-          "where <file> is the name of a program, cartridge or\n"
-          "snapshot to launch (the file format is auto-detected)\n"
-          "and <options> are:\n"
-          " --conf <cfile>          Configuration file\n"
-          " --romdir <romdir>       ROMs directory\n"
-          " --palettedir <pdir>     Colour palette directory\n"
-          " --palette <palette>     Colour palette name or filename\n"
-          " --keymapsdir <kdir>     Key mappings directory\n"
-          " --keymaps <keymaps>     Key mappings name or filename\n"
-          " --cart <cfile>          Cartridge filename\n"
-          " --fps <rate>            Frame rate (default is " << DEFAULT_FPS << ")\n"
-          " --scale <scale>         Window scale factor (default is " << DEFAULT_SCALE << ")\n"
-          " --scanlines <n|h|v|H|V> Scanlines effect: (n)one, (h)orizontal, (v)ertical,\n"
-          "                         advanced (H)orizontal, advanced (V)ertical\n"
-          "                         (default is " << DEFAULT_SCANLINES << ")\n"
-          " --fullscreen [yes|no]   Start in fullscreen mode\n"
-          " --sresize [yes|no]      Smooth window resize (default is " << DEFAULT_SRESIZE << ")\n"
-          " --audio [yes|no]        Enable audio (default is " << DEFAULT_AUDIO << ")\n"
-          " --delay <delay>         Clock delay factor (default is " << DEFAULT_DELAY << ")\n"
-          " --monitor [yes|no]      Activate the CPU monitor (default is " << DEFAULT_MONITOR << ")\n"
-          " --logfile <file>        Send log information to the specified destination\n"
-          "                         (default is " << DEFAULT_LOGFILE << ")\n"
-          " --loglevel <lv>         Loglevel, bitwise combination of:\n"
-          "                         none|error|warn|info|debug|all (default is " << DEFAULT_LOGLEVEL << ")\n"
-          " --vjoy [yes|no]         Enable virtual joystick (default is " << DEFAULT_VJOY << ")\n"
-          " --vjoy-up <keyname>     Virtual joystick UP key (default is " << DEFAULT_VJOY_UP << ")\n"
-          " --vjoy-down <keyname>   Virtual joystick DOWN key (default is " << DEFAULT_VJOY_DOWN << ")\n"
-          " --vjoy-left <keyname>   Virtual joystick LEFT key (default is " << DEFAULT_VJOY_LEFT << ")\n"
-          " --vjoy-right <keyname>  Virtual joystick RIGHT key (default is " << DEFAULT_VJOY_RIGHT << ")\n"
-          " --vjoy-fire <keyname>   Virtual joystick FIRE-A key (default is " << DEFAULT_VJOY_FIRE_A << ")\n"
-          " --vjoy-fire-b <keyname> Virtual joystick FIRE-B key (default is " << DEFAULT_VJOY_FIRE_B << ")\n"
-          " -v|--version            Show version information and exit\n"
-          " -h|--help               Print this message and exit";
-
-    return os.str();
+      // 0         1         2         3         4         5         6         7
+      // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
+    return std::format("usage: {} <options> [<file>]\n"
+        "where <file> is the name of a program, cartridge or\n"
+        "snapshot to launch (the file format is auto-detected)\n"
+        "and <options> are:\n"
+        " --conf <cfile>          Configuration file\n"
+        " --romdir <romdir>       ROMs directory\n"
+        " --palettedir <pdir>     Colour palette directory\n"
+        " --palette <palette>     Colour palette name or filename\n"
+        " --keymapsdir <kdir>     Key mappings directory\n"
+        " --keymaps <keymaps>     Key mappings name or filename\n"
+        " --cart <cfile>          Cartridge filename\n"
+        " --fps <rate>            Frame rate (default is {})\n"
+        " --scale <scale>         Window scale factor (default is {})\n"
+        " --scanlines <n|h|v|H|V> Scanlines effect: (n)one, (h)orizontal, (v)ertical,\n"
+        "                         advanced (H)orizontal, advanced (V)ertical\n"
+        "                         (default is {})\n"
+        " --fullscreen [yes|no]   Start in fullscreen mode\n"
+        " --sresize [yes|no]      Smooth window resize (default is {})\n"
+        " --audio [yes|no]        Enable audio (default is {})\n"
+        " --delay <delay>         Clock delay factor (default is {})\n"
+        " --monitor [yes|no]      Activate the CPU monitor (default is {})\n"
+        " --logfile <file>        Send log information to the specified destination\n"
+        "                         (default is {})\n"
+        " --loglevel <lv>         Loglevel, bitwise combination of:\n"
+        "                         none|error|warn|info|debug|all (default is {})\n"
+        " --vjoy [yes|no]         Enable virtual joystick (default is {})\n"
+        " --vjoy-up <keyname>     Virtual joystick UP key (default is {})\n"
+        " --vjoy-down <keyname>   Virtual joystick DOWN key (default is {})\n"
+        " --vjoy-left <keyname>   Virtual joystick LEFT key (default is {})\n"
+        " --vjoy-right <keyname>  Virtual joystick RIGHT key (default is {})\n"
+        " --vjoy-fire <keyname>   Virtual joystick FIRE-A key (default is {})\n"
+        " --vjoy-fire-b <keyname> Virtual joystick FIRE-B key (default is {})\n"
+        " -v|--version            Show version information and exit\n"
+        " -h|--help               Print this message and exit",
+        _progname,
+        DEFAULT_FPS,
+        DEFAULT_SCALE,
+        DEFAULT_SCANLINES,
+        DEFAULT_SRESIZE,
+        DEFAULT_AUDIO,
+        DEFAULT_DELAY,
+        DEFAULT_MONITOR,
+        DEFAULT_LOGFILE,
+        DEFAULT_LOGLEVEL,
+        DEFAULT_VJOY,
+        DEFAULT_VJOY_UP,
+        DEFAULT_VJOY_DOWN,
+        DEFAULT_VJOY_LEFT,
+        DEFAULT_VJOY_RIGHT,
+        DEFAULT_VJOY_FIRE_A,
+        DEFAULT_VJOY_FIRE_B);
 }
 
 Confile Cmdline::defaults()
@@ -198,7 +210,7 @@ std::pair<Confile, std::string> Cmdline::parse(int argc, const char** argv)
                 pname = argv[i];
                 continue;
             }
-            throw InvalidArgument{"Invalid command line option: " + optstr};
+            throw InvalidArgument{"Invalid command line option: {}", optstr};
         }
 
         std::string optval{};
@@ -219,17 +231,16 @@ std::pair<Confile, std::string> Cmdline::parse(int argc, const char** argv)
                         optval = argv[i];
                     }
                     if (!opt.fn(cf, opt, optval)) {
-                        throw InvalidArgument{"Invalid optional parameter: option " + optstr + ", parameter " +
-                            optval};
+                        throw InvalidArgument{"Invalid optional parameter: option: {}, parameter: {}", optstr, optval};
                     }
                     break;
                 case Arg::Required:
                     if (i + 1 >= argc) {
-                        throw InvalidArgument{"Missing parameter: " + optstr};
+                        throw InvalidArgument{"Missing parameter: {}", optstr};
                     }
                     ++i;
                     if (!opt.fn(cf, opt, argv[i])) {
-                        throw InvalidArgument{"Invalid parameter: option " + optstr + ", parameter " + argv[i]};
+                        throw InvalidArgument{"Invalid parameter: option: {}, parameter: {}", optstr, argv[i]};
                     }
                     break;
                 }
@@ -240,7 +251,7 @@ std::pair<Confile, std::string> Cmdline::parse(int argc, const char** argv)
         }
 
         if (j == opts.size()) {
-            throw InvalidArgument{"Invalid option: " + optstr};
+            throw InvalidArgument{"Invalid option: {}", optstr};
         }
     }
 

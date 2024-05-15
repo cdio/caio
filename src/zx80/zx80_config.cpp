@@ -18,8 +18,6 @@
  */
 #include "zx80_config.hpp"
 
-#include <sstream>
-
 namespace caio {
 namespace sinclair {
 namespace zx80 {
@@ -34,17 +32,15 @@ static const config::Option zx80_options[] = {
 
 std::string ZX80Cmdline::usage() const
 {
-    std::ostringstream os{};
-
-    os << config::Cmdline::usage() << "\n\n"
+    return std::format("{}\n\n"
         "Sinclair ZX-80 specific:\n"
         " --ram16 [yes|no]        Attach a 16K RAM instead of the default 1K RAM\n"
         " --rom8 [yes|no]         Attach the 8K ROM instead of the default 4K ROM\n"
         " --rvideo [yes|no]       Reverse video output\n"
-        " --cassdir <dir>         Set the basic save/load directory (default is " << DEFAULT_CASSDIR << ")\n"
-        " --prg <.o|.p>           Load a .o/.p file as soon as the basic is started";
-
-    return os.str();
+        " --cassdir <dir>         Set the basic save/load directory (default is {})\n"
+        " --prg <.o|.p>           Load a .o/.p file as soon as the basic is started",
+        config::Cmdline::usage(),
+        DEFAULT_CASSDIR);
 }
 
 std::vector<config::Option> ZX80Cmdline::options() const
@@ -72,16 +68,18 @@ ZX80Config::ZX80Config(config::Section& sec)
 
 std::string ZX80Config::to_string() const
 {
-    std::ostringstream os{};
-
-    os << Config::to_string() << "\n"
-        "  16K RAM:            " << (ram16  ? "yes" : "no") << "\n"
-        "  8K ROM:             " << (rom8   ? "yes" : "no") << "\n"
-        "  Reverse video:      " << (rvideo ? "yes" : "no") << "\n"
-        "  Cassette directory: " << std::quoted(cassdir)    << "\n"
-        "  Attached PRG:       " << std::quoted(prgfile);
-
-    return os.str();
+    return std::format("{}\n"
+        "  16K RAM:            {}\n"
+        "  8K ROM:             {}\n"
+        "  Reverse video:      {}\n"
+        "  Cassette directory: \"{}\"\n"
+        "  Attached PRG:       \"{}\"",
+        Config::to_string(),
+        (ram16  ? "yes" : "no"),
+        (rom8   ? "yes" : "no"),
+        (rvideo ? "yes" : "no"),
+        cassdir,
+        prgfile);
 }
 
 }

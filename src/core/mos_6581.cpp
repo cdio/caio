@@ -564,7 +564,7 @@ void Filter::generate()
 
         _gain_comp = 1.0;
 
-//        log.debug("type: %x, fc=%f, Q=%f\n", _type, fc, Q);
+//        log.debug("type: {:x}, fc={}, Q={}\n", +_type, fc, Q);
 
         switch (_type) {
         case FILTER_LO:
@@ -574,11 +574,11 @@ void Filter::generate()
             _flt = signal::iir_hipass40(fc, Q, SAMPLING_RATE);
             break;
         case FILTER_BA:
-            _gain_comp = 2.0;
+            _gain_comp *= 2.0;
             _flt = signal::iir_bapass20(fc, Q, SAMPLING_RATE);
             break;
         case FILTER_LOHI:
-            _gain_comp = 2.0;
+            _gain_comp *= 2.0;
             _flt = signal::iir_hipass40(fc, Q, SAMPLING_RATE) +
                    signal::iir_lopass40(fc, Q, SAMPLING_RATE);
             break;
@@ -589,7 +589,7 @@ void Filter::generate()
             _flt = signal::iir_hipass40(fc, Q, SAMPLING_RATE);
             break;
         case FILTER_LHBA:
-            _gain_comp = 3.0;
+            _gain_comp *= 3.0;
             _flt = signal::iir_hipass40(fc, Q, SAMPLING_RATE) +
                    signal::iir_lopass40(fc, Q, SAMPLING_RATE) +
                    signal::iir_bapass20(fc, Q, SAMPLING_RATE);
@@ -597,8 +597,7 @@ void Filter::generate()
         default:;
         }
 
-//        log.debug("b=%s; a=%s;\n\n", signal::to_string(_flt.num).c_str(), signal::to_string(_flt.den).c_str());
-
+//        log.debug("b={}; a={};\n\n", signal::to_string(_flt.num), signal::to_string(_flt.den));
     }
 }
 

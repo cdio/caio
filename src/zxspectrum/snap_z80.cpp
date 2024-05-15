@@ -48,7 +48,7 @@ void SnapZ80::load(const std::string& fname)
 {
     _fname = fs::fix_home(fname);
 
-    log.debug("SnapZ80: Loading snapshot file: %s\n", _fname.c_str());
+    log.debug("SnapZ80: Loading snapshot file: {}\n", _fname);
 
     const auto raw = fs::load(_fname);
 
@@ -76,7 +76,7 @@ void SnapZ80::load(const std::string& fname)
 
 void SnapZ80::load_v1(const buffer_t& raw)
 {
-    log.debug("SnapZ80: %s: Detected version: 1\n", _fname.c_str());
+    log.debug("SnapZ80: {}: Detected version: 1\n", _fname);
     uncompress_v1(raw);
 }
 
@@ -108,7 +108,7 @@ void SnapZ80::load_v2(const buffer_t& raw)
         throw_ioerror("Invalid version 23b. Size: " + std::to_string(ext_size));
     }
 
-    log.debug("SnapZ80: %s: Detected version: %s\n", _fname.c_str(), ver);
+    log.debug("SnapZ80: {}: Detected version: {}\n", _fname, ver);
 
     /*
      * Only plain 48K is supported (no extra hardware).
@@ -190,7 +190,7 @@ void SnapZ80::uncompress_v1(const buffer_t& raw)
 
     bool compressed = (hdr->flags & SnapZ80Header::FLAGS_DATA_COMPRESSED);
 
-    log.debug("SnapZ80: %s: compressed: %d\n", _fname.c_str(), compressed);
+    log.debug("SnapZ80: {}: compressed: {}\n", _fname, compressed);
 
     if (compressed) {
         _data = uncompress(enc, true);
@@ -206,8 +206,8 @@ void SnapZ80::uncompress_v2(const buffer_t& raw, size_t rawoff)
         uint16_t enc_size = (block->sizeh << 8) | block->sizel;
         bool compressed = (enc_size != SnapZ80Block::UNCOMPRESSED_16K_BLOCK);
 
-        log.debug("SnapZ80: %s: Block: page: %d, encsiz: %d, compressed: %d\n",
-            _fname.c_str(), block->page, enc_size, compressed);
+        log.debug("SnapZ80: {}: Block: page: {}, encsiz: {}, compressed: {}\n", _fname, block->page, enc_size,
+            compressed);
 
         size_t dstoff{};
 

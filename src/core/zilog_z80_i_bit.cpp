@@ -614,8 +614,7 @@ int Z80::i_bit_sr(Z80& self, uint8_t op, addr_t arg)
 
     default:
         arg = self._iaddr;
-        log.error("Z80: i_bit_sr: Invalid opcode: CB %02X, addr: $%04X\n%s\n",
-            op, arg, self.disass(arg).c_str());
+        log.error("Z80: i_bit_sr: Invalid opcode: CB {:02X}, addr: ${:04X}\n{}\n", op, arg, self.disass(arg));
         return 0;
     }
 
@@ -713,8 +712,7 @@ int Z80::i_bit_b(Z80& self, uint8_t op, addr_t arg)
 
     default:
         arg = self._iaddr;
-        log.error("Z80: i_bit_b: Invalid opcode: CB %02X, addr: $%04X\n%s\n",
-            op, arg, self.disass(arg).c_str());
+        log.error("Z80: i_bit_b: Invalid opcode: CB {:02X}, addr: ${:04X}\n{}\n", op, arg, self.disass(arg));
         return 0;
     }
 

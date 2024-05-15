@@ -19,6 +19,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 namespace caio {
 
@@ -29,7 +30,7 @@ class Name {
 public:
     constexpr static const char* TYPE_UNKNOWN = "UNK";
 
-    Name(const std::string& type = {}, const std::string& label = {})
+    Name(std::string_view type = {}, std::string_view label = {})
         : _type{(type.empty() ? TYPE_UNKNOWN : type)},
           _label{(label.empty() ? "" : label)} {
     }
@@ -49,7 +50,7 @@ public:
      * Change the type of this instance.
      * @param type New type to set.
      */
-    void type(const std::string& type) {
+    void type(std::string_view type) {
         _type = type;
     }
 
@@ -65,7 +66,7 @@ public:
      * Change the label of this instance.
      * @param label New label to set.
      */
-    void label(const std::string& label) {
+    void label(std::string_view label) {
         _label = label;
     }
 
@@ -73,13 +74,12 @@ public:
      * Get a string with the representation of this instance.
      * @return A string with the representation of this instance.
      */
-    virtual std::string to_string() const;
+    virtual std::string to_string() const {
+        return to_string(_type, _label);
+    }
 
-    /**
-     * Cast to std::string.
-     */
-    virtual operator std::string() const {
-        return to_string();
+    constexpr static std::string to_string(std::string_view type, std::string_view label) {
+        return std::string{type} + "(" + std::string{label} + ")";
     }
 
 private:

@@ -55,7 +55,7 @@ void TAPFile::load(const std::string& path)
 
         auto isdir = fs::is_directory(_path);
 
-        log.debug("TAPFile: Loading: \"%s\", is_directory: %d\n", _path.c_str(), isdir);
+        log.debug("TAPFile: Loading: \"{}\", is_directory: {}\n", _path, isdir);
 
         if (isdir) {
             _entries = fs::directory(_path, FILE_PATTERN, fs::MATCH_CASE_INSENSITIVE);
@@ -75,8 +75,8 @@ void TAPFile::load(const std::string& path)
         do {
             for (it = _entries.begin(); it != _entries.end(); ++it) {
                 if (it->second > FILE_SIZE_LIMIT || it->second < 3) {
-                    log.warn("TAPFile: Found: \"%s\", size: %" PRIu64 ", min size: 3, max size: %" PRIu64 ". Ignored\n",
-                        it->first.c_str(), it->second, FILE_SIZE_LIMIT);
+                    log.warn("TAPFile: Found: \"{}\", size: {}, min size: 3, max size: {}. Ignored\n",
+                        it->first, it->second, FILE_SIZE_LIMIT);
                     _entries.erase(it);
                     break;
                 }
@@ -88,7 +88,7 @@ void TAPFile::load(const std::string& path)
         }
 
         for (const auto& entry : _entries) {
-            log.debug("TAPFile: Found: \"%s\", size: %" PRIu64 "\n", entry.first.c_str(), entry.second);
+            log.debug("TAPFile: Found: \"{}\", size: {}\n", entry.first, entry.second);
         }
     }
 }
@@ -105,7 +105,7 @@ bool TAPFile::more_data()
 
     const auto& fname = _dirit->first;
 
-    log.debug("TAPFile: Feeding file: \"%s\"\n", fname.c_str());
+    log.debug("TAPFile: Feeding file: \"{}\"\n", fname);
 
     _buf = fs::load(fname);
     _bufpos = 0;
@@ -129,13 +129,13 @@ const TAPFile::Block TAPFile::next_block()
 
     _bufpos += 2 + block_size;
     if (_bufpos > _buf.size()) {
-        log.error("TAPFile: %s: Invalid block size: %d. TAP aborted.\n", (_dirit - 1)->first.c_str(), block_size);
+        log.error("TAPFile: {}: Invalid block size: {}. TAP aborted.\n", (_dirit - 1)->first, block_size);
         reset();
         return {};
     }
 
     data += 2;
-    log.debug("TAPFile: New block: type: $%02X, size: %d\n", *data, block_size);
+    log.debug("TAPFile: New block: type: ${:02X}, size: {}\n", *data, block_size);
     return {data, block_size};
 }
 

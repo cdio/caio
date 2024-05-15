@@ -31,19 +31,19 @@ void P00File::load(const std::string& fname)
     if (!fname.empty()) {
         std::ifstream is{fname, std::ios::binary | std::ios::in};
         if (!is) {
-            throw IOError{"Can't open P00 file: " + fname + ": " + Error::to_string()};
+            throw IOError{"Can't open P00 file: {}: {}", fname, Error::to_string()};
         }
 
         if (!is.read(reinterpret_cast<char*>(&_hdr), sizeof(_hdr))) {
-            throw IOError{"Can't read P00 header: " + fname + ": " + Error::to_string()};
+            throw IOError{"Can't read P00 header: {}: {}", fname, Error::to_string()};
         }
 
         if (be64toh(_hdr.magic) != P00_MAGIC) {
-            throw IOError{"Invalid magic number: " + fname};
+            throw IOError{"Invalid magic number: {}", fname};
         }
 
         if (_hdr.rsize != 0) {
-            throw IOError("REL file type is not unsupported: " + fname);
+            throw IOError{"REL file type is not unsupported: {}", fname};
         }
 
         PrgFile::load(is);
@@ -55,11 +55,11 @@ void P00File::save(const std::string& fname, addr_t addr)
     if (!fname.empty()) {
         std::ofstream os{fname, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
         if (!os) {
-            throw IOError{"Can't create P00 file: " + fname + ": " + Error::to_string()};
+            throw IOError{"Can't create P00 file: {}: {}", fname, Error::to_string()};
         }
 
         if (!os.write(reinterpret_cast<char*>(&_hdr), sizeof(_hdr))) {
-            throw IOError{"Can't write P00 header: " + fname + ": " + Error::to_string()};
+            throw IOError{"Can't write P00 header: {}: {}", fname, Error::to_string()};
         }
 
         PrgFile::save(os, addr);

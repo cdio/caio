@@ -32,7 +32,7 @@ sptr_t<C1541> create(const std::string& path, uint8_t unit, const sptr_t<cbm_bus
     sptr_t<C1541> drive{};
 
     if (!fs::exists(path)) {
-        throw IOError{"Can't create C1541 instance: " + path + ": " + Error::to_string(ENOENT)};
+        throw IOError{"Can't create C1541 instance: {}: {}", path, Error::to_string(ENOENT)};
     }
 
     try {
@@ -40,10 +40,10 @@ sptr_t<C1541> create(const std::string& path, uint8_t unit, const sptr_t<cbm_bus
             drive = std::make_shared<C1541Fs>(unit, bus);
             drive->attach(path);
         } else {
-            throw IOError{"Can't create C1541 instance: " + path + ": Unsupported format"};
+            throw IOError{"Can't create C1541 instance: {}: Unsupported format", path};
         }
     } catch (const std::filesystem::filesystem_error& err) {
-        throw IOError{std::string{"Can't create C1541 instance: "} + err.what()};
+        throw IOError{"Can't create C1541 instance: {}", err.what()};
     }
 
     return drive;

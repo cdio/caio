@@ -26,18 +26,16 @@
 //#define CAIO_CBMBUS_DEBUG_STATE
 
 #ifdef CAIO_CBMBUS_DEBUG
-#define CBMBUS_DEBUG(fmt, args...)              do {                                                        \
-                                                    log.debug("%s: %s: " fmt,                               \
-                                                        bus_name().c_str(), dev_name().c_str(), ## args);   \
+#define CBMBUS_DEBUG(fmt, args...)              do {                                                            \
+                                                    log.debug("{}: {}: " fmt, bus_name(), dev_name(), ## args); \
                                                 } while (0)
 #else
 #define CBMBUS_DEBUG(...)
 #endif
 
 #ifdef CAIO_CBMBUS_DEBUG_STATE
-#define CBMBUS_DEBUG_STATE(fmt, args...)        do {                                                        \
-                                                    log.debug("%s: %s: " fmt,                               \
-                                                        bus_name().c_str(), dev_name().c_str(), ## args);   \
+#define CBMBUS_DEBUG_STATE(fmt, args...)        do {                                                            \
+                                                    log.debug("{}: {}: " fmt, bus_name(), dev_name(), ## args); \
                                                 } while (0)
 #else
 #define CBMBUS_DEBUG_STATE(...)
@@ -49,15 +47,7 @@ namespace cbm_bus {
 
 std::string BusData::to_string() const
 {
-    std::ostringstream os{};
-
-    os << "SRQ "   << +srq()
-       << ", ATN " << +atn()
-       << ", CLK " << +clk()
-       << ", DAT " << +dat()
-       << ", RST " << +rst();
-
-    return os.str();
+    return std::format("SRQ {}, ATN {}, CLK {}, DAT {}, RST {}", srq(), atn(), clk(), dat(), rst());
 }
 
 
@@ -68,8 +58,8 @@ bool Bus::add(Controller* dev)
     });
 
     if (it != _devs.end()) {
-        log.error("%s: Can't add device to bus: %s. Existing device: %s\n", Name::to_string().c_str(),
-            dev->to_string().c_str(), (*it)->to_string().c_str());
+        log.error("{}: Can't add device to bus: {}. Existing device: {}\n", Name::to_string(), dev->to_string(),
+            (*it)->to_string());
         return false;
     }
 
@@ -184,7 +174,7 @@ size_t Device::tick(const Clock& clock)
              */
             release();
             _mode = Mode::WAIT;
-            CBMBUS_DEBUG("Unrecognised command: Mode COMMAND -> Mode WAIT, bus %s\n", bus_data().to_string().c_str());
+            CBMBUS_DEBUG("Unrecognised command: Mode COMMAND -> Mode WAIT, bus {}\n", bus_data().to_string());
             break;
         }
 
@@ -333,7 +323,7 @@ size_t Device::tick(const Clock& clock)
                  */
                 push_back(_cmd.chunit());
                 CBMBUS_DEBUG("Talker device: ATN line ON: Mode TALKER -> Mode IDLE. "
-                    "Pushed back untransmitted byte $%02X\n", _bytetr.byte());
+                    "Pushed back untransmitted byte ${:02X}\n", _bytetr.byte());
             } else {
                 CBMBUS_DEBUG("Talker device: ATN line ON: Mode TALKER -> Mode IDLE\n");
             }
@@ -372,8 +362,8 @@ size_t Device::tick(const Clock& clock)
             _bytetr.byte(rb.value(), rb.is_last());
             state(State::IDLE);
 
-            CBMBUS_DEBUG("Talker device: Transmitting byte $%02X, islast %d, bus %s\n", _bytetr.byte(),
-                _bytetr.last(), bus_data().to_string().c_str());
+            CBMBUS_DEBUG("Talker device: Transmitting byte ${:02X}, islast {}, bus {}\n", _bytetr.byte(),
+                _bytetr.last(), bus_data().to_string());
         }
 
         tick_tx();
@@ -453,7 +443,7 @@ bool Device::tick_rx()
              */
             _bytetr.bit(dat());
             state(State::BIT_DONE);
-            CBMBUS_DEBUG_STATE("RX: BIT_WAIT -> BIT_DONE, received bit %d\n", dat());
+            CBMBUS_DEBUG_STATE("RX: BIT_WAIT -> BIT_DONE, received bit {}\n", dat());
         }
         break;
 
@@ -473,7 +463,7 @@ bool Device::tick_rx()
                 CBMBUS_DEBUG_STATE("RX: BIT_DONE -> BIT_WAIT\n");
             }
         } else if (_time > TIMEOUT) {
-            log.error(bus_name() + ": " + dev_name() + ": RX: Timeout on state BIT_DONE. Moving to state IDLE\n");
+            log.error("{}: {}: RX: Timeout on state BIT_DONE. Moving to state IDLE\n", bus_name(), dev_name());
             release();
             state(State::IDLE);
         }
@@ -483,7 +473,7 @@ bool Device::tick_rx()
         dat(ACTIVE);
         _bytetr.ready(true);
         state(State::IDLE);
-        CBMBUS_DEBUG_STATE("RX: FRAME -> IDLE, received byte $%02X\n", _bytetr.byte());
+        CBMBUS_DEBUG_STATE("RX: FRAME -> IDLE, received byte ${:02X}\n", _bytetr.byte());
 
         /* Byte reception completed */
         return true;
@@ -511,7 +501,7 @@ void Device::tick_tx()
          * Ready to send.
          */
         clk(INACTIVE);
-        CBMBUS_DEBUG_STATE("TX: IDLE -> INIT, time %" PRIu64 ", bus %s\n", _time, bus_data().to_string().c_str());
+        CBMBUS_DEBUG_STATE("TX: IDLE -> INIT, time {}, bus {}\n", _time, bus_data().to_string());
         state(State::INIT);
         /* PASSTHROUGH */
 
@@ -523,7 +513,7 @@ void Device::tick_tx()
         /*
          * The listener is ready to receive.
          */
-        CBMBUS_DEBUG_STATE("TX: INIT -> READY, time %" PRIu64 ", bus %s\n", _time, bus_data().to_string().c_str());
+        CBMBUS_DEBUG_STATE("TX: INIT -> READY, time {}, bus {}\n", _time, bus_data().to_string());
         state(State::READY);
         /* PASSTHROUGH */
 
@@ -539,7 +529,7 @@ void Device::tick_tx()
             /*
              * This is not the last byte we are sending: Transmit it normally.
              */
-            CBMBUS_DEBUG_STATE("TX: READY -> BIT_WAIT, time %" PRIu64 "\n", _time);
+            CBMBUS_DEBUG_STATE("TX: READY -> BIT_WAIT, time {}\n", _time);
             clk(ACTIVE);
             state(State::BIT_WAIT);
             break;
@@ -553,7 +543,7 @@ void Device::tick_tx()
             break;
         }
 
-        CBMBUS_DEBUG_STATE("TX: READY -> EOI, time %" PRIu64 "\n", _time);
+        CBMBUS_DEBUG_STATE("TX: READY -> EOI, time {}\n", _time);
         state(State::EOI);
         /* PASSTHROUGH */
 
@@ -565,7 +555,7 @@ void Device::tick_tx()
         /*
          * EOI handshake done.
          */
-        CBMBUS_DEBUG_STATE("TX: EOI -> BIT_WAIT, time %" PRIu64 "\n", _time);
+        CBMBUS_DEBUG_STATE("TX: EOI -> BIT_WAIT, time {}\n", _time);
         clk(ACTIVE);
         dat(INACTIVE);
         state(State::BIT_WAIT);
@@ -581,7 +571,7 @@ void Device::tick_tx()
          */
         dat(_bytetr.bit());
         clk(INACTIVE);
-        CBMBUS_DEBUG_STATE("TX: BIT_WAIT -> BIT_DONE, bit %d, time %" PRIu64 "\n", _data.dat(), _time);
+        CBMBUS_DEBUG_STATE("TX: BIT_WAIT -> BIT_DONE, bit {} time {}\n", _data.dat(), _time);
         state(State::BIT_DONE);
         /* PASSTHROUGH */
 
@@ -596,7 +586,7 @@ void Device::tick_tx()
             /*
              * Bit transmitted. Go for the next one.
              */
-            CBMBUS_DEBUG_STATE("TX: BIT_DONE -> BIT_WAIT, time %" PRIu64 "\n", _time);
+            CBMBUS_DEBUG_STATE("TX: BIT_DONE -> BIT_WAIT, time {}\n", _time);
             state(State::BIT_WAIT);
             break;
         }
@@ -604,15 +594,15 @@ void Device::tick_tx()
         /*
          * Byte completed: Frame handshake.
          */
-        CBMBUS_DEBUG_STATE("TX: BIT_DONE -> FRAME, time %" PRIu64 "\n", _time);
+        CBMBUS_DEBUG_STATE("TX: BIT_DONE -> FRAME, time {}\n", _time);
         state(State::FRAME);
         /* PASSTHROUGH */
 
     case State::FRAME:
         if (_time > FRAME_TIMEOUT) {
             //FIXME abort() or something similar?
-            log.error("%s: %s: TX: FRAME timeout error. time %" PRIu64 ", bus %s\n", bus_name().c_str(), dev_name().c_str(),
-                _time, bus_data().to_string().c_str());
+            log.error("{}: {}: TX: FRAME timeout error. time {}, bus {}\n", bus_name(), dev_name(), _time,
+                bus_data().to_string());
             state(State::IDLE);
             release();
             _mode = Mode::IDLE;
@@ -626,7 +616,7 @@ void Device::tick_tx()
         /*
          * (Frame) Byte acknowledged by listener.
          */
-        CBMBUS_DEBUG_STATE("TX: FRAME -> FRAME_WAIT, time %" PRIu64 "\n", _time);
+        CBMBUS_DEBUG_STATE("TX: FRAME -> FRAME_WAIT, time {}\n", _time);
         state(State::FRAME_WAIT);
         /* PASSTHROUGH */
 
@@ -647,8 +637,7 @@ void Device::tick_tx()
             /*
              * Ready to transmit next byte.
              */
-            CBMBUS_DEBUG_STATE("TX: FRAME_WAIT -> IDLE, time %" PRIu64 ", bus %s\n", _time,
-                bus_data().to_string().c_str());
+            CBMBUS_DEBUG_STATE("TX: FRAME_WAIT -> IDLE, time {}, bus {}\n", _time, bus_data().to_string());
             state(State::IDLE);
             break;
         }
@@ -687,7 +676,7 @@ bool Device::parse_command(uint8_t byte)
     default:;
     }
 
-    log.error("%s: %s: Invalid command: $%02x\n", bus_name().c_str(), dev_name().c_str(), byte);
+    log.error("{}: {}: Invalid command: ${:02x}\n", bus_name(), dev_name(), byte);
     return false;
 }
 
@@ -696,13 +685,13 @@ bool Device::process_command()
     switch (_cmd.command()) {
     case LISTEN:
         _role = (_unit == _cmd.chunit() ? Role::LISTENER : Role::PASSIVE);
-        CBMBUS_DEBUG("Exec: LISTEN unit %d, role %s\n", _cmd.chunit(),
+        CBMBUS_DEBUG("Exec: LISTEN unit {}, role {}\n", _cmd.chunit(),
             (_role == Role::PASSIVE ? "PASSIVE" : "LISTENER"));
         break;
 
     case TALK:
         _role = (_unit == _cmd.chunit() ? Role::TALKER : Role::PASSIVE);
-        CBMBUS_DEBUG("Exec: TALK unit %d, role %s\n", _cmd.chunit(), (_role == Role::PASSIVE ? "PASSIVE" : "TALKER"));
+        CBMBUS_DEBUG("Exec: TALK unit {}, role {}\n", _cmd.chunit(), (_role == Role::PASSIVE ? "PASSIVE" : "TALKER"));
         break;
 
     case UNLISTEN:
@@ -727,19 +716,19 @@ bool Device::process_secondary(bool with_param)
     case OPEN:
         if (with_param) {
             auto arg = _cmd.param_str();
-            CBMBUS_DEBUG("Exec: OPEN channel %d, param \"%s\"\n", _cmd.chunit(), arg.c_str());
+            CBMBUS_DEBUG("Exec: OPEN channel {}, param \"{}\"\n", _cmd.chunit(), arg);
             open(_cmd.chunit(), arg);
         } else {
             /*
              * OPEN has an optional argument and it was not received.
              */
-            CBMBUS_DEBUG("Exec delayed: OPEN channel %d\n", _cmd.chunit());
+            CBMBUS_DEBUG("Exec delayed: OPEN channel {}\n", _cmd.chunit());
             return true;
         }
         break;
 
     case CLOSE:
-        CBMBUS_DEBUG("Exec: CLOSE channel %d\n", _cmd.chunit());
+        CBMBUS_DEBUG("Exec: CLOSE channel {}\n", _cmd.chunit());
         close(_cmd.chunit());   /* FIXME: Should this be done just after UNLISTEN? */
         break;
 
@@ -749,7 +738,7 @@ bool Device::process_secondary(bool with_param)
                 /*
                  * REOPEN as listener has an optional data buffer and it was not received.
                  */
-                CBMBUS_DEBUG("Exec delayed: REOPEN channel %d\n", _cmd.chunit());
+                CBMBUS_DEBUG("Exec delayed: REOPEN channel {}\n", _cmd.chunit());
                 return true;
             } else {
                 /*
@@ -761,7 +750,7 @@ bool Device::process_secondary(bool with_param)
             /*
              * REOPEN a channel as a talker.
              */
-            CBMBUS_DEBUG("Exec: REOPEN channel %d\n", _cmd.chunit());
+            CBMBUS_DEBUG("Exec: REOPEN channel {}\n", _cmd.chunit());
         }
         break;
 

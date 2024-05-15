@@ -33,9 +33,7 @@ namespace c1541 {
 void C1541Fs::attach(const std::string& path)
 {
     if (!path.empty() && (!fs::exists(path) || !fs::is_directory(path))) {
-        std::ostringstream os{};
-        os << "Can't attach: " << std::quoted(path) << ": Not a directory";
-        throw IOError{*this, os.str()};
+        throw IOError{*this, "Can't attach: \"{}\": Not a directory", path};
     }
 
     attached_path(path.size() && path.rfind("/") != path.size() - 1 ? path + "/" : path);
@@ -139,7 +137,7 @@ Status C1541Fs::open_dir(uint8_t ch, Channel& channel, const std::string& fname,
     ss << to_basic(addr, {}, 0);
 
     fs::directory(attached_path(), pattern, fs::MATCH_CASE_SENSITIVE,
-        [this, &ss, &addr, &root_len](const std::string& entry, uint64_t size) -> bool {
+        [this, &ss, &addr, &root_len](std::string_view entry, uint64_t size) -> bool {
             ss << to_basic(addr, entry.substr(root_len), size);
             return true;
         }
@@ -155,8 +153,8 @@ Status C1541Fs::open_dir(uint8_t ch, Channel& channel, const std::string& fname,
     channel.pos   = 0;
     channel.size  = channel.ss.str().size();
 
-    log.debug("%s: Open directory listing \"%s\", pattern \"%s\" (\"%s\")\n", name(ch).c_str(),
-        attached_path().c_str(), pattern.c_str(), fname.c_str());
+    log.debug("{}: Open directory listing \"{}\", pattern \"{}\" (\"{}\")\n",
+        name(ch), attached_path(), pattern, fname);
 
     return Status::OK;
 }
@@ -192,7 +190,7 @@ Status C1541Fs::open_file(uint8_t ch, Channel& channel, const std::string& fname
         break;
 
     default:
-        log.error("%s: Can't open file: \"%s\": Unsupported file type: %d\n", name(ch).c_str(), fname.c_str(),
+        log.error("{}: Can't open file: \"{}\": Unsupported file type: {}\n", name(ch), fname,
             static_cast<unsigned>(type));
         return Status::FILE_TYPE_MISMATCH;
     }
@@ -209,8 +207,7 @@ Status C1541Fs::open_file(uint8_t ch, Channel& channel, const std::string& fname
              */
             fullpath = _last_file;
 
-            log.debug("%s: Open file: \"%s\": Pevious accessed file: \"%s\"\n", name(ch).c_str(), fname.c_str(),
-                fullpath.c_str());
+            log.debug("{}: Open file: \"{}\": Pevious accessed file: \"{}\"\n", name(ch), fname, fullpath);
 
         } else {
             /*
@@ -219,20 +216,19 @@ Status C1541Fs::open_file(uint8_t ch, Channel& channel, const std::string& fname
              */
             const std::string& pattern = attached_path() + c1541::pet_to_u8(fname) + ext;
             fs::directory(attached_path(), pattern, fs::MATCH_CASE_SENSITIVE,
-                [&fullpath](const std::string& entry, uint64_t size) -> bool {
+                [&fullpath](std::string_view entry, uint64_t size) -> bool {
                     fullpath = entry;
                     return false;
                 }
             );
 
             if (fullpath.empty()) {
-                log.debug("%s: Can't open file: \"%s\": No match for pattern \"%s\"\n", name(ch).c_str(), fname.c_str(),
-                    pattern.c_str());
+                log.debug("{}: Can't open file: \"{}\": No match for pattern \"{}\"\n", name(ch), fname, pattern);
                 return Status::FILE_NOT_FOUND;
             }
 
-            log.debug("%s: Open file: \"%s\": Pattern \"%s\", match found: \"%s\"\n", name(ch).c_str(),
-                fname.c_str(), pattern.c_str(), fullpath.c_str());
+            log.debug("{}: Open file: \"{}\": Pattern \"{}\", match found: \"{}\"\n", name(ch), fname, pattern,
+                fullpath);
         }
 
     } else {
@@ -240,8 +236,7 @@ Status C1541Fs::open_file(uint8_t ch, Channel& channel, const std::string& fname
          * WRITE mode: The file name must be specified.
          */
         if (c1541::is_pattern(fname)) {
-            log.debug("%s: Write file: Detected pattern matching expression: \"%s\"\n", name(ch).c_str(),
-                fname.c_str());
+            log.debug("{}: Write file: Detected pattern matching expression: \"{}\"\n", name(ch), fname);
             return Status::INVALID_FILENAME;
         }
 
@@ -250,7 +245,7 @@ Status C1541Fs::open_file(uint8_t ch, Channel& channel, const std::string& fname
 
     std::fstream fs{fullpath, fmode};
     if (!fs) {
-        log.error("%s: Can't open file: \"%s\": %s\n", name(ch).c_str(), fullpath.c_str(), Error::to_string().c_str());
+        log.error("{}: Can't open file: \"{}\": {}\n", name(ch), fullpath, Error::to_string());
 
         switch (errno) {
         case EEXIST:
@@ -286,8 +281,7 @@ Status C1541Fs::channel_open(uint8_t ch, const std::string& petfname, FileType t
 
     if (channel.is_open()) {
         if (ch != LOAD_CHANNEL && ch != SAVE_CHANNEL) {
-            log.error("%s: Open \"%s\": Channel already open on file \"%s\"\n", name(ch).c_str(), petfname.c_str(),
-                channel.fname.c_str());
+            log.error("{}: Open \"{}\": Channel already open on file \"{}\"\n", name(ch), petfname, channel.fname);
             return Status::NO_CHANNELS_AVAILABLE;
         }
 
@@ -302,7 +296,7 @@ Status C1541Fs::channel_open(uint8_t ch, const std::string& petfname, FileType t
 
     if (it != _channels.end()) {
         if (it->is_write() && mode == OpenMode::READ) {
-            log.error("%s: Open \"%s\": File open for write on channel %d\n", name(ch).c_str(), petfname.c_str(),
+            log.error("{}: Open \"{}\": File open for write on channel {}\n", name(ch), petfname,
                 static_cast<unsigned>(it - _channels.begin()));
             return Status::FILE_OPEN_FOR_WRITE;
         }
@@ -322,7 +316,7 @@ Status C1541Fs::channel_close(uint8_t ch)
         }
 
         channel = {};
-        log.debug("%s: Channel closed\n", name(ch).c_str());
+        log.debug("{}: Channel closed\n", name(ch));
     }
 
     return Status::OK;
@@ -356,7 +350,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
     uint8_t value{};
     is.read(reinterpret_cast<char *>(&value), 1);
     if (is.fail()) {
-        log.error("%s: Can't read: \"%s\": %s\n", name(ch).c_str(), channel.fname.c_str(), Error::to_string().c_str());
+        log.error("{}: Can't read: \"{}\": {}\n", name(ch), channel.fname, Error::to_string());
         return {{}, Status::READ_ERROR};
     }
 
@@ -370,7 +364,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
         size_t part = channel.size / 10;
         if (part == 0 || (channel.pos % part) == 0 || is_last) {
             float perc = (100.0f * channel.pos) / channel.size;
-            log.debug("%s: Read %d of %d bytes (%.1f%%)\n", name(ch).c_str(), channel.pos, channel.size, perc);
+            log.debug("{}: Read {} of {} bytes ({:.1f}%)\n", name(ch), channel.pos, channel.size, perc);
         }
     }
 
@@ -379,7 +373,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
         if (log.is_debug()) {
             if (channel.elapsed != 0) {
                 float speed = channel.size / (channel.elapsed / 1000000.0f);
-                log.debug("%s: Transmission rate %.01fBytes/s\n", name(ch).c_str(), speed);
+                log.debug("{}: Transmission rate {:.01f} bytes/s\n", name(ch), speed);
             }
         }
     }
@@ -415,11 +409,11 @@ Status C1541Fs::channel_write(uint8_t ch, const buffer_t& buf)
 
     channel.fs.write(reinterpret_cast<const char *>(&buf[0]), buf.size());
     if (channel.fs.fail()) {
-        log.error("%s: Can't write: \"%s\": %s\n", name(ch).c_str(), channel.fname.c_str(), Error::to_string().c_str());
+        log.error("{}: Can't write: \"{}\": {}\n", name(ch), channel.fname, Error::to_string());
         return Status::WRITE_ERROR;
     }
 
-    log.debug("%s: Write success, buffer size %d, data:\n%s\n", name(ch).c_str(), buf.size(), caio::dump(buf).c_str());
+    log.debug("{}: Write success, buffer size {}, data:\n{}\n", name(ch), buf.size(), caio::dump(buf));
 
     return Status::OK;
 }
@@ -560,12 +554,12 @@ Status C1541Fs::copy(const std::string& param)
         try {
             fs::concat(newfile, fname);
         } catch (const IOError& err) {
-            log.error("%s: %s: %s\n", name(15).c_str(), param.c_str(), err.what());
+            log.error("{}: {}: {}\n", name(15), param, err.what());
             return Status::WRITE_ERROR;  /* Another error code? */
         }
     }
 
-    log.debug("%s: Files copied: \"%s\" -> \"%s\"\n", name(15).c_str(), result.str(2).c_str(), newfile.c_str());
+    log.debug("{}: Files copied: \"{}\" -> \"{}\"\n", name(15), result.str(2), newfile);
 
     return Status::OK;
 }
@@ -608,11 +602,11 @@ Status C1541Fs::rename(const std::string& param)
     std::error_code err{};
     std::filesystem::rename(oldname, newname, err);
     if (err) {
-        log.error("%s: \"%s\": %s\n", name(15).c_str(), param.c_str(), err.message().c_str());
+        log.error("{}: \"{}\": {}\n", name(15), param, err.message());
         return Status::WRITE_ERROR;  /* Another error code? */
     }
 
-    log.debug("%s: File renamed: \"%s\" -> \"%s\"\n", name(15).c_str(), oldname.c_str(), newname.c_str());
+    log.debug("{}: File renamed: \"{}\" -> \"{}\"\n", name(15), oldname, newname);
 
     return Status::OK;
 }
@@ -630,13 +624,12 @@ Status C1541Fs::scratch(const std::string& param)
     std::smatch result{};
 
     if (std::regex_match(param, result, re_scratch) && result.size() == 2) {
-        auto remove = [this](const std::string& entry, uint64_t size) -> bool {
+        auto remove = [this](std::string_view entry, uint64_t size) -> bool {
             if (!fs::unlink(entry)) {
-                log.error("%s: Can't scratch: \"%s\": %s\n", name(15).c_str(), entry.c_str(),
-                    Error::to_string().c_str());
+                log.error("{}: Can't scratch: \"{}\": {}\n", name(15), entry, Error::to_string());
                 return false;
             }
-            log.debug("%s: File scratched: \"%s\"\n", name(15).c_str(), entry.c_str());
+            log.debug("{}: File scratched: \"{}\"\n", name(15), entry);
             return true;
         };
 

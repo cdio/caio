@@ -165,11 +165,7 @@ void C1541::reset()
 
 std::string C1541::to_string() const
 {
-    std::stringstream ss{};
-
-    ss << Name::to_string() << ", path " << std::quoted(attached_path());
-
-    return ss.str();
+    return std::format("{}, path \"{}\"", Name::to_string(), attached_path());
 }
 
 void C1541::open(uint8_t ch, const std::string& param)
@@ -212,7 +208,7 @@ void C1541::open(uint8_t ch, const std::string& param)
 
     if (param.empty()) {
         _statusch = Status::NO_FILE_GIVEN;
-        log.debug("%s: Open: Empty parameter\n", name(ch).c_str());
+        log.debug("{}: Open: Empty parameter\n", name(ch));
         return;
     }
 
@@ -220,7 +216,7 @@ void C1541::open(uint8_t ch, const std::string& param)
 
     if (std::regex_match(param, result, re_open) && result.size() != MATCHES) {
         _statusch = Status::INVALID_FILENAME;
-        log.debug("%s: Open: Match error: \"%s\"\n", name(ch).c_str(), param.c_str());
+        log.debug("{}: Open: Match error: \"{}\"\n", name(ch), param);
         return;
     }
 
@@ -231,7 +227,7 @@ void C1541::open(uint8_t ch, const std::string& param)
 
     if (fname.empty() && prefix.starts_with("$")) {
         _statusch = Status::NO_FILE_GIVEN;
-        log.debug("%s: Open: File name not detected: \"%s\"\n", name(ch).c_str(), param.c_str());
+        log.debug("{}: Open: File name not detected: \"{}\"\n", name(ch), param);
         return;
     }
 
@@ -258,7 +254,7 @@ void C1541::open(uint8_t ch, const std::string& param)
             omode = (trunc ? OpenMode::TRUNC : OpenMode::WRITE);
         } else {
             _statusch = Status::INVALID_FILENAME;
-            log.debug("%s: Open: \"%s\": Invalid open mode: \"%s\"\n", name(ch).c_str(), param.c_str(), mode.c_str());
+            log.debug("{}: Open: \"{}\": Invalid open mode: \"{}\"\n", name(ch), param, mode);
             return;
         }
     }
@@ -284,12 +280,12 @@ void C1541::open(uint8_t ch, const std::string& param)
         ftype = FileType::REL;
     } else {
         _statusch = Status::INVALID_FILENAME;
-        log.debug("%s: Open: \"%s\": Invalid file type: \"%s\"\n", name(ch).c_str(), param.c_str(), type.c_str());
+        log.debug("{}: Open: \"{}\": Invalid file type: \"{}\"\n", name(ch), param, type);
         return;
     }
 
     _statusch = channel_open(ch, fname, ftype, omode);
-    log.debug("%s: Open \"%s\": %s\n", name(ch).c_str(), param.c_str(), _statusch.to_string().c_str());
+    log.debug("{}: Open \"{}\": {}\n", name(ch), param, _statusch.to_string());
 }
 
 void C1541::close(uint8_t ch)
@@ -303,7 +299,7 @@ void C1541::close(uint8_t ch)
             channel_close(i);
         }
         _statusch = Status::OK;
-        log.debug("%s: Channel closed\n", name(ch).c_str());
+        log.debug("{}: Channel closed\n", name(ch));
     } else {
         _statusch = channel_close(ch);
     }
@@ -380,8 +376,7 @@ void C1541::command(const std::string& param)
 
     _statusch = st;
 
-    log.debug("%s: Executed command \"%s\", result \"%s\"\n", name(COMMAND_CHANNEL).c_str(), param.c_str(),
-        _statusch.to_string().c_str());
+    log.debug("{}: Executed command \"{}\", result \"{}\"\n", name(COMMAND_CHANNEL), param, _statusch.to_string());
 }
 
 bool C1541::check_attached()
@@ -390,7 +385,7 @@ bool C1541::check_attached()
         return true;
     }
 
-    log.error(Name::to_string() + ": Unit is not attached\n");
+    log.error("{}: Unit is not attached\n", Name::to_string());
 
     _statusch = Status::DRIVE_NOT_READY;
     return false;
@@ -438,12 +433,7 @@ void C1541::StatusChannel::push_back()
 
 std::string C1541::StatusChannel::to_string() const
 {
-    std::stringstream os{};
-
-    os << std::setfill('0') << std::setw(2) << std::to_string(static_cast<uint8_t>(_status)) << " - "
-       << std::quoted(c1541::to_string(_status));
-
-    return os.str();
+    return std::format("{:02X} - \"{}\"", static_cast<uint8_t>(_status), c1541::to_string(_status));
 }
 
 }

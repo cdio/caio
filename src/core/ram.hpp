@@ -42,7 +42,7 @@ public:
      * @param size  Size of this RAM;
      * @param label Label assigned to this RAM.
      */
-    RAM(size_t size, const std::string& label);
+    RAM(size_t size, std::string_view label);
 
     /**
      * Initialise this RAM with a repeating pattern.
@@ -55,7 +55,7 @@ public:
      * @see fill()
      */
     template<typename T>
-    RAM(size_t size, T pattern, bool random, const std::string& label)
+    RAM(size_t size, T pattern, bool random, std::string_view label)
         : Device{TYPE, label},
           _data(size) {
         std::span<uint8_t> dst{_data.data(), _data.size()};
@@ -69,7 +69,7 @@ public:
      * @param label Label assigned to this RAM.
      */
     template<typename Iterator>
-    RAM(Iterator first, Iterator last, const std::string& label)
+    RAM(Iterator first, Iterator last, std::string_view label)
         : Device{TYPE, label},
           _data{first, last} {
     }
@@ -83,7 +83,7 @@ public:
      * @see fs::LOAD_MAXSIZ
      * @see fs::load()
      */
-    RAM(const std::string& fname, size_t count, const std::string& label);
+    RAM(std::string_view fname, size_t count, std::string_view label);
 
     /**
      * Initialise this RAM with data from an input stream.
@@ -105,7 +105,7 @@ public:
      * Get an iterator to the first element of this RAM.
      * @return An iterator to the first element.
      */
-    std::vector<uint8_t>::iterator begin() {
+    buffer_it_t begin() {
         return _data.begin();
     }
 
@@ -113,7 +113,7 @@ public:
      * Get an iterator to the last element of this RAM +1.
      * @return An iterator to the last element +1.
      */
-    std::vector<uint8_t>::iterator end() {
+    buffer_it_t end() {
         return _data.end();
     }
 
@@ -146,7 +146,7 @@ public:
     std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
 
 protected:
-    std::vector<uint8_t> _data{};
+    buffer_t _data{};
 };
 
 }

@@ -36,7 +36,6 @@ CXXSRCS=	aspace.cpp \
 		keyboard.cpp \
 		logger.cpp \
 		monitor.cpp \
-		name.cpp \
 		readline.cpp \
 		rgb.cpp \
 		signal.cpp \

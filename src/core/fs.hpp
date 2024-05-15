@@ -25,6 +25,7 @@
 #include <iostream>
 #include <span>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -54,14 +55,14 @@ std::string home();
  * @param path Path to fix.
  * @return The fixed path.
  */
-std::string fix_home(const std::string& path);
+std::string fix_home(std::string_view path);
 
 /**
  * std::filesystem::exists() wrapper
  * @param path Pathname.
  * @return True if the specified file exists; false otherwise.
  */
-static inline bool exists(const std::string& path)
+static inline bool exists(std::string_view path)
 {
     std::error_code ec{};
     return std::filesystem::exists(path, ec);
@@ -72,7 +73,7 @@ static inline bool exists(const std::string& path)
  * @param path Pathname.
  * @return True if the specified path is a directory; false otherwise.
  */
-static inline bool is_directory(const std::string& path)
+static inline bool is_directory(std::string_view path)
 {
     std::error_code ec{};
     return std::filesystem::is_directory(path, ec);
@@ -83,7 +84,7 @@ static inline bool is_directory(const std::string& path)
  * @param path File name.
  * @return The file size or -1 if the file does not exist or it is not a file.
  */
-static inline std::uintmax_t file_size(const std::string& path)
+static inline std::uintmax_t file_size(std::string_view path)
 {
     std::error_code ec{};
     return std::filesystem::file_size(path, ec);
@@ -102,23 +103,24 @@ static inline std::uintmax_t file_size(const std::string& path)
  *              if it is not found there then try the search paths.
  * @return The existing file name; an empty string if the file is not found.
  */
-std::string search(const std::string& fname, const std::initializer_list<std::string>& spath = {}, bool cwd = false);
+std::string search(std::string_view fname, const std::initializer_list<std::string>& spath = {},
+    bool cwd = false);
 
 /**
  * Retrieve the basename of a full path.
  * @param fullpath Full path name.
  * @return The basename.
- * @see dirname(const std::string&)
+ * @see dirname(std::string_view)
  */
-std::string basename(const std::string& fullpath);
+std::string_view basename(std::string_view fullpath);
 
 /**
  * Retrieve the directory name of a full path.
  * @param fullpath Full path name.
  * @return The directory name.
- * @see basename(const std::string&)
+ * @see basename(std::string_view)
  */
-std::string dirname(const std::string& fullpath);
+std::string_view dirname(std::string_view fullpath);
 
 /**
  * Concatenate files.
@@ -127,14 +129,14 @@ std::string dirname(const std::string& fullpath);
  * @param src Source file name.
  * @exception IOError
  */
-void concat(const std::string& dst, const std::string& src);
+void concat(std::string_view dst, std::string_view src);
 
 /**
  * Remove a file.
  * @param fname File remove.
  * @return True on success; false on error.
  */
-bool unlink(const std::string& fname);
+bool unlink(std::string_view fname);
 
 /**
  * Match a file.
@@ -146,7 +148,7 @@ bool unlink(const std::string& fname);
  * @see MATCH_CASE_SENSITIVE
  * @see Unix manpage fnmatch(3)
  */
-bool match(const std::string& path, const std::string& pattern, bool icase = MATCH_CASE_SENSITIVE);
+bool match(std::string_view path, std::string_view pattern, bool icase = MATCH_CASE_SENSITIVE);
 
 /**
  * Get a directory listing.
@@ -159,8 +161,8 @@ bool match(const std::string& path, const std::string& pattern, bool icase = MAT
  * @see MATCH_CASE_INSENSITIVE
  * @see MATCH_CASE_SENSITIVE
  */
-bool directory(const std::string& path, const std::string& pattern, bool icase,
-    const std::function<bool(const std::string&, uint64_t)>& callback);
+bool directory(std::string_view path, std::string_view pattern, bool icase,
+    const std::function<bool(std::string_view, uint64_t)>& callback);
 
 /**
  * Get a directory listing.
@@ -175,7 +177,7 @@ bool directory(const std::string& path, const std::string& pattern, bool icase,
  * @see MATCH_CASE_INSENSITIVE
  * @see MATCH_CASE_SENSITIVE
  */
-dir_t directory(const std::string& path, const std::string& pattern, bool icase, size_t limit = DIR_ENTRIES_LIMIT);
+dir_t directory(std::string_view path, std::string_view pattern, bool icase, size_t limit = DIR_ENTRIES_LIMIT);
 
 /**
  * Load the contents of a file into memory.
@@ -184,12 +186,12 @@ dir_t directory(const std::string& path, const std::string& pattern, bool icase,
  * @return A buffer with the contents of the file.
  * @exception IOError
  * @see load(std::istream&)
- * @see save(const std::string&, const std::span<const uint8_t>&, std::ios_base::openmode)
- * @see save(std::ostream&, const std::span<const uint8_t>&)
+ * @see save(std::string_view, std::span<const uint8_t>, std::ios_base::openmode)
+ * @see save(std::ostream&, std::span<const uint8_t>)
  * @see LOAD_MAXSIZ
  * @see buffer_t
  */
-buffer_t load(const std::string& fname, size_t maxsiz = 0);
+buffer_t load(const std::string_view fname, size_t maxsiz = 0);
 
 /**
  * Read data from an input stream and create a memory buffer.
@@ -209,11 +211,11 @@ buffer_t load(std::istream& is, size_t maxsiz = 0);
  * @param buf   Buffer to save;
  * @param mode  Open mode (by default, if the file exists it is truncated).
  * @exception IOError
- * @see load(const std::string&)
+ * @see load(std::string_view
  * @see load(std::istream&)
- * @see save(std::ostream&, const std::span<const uint8_t>&)
+ * @see save(std::ostream&, std::span<const uint8_t>)
  */
-void save(const std::string& fname, const std::span<const uint8_t>& buf,
+void save(const std::string_view fname, std::span<const uint8_t> buf,
     std::ios_base::openmode mode = std::ios_base::out | std::ios_base::trunc);
 
 /**
@@ -222,9 +224,9 @@ void save(const std::string& fname, const std::span<const uint8_t>& buf,
  * @param buf Buffer.
  * @see load(const std::string&)
  * @see load(std::istream&)
- * @see save(const std::string&, const std::span<const uint8_t>&, std::ios_base::openmode)
+ * @see save(std::string_view std::span<const uint8_t>, std::ios_base::openmode)
  */
-std::ostream& save(std::ostream& os, const std::span<const uint8_t>& buf);
+std::ostream& save(std::ostream& os, std::span<const uint8_t> buf);
 
 }
 }

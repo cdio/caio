@@ -59,7 +59,7 @@ void ZX80::autorun(const std::string& pname)
 {
     if (!pname.empty()) {
         if (!_conf.prgfile.empty()) {
-            log.warn("Program file overrided. From %s to %s\n", _conf.prgfile.c_str(), pname.c_str());
+            log.warn("Program file overrided. From {} to {}\n", _conf.prgfile, pname);
         }
         _conf.prgfile = pname;
     }
@@ -67,7 +67,7 @@ void ZX80::autorun(const std::string& pname)
 
 void ZX80::start()
 {
-    log.info("Starting caio v%s - %s\n%s\n", caio::version().c_str(), _conf.title.c_str(), to_string().c_str());
+    log.info("Starting caio v{} - {}\n{}\n", caio::version(), _conf.title, to_string());
 
     /*
      * The emulator runs on its own thread.
@@ -85,7 +85,7 @@ void ZX80::start()
     }};
 
     if (!th.joinable()) {
-        log.error("Can't start the clock thread: " + Error::to_string() + "\n");
+        log.error("Can't start the clock thread: {}\n", Error::to_string());
         return;
     }
 
@@ -98,7 +98,7 @@ void ZX80::start()
 
     th.join();
 
-    log.info("Terminating " + _conf.title + "\n");
+    log.info("Terminating {}\n", _conf.title);
 }
 
 void ZX80::reset()
@@ -128,7 +128,7 @@ std::string ZX80::rompath(const std::string& fname) const
 {
     auto path = fs::search(fname, {_conf.romdir});
     if (path.empty()) {
-        throw IOError{"Can't load ROM: " + fname + ": " + Error::to_string(ENOENT)};
+        throw IOError{"Can't load ROM: {}: {}", fname, Error::to_string(ENOENT)};
     }
 
     return path;
@@ -142,10 +142,10 @@ void ZX80::attach_prg()
 
     std::string fname{fs::search(_conf.prgfile)};
     if (fname.empty()) {
-        throw IOError{"Can't load program: " + _conf.prgfile + ": " + Error::to_string()};
+        throw IOError{"Can't load program: {}: {}", _conf.prgfile, Error::to_string()};
     }
 
-    log.debug("Opening program: " + fname + "\n");
+    log.debug("Opening program: {}\n", fname);
 
     OFile* prog{};
     addr_t bpaddr{};
@@ -160,8 +160,8 @@ void ZX80::attach_prg()
 
     prog->load(fname);
 
-    log.debug("Loading program: %s, load address: $%04X, size: %d ($%04X)\n",
-        fname.c_str(), prog->load_address(), prog->size(), prog->size());
+    log.debug("Loading program: {}, load address: ${:04X}, size: {} (${:04X})\n", fname, prog->load_address(),
+        prog->size(), prog->size());
 
     _cpu->bpadd(bpaddr, [this, bpaddr](Z80& cpu, void* arg) {
         /*
@@ -336,7 +336,7 @@ void ZX80::hotkeys(keyboard::Key key)
         /* PASSTHROUGH */
 
     case keyboard::KEY_PAUSE:
-        log.debug("System %spaused\n", (_ui->paused() ? "un" : ""));
+        log.debug("System {}paused\n", (_ui->paused() ? "un" : ""));
         _clk->pause(_clk->paused() ^ true);
         break;
 
@@ -346,19 +346,22 @@ void ZX80::hotkeys(keyboard::Key key)
 
 std::string ZX80::to_string() const
 {
-    std::ostringstream os{};
-
-    os << _conf.to_string()                 << "\n\n"
-        "Connected devices:"                << "\n"
-        "  " << _clk->to_string()           << "\n"
-        "  " << _cpu->to_string()           << "\n"
-        "  " << _ram->to_string()           << "\n"
-        "  " << _rom->to_string()           << "\n"
-        "  " << _kbd->to_string()           << "\n"
-        "  " << _video->to_string()         << "\n\n"
-        "UI backend: " << _ui->to_string()  << "\n";
-
-    return os.str();
+    return std::format("{}\n\nConnected devices:\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n\n"
+        "UI backend: {}\n",
+        _conf.to_string(),
+        _clk->to_string(),
+        _cpu->to_string(),
+        _ram->to_string(),
+        _rom->to_string(),
+        _kbd->to_string(),
+        _video->to_string(),
+        _ui->to_string());
 }
 
 }

@@ -31,7 +31,7 @@ void Crt::open(const std::string& fname)
 {
     std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
     if (!is) {
-        throw InvalidCartridge{fname, "Can't open: " + Error::to_string()};
+        throw InvalidCartridge{"Can't open: {}: {}", fname, Error::to_string()};
     }
 
     _hdr   = {};
@@ -82,12 +82,12 @@ void Crt::open(std::istream& is)
             }
 
             default:
-                throw Error{"Invalid CHIP type: $" + caio::to_string(ch.type)};
+                throw Error{"Invalid CHIP type: ${}", caio::to_string(ch.type)};
             }
         }
 
     } catch (const std::exception& err) {
-        throw InvalidCartridge{_fname, err.what()};
+        throw InvalidCartridge{"{}: {}", _fname, err.what()};
     }
 }
 
@@ -154,7 +154,7 @@ bool Crt::is_valid(const Crt::Chip& ch)
 void Crt::load_header(std::istream& is, Header& hdr)
 {
     if (!is.read(reinterpret_cast<char*>(&hdr), sizeof(hdr))) {
-        throw IOError{"Can't read CRT header: " + Error::to_string()};
+        throw IOError{"Can't read CRT header: {}", Error::to_string()};
     }
 
     to_host(hdr);
@@ -163,7 +163,7 @@ void Crt::load_header(std::istream& is, Header& hdr)
 void Crt::load_chip(std::istream& is, Chip& ch)
 {
     if (!is.read(reinterpret_cast<char*>(&ch), sizeof(ch))) {
-        throw IOError{"Can't read CHIP header: " + Error::to_string()};
+        throw IOError{"Can't read CHIP header: {}", Error::to_string()};
     }
 
     to_host(ch);
@@ -176,29 +176,15 @@ devptr_t Crt::load_rom(std::istream& is, const Chip& ch)
 
 std::string Crt::to_string(const Crt::Header& hdr)
 {
-    std::ostringstream ss{};
-    std::string name{reinterpret_cast<const char*>(hdr.name), std::strlen(reinterpret_cast<const char*>(hdr.name))};
-
-    ss << "name "      << std::quoted(name)
-       << ", size "    << hdr.size
-       << ", hwtype $" << caio::to_string(hdr.hwtype)
-       << ", exrom "   << +hdr.exrom
-       << ", game "    << +hdr.game;
-
-    return ss.str();
+    std::string_view name{reinterpret_cast<const char*>(hdr.name), std::strlen(reinterpret_cast<const char*>(hdr.name))};
+    return std::format("name \"{}\", size {}, hwtype ${:02X}, exrom {}, game {}",
+        name, hdr.size, hdr.hwtype, hdr.exrom, hdr.game);
 }
 
 std::string Crt::to_string(const Crt::Chip& ch)
 {
-    std::ostringstream ss{};
-
-    ss << "size "    << ch.size
-       << ", type $" << caio::to_string(ch.type)
-       << ", bank $" << caio::to_string(ch.bank)
-       << ", addr $" << caio::to_string(ch.addr)
-       << ", rsiz "  << ch.rsiz;
-
-    return ss.str();
+    return std::format("size {}, type ${}, bank ${}, addr ${}, rsiz {}",
+        ch.size, caio::to_string(ch.type), caio::to_string(ch.bank), caio::to_string(ch.addr), ch.rsiz);
 }
 
 void Crt::to_host(Crt::Header& hdr)

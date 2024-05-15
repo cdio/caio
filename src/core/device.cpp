@@ -22,11 +22,7 @@ namespace caio {
 
 std::string Device::to_string() const
 {
-    std::ostringstream os{};
-
-    os << Name::to_string() << ", size: " << size();
-
-    return os.str();
+    return std::format("{}, size {}", Name::to_string(), size());
 }
 
 }

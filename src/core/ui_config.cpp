@@ -36,9 +36,7 @@ SLEffect to_sleffect(const std::string& str)
         return static_cast<SLEffect>(+str[0]);
     }
 
-    std::stringstream ss{};
-    ss << "Invalid scanlines effect: " << std::quoted(str);
-    throw InvalidArgument{ss.str()};
+    throw InvalidArgument{"Invalid scanlines effect: \"{}\"", str};
 }
 
 }

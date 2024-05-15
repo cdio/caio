@@ -19,17 +19,9 @@
 #pragma once
 
 #include <array>
-#include <algorithm>
 #include <cmath>
-#include <cstdint>
-#include <cstdlib>
 #include <functional>
-#include <limits>
-#include <numeric>
 #include <ostream>
-#include <sstream>
-#include <string>
-#include <type_traits>
 
 #include "types.hpp"
 
@@ -96,18 +88,6 @@ constexpr fp_t pulse(fp_t t, fp_t dc)
 }
 
 /**
- * Calculate the average of the floating point elements inside a container.
- * @param samples Container.
- * @return The average value.
- */
-template <typename C, typename = std::enable_if<is_container<C>::value>>
-fp_t mean(const C& samples)
-{
-    fp_t sum = std::accumulate(samples.begin(), samples.end(), 0.0f);
-    return (sum / samples.size());
-}
-
-/**
  * Compute the modulo of two values.
  * @param a First value;
  * @param m Second value.
@@ -124,14 +104,21 @@ constexpr T mod(T a, T m)
 }
 
 /**
- * Container for the coefficients of a transfer function.
+ * Calculate the average of the floating point elements inside a container.
+ * @param samples Container.
+ * @return The average value.
+ */
+fp_t mean(samples_fp samples);
+
+/**
+ * Transfer function coefficients.
  */
 template<size_t M, size_t N>
 struct PCoeffs {
     std::array<fp_t, M> num;
     std::array<fp_t, N> den;
 
-    operator const p_coeffs() const
+    operator p_coeffs() const
     {
         return {num, den};
     }
@@ -141,7 +128,7 @@ struct PCoeffs {
         return {num, den};
     }
 
-    PCoeffs<M, N>& operator=(const p_coeffs& coeffs)
+    PCoeffs<M, N>& operator=(p_coeffs coeffs)
     {
         const size_t max_m = std::min(std::size(coeffs.first), M);
         const size_t max_n = std::min(std::size(coeffs.second), N);
@@ -201,7 +188,7 @@ public:
      * @param coeffs Normalized filter coefficients.
      * @see p_coeffs
      */
-    Filter(const p_coeffs& coeffs)
+    Filter(p_coeffs coeffs)
     {
         static_cast<PCoeffs<M, N>&>(*this) = coeffs;
     }
@@ -380,25 +367,11 @@ constexpr PCoeffs<3, 3> iir_bapass20(fp_t fc, fp_t Q, fp_t fs)
 
 /**
  * Generate an octave transposed vector containing a set of samples.
- * @param samples Buffer with samples.
+ * @param samples Samples buffer.
  * @return A transposed vector string.
  * @see https://octave.org
  */
-template<typename T, typename = std::enable_if<is_container<T>::value>>
-std::string to_string(const T& samples)
-{
-    std::stringstream os{};
-
-    os << "[ ";
-
-    for (const auto& sample : samples) {
-        os << sample << " ";
-    }
-
-    os << "]";
-
-    return os.str();
-}
+std::string to_string(samples_fp samples);
 
 /**
  * Send the content of a samples buffer to an output stream formatted as an octave structure.
@@ -412,10 +385,9 @@ std::string to_string(const T& samples)
  * @return os.
  * @see https://octave.org
  */
-std::ostream& dump(std::ostream& os, const samples_fp& samples, const std::string& name,
-    fp_t fc1, fp_t fc2, fp_t Q, fp_t fs);
+std::ostream& dump(std::ostream& os, samples_fp samples, std::string_view name, fp_t fc1, fp_t fc2, fp_t Q, fp_t fs);
 
-}   /* namespace signal */
+}
 
 template<size_t M1, size_t N1, size_t M2, size_t N2>
 constexpr signal::PCoeffs<std::max(M1, M2), std::max(N1, N2)> operator+(const signal::PCoeffs<M1, N1>& c1,

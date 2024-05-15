@@ -278,7 +278,7 @@ void ZXSpectrumKeyboard::add_key_map(const std::string& key_name, bool key_shift
         /* Replace the existing definition */
         it.first->second = spectrum_key;
 
-        log.warn("ZXSpectrumKeyboard: Key redefined: %s%s%s. Previous value has been replaced\n", key_name.c_str(),
+        log.warn("ZXSpectrumKeyboard: Key redefined: {}{}{}. Previous value has been replaced\n", key_name,
             (key_shift ? " SHIFT" : ""), (key_altgr ? " ALTGR" : ""));
     }
 }

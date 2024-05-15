@@ -91,7 +91,7 @@ void Z80TestASpace::write(addr_t addr, uint8_t value)
             break;
 
         default:
-            log.error("z80-test: Invalid out command: %04X. Ignored\n", addr);
+            log.error("z80-test: Invalid out command: {:04X}. Ignored\n", addr);
         }
 
     } else {
@@ -137,7 +137,7 @@ void Z80TestASpace::bdos(uint8_t cmd, addr_t arg)
         break;
 
     default:
-        log.error("Unsupported bdos call: %02X. Ignored\n", cmd);
+        log.error("Unsupported bdos call: {:02X}. Ignored\n", cmd);
     }
 }
 

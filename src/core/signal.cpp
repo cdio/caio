@@ -18,24 +18,36 @@
  */
 #include "signal.hpp"
 
+#include <sstream>
+
 namespace caio {
 namespace signal {
 
-std::ostream& dump(std::ostream& os, const samples_fp& samples, const std::string& name, fp_t fc1, fp_t fc2,
-    fp_t Q, fp_t fs)
+fp_t mean(samples_fp samples)
 {
-    os << name << " = struct('fs', "   << fs  << ", "
-               <<           "'fc1', "  << fc1 << ", "
-               <<           "'fc2', "  << fc2 << ", "
-               <<           "'Q', "    << Q   << ", "
-               <<           "'v', [ ";
-
-    for (fp_t value : samples) {
-        os << value << " ";
+    fp_t sum = 0.0;
+    for (auto sample : samples) {
+        sum += sample;
     }
+    return (sum / samples.size());
+}
 
-    os << " ]);\n";
+std::string to_string(samples_fp samples)
+{
+    std::stringstream os{};
+    os << "[ ";
+    for (auto sample : samples) {
+        os << sample << " ";
+    }
+    os << "]";
+    return os.str();
+}
 
+std::ostream& dump(std::ostream& os, samples_fp samples, std::string_view name, fp_t fc1, fp_t fc2, fp_t Q, fp_t fs)
+{
+    std::format_to(std::ostream_iterator<char>(os),
+        "{} = struct('fs', {}, 'fc1', {}, 'fc2', {}, 'Q', {}, 'v', {});\n",
+        name, fs, fc1, fc2, Q, to_string(samples));
     return os;
 }
 

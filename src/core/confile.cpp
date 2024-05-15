@@ -18,6 +18,7 @@
  */
 #include "config.hpp"
 
+#include <format>
 #include <regex>
 
 #include "utils.hpp"
@@ -25,13 +26,13 @@
 namespace caio {
 namespace config {
 
-Confile::Confile(const std::string& fname)
+Confile::Confile(std::string_view fname)
     : _sections{}
 {
     load(fname);
 }
 
-void Confile::load(const std::string& fname)
+void Confile::load(const std::string_view fname)
 {
     if (fname.empty()) {
         return;
@@ -39,7 +40,7 @@ void Confile::load(const std::string& fname)
 
     std::ifstream ifs{fname};
     if (!ifs) {
-        throw IOError{"Can't open configuration file: " + fname + ": " + Error::to_string()};
+        throw IOError{"Can't open configuration file: {}: {}", fname, Error::to_string()};
     }
 
     static const std::regex re_comment("^[ \t]*#.*$", std::regex::extended);
@@ -65,7 +66,7 @@ void Confile::load(const std::string& fname)
             /*
              * Section detected.
              */
-            std::string sname{caio::tolow(result[1])};
+            std::string sname{caio::tolow(result.str(1))};
             cursect = &_sections[sname];
             continue;
         }
@@ -74,9 +75,7 @@ void Confile::load(const std::string& fname)
             /*
              * Invalid entry.
              */
-            std::stringstream ss{};
-            ss << fname << ": Invalid entry at line #" << line << ": " << std::quoted(str);
-            throw ConfigError{ss.str()};
+            throw ConfigError{"{}: Invalid entry at line #{}: \"{}\"", fname, line, str};
         }
 
         /*
@@ -86,30 +85,28 @@ void Confile::load(const std::string& fname)
             /*
              * Key-value pair is not valid when a section is not defined (empty sections are not allowed).
              */
-            std::stringstream ss{};
-            ss << fname << ": Entry without section at line #" << line << ": " << std::quoted(str);
-            throw ConfigError{ss.str()};
+            throw ConfigError{"{}: Entry without section at line #{}: \"{}\"", fname, line, str};
         }
 
-        const std::string& key = caio::tolow(result[1]);
+        const std::string& key = caio::tolow(result.str(1));
         const std::string& value = result[2];
 
         (*cursect)[key] = value;
     }
 }
 
-Section& Confile::operator[](const std::string& sname)
+Section& Confile::operator[](const std::string_view sname)
 {
     return _sections[caio::tolow(sname)];
 }
 
-Section Confile::extract(const std::string& sname)
+Section Confile::extract(const std::string_view sname)
 {
     auto nh = _sections.extract(caio::tolow(sname));
     return (nh ? std::move(nh.mapped()) : Section{});
 }
 
-std::map<std::string, Section>::const_iterator Confile::find(const std::string& sname) const
+std::map<std::string, Section>::const_iterator Confile::find(const std::string_view sname) const
 {
     return _sections.find(caio::tolow(sname));
 }

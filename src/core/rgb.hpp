@@ -88,11 +88,10 @@ struct Rgba {
      * @param color Colour to copy from.
      * @return This colour.
      */
-    Rgba& set(const Rgba& color) {
+    Rgba& set(Rgba color) {
         if (!color.is_transparent()) {
             u32 = color.u32;
         }
-
         return *this;
     }
 
@@ -103,7 +102,7 @@ struct Rgba {
      * @param value value.
      * @return The new colour.
      */
-    friend Rgba operator*(const Rgba& color, float value);
+    friend Rgba operator*(Rgba color, float value);
 
     /**
      * Divide a colour with a floating point value.
@@ -112,7 +111,7 @@ struct Rgba {
      * @param value value.
      * @return The new colour.
      */
-    friend Rgba operator/(const Rgba& color, float value);
+    friend Rgba operator/(Rgba color, float value);
 
     /**
      * Add two colours.
@@ -122,7 +121,7 @@ struct Rgba {
      * @param color2 Second colour.
      * @return The resulting colour.
      */
-    friend Rgba operator+(const Rgba& color1, const Rgba& color2);
+    friend Rgba operator+(Rgba color1, Rgba color2);
 
     /**
      * Transparent colour.
@@ -149,7 +148,7 @@ public:
      * @param fname Name of the file containing the colour table.
      * @exception IOError
      */
-    RgbaTable(const std::string& fname) {
+    RgbaTable(std::string_view fname) {
         load(fname);
     }
 
@@ -158,14 +157,14 @@ public:
      * @param fname File name.
      * @exception IOError
      */
-    void load(const std::string& fname);
+    void load(std::string_view fname);
 
     /**
      * Save this RGBA table to file.
      * @param fname File name.
      * @exception IOError
      */
-    void save(const std::string& fname);
+    void save(std::string_view fname);
 };
 
 /**
@@ -175,7 +174,7 @@ template<size_t N>
 class RgbaN_ {
 public:
     template<typename... Ts>
-    RgbaN_(const Ts&... colors)
+    RgbaN_(const Ts... colors)
         : _colors{{colors...}} {
     }
 

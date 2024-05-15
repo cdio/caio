@@ -42,7 +42,7 @@ std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdl
          * A configuration file is specified in the command line.
          */
         fname = it->second;
-        log.debug("Configuration file: %s\n", fname.c_str());
+        log.debug("Configuration file: {}\n", fname);
         cfile.load(fname);
     } else {
         /*
@@ -52,7 +52,7 @@ std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdl
         if (fname.empty()) {
             log.debug("Configuration file not found. Using default values\n");
         } else {
-            log.debug("Configuration file found: %s\n", fname.c_str());
+            log.debug("Configuration file found: {}\n", fname);
             cfile.load(fname);
         }
     }
@@ -82,27 +82,27 @@ VJoyConfig::VJoyConfig(Section& sec)
       enabled{is_true(sec[KEY_VJOY])}
 {
     if (up == keyboard::KEY_NONE) {
-        throw InvalidArgument{"Invalid virtual joystick up key: " + sec[KEY_VJOY_UP]};
+        throw InvalidArgument{"Invalid virtual joystick up key: {}", sec[KEY_VJOY_UP]};
     }
 
     if (down == keyboard::KEY_NONE) {
-        throw InvalidArgument{"Invalid virtual joystick down key: " + sec[KEY_VJOY_DOWN]};
+        throw InvalidArgument{"Invalid virtual joystick down key: {}", sec[KEY_VJOY_DOWN]};
     }
 
     if (left == keyboard::KEY_NONE) {
-        throw InvalidArgument{"Invalid virtual joystick left key: " + sec[KEY_VJOY_LEFT]};
+        throw InvalidArgument{"Invalid virtual joystick left key: {}", sec[KEY_VJOY_LEFT]};
     }
 
     if (right == keyboard::KEY_NONE) {
-        throw InvalidArgument{"Invalid virtual joystick right key: " + sec[KEY_VJOY_RIGHT]};
+        throw InvalidArgument{"Invalid virtual joystick right key: {}", sec[KEY_VJOY_RIGHT]};
     }
 
     if (fire == keyboard::KEY_NONE) {
-        throw InvalidArgument{"Invalid virtual joystick fire-A key: " + sec[KEY_VJOY_FIRE_A]};
+        throw InvalidArgument{"Invalid virtual joystick fire-A key: {}", sec[KEY_VJOY_FIRE_A]};
     }
 
     if (fire_b == keyboard::KEY_NONE) {
-        throw InvalidArgument{"Invalid virtual joystick fire-B key: " + sec[KEY_VJOY_FIRE_B]};
+        throw InvalidArgument{"Invalid virtual joystick fire-B key: {}", sec[KEY_VJOY_FIRE_B]};
     }
 }
 
@@ -149,37 +149,49 @@ std::string Config::resolve(const std::string& name, const std::string& path, co
         return fullpath;
     }
 
-    throw IOError{"File not found: name " + fname + ", path " + path};
+    throw IOError{"File not found: name: {}, path: {}", fname, path};
 }
 
 std::string Config::to_string() const
 {
-    std::ostringstream os{};
-
-    os << "  Title:              " << std::quoted(title)              << "\n"
-       << "  ROMs path:          " << std::quoted(romdir)             << "\n"
-       << "  Palette:            " << std::quoted(palette)            << "\n"
-       << "  Keymaps:            " << std::quoted(keymaps)            << "\n"
-       << "  Cartridge:          " << std::quoted(cartridge)          << "\n"
-       << "  FPS:                " << fps                             << "\n"
-       << "  Scale:              " << scale << "x"                    << "\n"
-       << "  Scanlines effect:   " << scanlines                       << "\n"
-       << "  Fullscreen:         " << (fullscreen ? "yes" : "no")     << "\n"
-       << "  Smooth resize:      " << (sresize ? "yes" : "no")        << "\n"
-       << "  Audio enabled:      " << (audio ? "yes" : "no")          << "\n"
-       << "  Clock delay:        " << delay << "x"                    << "\n"
-       << "  CPU Monitor:        " << (monitor ? "yes" : "no")        << "\n"
-       << "  Log file:           " << std::quoted(logfile)            << "\n"
-       << "  Log level:          " << loglevel                        << "\n"
-       << "  Virtual Joystick:   " << (vjoy.enabled ? "yes" : "no")   << "\n"
-       << "                up:   " << keyboard::to_string(vjoy.up)    << "\n"
-       << "              down:   " << keyboard::to_string(vjoy.down)  << "\n"
-       << "              left:   " << keyboard::to_string(vjoy.left)  << "\n"
-       << "             right:   " << keyboard::to_string(vjoy.right) << "\n"
-       << "            fire A:   " << keyboard::to_string(vjoy.fire)  << "\n"
-       << "            fire B:   " << keyboard::to_string(vjoy.fire_b);
-
-    return os.str();
+    return std::format(
+        "  Title:              \"{}\"\n"
+        "  ROMs path:          \"{}\"\n"
+        "  Palette:            \"{}\"\n"
+        "  Keymaps:            \"{}\"\n"
+        "  Cartridge:          \"{}\"\n"
+        "  FPS:                {}\n"
+        "  Scale:              {}x\n"
+        "  Scanlines effect:   {}\n"
+        "  Fullscreen:         {}\n"
+        "  Smooth resize:      {}\n"
+        "  Audio enabled:      {}\n"
+        "  Clock delay:        {:1.1f}x\n"
+        "  CPU Monitor:        {}\n"
+        "  Log file:           \"{}\"\n"
+        "  Log level:          {}\n"
+        "  Virtual Joystick:   {}\n"
+        "                up:   {}\n"
+        "              down:   {}\n"
+        "              left:   {}\n"
+        "             right:   {}\n"
+        "            fire A:   {}\n"
+        "            fire B:   {}",
+        title, romdir, palette, keymaps, cartridge, fps, scale, scanlines,
+        (fullscreen ? "yes" : "no"),
+        (sresize ? "yes" : "no"),
+        (audio ? "yes" : "no"),
+        delay,
+        (monitor ? "yes" : "no"),
+        logfile,
+        loglevel,
+        (vjoy.enabled ? "yes" : "no"),
+        keyboard::to_string(vjoy.up),
+        keyboard::to_string(vjoy.down),
+        keyboard::to_string(vjoy.left),
+        keyboard::to_string(vjoy.right),
+        keyboard::to_string(vjoy.fire),
+        keyboard::to_string(vjoy.fire_b));
 }
 
 }

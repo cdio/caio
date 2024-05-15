@@ -106,9 +106,9 @@ void History::load()
         std::ifstream is{_histfname, std::ios::binary | std::ios::in};
         if (!is) {
             if (errno != ENOENT) {
-                throw IOError{"Can't open: " + _histfname + ": " + Error::to_string()};
+                throw IOError{"Can't open: {}: {}", _histfname, Error::to_string()};
             }
-            log.warn("Unable to load history file: %s: %s\n", _histfname.c_str(), Error::to_string(errno).c_str());
+            log.warn("Unable to load history file: {}: {}\n", _histfname, Error::to_string(errno));
         }
 
         std::string line{};
@@ -132,9 +132,9 @@ void History::save()
         std::ofstream os{_histfname, std::ios::binary | std::ios::out | std::ios::trunc};
         if (!os) {
             if (errno != ENOENT) {
-                throw IOError{"Can't open: " + _histfname + ": " + Error::to_string()};
+                throw IOError{"Can't open: {}: {}", _histfname, Error::to_string()};
             }
-            log.warn("Unable to save history file: %s: %s\n", _histfname.c_str(), Error::to_string(errno).c_str());
+            log.warn("Unable to save history file: {}: {}\n", _histfname, Error::to_string(errno));
         }
 
         for (size_t pos = 0; pos < _current; ++pos) {
@@ -152,7 +152,7 @@ Readline::Readline(int ifd, int ofd, const std::string& histfname)
 {
     if (_ifd < 0) {
         if (ifd >= 0) {
-            throw IOError{"Can't duplicate input file descriptor: " + Error::to_string(errno)};
+            throw IOError{"Can't duplicate input file descriptor: {}", Error::to_string(errno)};
         } else {
             throw IOError{"Invalid input file descriptor"};
         }
@@ -160,7 +160,7 @@ Readline::Readline(int ifd, int ofd, const std::string& histfname)
 
     if (_ofd < 0) {
         if (ofd >= 0) {
-            throw IOError{"Can't duplicate output file descriptor: " + Error::to_string(errno)};
+            throw IOError{"Can't duplicate output file descriptor: {}", Error::to_string(errno)};
         } else {
             throw IOError{"Invalid output file descriptor"};
         }
@@ -198,12 +198,12 @@ void Readline::term_init()
     struct ::termios attr{};
 
     if (::tcgetattr(_ifd, &attr) < 0) {
-        IOError{"Can't get input terminal attributes: " + Error::to_string(errno)};
+        throw IOError{"Can't get input terminal attributes: {}", Error::to_string(errno)};
     }
 
     attr.c_lflag &= ~(ICANON | ECHO);
     if (::tcsetattr(_ifd, TCSANOW, &attr) < 0) {
-        IOError{"Can't set input terminal attributes: " + Error::to_string(errno)};
+        throw IOError{"Can't set input terminal attributes: {}", Error::to_string(errno)};
     }
 
     /* TODO: output */
@@ -215,7 +215,7 @@ char Readline::getc()
 
     while (::read(_ifd, &ch, 1) <= 0) {
         if (errno != EINTR) {
-            throw IOError{"Readline", "Can't read character: " + Error::to_string(errno)};
+            throw IOError{"Can't read character: {}", Error::to_string(errno)};
         }
     }
 
@@ -239,7 +239,7 @@ void Readline::write(const std::span<const char>& data) const
     if (data.size() != 0) {
         size_t wr = ::write(_ofd, data.data(), data.size());
         if (wr != data.size()) {
-            throw IOError{"Readline", "Can't write: " + Error::to_string(errno)};
+            throw IOError{"Can't write: {}", Error::to_string(errno)};
         }
     }
 }

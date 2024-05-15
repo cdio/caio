@@ -547,7 +547,7 @@ int Mos6502::i_KIL(Mos6502& self, addr_t addr)
      * alias: CIM
      */
     self._halted = true;
-    log.debug("KIL instruction at $" + caio::to_string(self._regs.PC) + ", CPU halted\n");
+    log.debug("KIL instruction at ${}, CPU halted\n", caio::to_string(self._regs.PC));
     return 0;
 }
 

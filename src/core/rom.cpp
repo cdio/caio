@@ -26,22 +26,22 @@
 
 namespace caio {
 
-ROM::ROM(const std::string& fname, const std::string& digest, const std::string& label)
+ROM::ROM(std::string_view fname, std::string_view digest, std::string_view label)
     : RAM{fname, 0, label}
 {
     type(TYPE);
     auto sign = signature();
     if (digest != sign) {
-        throw IOError{*this, fname + ": Invalid signature: Expected " + digest + ", Calculated: " + sign};
+        throw IOError{*this, "{}: Invalid signature: Expected: {}, Calculated: {}", fname, digest, sign};
     }
 }
 
-ROM::ROM(const std::string& fname, size_t size, const std::string& label)
+ROM::ROM(std::string_view fname, size_t size, std::string_view label)
     : RAM{fname, size, label}
 {
     type(TYPE);
     if (size > 0 && _data.size() != size) {
-        throw IOError{*this, fname + ": Invalid file size: It must be " + std::to_string(size)};
+        throw IOError{*this, "{}: Invalid file size: It must be {}", fname, std::to_string(size)};
     }
 }
 
@@ -54,8 +54,8 @@ ROM::ROM(std::istream& is, size_t count)
 void ROM::write(addr_t addr, uint8_t data)
 {
 #if 0
-    log.warn("%s(%s): Write attempt at relative address $%04x, data $%02x. Ignored\n",
-        type().c_str(), label().c_str(), addr, data);
+    log.warn("{}({}): Write attempt at relative address ${:04x}, data ${:02x}. Ignored\n",
+        type(), label(), addr, data);
 #endif
 }
 

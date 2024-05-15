@@ -343,8 +343,8 @@ int Z80::i_mi_io(Z80& self, uint8_t op, addr_t)
 
     default:
         prev = self._iaddr;
-        log.error("Z80: MI: Unrecognised IN/OUT opcode: ED %02X, addr: $%04X\n%s\n",
-            op, self._iaddr, self.disass(prev).c_str());
+        log.error("Z80: MI: Unrecognised IN/OUT opcode: ED {:02X}, addr: ${:04X}\n{}\n",
+            op, self._iaddr, self.disass(prev));
         return 0;
     }
 
@@ -455,7 +455,7 @@ int Z80::i_mi_adcsbc(Z80& self, uint8_t op, addr_t arg)
         self.sbc16(result, src_reg);
         break;
     default:
-        log.error("Z80: MI: Unrecognised ADC/SBC opcode: ED %02X, addr: %04X\n", op, self._regs.PC);
+        log.error("Z80: MI: Unrecognised ADC/SBC opcode: ED {:02X}, addr: ${:04X}\n", op, self._regs.PC);
     }
 
     self._regs.HL = result;
@@ -555,7 +555,7 @@ int Z80::i_mi_IM_x(Z80& self, uint8_t op, addr_t arg)
         self._imode = IMode::M2;
         break;
     default:
-        log.error("Z80: MI: Unrecognised MI X opcode: ED %02X, addr: %04X\n", op, self._regs.PC);
+        log.error("Z80: MI: Unrecognised MI X opcode: ED {:02X}, addr: ${:04X}\n", op, self._regs.PC);
     }
 
     return 0;

@@ -91,12 +91,12 @@ void C64::autorun(const std::string& pname)
     if (!pname.empty()) {
         if (Crt::is_crt(pname)) {
             if (!_conf.cartridge.empty()) {
-                log.warn("Cartridge file overrided. From %s to %s\n", _conf.cartridge.c_str(), pname.c_str());
+                log.warn("Cartridge file overrided. From {} to {}\n", _conf.cartridge, pname);
             }
             _conf.cartridge = pname;
         } else {
             if (!_conf.prgfile.empty()) {
-                log.warn("Program file overrided. From %s to %s\n", _conf.prgfile.c_str(), pname.c_str());
+                log.warn("Program file overrided. From {} to {}\n", _conf.prgfile, pname);
             }
             _conf.prgfile = pname;
         }
@@ -105,7 +105,7 @@ void C64::autorun(const std::string& pname)
 
 void C64::start()
 {
-    log.info("Starting caio v%s - %s\n%s\n", caio::version().c_str(), _conf.title.c_str(), to_string().c_str());
+    log.info("Starting caio v{} - {}\n{}\n", caio::version(), _conf.title, to_string());
 
     /*
      * The emulator runs on its own thread.
@@ -119,7 +119,7 @@ void C64::start()
     }};
 
     if (!th.joinable()) {
-        log.error("Can't start the clock thread: " + Error::to_string() + "\n");
+        log.error("Can't start the clock thread: {}\n", Error::to_string());
         return;
     }
 
@@ -132,7 +132,7 @@ void C64::start()
 
     th.join();
 
-    log.info("Terminating " + _conf.title + "\n");
+    log.info("Terminating {}\n", _conf.title);
 }
 
 void C64::reset()
@@ -185,7 +185,7 @@ std::string C64::rompath(const std::string& fname)
 {
     auto path = fs::search(fname, {_conf.romdir});
     if (path.empty()) {
-        throw IOError{"Can't load ROM: " + fname + ": " + Error::to_string(ENOENT)};
+        throw IOError{"Can't load ROM: {}: {}", fname, Error::to_string(ENOENT)};
     }
 
     return path;
@@ -199,7 +199,7 @@ sptr_t<Cartridge> C64::attach_cartridge()
 
     auto fpath = fs::search(_conf.cartridge);
     if (fpath.empty()) {
-        throw IOError{"Can't load Cartridge: " + _conf.cartridge + ": " + Error::to_string(ENOENT)};
+        throw IOError{"Can't load Cartridge: {}: {}", _conf.cartridge, Error::to_string(ENOENT)};
     }
 
     auto cart = Cartridge::create(fpath);
@@ -214,14 +214,14 @@ void C64::attach_prg()
 
     std::string prgfile{fs::search(_conf.prgfile)};
     if (prgfile.empty()) {
-        throw IOError{"Can't load program: " + _conf.prgfile + ": " + Error::to_string()};
+        throw IOError{"Can't load program: {}: {}", _conf.prgfile, Error::to_string()};
     }
 
     try {
         PrgFile* prog{};
         const char* format{};
 
-        log.debug("Preloading program: " + prgfile + "\n");
+        log.debug("Preloading program: {}\n", prgfile);
 
         try {
             prog = new P00File{prgfile};
@@ -231,7 +231,7 @@ void C64::attach_prg()
             format = "PRG";
         }
 
-        log.debug("Detected format: %s, start address: $%04X, size: %d ($%04X)\n", format, prog->address(),
+        log.debug("Detected format: {}, start address: ${:04X}, size: {} (${:04X})\n", format, prog->address(),
             prog->size(), prog->size());
 
         _cpu->bpadd(BASIC_READY_ADDR, [](Mos6510& cpu, void* arg) {
@@ -478,11 +478,11 @@ void C64::connect_devices()
 
 void C64::create_ui()
 {
-    std::string title{_conf.title};
+    std::string title;
     if (_ioexp) {
-        title += " - " + _ioexp->name();
+        title = std::format("{} - {}", _conf.title, _ioexp->name());
     } else if (!_conf.prgfile.empty()) {
-        title += " - " + fs::basename(_conf.prgfile);
+        title = std::format("{} - {}", _conf.title, fs::basename(_conf.prgfile));
     }
 
     ui::Config uiconf {
@@ -620,7 +620,7 @@ void C64::hotkeys(keyboard::Key key)
          * Swap joysticks.
          */
         _conf.swapj ^= true;
-        log.debug("Joysticks %sswapped\n", (_conf.swapj ? "" : "un"));
+        log.debug("Joysticks {}swapped\n", (_conf.swapj ? "" : "un"));
         break;
 
     case keyboard::KEY_ALT_K:
@@ -630,7 +630,7 @@ void C64::hotkeys(keyboard::Key key)
         if (_conf.vjoy.enabled) {
             bool kact = _kbd->active() ^ true;
             _kbd->active(kact);
-            log.debug("Keyboard %s\n", (kact ? "active" : "inactive"));
+            log.debug("Keyboard {}\n", (kact ? "active" : "inactive"));
         }
         break;
 
@@ -657,7 +657,7 @@ void C64::hotkeys(keyboard::Key key)
         /* PASSTHROUGH */
 
     case keyboard::KEY_PAUSE:
-        log.debug("System %spaused\n", (_ui->paused() ? "un" : ""));
+        log.debug("System {}paused\n", (_ui->paused() ? "un" : ""));
         _clk->pause(_clk->paused() ^ true);
         break;
 
@@ -667,33 +667,42 @@ void C64::hotkeys(keyboard::Key key)
 
 std::string C64::to_string() const
 {
-    std::ostringstream os{};
-
-    os << _conf.to_string() << "\n\n"
-          "Connected devices:\n"
-          "  " << _clk->to_string()     << "\n"
-          "  " << _cpu->to_string()     << "\n"
-          "  " << _vic2->to_string()    << "\n"
-          "  " << _cia1->to_string()    << "\n"
-          "  " << _cia2->to_string()    << "\n"
-          "  " << _sid->to_string()     << "\n"
-          "  " << _ram->to_string()     << "\n"
-          "  " << _vram->to_string()    << "\n"
-          "  " << _basic->to_string()   << "\n"
-          "  " << _kernal->to_string()  << "\n"
-          "  " << _chargen->to_string() << "\n";
-
-    if (_ioexp) {
-       os << "  " << _ioexp->to_string() << "\n";
-    }
-
-    os << "  " << _kbd->to_string()             << "\n"
-          "  " << _joy1->to_string()            << "\n"
-          "  " << _joy2->to_string()            << "\n"
-          "  " << _bus->to_string()             << "\n\n"
-          "UI backend: " << _ui->to_string()    << "\n";
-
-    return os.str();
+    return std::format("{}\n\nConnected devices:\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "UI backend: {}\n",
+        _conf.to_string(),
+        _clk->to_string(),
+        _cpu->to_string(),
+        _vic2->to_string(),
+        _cia1->to_string(),
+        _cia2->to_string(),
+        _sid->to_string(),
+        _ram->to_string(),
+        _vram->to_string(),
+        _basic->to_string(),
+        _kernal->to_string(),
+        _chargen->to_string(),
+        (_ioexp ? _ioexp->to_string() : "<No Cartridge>"),
+        _kbd->to_string(),
+        _joy1->to_string(),
+        _joy2->to_string(),
+        _bus->to_string(),
+        _ui->to_string());
 }
 
 }

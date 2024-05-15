@@ -42,13 +42,7 @@ size_t ULAAudio::tick(const Clock& clk)
         if (_pos == SAMPLES) {
             auto v = _audio_buffer();
             if (v) {
-                auto av = signal::mean(_samples);   //XXX required?
-
-                std::transform(_samples.begin(), _samples.end(), v.begin(), [av](const int16_t& s) {
-                    return (s - av);
-                });
-
-                v.dispatch();
+                std::copy(_samples.begin(), _samples.end(), v.begin());
             }
 
             clear();

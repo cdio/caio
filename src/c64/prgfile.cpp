@@ -31,7 +31,7 @@ void PrgFile::load(const std::string& fname)
 {
     std::ifstream is{fname, std::ios::in};
     if (!is) {
-        throw IOError{"Can't open PRG file: " + fname + ": " + Error::to_string()};
+        throw IOError{"Can't open PRG file: {}: {}", fname, Error::to_string()};
     }
 
     load(is);
@@ -40,7 +40,7 @@ void PrgFile::load(const std::string& fname)
 std::istream& PrgFile::load(std::istream& is)
 {
     if (!is.read(reinterpret_cast<char*>(&_hdr), sizeof(_hdr))) {
-        throw IOError{"Can't read PRG header: " + Error::to_string()};
+        throw IOError{"Can't read PRG header: {}", Error::to_string()};
     }
 
     _hdr.addr = le16toh(_hdr.addr);
@@ -54,7 +54,7 @@ void PrgFile::save(const std::string& fname, addr_t addr)
     if (!fname.empty()) {
         std::ofstream os{fname, std::ios_base::out | std::ios_base::trunc};
         if (!os) {
-            throw IOError{"Can't create PRG file: " + fname + ": " + Error::to_string()};
+            throw IOError{"Can't create PRG file: {}: {}", fname, Error::to_string()};
         }
 
         save(os, addr);
@@ -71,7 +71,7 @@ std::ostream& PrgFile::save(std::ostream& os, addr_t addr, const std::span<uint8
     addr_t leaddr = htole16(addr);
     if (!os.write(reinterpret_cast<char*>(&leaddr), sizeof(leaddr)) ||
         !os.write(reinterpret_cast<char*>(data.data()), data.size())) {
-            throw IOError{"Can't write file data: " + Error::to_string()};
+            throw IOError{"Can't write file data: {}", Error::to_string()};
     }
 
     return os;

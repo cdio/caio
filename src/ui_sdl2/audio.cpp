@@ -153,7 +153,7 @@ void AudioStream::stream_data(AudioStream* self, uint8_t* stream, int len)
     int16_t* data = reinterpret_cast<int16_t*>(stream);
     size_t datasiz = std::min<size_t>(len >> 1, samples.size());
     if (datasiz < samples.size()) {
-        log.warn("ui: audio: Destination buffer size: %d, expected %d. Audio stream truncated\n",
+        log.warn("ui: audio: Destination buffer size: {}, expected {}. Audio stream truncated\n",
             datasiz,
             samples.size());
     }

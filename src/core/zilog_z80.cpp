@@ -299,49 +299,45 @@ const Z80::Instruction Z80::main_instr_set[256] = {
 
 std::string Z80::Registers::to_string(Z80::Flags fl)
 {
-    std::ostringstream ss{};
-
-    ss << ((fl & Flags::S) ? "S" : "-")
-       << ((fl & Flags::Z) ? "Z" : "-")
-       << ((fl & Flags::Y) ? "Y" : "-")     /* Undocumented */
-       << ((fl & Flags::H) ? "H" : "-")
-       << ((fl & Flags::X) ? "X" : "-")     /* Undocumented */
-       << ((fl & Flags::V) ? "V" : "-")
-       << ((fl & Flags::N) ? "N" : "-")
-       << ((fl & Flags::C) ? "C" : "-");
-
-    return ss.str();
+    return std::format("{}{}{}{}{}{}{}{}",
+        ((fl & Flags::S) ? "S" : "-"),
+        ((fl & Flags::Z) ? "Z" : "-"),
+        ((fl & Flags::Y) ? "Y" : "-"),  /* Undocumented */
+        ((fl & Flags::H) ? "H" : "-"),
+        ((fl & Flags::X) ? "X" : "-"),  /* Undocumented */
+        ((fl & Flags::V) ? "V" : "-"),
+        ((fl & Flags::N) ? "N" : "-"),
+        ((fl & Flags::C) ? "C" : "-"));
 }
 
 std::string Z80::Registers::to_string() const
 {
-    std::ostringstream ss{};
-
-    ss << "  A ="    << caio::to_string(A)
-       << " B ="     << caio::to_string(B)
-       << " C ="     << caio::to_string(C)
-       << " D ="     << caio::to_string(D)
-       << " E ="     << caio::to_string(E)
-       << " H ="     << caio::to_string(H)
-       << " L ="     << caio::to_string(L)
-       << " F ="     << caio::to_string(F)  << " " << to_string(static_cast<Flags>(F)) << "\n"
-       << "  A'="    << caio::to_string(aA)
-       << " B'="     << caio::to_string(aB)
-       << " C'="     << caio::to_string(aC)
-       << " D'="     << caio::to_string(aD)
-       << " E'="     << caio::to_string(aE)
-       << " H'="     << caio::to_string(aH)
-       << " L'="     << caio::to_string(aL)
-       << " F'="     << caio::to_string(aF) << " " << to_string(static_cast<Flags>(aF)) << "\n"
-       << "  I ="    << caio::to_string(I)
-       << " R ="     << caio::to_string(R)
-       << " IX="     << caio::to_string(IX)
-       << " IY="     << caio::to_string(IY)
-       << " SP="     << caio::to_string(SP)
-       << " PC="     << caio::to_string(PC)
-       << " MEMPTR=" << caio::to_string(memptr);
-
-    return ss.str();
+    return std::format("  "
+        "A ={:02X} "
+        "B ={:02X} "
+        "C ={:02X} "
+        "D ={:02X} "
+        "E ={:02X} "
+        "H ={:02X} "
+        "L ={:02X} "
+        "F ={:02X} {}\n  "
+        "A'={:02X} "
+        "B'={:02X} "
+        "C'={:02X} "
+        "D'={:02X} "
+        "E'={:02X} "
+        "H'={:02X} "
+        "L'={:02X} "
+        "F'={:02X} {}\n  "
+        "A'={:02X} "
+        "I ={:02X} "
+        "R ={:02X} "
+        "SP={:04X} "
+        "PC={:04X} "
+        "MEMPTR={:04X}",
+        A, B, C, D, E, H, L, F, to_string(static_cast<Flags>(F)),
+        aA, aB, aC, aD, aE, aH, aL, aF, to_string(static_cast<Flags>(aF)),
+        I, R, IX, IY, SP, PC, memptr);
 }
 
 Z80::Z80(const std::string& type, const std::string& label)
@@ -905,7 +901,9 @@ size_t Z80::m1_cycle_interrupt()
                 _regs.memptr = NMI_ADDR;
                 _iaddr = NMI_ADDR;
 
-                _log.debug("Processing NMI interrupt, PC: $%04X\n", _regs.PC);
+                if (_log.is_debug()) {
+                    _log.debug("Processing NMI interrupt, PC: ${:04X}\n", _regs.PC);
+                }
                 cycles = CALL_CYCLES;
 
             } else {
@@ -921,7 +919,9 @@ size_t Z80::m1_cycle_interrupt()
                     /*
                      * The interrupting device provided the instruction to execute.
                      */
-                    _log.debug("Processing INT interrupt M0\n");
+                    if (_log.is_debug()) {
+                        _log.debug("Processing INT interrupt M0\n");
+                    }
                     cycles = execute(_opcode, FORCED_INSTRUCTION);
                     if (cycles == 0) {
                         return 0;
@@ -935,7 +935,9 @@ size_t Z80::m1_cycle_interrupt()
                     call(INT_ADDR);
                     _regs.memptr = INT_ADDR;
                     _iaddr = INT_ADDR;
-                    _log.debug("Processing INT interrupt M1, PC: $%04X\n", _regs.PC);
+                    if (_log.is_debug()) {
+                        _log.debug("Processing INT interrupt M1, PC: ${:04X}\n", _regs.PC);
+                    }
                     cycles = CALL_CYCLES;
                     break;
 
@@ -949,8 +951,10 @@ size_t Z80::m1_cycle_interrupt()
                     _regs.PC = read_addr(isr_addr);
                     _regs.memptr = _regs.PC;
                     _iaddr = _regs.PC;
-                    _log.debug("Processing INT interrupt M2, ISR table: $%04X, vector: $%02X, ISR: $%04X\n",
-                        isr_table, _opcode, _regs.PC);
+                    if (_log.is_debug()) {
+                        _log.debug("Processing INT interrupt M2, ISR table: ${:04X}, vector: ${:02X}, ISR: ${:04X}\n",
+                            isr_table, _opcode, _regs.PC);
+                    }
 
                     /*
                      * 7 cycles to fetch the lower eight bits from the interrupting device,
@@ -981,7 +985,7 @@ size_t Z80::execute(uint8_t opcode, bool forced)
     const auto& ins = _instr_set[opcode];
 
     if (!ins.fn) {
-        log.fatal("Empty callback: %s\n%s\n", ins.format, status().c_str());
+        log.fatal("Empty callback: {}\n{}\n", ins.format, status());
         /* NOTREACHED */
     }
 
@@ -993,7 +997,7 @@ size_t Z80::execute(uint8_t opcode, bool forced)
     size_t cycles = execute(ins, opcode, forced);
 
     if (_log.is_debug()) {
-        _log.debug("%35s  cycles=%d\n%s\n", line.c_str(), cycles, status().c_str());
+        _log.debug("{:35s}  cycles={}\n{}\n", line, cycles, status());
     }
 
     return cycles;
@@ -1032,8 +1036,8 @@ size_t Z80::execute(const Z80::Instruction& ins, uint8_t opcode, bool forced)
 
     default:
         arg = _iaddr;
-        log.error("Invalid opcode $%02X at $%04X, argtype %d\n%s\n%s\n%s\n",
-            opcode, _regs.PC, ins.type, disass(arg).c_str(), disass(arg).c_str(), disass(arg).c_str());
+        log.error("Invalid opcode ${:02X} at ${:04X}, argtype {}\n{}\n{}\n{}\n",
+            opcode, _regs.PC, static_cast<unsigned>(ins.type), disass(arg), disass(arg), disass(arg));
         ebreak();
         return NOP_CYCLES;
     }
@@ -1172,7 +1176,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
                 iset = ed_instr_set;
                 break;
             default:
-                log.fatal("Invalid gateway prefix: $%02X at $%04X\n", opcode, addr - 1);
+                log.fatal("Invalid gateway prefix: ${:02X} at ${:04X}\n", opcode, addr - 1);
                 /* NOTREACHED */
             }
 
@@ -1238,8 +1242,8 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
 
             default:
                 /* Internal error */
-                log.fatal("disass: Invalid format string: \"%s\", opcode: $%02X, disassembled: %s\n",
-                    format.c_str(), opcode, hex.str().c_str());
+                log.fatal("disass: Invalid format string: \"{}\", opcode: ${:02X}, disassembled: {}\n",
+                    format, opcode, hex.str());
                 /* NOTREACHED */
             }
             break;
@@ -1269,8 +1273,8 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
                 pos = format.find_first_of("*");
                 if (pos == std::string::npos) {
                     /* Internal error */
-                    log.fatal("disass: A16 instruction, missing 8 bits argument: Invalid format string: \"%s\","
-                        "opcode: $%02X, disassembled: %s\n", format.c_str(), opcode, hex.str().c_str());
+                    log.fatal("disass: A16 instruction, missing 8 bits argument: Invalid format string: \"{}\","
+                        "opcode: ${:02X}, disassembled: {}\n", format, opcode, hex.str());
                     /* NOTREACHED */
                 }
                 ophi = peek(addr++);
@@ -1279,8 +1283,8 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
                 break;
             default:
                 /* Internal error */
-                log.fatal("disass: Invalid format string: \"%s\", opcode: $%02X, disassembled: %s\n",
-                    format.c_str(), opcode, hex.str().c_str());
+                log.fatal("disass: Invalid format string: \"{}\", opcode: ${:02X}, disassembled: {}\n",
+                    format, opcode, hex.str());
                 /* NOTREACHED */
             }
             break;
@@ -1359,15 +1363,8 @@ Z80::Registers& Z80::regs()
 
 std::string Z80::status() const
 {
-    std::ostringstream os{};
-
-    os << _regs.to_string() << "\n"
-       << "  IFF1=" << _IFF1
-       << " IFF2="  << _IFF2
-       << " MI="    << static_cast<unsigned>(_imode)
-       << " HALT="  << _halt_pin;
-
-    return os.str();
+    return std::format("{}\n  IFF1={} IFF2={} MI={} HALT={}",
+        _regs.to_string(), _IFF1, _IFF2, static_cast<unsigned>(_imode), _halt_pin);
 }
 
 }

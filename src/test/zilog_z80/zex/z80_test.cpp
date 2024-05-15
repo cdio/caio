@@ -49,7 +49,7 @@ Z80Test::Z80Test(const std::string &fname)
 void Z80Test::run(bool autostart)
 {
     log.loglevel(Logger::All);
-    log.info("Starting caio v" + caio::version() + " - Z80 Test Suite\n");
+    log.info("Starting caio v{} - Z80 Test Suite\n", caio_version());
 
     _cpu->loglevel("error|info|warning");
 
@@ -64,13 +64,13 @@ void Z80Test::run(bool autostart)
     if (autostart) {
         int fds[2];
         if (::pipe(fds) < 0) {
-            log.fatal("Can't create pipe: %s\n", Error::to_string(errno).c_str());
+            log.fatal("Can't create pipe: {}\n", Error::to_string(errno));
             /* NOTREACHED */
         }
 
         static const std::string start{"g 100\nquit\n"};
         if (::write(fds[1], start.c_str(), start.size()) != start.size()) {
-            log.fatal("Can't write pipe: %s\n", Error::to_string(errno).c_str());
+            log.fatal("Can't write pipe: {}\n", Error::to_string(errno));
             /* NOTREACHED */
         }
 

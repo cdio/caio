@@ -21,6 +21,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "keyboard.hpp"
@@ -155,7 +156,7 @@ public:
      * @exception IOError
      * @see load(const std::string&)
      */
-    Confile(const std::string& fname = {});
+    Confile(std::string_view fname = {});
 
     virtual ~Confile() {
     }
@@ -168,7 +169,7 @@ public:
      * @exception ConfigError
      * @exception IOError
      */
-    void load(const std::string& fname);
+    void load(const std::string_view fname);
 
     /**
      * Return a configuration section.
@@ -176,14 +177,14 @@ public:
      * @param sname Name of the section (case insensitive).
      * @return The requested section.
      */
-    Section& operator[](const std::string& sname);
+    Section& operator[](const std::string_view sname);
 
     /**
      * Extract a section.
      * @param sname Name of the section to extract (case insensitive).
      * @return The extracted section or an empty one if it does not exist.
      */
-    Section extract(const std::string& sname);
+    Section extract(const std::string_view sname);
 
     /**
      * Find a section.
@@ -191,7 +192,7 @@ public:
      * @return An iterator to the section; or end() if the section does not exist.
      * @see end()
      */
-    std::map<std::string, Section>::const_iterator find(const std::string& sname) const;
+    std::map<std::string, Section>::const_iterator find(const std::string_view sname) const;
 
     /**
      * Return an interator following the last section of this configuration file.

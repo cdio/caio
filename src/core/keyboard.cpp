@@ -170,7 +170,7 @@ void Keyboard::load(const std::string& fname)
 
     std::ifstream is{fname, std::ios::binary | std::ios::in};
     if (!is) {
-        throw IOError{"Can't open: " + fname + ": " + Error::to_string()};
+        throw IOError{"Can't open: {}: {}", fname, Error::to_string()};
     }
 
     std::string line{};
@@ -203,15 +203,8 @@ void Keyboard::load(const std::string& fname)
             add_key_map(key_name, key_shift, key_altgr, impl_name, impl_shift);
 
         } catch (const InvalidArgument& err) {
-            std::stringstream ss{};
-            ss << fname << ": Invalid entry at line " << lineno << ": ";
-            if (std::string{err.what()}.empty()) {
-                ss << std::quoted(line);
-            } else {
-                ss << err.what();
-            }
-
-            throw InvalidArgument{ss.str()};
+            throw InvalidArgument{"{}: Invalid entry at line #{}: \"{}\"", fname, lineno,
+                (err.what() == nullptr || *err.what() == '\0' ? line : err.what())};
         }
     }
 

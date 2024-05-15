@@ -40,7 +40,7 @@ std::string home()
     return (chome == nullptr ? "" : chome);
 }
 
-std::string fix_home(const std::string& path)
+std::string fix_home(std::string_view path)
 {
     if (!path.empty() && path[0] == '~') {
         std::string newpath{path};
@@ -48,25 +48,25 @@ std::string fix_home(const std::string& path)
         return newpath;
     }
 
-    return path;
+    return std::string{path};
 }
 
-std::string search(const std::string& fname, const std::initializer_list<std::string>& spath, bool cwd)
+std::string search(std::string_view fname, const std::initializer_list<std::string>& spath, bool cwd)
 {
     if (fname.empty()) {
         return {};
     }
 
-    log.debug("Looking for file: " + fname + ": ");
+    log.debug("Looking for file: {}: ", fname);
 
-    const auto name = basename(fname);
+    auto name = basename(fname);
     if (name != fname) {
         /*
          * A directory is specified in fname.
          */
         const auto fullpath = fix_home(fname);
         if (exists(fullpath)) {
-            log.debug("Found: " + fullpath + "\n");
+            log.debug("Found: {}\n", fullpath);
             return fullpath;
         }
     }
@@ -76,16 +76,16 @@ std::string search(const std::string& fname, const std::initializer_list<std::st
          * Directory not specified in fname.
          * Search on the current working directory.
          */
-        log.debug("Looking for file: " + name + ": ");
+        log.debug("Looking for file: {}: ", name);
         if (exists(name)) {
-            log.debug("Found: " + name + "\n");
-            return fname;
+            log.debug("Found: {}\n", name);
+            return std::string{fname};
         }
     }
 
-    for (const auto &path : spath) {
-        std::string fullpath = fix_home(path) + "/" + name;
-        log.debug("Trying " + fullpath + "... ");
+    for (const auto& path : spath) {
+        std::string fullpath = fix_home(path) + "/" + std::string{name};
+        log.debug("Trying {}...", fullpath);
         if (exists(fullpath)) {
             log.debug("Found\n");
             return fullpath;
@@ -96,28 +96,28 @@ std::string search(const std::string& fname, const std::initializer_list<std::st
     return {};
 }
 
-std::string basename(const std::string& fullpath)
+std::string_view basename(std::string_view fullpath)
 {
     auto pos = fullpath.find_last_of("/");
     return (pos == std::string::npos ? fullpath : fullpath.substr(pos + 1));
 }
 
-std::string dirname(const std::string& fullpath)
+std::string_view dirname(std::string_view fullpath)
 {
     auto pos = fullpath.find_last_of("/");
     return (pos == std::string::npos ? "./" : fullpath.substr(0, pos));
 }
 
-void concat(const std::string& dst, const std::string& src)
+void concat(std::string_view dst, std::string_view src)
 {
     std::ifstream is{src, std::ios_base::in | std::ios_base::binary};
     if (!is) {
-        throw IOError{"Can't open input file: " + src + ": " + Error::to_string(errno)};
+        throw IOError{"Can't open input file: {}: {}", src, Error::to_string(errno)};
     }
 
     std::ofstream os{dst, std::ios_base::out | std::ios_base::app | std::ios_base::binary};
     if (!os) {
-        throw IOError{"Can't open output file: " + dst + ": " + Error::to_string(errno)};
+        throw IOError{"Can't open output file: {}: {}", dst, Error::to_string(errno)};
     }
 
     try {
@@ -129,29 +129,29 @@ void concat(const std::string& dst, const std::string& src)
     }
 }
 
-bool unlink(const std::string& fname)
+bool unlink(std::string_view fname)
 {
-    return (fname.empty() || !::unlink(fname.c_str()));
+    return (fname.empty() || !::unlink(fname.data()));
 }
 
-bool match(const std::string& path, const std::string& pattern, bool icase)
+bool match(std::string_view path, std::string_view pattern, bool icase)
 {
-    const char* cpath = path.c_str();
-    const char* cpattern = pattern.c_str();
+    const char* cpath = path.data();
+    const char* cpattern = pattern.data();
     return (!::fnmatch(cpattern, cpath, FNM_NOESCAPE | (icase == MATCH_CASE_INSENSITIVE ? FNM_CASEFOLD : 0)));
 }
 
-bool directory(const std::string& path, const std::string& pattern, bool icase,
-    const std::function<bool(const std::string&, uint64_t)>& callback)
+bool directory(std::string_view path, std::string_view pattern, bool icase,
+    const std::function<bool(std::string_view, uint64_t)>& callback)
 {
     const auto& end = std::filesystem::end(std::filesystem::recursive_directory_iterator{});
     std::filesystem::recursive_directory_iterator it{path, std::filesystem::directory_options::skip_permission_denied};
 
     for (; it != end; ++it) {
         const auto& entry = it->path();
-        if (!std::filesystem::is_directory(entry) && fs::match(entry, pattern, icase)) {
+        if (!std::filesystem::is_directory(entry) && fs::match(entry.c_str(), pattern, icase)) {
             auto size = std::filesystem::file_size(entry);
-            if (callback(entry, size) == false) {
+            if (callback(entry.c_str(), size) == false) {
                 return false;
             }
         }
@@ -160,43 +160,41 @@ bool directory(const std::string& path, const std::string& pattern, bool icase,
     return true;
 }
 
-dir_t directory(const std::string& path, const std::string& pattern, bool icase, size_t limit)
+dir_t directory(std::string_view path, std::string_view pattern, bool icase, size_t limit)
 {
     dir_t entries{};
     bool limited = (limit != 0);
 
-    directory(path, pattern, icase, [&entries, &limit, limited](const std::string& entry, uint64_t size) -> bool {
+    directory(path, pattern, icase, [&entries, &limit, limited](const std::string_view entry, uint64_t size) -> bool {
         if (limited) {
             if (limit == 0) {
                 return false;
             }
             --limit;
         }
-        entries.push_back({entry, size});
+        entries.push_back({std::string{entry}, size});
         return true;
     });
 
     return entries;
 }
 
-buffer_t load(const std::string& fname, size_t maxsiz)
+buffer_t load(std::string_view fname, size_t maxsiz)
 {
-    std::string errmsg{};
-
     if (maxsiz == 0) {
         maxsiz = LOAD_MAXSIZ;
     }
 
-    try {
-        std::ifstream is{fname, std::ios::in};
-        if (is) {
-            return load(is, maxsiz);
-        }
-    } catch (const std::exception& err) {
-        errmsg = err.what();
+    std::ifstream is{fname, std::ios::in};
+    if (!is) {
+        throw IOError{"Can't load: {}: {}", fname, Error::to_string()};
     }
 
-    throw IOError{"Can't load: " + fname + ": " + (errmsg.empty() ? Error::to_string() : errmsg)};
+    try {
+        return load(is, maxsiz);
+    } catch (const std::exception& err) {
+        throw IOError{"Can't load: {}: {}", fname, err.what()};
+    }
 }
 
 buffer_t load(std::istream& is, size_t maxsiz)
@@ -211,7 +209,7 @@ buffer_t load(std::istream& is, size_t maxsiz)
     while (buf.size() < maxsiz) {
         if (!is.read(reinterpret_cast<char*>(&c), sizeof(c))) {
             if (!is.eof()) {
-                throw IOError{"Can't read from stream: " + Error::to_string()};
+                throw IOError{"Can't read from stream: {}", Error::to_string()};
             }
             break;
         }
@@ -222,20 +220,20 @@ buffer_t load(std::istream& is, size_t maxsiz)
     return buf;
 }
 
-void save(const std::string& fname, const std::span<const uint8_t>& buf, std::ios_base::openmode mode)
+void save(std::string_view fname, std::span<const uint8_t> buf, std::ios_base::openmode mode)
 {
     std::ofstream os{fname, mode};
     if (!os) {
-        throw IOError{"Can't save: " + fname + ": " + Error::to_string()};
+        throw IOError{"Can't save: {}: {}", fname, Error::to_string()};
     }
 
     save(os, buf);
 }
 
-std::ostream& save(std::ostream& os, const std::span<const uint8_t>& buf)
+std::ostream& save(std::ostream& os, std::span<const uint8_t> buf)
 {
     if (!os.write(reinterpret_cast<const char*>(buf.data()), buf.size())) {
-        throw IOError{"Can't write: " + Error::to_string()};
+        throw IOError{"Can't write: {}", Error::to_string()};
     }
 
     return os;

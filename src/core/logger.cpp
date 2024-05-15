@@ -62,10 +62,7 @@ Logger::Level Logger::parse_loglevel(const std::string& levels)
             /*
              * Malformed levels string.
              */
-            std::ostringstream ss{};
-            ss << "Invalid log level: " << std::quoted(lstr)
-               << ", complete log level specification: " << std::quoted(levels);
-            throw LoggerError{ss.str()};
+            throw LoggerError{"Invalid log level: \"{}\", complete log level argument: \"{}\"", lstr, levels};
         }
 
         loglevel |= l;
@@ -85,12 +82,12 @@ void Logger::loglevel(const std::string& lvs)
     _lv = Logger::parse_loglevel(lvs);
 }
 
-void Logger::logfile(const std::string& fname)
+void Logger::logfile(std::string_view fname)
 {
     if (!fname.empty()) {
         std::ofstream ofs{fname};
         if (!ofs) {
-            throw LoggerError{"Can't open logfile: " + fname};
+            throw LoggerError{"Can't open logfile: {}", fname};
         }
 
         _logfile = fname;
@@ -98,128 +95,11 @@ void Logger::logfile(const std::string& fname)
     }
 }
 
-Logger& Logger::log(Level lv, const std::string& msg)
+Logger& Logger::log(std::string_view color, std::string_view fmt, std::format_args args)
 {
-    if (_os && is_level(lv) && !msg.empty()) {
-        std::string m{msg};
-        char nl = msg.back();
-        if (nl == '\n') {
-            m.erase(m.end() - 1);
-        } else {
-            nl = '\0';
-        }
-
-        std::string color{ANSI_FG};
-        switch (lv) {
-        case Level::Error:
-            color += std::string{ANSI_WHITE} + ANSI_BG + ANSI_RED;
-            break;
-
-        case Level::Warn:
-            color += ANSI_YELLOW;
-            break;
-
-        case Level::Debug:
-            color += ANSI_GREEN;
-            break;
-
-        default:
-            color = ANSI_RESET;
-        }
-
-        _os << color << m << ANSI_RESET << nl;
-        _os.flush();
-    }
-
-    return *this;
-}
-
-Logger& Logger::log(Level lv, const char* fmt, va_list ap)
-{
-    char buf[8192];
-
-    std::vsnprintf(buf, sizeof(buf), fmt, ap);
-
-    return log(lv, std::string{buf});
-}
-
-Logger& Logger::log(Level lv, const char* fmt, ...)
-{
-    va_list ap;
-
-    va_start(ap, fmt);
-    log(lv, fmt, ap);
-    va_end(ap);
-
-    return *this;
-}
-
-[[noreturn]]
-void Logger::fatal(const char* fmt, va_list ap)
-{
-    error(fmt, ap);
-    std::exit(EXIT_FAILURE);
-}
-
-[[noreturn]]
-void Logger::fatal(const char* fmt, ...)
-{
-    va_list ap;
-
-    va_start(ap, fmt);
-    fatal(fmt, ap);
-    va_end(ap);
-}
-
-Logger& Logger::error(const char* fmt, ...)
-{
-    if (is_error()) {
-        va_list ap;
-
-        va_start(ap, fmt);
-        error(fmt, ap);
-        va_end(ap);
-    }
-
-    return *this;
-}
-
-Logger& Logger::warn(const char* fmt, ...)
-{
-    if (is_warn()) {
-        va_list ap;
-
-        va_start(ap, fmt);
-        warn(fmt, ap);
-        va_end(ap);
-    }
-
-    return *this;
-}
-
-Logger& Logger::info(const char* fmt, ...)
-{
-    if (is_info()) {
-        va_list ap;
-
-        va_start(ap, fmt);
-        info(fmt, ap);
-        va_end(ap);
-    }
-
-    return *this;
-}
-
-Logger& Logger::debug(const char* fmt, ...)
-{
-    if (is_debug()) {
-        va_list ap;
-
-        va_start(ap, fmt);
-        debug(fmt, ap);
-        va_end(ap);
-    }
-
+    _os << color;
+    std::vformat_to(std::ostream_iterator<char>(_os), fmt, args);
+    (_os << ANSI_RESET).flush();
     return *this;
 }
 

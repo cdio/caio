@@ -50,13 +50,13 @@ static void signal_handler(int signo)
     switch (signo) {
     case SIGSEGV:
         std::cout.flush();
-        log.fatal("caio: Segmentation Fault\n%s\n", stacktrace().c_str());
+        log.fatal("caio: Segmentation Fault\n{}\n", stacktrace());
         /* NOTREACHED */
         break;
 
     case SIGABRT:
         std::cout.flush();
-        log.fatal("caio: Abort\n%s\n", stacktrace().c_str());
+        log.fatal("caio: Abort\n{}\n", stacktrace());
         /* NOTREACHED */
         break;
 
@@ -337,7 +337,7 @@ void UI::render_line(unsigned line, const Scanline& sline)
     }
 
     if (line >= _conf.video.height || sline.size() != _conf.video.width) {
-        log.warn("ui: Can't render line: Invalid raster line %d, size %d. Ignored\n", line, sline.size());
+        log.warn("ui: Can't render line: Invalid raster line {}, size {}. Ignored\n", line, sline.size());
         return;
     }
 
@@ -652,7 +652,7 @@ void UI::joy_event(const SDL_Event& event)
          * New joystick detected.
          */
         jid = event.jdevice.which;
-        log.debug("ui: New game controller detected, id: %d\n", jid);
+        log.debug("ui: New game controller detected, id: {}\n", jid);
         joy_add(jid);
         break;
 
@@ -661,7 +661,7 @@ void UI::joy_event(const SDL_Event& event)
          * Joystick removed.
          */
         jid = event.jdevice.which;
-        log.debug("ui: Game controller disconnected, id: %d\n", jid);
+        log.debug("ui: Game controller disconnected, id: {}\n", jid);
         joy_del(jid);
         break;
 
@@ -688,7 +688,7 @@ void UI::joy_event(const SDL_Event& event)
     case SDL_JOYHATMOTION:
         jid = event.jhat.which;
         ejoy = find_joystick(jid);
-//        log.debug("ui: joy: %d, hat: %d, value: %d\n", jid, event.jhat.hat, event.jhat.value);
+//        log.debug("ui: joy: {}, hat: {}, value: {}\n", jid, event.jhat.hat, event.jhat.value);
         if (ejoy) {
             uint8_t pos{};
             const auto& jport = ejoy->port();
@@ -728,7 +728,7 @@ void UI::joy_event(const SDL_Event& event)
     case SDL_JOYAXISMOTION:
         jid = event.jaxis.which;
         ejoy = find_joystick(jid);
-//        log.debug("ui: joy: %d, axis: %d, value: %d\n", jid, event.jaxis.axis, event.jaxis.value);
+//        log.debug("ui: joy: {}, axis: {}, value: {}\n", jid, event.jaxis.axis, event.jaxis.value);
         if (ejoy) {
             /*
              * FIXME
@@ -769,7 +769,7 @@ void UI::joy_event(const SDL_Event& event)
                 iy = event.jaxis.value;
                 break;
             default:
-                log.warn("Unrecognised axis, jid: %d, axis: %d, value: %d\n", jid, axis, event.jaxis.value);
+                log.warn("Unrecognised axis, jid: {}, axis: {}, value: {}\n", jid, axis, event.jaxis.value);
                 return;
             }
 #else
@@ -785,7 +785,7 @@ void UI::joy_event(const SDL_Event& event)
                 iy = event.jaxis.value;
                 break;
             default:
-                log.warn("Unrecognised axis, jid: %d, axis: %d, value: %d\n", jid, axis, event.jaxis.value);
+                log.warn("Unrecognised axis, jid: {}, axis: {}, value: {}\n", jid, axis, event.jaxis.value);
                 return;
             }
 #endif
@@ -852,7 +852,7 @@ void UI::toggle_fullscreen()
          * Leave fullscreen.
          */
         if (SDL_SetWindowFullscreen(_window, 0) < 0) {
-            log.error("ui: Can't leave fullscreen mode: %s\n", sdl_error().c_str());
+            log.error("ui: Can't leave fullscreen mode: {}\n", sdl_error());
             return;
         }
 
@@ -863,7 +863,7 @@ void UI::toggle_fullscreen()
          * Enter fullscreen.
          */
         if (SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN_DESKTOP) < 0) {
-            log.error("ui: Can't enter fullscreen mode: %s\n", sdl_error().c_str());
+            log.error("ui: Can't enter fullscreen mode: {}\n", sdl_error());
             return;
         }
 
@@ -964,7 +964,7 @@ void UI::postrender_effects()
     }
 
     if (SDL_SetRenderDrawColor(_renderer, SCANLINE_COLOR.r, SCANLINE_COLOR.g, SCANLINE_COLOR.b, alpha) < 0) {
-        log.error("ui: Can't set render draw color: %s\n", sdl_error().c_str());
+        log.error("ui: Can't set render draw color: {}\n", sdl_error());
         return;
     }
 
@@ -1015,7 +1015,7 @@ void UI::render_screen()
 #if 0
     // Is this necessary?
     if (pitch / _conf.video.width != 4) {
-        log.fatal("ui: Invalid pitch: %d\n", pitch);
+        log.fatal("ui: Invalid pitch: {}\n", pitch);
     }
 #endif
 
@@ -1122,20 +1122,19 @@ void UI::joy_add(int32_t jid)
 {
     auto ejoy = find_joystick(jid);
     if (ejoy) {
-        log.debug("ui: Game controlled already handled, id: %d.\n", jid);
+        log.debug("ui: Game controlled already handled, id: {}.\n", jid);
         return;
     }
 
     ejoy = find_joystick(Joystick::JOYID_UNASSIGNED);
     if (!ejoy) {
-        log.debug("ui: No space for a new game controller, id: %d. New controller ignored.\n", jid);
+        log.debug("ui: No space for a new game controller, id: {}. New controller ignored.\n", jid);
         return;
     }
 
     SDL_Joystick* sjoy = SDL_JoystickOpen(jid);
     if (sjoy == nullptr) {
-        log.error("ui: Can't open new game controller, id: %d: %s. New game controller ignored.\n",
-            jid, sdl_error().c_str());
+        log.error("ui: Can't open new game controller, id: {}: {}. New game controller ignored.\n", jid, sdl_error());
         return;
     }
 
@@ -1144,7 +1143,7 @@ void UI::joy_add(int32_t jid)
      */
     _sdl_joys[jid] = sjoy;
     ejoy->reset(jid);
-    log.debug("ui: New game controller added, id: %d, %p\n", jid, sjoy);
+    log.debug("ui: New game controller added, id: {}, {:p}\n", jid, static_cast<void*>(sjoy));
 }
 
 void UI::joy_del(int32_t jid)
@@ -1166,7 +1165,7 @@ void UI::joy_del(int32_t jid)
         ejoy->reset();
         SDL_JoystickClose(sjoy);
         _sdl_joys.erase(jid);
-        log.debug("ui: Game controller deleted, id: %d, %p\n", jid, sjoy);
+        log.debug("ui: Game controller deleted, id: {}, {:p}\n", jid, static_cast<void*>(sjoy));
     }
 }
 

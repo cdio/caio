@@ -18,8 +18,6 @@
  */
 #include "c64_config.hpp"
 
-#include <sstream>
-
 #include "utils.hpp"
 
 namespace caio {
@@ -36,19 +34,18 @@ static const config::Option c64_options[] = {
 
 std::string C64Cmdline::usage() const
 {
-    std::ostringstream os{};
-
-        // 0         1         2         3         4         5         6         7
-        // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
-    os << config::Cmdline::usage() << "\n\n"
-          "Commodore 64 specific:\n"
-          " --prg <prg>             Load a PRG file as soon as the basic is ready\n"
-          " --resid [yes|no]        Use the MOS6581 reSID library (default is " << DEFAULT_RESID << ")\n"
-          " --swapj [yes|no]        Swap Joysticks (default is " << DEFAULT_SWAPJOY << ")\n"
-          " --unit8 <dir>           Attach a disk drive as unit 8\n"
-          " --unit9 <dir>           Attach a disk drive as unit 9";
-
-    return os.str();
+      // 0         1         2         3         4         5         6         7
+      // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
+    return std::format("{}\n\n"
+        "Commodore 64 specific:\n"
+        " --prg <prg>             Load a PRG file as soon as the basic is ready\n"
+        " --resid [yes|no]        Use the MOS6581 reSID library (default is {})\n"
+        " --swapj [yes|no]        Swap Joysticks (default is {})\n"
+        " --unit8 <dir>           Attach a disk drive as unit 8\n"
+        " --unit9 <dir>           Attach a disk drive as unit 9",
+        config::Cmdline::usage(),
+        DEFAULT_RESID,
+        DEFAULT_SWAPJOY);
 }
 
 std::vector<config::Option> C64Cmdline::options() const
@@ -76,16 +73,18 @@ C64Config::C64Config(config::Section& sec)
 
 std::string C64Config::to_string() const
 {
-    std::ostringstream os{};
-
-    os << Config::to_string()                                   << "\n"
-          "  Swap Joysticks:     " << (swapj ? "yes" : "no")    << "\n"
-          "  Attached PRG:       " << std::quoted(prgfile)      << "\n"
-          "  Unit-8:             " << std::quoted(unit8)        << "\n"
-          "  Unit-9:             " << std::quoted(unit9)        << "\n"
-          "  Use reSID library:  " << (resid ? "yes" : "no");
-
-    return os.str();
+    return std::format("{}\n"
+        "  Swap Joysticks:     {}\n"
+        "  Attached PRG:       \"{}\"\n"
+        "  Unit-8:             \"{}\"\n"
+        "  Unit-9:             \"{}\"\n"
+        "  Use reSID library:  {}",
+        Config::to_string(),
+        (swapj ? "yes" : "no"),
+        prgfile,
+        unit8,
+        unit9,
+        (resid ? "yes" : "no"));
 }
 
 }

@@ -19,7 +19,6 @@
 #include "c64_cartridge.hpp"
 
 #include <array>
-#include <sstream>
 
 #include "logger.hpp"
 #include "types.hpp"
@@ -50,7 +49,7 @@ std::string Cartridge::name() const
 
 void Cartridge::reset()
 {
-    log.debug("%s: %s\n", type().c_str(), _crt->to_string().c_str());
+    log.debug("{}: {}\n", type(), _crt->to_string());
 
     _mode = static_cast<GameExromMode>((_crt->game() ? GAME : 0 ) | (_crt->exrom() ? EXROM : 0));
 }
@@ -106,17 +105,11 @@ void Cartridge::mode(Cartridge::GameExromMode mode)
 
 void Cartridge::throw_invalid_cartridge(const std::string& reason, ssize_t entry)
 {
-    std::ostringstream err{};
-
-    err << name();
-
     if (entry >= 0) {
-        err << ": Chip entry " << entry;
+        throw InvalidCartridge{"{}: {}: Chip entry {}: {}. {}", type(), name(), entry, reason, _crt->to_string()};
+    } else {
+        throw InvalidCartridge{"{}: {}: {}. {}", type(), name(), reason, _crt->to_string()};
     }
-
-    err << ": " << reason << ". " << _crt->to_string();
-
-    throw InvalidCartridge{type(), err.str()};
 }
 
 sptr_t<Cartridge> Cartridge::create(const std::string& fname)
@@ -227,7 +220,7 @@ sptr_t<Cartridge> Cartridge::create(const std::string& fname)
     default:;
     }
 
-    throw InvalidCartridge{Cartridge::TYPE, "Hardware type not supported: " + std::to_string(crt->type()) + ", " +
+    throw InvalidCartridge{"{}: Hardware type not supported: {}, {}", Cartridge::TYPE, static_cast<int>(crt->type()),
         crt->to_string()};
 }
 

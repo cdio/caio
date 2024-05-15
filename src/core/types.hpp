@@ -23,15 +23,19 @@
 #include <cstdint>
 #include <cstring>
 #include <exception>
+#include <format>
 #include <iomanip>
 #include <numbers>
 #include <ostream>
 #include <memory>
 #include <span>
 #include <string>
+#include <string_view>
 #include <sstream>
 #include <type_traits>
 #include <vector>
+
+#include "name.hpp"
 
 #define CAIO_STR_(x)    #x
 #define CAIO_STR(x)     CAIO_STR_(x)
@@ -48,8 +52,9 @@ using sptr_t = std::shared_ptr<T>;
 template<typename T>
 using uptr_t = std::unique_ptr<T>;
 
-using buffer_t    = std::vector<uint8_t>;
-using buffer_it_t = std::vector<uint8_t>::iterator;
+using buffer_t     = std::vector<uint8_t>;
+using buffer_it_t  = std::vector<uint8_t>::iterator;
+using buffer_cit_t = std::vector<uint8_t>::const_iterator;
 
 using samples_fp  = std::span<fp_t>;
 using samples_i16 = std::span<int16_t>;
@@ -114,44 +119,58 @@ class Error : public std::exception {
 public:
     /**
      * Initialise this error.
-     * @param elem   Name of the element that generated this error;
-     * @param reason Reason of description of this error.
      */
-    Error(const std::string& elem, const std::string& reason)
+    Error(std::string_view errmsg = {})
         : std::exception{},
-          _reason{(elem.empty() ? reason : elem + ": " + reason)} {
+          _reason{errmsg} {
     }
 
     /**
      * Initialise this error.
-     * @param reason The reason or description of this error.
+     * @param fmt  Error message format string;
+     * @param args Error message format string arguments.
      */
-    Error(const std::string& reason = {})
-        : Error{{}, reason} {
+    template<typename... Args>
+    Error(std::format_string<Args...> fmt, Args&&... args)
+        : std::exception{},
+          _reason{std::vformat(fmt.get(), std::make_format_args(args...))} {
     }
 
     /**
      * Initialise this error.
-     * @param ex Standard exception associated to this error.
+     * @param elem Name of the element that generated this error;
+     * @param fmt  Error message format string;
+     * @param args Error message format string arguments.
+     */
+    template<typename... Args>
+    Error(const Name& elem, std::format_string<Args...> fmt, Args&&... args)
+        : std::exception{},
+          _reason{std::format("{}: {}", elem.to_string(), std::vformat(fmt.get(), std::make_format_args(args...)))} {
+    }
+
+    /**
+     * Initialise this error.
+     * @param ex Exception associated to this error.
      */
     Error(const std::exception& ex)
-        : Error{{}, ex.what()} {
+        : std::exception{},
+          _reason{ex.what()} {
     }
 
     /**
-     * Return a null terminated string with the description of this error.
-     * @return The null terminated string description of this error.
+     * Return a null terminated string with the error message.
+     * @return The null terminated string with the error message.
      */
     const char* what() const noexcept override {
         return _reason.c_str();
     }
 
     /**
-     * Set the reason or description of this error.
-     * @param reason Reason or description of this error.
+     * Set the error message.
+     * @param reason Error message.
      * @return A reference to this error.
      */
-    Error& operator=(const std::string& reason) {
+    Error& operator=(std::string_view reason) {
         _reason = reason;
         return *this;
     }
@@ -183,19 +202,22 @@ ERROR_CLASS(InvalidCartridge);
 ERROR_CLASS(InvalidNumber);
 ERROR_CLASS(InvalidPalette);
 ERROR_CLASS(IOError);
+ERROR_CLASS(LoggerError);
 ERROR_CLASS(SignalError);
 ERROR_CLASS(UIError);
 
 /**
  * Argument check.
- * @param cond Condition.
- * @param emsg Error message.
+ * @param cond  Condition.
+ * @param fmt   Mesage format string;
+ * @param args  Format string arguments.
  * @execption InvalidArgument if the specified condition is not met.
  */
-static inline void expects(bool cond, const std::string& emsg)
+template<typename... Args>
+void expects(bool cond, std::format_string<Args...> fmt, Args&&... args)
 {
     if (!cond) {
-        throw InvalidArgument{emsg};
+        throw InvalidArgument{std::vformat(fmt.get(), std::make_format_args(args...))};
     }
 }
 

@@ -29,6 +29,7 @@
 #include <span>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -104,14 +105,14 @@ constexpr static inline int ceil(T fval)
  * @param str String to convert.
  * @return The converted line.
  */
-std::string tolow(const std::string& str);
+std::string tolow(std::string_view str);
 
 /**
  * Toupper a string.
  * @param str String to convert.
  * @return The converted string.
  */
-std::string toup(const std::string& str);
+std::string toup(std::string_view str);
 
 /**
  * Split a string.
@@ -119,34 +120,21 @@ std::string toup(const std::string& str);
  * @param sep Separator.
  * @return The splitted string without the separator.
  */
-std::vector<std::string> split(const std::string& str, char sep);
+std::vector<std::string> split(std::string_view str, char sep);
 
 /**
  * Remove leading and trailing white spaces from a string.
  * @param str The string to trim.
  * @return The trimmed string.
  */
-std::string trim(const std::string& str);
-
-/**
- * Detect whether a number is a power of two.
- * @pararm n Number.
- * @return true if a number is a power of two; false otherwise.
- *
- * FIXME: this method exists in the standard library
- */
-template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
-bool is_power_of_two(T n)
-{
-    return (n != 0 && (n & (n - 1)) == 0);
-}
+std::string trim(std::string_view str);
 
 /**
  * Convert a byte buffer to string.
  * @param buf Byte buffer to convert.
  * @return The string.
  */
-std::string to_string(const std::span<const uint8_t>& buf);
+std::string to_string(std::span<const uint8_t> buf);
 
 /**
  * Convert an integer value to uppercase hexadecimal string.
@@ -245,7 +233,7 @@ std::string dump(const C& cont, addr_t base = 0)
  * @return The converted number.
  * @exception InvalidNumber
  */
-unsigned long long to_ulonglong(const std::string& str, size_t max);
+unsigned long long to_ulonglong(std::string_view str, size_t max);
 
 /**
  * Convert a string into an integer type.
@@ -257,7 +245,7 @@ unsigned long long to_ulonglong(const std::string& str, size_t max);
  * @exception InvalidNumber
  */
 template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
-T to_number(const std::string& str)
+T to_number(std::string_view str)
 {
     return static_cast<T>(to_ulonglong(str, std::numeric_limits<T>::max()));
 }
@@ -390,7 +378,7 @@ void convert_01_10_to_11(C& bytes)
  * @param random  If true, contaminate the destination buffer with some random values.
  */
 template<typename T>
-void fill(std::span<uint8_t>& dst, T pattern, bool random = false)
+void fill(std::span<uint8_t> dst, T pattern, bool random = false)
 {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
     std::reverse(reinterpret_cast<uint8_t*>(&pattern), reinterpret_cast<uint8_t*>(&pattern) + sizeof(pattern));
@@ -424,6 +412,6 @@ uint64_t sleep(uint64_t delay);
  * @param buf Data buffer.
  * @return The hash value as a string.
  */
-std::string sha256(const std::span<const uint8_t>& buf);
+std::string sha256(std::span<const uint8_t> buf);
 
 }

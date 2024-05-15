@@ -18,8 +18,6 @@
  */
 #include "zxsp_config.hpp"
 
-#include <sstream>
-
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {
@@ -33,17 +31,16 @@ static const config::Option zxspectrum_options[] = {
 
 std::string ZXSpectrumCmdline::usage() const
 {
-    std::ostringstream os{};
-
-    os << config::Cmdline::usage() << "\n\n"
+    return std::format("{}\n\n"
         "Sinclair ZX-Spectrum 48K specific:\n"
         " --tape <fname|dir>      Set the input tape file (TAP) or directory\n"
         " --otape <fname|dir>     Set the output tape file (TAP) or directory\n"
-        "                         (default is " << DEFAULT_OTAPE << ")\n"
-        " --fastload [yes|no]     Fast tape loading (default is " << DEFAULT_FASTLOAD << ")\n"
-        " --snap <fname>          Load a snapshot image (Z80 or SNA formats)\n";
-
-    return os.str();
+        "                         (default is {})\n"
+        " --fastload [yes|no]     Fast tape loading (default is {})\n"
+        " --snap <fname>          Load a snapshot image (Z80 or SNA formats)\n",
+        config::Cmdline::usage(),
+        DEFAULT_OTAPE,
+        DEFAULT_FASTLOAD);
 }
 
 std::vector<config::Option> ZXSpectrumCmdline::options() const
@@ -70,15 +67,16 @@ ZXSpectrumConfig::ZXSpectrumConfig(config::Section& sec)
 
 std::string ZXSpectrumConfig::to_string() const
 {
-    std::ostringstream os{};
-
-    os << Config::to_string() << "\n"
-        "  Output tape:        " << std::quoted(otape)          << "\n"
-        "  Input tape:         " << std::quoted(itape)          << "\n"
-        "  Tape fastload:      " << (fastload ? "yes" : "no")   << "\n"
-        "  Snapshot:           " << std::quoted(snap);
-
-    return os.str();
+    return std::format("{}\n"
+        "  Output tape:        \"{}\"\n"
+        "  Input tape:         \"{}\"\n"
+        "  Tape fastload:      {}\n"
+        "  Snapshot:           \"{}\"",
+        Config::to_string(),
+        otape,
+        itape,
+        (fastload ? "yes" : "no"),
+        snap);
 }
 
 }

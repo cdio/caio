@@ -74,7 +74,7 @@ static inline uint8_t u8_to_pet(uint8_t u8)
  * @see pet_to_u8(uint8_t)
  * @see u8_to_pet(string &)
  */
-inline std::string pet_to_u8(const std::string& petscii)
+inline std::string pet_to_u8(std::string_view petscii)
 {
     std::string u8{petscii};
     std::transform(u8.begin(), u8.end(), u8.begin(), static_cast<uint8_t(*)(uint8_t)>(&pet_to_u8));
@@ -88,7 +88,7 @@ inline std::string pet_to_u8(const std::string& petscii)
  * @see u8_to_pet(uint8_t)
  * @see pet_to_u8(string &)
  */
-inline std::string u8_to_pet(const std::string& u8)
+inline std::string u8_to_pet(std::string_view u8)
 {
     std::string petscii{u8};
     std::transform(petscii.begin(), petscii.end(), petscii.begin(), static_cast<uint8_t(*)(uint8_t)>(&u8_to_pet));
@@ -98,9 +98,9 @@ inline std::string u8_to_pet(const std::string& u8)
 /**
  * @return True if the string contains pattern matching values ('?', '*'); false otherwise.
  */
-static inline bool is_pattern(const std::string& fname)
+static inline bool is_pattern(std::string_view fname)
 {
-    return (fname.find_first_of("*?") != std::string::npos);
+    return (fname.find_first_of("*?") != std::string_view::npos);
 }
 
 /**

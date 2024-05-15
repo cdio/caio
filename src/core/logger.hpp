@@ -20,17 +20,24 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <cstdint>
+#include <format>
 #include <fstream>
 #include <map>
 #include <string>
+#include <string_view>
 
 #include "types.hpp"
 
 namespace caio {
 
-class LoggerError : public Error {
-    using Error::Error;
-};
+#define ANSI_FG                 "\x1b[38;2;"
+#define ANSI_BG                 "\x1b[48;2;"
+#define ANSI_WHITE              "255;255;255;1m"
+#define ANSI_RED                "255;0;0m"
+#define ANSI_GREEN              "0;255;0m"
+#define ANSI_YELLOW             "255;255;0m"
+#define ANSI_RESET              "\x1b[0m"
 
 class Logger {
 public:
@@ -41,13 +48,10 @@ public:
     constexpr static const char* ALL_STR          = "all";
     constexpr static const char* NONE_STR         = "none";
 
-    constexpr static const char* ANSI_FG          = "\x1b[38;2;";
-    constexpr static const char* ANSI_BG          = "\x1b[48;2;";
-    constexpr static const char* ANSI_WHITE       = "255;255;255;1m";
-    constexpr static const char* ANSI_RED         = "255;0;0m";
-    constexpr static const char* ANSI_GREEN       = "0;255;0m";
-    constexpr static const char* ANSI_YELLOW      = "255;255;0m";
-    constexpr static const char* ANSI_RESET       = "\x1b[0m";
+    constexpr static const char* ERROR_COLOR      = ANSI_FG ANSI_WHITE ANSI_BG ANSI_RED;
+    constexpr static const char* WARN_COLOR       = ANSI_FG ANSI_YELLOW;
+    constexpr static const char* DEBUG_COLOR      = ANSI_FG ANSI_GREEN;
+    constexpr static const char* INFO_COLOR       = ANSI_RESET;
 
     constexpr static const char* DEFAULT_LOGFILE  = "/dev/tty";
     constexpr static const char* DEFAULT_LOGLEVEL = NONE_STR;
@@ -94,61 +98,54 @@ public:
         return _lv;
     }
 
-    void logfile(const std::string& fname);
+    void logfile(std::string_view fname);
 
     std::string logfile() const {
         return _logfile;
     }
 
-    Logger& log(Level lv, const std::string& msg);
+    Logger& log(std::string_view color, std::string_view fmt, std::format_args args);
 
-    Logger& log(Level lv, const char* fmt, va_list ap);
-
-    Logger& log(Level lv, const char* fmt, ...);
-
-    [[noreturn]] void fatal(const char* fmt, va_list ap);
-
-    [[noreturn]] void fatal(const char* fmt, ...);
-
-    Logger& error(const std::string& msg) {
-        return log(Level::Error, msg);
+    template<typename... Args>
+    [[noreturn]]
+    Logger& fatal(std::format_string<Args...> fmt, Args&&... args) {
+        if (is_error()) {
+            log(ERROR_COLOR, fmt.get(), std::make_format_args(args...));
+        }
+        std::exit(EXIT_FAILURE);
     }
 
-    Logger& error(const char* fmt, va_list ap) { //FIXME
-        return log(Level::Error, fmt, ap);
+    template<typename... Args>
+    Logger& error(std::format_string<Args...> fmt, Args&&... args) {
+        if (is_error()) {
+            log(ERROR_COLOR, fmt.get(), std::make_format_args(args...));
+        }
+        return *this;
     }
 
-    Logger& error(const char* fmt, ...); //FIXME
-
-    Logger& warn(const std::string& msg) {
-        return log(Level::Warn, msg);
+    template<typename... Args>
+    Logger& warn(std::format_string<Args...> fmt, Args&&... args) {
+        if (is_warn()) {
+            log(WARN_COLOR, fmt.get(), std::make_format_args(args...));
+        }
+        return *this;
     }
 
-    Logger& warn(const char* fmt, va_list ap) {
-        return log(Level::Warn, fmt, ap);
+    template<typename... Args>
+    Logger& info(std::format_string<Args...> fmt, Args&&... args) {
+        if (is_info()) {
+            log(INFO_COLOR, fmt.get(), std::make_format_args(args...));
+        }
+        return *this;
     }
 
-    Logger& warn(const char* fmt, ...);
-
-    Logger& info(const std::string& msg) {
-        return log(Level::Info, msg);
+    template<typename... Args>
+    Logger& debug(std::format_string<Args...> fmt, Args&&... args) {
+        if (is_debug()) {
+            log(DEBUG_COLOR, fmt.get(), std::make_format_args(args...));
+        }
+       return *this;
     }
-
-    Logger& info(const char* fmt, va_list ap) {
-        return log(Level::Info, fmt, ap);
-    }
-
-    Logger& info(const char* fmt, ...);
-
-    Logger& debug(const std::string& msg) {
-        return log(Level::Debug, msg);
-    }
-
-    Logger& debug(const char* fmt, va_list ap) {
-        return log(Level::Debug, fmt, ap);
-    }
-
-    Logger& debug(const char* fmt, ...);
 
     /**
      * Convert a string to a level type.

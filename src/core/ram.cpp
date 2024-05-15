@@ -23,13 +23,13 @@
 
 namespace caio {
 
-RAM::RAM(size_t size, const std::string& label)
+RAM::RAM(size_t size, std::string_view label)
     : Device{TYPE, label},
       _data(size)
 {
 }
 
-RAM::RAM(const std::string& fname, size_t count, const std::string& label)
+RAM::RAM(std::string_view fname, size_t count, std::string_view label)
     : Device{TYPE, label},
       _data{fs::load(fname, count)}
 {
@@ -42,7 +42,7 @@ RAM::RAM(std::istream& is, size_t count)
 }
 
 RAM::RAM(RAM&& other)
-    : Device{TYPE, std::move(other.label())},
+    : Device{TYPE, other.label()},
       _data{std::move(other._data)}
 {
 }

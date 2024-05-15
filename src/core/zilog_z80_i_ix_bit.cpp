@@ -386,9 +386,9 @@ int Z80::xx_bit_sr(uint16_t& reg, uint8_t op, addr_t arg)
 
     default:
         addr = _iaddr;
-        log.error("Z80: BIT_sr: A8_Invalid opcode: %s CB %02X, addr: $04X\n",
+        log.error("Z80: BIT_sr: A8_Invalid opcode: {}CB {:02X}, addr: ${:04X}\n{}\n{}\n{}\n",
             (_iprefix == Prefix::IX ? "DD " : (_iprefix == Prefix::IY ? "FD " : "")),
-            op, addr, disass(addr).c_str(), disass(addr).c_str(), disass(addr).c_str());
+            op, addr, disass(addr), disass(addr), disass(addr));
         return 0;
     }
 
@@ -458,9 +458,9 @@ int Z80::xx_bit(uint16_t& reg, uint8_t op, addr_t arg)
 
     default:
         addr = _iaddr;
-        log.error("Z80: xx_bit: A8_Invalid opcode: %sCB %02X, addr: $%04X\n%s\n",
+        log.error("Z80: xx_bit: A8_Invalid opcode: {}CB {:02X}, addr: ${:04X}\n{}\n",
             (_iprefix == Prefix::IX ? "DD " : (_iprefix == Prefix::IY ? "FD " : "")),
-            op, addr, disass(addr).c_str());
+            op, addr, disass(addr));
         return 0;
     }
 

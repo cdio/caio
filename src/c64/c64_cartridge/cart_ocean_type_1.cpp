@@ -176,7 +176,7 @@ std::string CartOceanType1::to_string() const
 
     os << Name::to_string() << ", banks " << _banks << ", size " << cartsize() << " (" << (cartsize() >> 10) << "K)";
 
-    for (const auto &rom : _roms) {
+    for (const auto& rom : _roms) {
         if (rom) {
             os << ", " << rom->to_string();
         }

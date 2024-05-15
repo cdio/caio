@@ -36,7 +36,7 @@ public:
      * @param label Label assigned to this ROM.
      */
     template<typename Iterator>
-    ROM(Iterator first, Iterator last, const std::string& label)
+    ROM(Iterator first, Iterator last, std::string_view label)
         : RAM{first, last, label} {
         type(TYPE);
     }
@@ -48,9 +48,9 @@ public:
      * @param label  Label assigned to this ROM.
      * @exception IOError If the specified signature is not equal to the calculated one.
      * @see signature()
-     * @see RAM::RAM(const std::string&, size_t, const std::string&)
+     * @see RAM::RAM(std::string_view size_t, std::string_view)
      */
-    ROM(const std::string& fname, const std::string& digest, const std::string& label);
+    ROM(std::string_view fname, std::string_view digest, std::string_view label);
 
     /**
      * Initialise this ROM with data from a file.
@@ -58,9 +58,9 @@ public:
      * @param size   Size the file must have (0 not to check size);
      * @param label  Label assigned to this ROM.
      * @exception IOError If the size of the file is not equal to the specified size.
-     * @see RAM:RAM(const std::string&, size_t, const std::string&)
+     * @see RAM:RAM(std::string_view size_t, std::string_view)
      */
-    ROM(const std::string& fname, size_t size, const std::string& label);
+    ROM(std::string_view fname, size_t size, std::string_view label);
 
     /**
      * Initialise this ROM with data from an input stream.
@@ -75,7 +75,7 @@ public:
      * Get an iterator to the first element of this ROM.
      * @return An iterator to the first element.
      */
-    std::vector<uint8_t>::const_iterator begin() const {
+    buffer_cit_t begin() const {
         return _data.cbegin();
     }
 
@@ -83,7 +83,7 @@ public:
      * Get an iterator to the last element of this ROM + 1..
      * @return An iterator to the last element +1.
      */
-    std::vector<uint8_t>::const_iterator end() const {
+    buffer_cit_t end() const {
         return _data.cend();
     }
 

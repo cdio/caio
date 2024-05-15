@@ -35,7 +35,7 @@ std::string stacktrace()
     std::array<void*, 256> buffer{};
     size_t size = ::backtrace(buffer.begin(), buffer.size());
     if (size == 0) {
-        os << "Unable to retreive stack trace data\n";
+        os << "Unable to retrieve stack trace data\n";
 
     } else {
         os << "Stack Trace:\n";

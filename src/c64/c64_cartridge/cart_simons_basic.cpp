@@ -18,8 +18,6 @@
  */
 #include "cart_simons_basic.hpp"
 
-#include <sstream>
-
 #include "logger.hpp"
 #include "utils.hpp"
 
@@ -136,13 +134,10 @@ void CartSimonsBasic::write(addr_t addr, uint8_t data)
 
 std::string CartSimonsBasic::to_string() const
 {
-    std::ostringstream os{};
-
-    os << Name::to_string()
-       << ", roml " << (_roml ? _roml->to_string() : "")
-       << ", romh " << (_romh ? _romh->to_string() : "");
-
-    return os.str();
+    return std::format("{}, roml {}, romh {}",
+        Name::to_string(),
+        (_roml ? _roml->to_string() : ""),
+        (_romh ? _romh->to_string() : ""));
 }
 
 std::pair<ASpace::devmap_t, ASpace::devmap_t> CartSimonsBasic::getdev(addr_t addr, bool romh, bool roml)

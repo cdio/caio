@@ -119,7 +119,7 @@ void Tape::save(const std::string& path)
     }
 
     _tx = tx;
-    log.debug("Tape: Output tape: \"%s\", is_directory: %d\n", _tx.path.c_str(), _tx.isdir);
+    log.debug("Tape: Output tape: \"{}\", is_directory: {}\n", _tx.path, _tx.isdir);
 }
 
 void Tape::load(const std::string& path)
@@ -139,14 +139,14 @@ inline void Tape::fastload(bool on)
 
 void Tape::play()
 {
-    log.debug("Tape: Input tape play: \"%s\"\n", _rx.path.c_str());
+    log.debug("Tape: Input tape play: \"{}\"\n", _rx.path);
     _rx.stopped = false;
     fastload(true);
 }
 
 void Tape::stop()
 {
-    log.debug("Tape: Input tape stop: \"%s\". Last block invalidated\n", _rx.path.c_str());
+    log.debug("Tape: Input tape stop: \"{}\". Last block invalidated\n", _rx.path);
     _rx.stopped = true;
     _rx.state = RXState::Init;
     fastload(false);
@@ -154,13 +154,13 @@ void Tape::stop()
 
 void Tape::eject()
 {
-    log.debug("Tape: Input tape eject: \"%s\"\n", _rx.path.c_str());
+    log.debug("Tape: Input tape eject: \"{}\"\n", _rx.path);
     _rx = {};
 }
 
 void Tape::rewind()
 {
-    log.debug("Tape: Input tape rewind: \"%s\"\n", _rx.path.c_str());
+    log.debug("Tape: Input tape rewind: \"{}\"\n", _rx.path);
     load(_rx.path);
 }
 
@@ -243,7 +243,7 @@ void Tape::write(bool pulse)
         case TXState::Bit_0:
             _tx.bit >>= 1;
             if (_tx.bit == 0) {
-                ZXSPECTRUM_TAPE_DEBUG("Tape: write: Transmitting byte: $%02X\n", _tx.byte);
+                ZXSPECTRUM_TAPE_DEBUG("Tape: write: Transmitting byte: ${:02X}\n", _tx.byte);
                 if (!transmit()) {
                     _tx.state = TXState::Init;
                     ZXSPECTRUM_TAPE_DEBUG("Tape: write: Transmission error: Bit_X -> Init\n");
@@ -309,11 +309,10 @@ bool Tape::decode_pulse(bool pulse)
     }
 
 #if 0
-    ZXSPECTRUM_TAPE_DEBUG("Tape: decode_pulse: lo=%" PRIu64 ", hi=%" PRIu64 "\n",
-        _tx.pulse_lo, _tx.pulse_hi);
+    ZXSPECTRUM_TAPE_DEBUG("Tape: decode_pulse: lo={}, hi={}\n", _tx.pulse_lo, _tx.pulse_hi);
 
     if (newst != _tx.state) {
-        ZXSPECTRUM_TAPE_DEBUG("Tape: decode_pulse: %d -> %d\n",
+        ZXSPECTRUM_TAPE_DEBUG("Tape: decode_pulse: {} -> {}\n",
             static_cast<int>(_tx.state), static_cast<int>(newst));
     }
 #endif
@@ -339,7 +338,7 @@ bool Tape::transmit()
     }
 
     if (hdr->block_type != HeaderBlock::BLOCKTYPE_HEADER) {
-        log.error("Tape: Invalid header: $%02X. Operation aborted.\n", hdr->block_type);
+        log.error("Tape: Invalid header: ${:02X}. Operation aborted.\n", hdr->block_type);
         return false;
     }
 
@@ -358,10 +357,10 @@ bool Tape::transmit()
     const auto fullpath = otape_fullpath(name);
     const uint8_t* data = _tx.buffer.data() + HEADER_BLOCK_SIZE;
     try {
-        log.debug("Tape: Saving file: \"%s\"\n", fullpath.c_str());
+        log.debug("Tape: Saving file: \"{}\"\n", fullpath);
         TAPFile::save(fullpath, {_tx.buffer.data(), HEADER_BLOCK_SIZE}, {data, datalen});
     } catch (const std::exception& err) {
-        log.error("Tape: %s\n", err.what());
+        log.error("Tape: {}\n", err.what());
     }
 
     _tx.buffer.clear();
@@ -382,7 +381,7 @@ bool Tape::receive()
     _rx.pulsebuf.push_block(block);
     _rx.pulseit = _rx.pulsebuf.begin();
 
-    log.debug("Tape: New block converted to pulses: block size: %d, pulse buffer size: %d\n",
+    log.debug("Tape: New block converted to pulses: block size: {}, pulse buffer size: {}\n",
         block.size(), _rx.pulsebuf.size());
 
     return true;

@@ -71,7 +71,7 @@ void ZXSpectrum::autorun(const std::string& pname)
 {
     if (!pname.empty()) {
         if (!_conf.snap.empty()) {
-            log.warn("Snapshot file overrided. From %s to %s\n", _conf.snap.c_str(), pname.c_str());
+            log.warn("Snapshot file overrided. From {} to {}\n", _conf.snap, pname);
         }
         _conf.snap = pname;
     }
@@ -79,7 +79,7 @@ void ZXSpectrum::autorun(const std::string& pname)
 
 void ZXSpectrum::start()
 {
-    log.info("Starting caio v" + caio::version() + " - " + name() + "\n" + to_string() + "\n");
+    log.info("Starting caio v{} - {}\n{}\n", caio::version(), name(), to_string());
 
     /*
      * The emulator runs on its own thread.
@@ -102,7 +102,7 @@ void ZXSpectrum::start()
     }};
 
     if (!th.joinable()) {
-        log.error("Can't start the clock thread: " + Error::to_string() + "\n");
+        log.error("Can't start the clock thread: {}\n", Error::to_string());
         return;
     }
 
@@ -119,7 +119,7 @@ void ZXSpectrum::start()
         std::rethrow_exception(error);
     }
 
-    log.info("Terminating " + _title + "\n");
+    log.info("Terminating {}\n", _title);
 }
 
 void ZXSpectrum::reset()
@@ -186,7 +186,7 @@ void ZXSpectrum::attach_prg()
 
         reset(*snap);
 
-        _title = _conf.title + " - " + fs::basename(fname);
+        _title = std::format("{} - {}", _conf.title, fs::basename(fname));
     }
 }
 
@@ -209,7 +209,7 @@ void ZXSpectrum::create_devices()
 
     auto itape = fs::fix_home(_conf.itape);
     if (fs::exists(itape) && !fs::is_directory(itape)) {
-        _title = _conf.title + " - " + fs::basename(itape);
+        _title = std::format("{} - {}", _conf.title, fs::basename(itape));
     }
 }
 
@@ -353,7 +353,7 @@ void ZXSpectrum::hotkeys(keyboard::Key key)
         /* PASSTHROUGH */
 
     case keyboard::KEY_PAUSE:
-        log.debug("System %spaused\n", (_ui->paused() ? "un" : ""));
+        log.debug("System {}paused\n", (_ui->paused() ? "un" : ""));
         _clk->pause(_clk->paused() ^ true);
         break;
 
@@ -363,20 +363,24 @@ void ZXSpectrum::hotkeys(keyboard::Key key)
 
 std::string ZXSpectrum::to_string() const
 {
-    std::ostringstream os{};
-
-    os << _conf.to_string()                     << "\n\n"
-          "Connected devices:"                  << "\n"
-          "  " << _clk->to_string()             << "\n"
-          "  " << _cpu->to_string()             << "\n"
-          "  " << _ram->to_string()             << "\n"
-          "  " << _rom->to_string()             << "\n"
-          "  " << _ula->to_string()             << "\n"
-          "  " << _kbd->to_string()             << "\n"
-          "  " << _joy->to_string()             << "\n\n"
-          "UI backend: " << _ui->to_string()    << "\n";
-
-    return os.str();
+    return std::format("{}\n\nConnected devices:\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "UI backend: {}\n",
+        _conf.to_string(),
+        _clk->to_string(),
+        _cpu->to_string(),
+        _ram->to_string(),
+        _rom->to_string(),
+        _ula->to_string(),
+        _kbd->to_string(),
+        _joy->to_string(),
+        _ui->to_string());
 }
 
 }

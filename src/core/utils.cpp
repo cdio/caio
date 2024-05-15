@@ -24,7 +24,7 @@
 
 namespace caio {
 
-std::string tolow(const std::string& str)
+std::string tolow(std::string_view str)
 {
     std::string lstr{str};
 
@@ -35,7 +35,7 @@ std::string tolow(const std::string& str)
     return lstr;
 }
 
-std::string toup(const std::string& str)
+std::string toup(std::string_view str)
 {
     std::string ustr{str};
 
@@ -46,21 +46,21 @@ std::string toup(const std::string& str)
     return ustr;
 }
 
-std::vector<std::string> split(const std::string& str, char sep)
+std::vector<std::string> split(std::string_view str, char sep)
 {
     std::vector<std::string> v{};
     size_t pos{}, ipos{};
 
     do {
         pos = str.find(sep, ipos);
-        v.push_back(str.substr(ipos, pos - ipos));
+        v.push_back(std::string{str.substr(ipos, pos - ipos)});
         ipos = pos + 1;
     } while (pos != std::string::npos);
 
     return v;
 }
 
-std::string trim(const std::string& str)
+std::string trim(std::string_view str)
 {
     size_t len = str.length();
     size_t begin = str.find_first_not_of(" \t");
@@ -76,13 +76,13 @@ std::string trim(const std::string& str)
         ++end;
     }
 
-    return (str.substr(begin, end));
+    return std::string{str.substr(begin, end)};
 }
 
-unsigned long long to_ulonglong(const std::string& str, size_t max)
+unsigned long long to_ulonglong(std::string_view str, size_t max)
 {
     if (str.empty()) {
-        throw InvalidNumber{str};
+        throw InvalidNumber{"Empty string"};
     }
 
     int base = 16;
@@ -98,7 +98,7 @@ unsigned long long to_ulonglong(const std::string& str, size_t max)
     }
 
     char* err;
-    unsigned long long val = std::strtoull(str.c_str() + pos, &err, base);
+    unsigned long long val = std::strtoull(str.data() + pos, &err, base);
     if (*err != '\0' || val > max) {
         throw InvalidNumber{str};
     }
@@ -106,7 +106,7 @@ unsigned long long to_ulonglong(const std::string& str, size_t max)
     return val;
 }
 
-std::string to_string(const std::span<const uint8_t>& buf)
+std::string to_string(std::span<const uint8_t> buf)
 {
     std::string str{};
 
@@ -124,7 +124,7 @@ uint64_t sleep(uint64_t delay)
     return (now() - start);
 }
 
-std::string sha256(const std::span<const uint8_t>& buf)
+std::string sha256(std::span<const uint8_t> buf)
 {
     SHA2_CTX ctx{};
     uint8_t md[SHA256_DIGEST_LENGTH];

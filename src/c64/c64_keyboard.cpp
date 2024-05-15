@@ -390,12 +390,12 @@ void C64Keyboard::add_key_map(const std::string& key_name, bool key_shift, bool 
 {
     auto key = keyboard::to_key(key_name);
     if (key == keyboard::KEY_NONE) {
-        throw InvalidArgument{"Invalid key name: \"" + key_name + "\""};
+        throw InvalidArgument{"Invalid key name: \"{}\"", key_name};
     }
 
     MatrixKey impl_key = to_c64(impl_name);
     if (impl_key == MatrixKey::KEY_NONE) {
-        throw InvalidArgument{"Invalid C64 key name: \"" + impl_name + "\""};
+        throw InvalidArgument{"Invalid C64 key name: \"{}\"", impl_name};
     }
 
     std::tuple pc_key{key, key_shift, key_altgr};
@@ -406,7 +406,7 @@ void C64Keyboard::add_key_map(const std::string& key_name, bool key_shift, bool 
         /* Replace the existing definition */
         it.first->second = c64_key;
 
-        log.warn("C64Keyboard: Key redefined: %s%s%s. Previous value has been replaced\n", key_name.c_str(),
+        log.warn("C64Keyboard: Key redefined: {}{}{}. Previous value has been replaced\n", key_name,
             (key_shift ? " SHIFT" : ""), (key_altgr ? " ALTGR" : ""));
     }
 }

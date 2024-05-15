@@ -49,7 +49,7 @@ void SnapSNA::load(const std::string& fname)
 {
     _fname = fs::fix_home(fname);
 
-    log.debug("SnapSNA: Loading snapshot file: %s\n", _fname.c_str());
+    log.debug("SnapSNA: Loading snapshot file: {}\n", _fname);
 
     auto raw = fs::load(_fname);
 
@@ -89,7 +89,7 @@ void SnapSNA::load(const std::string& fname)
     uint8_t im = (hdr->im & 0x03);
     if (im > 2) {
         im = 2;
-        log.warn("SnapSNA: %s: Invalid IM flag: $%02x. Set to $%02X\n", _fname.c_str(), hdr->im, im);
+        log.warn("SnapSNA: {}: Invalid IM flag: ${:02x}. Set to ${:02X}\n", _fname, hdr->im, im);
     }
 
     bool iff2 = (hdr->IFF2 & SnapSNAHeader::IFF2_BIT);

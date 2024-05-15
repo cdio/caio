@@ -36,14 +36,14 @@ void OFile::load(const std::string& fname)
         if (size > laddr) {
             size -= laddr;
             if (size > MAX_SIZE) {
-                throw IOError{"Invalid cassette file size: " + fname + ": " + std::to_string(size)};
+                throw IOError{"Invalid cassette file size: {}: {}", fname, std::to_string(size)};
             }
 
             return;
         }
     }
 
-    throw IOError{"Invalid cassette file: " + fname};
+    throw IOError{"Invalid cassette file: {}", fname};
 }
 
 void OFile::save(const std::string& fname)

@@ -301,32 +301,20 @@ const Mos6502::Instruction Mos6502::instr_set[256] = {
 
 std::string Mos6502::Registers::to_string(Mos6502::Flags fl)
 {
-    std::ostringstream ss{};
-
-    ss << ((fl & Flags::N) ? "N" : "-")
-       << ((fl & Flags::V) ? "V" : "-")
-       << "-"
-       << ((fl & Flags::B) ? "B" : "-")
-       << ((fl & Flags::D) ? "D" : "-")
-       << ((fl & Flags::I) ? "I" : "-")
-       << ((fl & Flags::Z) ? "Z" : "-")
-       << ((fl & Flags::C) ? "C" : "-");
-
-    return ss.str();
+    return std::format("{}{}-{}{}{}{}{}",
+        ((fl & Flags::N) ? "N" : "-"),
+        ((fl & Flags::V) ? "V" : "-"),
+        ((fl & Flags::B) ? "B" : "-"),
+        ((fl & Flags::D) ? "D" : "-"),
+        ((fl & Flags::I) ? "I" : "-"),
+        ((fl & Flags::Z) ? "Z" : "-"),
+        ((fl & Flags::C) ? "C" : "-"));
 }
 
 std::string Mos6502::Registers::to_string() const
 {
-    std::ostringstream ss;
-
-    ss << "A=" << caio::to_string(A)
-       << "  X=" << caio::to_string(X)
-       << "  Y=" << caio::to_string(Y)
-       << "  P=" << caio::to_string(P) << " " << to_string(static_cast<Flags>(P))
-       << "  S=" << caio::to_string(S)
-       << "  PC=" << caio::to_string(PC);
-
-    return ss.str();
+    return std::format("A={:02X} X={:02X} Y={:02X} P={:02X} {} S={:02X} PC={:04X}",
+        A, X, Y, P, to_string(static_cast<Flags>(P)), S, PC);
 }
 
 void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const monitor::save_cb_t& save)
@@ -521,12 +509,8 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
         if ((v == '*' && ins.size != 2) ||
             (v == '+' && ins.size != 2) ||
             (v == '^' && ins.size != 3)) {
-            std::ostringstream err{};
-            err << "Invalid instruction encoding: "
-                << "opcode " << caio::to_string(opcode)
-                << ", size " << ins.size
-                << ", fmt " << std::quoted(ins.format);
-            log.fatal("%s: %s\n", Name::type().c_str(), err.str().c_str());
+            log.fatal("{}: Invalid instruction encodeing: opcode: {}, size: {}, fmt: \"{}\"\n",
+                Name::type(), caio::to_string(opcode), ins.size, ins.format);
             /* NOTREACHED */
         }
 
@@ -620,7 +604,9 @@ size_t Mos6502::single_step()
         push_P();
         _regs.PC = addr;
         flag(Flags::I);
-        _log.debug("Detected %s interrupt. Extra cycles=7\n", (is_nmi ? "NMI" : "IRQ"));
+        if (_log.is_debug()) {
+            _log.debug("Detected {} interrupt. Extra cycles=7\n", (is_nmi ? "NMI" : "IRQ"));
+        }
         return 7;
     }
 
@@ -708,9 +694,7 @@ size_t Mos6502::single_step()
     auto cycles = ins.fn(*this, arg);
 
     if (_log.is_debug()) {
-        std::ostringstream msg{};
-        msg << std::setw(35) << std::left << line << _regs.to_string() << "  cycles=" << ins.cycles << "\n";
-        _log.debug(msg.str());
+        _log.debug("{:35s}{}  cycles={}\n", line, _regs.to_string(), ins.cycles);
     }
 
     return (cycles == 0 ? ins.cycles : cycles);
