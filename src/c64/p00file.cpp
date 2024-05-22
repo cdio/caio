@@ -26,10 +26,11 @@ namespace caio {
 namespace commodore {
 namespace c64 {
 
-void P00File::load(const std::string& fname)
+void P00File::load(std::string_view fname)
 {
     if (!fname.empty()) {
-        std::ifstream is{fname, std::ios::binary | std::ios::in};
+        //FIXME libstdc++ not there yet   std::ifstream is{fname, std::ios::binary | std::ios::in};
+        std::ifstream is{std::string{fname}, std::ios::binary | std::ios::in};
         if (!is) {
             throw IOError{"Can't open P00 file: {}: {}", fname, Error::to_string()};
         }
@@ -50,10 +51,11 @@ void P00File::load(const std::string& fname)
     }
 }
 
-void P00File::save(const std::string& fname, addr_t addr)
+void P00File::save(std::string_view fname, addr_t addr)
 {
     if (!fname.empty()) {
-        std::ofstream os{fname, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
+        //FIXME libstdc++ not there yet  std::ofstream os{fname, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
+        std::ofstream os{std::string{fname}, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc};
         if (!os) {
             throw IOError{"Can't create P00 file: {}: {}", fname, Error::to_string()};
         }

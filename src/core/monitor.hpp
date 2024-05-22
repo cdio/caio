@@ -23,6 +23,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -43,11 +44,11 @@ using write_cb_t    = std::function<void(addr_t, uint8_t)>;
 using disass_cb_t   = std::function<void(std::ostream&, addr_t, size_t, bool)>;
 using mmap_cb_t     = std::function<sptr_t<ASpace>()>;
 using ebreak_cb_t   = std::function<void()>;
-using load_cb_t     = std::function<std::pair<addr_t, addr_t>(const std::string&, addr_t)>;
-using save_cb_t     = std::function<void(const std::string&, addr_t, addr_t)>;
-using loglevel_cb_t = std::function<Loglevel(const std::string&)>;
-using regvalue_cb_t = std::function<uint16_t(const std::string&)>;
-using bpdoc_cb_t    = std::function<std::string(const std::string&)>;
+using load_cb_t     = std::function<std::pair<addr_t, addr_t>(std::string_view, addr_t)>;
+using save_cb_t     = std::function<void(std::string_view, addr_t, addr_t)>;
+using loglevel_cb_t = std::function<Loglevel(std::string_view)>;
+using regvalue_cb_t = std::function<uint16_t(std::string_view)>;
+using bpdoc_cb_t    = std::function<std::string(std::string_view)>;
 
 /**
  * Monitored CPU.
@@ -130,7 +131,7 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
             return cpu->ebreak();
         },
 
-        .load = [cpu](const std::string& fname, addr_t start) -> std::pair<addr_t, addr_t> {
+        .load = [cpu](std::string_view fname, addr_t start) -> std::pair<addr_t, addr_t> {
             auto buf = fs::load(fname);
             addr_t addr = start;
             for (auto c : buf) {
@@ -139,7 +140,7 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
             return {start, buf.size()};
         },
 
-        .save = [cpu](const std::string& fname, addr_t start, addr_t end) {
+        .save = [cpu](std::string_view fname, addr_t start, addr_t end) {
             ssize_t size = end - start;
             if (size > 0) {
                 std::vector<uint8_t> buf{};
@@ -151,7 +152,7 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
             }
         },
 
-        .loglevel = [cpu](const std::string& lv) {
+        .loglevel = [cpu](std::string_view lv) {
             if (!empty(lv)) {
                 cpu->loglevel(lv);
             }
@@ -164,7 +165,7 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
              */
         },
 
-        .bpdoc = [](const std::string&) {
+        .bpdoc = [](std::string_view) {
             return "";
         }
     };
@@ -201,7 +202,7 @@ public:
      * @return The compiled expression as a function call.
      * @exception InvalidArgument
      */
-    static std::function<int()> compile(MonitoredCPU& cpu, const std::string& line);
+    static std::function<int()> compile(MonitoredCPU& cpu, std::string_view line);
 
 private:
     /**
@@ -211,7 +212,7 @@ private:
      * @param line The argument to compile.
      * @return The compiled argument.
      */
-    static fn_t compile_argument(MonitoredCPU& cpu, const std::string& line);
+    static fn_t compile_argument(MonitoredCPU& cpu, std::string_view line);
 
     static const std::pair<std::string, ex_t> operators[];
 };
@@ -297,7 +298,7 @@ private:
      * @see to_number()
      */
     //FIXME: move to utils
-    addr_t to_addr(const std::string& str, addr_t defval);
+    addr_t to_addr(std::string_view str, addr_t defval);
 
     /**
      * Convert a string formatted as "[$#]xxx" to an unsigned number.
@@ -307,7 +308,7 @@ private:
      * @see caio::to_number()
      */
     //FIXME: move to utils
-    size_t to_count(const std::string& str);
+    size_t to_count(std::string_view str);
 
     Readline                 _rd{};
     MonitoredCPU             _cpu{};

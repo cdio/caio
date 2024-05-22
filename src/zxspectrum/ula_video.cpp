@@ -46,7 +46,7 @@ RgbaTable ULAVideo::builtin_palette{
     0xFFFFFFFF
 };
 
-ULAVideo::ULAVideo(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, const std::string& label)
+ULAVideo::ULAVideo(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, std::string_view label)
     : Clockable{},
       Name{TYPE, label},
       _cpu{cpu},
@@ -61,7 +61,7 @@ ULAVideo::~ULAVideo()
 {
 }
 
-void ULAVideo::palette(const std::string& fname)
+void ULAVideo::palette(std::string_view fname)
 {
     if (!fname.empty()) {
         _palette.load(fname);

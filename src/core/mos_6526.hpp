@@ -20,7 +20,7 @@
 
 #include <cstdint>
 #include <functional>
-#include <string>
+#include <string_view>
 
 #include "clock.hpp"
 #include "device.hpp"
@@ -182,7 +182,7 @@ public:
      * Initalise this CIA instance.
      * @param label Label assigned to this device.
      */
-    explicit Mos6526(const std::string& label = {});
+    explicit Mos6526(std::string_view label = {});
 
     virtual ~Mos6526();
 

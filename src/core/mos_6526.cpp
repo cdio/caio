@@ -292,7 +292,7 @@ bool Mos6526::Tod::tick(const Clock& clk)
     return false;
 }
 
-Mos6526::Mos6526(const std::string& label)
+Mos6526::Mos6526(std::string_view label)
     : Device{TYPE, label},
       _timer_A{*this, PB6},
       _timer_B{*this, PB7}

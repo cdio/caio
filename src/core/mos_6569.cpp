@@ -46,7 +46,7 @@ RgbaTable Mos6569::builtin_palette{
     0xB2B2B2FF
 };
 
-Mos6569::Mos6569(const std::string& label, const sptr_t<ASpace>& mmap, const devptr_t& vcolor)
+Mos6569::Mos6569(std::string_view label, const sptr_t<ASpace>& mmap, const devptr_t& vcolor)
     : Device{TYPE, label},
       Clockable{},
       _mmap{mmap},
@@ -61,7 +61,7 @@ void Mos6569::render_line(const std::function<void(unsigned, const ui::Scanline&
     _render_line = rl;
 }
 
-void Mos6569::palette(const std::string& fname)
+void Mos6569::palette(std::string_view fname)
 {
     if (!fname.empty()) {
         _palette.load(fname);

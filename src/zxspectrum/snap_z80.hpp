@@ -249,9 +249,9 @@ public:
      * Load a Z80 file.
      * @param fname File name.
      * @exception IOError
-     * @see load(const std::string&)
+     * @see load(std::string_view)
      */
-    SnapZ80(const std::string& fname);
+    SnapZ80(std::string_view fname);
 
     virtual ~SnapZ80();
 
@@ -263,7 +263,7 @@ public:
      * @return true if the specified file seems to be a Z80 formatted snapshot; false otherwise.
      * @see FILE_EXTENSION
      */
-    static bool seems_like(const std::string& fname);
+    static bool seems_like(std::string_view fname);
 
 private:
     enum class Version {
@@ -273,14 +273,14 @@ private:
         v3b
     };
 
-    void load(const std::string& fname);
+    void load(std::string_view fname);
     void load_v1(const buffer_t& raw);
     void load_v2(const buffer_t& raw);
     void uncompress_v1(const buffer_t& raw);
     void uncompress_v2(const buffer_t& raw, size_t rawoff);
-    buffer_t uncompress(const std::span<const uint8_t>& enc, bool v1);
+    buffer_t uncompress(std::span<const uint8_t> enc, bool v1);
 
-    void throw_ioerror(const std::string& reason = {}) const;
+    void throw_ioerror(std::string_view reason = {}) const;
 
     static Z80::Registers extract_registers(const SnapZ80HeaderV23* hdr);
     static intflags_t extract_intflags(const SnapZ80HeaderV23* hdr);

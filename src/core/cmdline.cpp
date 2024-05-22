@@ -29,31 +29,31 @@
 namespace caio {
 namespace config {
 
-bool is_true(const std::string& value)
+bool is_true(std::string_view value)
 {
     auto val = caio::tolow(value);
     return (val == "yes" || val == "ye" || val == "y");
 }
 
-bool is_false(const std::string& value)
+bool is_false(std::string_view value)
 {
     auto val = caio::tolow(value);
     return (val == "no" || val == "n");
 }
 
-bool set_value(Confile& cf, const Option& opt, const std::string& value)
+bool set_value(Confile& cf, const Option& opt, std::string_view value)
 {
     cf[opt.sname][opt.key] = value;
     return true;
 }
 
-bool set_true(Confile& cf, const Option& opt, const std::string&)
+bool set_true(Confile& cf, const Option& opt, std::string_view value)
 {
     cf[opt.sname][opt.key] = "yes";
     return true;
 }
 
-bool set_bool(Confile& cf, const Option& opt, const std::string& value)
+bool set_bool(Confile& cf, const Option& opt, std::string_view value)
 {
     auto& cfvalue = cf[opt.sname][opt.key];
     if (is_true(value)) {

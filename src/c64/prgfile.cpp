@@ -27,9 +27,10 @@ namespace caio {
 namespace commodore {
 namespace c64 {
 
-void PrgFile::load(const std::string& fname)
+void PrgFile::load(std::string_view fname)
 {
-    std::ifstream is{fname, std::ios::in};
+    //FIXME libstdc++ not there yet   std::ifstream is{fname, std::ios::in};
+    std::ifstream is{std::string{fname}, std::ios::in};
     if (!is) {
         throw IOError{"Can't open PRG file: {}: {}", fname, Error::to_string()};
     }
@@ -49,10 +50,11 @@ std::istream& PrgFile::load(std::istream& is)
     return is;
 }
 
-void PrgFile::save(const std::string& fname, addr_t addr)
+void PrgFile::save(std::string_view fname, addr_t addr)
 {
     if (!fname.empty()) {
-        std::ofstream os{fname, std::ios_base::out | std::ios_base::trunc};
+        //FIXME libstdc++ not there yet   std::ofstream os{fname, std::ios_base::out | std::ios_base::trunc};
+        std::ofstream os{std::string{fname}, std::ios_base::out | std::ios_base::trunc};
         if (!os) {
             throw IOError{"Can't create PRG file: {}: {}", fname, Error::to_string()};
         }
@@ -66,11 +68,11 @@ std::ostream& PrgFile::save(std::ostream& os, addr_t addr)
     return PrgFile::save(os, (addr == 0 ? address() : addr), {data(), size()});
 }
 
-std::ostream& PrgFile::save(std::ostream& os, addr_t addr, const std::span<uint8_t>& data)
+std::ostream& PrgFile::save(std::ostream& os, addr_t addr, std::span<const uint8_t> data)
 {
-    addr_t leaddr = htole16(addr);
-    if (!os.write(reinterpret_cast<char*>(&leaddr), sizeof(leaddr)) ||
-        !os.write(reinterpret_cast<char*>(data.data()), data.size())) {
+    const addr_t leaddr = htole16(addr);
+    if (!os.write(reinterpret_cast<const char*>(&leaddr), sizeof(leaddr)) ||
+        !os.write(reinterpret_cast<const char*>(data.data()), data.size())) {
             throw IOError{"Can't write file data: {}", Error::to_string()};
     }
 

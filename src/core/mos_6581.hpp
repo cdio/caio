@@ -335,7 +335,7 @@ public:
      * @param label Label assigned to this instance;
      * @param clkf  System clock frequency.
      */
-    Mos6581(const std::string& label, unsigned clkf);
+    Mos6581(std::string_view label, unsigned clkf);
 
     virtual ~Mos6581() {
     }

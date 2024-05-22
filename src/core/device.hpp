@@ -93,7 +93,7 @@ public:
     virtual std::ostream& dump(std::ostream& os, addr_t base = 0) const = 0;
 
 protected:
-    Device(const std::string_view type, const std::string_view label)
+    Device(std::string_view type, std::string_view label)
         : Name{type, label} {
     }
 

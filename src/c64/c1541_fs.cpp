@@ -18,6 +18,7 @@
  */
 #include "c1541_fs.hpp"
 
+#include <format>
 #include <iomanip>
 #include <regex>
 
@@ -30,13 +31,13 @@ namespace caio {
 namespace commodore {
 namespace c1541 {
 
-void C1541Fs::attach(const std::string& path)
+void C1541Fs::attach(std::string_view path)
 {
     if (!path.empty() && (!fs::exists(path) || !fs::is_directory(path))) {
         throw IOError{*this, "Can't attach: \"{}\": Not a directory", path};
     }
 
-    attached_path(path.size() && path.rfind("/") != path.size() - 1 ? path + "/" : path);
+    attached_path(std::format("{}{}", path, (path.size() && path.rfind("/") != path.size() - 1) ? "/" : ""));
     reset();
 }
 
@@ -127,9 +128,9 @@ std::string C1541Fs::to_basic(addr_t& addr, const std::filesystem::path& fspath,
     return os.str();
 }
 
-Status C1541Fs::open_dir(uint8_t ch, Channel& channel, const std::string& fname, FileType type, OpenMode mode)
+Status C1541Fs::open_dir(uint8_t ch, Channel& channel, std::string_view fname, FileType type, OpenMode mode)
 {
-    const std::string pattern{attached_path() + (fname.empty() ? "*" : fname)};
+    const std::string pattern = std::format("{}{}", attached_path(), (fname.empty() ? "*" : fname));
     size_t root_len = attached_path().size();
     std::stringstream ss{};
     addr_t addr{};
@@ -159,7 +160,7 @@ Status C1541Fs::open_dir(uint8_t ch, Channel& channel, const std::string& fname,
     return Status::OK;
 }
 
-Status C1541Fs::open_file(uint8_t ch, Channel& channel, const std::string& fname, FileType type, OpenMode mode)
+Status C1541Fs::open_file(uint8_t ch, Channel& channel, std::string_view fname, FileType type, OpenMode mode)
 {
     std::ios_base::openmode fmode{std::ios_base::binary};
 
@@ -214,7 +215,7 @@ Status C1541Fs::open_file(uint8_t ch, Channel& channel, const std::string& fname
              * The '*' wildcard w/o a previously accessed file
              * loads the first file in the disk.
              */
-            const std::string& pattern = attached_path() + c1541::pet_to_u8(fname) + ext;
+            const auto pattern = std::format("{}{}{}", attached_path(), c1541::pet_to_u8(fname), ext);
             fs::directory(attached_path(), pattern, fs::MATCH_CASE_SENSITIVE,
                 [&fullpath](std::string_view entry, uint64_t size) -> bool {
                     fullpath = entry;
@@ -240,7 +241,7 @@ Status C1541Fs::open_file(uint8_t ch, Channel& channel, const std::string& fname
             return Status::INVALID_FILENAME;
         }
 
-        fullpath = attached_path() + fname + ext;
+        fullpath = std::format("{}{}{}", attached_path(), fname, ext);
     }
 
     std::fstream fs{fullpath, fmode};
@@ -275,7 +276,7 @@ Status C1541Fs::open_file(uint8_t ch, Channel& channel, const std::string& fname
     return Status::OK;
 }
 
-Status C1541Fs::channel_open(uint8_t ch, const std::string& petfname, FileType type, OpenMode mode)
+Status C1541Fs::channel_open(uint8_t ch, std::string_view petfname, FileType type, OpenMode mode)
 {
     auto& channel = _channels[ch];
 
@@ -418,7 +419,7 @@ Status C1541Fs::channel_write(uint8_t ch, const buffer_t& buf)
     return Status::OK;
 }
 
-Status C1541Fs::command(DOSCommand cmd, const std::string& param)
+Status C1541Fs::command(DOSCommand cmd, std::string_view param)
 {
     switch (cmd) {
     case DOSCommand::COPY:
@@ -511,7 +512,7 @@ Status C1541Fs::command(DOSCommand cmd, const std::string& param)
     return Status::OK;
 }
 
-Status C1541Fs::copy(const std::string& param)
+Status C1541Fs::copy(std::string_view param)
 {
     /*
      * Copy or concatenate files:
@@ -521,8 +522,9 @@ Status C1541Fs::copy(const std::string& param)
     static const std::regex re_copy("^[^:]*:([^=]+)=(.+)$", std::regex::extended);
 
     std::smatch result{};
+    std::string par{param};
 
-    if (!std::regex_match(param, result, re_copy) || result.size() != 3) {
+    if (!std::regex_match(par, result, re_copy) || result.size() != 3) {
         return Status::COMMAND_INVALID_COMMAND;
     }
 
@@ -564,7 +566,7 @@ Status C1541Fs::copy(const std::string& param)
     return Status::OK;
 }
 
-Status C1541Fs::rename(const std::string& param)
+Status C1541Fs::rename(std::string_view param)
 {
     /*
      * Rename:
@@ -575,8 +577,9 @@ Status C1541Fs::rename(const std::string& param)
     static const std::regex re_rename("^[^:]*:([^=]+)=(.+)$", std::regex::extended);
 
     std::smatch result{};
+    std::string par{param};
 
-    if (!std::regex_match(param, result, re_rename) && result.size() != 3) {
+    if (!std::regex_match(par, result, re_rename) && result.size() != 3) {
         return Status::COMMAND_INVALID_COMMAND;
     }
 
@@ -611,7 +614,7 @@ Status C1541Fs::rename(const std::string& param)
     return Status::OK;
 }
 
-Status C1541Fs::scratch(const std::string& param)
+Status C1541Fs::scratch(std::string_view param)
 {
     /*
      * Scratch (remove) files:
@@ -622,8 +625,9 @@ Status C1541Fs::scratch(const std::string& param)
     static const std::regex re_scratch("^[^:]*:(.+)$", std::regex::extended);
 
     std::smatch result{};
+    std::string par{param};
 
-    if (std::regex_match(param, result, re_scratch) && result.size() == 2) {
+    if (std::regex_match(par, result, re_scratch) && result.size() == 2) {
         auto remove = [this](std::string_view entry, uint64_t size) -> bool {
             if (!fs::unlink(entry)) {
                 log.error("{}: Can't scratch: \"{}\": {}\n", name(15), entry, Error::to_string());
@@ -633,7 +637,7 @@ Status C1541Fs::scratch(const std::string& param)
             return true;
         };
 
-        const auto& fname = attached_path() + c1541::pet_to_u8(result.str(1));
+        auto fname = std::format("{}{}", attached_path(), c1541::pet_to_u8(result.str(1)));
         bool success{};
 
         if (!fname.empty() && fs::exists(fname)) {

@@ -180,9 +180,9 @@ public:
      * Create a CRT instance.
      * @param fname Name of the cartridge file to open.
      * @exceptions InvalidCartridge
-     * @see open(const std::string&)
+     * @see open(std::string_view)
      */
-    Crt(const std::string& fname) {
+    Crt(std::string_view fname) {
         open(fname);
     }
 
@@ -195,7 +195,7 @@ public:
      * @param fname Name of the CRT cartridge file to open.
      * @exception InvalidCartridge
      */
-    void open(const std::string& fname);
+    void open(std::string_view fname);
 
     /**
      * Get the hardware type of this CRT file.
@@ -254,7 +254,7 @@ public:
      * @param fname File name.
      * @return true if the specified file is a CRT file; false otherwise.
      */
-    static bool is_crt(const std::string& fname);
+    static bool is_crt(std::string_view fname);
 
     /**
      * Detect whether a CRT header is valid.

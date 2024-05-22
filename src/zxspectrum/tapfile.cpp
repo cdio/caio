@@ -25,7 +25,7 @@ namespace caio {
 namespace sinclair {
 namespace zxspectrum {
 
-TAPFile::TAPFile(const std::string& path)
+TAPFile::TAPFile(std::string_view path)
 {
     load(path);
 }
@@ -43,14 +43,14 @@ void TAPFile::reset()
     _bufpos = 0;
 }
 
-void TAPFile::load(const std::string& path)
+void TAPFile::load(std::string_view path)
 {
     reset();
 
     if (!path.empty()) {
         _path = fs::fix_home(path);
         if (!fs::exists(_path)) {
-            throw IOError{_path + ": " + Error::to_string(ENOENT)};
+            throw IOError{"{}: {}", _path, Error::to_string(ENOENT)};
         }
 
         auto isdir = fs::is_directory(_path);
@@ -113,7 +113,7 @@ bool TAPFile::more_data()
     return true;
 }
 
-const TAPFile::Block TAPFile::next_block()
+TAPFile::Block TAPFile::next_block()
 {
     if (!more_data()) {
         log.debug("TAPFile: No more blocks\n");
@@ -139,13 +139,13 @@ const TAPFile::Block TAPFile::next_block()
     return {data, block_size};
 }
 
-void TAPFile::save(const std::string& fname, const Block& header, const Block& data)
+void TAPFile::save(std::string_view fname, Block header, Block data)
 {
     const auto fullpath = fs::fix_home(fname);
 
     std::ofstream os{fullpath, std::ios_base::out | std::ios_base::app};
     if (!os) {
-        throw IOError{"Can't open TAP file: " + fullpath + ": " + Error::to_string()};
+        throw IOError{"Can't open TAP file: {}: {}", fullpath, Error::to_string()};
     }
 
     uint8_t size_lo = header.size() & 255;
@@ -154,7 +154,7 @@ void TAPFile::save(const std::string& fname, const Block& header, const Block& d
     if (!os.write(reinterpret_cast<const char*>(&size_lo), 1) ||
         !os.write(reinterpret_cast<const char*>(&size_hi), 1) ||
         !os.write(reinterpret_cast<const char*>(header.data()), header.size())) {
-        throw IOError{"Can't save TAP header block: " + fullpath + ": " + Error::to_string()};
+        throw IOError{"Can't save TAP header block: {}: {}", fullpath, Error::to_string()};
     }
 
     size_lo = data.size() & 255;
@@ -163,7 +163,7 @@ void TAPFile::save(const std::string& fname, const Block& header, const Block& d
     if (!os.write(reinterpret_cast<const char*>(&size_lo), 1) ||
         !os.write(reinterpret_cast<const char*>(&size_hi), 1) ||
         !os.write(reinterpret_cast<const char*>(data.data()), data.size())) {
-        throw IOError{"Can't save TAP data block: " + fullpath + ": " + Error::to_string()};
+        throw IOError{"Can't save TAP data block: {}: {}", fullpath, Error::to_string()};
     }
 }
 

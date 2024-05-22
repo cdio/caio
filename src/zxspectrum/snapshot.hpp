@@ -19,7 +19,7 @@
 #pragma once
 
 #include <span>
-#include <string>
+#include <string_view>
 #include <tuple>
 #include <vector>
 
@@ -84,7 +84,7 @@ public:
     }
 
 protected:
-    void throw_ioerror(const std::string& caller, const std::string& reason = {}) const;
+    void throw_ioerror(std::string_view caller, std::string_view reason = {}) const;
 
     std::string     _fname{};
     buffer_t        _data{};

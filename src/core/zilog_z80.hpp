@@ -293,7 +293,6 @@ public:
         uint16_t memptr;        /* Undocumented pseudo register */
 
         std::string to_string() const;
-
         static std::string to_string(Flags fl);
     };
 
@@ -302,7 +301,7 @@ public:
      * @param type  CPU type;
      * @param label CPU label.
      */
-    Z80(const std::string& type = TYPE, const std::string& label = LABEL);
+    Z80(std::string_view type = TYPE, std::string_view label = LABEL);
 
     /**
      * Initialise this CPU.
@@ -311,7 +310,7 @@ public:
      * @param label CPU label.
      * @see ASpace
      */
-    Z80(const sptr_t<ASpace>& mmap, const std::string& type = TYPE, const std::string& label = LABEL);
+    Z80(const sptr_t<ASpace>& mmap, std::string_view type = TYPE, std::string_view label = LABEL);
 
     virtual ~Z80();
 
@@ -333,9 +332,9 @@ public:
     /**
      * Set the loglevel for single-step execution.
      * @param lvs Loglevel string to set.
-     * @see Logger::loglevel(const std::string&)
+     * @see Logger::loglevel(std::string_view)
      */
-    void loglevel(const std::string& lvs);
+    void loglevel(std::string_view lvs);
 
     /**
      * Get the log level for the single-step operation.

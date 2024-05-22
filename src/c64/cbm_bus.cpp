@@ -100,15 +100,12 @@ std::string Bus::to_string() const
 }
 
 
-Controller::Controller(uint8_t unit, const sptr_t<Bus>& bus, const std::string& label)
+Controller::Controller(uint8_t unit, const sptr_t<Bus>& bus, std::string_view label)
     : Name{TYPE, label},
       _unit{unit},
       _bus{bus}
 {
-    if (!_bus) {
-        throw InvalidArgument{*this, "Empty bus parameter"};
-    }
-
+    CAIO_ASSERT(_bus.get() != nullptr);
     _bus->add(this);
     _bus->propagate();
 }
@@ -372,11 +369,11 @@ size_t Device::tick(const Clock& clock)
 
     /*
      * Do not starve the hosting cpu unnecessarily,
-     * sleep for 900us when this cbm bus device is in idle mode.
+     * sleep for 800us when this cbm bus device is in idle mode.
      */
-    uint64_t T = (_mode == Mode::IDLE ? 900 : 10);
+    uint64_t T = (_mode == Mode::IDLE ? 800 : 10);
     _time += T;
-    return clock.cycles(T / 1000000.0f);
+    return clock.cycles(T / 1'000'000.0);
 }
 
 bool Device::tick_rx()

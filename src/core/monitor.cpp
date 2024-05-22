@@ -39,7 +39,7 @@ const std::pair<std::string, Expr::ex_t> Expr::operators[] = {
     { "|",  [](MonitoredCPU* cpu, Expr::fn_t& a, Expr::fn_t& b) { return a(*cpu) | b(*cpu);  }}
 };
 
-Expr::fn_t Expr::compile_argument(MonitoredCPU& cpu, const std::string& line)
+Expr::fn_t Expr::compile_argument(MonitoredCPU& cpu, std::string_view line)
 {
     /*
      * <line> = ["*"]<register_name> | ["*"]["#"]["$"]<number>
@@ -47,9 +47,9 @@ Expr::fn_t Expr::compile_argument(MonitoredCPU& cpu, const std::string& line)
      * <register_name> is the name of a cpu register.
      */
     auto pos = line.find_first_not_of(" \n\r\v\t");
-    if (pos != std::string::npos) {
+    if (pos != std::string_view::npos) {
         auto last = line.find_last_not_of(" \n\r\v\t");
-        if (last == std::string::npos) {
+        if (last == std::string_view::npos) {
             last = line.size();
         }
 
@@ -122,7 +122,7 @@ Expr::fn_t Expr::compile_argument(MonitoredCPU& cpu, const std::string& line)
     throw InvalidArgument{"Invalid argument expression: \"{}\"", line};
 }
 
-std::function<int()> Expr::compile(MonitoredCPU& cpu, const std::string& line)
+std::function<int()> Expr::compile(MonitoredCPU& cpu, std::string_view line)
 {
     /*
      * <expr> = <val1> <op> <val2>
@@ -130,7 +130,7 @@ std::function<int()> Expr::compile(MonitoredCPU& cpu, const std::string& line)
     for (const auto& op : operators) {
         const auto& name = op.first;
         auto pos = line.find(name);
-        if (pos != std::string::npos) {
+        if (pos != std::string_view::npos) {
             const auto arg1 = line.substr(0, pos);
             const auto arg2 = line.substr(pos + name.size());
             const auto carg1 = compile_argument(cpu, arg1);
@@ -200,7 +200,7 @@ bool Monitor::run()
         });
 
         if (it == end) {
-            _rd.write("Invalid command: " + args[0] + "\n");
+            _rd.write("Invalid command: {}\n", args[0]);
             continue;
         }
 
@@ -229,7 +229,7 @@ bool Monitor::is_breakpoint(addr_t addr) const
             /*
              * Unconditional breakpoint.
              */
-            _rd.write("Breakpoint at $" + caio::to_string(addr) + "\n");
+            _rd.write("Breakpoint at ${}\n", caio::to_string(addr));
             return true;
         }
 
@@ -237,7 +237,7 @@ bool Monitor::is_breakpoint(addr_t addr) const
             /*
              * Conditional breakpoint.
              */
-            _rd.write("Conditional breakpoint at $" + caio::to_string(addr) + " " + cond.second + "\n");
+            _rd.write("Conditional breakpoint at ${} {}\n", caio::to_string(addr), cond.second);
             return true;
         }
     }
@@ -262,18 +262,18 @@ std::string Monitor::prompt()
     return os.str();
 }
 
-inline addr_t Monitor::to_addr(const std::string& str, addr_t defval)
+inline addr_t Monitor::to_addr(std::string_view str, addr_t defval)
 {
     return ((str == ".") ? defval : static_cast<addr_t>(to_count(str)));
 }
 
-size_t Monitor::to_count(const std::string& str)
+size_t Monitor::to_count(std::string_view str)
 {
     try {
         return caio::to_number<size_t>(str);
 
     } catch (const InvalidNumber& err) {
-        _rd.write("Invalid value: " + str + "\n");
+        _rd.write("Invalid value: {}\n", str);
         throw err;
     }
 }
@@ -295,12 +295,12 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
         }
     }
 
-    mon._rd.write(std::string{"Entering edit mode. To finish write '.' or an empty line\n"});
+    mon._rd.write("Entering edit mode. To finish write '.' or an empty line\n");
 
     auto [ifd, ofd] = mon._rd.fds();
     Readline editor{ifd, ofd};
     while (true) {
-        editor.write("$"s + caio::to_string(addr) + ": "s);
+        editor.write("${}: ", caio::to_string(addr));
 
         std::string line = editor.getline();
         line = caio::trim(line);
@@ -326,7 +326,7 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
                 /*
                  * Show the error and invalidate the whole line.
                  */
-                editor.write("Invalid value: " + str + "\n");
+                editor.write("Invalid value: {}\n", str);
                 program.clear();
                 break;
             }
@@ -343,9 +343,7 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
             /*
              * Error, exit from edit mode.
              */
-            std::ostringstream os{};
-            os << "Unexpected error: " << err.what() << "\nExiting edit mode.\n";
-            editor.write(os.str());
+            editor.write("Unexpected error: {}\nExiting edit mode.\n", err.what());
             break;
         }
     }
@@ -424,9 +422,7 @@ bool Monitor::registers(Monitor& mon, const Command::args_t& args)
     /*
      * registers, r
      */
-    std::ostringstream os{};
-    os << mon._cpu.regs() << "\n";
-    mon._rd.write(os.str());
+    mon._rd.write("{}\n", mon._cpu.regs());
     return false;
 }
 
@@ -489,7 +485,7 @@ bool Monitor::bp_add(Monitor& mon, const Command::args_t& args)
             auto expr = Expr::compile(mon._cpu, line);
             cond = {expr, line};
         } catch (const std::exception& err) {
-            mon._rd.write(std::string{err.what()} + "\n");
+            mon._rd.write("{}\n", err.what());
             return false;
         }
     }
@@ -579,7 +575,7 @@ bool Monitor::go(Monitor& mon, const Command::args_t& args)
         return true;
 
     } catch (const std::exception&) {
-        mon._rd.write(std::string{"Invalid address: "} + args[1] + "\n");
+        mon._rd.write("Invalid address: {}\n", args[1]);
     }
 
     return false;
@@ -602,7 +598,7 @@ bool Monitor::step(Monitor& mon, const Command::args_t& args)
         return true;
 
     } catch (const std::exception&) {
-        mon._rd.write("Invalid address: "s + args[1] + "\n");
+        mon._rd.write("Invalid address: {}\n", args[1]);
     }
 
     return false;
@@ -622,14 +618,11 @@ bool Monitor::load(Monitor& mon, const Command::args_t& args)
             }
 
             auto [start, size] = mon._cpu.load(args[1], addr);
-
-            std::ostringstream os{};
-            os << "load: " << args[1] << " loaded at $" << caio::to_string(addr)
-               << ", size " << size << " ($" << caio::to_string(size) << ")\n";
-            mon._rd.write(os.str());
+            mon._rd.write("load: {} loaded at ${}, size {} (${})\n",
+                args[1], caio::to_string(addr), size, caio::to_string(size));
         }
     } catch (const std::exception& e) {
-        mon._rd.write(std::string{e.what()} + "\n");
+        mon._rd.write("{}\n", e.what());
     }
 
     return false;
@@ -645,7 +638,7 @@ bool Monitor::save(Monitor& mon, const Command::args_t& args)
             throw InvalidArgument{"Invalid number of arguments"};
         }
 
-        const std::string& fname = args[1];
+        const auto& fname = args[1];
         addr_t start = caio::to_number<addr_t>(args[2]);
         addr_t end = caio::to_number<addr_t>(args[3]);
 
@@ -656,7 +649,7 @@ bool Monitor::save(Monitor& mon, const Command::args_t& args)
         mon._cpu.save(fname, start, end);
 
     } catch (const std::exception& e) {
-        mon._rd.write(std::string{e.what()} + "\n");
+        mon._rd.write("{}\n", e.what());
     }
 
     return false;
@@ -671,13 +664,13 @@ bool Monitor::loglevel(Monitor& mon, const Command::args_t& args)
     try {
         if (args.size() != 2) {
             unsigned lv = mon._cpu.loglevel({});
-            mon._rd.write(std::to_string(lv) + "\n");
+            mon._rd.write("{}\n", std::to_string(lv));
         } else {
             mon._cpu.loglevel(args[1]);
         }
 
     } catch (const std::exception& e) {
-        mon._rd.write(std::string{e.what()} + "\n");
+        mon._rd.write("{}\n", e.what());
     }
 
     return false;
@@ -698,10 +691,8 @@ bool Monitor::quit(Monitor& mon, const Command::args_t& args)
      * quit, q
      */
     if (args.size() > 1) {
-        std::ostringstream os{};
         int eval = std::atoi(args[1].c_str());
-        os << "Emulator terminated with exit code: " << eval << "\n";
-        mon._rd.write(os.str());
+        mon._rd.write("Emulator terminated with exit code: {}\n", eval);
         std::exit(eval);
     }
 

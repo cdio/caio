@@ -20,6 +20,7 @@
 
 #include <functional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "clock.hpp"
@@ -160,7 +161,7 @@ public:
      * @exception IOError if the specified cassette directory does not exist or it is not a directory.
      * @see ZX80Cassette(const sptr_t<Clock>&)
      */
-    ZX80CassetteO(const sptr_t<Clock>& clk, const std::string& cassdir);
+    ZX80CassetteO(const sptr_t<Clock>& clk, std::string_view cassdir);
 
     virtual ~ZX80CassetteO();
 
@@ -179,7 +180,7 @@ protected:
      * this emulator uses an arbitrarily chosen name: CASSETTE_FNAME.
      * @return The full pathname.
      * @see CASSETTE_FNAME
-     * @see ZX80CassetteO(const sptr_t<Clock>&, const std::string&)
+     * @see ZX80CassetteO(const sptr_t<Clock>&, std::string_view)
      */
     std::string fname() const;
 
@@ -232,9 +233,9 @@ public:
      * @param clk     System clock;
      * @param cassdir Cassette directory.
      * @exception IOError if the specified cassette directory does not exist or it is not a directory.
-     * @see ZX80CassetteO(const sptr_t<Clock>&, const std::string&)
+     * @see ZX80CassetteO(const sptr_t<Clock>&, std::string_view)
      */
-    ZX80CassetteP(const sptr_t<Clock>& clk, const std::string& cassdir);
+    ZX80CassetteP(const sptr_t<Clock>& clk, std::string_view cassdir);
 
     virtual ~ZX80CassetteP();
 

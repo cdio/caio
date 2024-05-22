@@ -28,7 +28,7 @@ namespace caio {
 namespace sinclair {
 namespace zxspectrum {
 
-SnapSNA::SnapSNA(const std::string& fname)
+SnapSNA::SnapSNA(std::string_view fname)
     : Snapshot{}
 {
     load(fname);
@@ -38,14 +38,14 @@ SnapSNA::~SnapSNA()
 {
 }
 
-bool SnapSNA::seems_like(const std::string& fname)
+bool SnapSNA::seems_like(std::string_view fname)
 {
     auto fullpath = fs::fix_home(fname);
     auto lowcase = caio::tolow(fname);
     return (fs::file_size(fullpath) == FILE_SIZE && lowcase.ends_with(FILE_EXTENSION));
 }
 
-void SnapSNA::load(const std::string& fname)
+void SnapSNA::load(std::string_view fname)
 {
     _fname = fs::fix_home(fname);
 

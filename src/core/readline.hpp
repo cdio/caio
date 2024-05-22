@@ -16,9 +16,13 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
+#pragma once
+
 #include <array>
+#include <format>
 #include <span>
 #include <string>
+#include <string_view>
 
 #include "types.hpp"
 
@@ -38,7 +42,7 @@ public:
      * @see load()
      * @exception IOError if an error occurs while trying to load the specified file.
      */
-    History(const std::string& fname = {})
+    History(std::string_view fname = {})
         : _histfname{fname} {
         load();
     }
@@ -135,7 +139,7 @@ public:
      * so they can be closed after this method returns.
      */
     //TODO: replace with iostream and native_handle() (C++26)
-    Readline(int ifd = -1, int ofd = -1, const std::string& histfname = {});
+    Readline(int ifd = -1, int ofd = -1, std::string_view histfname = {});
 
     virtual ~Readline() {
         close();
@@ -163,21 +167,45 @@ public:
      * @param ch Character to send.
      * @exception IOError
      */
-    void write(char ch) const;
+    void write(char ch) const {
+        write(std::span{&ch, 1});
+    }
 
     /**
      * Send a message to the user.
      * @param msg Message to send.
      * @exception IOError
      */
-    void write(const std::string& str) const;
+    void write(const std::string& msg) const {
+        write(std::span{msg.c_str(), msg.size()});
+    }
+
+    /**
+     * Send a message to the user.
+     * @param msg Message to send.
+     * @exception IOError
+     */
+    void write(const char* msg) const {
+        write(std::string{msg});
+    }
+
+    /**
+     * Send a message to the user.
+     * @param fmt  Format string;
+     * @param args Arguments.
+     * @exception IOError
+     */
+    template<typename... Args>
+    void write(std::format_string<Args...> fmt, Args&&... args) const {
+        write(std::vformat(fmt.get(), std::make_format_args(args...)));
+    }
 
     /**
      * Send a character buffer to the user.
      * @param data Buffer to send.
      * @exception IOError
      */
-    void write(const std::span<const char>& data) const;
+    void write(std::span<const char> data) const;
 
     /**
      * Get input and output file descriptors.
@@ -187,6 +215,14 @@ public:
         return {_ifd, _ofd};
     }
 
+    /**
+     * Read a character from the user.
+     * This method blocks until the user enters a character
+     * and it does not affect the history.
+     * @return The user input.
+     */
+    char getc();
+
 private:
     /**
      * Properly configure the input/output file descriptors.
@@ -195,16 +231,9 @@ private:
 
     /**
      * Close the (duplicated) input/output file descriptors.
-     * @see Readline(int ifd, int, const std::string&)
+     * @see Readline(int ifd, int, std::string_view)
      */
     void close();
-
-    /**
-     * Read a character from the user.
-     * This method blocks until the user enters a character.
-     * @return The user input.
-     */
-    char getc();
 
     /**
      * Process ANSI escape sequences.

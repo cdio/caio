@@ -35,7 +35,7 @@ namespace caio {
 namespace commodore {
 namespace c64 {
 
-Cartridge::Cartridge(const std::string& type, const sptr_t<Crt>& crt)
+Cartridge::Cartridge(std::string_view type, const sptr_t<Crt>& crt)
     : Device{type, (crt ? crt->name() : "")},
       _crt{crt}
 {
@@ -103,7 +103,7 @@ void Cartridge::mode(Cartridge::GameExromMode mode)
     }
 }
 
-void Cartridge::throw_invalid_cartridge(const std::string& reason, ssize_t entry)
+void Cartridge::throw_invalid_cartridge(std::string_view reason, ssize_t entry)
 {
     if (entry >= 0) {
         throw InvalidCartridge{"{}: {}: Chip entry {}: {}. {}", type(), name(), entry, reason, _crt->to_string()};
@@ -112,7 +112,7 @@ void Cartridge::throw_invalid_cartridge(const std::string& reason, ssize_t entry
     }
 }
 
-sptr_t<Cartridge> Cartridge::create(const std::string& fname)
+sptr_t<Cartridge> Cartridge::create(std::string_view fname)
 {
     auto crt = std::make_shared<Crt>(fname);
 

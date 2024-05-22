@@ -55,7 +55,7 @@ public:
      * @param label CPU label.
      * @see ASpace
      */
-    Mos6510(const sptr_t<ASpace>& mmap, const std::string& type = TYPE, const std::string& label = LABEL)
+    Mos6510(const sptr_t<ASpace>& mmap, std::string_view type = TYPE, std::string_view label = LABEL)
         : Mos6502{mmap, type, label} {
     }
 

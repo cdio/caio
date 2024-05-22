@@ -168,7 +168,7 @@ std::string C1541::to_string() const
     return std::format("{}, path \"{}\"", Name::to_string(), attached_path());
 }
 
-void C1541::open(uint8_t ch, const std::string& param)
+void C1541::open(uint8_t ch, std::string_view param)
 {
     if (!check_attached()) {
         return;
@@ -213,8 +213,9 @@ void C1541::open(uint8_t ch, const std::string& param)
     }
 
     std::smatch result{};
+    std::string par{param};
 
-    if (std::regex_match(param, result, re_open) && result.size() != MATCHES) {
+    if (std::regex_match(par, result, re_open) && result.size() != MATCHES) {
         _statusch = Status::INVALID_FILENAME;
         log.debug("{}: Open: Match error: \"{}\"\n", name(ch), param);
         return;
@@ -353,7 +354,7 @@ void C1541::write(uint8_t ch, const buffer_t& buf)
     }
 }
 
-void C1541::command(const std::string& param)
+void C1541::command(std::string_view param)
 {
     /*
      * OPEN#15,8,15, "<CMD>"
@@ -367,7 +368,7 @@ void C1541::command(const std::string& param)
 
         } else {
             auto it = std::find_if(commands.begin(), commands.end(), [&param](const DiskCommand& dc) -> bool {
-                return (param.find(dc.name) == 0 || param.find(dc.alias) == 0);
+                return (param.find(dc.name) == 0 || param.find(dc.alias) == -1);
             });
 
             st = (it == commands.end() ? Status::INVALID_COMMAND : command(it->code, param));

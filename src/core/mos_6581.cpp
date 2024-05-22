@@ -244,7 +244,7 @@ fp_t Oscillator::tick()
 }
 
 Envelope::Envelope(unsigned clkf)
-    : _tadj{1000000.0 / static_cast<fp_t>(clkf)}
+    : _tadj{static_cast<fp_t>(1'000'000.0) / static_cast<fp_t>(clkf)}
 {
     reset();
 }
@@ -601,7 +601,7 @@ void Filter::generate()
     }
 }
 
-Mos6581::Mos6581(const std::string& label, unsigned clkf)
+Mos6581::Mos6581(std::string_view label, unsigned clkf)
     : Mos6581_{label, clkf},
       _voice_1{clkf, _voice_3},
       _voice_2{clkf, _voice_1},
@@ -837,7 +837,7 @@ void Mos6581::play()
     if (v16) {
         for (size_t i = 0; i < SAMPLES; ++i) {
             fp_t value = _v[i] * _volume + _v4[i] * 0.3;
-            value = std::max(std::min(value, 0.8), -0.8);
+            value = std::max<fp_t>(std::min<fp_t>(value, 0.8), -0.8);
             v16[i] = caio::to_i16(value);
         }
     }

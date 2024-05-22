@@ -51,7 +51,7 @@ std::string fix_home(std::string_view path)
     return std::string{path};
 }
 
-std::string search(std::string_view fname, const std::initializer_list<std::string>& spath, bool cwd)
+std::string search(std::string_view fname, const std::initializer_list<std::string_view>& spath, bool cwd)
 {
     if (fname.empty()) {
         return {};
@@ -84,7 +84,7 @@ std::string search(std::string_view fname, const std::initializer_list<std::stri
     }
 
     for (const auto& path : spath) {
-        std::string fullpath = fix_home(path) + "/" + std::string{name};
+        std::string fullpath = std::format("{}/{}", fix_home(path), name);
         log.debug("Trying {}...", fullpath);
         if (exists(fullpath)) {
             log.debug("Found\n");
@@ -110,12 +110,14 @@ std::string_view dirname(std::string_view fullpath)
 
 void concat(std::string_view dst, std::string_view src)
 {
-    std::ifstream is{src, std::ios_base::in | std::ios_base::binary};
+    //FIXME libstdc++ not there yet   std::ifstream is{src, std::ios_base::in | std::ios_base::binary};
+    std::ifstream is{std::string{src}, std::ios_base::in | std::ios_base::binary};
     if (!is) {
         throw IOError{"Can't open input file: {}: {}", src, Error::to_string(errno)};
     }
 
-    std::ofstream os{dst, std::ios_base::out | std::ios_base::app | std::ios_base::binary};
+    //FIXME libstdc++ not there yet  std::ofstream os{dst, std::ios_base::out | std::ios_base::app | std::ios_base::binary};
+    std::ofstream os{std::string{dst}, std::ios_base::out | std::ios_base::app | std::ios_base::binary};
     if (!os) {
         throw IOError{"Can't open output file: {}: {}", dst, Error::to_string(errno)};
     }
@@ -165,7 +167,7 @@ dir_t directory(std::string_view path, std::string_view pattern, bool icase, siz
     dir_t entries{};
     bool limited = (limit != 0);
 
-    directory(path, pattern, icase, [&entries, &limit, limited](const std::string_view entry, uint64_t size) -> bool {
+    directory(path, pattern, icase, [&entries, &limit, limited](std::string_view entry, uint64_t size) -> bool {
         if (limited) {
             if (limit == 0) {
                 return false;
@@ -185,7 +187,8 @@ buffer_t load(std::string_view fname, size_t maxsiz)
         maxsiz = LOAD_MAXSIZ;
     }
 
-    std::ifstream is{fname, std::ios::in};
+    //FIXME libstdc++ not there yet   std::ifstream is{fname, std::ios::in};
+    std::ifstream is{std::string{fname}, std::ios::in};
     if (!is) {
         throw IOError{"Can't load: {}: {}", fname, Error::to_string()};
     }
@@ -222,7 +225,8 @@ buffer_t load(std::istream& is, size_t maxsiz)
 
 void save(std::string_view fname, std::span<const uint8_t> buf, std::ios_base::openmode mode)
 {
-    std::ofstream os{fname, mode};
+    //FIXME libstdc++ not there yet   std::ofstream os{fname, mode};
+    std::ofstream os{std::string{fname}, mode};
     if (!os) {
         throw IOError{"Can't save: {}: {}", fname, Error::to_string()};
     }

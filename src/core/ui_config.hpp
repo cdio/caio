@@ -19,6 +19,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 namespace caio {
 namespace ui {
@@ -41,7 +42,7 @@ enum class SLEffect {
  * @exception InvalidArgument if the string to convert is invalid.
  * @see SLEffect
  */
-SLEffect to_sleffect(const std::string& str);
+SLEffect to_sleffect(std::string_view str);
 
 /**
  * Video configuration.

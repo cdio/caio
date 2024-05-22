@@ -33,7 +33,7 @@ RgbaTable ZX80Video::builtin_palette{
     0xCFCFCFFF
 };
 
-ZX80Video::ZX80Video(const sptr_t<Clock>& clk, bool rvideo, const std::string& label)
+ZX80Video::ZX80Video(const sptr_t<Clock>& clk, bool rvideo, std::string_view label)
     : Name{TYPE, label},
       _clk{clk},
       _rvideo{rvideo},
@@ -43,7 +43,7 @@ ZX80Video::ZX80Video(const sptr_t<Clock>& clk, bool rvideo, const std::string& l
     CAIO_ASSERT(clk.get() != nullptr);
 }
 
-void ZX80Video::palette(const std::string& fname)
+void ZX80Video::palette(std::string_view fname)
 {
     if (!fname.empty()) {
         _palette.load(fname);

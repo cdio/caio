@@ -160,7 +160,7 @@ std::string to_string(Key key)
     return (it == name_to_key.end() ? "" : it->first);
 }
 
-void Keyboard::load(const std::string& fname)
+void Keyboard::load(std::string_view fname)
 {
     static const std::regex re_comment{"^[ \t]*#.*$", std::regex::extended};
     static const std::regex re_line{"^[ \t]*([^ \t]+)[ \t]+(SHIFT)?[ \t]*(ALTGR)?[ \t]*([^ \t]+)[ \t]*(SHIFT)?[ \t]*$",
@@ -168,7 +168,8 @@ void Keyboard::load(const std::string& fname)
 
     clear_key_map();
 
-    std::ifstream is{fname, std::ios::binary | std::ios::in};
+    //FIXME stdc++ not there yet std::ifstream is{fname, std::ios::binary | std::ios::in};
+    std::ifstream is{std::string{fname}, std::ios::binary | std::ios::in};
     if (!is) {
         throw IOError{"Can't open: {}: {}", fname, Error::to_string()};
     }

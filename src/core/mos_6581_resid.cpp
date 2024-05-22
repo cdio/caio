@@ -31,7 +31,7 @@ public:
     using ::SID::SID;
 };
 
-Mos6581Resid::Mos6581Resid(const std::string& label, unsigned clkf)
+Mos6581Resid::Mos6581Resid(std::string_view label, unsigned clkf)
     : Mos6581_{label, clkf},
       _resid{std::make_shared<Resid>()}
 {
@@ -64,9 +64,9 @@ size_t Mos6581Resid::tick(const Clock& clk)
     return _samples_cycles;
 }
 
-const std::string Mos6581Resid::version()
+std::string Mos6581Resid::version()
 {
-    return std::string{"reSID-"} + resid_version_string;
+    return std::format("reSID-{}", resid_version_string);
 }
 
 }

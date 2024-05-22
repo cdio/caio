@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <format>
 #include <string>
 #include <string_view>
 
@@ -42,7 +43,7 @@ public:
      * Get the type of this instance.
      * @return The type of this instance.
      */
-    const std::string& type() const {
+    std::string type() const {
         return _type;
     }
 
@@ -58,7 +59,7 @@ public:
      * Get the label assigned to this instance.
      * @return The label of this instance.
      */
-    const std::string& label() const {
+    std::string label() const {
         return _label;
     }
 
@@ -79,7 +80,7 @@ public:
     }
 
     constexpr static std::string to_string(std::string_view type, std::string_view label) {
-        return std::string{type} + "(" + std::string{label} + ")";
+        return std::format("{}({})", type, label);
     }
 
 private:

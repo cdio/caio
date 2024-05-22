@@ -36,7 +36,7 @@ namespace caio {
 namespace sinclair {
 namespace zx80 {
 
-void ZX80::run(const std::string& pname)
+void ZX80::run(std::string_view pname)
 {
     autorun(pname);
 
@@ -55,7 +55,7 @@ void ZX80::run(const std::string& pname)
     start();
 }
 
-void ZX80::autorun(const std::string& pname)
+void ZX80::autorun(std::string_view pname)
 {
     if (!pname.empty()) {
         if (!_conf.prgfile.empty()) {
@@ -67,7 +67,7 @@ void ZX80::autorun(const std::string& pname)
 
 void ZX80::start()
 {
-    log.info("Starting caio v{} - {}\n{}\n", caio::version(), _conf.title, to_string());
+    log.info("Starting {} - {}\n{}\n", caio::full_version(), _conf.title, to_string());
 
     /*
      * The emulator runs on its own thread.
@@ -124,7 +124,7 @@ void ZX80::reset()
     }
 }
 
-std::string ZX80::rompath(const std::string& fname) const
+std::string ZX80::rompath(std::string_view fname) const
 {
     auto path = fs::search(fname, {_conf.romdir});
     if (path.empty()) {

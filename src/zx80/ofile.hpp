@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <string>
+#include <string_view>
 #include <vector>
 
 #include "fs.hpp"
@@ -73,14 +73,14 @@ public:
      * @param fname Name of the file to load.
      * @exception IOError
      */
-    void load(const std::string& fname);
+    void load(std::string_view fname);
 
     /**
      * Save this cassette image to file.
      * @param fname Name of the file to save.
      * @exception IOError
      */
-    void save(const std::string& fname);
+    void save(std::string_view fname);
 };
 
 /**

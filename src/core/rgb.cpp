@@ -69,7 +69,8 @@ Rgba operator+(Rgba color1, Rgba color2)
 
 void RgbaTable::load(std::string_view fname)
 {
-    std::ifstream is{fname, std::ios::binary | std::ios::in};
+    //FIXME libstdc++ not there yet  std::ifstream is{fname, std::ios::binary | std::ios::in};
+    std::ifstream is{std::string{fname}, std::ios::binary | std::ios::in};
     if (!is) {
         throw IOError{"Can't open: {}: {}", fname, Error::to_string()};
     }
@@ -103,7 +104,8 @@ void RgbaTable::load(std::string_view fname)
 
 void RgbaTable::save(std::string_view fname)
 {
-    std::ofstream os{fname, std::ios::binary | std::ios::out | std::ios::trunc};
+    //FIXME libstdc++ not there yet   std::ofstream os{fname, std::ios::binary | std::ios::out | std::ios::trunc};
+    std::ofstream os{std::string{fname}, std::ios::binary | std::ios::out | std::ios::trunc};
     if (!os) {
         throw IOError{"Can't create: {}: {}", fname, Error::to_string()};
     }

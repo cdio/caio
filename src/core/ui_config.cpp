@@ -26,13 +26,13 @@
 namespace caio {
 namespace ui {
 
-SLEffect to_sleffect(const std::string& str)
+SLEffect to_sleffect(std::string_view str)
 {
     if (str.empty()) {
         return SLEffect::None;
     }
 
-    if (str.size() == 1 && str.find_first_of("nhvHV") != std::string::npos) {
+    if (str.size() == 1 && str.find_first_of("nhvHV") != std::string_view::npos) {
         return static_cast<SLEffect>(+str[0]);
     }
 

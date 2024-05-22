@@ -42,9 +42,9 @@ public:
      * Load a TAP file or directory.
      * @param path TAP file name or directory.
      * @exception IOError
-     * @see load(const std::string&)
+     * @see load(std::string_view)
      */
-    TAPFile(const std::string& path = {});
+    TAPFile(std::string_view path = {});
 
     virtual ~TAPFile();
 
@@ -62,14 +62,14 @@ public:
      * @see FILE_SIZE_LIMIT
      * @see FILE_EXTENSION
      */
-    void load(const std::string& path);
+    void load(std::string_view path);
 
     /**
      * Retrieve the next block.
      * @return The next TAP block or nullptr if there are no more blocks.
      * @exception IOError
      */
-    const Block next_block();
+    Block next_block();
 
     /**
      * Create a simple TAP file consisting of a header block and a data block.
@@ -80,7 +80,7 @@ public:
      * @exception IOError
      * @see Block
      */
-    static void save(const std::string& fname, const Block& header, const Block& data);
+    static void save(std::string_view fname, Block header, Block data);
 
 private:
     void reset();

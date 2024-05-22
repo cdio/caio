@@ -312,40 +312,21 @@ std::string Z80::Registers::to_string(Z80::Flags fl)
 
 std::string Z80::Registers::to_string() const
 {
-    return std::format("  "
-        "A ={:02X} "
-        "B ={:02X} "
-        "C ={:02X} "
-        "D ={:02X} "
-        "E ={:02X} "
-        "H ={:02X} "
-        "L ={:02X} "
-        "F ={:02X} {}\n  "
-        "A'={:02X} "
-        "B'={:02X} "
-        "C'={:02X} "
-        "D'={:02X} "
-        "E'={:02X} "
-        "H'={:02X} "
-        "L'={:02X} "
-        "F'={:02X} {}\n  "
-        "A'={:02X} "
-        "I ={:02X} "
-        "R ={:02X} "
-        "SP={:04X} "
-        "PC={:04X} "
-        "MEMPTR={:04X}",
+    return std::format(
+        "  A ={:02X} B ={:02X} C ={:02X} D ={:02X} E ={:02X} H ={:02X} L ={:02X} F ={:02X} {}\n"
+        "  A'={:02X} B'={:02X} C'={:02X} D'={:02X} E'={:02X} H'={:02X} L'={:02X} F'={:02X} {}\n"
+        "  I ={:02X} R ={:02X} IX={:04X} IY={:04X} SP={:04X} PC={:04X} MEMPTR={:04X}",
         A, B, C, D, E, H, L, F, to_string(static_cast<Flags>(F)),
         aA, aB, aC, aD, aE, aH, aL, aF, to_string(static_cast<Flags>(aF)),
         I, R, IX, IY, SP, PC, memptr);
 }
 
-Z80::Z80(const std::string& type, const std::string& label)
+Z80::Z80(std::string_view type, std::string_view label)
     : Name{type, (label.empty() ? LABEL : label)}
 {
 }
 
-Z80::Z80(const sptr_t<ASpace>& mmap, const std::string& type, const std::string& label)
+Z80::Z80(const sptr_t<ASpace>& mmap, std::string_view type, std::string_view label)
     : Name{type, (label.empty() ? LABEL : label)}
 {
     init(mmap);
@@ -379,7 +360,7 @@ void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const m
         return _mmap;
     };
 
-    auto regvalue = [this](const std::string& rname) -> uint16_t {
+    auto regvalue = [this](std::string_view rname) -> uint16_t {
         static std::map<std::string, std::function<int(const Z80&)>> regvals{
             { "ra",    [](const Z80& cpu) { return cpu._regs.A;     }},
             { "rf",    [](const Z80& cpu) { return cpu._regs.F;     }},
@@ -424,17 +405,17 @@ void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const m
             { "rf'.n", [](const Z80& cpu) { return cpu.test_aN();   }},
             { "rf'.c", [](const Z80& cpu) { return cpu.test_aC();   }}
         };
-        auto it = regvals.find(rname);
+        auto it = regvals.find(std::string{rname});
         if (it != regvals.end()) {
             return it->second(*this);
         }
         throw InvalidArgument{};
     };
 
-    auto bpdoc = [](const std::string& cmd) -> std::string {
+    auto bpdoc = [](std::string_view cmd) -> std::string {
         return {
-            cmd + " help | h | ?\n" +
-            cmd + " <addr> [<cond>]\n\n"
+            std::string{cmd} + " help | h | ?\n" +
+            std::string{cmd} + " <addr> [<cond>]\n\n"
             "<cond> = <val> <op> <val>\n\n"
             "<val>  = [*] { [#][$]<u16> |\n"
             "         ra | rf | raf | rb | rc | rbc | rd | re | rde | rh | rl | rhl |\n"
@@ -469,7 +450,7 @@ void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const m
     _monitor->add_breakpoint(RESET_ADDR);
 }
 
-void Z80::loglevel(const std::string& ll)
+void Z80::loglevel(std::string_view ll)
 {
     if (!empty(ll)) {
         _log.loglevel(ll);
@@ -1109,7 +1090,7 @@ size_t Z80::tick(const Clock& clk)
 void Z80::disass(std::ostream& os, addr_t start, size_t count, bool show_pc)
 {
     for (addr_t addr = start; count; --count) {
-        const std::string& line = disass(addr, show_pc);
+        auto line = disass(addr, show_pc);
         os << line << "\n";
     }
 }

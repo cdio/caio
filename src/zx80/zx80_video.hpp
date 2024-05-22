@@ -100,7 +100,7 @@ public:
      * @param label Label assigned to this device.
      * @see render_line(const renderer_t&)
      */
-    ZX80Video(const sptr_t<Clock>& clk, bool rvideo, const std::string& label);
+    ZX80Video(const sptr_t<Clock>& clk, bool rvideo, std::string_view label);
 
     virtual ~ZX80Video() {
     }
@@ -124,9 +124,9 @@ public:
      * @param fname Palette file name.
      * @exception IOError
      * @see palette(const RgbaTable&)
-     * @see RgbaTable::load(const string&)
+     * @see RgbaTable::load(std::string_view)
      */
-    void palette(const std::string& fname);
+    void palette(std::string_view fname);
 
     /**
      * Set a colour palette.

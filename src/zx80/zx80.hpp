@@ -60,7 +60,7 @@ public:
      * @param pname If not empty, name of the program to launch (its format is auto-detected).
      * @see start()
      */
-    void run(const std::string& pname);
+    void run(std::string_view pname);
 
     /**
      * Return a human-readable string representation of this ZX80.
@@ -72,7 +72,7 @@ public:
      * Return the name of this platform.
      * @return The name of this platform.
      */
-    constexpr static const char* name() {
+    constexpr static std::string_view name() {
         return "Sinclair ZX80";
     }
 
@@ -83,7 +83,7 @@ private:
      * @param pname File to launch.
      * @exception IOError
      */
-    void autorun(const std::string& pname);
+    void autorun(std::string_view pname);
 
     /**
      * Start this ZX80.
@@ -136,7 +136,7 @@ private:
      * @return The full pathname.
      * @exception IOError if the ROM file is not found.
      */
-    std::string rompath(const std::string& fname) const;
+    std::string rompath(std::string_view fname) const;
 
     /**
      * Attach a .o (4K ROM) or a .p (8K ROM) program file.

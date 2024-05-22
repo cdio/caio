@@ -154,7 +154,7 @@ public:
      * @param fname Name of the configuration file to read or an empty string.
      * @exception ConfigError
      * @exception IOError
-     * @see load(const std::string&)
+     * @see load(std::string_view)
      */
     Confile(std::string_view fname = {});
 
@@ -169,7 +169,7 @@ public:
      * @exception ConfigError
      * @exception IOError
      */
-    void load(const std::string_view fname);
+    void load(std::string_view fname);
 
     /**
      * Return a configuration section.
@@ -177,14 +177,14 @@ public:
      * @param sname Name of the section (case insensitive).
      * @return The requested section.
      */
-    Section& operator[](const std::string_view sname);
+    Section& operator[](std::string_view sname);
 
     /**
      * Extract a section.
      * @param sname Name of the section to extract (case insensitive).
      * @return The extracted section or an empty one if it does not exist.
      */
-    Section extract(const std::string_view sname);
+    Section extract(std::string_view sname);
 
     /**
      * Find a section.
@@ -192,7 +192,7 @@ public:
      * @return An iterator to the section; or end() if the section does not exist.
      * @see end()
      */
-    std::map<std::string, Section>::const_iterator find(const std::string_view sname) const;
+    std::map<std::string, Section>::const_iterator find(std::string_view sname) const;
 
     /**
      * Return an interator following the last section of this configuration file.
@@ -217,7 +217,7 @@ enum class Arg {
  * Command line option.
  */
 struct Option {
-    using set_cb_t = std::function<bool(class Confile&, const Option&, const std::string&)>;
+    using set_cb_t = std::function<bool(class Confile&, const Option&, std::string_view)>;
 
     std::string name{};     /* Command line option without the "--" prefix              */
     std::string sname{};    /* Section name                                             */
@@ -228,21 +228,21 @@ struct Option {
     std::string optval{};   /* Value to set when an optional argument is not provided   */
 };
 
-bool set_value(Confile&, const Option&, const std::string&);
-bool set_bool(Confile&, const Option&, const std::string&);
-bool set_true(Confile&, const Option&, const std::string&);
+bool set_value(Confile&, const Option&, std::string_view);
+bool set_bool(Confile&, const Option&, std::string_view);
+bool set_true(Confile&, const Option&, std::string_view);
 
 /**
  * Detect a "yes" string.
  * @return true if the specified string is equal to "yes", "ye", or "y"; false otherwise.
  */
-bool is_true(const std::string&);
+bool is_true(std::string_view);
 
 /**
  * Detect a "no" string.
  * @return true if the specified string is equal to "no" or "n"; false otherwise.
  */
-bool is_false(const std::string&);
+bool is_false(std::string_view);
 
 /**
  * Command line parser.
@@ -255,7 +255,7 @@ public:
     virtual ~Cmdline() {
     }
 
-    const std::string progname() const {
+    std::string_view progname() const {
         return _progname;
     }
 
@@ -367,9 +367,9 @@ struct Config {
      * @param prefix Platform prefix (see resolve()).
      * @exception InvalidArgument
      * @exception IOError
-     * @see resolve(const std::string&, const std::string&, const std::string&, const std::string&)
+     * @see resolve(std::string_view, std::string_view, std::string_view, std::string_view)
      */
-    Config(Section& sec, const std::string& prefix);
+    Config(Section& sec, std::string_view prefix);
 
     virtual ~Config() {
     }
@@ -390,8 +390,7 @@ private:
      * @return The resolved fullpath if the file is found (name or path + "/" + prefix + name + ext).
      * @exception IOError if the file does not exist in the specified path.
      */
-    std::string resolve(const std::string& name, const std::string& path, const std::string& prefix,
-        const std::string& ext);
+    std::string resolve(std::string_view name, std::string_view path, std::string_view prefix, std::string_view ext);
 };
 
 }

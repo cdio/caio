@@ -35,7 +35,7 @@ namespace signal {
  */
 constexpr fp_t sinc(fp_t x)
 {
-    return ((x == 0.0f) ? 1.0f : std::sin(x) / x);
+    return ((x == 0.0) ? 1.0 : std::sin(x) / x);
 }
 
 /**
@@ -61,7 +61,7 @@ constexpr fp_t triangle(fp_t t, fp_t T)
 {
     const fp_t slope = 4.0f / T;
     const fp_t T50   = 0.5f * T;
-    return (t <= T50 ? slope * t - 1.0f : 1.0f - slope * (t - T50));
+    return (t <= T50 ? slope * t - 1.0 : 1.0 - slope * (t - T50));
 }
 
 /**
@@ -72,8 +72,8 @@ constexpr fp_t triangle(fp_t t, fp_t T)
  */
 constexpr fp_t sawtooth(fp_t t, fp_t T)
 {
-    const fp_t slope = 2.0f / T;
-    return (-1.0f + slope * t);
+    const fp_t slope = 2.0 / T;
+    return (-1.0 + slope * t);
 }
 
 /**
@@ -84,7 +84,7 @@ constexpr fp_t sawtooth(fp_t t, fp_t T)
  */
 constexpr fp_t pulse(fp_t t, fp_t dc)
 {
-    return (t <= dc ? 1.0f : -1.0f);
+    return (t <= dc ? 1.0 : -1.0);
 }
 
 /**
@@ -344,12 +344,8 @@ constexpr PCoeffs<3, 3> iir_hipass40(fp_t f0, fp_t Q, fp_t fs)
 constexpr PCoeffs<3, 3> iir_bapass20(fp_t fc, fp_t Q, fp_t fs)
 {
     fp_t df = fc / (2.0 * Q);
-    fp_t fh = std::max(fc - df, 0.0);
-    fp_t fl = std::min(fc + df, fs / 2.0);
-
-    if (fl < fh) {
-        std::swap(fh, fl);
-    }
+    fp_t fh = std::max<fp_t>(fc - df, 0.0);
+    fp_t fl = std::min<fp_t>(fc + df, fs / 2.0);
 
     const fp_t wh = Pi * fh / fs;
     const fp_t wl = Pi * fl / fs;

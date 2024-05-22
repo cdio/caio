@@ -18,6 +18,8 @@
  */
 #include "signal.hpp"
 
+#include <iterator>
+#include <numeric>
 #include <sstream>
 
 namespace caio {
@@ -25,10 +27,7 @@ namespace signal {
 
 fp_t mean(samples_fp samples)
 {
-    fp_t sum = 0.0;
-    for (auto sample : samples) {
-        sum += sample;
-    }
+    fp_t sum = std::accumulate(samples.begin(), samples.end(), 0.0);
     return (sum / samples.size());
 }
 

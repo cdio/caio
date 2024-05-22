@@ -92,7 +92,7 @@ public:
         _lv = lv;
     }
 
-    void loglevel(const std::string& lvs);
+    void loglevel(std::string_view lvs);
 
     Level loglevel() const {
         return _lv;
@@ -152,7 +152,7 @@ public:
      * @param level Log level string to convert.
      * @return The log level.
      */
-    static Level to_loglevel(const std::string& level);
+    static Level to_loglevel(std::string_view level);
 
     /**
      * Convert a string with several log level strings to a bitwise combination of levels.
@@ -160,7 +160,7 @@ public:
      * @return The bitwise combination of log levels.
      * @exception LoggerError If the specified string is malformed.
      */
-    static Level parse_loglevel(const std::string& levels);
+    static Level parse_loglevel(std::string_view levels);
 
 private:
     Level         _lv;

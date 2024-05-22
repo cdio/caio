@@ -21,6 +21,7 @@
 #include <climits>
 #include <cstdlib>
 #include <iomanip>
+#include <iterator>
 #include <regex>
 
 #include "utils.hpp"
@@ -38,25 +39,26 @@ std::map<std::string, Logger::Level> Logger::loglevels = {
 
 Logger log{};
 
-Logger::Level Logger::to_loglevel(const std::string& level)
+Logger::Level Logger::to_loglevel(std::string_view level)
 {
     if (level.empty()) {
         return Level::None;
     }
 
-    auto it = loglevels.find(level);
+    auto it = loglevels.find(std::string{level});
     return (it == loglevels.end() ? Level::Invalid : it->second);
 }
 
-Logger::Level Logger::parse_loglevel(const std::string& levels)
+Logger::Level Logger::parse_loglevel(std::string_view levels)
 {
     static const std::regex re_loglevel("([^\\|]+)", std::regex::extended);
     int loglevel = Level::None;
 
-    for (auto it = std::sregex_iterator(levels.begin(), levels.end(), re_loglevel);
+    const  std::string lvls{levels};
+    for (auto it = std::sregex_iterator(lvls.begin(), lvls.end(), re_loglevel);
         it != std::sregex_iterator(); ++it) {
 
-        const std::string& lstr = caio::trim(it->str());
+        auto lstr = caio::trim(it->str());
         Level l = Logger::to_loglevel(lstr);
         if (l == Level::Invalid) {
             /*
@@ -77,7 +79,7 @@ Logger::Logger()
     _os.open(DEFAULT_LOGFILE);
 }
 
-void Logger::loglevel(const std::string& lvs)
+void Logger::loglevel(std::string_view lvs)
 {
     _lv = Logger::parse_loglevel(lvs);
 }
@@ -85,7 +87,8 @@ void Logger::loglevel(const std::string& lvs)
 void Logger::logfile(std::string_view fname)
 {
     if (!fname.empty()) {
-        std::ofstream ofs{fname};
+        //FIXME libstdc++ not there yet   std::ofstream ofs{fname};
+        std::ofstream ofs{std::string{fname}};
         if (!ofs) {
             throw LoggerError{"Can't open logfile: {}", fname};
         }

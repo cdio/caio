@@ -73,7 +73,7 @@ public:
      * @param delay The speed delay (1.0f is normal speed).
      * @see delay(float)
      */
-    Clock(const std::string& label = {}, size_t freq = {}, float delay = 1.0f);
+    Clock(std::string_view label = {}, size_t freq = {}, float delay = 1.0f);
 
     /**
      * Initialise this clock.

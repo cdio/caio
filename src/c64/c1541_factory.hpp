@@ -20,7 +20,7 @@
 
 #include <cstdint>
 #include <memory>
-#include <string>
+#include <string_view>
 
 #include "cbm_bus.hpp"
 #include "c1541.hpp"
@@ -40,7 +40,7 @@ namespace c1541 {
  * @see C1541::C1541()
  * @see C1541::attach()
  */
-sptr_t<C1541> create(const std::string& path, uint8_t unit, const sptr_t<cbm_bus::Bus>& bus);
+sptr_t<C1541> create(std::string_view path, uint8_t unit, const sptr_t<cbm_bus::Bus>& bus);
 
 }
 }

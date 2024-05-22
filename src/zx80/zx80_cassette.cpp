@@ -260,7 +260,7 @@ bool ZX80Cassette::is_idle() const
         (_tx_state == State::Init || _tx_state == State::End));
 }
 
-ZX80CassetteO::ZX80CassetteO(const sptr_t<Clock>& clk, const std::string& cassdir)
+ZX80CassetteO::ZX80CassetteO(const sptr_t<Clock>& clk, std::string_view cassdir)
     : ZX80Cassette{clk},
       _cassdir{fs::fix_home(cassdir)}
 {
@@ -317,7 +317,7 @@ int ZX80CassetteO::receive(RxCmd cmd)
     return data;
 }
 
-ZX80CassetteP::ZX80CassetteP(const sptr_t<Clock>& clk, const std::string& cassdir)
+ZX80CassetteP::ZX80CassetteP(const sptr_t<Clock>& clk, std::string_view cassdir)
     : ZX80CassetteO{clk, cassdir}
 {
 }

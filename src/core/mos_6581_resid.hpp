@@ -30,7 +30,7 @@ namespace mos_6581 {
  */
 class Mos6581Resid : public Mos6581_ {
 public:
-    Mos6581Resid(const std::string& label, unsigned clkf);
+    Mos6581Resid(std::string_view label, unsigned clkf);
 
     virtual ~Mos6581Resid() {
     }
@@ -49,7 +49,7 @@ public:
      * Get a string with reSID library version.
      * @return A string with the reSID library version.
      */
-    static const std::string version();
+    static std::string version();
 
 private:
     /**

@@ -63,7 +63,7 @@ public:
     /**
      * @see C1541::attach()
      */
-    void attach(const std::string& path) override;
+    void attach(std::string_view path) override;
 
 private:
     /**
@@ -112,7 +112,7 @@ private:
     /**
      * @see C1541::channel_open()
      */
-    Status channel_open(uint8_t ch, const std::string& petfname, FileType type, OpenMode mode) override;
+    Status channel_open(uint8_t ch, std::string_view petfname, FileType type, OpenMode mode) override;
 
     /**
      * @see C1541::channel_close()
@@ -135,21 +135,21 @@ private:
     Status channel_write(uint8_t ch, const buffer_t& buf) override;
 
     /**
-     * @see C1541::command(DOSCommand, const std::string&)
+     * @see C1541::command(DOSCommand, std::string_view)
      */
-    Status command(DOSCommand cmd, const std::string& param) override;
+    Status command(DOSCommand cmd, std::string_view param) override;
 
     std::string to_basic(addr_t& addr, const std::filesystem::path& fspath, size_t fsize);
 
-    Status open_dir(uint8_t ch, Channel& channel, const std::string& fname, FileType type, OpenMode mode);
+    Status open_dir(uint8_t ch, Channel& channel, std::string_view fname, FileType type, OpenMode mode);
 
-    Status open_file(uint8_t ch, Channel& channel, const std::string& fname, FileType type, OpenMode mode);
+    Status open_file(uint8_t ch, Channel& channel, std::string_view fname, FileType type, OpenMode mode);
 
-    Status copy(const std::string& param);
+    Status copy(std::string_view param);
 
-    Status rename(const std::string& param);
+    Status rename(std::string_view param);
 
-    Status scratch(const std::string& param);
+    Status scratch(std::string_view param);
 
     Status initialize();
 

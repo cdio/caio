@@ -25,7 +25,7 @@ namespace caio {
 namespace sinclair {
 namespace zx80 {
 
-void OFile::load(const std::string& fname)
+void OFile::load(std::string_view fname)
 {
     *static_cast<std::vector<uint8_t>*>(this) = fs::load(fname);
     addr_t laddr = load_address();
@@ -46,7 +46,7 @@ void OFile::load(const std::string& fname)
     throw IOError{"Invalid cassette file: {}", fname};
 }
 
-void OFile::save(const std::string& fname)
+void OFile::save(std::string_view fname)
 {
     fs::save(fname, *this);
 }

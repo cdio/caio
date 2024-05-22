@@ -19,6 +19,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <memory>
 
 #include "aspace.hpp"
@@ -67,7 +68,7 @@ public:
      * @see c64::Crt
      * @see reset()
      */
-    static sptr_t<Cartridge> create(const std::string& fname);
+    static sptr_t<Cartridge> create(std::string_view fname);
 
     virtual ~Cartridge() {
     }
@@ -137,7 +138,7 @@ public:
     GameExromMode mode() const;
 
 protected:
-    Cartridge(const std::string& type, const sptr_t<Crt>& crt);
+    Cartridge(std::string_view type, const sptr_t<Crt>& crt);
 
     /**
      * Set a new GAME/EXROM mode and propagate it.
@@ -161,7 +162,7 @@ protected:
      */
     const Crt& crt() const;
 
-    virtual void throw_invalid_cartridge(const std::string& reason, ssize_t entry = -1);
+    virtual void throw_invalid_cartridge(std::string_view reason, ssize_t entry = -1);
 
 private:
     sptr_t<Crt>     _crt;

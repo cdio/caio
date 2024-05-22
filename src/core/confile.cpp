@@ -32,13 +32,13 @@ Confile::Confile(std::string_view fname)
     load(fname);
 }
 
-void Confile::load(const std::string_view fname)
+void Confile::load(std::string_view fname)
 {
     if (fname.empty()) {
         return;
     }
 
-    std::ifstream ifs{fname};
+    std::ifstream ifs{std::string{fname}};
     if (!ifs) {
         throw IOError{"Can't open configuration file: {}: {}", fname, Error::to_string()};
     }
@@ -66,7 +66,7 @@ void Confile::load(const std::string_view fname)
             /*
              * Section detected.
              */
-            std::string sname{caio::tolow(result.str(1))};
+            auto sname = caio::tolow(result.str(1));
             cursect = &_sections[sname];
             continue;
         }
@@ -88,25 +88,25 @@ void Confile::load(const std::string_view fname)
             throw ConfigError{"{}: Entry without section at line #{}: \"{}\"", fname, line, str};
         }
 
-        const std::string& key = caio::tolow(result.str(1));
-        const std::string& value = result[2];
+        const auto key = caio::tolow(result.str(1));
+        const auto value = result[2];
 
         (*cursect)[key] = value;
     }
 }
 
-Section& Confile::operator[](const std::string_view sname)
+Section& Confile::operator[](std::string_view sname)
 {
     return _sections[caio::tolow(sname)];
 }
 
-Section Confile::extract(const std::string_view sname)
+Section Confile::extract(std::string_view sname)
 {
     auto nh = _sections.extract(caio::tolow(sname));
     return (nh ? std::move(nh.mapped()) : Section{});
 }
 
-std::map<std::string, Section>::const_iterator Confile::find(const std::string_view sname) const
+std::map<std::string, Section>::const_iterator Confile::find(std::string_view sname) const
 {
     return _sections.find(caio::tolow(sname));
 }

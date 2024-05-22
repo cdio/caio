@@ -106,7 +106,7 @@ VJoyConfig::VJoyConfig(Section& sec)
     }
 }
 
-Config::Config(Section& sec, const std::string& prefix)
+Config::Config(Section& sec, std::string_view prefix)
     : title{"caio"},
       romdir{sec[KEY_ROMDIR]},
       palette{(sec[KEY_PALETTE].empty() ? "" : resolve(sec[KEY_PALETTE], sec[KEY_PALETTEDIR], prefix, PALETTEFILE_EXT))},
@@ -129,8 +129,8 @@ Config::Config(Section& sec, const std::string& prefix)
     }
 }
 
-std::string Config::resolve(const std::string& name, const std::string& path, const std::string& prefix,
-    const std::string& ext)
+std::string Config::resolve(std::string_view name, std::string_view path, std::string_view prefix,
+    std::string_view ext)
 {
     std::string fname{fs::search(name)};
     if (!fname.empty()) {
@@ -143,7 +143,7 @@ std::string Config::resolve(const std::string& name, const std::string& path, co
     /*
      * Build the basename and search for the file in the specified path.
      */
-    fname = prefix + name + ext;
+    fname = std::format("{}{}{}", prefix, name, ext);
     std::string fullpath{fs::search(fname, {path})};
     if (!fullpath.empty()) {
         return fullpath;

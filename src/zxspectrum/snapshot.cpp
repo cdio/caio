@@ -22,11 +22,11 @@ namespace caio {
 namespace sinclair {
 namespace zxspectrum {
 
-void Snapshot::throw_ioerror(const std::string& caller, const std::string& reason) const
+void Snapshot::throw_ioerror(std::string_view caller, std::string_view reason) const
 {
-    std::string msg{caller + ": Invalid snapshot file: " + _fname};
+    std::string msg{std::string{caller} + ": Invalid snapshot file: " + _fname};
     if (!reason.empty()) {
-        msg += ": " + reason;
+        msg += ": " + std::string{reason};
     }
 
     throw IOError{msg};

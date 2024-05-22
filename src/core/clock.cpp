@@ -30,7 +30,7 @@ namespace caio {
 
 using namespace std::chrono_literals;
 
-Clock::Clock(const std::string& label, size_t freq, float delay)
+Clock::Clock(std::string_view label, size_t freq, float delay)
     : Name{TYPE, label},
       _freq{freq},
       _delay{delay}

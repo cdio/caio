@@ -46,7 +46,7 @@ ZXSpectrum::~ZXSpectrum()
 {
 }
 
-void ZXSpectrum::run(const std::string& pname)
+void ZXSpectrum::run(std::string_view pname)
 {
     _title = _conf.title;
 
@@ -67,7 +67,7 @@ void ZXSpectrum::run(const std::string& pname)
     start();
 }
 
-void ZXSpectrum::autorun(const std::string& pname)
+void ZXSpectrum::autorun(std::string_view pname)
 {
     if (!pname.empty()) {
         if (!_conf.snap.empty()) {
@@ -79,7 +79,7 @@ void ZXSpectrum::autorun(const std::string& pname)
 
 void ZXSpectrum::start()
 {
-    log.info("Starting caio v{} - {}\n{}\n", caio::version(), name(), to_string());
+    log.info("Starting {} - {}\n{}\n", caio::full_version(), name(), to_string());
 
     /*
      * The emulator runs on its own thread.
@@ -156,11 +156,11 @@ void ZXSpectrum::reset(const Snapshot& snap)
     _ula->video()->border_colour(snap.border_colour());
 }
 
-std::string ZXSpectrum::rompath(const std::string& fname) const
+std::string ZXSpectrum::rompath(std::string_view fname) const
 {
     auto path = fs::search(fname, {_conf.romdir});
     if (path.empty()) {
-        throw IOError{"Can't load ROM: " + fname + ": " + Error::to_string(ENOENT)};
+        throw IOError{"Can't load ROM: {}: {}", fname, Error::to_string(ENOENT)};
     }
 
     return path;
@@ -171,7 +171,7 @@ void ZXSpectrum::attach_prg()
     if (!_conf.snap.empty()) {
         std::string fname{fs::search(_conf.snap, {}, true)};
         if (fname.empty()) {
-            throw IOError{"Can't load snapshot: " + _conf.snap + ": " + Error::to_string()};
+            throw IOError{"Can't load snapshot: {}: {}", _conf.snap, Error::to_string()};
         }
 
         uptr_t<Snapshot> snap{};
@@ -181,7 +181,7 @@ void ZXSpectrum::attach_prg()
         } else if (SnapZ80::seems_like(fname)) {
             snap = std::make_unique<SnapZ80>(fname);
         } else {
-            throw IOError{"Uncrecognised snapshot format: " + _conf.snap};
+            throw IOError{"Uncrecognised snapshot format: {}", _conf.snap};
         }
 
         reset(*snap);
@@ -370,7 +370,7 @@ std::string ZXSpectrum::to_string() const
         "  {}\n"
         "  {}\n"
         "  {}\n"
-        "  {}\n"
+        "  {}\n\n"
         "UI backend: {}\n",
         _conf.to_string(),
         _clk->to_string(),

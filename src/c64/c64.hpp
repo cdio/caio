@@ -66,7 +66,7 @@ public:
      * @param pname If not empty, name of the program to launch (its format is auto-detected).
      * @see start()
      */
-    void run(const std::string& pname);
+    void run(std::string_view pname);
 
     /**
      * Get a string describing the components that build this C64.
@@ -78,7 +78,7 @@ public:
      * Get the name of this platform.
      * @return The name of this platform.
      */
-    constexpr static const char* name() {
+    constexpr static std::string_view name() {
         return "C64";
     }
 
@@ -89,7 +89,7 @@ private:
      * @param pname File to launch.
      * @exception IOError
      */
-    void autorun(const std::string& pname);
+    void autorun(std::string_view pname);
 
     /**
      * Start this C64.
@@ -142,7 +142,7 @@ private:
      * @return The full path.
      * @exception IOError if the ROM file is not found.
      */
-    std::string rompath(const std::string& fname);
+    std::string rompath(std::string_view fname);
 
     /**
      * Attach a cartridge image file.

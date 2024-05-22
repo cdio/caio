@@ -42,7 +42,7 @@ namespace caio {
 namespace commodore {
 namespace c64 {
 
-void C64::run(const std::string& pname)
+void C64::run(std::string_view pname)
 {
     autorun(pname);
 
@@ -56,7 +56,7 @@ void C64::run(const std::string& pname)
     connect_ui();
 
     if (_conf.monitor) {
-        auto load = [this](const std::string& fname, addr_t start) -> std::pair<addr_t, addr_t>{
+        auto load = [this](std::string_view fname, addr_t start) -> std::pair<addr_t, addr_t>{
             PrgFile prog{fname};
             addr_t addr = prog.address();
             if (start != 0) {
@@ -71,7 +71,7 @@ void C64::run(const std::string& pname)
             return {start, prog.size()};
         };
 
-        auto save = [this](const std::string& fname, addr_t start, addr_t end) {
+        auto save = [this](std::string_view fname, addr_t start, addr_t end) {
             PrgFile prog{};
             for (auto addr = start; addr <= end; ++addr) {
                 uint8_t c = this->_cpu->read(addr);
@@ -86,7 +86,7 @@ void C64::run(const std::string& pname)
     start();
 }
 
-void C64::autorun(const std::string& pname)
+void C64::autorun(std::string_view pname)
 {
     if (!pname.empty()) {
         if (Crt::is_crt(pname)) {
@@ -105,7 +105,7 @@ void C64::autorun(const std::string& pname)
 
 void C64::start()
 {
-    log.info("Starting caio v{} - {}\n{}\n", caio::version(), _conf.title, to_string());
+    log.info("Starting {} - {}\n{}\n", caio::full_version(), _conf.title, to_string());
 
     /*
      * The emulator runs on its own thread.
@@ -181,7 +181,7 @@ void C64::reset()
     }
 }
 
-std::string C64::rompath(const std::string& fname)
+std::string C64::rompath(std::string_view fname)
 {
     auto path = fs::search(fname, {_conf.romdir});
     if (path.empty()) {
@@ -683,7 +683,7 @@ std::string C64::to_string() const
         "  {}\n"
         "  {}\n"
         "  {}\n"
-        "  {}\n"
+        "  {}\n\n"
         "UI backend: {}\n",
         _conf.to_string(),
         _clk->to_string(),

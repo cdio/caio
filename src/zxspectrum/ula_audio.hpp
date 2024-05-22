@@ -19,7 +19,7 @@
 #pragma once
 
 #include <functional>
-#include <string>
+#include <string_view>
 
 #include "clock.hpp"
 #include "signal.hpp"
@@ -48,7 +48,7 @@ public:
      * @param clkf  System clock frequency;
      * @param label Label assigned to this instance.
      */
-    ULAAudio(unsigned clkf, const std::string& label);
+    ULAAudio(unsigned clkf, std::string_view label);
 
     virtual ~ULAAudio() {
     }

@@ -53,15 +53,12 @@ public:
     explicit Gpio_() {
     }
 
-    virtual ~Gpio_() {
-    }
-
     /**
      * Add an input callback.
      * @param ior  Input callback;
      * @param mask Data bits used by the callback.
      */
-    virtual void add_ior(const ior_t& ior, DATA mask) {
+    void add_ior(const ior_t& ior, DATA mask) {
         _iors.push_back({ior, mask});
     }
 
@@ -70,7 +67,7 @@ public:
      * @param iow  Output callback;
      * @param mask Data bits used by the callback.
      */
-    virtual void add_iow(const iow_t& iow, DATA mask) {
+    void add_iow(const iow_t& iow, DATA mask) {
         _iows.push_back({iow, mask});
     }
 
@@ -81,7 +78,7 @@ public:
      * @param addr Port to read from.
      * @return The port value.
      */
-    virtual DATA ior(ADDR addr) const {
+    DATA ior(ADDR addr) const {
         DATA value{std::numeric_limits<DATA>::max()};   /* pull-up */
         for (const auto& [ior, mask] : _iors) {
             value &= (ior(addr) & mask) | ~mask;
@@ -98,7 +95,7 @@ public:
      * @param value Value to write;
      * @param force Force write.
      */
-    virtual void iow(ADDR addr, DATA value, bool force = false) {
+    void iow(ADDR addr, DATA value, bool force = false) {
         for (auto& [iow, mask] : _iows) {
             iow(addr, value & mask, force);
         }

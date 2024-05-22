@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <string>
+#include <string_view>
 
 #include "clock.hpp"
 #include "device.hpp"
@@ -131,7 +131,7 @@ protected:
      * @param label Label assigned to this instance;
      * @param clkf  System clock frequency.
      */
-    Mos6581_(const std::string& label, unsigned clkf)
+    Mos6581_(std::string_view label, unsigned clkf)
         : Device{TYPE, label},
           _clkf{clkf},
           _samples_cycles{Clock::cycles(SAMPLES_TIME, clkf)} {

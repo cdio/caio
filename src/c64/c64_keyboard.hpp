@@ -24,6 +24,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -141,7 +142,7 @@ public:
      * @param label      Label assigned to this keyboard;
      * @param restore_cb Callback to call when the RESTORE key is pressed.
      */
-    C64Keyboard(const std::string& label, const std::function<void()>& restore_cb = {});
+    C64Keyboard(std::string_view label, const std::function<void()>& restore_cb = {});
 
     virtual ~C64Keyboard();
 

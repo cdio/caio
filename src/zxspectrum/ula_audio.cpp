@@ -22,7 +22,7 @@ namespace caio {
 namespace sinclair {
 namespace zxspectrum {
 
-ULAAudio::ULAAudio(unsigned clkf, const std::string& label)
+ULAAudio::ULAAudio(unsigned clkf, std::string_view label)
     : Name{TYPE, label},
       _samples_cycles{Clock::cycles(1.0f / SAMPLING_RATE, clkf)}
 {

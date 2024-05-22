@@ -22,6 +22,7 @@
 #include <cctype>
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include "types.hpp"
 #include "cbm_bus.hpp"
@@ -72,7 +73,7 @@ static inline uint8_t u8_to_pet(uint8_t u8)
  * @param petscii The PETSCII string.
  * @return The UTF-8 string.
  * @see pet_to_u8(uint8_t)
- * @see u8_to_pet(string &)
+ * @see u8_to_pet(std::string_view)
  */
 inline std::string pet_to_u8(std::string_view petscii)
 {
@@ -239,7 +240,7 @@ public:
      * @param path File, directory or device to attach to.
      * @exception IOError
      */
-    virtual void attach(const std::string& path) = 0;
+    virtual void attach(std::string_view path) = 0;
 
     /**
      * Reset this drive.
@@ -252,7 +253,7 @@ public:
      * Get the attached path.
      * @return A reference to the attached path.
      */
-    const std::string& attached_path() const {
+    std::string_view attached_path() const {
         return _attached_path;
     }
 
@@ -290,7 +291,7 @@ protected:
      * @see OpenMode
      * @see Status
      */
-    virtual Status channel_open(uint8_t ch, const std::string& petfname, FileType type, OpenMode mode) = 0;
+    virtual Status channel_open(uint8_t ch, std::string_view petfname, FileType type, OpenMode mode) = 0;
 
     /**
      * Close a channel.
@@ -333,13 +334,13 @@ protected:
      * @see DOSCommand
      * @see Status
      */
-    virtual Status command(DOSCommand cmd, const std::string& param) = 0;
+    virtual Status command(DOSCommand cmd, std::string_view param) = 0;
 
     /**
      * Set attached native path name.
      * @param path Path to attach to.
      */
-    void attached_path(const std::string& path) {
+    void attached_path(std::string_view path) {
         _attached_path = path;
     }
 
@@ -385,7 +386,7 @@ private:
     /**
      * @see cbm_bus::Device::open()
      */
-    void open(uint8_t ch, const std::string& param) override;
+    void open(uint8_t ch, std::string_view param) override;
 
     /**
      * @see cbm_bus::Device::close()
@@ -412,9 +413,9 @@ private:
      * This method is called when a DOS command is received.
      * @param param Command parameters.
      * @see COMMAND_CHANNEL
-     * @see command(DOSCommand, const std::string &)
+     * @see command(DOSCommand, std::string_view)
      */
-    void command(const std::string& param);
+    void command(std::string_view param);
 
     /**
      * Check wether this disk drive is attached.

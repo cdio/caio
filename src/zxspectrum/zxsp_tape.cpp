@@ -92,7 +92,7 @@ void PulseBuffer::push_block(const TAPFile::Block& block)
     push_data(block);
 }
 
-Tape::Tape(const sptr_t<Clock>& clk, const std::string& itape, const std::string& otape, bool fastload)
+Tape::Tape(const sptr_t<Clock>& clk, std::string_view itape, std::string_view otape, bool fastload)
     : _clk{clk},
       _fastload{fastload}
 {
@@ -106,7 +106,7 @@ Tape::~Tape()
 {
 }
 
-void Tape::save(const std::string& path)
+void Tape::save(std::string_view path)
 {
     TX tx{};
 
@@ -122,7 +122,7 @@ void Tape::save(const std::string& path)
     log.debug("Tape: Output tape: \"{}\", is_directory: {}\n", _tx.path, _tx.isdir);
 }
 
-void Tape::load(const std::string& path)
+void Tape::load(std::string_view path)
 {
     auto spath = path;  /* _rx is destroyed but path could be a reference to _rx's path */
     _rx = {};
@@ -321,9 +321,9 @@ bool Tape::decode_pulse(bool pulse)
     return true;
 }
 
-inline std::string Tape::otape_fullpath(const std::string& basename) const
+inline std::string Tape::otape_fullpath(std::string_view basename) const
 {
-    return (!_tx.isdir ? _tx.path : _tx.path + "/" + basename + TAPFile::FILE_EXTENSION);
+    return (!_tx.isdir ? _tx.path : _tx.path + "/" + std::string{basename} + TAPFile::FILE_EXTENSION);
 }
 
 bool Tape::transmit()

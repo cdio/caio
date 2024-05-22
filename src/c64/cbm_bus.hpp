@@ -23,6 +23,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "clock.hpp"
@@ -128,7 +129,7 @@ class Bus : public Name {
 public:
     constexpr static const char* TYPE = "CBM-BUS";
 
-    explicit Bus(const std::string& label = "")
+    explicit Bus(std::string_view label = "")
         : Name{TYPE, label} {
     }
 
@@ -189,7 +190,6 @@ public:
      * Initialise this bus controller.
      * @param bus   Bus to connect to;
      * @param label Label asssigned to this controller.
-     * @exception InvalidArgument if the bus is empty.
      */
     Controller(const sptr_t<Bus>& bus)
         : Controller{CONTROLLER_UNIT, bus, LABEL} {
@@ -266,9 +266,8 @@ protected:
      * @param unit  Unit number assigned to this controller;;
      * @param bus   Bus to connect to;
      * @param label Label asssigned to this controller.
-     * @exception InvalidArgument if the bus is empty.
      */
-    Controller(uint8_t unit, const sptr_t<Bus>& bus, const std::string& label = LABEL);
+    Controller(uint8_t unit, const sptr_t<Bus>& bus, std::string_view label = LABEL);
 
     uint8_t     _unit;
     sptr_t<Bus> _bus;
@@ -547,7 +546,6 @@ public:
      * Initialise this CBM-BUS Device.
      * @param unit The unit number;
      * @param bus  The CBM-BUS to connect to.
-     * @exception InvalidArgument
      */
     Device(uint8_t unit, const sptr_t<Bus>& bus);
 
@@ -564,7 +562,7 @@ public:
      * @param ch    Channel to open;
      * @param param Channel parameters.
      */
-    virtual void open(uint8_t ch, const std::string& param) = 0;
+    virtual void open(uint8_t ch, std::string_view param) = 0;
 
     /**
      * Close a channel.

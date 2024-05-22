@@ -94,9 +94,9 @@ public:
      * Load a SNA file.
      * @param fname File name.
      * @exception IOError
-     * @see load(const std::string&)
+     * @see load(std::string_view)
      */
-    SnapSNA(const std::string& fname);
+    SnapSNA(std::string_view fname);
 
     virtual ~SnapSNA();
 
@@ -109,10 +109,10 @@ public:
      * @see FILE_EXTENSION
      * @see FILE_SIZE
      */
-    static bool seems_like(const std::string& fname);
+    static bool seems_like(std::string_view fname);
 
 private:
-    void load(const std::string& fname);
+    void load(std::string_view fname);
 };
 
 }

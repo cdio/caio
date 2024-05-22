@@ -287,7 +287,7 @@ public:
      * @param label Label assigned to this device.
      * @see render_line(const renderer_t&)
      */
-    ULAVideo(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, const std::string& label);
+    ULAVideo(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, std::string_view label);
 
     virtual ~ULAVideo();
 
@@ -303,9 +303,9 @@ public:
      * @param fname Palette file name.
      * @exception IOError
      * @see palette(const RgbaTable&)
-     * @see RgbaTable::load(const string&)
+     * @see RgbaTable::load(std::string_view)
      */
-    void palette(const std::string& fname);
+    void palette(std::string_view fname);
 
     /**
      * Set a colour palette.

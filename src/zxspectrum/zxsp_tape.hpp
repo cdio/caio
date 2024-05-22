@@ -20,7 +20,7 @@
 
 #include <atomic>
 #include <functional>
-#include <string>
+#include <string_view>
 #include <tuple>
 #include <vector>
 
@@ -149,10 +149,10 @@ public:
      * @param otape    Output tape file (TAP) or directory;
      * @param fastload true to deactivate emulation of cassette speed; false otherwise.
      * @exception IOError
-     * @see load(const std::string&)
-     * @see save(const std::string&)
+     * @see load(std::string_view)
+     * @see save(std::string_view)
      */
-    Tape(const sptr_t<Clock>& clk, const std::string& itape, const std::string& otape, bool fastload);
+    Tape(const sptr_t<Clock>& clk, std::string_view itape, std::string_view otape, bool fastload);
 
     virtual ~Tape();
 
@@ -167,10 +167,10 @@ public:
      * new file is extracted from the standard header.
      * @param path Tape file or directory name.
      * @exception IOError
-     * @see load(const std::string&)
+     * @see load(std::string_view)
      * @see HeaderBlock
      */
-    void save(const std::string& path);
+    void save(std::string_view path);
 
     /**
      * Set the input tape and rewind it.
@@ -180,18 +180,18 @@ public:
      * If the specified path is empty, the current tape is ejected.
      * If the specified path is a file name, it is considered to be a TAP file.
      * If the specified path is a directory, a number of its TAP files are
-     * concatenated into a single big TAP (see TAPFile::load(const std::string&)).
+     * concatenated into a single big TAP (see TAPFile::load(std::string_view))
      * In the last two cases a rewind is done afterwards.
      * @param path Tape file or directory name.
      * @exception IOError
-     * @see TAPFile::load(const std::string&)
+     * @see TAPFile::load(std::string_view)
      */
-    void load(const std::string& path);
+    void load(std::string_view path);
 
     /**
      * Start playing the input tape.
      * This method affects LOAD operations, it does not affect SAVE operations.
-     * @see load(const std::string&)
+     * @see load(std::string_view)
      * @see stop()
      */
     void play();
@@ -206,14 +206,14 @@ public:
     /**
      * Eject the input tape.
      * This method affects LOAD operations, it does not affect SAVE operations.
-     * @see load(const std::string&)
+     * @see load(std::string_view)
      */
     void eject();
 
     /**
      * Rewind the input tape.
      * This method affects LOAD operations, it does not affect SAVE operations.
-     * @see load(const std::string&)
+     * @see load(std::string_view)
      */
     void rewind();
 
@@ -237,7 +237,7 @@ public:
      * pulse is detected a TAP file is generated in the output tape.
      * @param pulse Pulse to transmit.
      * @see decode_pulse(bool)
-     * @see save(const std::string&)
+     * @see save(std::string_view)
      * @see transmit()
      * @see TX
      */
@@ -321,7 +321,7 @@ private:
      * @return The full pathname.
      * @see HeaderBlock
      */
-    std::string otape_fullpath(const std::string& basename) const;
+    std::string otape_fullpath(std::string_view basename) const;
 
     /**
      * Send a byte to the output tape.
@@ -330,8 +330,8 @@ private:
      * and saved in the output tape directory or appended to
      * the output tape file.
      * @return true on success; false otherwise.
-     * @see otape_fullpath(const std::string&)
-     * @see save(const std::string&)
+     * @see otape_fullpath(std::string_view)
+     * @see save(std::string_view)
      * @see TX
      */
     bool transmit();

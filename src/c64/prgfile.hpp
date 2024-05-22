@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <iostream>
 #include <span>
-#include <string>
+#include <string_view>
 #include <vector>
 
 #include "types.hpp"
@@ -44,9 +44,9 @@ public:
      * Load a PRG file.
      * @param fname If defined, name of the PRG file to load.
      * @exception IOError
-     * @see load(const std::string &)
+     * @see load(std::string_view)
      */
-    PrgFile(const std::string& fname = {}) {
+    PrgFile(std::string_view fname = {}) {
         PrgFile::load(fname);
     }
 
@@ -75,7 +75,7 @@ public:
      * @param fname Name of the PRG file to load.
      * @exception IOError
      */
-    virtual void load(const std::string& fname);
+    virtual void load(std::string_view fname);
 
     /**
      * Load a PRG file from an already open stream.
@@ -92,7 +92,7 @@ public:
      * @param addr  If non-zero, use this value as the PRG's start address ignoring address().
      * @exception IOError
      */
-    virtual void save(const std::string& fname, addr_t addr = 0);
+    virtual void save(std::string_view fname, addr_t addr = 0);
 
     /**
      * Save a PRG file.
@@ -105,22 +105,13 @@ public:
 
     /**
      * Save a PRG file.
-     * @param fname Name of the PRG file to save.
-     * @param addr  Start address of the PRG file;
-     * @param data  Data.
-     * @exception IOError
-     */
-    static void save(const std::string& fname, addr_t addr, const std::span<uint8_t>& data);
-
-    /**
-     * Save a PRG file.
      * @param os   Output stream;
      * @param addr Start address of the PRG file;
      * @param data Data.
      * @return os.
      * @exception IOError
      */
-    static std::ostream& save(std::ostream& os, addr_t addr, const std::span<uint8_t>& data);
+    static std::ostream& save(std::ostream& os, addr_t addr, std::span<const uint8_t> data);
 
 private:
     PrgHeader _hdr{};

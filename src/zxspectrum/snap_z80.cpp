@@ -27,7 +27,7 @@ namespace caio {
 namespace sinclair {
 namespace zxspectrum {
 
-SnapZ80::SnapZ80(const std::string& fname)
+SnapZ80::SnapZ80(std::string_view fname)
     : Snapshot{}
 {
     load(fname);
@@ -37,14 +37,14 @@ SnapZ80::~SnapZ80()
 {
 }
 
-bool SnapZ80::seems_like(const std::string& fname)
+bool SnapZ80::seems_like(std::string_view fname)
 {
     auto fullpath = fs::fix_home(fname);
     auto lowcase = caio::tolow(fname);
     return (fs::exists(fullpath) && lowcase.ends_with(FILE_EXTENSION));
 }
 
-void SnapZ80::load(const std::string& fname)
+void SnapZ80::load(std::string_view fname)
 {
     _fname = fs::fix_home(fname);
 
@@ -138,7 +138,7 @@ void SnapZ80::load_v2(const buffer_t& raw)
     uncompress_v2(raw, sizeof(SnapZ80Header) + ext_size);
 }
 
-SnapZ80::buffer_t SnapZ80::uncompress(const std::span<const uint8_t>& enc, bool endmark)
+SnapZ80::buffer_t SnapZ80::uncompress(std::span<const uint8_t> enc, bool endmark)
 {
     buffer_t dst{};
     size_t i = 0;
@@ -315,7 +315,7 @@ inline const SnapZ80HeaderV23* SnapZ80::header(const buffer_t& raw)
     return reinterpret_cast<const SnapZ80HeaderV23*>(raw.data());
 }
 
-inline void SnapZ80::throw_ioerror(const std::string& reason) const
+inline void SnapZ80::throw_ioerror(std::string_view reason) const
 {
     Snapshot::throw_ioerror("Z80", reason);
 }

@@ -24,7 +24,6 @@
 #include <initializer_list>
 #include <iostream>
 #include <span>
-#include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
@@ -103,7 +102,7 @@ static inline std::uintmax_t file_size(std::string_view path)
  *              if it is not found there then try the search paths.
  * @return The existing file name; an empty string if the file is not found.
  */
-std::string search(std::string_view fname, const std::initializer_list<std::string>& spath = {},
+std::string search(std::string_view fname, const std::initializer_list<std::string_view>& spath = {},
     bool cwd = false);
 
 /**
@@ -157,7 +156,7 @@ bool match(std::string_view path, std::string_view pattern, bool icase = MATCH_C
  * @param icase    MATCH_CASE_INSENSITIVE or MATCH_CASE_SENSITIVE;
  * @param callback User defined callback (return false to stop directory traversing).
  * @return False if the callback stopped the traversal; true otherwise.
- * @see match(const std::string&, const std::string&)
+ * @see match(std::string_view, std::string_view)
  * @see MATCH_CASE_INSENSITIVE
  * @see MATCH_CASE_SENSITIVE
  */
@@ -171,8 +170,8 @@ bool directory(std::string_view path, std::string_view pattern, bool icase,
  * @param icase   MATCH_CASE_INSENSITIVE or MATCH_CASE_SENSITIVE;
  * @param limit   Maximum number of entries (0 means no limits; default is DIR_ENTRIES_LIMIT).
  * @return The entries that match the specified pattern plus their size on disk.
- * @see directory(const std::string&, const std::string&, const std::function<void(const std::string&, uint64_t)>&)
- * @see match(const std::string&, const std::string&)
+ * @see directory(std::string_view, std::string_view, const std::function<void(std::string_view, uint64_t)>&)
+ * @see match(cstd::string_view, std::string_view)
  * @see DIR_ENTRIES_LIMIT
  * @see MATCH_CASE_INSENSITIVE
  * @see MATCH_CASE_SENSITIVE
@@ -191,7 +190,7 @@ dir_t directory(std::string_view path, std::string_view pattern, bool icase, siz
  * @see LOAD_MAXSIZ
  * @see buffer_t
  */
-buffer_t load(const std::string_view fname, size_t maxsiz = 0);
+buffer_t load(std::string_view fname, size_t maxsiz = 0);
 
 /**
  * Read data from an input stream and create a memory buffer.
@@ -199,9 +198,9 @@ buffer_t load(const std::string_view fname, size_t maxsiz = 0);
  * @param maxsiz Maximum number of bytes to read (0 means LOAD_MAXSIZ).
  * @return A buffer with the data read from the input stream.
  * @exception IOError
- * @see load(const std::string&)
- * @see save(const std::string&, const std::span<const uint8_t>&, std::ios_base::openmode)
- * @see save(std::ostream&, const std::span<const uint8_t>&)
+ * @see load(std::string_view)
+ * @see save(std::string_view, std::span<const uint8_t>&, std::ios_base::openmode)
+ * @see save(std::ostream&, std::span<const uint8_t>&)
  */
 buffer_t load(std::istream& is, size_t maxsiz = 0);
 
@@ -211,18 +210,18 @@ buffer_t load(std::istream& is, size_t maxsiz = 0);
  * @param buf   Buffer to save;
  * @param mode  Open mode (by default, if the file exists it is truncated).
  * @exception IOError
- * @see load(std::string_view
+ * @see load(std::string_view)
  * @see load(std::istream&)
  * @see save(std::ostream&, std::span<const uint8_t>)
  */
-void save(const std::string_view fname, std::span<const uint8_t> buf,
+void save(std::string_view fname, std::span<const uint8_t> buf,
     std::ios_base::openmode mode = std::ios_base::out | std::ios_base::trunc);
 
 /**
  * Send a buffer to an output stream.
  * @param os  Output stream;
  * @param buf Buffer.
- * @see load(const std::string&)
+ * @see load(std::string_view)
  * @see load(std::istream&)
  * @see save(std::string_view std::span<const uint8_t>, std::ios_base::openmode)
  */

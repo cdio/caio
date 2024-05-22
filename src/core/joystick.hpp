@@ -19,7 +19,7 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
+#include <string_view>
 
 #include "name.hpp"
 
@@ -55,7 +55,7 @@ public:
      * @param label Label assigned to this joystick.
      * @see JoyPort
      */
-    Joystick(const Port& port, const std::string& label = {})
+    Joystick(const Port& port, std::string_view label = {})
         : Name{TYPE, label},
           _port{port} {
     }

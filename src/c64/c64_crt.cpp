@@ -27,9 +27,10 @@ namespace caio {
 namespace commodore {
 namespace c64 {
 
-void Crt::open(const std::string& fname)
+void Crt::open(std::string_view fname)
 {
-    std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
+    //FIXME libstdc++ not there yet   std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
+    std::ifstream is{std::string{fname}, std::ios_base::binary | std::ios_base::in};
     if (!is) {
         throw InvalidCartridge{"Can't open: {}: {}", fname, Error::to_string()};
     }
@@ -120,10 +121,11 @@ std::string Crt::name() const
         std::strlen(reinterpret_cast<const char*>(_hdr.name))};
 }
 
-bool Crt::is_crt(const std::string& fname)
+bool Crt::is_crt(std::string_view fname)
 {
     try {
-        std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
+        //FIXME libstdc++ not there yet   std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
+        std::ifstream is{std::string{fname}, std::ios_base::binary | std::ios_base::in};
         if (is) {
             Header hdr{};
             load_header(is, hdr);

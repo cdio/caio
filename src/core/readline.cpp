@@ -145,7 +145,7 @@ void History::save()
     }
 }
 
-Readline::Readline(int ifd, int ofd, const std::string& histfname)
+Readline::Readline(int ifd, int ofd, std::string_view histfname)
     : _ifd{::dup(ifd)},
       _ofd{::dup(ofd)},
       _history{histfname}
@@ -195,15 +195,17 @@ void Readline::close()
 
 void Readline::term_init()
 {
-    struct ::termios attr{};
+    if (::isatty(_ifd)) {
+        struct ::termios attr{};
 
-    if (::tcgetattr(_ifd, &attr) < 0) {
-        throw IOError{"Can't get input terminal attributes: {}", Error::to_string(errno)};
-    }
+        if (::tcgetattr(_ifd, &attr) < 0) {
+            throw IOError{"Can't get input terminal attributes: {}", Error::to_string(errno)};
+        }
 
-    attr.c_lflag &= ~(ICANON | ECHO);
-    if (::tcsetattr(_ifd, TCSANOW, &attr) < 0) {
-        throw IOError{"Can't set input terminal attributes: {}", Error::to_string(errno)};
+        attr.c_lflag &= ~(ICANON | ECHO);
+        if (::tcsetattr(_ifd, TCSANOW, &attr) < 0) {
+            throw IOError{"Can't set input terminal attributes: {}", Error::to_string(errno)};
+        }
     }
 
     /* TODO: output */
@@ -222,19 +224,7 @@ char Readline::getc()
     return ch;
 }
 
-void Readline::write(char ch) const
-{
-    std::span<const char>buf{&ch, 1};
-    write(buf);
-}
-
-void Readline::write(const std::string& msg) const
-{
-    std::span buf{msg.c_str(), msg.size()};
-    write(buf);
-}
-
-void Readline::write(const std::span<const char>& data) const
+void Readline::write(std::span<const char> data) const
 {
     if (data.size() != 0) {
         size_t wr = ::write(_ofd, data.data(), data.size());

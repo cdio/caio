@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <string_view>
 
 #include "joystick.hpp"
 #include "name.hpp"
@@ -203,7 +204,7 @@ public:
      * @see add_key_map()
      * @see clear_key_map()
      */
-    void load(const std::string& fname);
+    void load(std::string_view fname);
 
     /**
      * Assign a virtual joystick to an emulated joystick.
@@ -303,7 +304,7 @@ public:
     virtual void clear_key_map() = 0;
 
 protected:
-    Keyboard(const std::string& label = {})
+    Keyboard(std::string_view label = {})
         : Name{TYPE, label} {
     }
 

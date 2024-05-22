@@ -23,6 +23,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -143,7 +144,7 @@ public:
      * Initialise this keyboard.
      * @param label Label assigned to this keyboard.
      */
-    ZXSpectrumKeyboard(const std::string& label);
+    ZXSpectrumKeyboard(std::string_view label);
 
     virtual ~ZXSpectrumKeyboard() {
     }

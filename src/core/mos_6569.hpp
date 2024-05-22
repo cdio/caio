@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -247,7 +247,7 @@ public:
      * @param vcolor Colour RAM (1K).
      * @see render_line(const std::function<void(unsigned, const ui::Scanline&)>&);
      */
-    Mos6569(const std::string& label, const sptr_t<ASpace>& mmap, const devptr_t& vcolor);
+    Mos6569(std::string_view label, const sptr_t<ASpace>& mmap, const devptr_t& vcolor);
 
     virtual ~Mos6569() {
     }
@@ -265,7 +265,7 @@ public:
      * @exception IOError see RgbaTable::load().
      * @see palette(const RgbaTable&)
      */
-    void palette(const std::string& fname);
+    void palette(std::string_view fname);
 
     /**
      * Set a colour palette from memory.
