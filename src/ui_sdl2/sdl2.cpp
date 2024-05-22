@@ -158,11 +158,6 @@ std::string sdl_error()
     return SDL_GetError();
 }
 
-void throw_sdl_uierror(const std::string& reason)
-{
-    throw UIError{reason + ": " + sdl_error()};
-}
-
 bool in_rect(int x, int y, const SDL_Rect& rect)
 {
     return ((x >= rect.x && x < rect.x + rect.w) && (y >= rect.y && y < rect.y + rect.h));

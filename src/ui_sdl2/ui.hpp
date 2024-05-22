@@ -200,7 +200,7 @@ public:
      * @param color Colour (default is CRT_COLOR).
      * @see CRT_COLOR
      */
-    void clear_screen(const Rgba& color = CRT_COLOR);
+    void clear_screen(Rgba color = CRT_COLOR);
 
     /**
      * Stop the main loop.
@@ -291,7 +291,7 @@ private:
      * the main window is closed or the stop() method is called.
      * @see win_event()
      * @see kbd_event()
-     * @see joy_event()
+     * @see gamepad_event()
      * @see mouse_event()
      */
     void event_loop();
@@ -322,22 +322,22 @@ private:
 
     /**
      * Associate a new game controller to an emulated joystick.
-     * @param jid SDL Identifier of the game controller.
+     * @param devid SDL game controller device index.
      */
-    void joy_add(int32_t jid);
+    void joy_add(int devid);
 
     /**
      * Dis-associate a game controller from an emulated joystick.
-     * @param jid SDL Identifier of the game controller.
+     * @param jid SDL game controller instance.
      */
-    void joy_del(int32_t jid);
+    void joy_del(SDL_JoystickID jid);
 
     /**
      * Find an emulated joystick given its identifier.
-     * @param jid Emulated joystick or game controller ID.
-     * @return The requested joystick on success; nullptr if the specified joystick does not exist.
+     * @param jid SDL game controller instance.
+     * @return The requested joystick on success; nullptr if the specified joystick is not found.
      */
-    joyptr_t find_joystick(unsigned jid);
+    joyptr_t find_joystick(SDL_JoystickID jid);
 
     Config                      _conf{};                /* UI configuration                                   */
     uint64_t                    _fps_time{};            /* FPS in microseconds                                */
@@ -371,7 +371,7 @@ private:
 
     AudioStream                 _audio_stream{};        /* Audio driver                                       */
 
-    std::map<int32_t, SDL_Joystick*> _sdl_joys{};       /* Map of SDL detected joysticks                      */
+    std::map<SDL_JoystickID, SDL_Joystick*> _sdl_joys{};    /* Map of SDL detected joysticks                  */
 };
 
 }

@@ -50,7 +50,7 @@ void Widget::load(const std::string& fname)
     if (_renderer != nullptr) {
         _texture = IMG_LoadTexture(_renderer, fname.c_str());
         if (_texture == nullptr) {
-            throw_sdl_uierror("Can't load image: " + fname);
+            throw UIError{"Can't load image: {}: {}", fname, sdl_error()};
         }
     }
 }
@@ -65,12 +65,12 @@ void Widget::load(const std::span<const uint8_t>& data)
     if (_renderer != nullptr) {
         SDL_RWops* ops = SDL_RWFromConstMem(data.data(), data.size());
         if (ops == nullptr) {
-            throw_sdl_uierror("Can't load image from memory");
+            throw UIError{"Can't load image from memory: {}", sdl_error()};
         }
 
         _texture = IMG_LoadTexture_RW(_renderer, ops, 1);
         if (_texture == nullptr) {
-            throw_sdl_uierror("Can't create texture from memory");
+            throw UIError{"Can't create texture from memory: {}", sdl_error()};
         }
     }
 }
@@ -134,11 +134,11 @@ void Widget::event(const SDL_Event& event, const SDL_Rect& rect)
 void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect)
 {
     if (SDL_RenderCopy(_renderer, _texture, &srcrect, &dstrect) < 0) {
-        throw_sdl_uierror("Can't SDL_RenderCopy");
+        throw UIError{"Can't SDL_RenderCopy: {}", sdl_error()};
     }
 }
 
-void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const Rgba& colour)
+void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, Rgba colour)
 {
     auto prev_colour = color_modulator();
     color_modulator(colour);
@@ -150,12 +150,12 @@ void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_
     const SDL_RendererFlip& flip)
 {
     if (SDL_RenderCopyEx(_renderer, _texture, &srcrect, &dstrect, angle, &centre, flip) < 0) {
-        throw_sdl_uierror("Can't SDL_RenderCopyEx");
+        throw UIError{"Can't SDL_RenderCopyEx: {}", sdl_error()};
     }
 }
 
 void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_Point& centre, float angle,
-    const SDL_RendererFlip& flip, const Rgba& colour)
+    const SDL_RendererFlip& flip, Rgba colour)
 {
     auto prev_colour = color_modulator();
     color_modulator(colour);
@@ -168,16 +168,16 @@ Rgba Widget::draw_color() const
     Rgba colour{};
 
     if (SDL_GetRenderDrawColor(_renderer, &colour.r, &colour.g, &colour.b, &colour.a) < 0) {
-        throw_sdl_uierror("Can't SDL_GetRenderDrawColor");
+        throw UIError{"Can't SDL_GetRenderDrawColor: {}", sdl_error()};
     }
 
     return colour;
 }
 
-void Widget::draw_color(const Rgba& colour)
+void Widget::draw_color(Rgba colour)
 {
     if (SDL_SetRenderDrawColor(_renderer, colour.r, colour.g, colour.b, colour.a) < 0) {
-        throw_sdl_uierror("Can't SDL_SetRenderDrawColor");
+        throw UIError{"Can't SDL_SetRenderDrawColor: {}", sdl_error()};
     }
 }
 
@@ -187,17 +187,17 @@ Rgba Widget::color_modulator() const
 
     if (SDL_GetTextureColorMod(_texture, &colour.r, &colour.g, &colour.b) < 0 ||
         SDL_GetTextureAlphaMod(_texture, &colour.a) < 0) {
-        throw_sdl_uierror("Can't SDL_GetTexture{Color,Alpha}Mod");
+        throw UIError{"Can't SDL_GetTexture{{Color,Alpha}}Mod: {}", sdl_error()};
     }
 
     return colour;
 }
 
-void Widget::color_modulator(const Rgba& colour)
+void Widget::color_modulator(Rgba colour)
 {
     if (SDL_SetTextureColorMod(_texture, colour.r, colour.g, colour.b) < 0 ||
         SDL_SetTextureAlphaMod(_texture, colour.a) < 0) {
-        throw_sdl_uierror("Can't SDL_SetTexture{Color,Alpha}Mod");
+        throw UIError{"Can't SDL_SetTexture{{Color,Alpha}}Mod: {}", sdl_error()};
     }
 }
 

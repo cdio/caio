@@ -98,27 +98,27 @@ public:
 protected:
     void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect);
 
-    void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const Rgba& colour);
+    void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, Rgba colour);
 
     void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_Point& centre, float angle,
         const SDL_RendererFlip& flip);
 
     void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_Point& centre, float angle,
-        const SDL_RendererFlip& flip, const Rgba& colour);
+        const SDL_RendererFlip& flip, Rgba colour);
 
     Rgba draw_color() const;
 
-    void draw_color(const Rgba& color);
+    void draw_color(Rgba color);
 
     Rgba color_modulator() const;
 
-    void color_modulator(const Rgba& colour);
+    void color_modulator(Rgba colour);
 
     SDL_Renderer*         _renderer;
     SDL_Texture*          _texture{nullptr};
     std::function<void()> _action{};
 
-    static Widget*        pressed_widget;  /* Last widget that received a button press event */
+    static Widget*        pressed_widget;   /* Last widget that received a button press event */
 };
 
 }

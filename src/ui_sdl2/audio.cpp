@@ -51,28 +51,19 @@ void AudioStream::reset(const ui::AudioConfig& aconf)
 
     _devid = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0);
     if (_devid == 0) {
-        throw_sdl_uierror("Can't open audio device");
+        throw UIError{"Can't open audio device: {}", sdl_error()};
     }
 
     if (obtained.freq != desired.freq ||
         obtained.format != desired.format ||
         obtained.channels != desired.channels ||
         obtained.samples != desired.samples) {
-
-        std::ostringstream os{};
-
-        os << "Can't set audio parameters: Desired"
-           << ": srate: "    << desired.freq
-           << ", format: "   << desired.format
-           << ", channels: " << desired.channels
-           << ", samples: "  << desired.samples
-           << ". Obtained"
-           << ": srate: "    << obtained.freq
-           << ", format: "   << obtained.format
-           << ", channels: " << obtained.channels
-           << ", samples: "  << obtained.samples;
-
-        throw_sdl_uierror(os.str());
+        throw UIError{"Can't set audio parameters: Desired: "
+            "srate {}, format {}, channels {}, samples {}. Obtained: "
+            "srate {}, format {}, channels {}, samples {}: {}",
+            desired.freq, desired.format, desired.channels, desired.samples,
+            obtained.freq, obtained.format, obtained.channels, obtained.samples,
+            sdl_error()};
     }
 
     _playing_queue.clear();

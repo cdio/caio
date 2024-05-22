@@ -57,14 +57,6 @@ constexpr const char* sdl_version()
 extern std::string sdl_error();
 
 /**
- * Throw an UIError exception
- * The last SDL error is added to the message.
- * @param reason Error message.
- * @exception UIError
- */
-extern void throw_sdl_uierror(const std::string& reason);
-
-/**
  * Convert a SDL scan code to keyboard::Key code.
  * @param code SDL scan code.
  * @return Keyboard::Key code.

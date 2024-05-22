@@ -55,7 +55,7 @@ void Floppy::render(const SDL_Rect& dstrect)
         }
     }
 
-    const Rgba& colour = (st.is_attached ? ENABLED_COLOR : DISABLED_COLOR);
+    auto colour = (st.is_attached ? ENABLED_COLOR : DISABLED_COLOR);
     Widget::render(rect, dstrect, colour);
 }
 

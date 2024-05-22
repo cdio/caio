@@ -83,7 +83,7 @@ UI::UI(const ui::Config& conf)
 {
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER) < 0 ||
         IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) {
-        throw_sdl_uierror("Can't initialise SDL library");
+        throw UIError{"Can't initialise SDL library: {}", sdl_error()};
     }
 
     auto& vconf = _conf.video;
@@ -142,7 +142,7 @@ UI::UI(const ui::Config& conf)
         _win_width, _win_height, SDL_WINDOW_RESIZABLE);
 
     if (_window == nullptr) {
-        throw_sdl_uierror("Can't create main window");
+        throw UIError{"Can't create main window: {}", sdl_error()};
     }
 
     const Image& ico = icon();
@@ -156,18 +156,18 @@ UI::UI(const ui::Config& conf)
 #endif
 
     if (_icon == nullptr) {
-        throw_sdl_uierror("Can't create main window icon");
+        throw UIError{"Can't create main window icon: {}", sdl_error()};
     }
 
     SDL_SetWindowIcon(_window, _icon);
 
     _renderer = SDL_CreateRenderer(_window, -1, 0);
     if (_renderer == nullptr) {
-        throw_sdl_uierror("Can't create renderer");
+        throw UIError{"Can't create renderer: {}", sdl_error()};
     }
 
     if (SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND) < 0) {
-        throw_sdl_uierror("Can't set renderer blend mode");
+        throw UIError{"Can't set renderer blend mode: {}", sdl_error()};
     }
 
     _screen_raw = std::vector<Rgba>(vconf.width * vconf.height, CRT_COLOR);
@@ -176,7 +176,7 @@ UI::UI(const ui::Config& conf)
         _tex_width, _tex_height);
 
     if (_screen_tex == nullptr) {
-        throw_sdl_uierror("Can't create screen texture");
+        throw UIError{"Can't create screen texture: {}", sdl_error()};
     }
 
     _is_fullscreen = false;
@@ -344,7 +344,7 @@ void UI::render_line(unsigned line, const Scanline& sline)
     std::copy(sline.begin(), sline.end(), _screen_raw.begin() + line * _conf.video.width);
 }
 
-void UI::clear_screen(const Rgba& color)
+void UI::clear_screen(Rgba color)
 {
     std::fill(_screen_raw.begin(), _screen_raw.end(), color);
 }
@@ -641,54 +641,68 @@ void UI::kbd_event(const SDL_Event& event)
     }
 }
 
-void UI::joy_event(const SDL_Event& event)
+#ifdef __APPLE__    /* WTF */
+void UI::joy_event(const SDL_Event& ev)
 {
-    int32_t jid{};
+    int devid{};
+    SDL_JoystickID jid{};
     joyptr_t ejoy{};
+    SDL_Event event = ev;
 
     switch (event.type) {
     case SDL_JOYDEVICEADDED:
         /*
-         * New joystick detected.
+         * Joystick detected.
          */
-        jid = event.jdevice.which;
-        log.debug("ui: New game controller detected, id: {}\n", jid);
-        joy_add(jid);
+        devid = event.jdevice.which;
+        log.debug("ui: Joystick detected: devid {}\n", devid);
+        joy_add(devid);
         break;
 
     case SDL_JOYDEVICEREMOVED:
         /*
-         * Joystick removed.
+         * Joystick disconnected.
          */
         jid = event.jdevice.which;
-        log.debug("ui: Game controller disconnected, id: {}\n", jid);
+        log.debug("ui: Joystick disconnected: jid {}\n", jid);
         joy_del(jid);
         break;
 
     case SDL_JOYBUTTONDOWN:
-        jid = event.jbutton.which;
-        ejoy = find_joystick(jid);
-        if (ejoy) {
-            auto fire = ((event.jbutton.button & 1) ? ejoy->port().fire_b : ejoy->port().fire);
-            auto pos = ejoy->position() | fire;
-            ejoy->position(pos);
-        }
-        break;
-
     case SDL_JOYBUTTONUP:
         jid = event.jbutton.which;
-        ejoy = find_joystick(jid);
-        if (ejoy) {
-            auto fire = ((event.jbutton.button & 1) ? ejoy->port().fire_b : ejoy->port().fire);
-            auto pos = ejoy->position() & ~fire;
-            ejoy->position(pos);
+        if (event.jbutton.button < 6 || event.jbutton.button > 9) {
+            ejoy = find_joystick(jid);
+            if (ejoy) {
+                auto fire = ((event.jbutton.button & 1) ? ejoy->port().fire_b : ejoy->port().fire);
+                auto pos = (event.type == SDL_JOYBUTTONDOWN ? ejoy->position() | fire : ejoy->position() & ~fire);
+                ejoy->position(pos);
+            }
+            break;
         }
-        break;
+
+        /*
+         * I can't tell if this mess with gamepad buttons
+         * is caused by Apple or the SDL library.
+         */
+        if (event.type == SDL_JOYBUTTONDOWN) {
+            switch (event.jbutton.button) {
+            case 6: event.jhat.value = SDL_HAT_DOWN;  break;
+            case 7: event.jhat.value = SDL_HAT_LEFT;  break;
+            case 8: event.jhat.value = SDL_HAT_RIGHT; break;
+            case 9: event.jhat.value = SDL_HAT_UP;    break;
+            }
+        } else {
+            event.jhat.value = SDL_HAT_CENTERED;
+        }
+        event.type = SDL_JOYHATMOTION;
+        event.jhat.which = jid;
+        /* PASSTHROUGH */
 
     case SDL_JOYHATMOTION:
         jid = event.jhat.which;
         ejoy = find_joystick(jid);
-//        log.debug("ui: joy: {}, hat: {}, value: {}\n", jid, event.jhat.hat, event.jhat.value);
+        //log.debug("ui: jid {}, hat {}, value {}\n", jid, event.jhat.hat, event.jhat.value);
         if (ejoy) {
             uint8_t pos{};
             const auto& jport = ejoy->port();
@@ -728,10 +742,142 @@ void UI::joy_event(const SDL_Event& event)
     case SDL_JOYAXISMOTION:
         jid = event.jaxis.which;
         ejoy = find_joystick(jid);
-//        log.debug("ui: joy: {}, axis: {}, value: {}\n", jid, event.jaxis.axis, event.jaxis.value);
+        //log.debug("ui: jid {}, axis {}, value {}\n", jid, event.jaxis.axis, event.jaxis.value);
         if (ejoy) {
             /*
-             * FIXME
+             * Don't bother to explain axis values,
+             * it is guaranteed to change randomly with new updates of SDL or macOS.
+             */
+            auto* sjoy = _sdl_joys[jid];
+            uint8_t axis = event.jaxis.axis;
+            int16_t ix{}, iy{};
+
+            switch (axis) {
+            case 0:
+            case 2:
+                ix = event.jaxis.value;
+                iy = -SDL_JoystickGetAxis(sjoy, axis + 1);
+                break;
+            case 1:
+            case 3:
+                ix = SDL_JoystickGetAxis(sjoy, axis - 1);
+                iy = -event.jaxis.value;
+                break;
+            default:
+                log.warn("Unrecognised axis, jid {}, axis {}, value {}\n", jid, axis, event.jaxis.value);
+                return;
+            }
+
+            const auto& jport = ejoy->port();
+            uint8_t pos = ejoy->position() & (jport.fire | jport.fire_b);
+
+            pos |= (ix < -12452 ? jport.left :
+                   (ix >  12452 ? jport.right : 0));
+
+            pos |= (iy < -12452 ? jport.up :
+                   (iy >  12452 ? jport.down : 0));
+
+            ejoy->position(pos);
+        }
+        break;
+
+    case SDL_CONTROLLERDEVICEADDED:
+    case SDL_CONTROLLERDEVICEREMOVED:
+    case SDL_CONTROLLERDEVICEREMAPPED:
+    case SDL_JOYBALLMOTION:
+    case SDL_CONTROLLERAXISMOTION:
+    case SDL_CONTROLLERBUTTONDOWN:
+    case SDL_CONTROLLERBUTTONUP:
+    case SDL_CONTROLLERTOUCHPADDOWN:
+    case SDL_CONTROLLERTOUCHPADMOTION:
+    case SDL_CONTROLLERTOUCHPADUP:
+    case SDL_CONTROLLERSENSORUPDATE:
+    default:;
+    }
+}
+#else
+void UI::joy_event(const SDL_Event& event)
+{
+    int devid{};
+    SDL_JoystickID jid{};
+    joyptr_t ejoy{};
+
+    switch (event.type) {
+    case SDL_JOYDEVICEADDED:
+        /*
+         * New joystick detected.
+         */
+        devid = event.jdevice.which;
+        log.debug("ui: Joystick detected: devid {}\n", devid);
+        joy_add(jid);
+        break;
+
+    case SDL_JOYDEVICEREMOVED:
+        /*
+         * Joystick removed.
+         */
+        jid = event.jdevice.which;
+        log.debug("ui: Joystick disconnected: jid {}\n", jid);
+        joy_del(jid);
+        break;
+
+    case SDL_JOYBUTTONDOWN:
+    case SDL_JOYBUTTONUP:
+        jid = event.jbutton.which;
+        ejoy = find_joystick(jid);
+        if (ejoy) {
+            auto fire = ((event.jbutton.button & 1) ? ejoy->port().fire_b : ejoy->port().fire);
+            auto pos = (event.type == SDL_JOYBUTTONDOWN ? (ejoy->position() | fire) : (ejoy->position() & ~fire));
+            ejoy->position(pos);
+        }
+        break;
+
+    case SDL_JOYHATMOTION:
+        jid = event.jhat.which;
+        ejoy = find_joystick(jid);
+        //log.debug("ui: jid {}, hat {}, value {}\n", jid, event.jhat.hat, event.jhat.value);
+        if (ejoy) {
+            uint8_t pos{};
+            const auto& jport = ejoy->port();
+            switch (event.jhat.value) {
+            case SDL_HAT_UP:
+                pos = jport.up;
+                break;
+            case SDL_HAT_RIGHT:
+                pos = jport.right;
+                break;
+            case SDL_HAT_DOWN:
+                pos = jport.down;
+                break;
+            case SDL_HAT_LEFT:
+                pos = jport.left;
+                break;
+            case SDL_HAT_RIGHTUP:
+                pos = jport.right | jport.up;
+                break;
+            case SDL_HAT_RIGHTDOWN:
+                pos = jport.right | jport.down;
+                break;
+            case SDL_HAT_LEFTUP:
+                pos = jport.left | jport.up;
+                break;
+            case SDL_HAT_LEFTDOWN:
+                pos = jport.left | jport.down;
+                break;
+            case SDL_HAT_CENTERED:
+            default:
+                break;
+            }
+            ejoy->position(pos);
+        }
+        break;
+
+    case SDL_JOYAXISMOTION:
+        jid = event.jaxis.which;
+        ejoy = find_joystick(jid);
+        //log.debug("ui: jid {}, axis {}, value {}\n", jid, event.jaxis.axis, event.jaxis.value);
+        if (ejoy) {
+            /*
              * Axis 0: Left joystick X direction
              * Axis 2: Right joystick X direction
              *
@@ -740,39 +886,11 @@ void UI::joy_event(const SDL_Event& event)
              *
              * Positive value: Right or Down
              * Negative value: Left or Up
-             *
-             * macos has a weird driver and/or sdl gamepad implementation:
-             * The left joystick is recognised as hat, the hat is recognised as left joystick.
-             * Don't know if this is the usual apple bug or if it is an intended incompatibility.
-             * In either case, apple software sucks.
-             *
-             * Axis 0: Left joystick X direction (left negative, right positive)
-             * Axis 1: Left joystick Y direction (up negative, down positive)
-             * Axis 3: Right joystick X direction (left negative, right positive)
-             * Axis 4: Right joystick Y direction (up negative, down positive)
              */
             auto* sjoy = _sdl_joys[jid];
             uint8_t axis = event.jaxis.axis;
             int16_t ix{}, iy{};
 
-#ifdef __APPLE__
-            /* XXX SDL problem or apple incompatibility/bug? */
-            switch (axis) {
-            case 0:
-            case 3:
-                ix = event.jaxis.value;
-                iy = SDL_JoystickGetAxis(sjoy, axis + 1);
-                break;
-            case 1:
-            case 4:
-                ix = SDL_JoystickGetAxis(sjoy, axis - 1);
-                iy = event.jaxis.value;
-                break;
-            default:
-                log.warn("Unrecognised axis, jid: {}, axis: {}, value: {}\n", jid, axis, event.jaxis.value);
-                return;
-            }
-#else
             switch (axis) {
             case 0:
             case 2:
@@ -785,10 +903,10 @@ void UI::joy_event(const SDL_Event& event)
                 iy = event.jaxis.value;
                 break;
             default:
-                log.warn("Unrecognised axis, jid: {}, axis: {}, value: {}\n", jid, axis, event.jaxis.value);
+                log.warn("Unrecognised axis: jid {}, axis {}, value {}\n", jid, axis, event.jaxis.value);
                 return;
             }
-#endif
+
             const auto& jport = ejoy->port();
             uint8_t pos = ejoy->position() & (jport.fire | jport.fire_b);
 
@@ -816,6 +934,7 @@ void UI::joy_event(const SDL_Event& event)
     default:;
     }
 }
+#endif
 
 void UI::mouse_event(const SDL_Event& event)
 {
@@ -1009,7 +1128,7 @@ void UI::render_screen()
     int pitch{};
 
     if (SDL_LockTexture(_screen_tex, nullptr, reinterpret_cast<void**>(&dst), &pitch) < 0) {
-        throw_sdl_uierror("Can't lock texture");
+        throw UIError{"Can't lock texture: {}", sdl_error()};
     }
 
 #if 0
@@ -1021,7 +1140,7 @@ void UI::render_screen()
 
     switch (_conf.video.sleffect) {
     case SLEffect::None:
-        std::transform(_screen_raw.begin(), _screen_raw.end(), dst, [](const Rgba& px) {
+        std::transform(_screen_raw.begin(), _screen_raw.end(), dst, [](Rgba px) {
             return px.u32;
         });
         break;
@@ -1034,7 +1153,7 @@ void UI::render_screen()
          * Pixel values are increased to compensate for the loss of luminosity due to
          * these fake scanlines.
          */
-        std::transform(_screen_raw.begin(), _screen_raw.end(), dst, [](const Rgba& px) {
+        std::transform(_screen_raw.begin(), _screen_raw.end(), dst, [](Rgba px) {
             return (px * SCANLINE_LUMINOSITY).u32;
         });
         break;
@@ -1049,7 +1168,7 @@ void UI::render_screen()
          */
         unsigned line = 0;
         for (auto it = _screen_raw.begin(); it != _screen_raw.end(); it += _conf.video.width) {
-            std::for_each(it, it + _conf.video.width, [&dst, &line, this](const Rgba& px) {
+            std::for_each(it, it + _conf.video.width, [&dst, &line, this](Rgba px) {
                 Rgba pixel{px * ADV_SCANLINE_LUMINOSITY};
                 Rgba refle{px * ADV_SCANLINE_REFLECTION};
                 *dst = pixel.u32;
@@ -1076,7 +1195,7 @@ void UI::render_screen()
          */
         unsigned x = 0;
         for (auto it = _screen_raw.begin(); it != _screen_raw.end(); it += _conf.video.width) {
-            std::for_each(it, it + _conf.video.width, [&dst, &x, this](const Rgba& px) {
+            std::for_each(it, it + _conf.video.width, [&dst, &x, this](Rgba px) {
                 Rgba pixel{px * ADV_SCANLINE_LUMINOSITY};
                 Rgba refle{px * ADV_SCANLINE_REFLECTION};
                 *dst = pixel.u32;
@@ -1099,7 +1218,7 @@ void UI::render_screen()
     if (SDL_SetRenderDrawColor(_renderer, CRT_COLOR.r, CRT_COLOR.g, CRT_COLOR.b, CRT_COLOR.a) < 0 ||
         SDL_RenderClear(_renderer) < 0 ||
         SDL_RenderCopy(_renderer, _screen_tex, nullptr, &_screen_rect) < 0) {
-        throw_sdl_uierror("Can't copy texture");
+        throw IOError{"Can't copy texture: {}", sdl_error()};
     }
 
     postrender_effects();
@@ -1109,7 +1228,7 @@ void UI::render_screen()
     SDL_RenderPresent(_renderer);
 }
 
-inline UI::joyptr_t UI::find_joystick(unsigned jid)
+inline UI::joyptr_t UI::find_joystick(SDL_JoystickID jid)
 {
     auto it = std::find_if(_joys.begin(), _joys.end(), [jid](const joyptr_t& joy) {
         return (joy->joyid() == jid);
@@ -1118,23 +1237,27 @@ inline UI::joyptr_t UI::find_joystick(unsigned jid)
     return (it == _joys.end() ? joyptr_t{} : *it);
 }
 
-void UI::joy_add(int32_t jid)
+void UI::joy_add(int devid)
 {
+    SDL_Joystick* sjoy = SDL_JoystickOpen(devid);
+    if (sjoy == nullptr) {
+        log.error("ui: Can't open game controller, devid {}: {}. Game controller ignored.\n",
+            devid, sdl_error());
+        return;
+    }
+
+    SDL_JoystickID jid = SDL_JoystickInstanceID(sjoy);
     auto ejoy = find_joystick(jid);
     if (ejoy) {
-        log.debug("ui: Game controlled already handled, id: {}.\n", jid);
+        log.debug("ui: Game controller already handled: devid {}, jid {}.\n", devid, jid);
+        SDL_JoystickClose(sjoy);
         return;
     }
 
     ejoy = find_joystick(Joystick::JOYID_UNASSIGNED);
     if (!ejoy) {
-        log.debug("ui: No space for a new game controller, id: {}. New controller ignored.\n", jid);
-        return;
-    }
-
-    SDL_Joystick* sjoy = SDL_JoystickOpen(jid);
-    if (sjoy == nullptr) {
-        log.error("ui: Can't open new game controller, id: {}: {}. New game controller ignored.\n", jid, sdl_error());
+        log.debug("ui: No space for a new game controller, devid {}. Game controller ignored.\n", devid);
+        SDL_JoystickClose(sjoy);
         return;
     }
 
@@ -1143,10 +1266,10 @@ void UI::joy_add(int32_t jid)
      */
     _sdl_joys[jid] = sjoy;
     ejoy->reset(jid);
-    log.debug("ui: New game controller added, id: {}, {:p}\n", jid, static_cast<void*>(sjoy));
+    log.debug("ui: Game controller added: devid {}, jid {}, {:p}\n", devid, jid, static_cast<void*>(sjoy));
 }
 
-void UI::joy_del(int32_t jid)
+void UI::joy_del(SDL_JoystickID jid)
 {
     auto ejoy = find_joystick(jid);
     if (!ejoy) {
@@ -1165,7 +1288,7 @@ void UI::joy_del(int32_t jid)
         ejoy->reset();
         SDL_JoystickClose(sjoy);
         _sdl_joys.erase(jid);
-        log.debug("ui: Game controller deleted, id: {}, {:p}\n", jid, static_cast<void*>(sjoy));
+        log.debug("ui: Game device controller deleted: id {}, {:p}\n", jid, static_cast<void*>(sjoy));
     }
 }
 

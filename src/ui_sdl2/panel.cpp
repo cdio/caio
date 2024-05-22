@@ -47,14 +47,14 @@ void Panel::reset(SDL_Renderer* renderer)
     if (_renderer != nullptr) {
         int displays = SDL_GetNumVideoDisplays();
         if (displays <= 0) {
-            throw_sdl_uierror("panel: Can't get number of displays");
+            throw UIError{"panel: Can't get number of displays: {}", sdl_error()};
         }
 
         int max_width{};
         SDL_DisplayMode dmode{};
         for (int displ = 0; displ < displays; ++displ) {
             if (SDL_GetDesktopDisplayMode(0, &dmode) < 0) {
-                throw_sdl_uierror("panel: Can't get desktop display mode for display: " + std::to_string(displ));
+                throw UIError{"panel: Can't get desktop display mode for display {}: {}", displ, sdl_error()};
             }
 
             if (dmode.w > max_width) {
@@ -66,7 +66,7 @@ void Panel::reset(SDL_Renderer* renderer)
             max_width, max_width * HEIGHT_RATIO);
 
         if (_tex == nullptr) {
-            throw_sdl_uierror("panel: Can't create texture");
+            throw UIError{"panel: Can't create texture: {}", sdl_error()};
         }
     }
 }
