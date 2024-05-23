@@ -164,7 +164,7 @@ const Mos6502::Instruction Mos6502::instr_set[256] = {
 
     { "NOP #$*",        Mos6502::i_NOP,         MODE_IMM,   2,  2   },  /* 80 */
     { "STA ($*, X)",    Mos6502::i_STA,         MODE_IND_X, 6,  2   },  /* 81 */
-    { "NOP $#*",        Mos6502::i_NOP,         MODE_IMM,   2,  2   },  /* 82 */
+    { "NOP #$*",        Mos6502::i_NOP,         MODE_IMM,   2,  2   },  /* 82 */
     { "SAX ($*, X)",    Mos6502::i_SAX,         MODE_IND_X, 6,  2   },  /* 83 */
     { "STY $*",         Mos6502::i_STY,         MODE_ZP,    3,  2   },  /* 84 */
     { "STA $*",         Mos6502::i_STA,         MODE_ZP,    3,  2   },  /* 85 */
@@ -182,7 +182,7 @@ const Mos6502::Instruction Mos6502::instr_set[256] = {
     { "BCC $+",         Mos6502::i_BCC,         MODE_REL,   2,  2   },  /* 90 */
     { "STA ($*), Y",    Mos6502::i_STA,         MODE_IND_Y, 6,  2   },  /* 91 */
     { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,  1   },  /* 92 */
-    { "SHA ($*), Y",    Mos6502::i_SHA_zp,      MODE_ZP,    6,  2   },  /* 93 */ /* It is not MODE_ZP_Y */
+    { "SHA ($*), Y",    Mos6502::i_SHA,         MODE_IND_Y, 6,  2   },  /* 93 */
     { "STY $*, X",      Mos6502::i_STY,         MODE_ZP_X,  4,  2   },  /* 94 */
     { "STA $*, X",      Mos6502::i_STA,         MODE_ZP_X,  4,  2   },  /* 95 */
     { "STX $*, Y",      Mos6502::i_STX,         MODE_ZP_Y,  4,  2   },  /* 96 */
@@ -194,7 +194,7 @@ const Mos6502::Instruction Mos6502::instr_set[256] = {
     { "SHY $^, X",      Mos6502::i_SHY,         MODE_ABS,   5,  3   },  /* 9C */ /* It is not MODE_ABS_X */
     { "STA $^, X",      Mos6502::i_STA,         MODE_ABS_X, 5,  3   },  /* 9D */
     { "SHX $^, Y",      Mos6502::i_SHX,         MODE_ABS,   5,  3   },  /* 9E */ /* It is not MODE_ABS_Y */
-    { "SHA $^, Y",      Mos6502::i_SHA,         MODE_ABS,   5,  3   },  /* 9F */ /* It is not MODE_ABS_Y */
+    { "SHA $^, Y",      Mos6502::i_SHA,         MODE_ABS_Y, 5,  3   },  /* 9F */
 
     { "LDY #$*",        Mos6502::i_LDY_imm,     MODE_IMM,   2,  2   },  /* A0 */
     { "LDA ($*, X)",    Mos6502::i_LDA,         MODE_IND_X, 6,  2   },  /* A1 */
@@ -207,7 +207,7 @@ const Mos6502::Instruction Mos6502::instr_set[256] = {
     { "TAY",            Mos6502::i_TAY,         MODE_NONE,  2,  1   },  /* A8 */
     { "LDA #$*",        Mos6502::i_LDA_imm,     MODE_IMM,   2,  2   },  /* A9 */
     { "TAX",            Mos6502::i_TAX,         MODE_NONE,  2,  1   },  /* AA */
-    { "LAX #$*",        Mos6502::i_LAX_imm,     MODE_IMM,   2,  2   },  /* AB */
+    { "LXA #$*",        Mos6502::i_LXA,         MODE_IMM,   2,  2   },  /* AB */
     { "LDY $^",         Mos6502::i_LDY,         MODE_ABS,   4,  3   },  /* AC */
     { "LDA $^",         Mos6502::i_LDA,         MODE_ABS,   4,  3   },  /* AD */
     { "LDX $^",         Mos6502::i_LDX,         MODE_ABS,   4,  3   },  /* AE */
@@ -232,7 +232,7 @@ const Mos6502::Instruction Mos6502::instr_set[256] = {
 
     { "CPY #$*",        Mos6502::i_CPY_imm,     MODE_IMM,   2,  2   },  /* C0 */
     { "CMP ($*, X)",    Mos6502::i_CMP,         MODE_IND_X, 6,  2   },  /* C1 */
-    { "NOP $#*",        Mos6502::i_NOP,         MODE_IMM,   2,  2   },  /* C2 */
+    { "NOP #$*",        Mos6502::i_NOP,         MODE_IMM,   2,  2   },  /* C2 */
     { "DCP ($*, X)",    Mos6502::i_DCP,         MODE_IND_X, 8,  2   },  /* C3 */
     { "CPY $*",         Mos6502::i_CPY,         MODE_ZP,    3,  2   },  /* C4 */
     { "CMP $*",         Mos6502::i_CMP,         MODE_ZP,    3,  2   },  /* C5 */
@@ -266,7 +266,7 @@ const Mos6502::Instruction Mos6502::instr_set[256] = {
 
     { "CPX #$*",        Mos6502::i_CPX_imm,     MODE_IMM,   2,  2   },  /* E0 */
     { "SBC ($*, X)",    Mos6502::i_SBC,         MODE_IND_X, 6,  2   },  /* E1 */
-    { "NOP $#*",        Mos6502::i_NOP,         MODE_IMM,   2,  2   },  /* E2 */
+    { "NOP #$*",        Mos6502::i_NOP,         MODE_IMM,   2,  2   },  /* E2 */
     { "ISC ($*, X)",    Mos6502::i_ISC,         MODE_IND_X, 8,  2   },  /* E3 */
     { "CPX $*",         Mos6502::i_CPX,         MODE_ZP,    3,  2   },  /* E4 */
     { "SBC $*",         Mos6502::i_SBC,         MODE_ZP,    3,  2   },  /* E5 */
@@ -301,7 +301,7 @@ const Mos6502::Instruction Mos6502::instr_set[256] = {
 
 std::string Mos6502::Registers::to_string(Mos6502::Flags fl)
 {
-    return std::format("{}{}-{}{}{}{}{}",
+    return std::format("{}{}1{}{}{}{}{}",
         ((fl & Flags::N) ? "N" : "-"),
         ((fl & Flags::V) ? "V" : "-"),
         ((fl & Flags::B) ? "B" : "-"),
@@ -333,7 +333,7 @@ void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, con
         return this->_mmap;
     };
 
-    auto regvalue = [this](const std::string& rname) -> uint16_t {
+    auto regvalue = [this](std::string_view rname) -> uint16_t {
         static std::map<std::string, std::function<int(const Mos6502&)>> regvals{
             { "ra",   [](const Mos6502& cpu) { return cpu._regs.A;  }},
             { "rx",   [](const Mos6502& cpu) { return cpu._regs.X;  }},
@@ -348,17 +348,17 @@ void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, con
             { "rp.z", [](const Mos6502& cpu) { return cpu.test_Z(); }},
             { "rp.c", [](const Mos6502& cpu) { return cpu.test_C(); }}
         };
-        auto it = regvals.find(rname);
+        auto it = regvals.find(std::string{rname});
         if (it != regvals.end()) {
             return it->second(*this);
         }
         throw InvalidArgument{};
     };
 
-    auto bpdoc = [](const std::string& cmd) -> std::string {
+    auto bpdoc = [](std::string_view cmd) -> std::string {
         return {
-            cmd + " help | h | ?\n" +
-            cmd + " <addr> [<cond>]\n\n"
+            std::string{cmd} + " help | h | ?\n" +
+            std::string{cmd} + " <addr> [<cond>]\n\n"
             "<cond> = <val> <op> <val>\n\n"
             "<val>  = [*] { [#][$]<u16>| ra | rx | ry | rs | rp | rp.n | rp.v | rp.b | rp.i | rp.z | rp.c }\n\n"
             "<op>   = '<' | '>' | '<=' | '>=' | '==' | '!=' | '&' | '|'\n\n"
@@ -397,7 +397,7 @@ void Mos6502::init(const sptr_t<ASpace>& mmap)
     reset();
 }
 
-void Mos6502::loglevel(const std::string& lvs)
+void Mos6502::loglevel(std::string_view lvs)
 {
     _log.loglevel(lvs);
 }
@@ -415,7 +415,6 @@ void Mos6502::reset()
     };
 
     _halted = false;
-
     flag(0);
 }
 
@@ -460,7 +459,7 @@ const Mos6502::Registers& Mos6502::regs() const
 void Mos6502::disass(std::ostream& os, addr_t start, size_t count, bool show_pc)
 {
     for (addr_t addr = start; count; --count) {
-        const std::string& line = disass(addr, show_pc);
+        auto line = disass(addr, show_pc);
         os << line << "\n";
     }
 }
@@ -509,7 +508,7 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
         if ((v == '*' && ins.size != 2) ||
             (v == '+' && ins.size != 2) ||
             (v == '^' && ins.size != 3)) {
-            log.fatal("{}: Invalid instruction encodeing: opcode: {}, size: {}, fmt: \"{}\"\n",
+            log.fatal("{}: Invalid instruction encoding: opcode: {}, size: {}, fmt: \"{}\"\n",
                 Name::type(), caio::to_string(opcode), ins.size, ins.format);
             /* NOTREACHED */
         }
@@ -601,7 +600,7 @@ size_t Mos6502::single_step()
 
     if (addr) {
         push_addr(_regs.PC);
-        push_P();
+        push(_regs.P);
         _regs.PC = addr;
         flag(Flags::I);
         if (_log.is_debug()) {
@@ -659,7 +658,7 @@ size_t Mos6502::single_step()
 
         case MODE_ZP_X:
             arg += _regs.X;
-            arg %= 0x0100;                      /* Zero page index bug */
+            arg %= 0x0100;              /* Zero page index bug */
             break;
 
         case MODE_ABS_X:
@@ -668,7 +667,7 @@ size_t Mos6502::single_step()
 
         case MODE_ZP_Y:
             arg += _regs.Y;
-            arg %= 0x0100;                     /* Zero page index bug */
+            arg %= 0x0100;              /* Zero page index bug */
             break;
 
         case MODE_ABS_Y:
@@ -676,15 +675,22 @@ size_t Mos6502::single_step()
             break;
 
         case MODE_IND_X:
-            arg = read_addr(arg + _regs.X);     /* XXX: Zero page index bug */
+            arg += _regs.X;
+            arg %= 0x100;               /* Zero page index bug */
+            arg = read_addr(arg);
             break;
 
         case MODE_IND_Y:
-            arg = read_addr(arg) + _regs.Y;     /* XXX: Zero page index bug */
+            arg = read_addr(arg) + _regs.Y;
             break;
 
         case MODE_IND:
-            arg = read_addr(arg);
+            if ((arg & 0x00FF) != 0x00FF) {
+                arg = read_addr(arg);
+            } else {
+                /* Indirect mode: Last byte of page bug */
+                arg = (read(arg & 0xFF00) << 8) | read(arg);
+            }
             break;
         }
 
@@ -727,7 +733,7 @@ size_t Mos6502::tick(const Clock& clk)
          * System breakpoint (from some part of the emulator).
          */
         auto& fn = bp->second.first;
-        auto *arg = bp->second.second;
+        auto* arg = bp->second.second;
         fn(*this, arg);
     }
 
@@ -739,7 +745,6 @@ addr_t Mos6502::read_addr(size_t addr)
 {
     uint8_t lo = read(addr);
     uint8_t hi = read(addr + 1);
-
     return (static_cast<addr_t>(hi) << 8 | lo);
 }
 
@@ -747,7 +752,6 @@ void Mos6502::write_addr(addr_t addr, addr_t data)
 {
     uint8_t lo = static_cast<uint8_t>(data & 0xFF);
     uint8_t hi = static_cast<uint8_t>(data >> 8);
-
     write(addr, lo);
     write(addr + 1, hi);
 }

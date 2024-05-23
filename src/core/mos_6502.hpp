@@ -20,10 +20,11 @@
 
 #include <atomic>
 #include <functional>
-#include <iostream>
 #include <map>
 #include <memory>
+#include <ostream>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "aspace.hpp"
@@ -39,6 +40,9 @@ namespace caio {
 
 /**
  * MOS 6502 emulator.
+ * @see https://www.nesdev.org/6502_cpu.txt
+ * @see https://www.nesdev.org/extra_instructions.txt
+ * @see https://www.nesdev.org/undocumented_opcodes.txt
  */
 class Mos6502 : public Clockable, public Name {
 public:
@@ -97,7 +101,6 @@ public:
         uint8_t P;
 
         std::string to_string() const;
-
         static std::string to_string(Flags fl);
     };
 
@@ -106,7 +109,7 @@ public:
      * @param type  CPU type;
      * @param label CPU label.
      */
-    Mos6502(const std::string& type = TYPE, const std::string& label = LABEL)
+    Mos6502(std::string_view type = TYPE, std::string_view label = LABEL)
         : Name{type, label} {
     }
 
@@ -117,7 +120,7 @@ public:
      * @param label CPU label.
      * @see ASpace
      */
-    Mos6502(const sptr_t<ASpace>& mmap, const std::string& type = TYPE, const std::string& label = LABEL)
+    Mos6502(const sptr_t<ASpace>& mmap, std::string_view type = TYPE, std::string_view label = LABEL)
         : Name{type, (label.empty() ? LABEL : label)} {
         init(mmap);
     }
@@ -146,9 +149,9 @@ public:
     /**
      * Set the single-step log level.
      * @param lvs Log level string to set.
-     * @see Logger::loglevel(const std::string&)
+     * @see Logger::loglevel(std::string_view)
      */
-    void loglevel(const std::string& lvs);
+    void loglevel(std::string_view lvs);
 
     /**
      * Get the log level for the single-step operation.
@@ -286,10 +289,27 @@ protected:
      * address is executed and the PC is updated to point to the next instruction.
      * If the RDY pin input is not active this method does nothing.
      * @return The clock cycles that must pass until the clock is allowd to call
-     *         this method again (clock cycles consumed by the executed instruction);
-     *         clockable::HALT if the KIL (HALT) instruction was executed.
+     * this method again (clock cycles consumed by the executed instruction);
+     * clockable::HALT if the KIL (HALT) instruction was executed.
      */
     size_t single_step();
+
+    /**
+     * Enable/disable support for decimal mode.
+     * If decimal mode is disabled the D flag is ignored and binary operations are performed.
+     * @param act Enable/disable flag.
+     */
+    void decimal_enable(int act) {
+        _decimal_en = act;
+    }
+
+    /**
+     * Get the decimal mode status.
+     * @return True if the decimal mode is enabled and the decimal flag is set; false otherwise.
+     */
+    bool decimal_mode() const {
+        return (_decimal_en && test_D());
+    }
 
     void flag(uint8_t bits, bool act = true) {
         _regs.P = (act ? (_regs.P | bits) : (_regs.P & (~bits))) | Flags::_;
@@ -368,11 +388,11 @@ protected:
     }
 
     void push(uint8_t value) {
-        write(S_base + _regs.S--, value);
+        write(S_base | _regs.S--, value);
     }
 
     uint8_t pop() {
-        return read(S_base + (++_regs.S));
+        return read(S_base | (++_regs.S));
     }
 
     void push_addr(addr_t value) {
@@ -389,22 +409,15 @@ protected:
         return addr;
     }
 
-    void push_P() {
-        push(_regs.P);
-    }
-
-    void pop_P() {
-        _regs.P = pop() | Flags::_;
-    }
-
     Logger          _log{};
     uptr_t<Monitor> _monitor{};
     Registers       _regs{};
     sptr_t<ASpace>  _mmap{};
     IRQPin          _irq_pin{};
     IRQPin          _nmi_pin{};
-    InputPin        _rdy_pin{};
+    InputPin        _rdy_pin{true};
     bool            _halted{};
+    bool            _decimal_en{true};
 
     std::atomic_bool _break{};
     std::map<addr_t, std::pair<breakpoint_cb_t, void*>> _breakpoints{};
@@ -691,7 +704,7 @@ protected:
     static int i_SRE       (Mos6502&, addr_t);
     static int i_RRA       (Mos6502&, addr_t);
     static int i_SAX       (Mos6502&, addr_t);
-    static int i_LAX_imm   (Mos6502&, addr_t);
+    static int i_LXA       (Mos6502&, addr_t);
     static int i_LAX       (Mos6502&, addr_t);
     static int i_DCP       (Mos6502&, addr_t);
     static int i_ISC       (Mos6502&, addr_t);
@@ -700,7 +713,7 @@ protected:
     static int i_ARR_imm   (Mos6502&, addr_t);
     static int i_XAA_imm   (Mos6502&, addr_t);
     static int i_SBX_imm   (Mos6502&, addr_t);
-    static int i_SHA_zp    (Mos6502&, addr_t);
+    static int i_SHA_iy    (Mos6502&, addr_t);
     static int i_SHA       (Mos6502&, addr_t);
     static int i_SHY       (Mos6502&, addr_t);
     static int i_SHX       (Mos6502&, addr_t);

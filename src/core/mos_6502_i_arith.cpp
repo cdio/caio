@@ -20,45 +20,39 @@
 
 namespace caio {
 
-/********************************************************************************
- * AND
- ********************************************************************************/
 int Mos6502::i_AND_imm(Mos6502& self, addr_t value)
 {
     /*
-     * AND #$00
+     * AND accumulator
+     * AND #$00         - 29
      */
-    self._regs.A = self.logic_and(self._regs.A, static_cast<uint8_t>(value));
+    self._regs.A = self.logic_and(self._regs.A, value);
     return 0;
 }
 
 int Mos6502::i_AND(Mos6502& self, addr_t addr)
 {
     /*
-     * AND $00
-     * AND $00, X
-     * AND $0000
-     * AND $0000, Y
-     * AND $0000, X
-     * AND ($00, X)
-     * AND ($00), Y
+     * AND accumulator with memory
+     * AND ($00, X)     - 21
+     * AND $00          - 25
+     * AND $0000        - 2D
+     * AND ($00), Y     - 31
+     * AND $00, X       - 35
+     * AND $0000, Y     - 39
+     * AND $0000, X     - 3D
      */
     uint8_t value = self.read(addr);
     return i_AND_imm(self, value);
 }
 
-/********************************************************************************
- * BIT (AND Accumulator without store. Modify flags only)
- ********************************************************************************/
 int Mos6502::i_BIT(Mos6502& self, addr_t addr)
 {
     /*
-     * BIT $00
-     * BIT $0000
-     *
+     * AND accumulator without store (modify flags only)
+     * BIT $00          - 24 - 3 cycles
+     * BIT $0000        - 2C - 4 cycles
      * Flags: N V Z
-     *
-     * 3 cycles
      */
     uint8_t value = self.read(addr);
     self.set_N(value);
@@ -68,67 +62,61 @@ int Mos6502::i_BIT(Mos6502& self, addr_t addr)
     return 0;
 }
 
-/********************************************************************************
- * ORA
- ********************************************************************************/
 int Mos6502::i_ORA_imm(Mos6502& self, addr_t value)
 {
     /*
-     * ORA #$00
+     * OR accumulator
+     * ORA #$00         - 09
      */
-    self._regs.A = self.logic_or(self._regs.A, static_cast<uint8_t>(value));
+    self._regs.A = self.logic_or(self._regs.A, value);
     return 0;
 }
 
 int Mos6502::i_ORA(Mos6502& self, addr_t addr)
 {
     /*
-     * ORA $00
-     * ORA $00, X
-     * ORA $0000
-     * ORA $0000, X
-     * ORA $0000, Y
-     * ORA ($00, X)
-     * ORA ($00), Y
+     * OR accumulator with memory
+     * ORA ($00, X)     - 01
+     * ORA $00          - 05
+     * ORA $0000        - 0D
+     * ORA ($00), Y     - 11
+     * ORA $00, X       - 15
+     * ORA $0000, Y     - 19
+     * ORA $0000, X     - 1D
      */
     uint8_t value = self.read(addr);
     return i_ORA_imm(self, value);
 }
 
-/********************************************************************************
- * EOR
- ********************************************************************************/
 int Mos6502::i_EOR_imm(Mos6502& self, addr_t value)
 {
     /*
-     * EOR #$00
+     * XOR accumulator
+     * EOR #$00         - 49
      */
-    self._regs.A = self.logic_eor(self._regs.A, static_cast<uint8_t>(value));
+    self._regs.A = self.logic_eor(self._regs.A, value);
     return 0;
 }
 
 int Mos6502::i_EOR(Mos6502& self, addr_t addr)
 {
     /*
-     * EOR $00
-     * EOR $00, X
-     * EOR $0000
-     * EOR $0000, Y
-     * EOR $0000, X
-     * EOR ($00, X)
-     * EOR ($00, Y)
+     * XOR accumulator with memory
+     * EOR ($00, X)     - 41
+     * EOR $00          - 45
+     * EOR $0000        - 4D
+     * EOR ($00, Y)     - 51
+     * EOR $0000, X     - 55
+     * EOR $0000, Y     - 59
+     * EOR $00, X       - 5D
      */
     uint8_t value = self.read(addr);
     return i_EOR_imm(self, value);
 }
 
-/********************************************************************************
- * ADC
- ********************************************************************************/
 uint8_t Mos6502::adc_bin(uint8_t v1, uint8_t v2)
 {
     unsigned r = v1 + v2 + test_C();
-
     bool s1 = v1 & 0x80;
     bool s2 = v2 & 0x80;
     bool sr = r & 0x80;
@@ -136,14 +124,12 @@ uint8_t Mos6502::adc_bin(uint8_t v1, uint8_t v2)
     flag_C(r & 0x100);
     set_N(r);
     set_Z(r & 0xFF);
-
     return (r & 0xFF);
 }
 
 uint8_t Mos6502::adc_bcd(uint8_t v1, uint8_t v2)
 {
     /*
-     * See https://sourceforge.net/p/vice-emu/code/HEAD/tree/testprogs/decimalmode.c
      * See "65xx Processor Data" by Mark Ormston
      */
     unsigned r = (v1 & 0x0F) + (v2 & 0x0F) + test_C();
@@ -168,41 +154,39 @@ uint8_t Mos6502::adc_bcd(uint8_t v1, uint8_t v2)
 
 uint8_t Mos6502::adc(uint8_t v1, uint8_t v2)
 {
-    return (test_D() ? adc_bcd(v1, v2) : adc_bin(v1, v2));
+    return (decimal_mode() ? adc_bcd(v1, v2) : adc_bin(v1, v2));
 }
 
 int Mos6502::i_ADC_imm(Mos6502& self, addr_t value)
 {
     /*
-     * ADC #$00
+     * ADD accumulator with carry
+     * ADC #$00         - 69
      */
-    self._regs.A = self.adc(self._regs.A, static_cast<uint8_t>(value));
+    self._regs.A = self.adc(self._regs.A, value);
     return 0;
 }
 
 int Mos6502::i_ADC(Mos6502& self, addr_t addr)
 {
     /*
-     * ADC $00
-     * ADC $00, X
-     * ADC $0000
-     * ADC $0000, X
-     * ADC $0000, Y
-     * ADC ($00, X)
-     * ADC ($00), Y
+     * ADD accumultaor and memory with carry
+     * ADC ($00, X)     - 61
+     * ADC $00          - 65
+     * ADC $0000        - 6D
+     * ADC ($00), Y     - 71
+     * ADC $00, X       - 75
+     * ADC $0000, Y     - 79
+     * ADC $0000, X     - 7D
      */
     uint8_t value = self.read(addr);
     return i_ADC_imm(self, value);
 }
 
-/********************************************************************************
- * SBC
- ********************************************************************************/
 uint8_t Mos6502::sbc_bin(uint8_t v1, uint8_t v2)
 {
     uint16_t b = (test_C() ? 0x0000 : 0xFFFF);
     uint16_t r = v1 - v2 + b;
-
     bool s1 = v1 & 0x80;
     bool s2 = v2 & 0x80;
     bool sr = r & 0x80;
@@ -210,14 +194,12 @@ uint8_t Mos6502::sbc_bin(uint8_t v1, uint8_t v2)
     flag_C(!(r & 0x100));
     set_N(r);
     set_Z(r);
-
     return (r & 255);
 }
 
 uint8_t Mos6502::sbc_bcd(uint8_t v1, uint8_t v2)
 {
     /*
-     * See https://sourceforge.net/p/vice-emu/code/HEAD/tree/testprogs/decimalmode.c
      * See "65xx Processor Data" by Mark Ormston
      */
     unsigned t  = v1 - v2 - (test_C() ^ 1);
@@ -243,120 +225,116 @@ uint8_t Mos6502::sbc_bcd(uint8_t v1, uint8_t v2)
 
 uint8_t Mos6502::sbc(uint8_t v1, uint8_t v2)
 {
-    return (test_D() ? sbc_bcd(v1, v2) : sbc_bin(v1, v2));
+    return (decimal_mode() ? sbc_bcd(v1, v2) : sbc_bin(v1, v2));
 }
 
 int Mos6502::i_SBC_imm(Mos6502& self, addr_t value)
 {
     /*
-     * SBC #$00
+     * Substract accumulator with borrow
+     * SBC #$00         - E9
+     * SBC #$00         - EB (undocumented or invalid instruction)
      */
-    self._regs.A = self.sbc(self._regs.A, static_cast<uint8_t>(value));
+    self._regs.A = self.sbc(self._regs.A, value);
     return 0;
 }
 
 int Mos6502::i_SBC(Mos6502& self, addr_t addr)
 {
     /*
-     * SBC $00
-     * SBC $00, X
-     * SBC $0000
-     * SBC $0000, X
-     * SBC $0000, Y
-     * SBC ($00, X)
-     * SBC ($00), Y
+     * Substract accumulator and memory with borrow
+     * SBC ($00, X)     - E1
+     * SBC $00          - E5
+     * SBC $0000        - ED
+     * SBC ($00), Y     - F1
+     * SBC $00, X       - F5
+     * SBC $0000, Y     - F9
+     * SBC $0000, X     - FD
      */
     uint8_t value = self.read(addr);
     return i_SBC_imm(self, value);
 }
 
-/********************************************************************************
- * CMP
- ********************************************************************************/
 int Mos6502::i_CMP_imm(Mos6502& self, addr_t value)
 {
     /*
-     * CMP #$00
+     * Compare accumulator and value
+     * CMP #$00         - C9
      */
-    self.cmp(self._regs.A, static_cast<uint8_t>(value));
+    self.cmp(self._regs.A, value);
     return 0;
 }
 
 int Mos6502::i_CMP(Mos6502& self, addr_t addr)
 {
     /*
-     * CMP $00
-     * CMP $00, X
-     * CMP $0000
-     * CMP $0000, X
-     * CMP $0000, Y
-     * CPM ($00, X)
-     * CPM ($00, Y)
+     * Compare accumulator and memory
+     * CPM ($00, X)     - C1
+     * CMP $00          - C5
+     * CMP $0000        - CD
+     * CMP ($00, Y)     - D1
+     * CMP $00, X       - D5
+     * CMP $0000, Y     - D9
+     * CMP $0000, X     - DD
      */
     uint8_t value = self.read(addr);
     return i_CMP_imm(self, value);
 }
 
-/********************************************************************************
- * CPX
- ********************************************************************************/
 int Mos6502::i_CPX_imm(Mos6502& self, addr_t value)
 {
     /*
-     * CPX #$00
+     * Compary X and value
+     * CPX #$00         - E0
      */
-    self.cmp(self._regs.X, static_cast<uint8_t>(value));
+    self.cmp(self._regs.X, value);
     return 0;
 }
 
 int Mos6502::i_CPX(Mos6502& self, addr_t addr)
 {
     /*
-     * CPX $00
-     * CPX $0000
+     * Compare X and memory
+     * CPX $00          - E4
+     * CPX $0000        - EC
      */
     uint8_t value = self.read(addr);
     return i_CPX_imm(self, value);
 }
 
-
-/********************************************************************************
- * CPY
- ********************************************************************************/
 int Mos6502::i_CPY_imm(Mos6502& self, addr_t value)
 {
     /*
-     * CPY #$00
+     * Compary Y and value
+     * CPY #$00         - C0
      */
-    self.cmp(self._regs.Y, static_cast<uint8_t>(value));
+    self.cmp(self._regs.Y, value);
     return 0;
 }
 
 int Mos6502::i_CPY(Mos6502& self, addr_t addr)
 {
     /*
-     * CPY $00
-     * CPY $0000
+     * Compary Y and memory
+     * CPY $00          - C4
+     * CPY $0000        - CC
      */
     uint8_t value = self.read(addr);
     return i_CPY_imm(self, value);
 }
 
-/********************************************************************************
- * DEC
- ********************************************************************************/
 int Mos6502::i_DEC(Mos6502& self, addr_t addr)
 {
     /*
-     * DEC $00
-     * DEC $00, X
-     * DEC $0000
-     * DEC $0000, X
-     *
+     * Decrement memory
+     * DEC $00          - C6
+     * DEC $0000        - CE
+     * DEC $00, X       - D6
+     * DEC $0000, X     - DE
      * Flags: N Z
      */
     uint8_t value = self.read(addr);
-    self.write(addr, value); // Read-Write-Modify instruction.
+    self.write(addr, value);    /* Read-Write-Modify instruction */
     --value;
     self.set_N(value);
     self.set_Z(value);
@@ -364,14 +342,11 @@ int Mos6502::i_DEC(Mos6502& self, addr_t addr)
     return 0;
 }
 
-/********************************************************************************
- * DEX
- ********************************************************************************/
 int Mos6502::i_DEX(Mos6502& self, addr_t)
 {
     /*
-     * DEX
-     *
+     * Decrement X
+     * DEX              - CA
      * Flags: N Z
      */
     --self._regs.X;
@@ -380,14 +355,11 @@ int Mos6502::i_DEX(Mos6502& self, addr_t)
     return 0;
 }
 
-/********************************************************************************
- * DEY
- ********************************************************************************/
 int Mos6502::i_DEY(Mos6502& self, addr_t)
 {
     /*
-     * DEY
-     *
+     * Decrement Y
+     * DEY              - 88
      * Flags: N Z
      */
     --self._regs.Y;
@@ -396,21 +368,18 @@ int Mos6502::i_DEY(Mos6502& self, addr_t)
     return 0;
 }
 
-/********************************************************************************
- * INC
- ********************************************************************************/
 int Mos6502::i_INC(Mos6502& self, addr_t addr)
 {
     /*
-     * INC $00
-     * INC $00, X
-     * INC $0000
-     * INC $0000, X
-     *
+     * Increment memory
+     * INC $00          - E6
+     * INC $0000        - EE
+     * INC $00, X       - F6
+     * INC $0000, X     - FE
      * Flags: N Z
      */
     uint8_t value = self.read(addr);
-    self.write(addr, value); // Read-Write-Modify instruction.
+    self.write(addr, value);    /* Read-Write-Modify instruction */
     ++value;
     self.write(addr, value);
     self.set_N(value);
@@ -418,14 +387,11 @@ int Mos6502::i_INC(Mos6502& self, addr_t addr)
     return 0;
 }
 
-/********************************************************************************
- * INX
- ********************************************************************************/
 int Mos6502::i_INX(Mos6502& self, addr_t)
 {
     /*
-     * INX
-     *
+     * Increment X
+     * INX              - E8
      * Flags: N Z
      */
     ++self._regs.X;
@@ -434,14 +400,11 @@ int Mos6502::i_INX(Mos6502& self, addr_t)
     return 0;
 }
 
-/********************************************************************************
- * INY
- ********************************************************************************/
 int Mos6502::i_INY(Mos6502& self, addr_t _)
 {
     /*
-     * INY
-     *
+     * Increment Y
+     * INY              - C8
      * Flags: N Z
      */
     ++self._regs.Y;
@@ -450,14 +413,11 @@ int Mos6502::i_INY(Mos6502& self, addr_t _)
     return 0;
 }
 
-/********************************************************************************
- * ASL (shift left 1 bit)
- ********************************************************************************/
 int Mos6502::i_ASL_acc(Mos6502& self, addr_t)
 {
     /*
-     * ASL
-     *
+     * Shift left accumulator 1 bit
+     * ASL              - 0A
      * Flags: N Z C
      */
     self._regs.A = self.logic_shl(self._regs.A);
@@ -467,28 +427,25 @@ int Mos6502::i_ASL_acc(Mos6502& self, addr_t)
 int Mos6502::i_ASL(Mos6502& self, addr_t addr)
 {
     /*
-     * ASL $00
-     * ASL $00, X
-     * ASL $0000
-     * ASL $0000, X
-     *
+     * Shift left memory 1 bit
+     * ASL $00          - 06
+     * ASL $0000        - 0E
+     * ASL $00, X       - 16
+     * ASL $0000, X     - 1E
      * Flags: N Z C
      */
     uint8_t value = self.read(addr);
-    self.write(addr, value); // Read-Write-Modify instruction.
+    self.write(addr, value);    /* Read-Write-Modify instruction */
     value = self.logic_shl(value);
     self.write(addr, value);
     return 0;
 }
 
-/********************************************************************************
- * ROL (rotate left 1 bit)
- ********************************************************************************/
 int Mos6502::i_ROL_acc(Mos6502& self, addr_t)
 {
     /*
-     * ROL $00
-     *
+     * Rotate left accumulator 1 bit
+     * ROL              - 2A
      * Flags: N Z C
      */
     self._regs.A = self.logic_rol(self._regs.A);
@@ -498,28 +455,25 @@ int Mos6502::i_ROL_acc(Mos6502& self, addr_t)
 int Mos6502::i_ROL(Mos6502& self, addr_t addr)
 {
     /*
-     * ROL $00
-     * ROL $00, X
-     * ROL $0000
-     * ROL $0000, X
-     *
+     * Rotate left memory 1 bit
+     * ROL $00          - 26
+     * ROL $0000        - 2E
+     * ROL $00, X       - 36
+     * ROL $0000, X     - 3E
      * Flags: N Z C
      */
     uint8_t value = self.read(addr);
-    self.write(addr, value); // Read-Write-Modify instruction.
+    self.write(addr, value);    /* Read-Write-Modify instruction */
     value = self.logic_rol(value);
     self.write(addr, value);
     return 0;
 }
 
-/********************************************************************************
- * LSR (shift right 1 bit)
- ********************************************************************************/
 int Mos6502::i_LSR_acc(Mos6502& self, addr_t)
 {
     /*
-     * LSR
-     *
+     * Shift right accumulator 1 bit
+     * LSR              - 4A
      * Flags: N Z C
      */
     self._regs.A = self.logic_shr(self._regs.A);
@@ -529,28 +483,25 @@ int Mos6502::i_LSR_acc(Mos6502& self, addr_t)
 int Mos6502::i_LSR(Mos6502& self, addr_t addr)
 {
     /*
-     * LSR $00
-     * LSR $00, X
-     * LSR $0000
-     * LSR $0000, X
-     *
+     * Shift right memory 1 bit
+     * LSR $00          - 46
+     * LSR $0000        - 4E
+     * LSR $00, X       - 56
+     * LSR $0000, X     - 5E
      * Flags: N Z C
      */
     uint8_t value = self.read(addr);
-    self.write(addr, value);    // Read-Write-Modify instruction.
+    self.write(addr, value);    /* Read-Write-Modify instruction */
     value = self.logic_shr(value);
     self.write(addr, value);
     return 0;
 }
 
-/********************************************************************************
- * ROR (rotate right 1 bit)
- ********************************************************************************/
 int Mos6502::i_ROR_acc(Mos6502& self, addr_t)
 {
     /*
-     * ROR
-     *
+     * Rotate right accumulator 1 bit
+     * ROR              - 6A
      * Flags: N Z C
      */
     self._regs.A = self.logic_ror(self._regs.A);
@@ -560,15 +511,15 @@ int Mos6502::i_ROR_acc(Mos6502& self, addr_t)
 int Mos6502::i_ROR(Mos6502& self, addr_t addr)
 {
     /*
-     * ROR $00
-     * ROR $00, X
-     * ROR $0000
-     * ROR $0000, X
-     *
+     * Rotate memory right 1 bit
+     * ROR $00          - 66
+     * ROR $0000        - 6E
+     * ROR $00, X       - 76
+     * ROR $0000, X     - 7E
      * Flags: N Z C
      */
     uint8_t value = self.read(addr);
-    self.write(addr, value);    // Read-Write-Modify instruction.
+    self.write(addr, value);    /* Read-Write-Modify instruction */
     value = self.logic_ror(value);
     self.write(addr, value);
     return 0;
