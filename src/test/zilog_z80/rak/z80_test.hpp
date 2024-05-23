@@ -19,7 +19,7 @@
 #pragma once
 
 #include <memory>
-#include <string>
+#include <string_view>
 
 #include "clock.hpp"
 #include "ram.hpp"
@@ -38,7 +38,7 @@ constexpr static const unsigned CLOCK_FREQ = 3250000;
  */
 class Z80Test {
 public:
-    Z80Test(const std::string& fname);
+    Z80Test(std::string_view fname);
 
     void run(bool autostart);
 

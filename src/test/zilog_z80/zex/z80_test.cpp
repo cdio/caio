@@ -49,7 +49,7 @@ Z80Test::Z80Test(const std::string &fname)
 void Z80Test::run(bool autostart)
 {
     log.loglevel(Logger::All);
-    log.info("Starting caio v{} - Z80 Test Suite\n", caio_version());
+    log.info("Starting {} - Z80 Test Suite\n", full_version());
 
     _cpu->loglevel("error|info|warning");
 

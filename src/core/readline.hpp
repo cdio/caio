@@ -216,6 +216,13 @@ public:
     }
 
     /**
+     * Reset input and output file descriptors.
+     * If only one of them must be changed specify the other as -1.
+     * @param fd Pair with the new file descriptors (input and output).
+     */
+    void fds(const std::pair<int, int>& fd);
+
+    /**
      * Read a character from the user.
      * This method blocks until the user enters a character
      * and it does not affect the history.

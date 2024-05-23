@@ -16,60 +16,13 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-TESTS=		test_mos6510_arith_adc.mon \
-		test_mos6510_arith_and.mon \
-		test_mos6510_arith_asl.mon \
-		test_mos6510_arith_bit.mon \
-		test_mos6510_arith_cmp.mon \
-		test_mos6510_arith_dec.mon \
-		test_mos6510_arith_eor.mon \
-		test_mos6510_arith_ora.mon \
-		test_mos6510_arith_sbc.mon \
-		test_mos6510_branch.mon \
-		test_mos6510_move.mon
+ROOT=		${abspath ../../..}
 
-# TODO: illegal instructions
-# TODO: ghost instructions
+DIRS=		functional \
+		testsuite
 
-BIN=		../../main/c64
+CLEANDIRS=	${DIRS}
 
-ROMPATH=	../../../data/roms
+DISTCLEANDIRS=	${CLEANDIRS}
 
-TEST_FLAGS=	--audio no \
-		--monitor \
-		--romdir ${ROMPATH} \
-		--loglevel ${LOGLEVEL}
-
-V?=		0
-
-ifeq (${V}, 1)
-LOGLEVEL=	all
-STDOUT=
-else
-LOGLEVEL=	"none"
-STDOUT=		> /dev/null
-endif
-
-.PHONY: clean install test ${TESTS}
-
-all: test
-
-test: ${TESTS}
-
-${TESTS}: ${BIN}
-	@echo "======================================================================"
-	@echo "=> LAUNCHING TEST: $@"
-	@${BIN} ${TEST_FLAGS} < $@ ${STDOUT} && { \
-		echo "=> TEST FAILED: $@"; \
-		echo "======================================================================"; \
-		exit 1; \
-	} || { \
-		echo "=> TEST SUCCESS: $@"; \
-		echo "======================================================================"; \
-	}
-
-${BIN}:
-	${MAKE} ${MAKEARGS} -C ${dir $@} ${notdir $@}
-
-install clean distclean:
-
+include ${ROOT}/mk/dir.mk

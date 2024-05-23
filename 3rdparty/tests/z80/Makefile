@@ -20,8 +20,7 @@ ROOT=		${abspath ../../../}
 
 include ${ROOT}/mk/config.mk
 
-DIRS+=		rak \
-		zex
+DIRS+=		rak
 
 CLEANDIRS=	${DIRS}
 

@@ -33,10 +33,10 @@
 namespace caio {
 namespace test {
 
-Z80Test::Z80Test(const std::string& fname)
+Z80Test::Z80Test(std::string_view fname)
     : _clk{std::make_shared<Clock>("clk", CLOCK_FREQ, 0)},
       _ram{std::make_shared<RAM>(65536, "ram")},
-      _rom{std::make_shared<RAM>(fname, 16384)},
+      _rom{std::make_shared<RAM>(fname, 16384, "rom")},
       _cpu{std::make_shared<Z80>()},
       _mmap{std::make_shared<Z80TestASpace>(_cpu, _ram, _rom, std::cout)}
 {
@@ -47,7 +47,7 @@ Z80Test::Z80Test(const std::string& fname)
 void Z80Test::run(bool autostart)
 {
     log.loglevel(Loglevel::All);
-    log.info("Starting caio v{} - Z80 Test Suite\n", caio::version());
+    log.info("Starting {} - Z80 Test Suite\n", caio::full_version());
 
     _cpu->loglevel("error|info|warning");
 

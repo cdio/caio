@@ -146,27 +146,11 @@ void History::save()
 }
 
 Readline::Readline(int ifd, int ofd, std::string_view histfname)
-    : _ifd{::dup(ifd)},
-      _ofd{::dup(ofd)},
+    : _ifd{-1},
+      _ofd{-1},
       _history{histfname}
 {
-    if (_ifd < 0) {
-        if (ifd >= 0) {
-            throw IOError{"Can't duplicate input file descriptor: {}", Error::to_string(errno)};
-        } else {
-            throw IOError{"Invalid input file descriptor"};
-        }
-    }
-
-    if (_ofd < 0) {
-        if (ofd >= 0) {
-            throw IOError{"Can't duplicate output file descriptor: {}", Error::to_string(errno)};
-        } else {
-            throw IOError{"Invalid output file descriptor"};
-        }
-    }
-
-    term_init();
+    fds({ifd, ofd});
 }
 
 Readline& Readline::operator=(Readline&& other)
@@ -180,6 +164,26 @@ Readline& Readline::operator=(Readline&& other)
     other._ofd = -1;
 
     return *this;
+}
+
+void Readline::fds(const std::pair<int, int>& fd)
+{
+    auto setfd = [](int& dstfd, int fd, std::string_view iostr) {
+        if (fd >= 0) {
+            auto nfd = ::dup(fd);
+            if (nfd < 0) {
+                throw IOError{"Can't duplicate {} file descriptor: {}", iostr, Error::to_string(errno)};
+            }
+            if (dstfd >= 0) {
+                ::close(dstfd);
+            }
+            dstfd = nfd;
+        }
+    };
+
+    setfd(_ifd, fd.first, "input");
+    setfd(_ofd, fd.second, "output");
+    term_init();
 }
 
 void Readline::close()
