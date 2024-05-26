@@ -46,13 +46,12 @@ void C64::run(std::string_view pname)
 {
     autorun(pname);
 
-    create_ui();
-    make_widgets();
-
     create_devices();
     connect_devices();
     attach_prg();
 
+    create_ui();
+    make_widgets();
     connect_ui();
 
     if (_conf.monitor) {
@@ -478,11 +477,12 @@ void C64::connect_devices()
 
 void C64::create_ui()
 {
-    std::string title;
+    std::string title = _conf.title;
     if (_ioexp) {
-        title = std::format("{} - {}", _conf.title, _ioexp->name());
-    } else if (!_conf.prgfile.empty()) {
-        title = std::format("{} - {}", _conf.title, fs::basename(_conf.prgfile));
+        title = std::format("{} - {}", title, fs::basename(_ioexp->name()));
+    }
+    if (!_conf.prgfile.empty()) {
+        title = std::format("{} - {}", title, fs::basename(_conf.prgfile));
     }
 
     ui::Config uiconf {

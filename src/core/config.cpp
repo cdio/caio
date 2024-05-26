@@ -213,7 +213,7 @@ std::string Config::to_string() const
         "                 Y:   {}\n"
         "              back:   {}\n"
         "             guide:   {}\n"
-        "             start:   {}\n",
+        "             start:   {}",
         title, romdir, palette, keymaps, cartridge, fps, scale, scanlines,
         (fullscreen ? "yes" : "no"),
         (sresize ? "yes" : "no"),

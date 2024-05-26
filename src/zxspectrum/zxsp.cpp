@@ -181,7 +181,7 @@ void ZXSpectrum::attach_prg()
         } else if (SnapZ80::seems_like(fname)) {
             snap = std::make_unique<SnapZ80>(fname);
         } else {
-            throw IOError{"Uncrecognised snapshot format: {}", _conf.snap};
+            throw IOError{"Unrecognised snapshot format: {}", _conf.snap};
         }
 
         reset(*snap);

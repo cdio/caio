@@ -27,7 +27,7 @@ namespace c64 {
 
 /**
  * C64 I/O device.
- * This class implements a meta-device that embeds all the devices
+ * This class is a container-device that embeds all the devices
  * connected to the C64 I/O space mapped from address $D000 to $DFFF.
  *
  * $D000 - $D02E -- $0000 - $002E   VIC2 registers
