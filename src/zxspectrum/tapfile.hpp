@@ -84,7 +84,6 @@ public:
 
 private:
     void reset();
-
     bool more_data();
 
     std::string         _path{};

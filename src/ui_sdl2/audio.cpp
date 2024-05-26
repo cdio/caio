@@ -31,7 +31,7 @@ namespace sdl2 {
 void AudioStream::reset(const ui::AudioConfig& aconf)
 {
     if (_devid) {
-        SDL_CloseAudioDevice(_devid);
+        ::SDL_CloseAudioDevice(_devid);
         _devid = 0;
     }
 
@@ -39,17 +39,17 @@ void AudioStream::reset(const ui::AudioConfig& aconf)
         return;
     }
 
-    SDL_AudioSpec obtained{};
-    SDL_AudioSpec desired{};
+    ::SDL_AudioSpec obtained{};
+    ::SDL_AudioSpec desired{
+        .freq     = static_cast<int>(aconf.srate),
+        .format   = AUDIO_S16SYS,  /* Native endian signed 16 bits */
+        .channels = static_cast<uint8_t>(aconf.channels),
+        .samples  = static_cast<uint16_t>(aconf.samples),
+        .callback = reinterpret_cast<::SDL_AudioCallback>(AudioStream::stream_data),
+        .userdata = static_cast<void*>(this)
+    };
 
-    desired.freq     = aconf.srate;
-    desired.format   = AUDIO_S16SYS;  /* Native endian signed 16 bits */
-    desired.channels = aconf.channels;
-    desired.samples  = aconf.samples;
-    desired.userdata = static_cast<void*>(this);
-    desired.callback = reinterpret_cast<SDL_AudioCallback>(AudioStream::stream_data);
-
-    _devid = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0);
+    _devid = ::SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, 0);
     if (_devid == 0) {
         throw UIError{"Can't open audio device: {}", sdl_error()};
     }
@@ -83,20 +83,20 @@ void AudioStream::stop()
 
     if (_devid) {
         /* Blocks until all audio related events are stopped */
-        SDL_CloseAudioDevice(_devid);
+        ::SDL_CloseAudioDevice(_devid);
         _devid = 0;
     }
 }
 
 void AudioStream::play()
 {
-    SDL_PauseAudioDevice(_devid, 0);
+    ::SDL_PauseAudioDevice(_devid, 0);
     _paused = false;
 }
 
 void AudioStream::pause()
 {
-    SDL_PauseAudioDevice(_devid, 1);
+    ::SDL_PauseAudioDevice(_devid, 1);
     _paused = true;
 }
 

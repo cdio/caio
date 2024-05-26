@@ -26,7 +26,7 @@ namespace caio {
 namespace ui {
 namespace sdl2 {
 
-Panel::Panel(SDL_Renderer* renderer)
+Panel::Panel(::SDL_Renderer* renderer)
 {
     reset(renderer);
 }
@@ -36,24 +36,24 @@ Panel::~Panel()
     reset();
 }
 
-void Panel::reset(SDL_Renderer* renderer)
+void Panel::reset(::SDL_Renderer* renderer)
 {
     _renderer = renderer;
 
     if (_tex != nullptr) {
-        SDL_DestroyTexture(_tex);
+        ::SDL_DestroyTexture(_tex);
     }
 
     if (_renderer != nullptr) {
-        int displays = SDL_GetNumVideoDisplays();
+        int displays = ::SDL_GetNumVideoDisplays();
         if (displays <= 0) {
             throw UIError{"panel: Can't get number of displays: {}", sdl_error()};
         }
 
         int max_width{};
-        SDL_DisplayMode dmode{};
+        ::SDL_DisplayMode dmode{};
         for (int displ = 0; displ < displays; ++displ) {
-            if (SDL_GetDesktopDisplayMode(0, &dmode) < 0) {
+            if (::SDL_GetDesktopDisplayMode(0, &dmode) < 0) {
                 throw UIError{"panel: Can't get desktop display mode for display {}: {}", displ, sdl_error()};
             }
 
@@ -62,7 +62,7 @@ void Panel::reset(SDL_Renderer* renderer)
             }
         }
 
-        _tex = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+        _tex = ::SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
             max_width, max_width * HEIGHT_RATIO);
 
         if (_tex == nullptr) {
@@ -81,14 +81,14 @@ bool Panel::visible() const
     return _visible;
 }
 
-void Panel::event(const SDL_Event& event)
+void Panel::event(const ::SDL_Event& event)
 {
     if (!_visible) {
         return;
     }
 
     int x{}, y{};
-    SDL_GetMouseState(&x, &y);
+    ::SDL_GetMouseState(&x, &y);
 
     auto it = find_widget(x, y);
     if (it == _widgets.end()) {
@@ -140,7 +140,7 @@ void Panel::render(int width, int height)
         /*
          * Panel internal rectangle.
          */
-        SDL_Rect int_rect{
+        ::SDL_Rect int_rect{
             .x = 0,
             .y = ext_y + frame_thickness,
             .w = width,
@@ -150,16 +150,16 @@ void Panel::render(int width, int height)
         /*
          * Draw panel.
          */
-        SDL_SetRenderDrawColor(_renderer, FRAME_COLOR.r, FRAME_COLOR.g, FRAME_COLOR.b, FRAME_COLOR.a);
-        SDL_RenderFillRect(_renderer, &_ext_rect);
+        ::SDL_SetRenderDrawColor(_renderer, FRAME_COLOR.r, FRAME_COLOR.g, FRAME_COLOR.b, FRAME_COLOR.a);
+        ::SDL_RenderFillRect(_renderer, &_ext_rect);
 
-        SDL_SetRenderDrawColor(_renderer, BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
-        SDL_RenderFillRect(_renderer, &int_rect);
+        ::SDL_SetRenderDrawColor(_renderer, BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
+        ::SDL_RenderFillRect(_renderer, &int_rect);
 
         /*
          * Left justified widget rectangle.
          */
-        SDL_Rect wid_rect{
+        ::SDL_Rect wid_rect{
             .x = wx,
             .y = wy,
             .w = ww,
@@ -169,7 +169,7 @@ void Panel::render(int width, int height)
         /*
          * Right justified widget rectangle.
          */
-        SDL_Rect wid_rev_rect{
+        ::SDL_Rect wid_rev_rect{
             .x = rev_wx,
             .y = wy,
             .w = ww,
@@ -196,16 +196,16 @@ void Panel::render(int width, int height)
                     /*
                      * Draw a rectangle around the widget under the mouse cursor.
                      */
-                    SDL_SetRenderDrawColor(_renderer, FRAME_COLOR.r, FRAME_COLOR.g, FRAME_COLOR.b, FRAME_COLOR.a);
-                    SDL_RenderFillRect(_renderer, &rect);
+                    ::SDL_SetRenderDrawColor(_renderer, FRAME_COLOR.r, FRAME_COLOR.g, FRAME_COLOR.b, FRAME_COLOR.a);
+                    ::SDL_RenderFillRect(_renderer, &rect);
 
                     auto irect = rect;
                     irect.x += frame_thickness;
                     irect.y += frame_thickness;
                     irect.w -= 2 * frame_thickness;
                     irect.h -= 2 * frame_thickness;
-                    SDL_SetRenderDrawColor(_renderer, BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
-                    SDL_RenderFillRect(_renderer, &irect);
+                    ::SDL_SetRenderDrawColor(_renderer, BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
+                    ::SDL_RenderFillRect(_renderer, &irect);
                 }
 
                 widget->render(rect);

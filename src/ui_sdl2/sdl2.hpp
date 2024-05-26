@@ -62,7 +62,7 @@ extern std::string sdl_error();
  * @return Keyboard::Key code.
  * @see sdl_to_key
  */
-extern keyboard::Key to_key(SDL_Scancode code);
+extern keyboard::Key to_key(::SDL_Scancode code);
 
 /**
  * Detect whether a coordinate belongs to a rectangle.
@@ -71,7 +71,7 @@ extern keyboard::Key to_key(SDL_Scancode code);
  * @param rect Rectangle.
  * @return True if the coordinates fall inside the rectangle; false otherwise.
  */
-extern bool in_rect(int x, int y, const SDL_Rect& rect);
+extern bool in_rect(int x, int y, const ::SDL_Rect& rect);
 
 }
 }

@@ -25,7 +25,7 @@ namespace widget {
 
 #include "icons/volume_128x21.hpp"
 
-Volume::Volume(SDL_Renderer* renderer, const std::function<float()>& getvol, const std::function<void(float)>& setvol)
+Volume::Volume(::SDL_Renderer* renderer, const std::function<float()>& getvol, const std::function<void(float)>& setvol)
     : Widget{renderer},
       _getvol{getvol},
       _setvol{setvol}
@@ -38,7 +38,7 @@ bool Volume::enabled() const
     return (_getvol && _setvol);
 }
 
-void Volume::event(const SDL_Event& event, const SDL_Rect& rect)
+void Volume::event(const ::SDL_Event& event, const ::SDL_Rect& rect)
 {
     if (enabled()) {
         switch (event.type) {
@@ -47,7 +47,7 @@ void Volume::event(const SDL_Event& event, const SDL_Rect& rect)
             break;
 
         case SDL_MOUSEMOTION:
-            if (pressed_widget == this && SDL_GetMouseState(nullptr, nullptr) == ACTION_BUTTON) {
+            if (pressed_widget == this && ::SDL_GetMouseState(nullptr, nullptr) == ACTION_BUTTON) {
                 volume(event.motion.xrel);
             }
             break;
@@ -61,7 +61,7 @@ void Volume::event(const SDL_Event& event, const SDL_Rect& rect)
     Widget::event(event, rect);
 }
 
-void Volume::render(const SDL_Rect& dstrect)
+void Volume::render(const ::SDL_Rect& dstrect)
 {
     if (_volidx < 0) {
         volume(0);

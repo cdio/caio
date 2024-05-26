@@ -73,12 +73,19 @@ std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdl
 }
 
 VJoyConfig::VJoyConfig(Section& sec)
-    : VJoyKeys{.up     = keyboard::to_key(sec[KEY_VJOY_UP]),
-               .down   = keyboard::to_key(sec[KEY_VJOY_DOWN]),
-               .left   = keyboard::to_key(sec[KEY_VJOY_LEFT]),
-               .right  = keyboard::to_key(sec[KEY_VJOY_RIGHT]),
-               .fire   = keyboard::to_key(sec[KEY_VJOY_FIRE_A]),
-               .fire_b = keyboard::to_key(sec[KEY_VJOY_FIRE_B])},
+    : VJoyKeys{
+        .up     = keyboard::to_key(sec[KEY_VJOY_UP]),
+        .down   = keyboard::to_key(sec[KEY_VJOY_DOWN]),
+        .left   = keyboard::to_key(sec[KEY_VJOY_LEFT]),
+        .right  = keyboard::to_key(sec[KEY_VJOY_RIGHT]),
+        .fire   = keyboard::to_key(sec[KEY_VJOY_FIRE]),
+        .a      = keyboard::to_key(sec[KEY_VJOY_A]),
+        .b      = keyboard::to_key(sec[KEY_VJOY_B]),
+        .x      = keyboard::to_key(sec[KEY_VJOY_X]),
+        .y      = keyboard::to_key(sec[KEY_VJOY_Y]),
+        .back   = keyboard::to_key(sec[KEY_VJOY_BACK]),
+        .guide  = keyboard::to_key(sec[KEY_VJOY_GUIDE]),
+        .start  = keyboard::to_key(sec[KEY_VJOY_START])},
       enabled{is_true(sec[KEY_VJOY])}
 {
     if (up == keyboard::KEY_NONE) {
@@ -98,11 +105,35 @@ VJoyConfig::VJoyConfig(Section& sec)
     }
 
     if (fire == keyboard::KEY_NONE) {
-        throw InvalidArgument{"Invalid virtual joystick fire-A key: {}", sec[KEY_VJOY_FIRE_A]};
+        throw InvalidArgument{"Invalid virtual joystick fire key: {}", sec[KEY_VJOY_FIRE]};
     }
 
-    if (fire_b == keyboard::KEY_NONE) {
-        throw InvalidArgument{"Invalid virtual joystick fire-B key: {}", sec[KEY_VJOY_FIRE_B]};
+    if (a == keyboard::KEY_NONE && !sec[KEY_VJOY_A].empty()) {
+        throw InvalidArgument{"Invalid virtual joystick A key: {}", sec[KEY_VJOY_A]};
+    }
+
+    if (b == keyboard::KEY_NONE && !sec[KEY_VJOY_B].empty()) {
+        throw InvalidArgument{"Invalid virtual joystick B key: {}", sec[KEY_VJOY_B]};
+    }
+
+    if (x == keyboard::KEY_NONE && !sec[KEY_VJOY_X].empty()) {
+        throw InvalidArgument{"Invalid virtual joystick X key: {}", sec[KEY_VJOY_X]};
+    }
+
+    if (y == keyboard::KEY_NONE && !sec[KEY_VJOY_Y].empty()) {
+        throw InvalidArgument{"Invalid virtual joystick Y key: {}", sec[KEY_VJOY_Y]};
+    }
+
+    if (back == keyboard::KEY_NONE && !sec[KEY_VJOY_BACK].empty()) {
+        throw InvalidArgument{"Invalid virtual joystick BACK key: {}", sec[KEY_VJOY_BACK]};
+    }
+
+    if (guide == keyboard::KEY_NONE && !sec[KEY_VJOY_GUIDE].empty()) {
+        throw InvalidArgument{"Invalid virtual joystick GUIDE key: {}", sec[KEY_VJOY_GUIDE]};
+    }
+
+    if (start == keyboard::KEY_NONE && !sec[KEY_VJOY_START].empty()) {
+        throw InvalidArgument{"Invalid virtual joystick START key: {}", sec[KEY_VJOY_START]};
     }
 }
 
@@ -175,8 +206,14 @@ std::string Config::to_string() const
         "              down:   {}\n"
         "              left:   {}\n"
         "             right:   {}\n"
-        "            fire A:   {}\n"
-        "            fire B:   {}",
+        "              fire:   {}\n"
+        "                 A:   {}\n"
+        "                 B:   {}\n"
+        "                 X:   {}\n"
+        "                 Y:   {}\n"
+        "              back:   {}\n"
+        "             guide:   {}\n"
+        "             start:   {}\n",
         title, romdir, palette, keymaps, cartridge, fps, scale, scanlines,
         (fullscreen ? "yes" : "no"),
         (sresize ? "yes" : "no"),
@@ -191,7 +228,13 @@ std::string Config::to_string() const
         keyboard::to_string(vjoy.left),
         keyboard::to_string(vjoy.right),
         keyboard::to_string(vjoy.fire),
-        keyboard::to_string(vjoy.fire_b));
+        keyboard::to_string(vjoy.a),
+        keyboard::to_string(vjoy.b),
+        keyboard::to_string(vjoy.x),
+        keyboard::to_string(vjoy.y),
+        keyboard::to_string(vjoy.back),
+        keyboard::to_string(vjoy.guide),
+        keyboard::to_string(vjoy.start));
 }
 
 }

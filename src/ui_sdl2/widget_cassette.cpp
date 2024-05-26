@@ -27,21 +27,21 @@ namespace widget {
 
 #include "icons/cassette_128x24.hpp"
 
-Cassette::Cassette(SDL_Renderer* renderer, const std::function<Status()>& upd)
+Cassette::Cassette(::SDL_Renderer* renderer, const std::function<Status()>& upd)
     : Widget{renderer},
       _update{upd}
 {
     Widget::load(cassette_128x24_png);
 }
 
-void Cassette::render(const SDL_Rect& dstrect)
+void Cassette::render(const ::SDL_Rect& dstrect)
 {
     Status st{};
     if (_update) {
        st = _update();
     }
 
-    SDL_Rect rect{0, 0, 128, 128};
+    ::SDL_Rect rect{0, 0, 128, 128};
 
     if (st.is_enabled && !st.is_idle) {
 

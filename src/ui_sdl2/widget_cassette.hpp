@@ -34,12 +34,12 @@ public:
         bool is_idle{};
     };
 
-    Cassette(SDL_Renderer* renderer, const std::function<Status()>& upd);
+    Cassette(::SDL_Renderer* renderer, const std::function<Status()>& upd);
 
     virtual ~Cassette() {
     }
 
-    void render(const SDL_Rect& dstrect) override;
+    void render(const ::SDL_Rect& dstrect) override;
 
 private:
     std::function<Status()> _update;

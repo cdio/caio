@@ -44,11 +44,11 @@ namespace c64 {
  *
  * Source: https://www.c64-wiki.com/wiki/Keyboard
  */
-constexpr static const uint8_t JOY_PORT_UP     = Mos6526::P0;
-constexpr static const uint8_t JOY_PORT_DOWN   = Mos6526::P1;
-constexpr static const uint8_t JOY_PORT_LEFT   = Mos6526::P2;
-constexpr static const uint8_t JOY_PORT_RIGHT  = Mos6526::P3;
-constexpr static const uint8_t JOY_PORT_FIRE   = Mos6526::P4;
+constexpr static const uint16_t JOY_PORT_UP     = Mos6526::P0;
+constexpr static const uint16_t JOY_PORT_DOWN   = Mos6526::P1;
+constexpr static const uint16_t JOY_PORT_LEFT   = Mos6526::P2;
+constexpr static const uint16_t JOY_PORT_RIGHT  = Mos6526::P3;
+constexpr static const uint16_t JOY_PORT_FIRE   = Mos6526::P4;
 
 JoystickPort joystick_port{
     .up     = JOY_PORT_UP,
@@ -56,7 +56,13 @@ JoystickPort joystick_port{
     .left   = JOY_PORT_LEFT,
     .right  = JOY_PORT_RIGHT,
     .fire   = JOY_PORT_FIRE,
-    .fire_b = JOY_PORT_FIRE
+    .a      = 0,
+    .b      = 0,
+    .x      = 0,
+    .y      = 0,
+    .back   = 0,
+    .guide  = 0,
+    .start  = 0
 };
 
 }

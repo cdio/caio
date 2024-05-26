@@ -24,6 +24,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "keyboard.hpp"
 #include "joystick.hpp"
@@ -226,7 +227,7 @@ public:
      * Get the backend renderer.
      * @return A raw pointer to the backend renderer.
      */
-    SDL_Renderer* renderer();
+    ::SDL_Renderer* renderer();
 
 private:
     /**
@@ -300,25 +301,25 @@ private:
      * Process window events.
      * @param event SDL event.
      */
-    void win_event(const SDL_Event& event);
+    void win_event(const ::SDL_Event& event);
 
     /**
      * Process keyboard events.
      * @param event SDL event.
      */
-    void kbd_event(const SDL_Event& event);
+    void kbd_event(const ::SDL_Event& event);
 
     /**
-     * Process joystick/game controller events.
+     * Process game controller events.
      * @param event SDL event.
      */
-    void joy_event(const SDL_Event& event);
+    void joy_event(const ::SDL_Event& event);
 
     /**
      * Process mouse events.
      * @param event SDL event.
      */
-    void mouse_event(const SDL_Event& event);
+    void mouse_event(const ::SDL_Event& event);
 
     /**
      * Associate a new game controller to an emulated joystick.
@@ -330,14 +331,20 @@ private:
      * Dis-associate a game controller from an emulated joystick.
      * @param jid SDL game controller instance.
      */
-    void joy_del(SDL_JoystickID jid);
+    void joy_del(::SDL_JoystickID jid);
 
     /**
      * Find an emulated joystick given its identifier.
-     * @param jid SDL game controller instance.
-     * @return The requested joystick on success; nullptr if the specified joystick is not found.
+     * @param jdi SDL joystick id.
+     * @return The requested emulated joystick on success;
+     * nullptr if the SDL joystick is not associated to an emulated joystick.
      */
-    joyptr_t find_joystick(SDL_JoystickID jid);
+    joyptr_t find_joystick(::SDL_JoystickID jid);
+
+    /**
+     * Find and associate game controllers to unassigned emulated joysticks.
+     */
+    void attach_controllers();
 
     Config                      _conf{};                /* UI configuration                                   */
     uint64_t                    _fps_time{};            /* FPS in microseconds                                */
@@ -361,17 +368,17 @@ private:
     uint64_t                    _mouse_active_time{};   /* Inactivity time until the cursor becomes invisible */
     bool                        _mouse_visible{true};   /* Whether the mouse cursor is visible or not         */
 
-    SDL_Window*                 _window{nullptr};       /* Main window                                        */
-    SDL_Renderer*               _renderer{nullptr};     /* Main window renderer                               */
-    SDL_Surface*                _icon{nullptr};         /* Main window icon                                   */
+    ::SDL_Window*               _window{nullptr};       /* Main window                                        */
+    ::SDL_Renderer*             _renderer{nullptr};     /* Main window renderer                               */
+    ::SDL_Surface*              _icon{nullptr};         /* Main window icon                                   */
     std::vector<Rgba>           _screen_raw{};          /* Emulated screen raw RGBA data                      */
-    SDL_Texture*                _screen_tex{nullptr};   /* Emulated screen texture ready to be rendered       */
-    SDL_Rect                    _screen_rect{};         /* Emulated screen rendering coordinates              */
+    ::SDL_Texture*              _screen_tex{nullptr};   /* Emulated screen texture ready to be rendered       */
+    ::SDL_Rect                  _screen_rect{};         /* Emulated screen rendering coordinates              */
     sptr_t<Panel>               _panel{};               /* Info Panel                                         */
 
     AudioStream                 _audio_stream{};        /* Audio driver                                       */
 
-    std::map<SDL_JoystickID, SDL_Joystick*> _sdl_joys{};    /* Map of SDL detected joysticks                  */
+    std::map<::SDL_JoystickID, std::unique_ptr<::SDL_GameController, void(*)(::SDL_GameController*)>> _sdl_joys{};
 };
 
 }

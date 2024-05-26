@@ -27,7 +27,13 @@ JoystickPort joystick_port{
     .left   = JOY_PORT_LEFT,
     .right  = JOY_PORT_RIGHT,
     .fire   = JOY_PORT_FIRE,
-    .fire_b = JOY_PORT_FIRE
+    .a      = 0,
+    .b      = 0,
+    .x      = 0,
+    .y      = 0,
+    .back   = 0,
+    .guide  = 0,
+    .start  = 0
 };
 
 }

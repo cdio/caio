@@ -97,8 +97,14 @@ constexpr static const char* KEY_VJOY_UP         = "vjoy-up";
 constexpr static const char* KEY_VJOY_DOWN       = "vjoy-down";
 constexpr static const char* KEY_VJOY_LEFT       = "vjoy-left";
 constexpr static const char* KEY_VJOY_RIGHT      = "vjoy-right";
-constexpr static const char* KEY_VJOY_FIRE_A     = "vjoy-fire";
-constexpr static const char* KEY_VJOY_FIRE_B     = "vjoy-fire-b";
+constexpr static const char* KEY_VJOY_FIRE       = "vjoy-fire";
+constexpr static const char* KEY_VJOY_A          = "vjoy-a";
+constexpr static const char* KEY_VJOY_B          = "vjoy-b";
+constexpr static const char* KEY_VJOY_X          = "vjoy-x";
+constexpr static const char* KEY_VJOY_Y          = "vjoy-y";
+constexpr static const char* KEY_VJOY_BACK       = "vjoy-back";
+constexpr static const char* KEY_VJOY_GUIDE      = "vjoy-guide";
+constexpr static const char* KEY_VJOY_START      = "vjoy-start";
 
 constexpr static const char* DEFAULT_ROMDIR      = ROMDIR;
 constexpr static const char* DEFAULT_PALETTEDIR  = PALETTEDIR;
@@ -121,8 +127,14 @@ constexpr static const char* DEFAULT_VJOY_UP     = "KEY_NUMPAD_8";
 constexpr static const char* DEFAULT_VJOY_DOWN   = "KEY_NUMPAD_2";
 constexpr static const char* DEFAULT_VJOY_LEFT   = "KEY_NUMPAD_4";
 constexpr static const char* DEFAULT_VJOY_RIGHT  = "KEY_NUMPAD_6";
-constexpr static const char* DEFAULT_VJOY_FIRE_A = "KEY_NUMPAD_5";
-constexpr static const char* DEFAULT_VJOY_FIRE_B = "KEY_NUMPAD_0";
+constexpr static const char* DEFAULT_VJOY_FIRE   = "KEY_NUMPAD_5";
+constexpr static const char* DEFAULT_VJOY_A      = "";
+constexpr static const char* DEFAULT_VJOY_B      = "";
+constexpr static const char* DEFAULT_VJOY_X      = "";
+constexpr static const char* DEFAULT_VJOY_Y      = "";
+constexpr static const char* DEFAULT_VJOY_BACK   = "";
+constexpr static const char* DEFAULT_VJOY_GUIDE  = "";
+constexpr static const char* DEFAULT_VJOY_START  = "";
 
 /**
  * Configuration file section.

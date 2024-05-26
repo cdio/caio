@@ -158,12 +158,18 @@ enum Key {
  * Virtual joystick.
  */
 struct VJoyKeys {
-    Key     up{};
-    Key     down{};
-    Key     left{};
-    Key     right{};
-    Key     fire{};
-    Key     fire_b{};
+    Key up{};
+    Key down{};
+    Key left{};
+    Key right{};
+    Key fire{};
+    Key a{};
+    Key b{};
+    Key x{};
+    Key y{};
+    Key back{};
+    Key guide{};
+    Key start{};
 };
 
 /**

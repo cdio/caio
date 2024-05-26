@@ -44,7 +44,7 @@ public:
     constexpr static const Rgba DISABLED_COLOR    = { 255, 255, 255, 64  };     /* Color modulators */
     constexpr static const Rgba ENABLED_COLOR     = { 255, 255, 255, 255 };
 
-    Widget(SDL_Renderer* renderer = nullptr);
+    Widget(::SDL_Renderer* renderer = nullptr);
 
     virtual ~Widget();
 
@@ -86,25 +86,25 @@ public:
      * @param event SDL event;
      * @param rect  Coordinates of this widget.
      */
-    virtual void event(const SDL_Event& event, const SDL_Rect& rect);
+    virtual void event(const ::SDL_Event& event, const ::SDL_Rect& rect);
 
     /**
      * Render the widget.
      * @param dstrect Destination rectangle.
      * @exception UIError
      */
-    virtual void render(const SDL_Rect& dstrect) = 0;
+    virtual void render(const ::SDL_Rect& dstrect) = 0;
 
 protected:
-    void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect);
+    void render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect);
 
-    void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, Rgba colour);
+    void render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect, Rgba colour);
 
-    void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_Point& centre, float angle,
-        const SDL_RendererFlip& flip);
+    void render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect, const ::SDL_Point& centre, float angle,
+        const ::SDL_RendererFlip& flip);
 
-    void render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_Point& centre, float angle,
-        const SDL_RendererFlip& flip, Rgba colour);
+    void render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect, const ::SDL_Point& centre, float angle,
+        const ::SDL_RendererFlip& flip, Rgba colour);
 
     Rgba draw_color() const;
 
@@ -114,8 +114,8 @@ protected:
 
     void color_modulator(Rgba colour);
 
-    SDL_Renderer*         _renderer;
-    SDL_Texture*          _texture{nullptr};
+    ::SDL_Renderer*       _renderer;
+    ::SDL_Texture*        _texture{nullptr};
     std::function<void()> _action{};
 
     static Widget*        pressed_widget;   /* Last widget that received a button press event */

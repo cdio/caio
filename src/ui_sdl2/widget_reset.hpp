@@ -27,12 +27,12 @@ namespace widget {
 
 class Reset : public Widget {
 public:
-    Reset(SDL_Renderer* _renderer, const std::function<bool()>& is_paused);
+    Reset(::SDL_Renderer* _renderer, const std::function<bool()>& is_paused);
 
     virtual ~Reset() {
     }
 
-    void render(const SDL_Rect& dstrect) override;
+    void render(const ::SDL_Rect& dstrect) override;
 
 private:
     std::function<bool()> _is_paused{};

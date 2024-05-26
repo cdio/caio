@@ -89,8 +89,14 @@ static Option generic_options[] = {
     { KEY_VJOY_DOWN,   SEC_GENERIC, KEY_VJOY_DOWN,   DEFAULT_VJOY_DOWN,   Arg::Required, set_value       },
     { KEY_VJOY_LEFT,   SEC_GENERIC, KEY_VJOY_LEFT,   DEFAULT_VJOY_LEFT,   Arg::Required, set_value       },
     { KEY_VJOY_RIGHT,  SEC_GENERIC, KEY_VJOY_RIGHT,  DEFAULT_VJOY_RIGHT,  Arg::Required, set_value       },
-    { KEY_VJOY_FIRE_A, SEC_GENERIC, KEY_VJOY_FIRE_A, DEFAULT_VJOY_FIRE_A, Arg::Required, set_value       },
-    { KEY_VJOY_FIRE_B, SEC_GENERIC, KEY_VJOY_FIRE_B, DEFAULT_VJOY_FIRE_B, Arg::Required, set_value       }
+    { KEY_VJOY_FIRE,   SEC_GENERIC, KEY_VJOY_FIRE,   DEFAULT_VJOY_FIRE,   Arg::Required, set_value       },
+    { KEY_VJOY_A,      SEC_GENERIC, KEY_VJOY_A,      DEFAULT_VJOY_A,      Arg::Required, set_value       },
+    { KEY_VJOY_B,      SEC_GENERIC, KEY_VJOY_B,      DEFAULT_VJOY_B,      Arg::Required, set_value       },
+    { KEY_VJOY_X,      SEC_GENERIC, KEY_VJOY_X,      DEFAULT_VJOY_X,      Arg::Required, set_value       },
+    { KEY_VJOY_Y,      SEC_GENERIC, KEY_VJOY_Y,      DEFAULT_VJOY_Y,      Arg::Required, set_value       },
+    { KEY_VJOY_BACK,   SEC_GENERIC, KEY_VJOY_BACK,   DEFAULT_VJOY_BACK,   Arg::Required, set_value       },
+    { KEY_VJOY_GUIDE,  SEC_GENERIC, KEY_VJOY_GUIDE,  DEFAULT_VJOY_GUIDE,  Arg::Required, set_value       },
+    { KEY_VJOY_START,  SEC_GENERIC, KEY_VJOY_START,  DEFAULT_VJOY_START,  Arg::Required, set_value       },
 };
 
 std::string Cmdline::usage() const
@@ -127,8 +133,14 @@ std::string Cmdline::usage() const
         " --vjoy-down <keyname>   Virtual joystick DOWN key (default is {})\n"
         " --vjoy-left <keyname>   Virtual joystick LEFT key (default is {})\n"
         " --vjoy-right <keyname>  Virtual joystick RIGHT key (default is {})\n"
-        " --vjoy-fire <keyname>   Virtual joystick FIRE-A key (default is {})\n"
-        " --vjoy-fire-b <keyname> Virtual joystick FIRE-B key (default is {})\n"
+        " --vjoy-fire <keyname>   Virtual joystick FIRE key (default is {})\n"
+        " --vjoy-a <keyname>      Virtual joystick A key\n"
+        " --vjoy-b <keyname>      Virtual joystick B key\n"
+        " --vjoy-x <keyname>      Virtual joystick X key\n"
+        " --vjoy-y <keyname>      Virtual joystick Y key\n"
+        " --vjoy-back <keyname>   Virtual joystick BACK key\n"
+        " --vjoy-guide <keyname>  Virtual joystick GUIDE key\n"
+        " --vjoy-start <keyname>  Virtual joystick START key\n"
         " -v|--version            Show version information and exit\n"
         " -h|--help               Print this message and exit",
         _progname,
@@ -146,8 +158,7 @@ std::string Cmdline::usage() const
         DEFAULT_VJOY_DOWN,
         DEFAULT_VJOY_LEFT,
         DEFAULT_VJOY_RIGHT,
-        DEFAULT_VJOY_FIRE_A,
-        DEFAULT_VJOY_FIRE_B);
+        DEFAULT_VJOY_FIRE);
 }
 
 Confile Cmdline::defaults()

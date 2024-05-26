@@ -229,14 +229,20 @@ void Keyboard::key_pressed(Key key)
 {
     if (_vjoy) {
         const auto& jport = _vjoy->port();
-        uint8_t pos = _vjoy->position();
+        uint16_t pos = _vjoy->position();
 
         pos |= (key == _vjoykeys.up     ? jport.up :
                (key == _vjoykeys.down   ? jport.down :
                (key == _vjoykeys.left   ? jport.left :
                (key == _vjoykeys.right  ? jport.right :
                (key == _vjoykeys.fire   ? jport.fire :
-               (key == _vjoykeys.fire_b ? jport.fire_b : 0))))));
+               (key == _vjoykeys.a      ? jport.a :
+               (key == _vjoykeys.b      ? jport.b :
+               (key == _vjoykeys.x      ? jport.x :
+               (key == _vjoykeys.y      ? jport.y :
+               (key == _vjoykeys.back   ? jport.back :
+               (key == _vjoykeys.guide  ? jport.guide :
+               (key == _vjoykeys.start  ? jport.start : 0))))))))))));
 
         _vjoy->position(pos);
     }
@@ -250,14 +256,20 @@ void Keyboard::key_released(Key key)
 {
     if (_vjoy) {
         const auto& jport = _vjoy->port();
-        uint8_t pos = _vjoy->position();
+        uint16_t pos = _vjoy->position();
 
         pos &= ~(key == _vjoykeys.up     ? jport.up :
                 (key == _vjoykeys.down   ? jport.down :
                 (key == _vjoykeys.left   ? jport.left :
                 (key == _vjoykeys.right  ? jport.right :
                 (key == _vjoykeys.fire   ? jport.fire :
-                (key == _vjoykeys.fire_b ? jport.fire_b : 0))))));
+                (key == _vjoykeys.a      ? jport.a :
+                (key == _vjoykeys.b      ? jport.b :
+                (key == _vjoykeys.x      ? jport.x :
+                (key == _vjoykeys.y      ? jport.y :
+                (key == _vjoykeys.back   ? jport.back :
+                (key == _vjoykeys.guide  ? jport.guide :
+                (key == _vjoykeys.start  ? jport.start : 0))))))))))));
 
         _vjoy->position(pos);
     }

@@ -33,12 +33,12 @@ public:
         bool is_swapped;
     };
 
-    Gamepad(SDL_Renderer* renderer, const std::function<Status()>& upd);
+    Gamepad(::SDL_Renderer* renderer, const std::function<Status()>& upd);
 
     virtual ~Gamepad() {
     }
 
-    void render(const SDL_Rect& dstrect) override;
+    void render(const ::SDL_Rect& dstrect) override;
 
 private:
     std::function<Status()> _update;

@@ -27,13 +27,13 @@ namespace widget {
 
 class Empty : public Widget {
 public:
-    Empty(SDL_Renderer* _renderer);
+    Empty(::SDL_Renderer* _renderer);
 
     virtual ~Empty();
 
     bool enabled() const override;
 
-    void render(const SDL_Rect& dstrect) override;
+    void render(const ::SDL_Rect& dstrect) override;
 };
 
 }

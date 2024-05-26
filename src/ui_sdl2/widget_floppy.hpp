@@ -32,12 +32,12 @@ public:
         bool is_idle{};
     };
 
-    Floppy(SDL_Renderer* renderer, const std::function<Status()>& upd);
+    Floppy(::SDL_Renderer* renderer, const std::function<Status()>& upd);
 
     virtual ~Floppy() {
     }
 
-    void render(const SDL_Rect& dstrect) override;
+    void render(const ::SDL_Rect& dstrect) override;
 
 private:
     std::function<Status()> _update;

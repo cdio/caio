@@ -27,17 +27,17 @@ namespace widget {
 
 class Pause : public Widget {
 public:
-    Pause(SDL_Renderer* _renderer, const std::function<bool()>& upd = {});
+    Pause(::SDL_Renderer* _renderer, const std::function<bool()>& upd = {});
 
     virtual ~Pause() {
     }
 
-    void render(const SDL_Rect& dstrect) override;
+    void render(const ::SDL_Rect& dstrect) override;
 
 private:
     std::function<bool()> _update;
     bool                  _is_paused{};
-    SDL_Rect              _rect{-1, -1, -1, -1};
+    ::SDL_Rect            _rect{-1, -1, -1, -1};
 };
 
 }

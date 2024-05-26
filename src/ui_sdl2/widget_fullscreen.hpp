@@ -27,17 +27,17 @@ namespace widget {
 
 class Fullscreen : public Widget {
 public:
-    Fullscreen(SDL_Renderer* _renderer, const std::function<bool()>& upd);
+    Fullscreen(::SDL_Renderer* _renderer, const std::function<bool()>& upd);
 
     virtual ~Fullscreen() {
     }
 
-    void render(const SDL_Rect& dstrect) override;
+    void render(const ::SDL_Rect& dstrect) override;
 
 private:
     std::function<bool()> _update;
     bool                  _is_fullscreen{};
-    SDL_Rect              _rect{-1, -1, -1, -1};
+    ::SDL_Rect            _rect{-1, -1, -1, -1};
 };
 
 }

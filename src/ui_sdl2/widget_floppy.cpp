@@ -27,21 +27,21 @@ namespace widget {
 
 #include "icons/floppy_128x2.hpp"
 
-Floppy::Floppy(SDL_Renderer* renderer, const std::function<Status()>& upd)
+Floppy::Floppy(::SDL_Renderer* renderer, const std::function<Status()>& upd)
     : Widget{renderer},
       _update{upd}
 {
     Widget::load(floppy_128x2_png);
 }
 
-void Floppy::render(const SDL_Rect& dstrect)
+void Floppy::render(const ::SDL_Rect& dstrect)
 {
     Status st{};
     if (_update) {
        st = _update();
     }
 
-    SDL_Rect rect{0, 0, 128, 128};
+    ::SDL_Rect rect{0, 0, 128, 128};
 
     if (!st.is_idle) {
         if (_prev_idle != st.is_idle) {
@@ -49,7 +49,7 @@ void Floppy::render(const SDL_Rect& dstrect)
         }
 
         _elapsed = caio::now() - _start;
-        rect = (_elapsed < 500000 ? SDL_Rect{0, 0, 128, 128} : SDL_Rect{128, 0, 128, 128});
+        rect = (_elapsed < 500000 ? ::SDL_Rect{0, 0, 128, 128} : ::SDL_Rect{128, 0, 128, 128});
         if (_elapsed >= 1000000) {
             _start = caio::now();
         }

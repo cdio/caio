@@ -244,6 +244,12 @@ then, from basic:
 LOAD "RAMBO",8,1
 ```
 
+Cartridges and programs can be specified without using their specific
+command line options, in this case the format is auto-detected:
+```
+    $ caio c64 --scale 3 /games/c64/ghostbusters.crt
+```
+
 <hr>
 </details>
 <details>
@@ -309,6 +315,12 @@ The `prg` configuration option can be used to automatically load a program as
 soon the basic is started by-passing the slow cassette interface. For example:
 ```
     $ caio zx80 --scale 2 --ram16 --prg /games/zx80/ZX80.4K.ROM.Pacman.o
+```
+
+Programs can be specified without using the `--prg` command line option,
+in this case the format is auto-detected:
+```
+    $ caio zx80 --scale 2 --ram16 --rom8 yes /games/zx80/ZX80.8K.ROM.Kong.o
 ```
 
 #### Software
@@ -404,6 +416,12 @@ The following command launches the game called *Jet Set Willy* which is
 embedded inside a snapshot:
 ```
     $ caio zxspectrum --snap /games/spectrum/Jet.Set.Willy.z80
+```
+
+Snapshots can be specified without using the `--snap` command line option,
+in this case the snapshot format is auto-detected:
+```
+    $ caio zxspectrum /games/spectrum/elite.z80
 ```
 
 <hr>

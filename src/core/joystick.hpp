@@ -31,12 +31,18 @@ namespace joystick {
  * Port values cannot be 0 and must not share bits.
  */
 struct Port {
-    uint8_t up{};
-    uint8_t down{};
-    uint8_t left{};
-    uint8_t right{};
-    uint8_t fire{};
-    uint8_t fire_b{};
+    uint16_t up{};
+    uint16_t down{};
+    uint16_t left{};
+    uint16_t right{};
+    uint16_t fire{};
+    uint16_t a{};
+    uint16_t b{};
+    uint16_t x{};
+    uint16_t y{};
+    uint16_t back{};
+    uint16_t guide{};
+    uint16_t start{};
 };
 
 /**
@@ -117,9 +123,9 @@ public:
     }
 
 private:
-    Port     _port;
-    unsigned _joyid{JOYID_INVALID};
-    uint8_t  _position{};
+    Port        _port;
+    unsigned    _joyid{JOYID_INVALID};
+    uint16_t    _position{};
 };
 
 }

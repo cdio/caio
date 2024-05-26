@@ -25,14 +25,14 @@ namespace widget {
 
 #include "icons/fullscreen_128x2.hpp"
 
-Fullscreen::Fullscreen(SDL_Renderer* renderer, const std::function<bool()>& upd)
+Fullscreen::Fullscreen(::SDL_Renderer* renderer, const std::function<bool()>& upd)
     : Widget{renderer},
       _update{upd}
 {
     Widget::load(fullscreen_128x2_png);
 }
 
-void Fullscreen::render(const SDL_Rect& dstrect)
+void Fullscreen::render(const ::SDL_Rect& dstrect)
 {
     bool is_fullscreen{};
 
@@ -41,7 +41,7 @@ void Fullscreen::render(const SDL_Rect& dstrect)
     }
 
     if (_rect.x == -1 || _is_fullscreen != is_fullscreen) {
-        _rect = (is_fullscreen ? SDL_Rect{128, 0, 128, 128} : SDL_Rect{0, 0, 128, 128});
+        _rect = (is_fullscreen ? ::SDL_Rect{128, 0, 128, 128} : ::SDL_Rect{0, 0, 128, 128});
         _is_fullscreen = is_fullscreen;
     }
 

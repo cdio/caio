@@ -28,7 +28,7 @@ namespace sdl2 {
 
 Widget* Widget::pressed_widget{nullptr};
 
-Widget::Widget(SDL_Renderer* renderer)
+Widget::Widget(::SDL_Renderer* renderer)
     : _renderer{renderer}
 {
 }
@@ -36,14 +36,14 @@ Widget::Widget(SDL_Renderer* renderer)
 Widget::~Widget()
 {
     if (_texture != nullptr) {
-        SDL_DestroyTexture(_texture);
+        ::SDL_DestroyTexture(_texture);
     }
 }
 
 void Widget::load(const std::string& fname)
 {
     if (_texture != nullptr) {
-        SDL_DestroyTexture(_texture);
+        ::SDL_DestroyTexture(_texture);
         _texture = nullptr;
     }
 
@@ -58,12 +58,12 @@ void Widget::load(const std::string& fname)
 void Widget::load(const std::span<const uint8_t>& data)
 {
     if (_texture != nullptr) {
-        SDL_DestroyTexture(_texture);
+        ::SDL_DestroyTexture(_texture);
         _texture = nullptr;
     }
 
     if (_renderer != nullptr) {
-        SDL_RWops* ops = SDL_RWFromConstMem(data.data(), data.size());
+        ::SDL_RWops* ops = ::SDL_RWFromConstMem(data.data(), data.size());
         if (ops == nullptr) {
             throw UIError{"Can't load image from memory: {}", sdl_error()};
         }
@@ -92,7 +92,7 @@ bool Widget::enabled() const
     return true;
 }
 
-void Widget::event(const SDL_Event& event, const SDL_Rect& rect)
+void Widget::event(const ::SDL_Event& event, const ::SDL_Rect& rect)
 {
     switch (event.type) {
     case SDL_JOYAXISMOTION:
@@ -131,14 +131,14 @@ void Widget::event(const SDL_Event& event, const SDL_Rect& rect)
     }
 }
 
-void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect)
+void Widget::render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect)
 {
-    if (SDL_RenderCopy(_renderer, _texture, &srcrect, &dstrect) < 0) {
+    if (::SDL_RenderCopy(_renderer, _texture, &srcrect, &dstrect) < 0) {
         throw UIError{"Can't SDL_RenderCopy: {}", sdl_error()};
     }
 }
 
-void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, Rgba colour)
+void Widget::render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect, Rgba colour)
 {
     auto prev_colour = color_modulator();
     color_modulator(colour);
@@ -146,16 +146,16 @@ void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, Rgba colou
     color_modulator(prev_colour);
 }
 
-void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_Point& centre, float angle,
-    const SDL_RendererFlip& flip)
+void Widget::render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect, const ::SDL_Point& centre, float angle,
+    const ::SDL_RendererFlip& flip)
 {
-    if (SDL_RenderCopyEx(_renderer, _texture, &srcrect, &dstrect, angle, &centre, flip) < 0) {
+    if (::SDL_RenderCopyEx(_renderer, _texture, &srcrect, &dstrect, angle, &centre, flip) < 0) {
         throw UIError{"Can't SDL_RenderCopyEx: {}", sdl_error()};
     }
 }
 
-void Widget::render(const SDL_Rect& srcrect, const SDL_Rect& dstrect, const SDL_Point& centre, float angle,
-    const SDL_RendererFlip& flip, Rgba colour)
+void Widget::render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect, const ::SDL_Point& centre, float angle,
+    const ::SDL_RendererFlip& flip, Rgba colour)
 {
     auto prev_colour = color_modulator();
     color_modulator(colour);
@@ -167,7 +167,7 @@ Rgba Widget::draw_color() const
 {
     Rgba colour{};
 
-    if (SDL_GetRenderDrawColor(_renderer, &colour.r, &colour.g, &colour.b, &colour.a) < 0) {
+    if (::SDL_GetRenderDrawColor(_renderer, &colour.r, &colour.g, &colour.b, &colour.a) < 0) {
         throw UIError{"Can't SDL_GetRenderDrawColor: {}", sdl_error()};
     }
 
@@ -176,8 +176,8 @@ Rgba Widget::draw_color() const
 
 void Widget::draw_color(Rgba colour)
 {
-    if (SDL_SetRenderDrawColor(_renderer, colour.r, colour.g, colour.b, colour.a) < 0) {
-        throw UIError{"Can't SDL_SetRenderDrawColor: {}", sdl_error()};
+    if (::SDL_SetRenderDrawColor(_renderer, colour.r, colour.g, colour.b, colour.a) < 0) {
+        throw UIError{"Can't ::SDL_SetRenderDrawColor: {}", sdl_error()};
     }
 }
 
@@ -185,8 +185,8 @@ Rgba Widget::color_modulator() const
 {
     Rgba colour{};
 
-    if (SDL_GetTextureColorMod(_texture, &colour.r, &colour.g, &colour.b) < 0 ||
-        SDL_GetTextureAlphaMod(_texture, &colour.a) < 0) {
+    if (::SDL_GetTextureColorMod(_texture, &colour.r, &colour.g, &colour.b) < 0 ||
+        ::SDL_GetTextureAlphaMod(_texture, &colour.a) < 0) {
         throw UIError{"Can't SDL_GetTexture{{Color,Alpha}}Mod: {}", sdl_error()};
     }
 
@@ -195,8 +195,8 @@ Rgba Widget::color_modulator() const
 
 void Widget::color_modulator(Rgba colour)
 {
-    if (SDL_SetTextureColorMod(_texture, colour.r, colour.g, colour.b) < 0 ||
-        SDL_SetTextureAlphaMod(_texture, colour.a) < 0) {
+    if (::SDL_SetTextureColorMod(_texture, colour.r, colour.g, colour.b) < 0 ||
+        ::SDL_SetTextureAlphaMod(_texture, colour.a) < 0) {
         throw UIError{"Can't SDL_SetTexture{{Color,Alpha}}Mod: {}", sdl_error()};
     }
 }

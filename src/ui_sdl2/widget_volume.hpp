@@ -37,16 +37,16 @@ public:
      * @exception UIError
      * @see Widget::load(const std::span<const uint8_t>&)
      */
-    Volume(SDL_Renderer* renderer, const std::function<float()>& getvol, const std::function<void(float)>& setvol);
+    Volume(::SDL_Renderer* renderer, const std::function<float()>& getvol, const std::function<void(float)>& setvol);
 
     virtual ~Volume() {
     }
 
     bool enabled() const override;
 
-    void render(const SDL_Rect& dstrect) override;
+    void render(const ::SDL_Rect& dstrect) override;
 
-    void event(const SDL_Event& event, const SDL_Rect& rect) override;
+    void event(const ::SDL_Event& event, const ::SDL_Rect& rect) override;
 
 private:
     void volume(int incr);
@@ -54,7 +54,7 @@ private:
     std::function<float()>     _getvol{};
     std::function<void(float)> _setvol{};
     int                        _volidx{-1};
-    SDL_Rect                   _rect{0, 0, 128, 128};
+    ::SDL_Rect                 _rect{0, 0, 128, 128};
 };
 
 }

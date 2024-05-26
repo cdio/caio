@@ -49,8 +49,8 @@ using saddr_t = int16_t;
 template<typename T>
 using sptr_t = std::shared_ptr<T>;
 
-template<typename T>
-using uptr_t = std::unique_ptr<T>;
+template<typename... T>
+using uptr_t = std::unique_ptr<T...>;
 
 using buffer_t     = std::vector<uint8_t>;
 using buffer_it_t  = std::vector<uint8_t>::iterator;

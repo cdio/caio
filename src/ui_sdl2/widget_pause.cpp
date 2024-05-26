@@ -26,14 +26,14 @@ namespace widget {
 #include "icons/pause_128x2.hpp"
 
 
-Pause::Pause(SDL_Renderer* renderer, const std::function<bool()>& upd)
+Pause::Pause(::SDL_Renderer* renderer, const std::function<bool()>& upd)
     : Widget{renderer},
       _update{upd}
 {
     Widget::load(pause_128x2_png);
 }
 
-void Pause::render(const SDL_Rect& dstrect)
+void Pause::render(const ::SDL_Rect& dstrect)
 {
     bool is_paused{};
 
@@ -42,7 +42,7 @@ void Pause::render(const SDL_Rect& dstrect)
     }
 
     if (_rect.x == -1 || _is_paused != is_paused) {
-        _rect = (is_paused ? SDL_Rect{128, 0, 128, 128} : SDL_Rect{0, 0, 128, 128});
+        _rect = (is_paused ? ::SDL_Rect{128, 0, 128, 128} : ::SDL_Rect{0, 0, 128, 128});
         _is_paused = is_paused;
     }
 

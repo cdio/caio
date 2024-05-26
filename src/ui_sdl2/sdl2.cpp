@@ -24,7 +24,7 @@ namespace caio {
 namespace ui {
 namespace sdl2 {
 
-static std::map<SDL_Scancode, keyboard::Key> sdl_to_key{
+static std::map<::SDL_Scancode, keyboard::Key> sdl_to_key{
     { SDL_SCANCODE_A,               keyboard::KEY_A                 },
     { SDL_SCANCODE_B,               keyboard::KEY_B                 },
     { SDL_SCANCODE_C,               keyboard::KEY_C                 },
@@ -147,7 +147,7 @@ static std::map<SDL_Scancode, keyboard::Key> sdl_to_key{
 #endif
 };
 
-keyboard::Key to_key(SDL_Scancode code)
+keyboard::Key to_key(::SDL_Scancode code)
 {
     auto it = sdl_to_key.find(code);
     return (it == sdl_to_key.end() ? keyboard::KEY_NONE : it->second);
@@ -155,10 +155,10 @@ keyboard::Key to_key(SDL_Scancode code)
 
 std::string sdl_error()
 {
-    return SDL_GetError();
+    return ::SDL_GetError();
 }
 
-bool in_rect(int x, int y, const SDL_Rect& rect)
+bool in_rect(int x, int y, const ::SDL_Rect& rect)
 {
     return ((x >= rect.x && x < rect.x + rect.w) && (y >= rect.y && y < rect.y + rect.h));
 }

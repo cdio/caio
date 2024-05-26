@@ -32,12 +32,12 @@ namespace kempston {
  * |       |       |       | Fire  | Up    | Down  | Left  | Right |
  * +-------+-------+-------+-------+-------+-------+-------+-------+
  */
-constexpr static const uint8_t JOY_PORT_UP    = D3;
-constexpr static const uint8_t JOY_PORT_DOWN  = D2;
-constexpr static const uint8_t JOY_PORT_LEFT  = D1;
-constexpr static const uint8_t JOY_PORT_RIGHT = D0;
-constexpr static const uint8_t JOY_PORT_FIRE  = D4;
-constexpr static const uint8_t JOY_MASK       = D0 | D1 | D2 | D3 | D4;
+constexpr static const uint16_t JOY_PORT_UP    = D3;
+constexpr static const uint16_t JOY_PORT_DOWN  = D2;
+constexpr static const uint16_t JOY_PORT_LEFT  = D1;
+constexpr static const uint16_t JOY_PORT_RIGHT = D0;
+constexpr static const uint16_t JOY_PORT_FIRE  = D4;
+constexpr static const uint16_t JOY_MASK       = D0 | D1 | D2 | D3 | D4;
 
 /**
  * Kempston interface joystick port.

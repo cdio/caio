@@ -25,18 +25,18 @@ namespace widget {
 
 #include "icons/gamepad_128x3.hpp"
 
-Gamepad::Gamepad(SDL_Renderer* renderer, const std::function<Status()>& upd)
+Gamepad::Gamepad(::SDL_Renderer* renderer, const std::function<Status()>& upd)
     : Widget{renderer},
       _update{upd}
 {
     Widget::load(gamepad_128x3_png);
 }
 
-void Gamepad::render(const SDL_Rect& dstrect)
+void Gamepad::render(const ::SDL_Rect& dstrect)
 {
-    static const SDL_Rect normal_rect{0, 0, 128, 128};
-    static const SDL_Rect swapped_0_rect{128, 0, 128, 128};
-    static const SDL_Rect swapped_1_rect{256, 0, 128, 128};
+    static const ::SDL_Rect normal_rect{0, 0, 128, 128};
+    static const ::SDL_Rect swapped_0_rect{128, 0, 128, 128};
+    static const ::SDL_Rect swapped_1_rect{256, 0, 128, 128};
 
     Status st{};
     if (_update) {
