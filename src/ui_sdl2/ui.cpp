@@ -426,15 +426,15 @@ void UI::run()
 {
     auto old_handler = std::signal(SIGINT, signal_handler);
     if (old_handler == SIG_ERR) {
-        throw UIError{"Can't set SIGINT handler: " + Error::to_string()};
+        throw UIError{"Can't set SIGINT handler: {}", Error::to_string()};
     }
 
     if (std::signal(SIGSEGV, signal_handler) == SIG_ERR) {
-        throw UIError{"Can't set SIGSEGV handler: " + Error::to_string()};
+        throw UIError{"Can't set SIGSEGV handler: {}", Error::to_string()};
     }
 
     if (std::signal(SIGABRT, signal_handler) == SIG_ERR) {
-        throw UIError{"Can't set SIGABRT handler: " + Error::to_string()};
+        throw UIError{"Can't set SIGABRT handler: {}", Error::to_string()};
     }
 
     attach_controllers();
@@ -511,7 +511,7 @@ void UI::event_loop()
 
         delay = _fps_time - caio::now() + start;
         start = (delay > 0 ? caio::sleep(delay) - delay : 0);
-     }
+    }
 }
 
 void UI::win_event(const ::SDL_Event& event)
@@ -1076,7 +1076,7 @@ void UI::joy_add(int devid)
     /*
      * Associate the new game controller to the emulated joystick.
      */
-    auto gcptr = std::unique_ptr<::SDL_GameController, void(*)(::SDL_GameController*)>{gc, ::SDL_GameControllerClose};
+    auto gcptr = uptr_t<::SDL_GameController, void(*)(::SDL_GameController*)>{gc, ::SDL_GameControllerClose};
     _sdl_joys.emplace(jid, std::move(gcptr));
 
     ejoy->reset(jid);
@@ -1106,7 +1106,7 @@ void UI::attach_controllers()
         }
     }
 
-    log.debug("ui: Unassigned emualted joysticks: {}\n", count);
+    log.debug("ui: Unassigned emulated joysticks: {}\n", count);
 
     for (int devid = 0; devid < ::SDL_NumJoysticks() && count > 0; ++devid) {
         if (::SDL_IsGameController(devid)) {
