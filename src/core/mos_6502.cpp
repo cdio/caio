@@ -657,8 +657,7 @@ size_t Mos6502::single_step()
             break;
 
         case MODE_ZP_X:
-            arg += _regs.X;
-            arg %= 0x0100;              /* Zero page index bug */
+            arg = (arg + _regs.X) & 255;    /* Zero page index bug */
             break;
 
         case MODE_ABS_X:
@@ -666,8 +665,7 @@ size_t Mos6502::single_step()
             break;
 
         case MODE_ZP_Y:
-            arg += _regs.Y;
-            arg %= 0x0100;              /* Zero page index bug */
+            arg = (arg + _regs.Y) & 255;    /* Zero page index bug */
             break;
 
         case MODE_ABS_Y:
@@ -675,8 +673,7 @@ size_t Mos6502::single_step()
             break;
 
         case MODE_IND_X:
-            arg += _regs.X;
-            arg %= 0x100;               /* Zero page index bug */
+            arg = (arg + _regs.X) & 255;    /* Zero page index bug */
             arg = read_addr(arg);
             break;
 
@@ -685,10 +682,11 @@ size_t Mos6502::single_step()
             break;
 
         case MODE_IND:
+            /* JMP ($xxFF) */
             if ((arg & 0x00FF) != 0x00FF) {
                 arg = read_addr(arg);
             } else {
-                /* Indirect mode: Last byte of page bug */
+                /* Last byte of page bug */
                 arg = (read(arg & 0xFF00) << 8) | read(arg);
             }
             break;

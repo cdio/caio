@@ -24,12 +24,13 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-#include "c64_cartridge/cart_generic.hpp"
+#include "c64_cartridge/cart_c64_game_system_3.hpp"
 #include "c64_cartridge/cart_easy_flash.hpp"
-#include "c64_cartridge/cart_simons_basic.hpp"
+#include "c64_cartridge/cart_generic.hpp"
 #include "c64_cartridge/cart_ocean_type_1.hpp"
 #include "c64_cartridge/cart_magic_desk.hpp"
-#include "c64_cartridge/cart_c64_game_system_3.hpp"
+#include "c64_cartridge/cart_simons_basic.hpp"
+#include "c64_cartridge/cart_zaxxon.hpp"
 
 namespace caio {
 namespace commodore {
@@ -103,12 +104,12 @@ void Cartridge::mode(Cartridge::GameExromMode mode)
     }
 }
 
-void Cartridge::throw_invalid_cartridge(std::string_view reason, ssize_t entry)
+void Cartridge::throw_invalid_cartridge(ssize_t entry, std::string_view errmsg)
 {
-    if (entry >= 0) {
-        throw InvalidCartridge{"{}: {}: Chip entry {}: {}. {}", type(), name(), entry, reason, _crt->to_string()};
+    if (entry < 0) {
+        throw InvalidCartridge{"{}: {}: {}. {}", type(), name(), errmsg, _crt->to_string()};
     } else {
-        throw InvalidCartridge{"{}: {}: {}. {}", type(), name(), reason, _crt->to_string()};
+        throw InvalidCartridge{"{}: {}: Chip entry {}: {}. {}", type(), name(), entry, errmsg, _crt->to_string()};
     }
 }
 
@@ -146,8 +147,10 @@ sptr_t<Cartridge> Cartridge::create(std::string_view fname)
 
     case Crt::HW_TYPE_WARP_SPEED:
     case Crt::HW_TYPE_DINAMIC:
-    case Crt::HW_TYPE_ZAXXON:
         break;
+
+    case Crt::HW_TYPE_ZAXXON:
+        return std::make_shared<CartZaxxon>(crt);
 
     case Crt::HW_TYPE_MAGIC_DESK:
         return std::make_shared<CartMagicDesk>(crt);

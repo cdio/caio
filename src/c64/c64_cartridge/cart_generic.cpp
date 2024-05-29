@@ -93,7 +93,7 @@ void CartGeneric::reset()
         break;
 
     case MODE_INVISIBLE:
-        log.warn("%s(\"%s\"): Cartridge in invisible mode\n", type().c_str(), name().c_str());
+        log.warn("{}({}): Cartridge in invisible mode\n", type(), name());
     }
 
     /*

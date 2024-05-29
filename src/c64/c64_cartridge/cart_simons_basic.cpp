@@ -80,27 +80,27 @@ void CartSimonsBasic::reset()
         case Crt::CHIP_TYPE_FLASH:
         case Crt::CHIP_TYPE_EEPROM:
             if (chip.rsiz != ROM_SIZE) {
-                throw_invalid_cartridge("Invalid ROM size " + std::to_string(chip.rsiz), entry);
+                throw_invalid_cartridge(entry, "Invalid ROM size {}", chip.rsiz);
             }
 
             if (chip.addr == ROML_LOAD_ADDR) {
                 _roml = rom;
-                DEBUG("%s(\"%s\"): Chip entry %d: ROML device, bank %d, load address $%04X, size %d\n", type().c_str(),
-                    name().c_str(), entry, chip.bank, chip.addr, rom->size());
+                DEBUG("{}({}): Chip entry {}: ROML device, bank {}, load address ${:04X}, size {}\n",
+                    type(), name(), entry, chip.bank, chip.addr, rom->size());
                 break;
             }
 
             if (chip.addr == ROMH_LOAD_ADDR) {
                 _romh = rom;
-                DEBUG("%s(\"%s\"): Chip entry %d: ROMH device, bank %d, load address $%04X, size %d\n", type().c_str(),
-                    name().c_str(), entry, chip.bank, chip.addr, rom->size());
+                DEBUG("{}({}): Chip entry {}: ROMH device, bank {}, load address ${:04X}, size {}\n",
+                    type(), name(), entry, chip.bank, chip.addr, rom->size());
                 break;
             }
 
-            throw_invalid_cartridge("Invalid chip ", entry);
+            throw_invalid_cartridge(entry, "Invalid chip");
 
         default:
-            throw_invalid_cartridge("Unrecognised chip type " + std::to_string(chip.type), entry);
+            throw_invalid_cartridge(entry, "Unrecognised chip type {}", chip.type);
         }
     }
 
@@ -146,7 +146,7 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartSimonsBasic::getdev(addr_t add
         /*
          * ROML mapped at $8000-$9FFF.
          */
-        DEBUG("%s(\"%s\"): ROML for base addr $%04X, offset $%04X\n", type().c_str(), name().c_str(), addr,
+        DEBUG("{}({}): ROML for base addr ${:04X}, offset ${:04X}\n", type().c_str(), name().c_str(), addr,
             addr - ROML_LOAD_ADDR);
         return {{_roml, addr - ROML_LOAD_ADDR}, {}};
     }
@@ -155,7 +155,7 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartSimonsBasic::getdev(addr_t add
         /*
          * ROMH mapped at $A000-$BFFF.
          */
-        DEBUG("%s(\"%s\"): ROMH for base addr $%04X, offset $%04X\n", type().c_str(), name().c_str(), addr,
+        DEBUG("{}({}): ROMH for base addr {:04X}, offset ${:04X}\n", type().c_str(), name().c_str(), addr,
             addr - ROMH_LOAD_ADDR);
         return {{_romh, addr - ROMH_LOAD_ADDR}, {}};
     }

@@ -117,11 +117,11 @@ public:
 
     /**
      * Retrieve the cartridge internal device that must handle a specific memory address.
-     * @param addr Memory bank starting address;
+     * @param addr Memory bank base address;
      * @param romh Status of ROMH line;
      * @param roml Status of ROML line.
      * @return A pair of read and write devices or an empty pair
-     * if the specified address is not handled by this cartridge.
+     * if the specified base address is not handled by this cartridge.
      */
     virtual std::pair<ASpace::devmap_t, ASpace::devmap_t> getdev(addr_t addr, bool romh, bool roml) = 0;
 
@@ -162,7 +162,17 @@ protected:
      */
     const Crt& crt() const;
 
-    virtual void throw_invalid_cartridge(std::string_view reason, ssize_t entry = -1);
+    void throw_invalid_cartridge(ssize_t entry, std::string_view errmsg);
+
+    template<typename... Args>
+    void throw_invalid_cartridge(std::format_string<Args...> fmt, Args&&... args) {
+        throw_invalid_cartridge(-1, std::vformat(fmt.get(), std::make_format_args(args...)));
+    }
+
+    template<typename... Args>
+    void throw_invalid_cartridge(ssize_t entry, std::format_string<Args...> fmt, Args&&... args) {
+        throw_invalid_cartridge(entry, std::vformat(fmt.get(), std::make_format_args(args...)));
+    }
 
 private:
     sptr_t<Crt>     _crt;

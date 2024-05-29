@@ -91,10 +91,10 @@ void CartEasyFlash::reset()
             break;
 
         case Crt::CHIP_TYPE_EEPROM:     /* TODO: File on user's config directory */
-            throw_invalid_cartridge("type EEPROM", entry);
+            throw_invalid_cartridge(entry, "type EEPROM");
 
         default:
-            throw_invalid_cartridge("Unrecognised chip type " + std::to_string(chip.type), entry);
+            throw_invalid_cartridge(entry, "Unrecognised chip type {}", chip.type);
         }
     }
 
@@ -107,11 +107,11 @@ void CartEasyFlash::reset()
 void CartEasyFlash::add_rom(size_t entry, const Crt::Chip& chip, const devptr_t& rom)
 {
     if (chip.rsiz != ROM_SIZE) {
-        throw_invalid_cartridge("Invalid ROM size " + std::to_string(chip.rsiz), entry);
+        throw_invalid_cartridge(entry, "Invalid ROM size {}", chip.rsiz);
     }
 
     if (chip.bank > MAX_BANKS) {
-        throw_invalid_cartridge("Invalid bank " + std::to_string(chip.bank), entry);
+        throw_invalid_cartridge(entry, "Invalid bank {}", chip.bank);
     }
 
     switch (chip.addr) {
@@ -127,16 +127,17 @@ void CartEasyFlash::add_rom(size_t entry, const Crt::Chip& chip, const devptr_t&
         break;
 
     default:
-        throw_invalid_cartridge("Invalid load address $" + caio::to_string(chip.addr), entry);
+        throw_invalid_cartridge(entry, "Invalid load address ${}", caio::to_string(chip.addr));
+
     }
 
-    DEBUG("%s(\"%s\"): Chip %d: ROM device: %s\n", type().c_str(), name().c_str(), entry, Crt::to_string(chip).c_str());
+    DEBUG("{}({}): Chip {}: ROM device: {}\n", type(), name(), entry, Crt::to_string(chip));
 }
 
 void CartEasyFlash::add_ram(size_t entry, const Crt::Chip& chip, const devptr_t& ram)
 {
     _ram = ram;
-    DEBUG("%s(\"%s\"): Chip %d: RAM device: %s\n", type().c_str(), name().c_str(), entry, Crt::to_string(chip).c_str());
+    DEBUG("{}({}): Chip {}: RAM device: {}\n", type(), name(), entry, Crt::to_string(chip));
 }
 
 uint8_t CartEasyFlash::dev_read(addr_t addr, ReadMode mode)
@@ -305,10 +306,7 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartEasyFlash::getdev(addr_t addr,
              * ROML mapped at $8000-$9FFF.
              */
 #if 1
-            DEBUG("%s:(\"%s\"): 8K ROML: %s\n",
-                type().c_str(),
-                name().c_str(),
-                _roms_hi[_bank]->to_string().c_str());
+            DEBUG("{}:({}): 8K ROML: {}\n", type(), name(), _roms_hi[_bank]->to_string());
 #endif
             return {{_roms_lo[_bank], addr - ROML_LOAD_ADDR}, {}};
         }
@@ -320,10 +318,7 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartEasyFlash::getdev(addr_t addr,
              * ROML mapped at $8000-$9FFF.
              */
 #if 1
-            DEBUG("%s(\"%s\"): 16K ROML: %s\n",
-                type().c_str(),
-                name().c_str(),
-                _roms_hi[_bank]->to_string().c_str());
+            DEBUG("{}({}): 16K ROML: {}\n", type(), name(), _roms_hi[_bank]->to_string());
 #endif
             return {{_roms_lo[_bank], addr - ROML_LOAD_ADDR}, {}};
         }
@@ -332,10 +327,7 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartEasyFlash::getdev(addr_t addr,
              * ROMH mapped at $A000-$BFFF.
              */
 #if 1
-            DEBUG("%s(\"%s\"): 16K ROMH: %s\n",
-                type().c_str(),
-                name().c_str(),
-                _roms_hi[_bank]->to_string().c_str());
+            DEBUG("{}({}): 16K ROMH: {}\n", type(), name(), _roms_hi[_bank]->to_string());
 #endif
             return {{_roms_hi[_bank], addr - ROMH_LOAD_ADDR_1}, {}};
         }

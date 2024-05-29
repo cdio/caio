@@ -95,23 +95,23 @@ void CartMagicDesk::reset()
         case Crt::CHIP_TYPE_FLASH:
         case Crt::CHIP_TYPE_EEPROM:
             if (chip.rsiz != ROM_SIZE) {
-                throw_invalid_cartridge("Invalid ROM size " + std::to_string(chip.rsiz), entry);
+                throw_invalid_cartridge(entry, "Invalid ROM size {}", chip.rsiz);
             }
 
             _roms[_banks] = rom;
             ++_banks;
 
             if (_banks > MAX_BANKS) {
-                throw_invalid_cartridge("Max number of banks reached " + std::to_string(_banks), entry);
+                throw_invalid_cartridge(entry, "Max number of banks reached {}", _banks);
             }
 
-            DEBUG("%s(\"%s\"): Chip entry %d: ROM device, bank %d, load address $%04X, size %d\n", type().c_str(),
-                name().c_str(), entry, chip.bank, chip.addr, rom->size());
+            DEBUG("{}({}): Chip entry {}: ROM device, bank {}, load address ${:04X}, size {}\n",
+                type(), name(), entry, chip.bank, chip.addr, rom->size());
 
             break;
 
         default:
-            throw_invalid_cartridge("Unrecognised chip type " + std::to_string(chip.type), entry);
+            throw_invalid_cartridge(entry, "Unrecognised chip type {}", chip.type);
         }
     }
 
@@ -121,8 +121,8 @@ void CartMagicDesk::reset()
     case 0x20000:   /* 128K */
         break;
     default:
-        throw_invalid_cartridge("Invalid cartridge size " + std::to_string(cartsize()) +
-            ". Allowed sizes are 32K, 64K, or 128K, " + cart.to_string());
+        throw_invalid_cartridge("Invalid cartridge size {}. Allowed sizes are 32K, 64K, or 128K, {}",
+            cartsize(), cart.to_string());
     }
 
     /*
@@ -160,16 +160,16 @@ void CartMagicDesk::dev_write(addr_t addr, uint8_t data)
          * turning on RAM at $8000-$9FFF instead of ROM.
          */
         if (data == 0x80) {
-            DEBUG("%s(\"%s\"): Setting mode INVISIBLE\n", type().c_str(), name().c_str());
+            DEBUG("{}({}): Setting mode INVISIBLE\n", type(), name());
             mode(GameExromMode::MODE_INVISIBLE);
         } else {
             uint8_t bank = data & 0x0F;
             if (mode() == GameExromMode::MODE_INVISIBLE) {
-                DEBUG("%s(\"%s\"): Setting mode 8K, bank %d\n", type().c_str(), name().c_str(), bank);
+                DEBUG("{}({}): Setting mode 8K, bank {}\n", type(), name(), bank);
                 _bank = bank;
                 mode(GameExromMode::MODE_8K);
             } else if (bank != _bank) {
-                DEBUG("%s(\"%s\"): Setting bank %d\n", type().c_str(), name().c_str(), bank);
+                DEBUG("{}({}): Setting bank {}\n", type(), name(), bank);
                 _bank = bank;
                 propagate(true);
             }
@@ -211,8 +211,7 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartMagicDesk::getdev(addr_t addr,
      * turning on RAM at $8000-$9FFF instead of ROM.
      */
     if (mode() == GameExromMode::MODE_8K) {
-        DEBUG("%s(\"%s\"): Setting rom for addr $%04X, roml %d, romh %d\n", type().c_str(), name().c_str(), addr,
-            roml, romh);
+        DEBUG("{}({}): Setting rom for addr ${:04X}, roml {}, romh {}\n", type(), name(), addr, roml, romh);
         if ((roml || romh)) {
             return {{_roms[_bank], addr - ROML_LOAD_ADDR}, {}};
         }

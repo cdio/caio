@@ -68,8 +68,7 @@ void CartC64GameSystem3::reset()
     const auto &cart = crt();
 
     if (mode() != GameExromMode::MODE_8K) {
-        throw_invalid_cartridge("Invalid GAME/EXROM mode $" + caio::to_string(static_cast<uint16_t>(mode())) +
-            ", " + cart.to_string());
+        throw_invalid_cartridge("Invalid GAME/EXROM mode ${:04X}, {}", static_cast<uint16_t>(mode()), cart.to_string());
     }
 
     _bank = 0;
@@ -86,29 +85,28 @@ void CartC64GameSystem3::reset()
         case Crt::CHIP_TYPE_FLASH:
         case Crt::CHIP_TYPE_EEPROM:
             if (chip.rsiz != ROM_SIZE) {
-                throw_invalid_cartridge("Invalid ROM size " + std::to_string(chip.rsiz), entry);
+                throw_invalid_cartridge(entry, "Invalid ROM size {}", chip.rsiz);
             }
 
             _roms[_banks] = rom;
             ++_banks;
 
             if (_banks > MAX_BANKS) {
-                throw_invalid_cartridge("Max number of banks reached " + std::to_string(_banks));
+                throw_invalid_cartridge("Max number of banks reached {}", _banks);
             }
 
-            DEBUG("%s(\"%s\"): Chip entry %d: ROM device, bank %d, load address $%04X, size %d\n", type().c_str(),
-                name().c_str(), entry, chip.bank, chip.addr, rom->size());
+            DEBUG("{}({}): Chip entry {}: ROM device, bank {}, load address ${:04X}, size {}\n",
+                type(), name(), entry, chip.bank, chip.addr, rom->size());
 
             break;
 
         default:
-            throw_invalid_cartridge("Unrecognised chip type " + std::to_string(chip.type), entry);
+            throw_invalid_cartridge(entry, "Unrecognised chip type {}", chip.type);
         }
     }
 
     if (cartsize() != 0x80000 /* 512K */) {
-        throw_invalid_cartridge("Invalid cartridge size " + std::to_string(cartsize()) +
-            ". it must be 512K, " + cart.to_string().c_str());
+        throw_invalid_cartridge("Invalid cartridge size {}, it must be 512K, {}", cartsize(), cart.to_string());
     }
 
     /*

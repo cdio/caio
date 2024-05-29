@@ -330,10 +330,6 @@ void C64::connect_devices()
 
         /* Cassette input pins not implemented */
         cpuval |= (Mos6510::P4 | Mos6510::P5);  /* pull-ups */
-
-        /* P6 and P7 not connected */
-        cpuval &= ~(Mos6510::P7 | Mos6510::P6);
-
         return cpuval;
     };
 
