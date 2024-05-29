@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <ostream>
 #include <string_view>
@@ -42,6 +43,23 @@ public:
         Read        /**< A read operation could change the internal state of the device.    */
     };
 
+    using ReadObserverCb  = std::function<void(addr_t, ReadMode)>;
+    using WriteObserverCb = std::function<void(addr_t, uint8_t)>;
+
+    /**
+     * Set a device read observer.
+     * @param cb Observer callback.
+     * @see read(addr_t, ReadMode)
+     */
+    void read_observer(const ReadObserverCb& cb);
+
+    /**
+     * Set a device write observer.
+     * @param cb Observer callback.
+     * @see write(addr_t, uint8_t)
+     */
+    void write_observer(const WriteObserverCb& cb);
+
     /**
      * Return a human readable string representing this device.
      * @return A string representing this device.
@@ -49,18 +67,16 @@ public:
     std::string to_string() const override;
 
     /**
-     * Reset this device.
-     */
-    virtual void reset() = 0;
-
-    /**
      * Read from an address or device register.
+     * If there is a read observer it is called before
+     * the actual device read operation through dev_read().
      * @param addr Address to read from;
      * @param mode Read mode (default is ReadMode::Read).
      * @return The data stored at the specified address.
+     * @see dev_read(addr_t, ReadMode mode)
      * @see ReadMode
      */
-    virtual uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) = 0;
+    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read);
 
     /**
      * Read from an address or register without changing the device's internal state.
@@ -73,10 +89,18 @@ public:
 
     /**
      * Write a value to an address or register.
+     * If there is a write observer it is called before
+     * the actual device write operation through dev_write().
      * @param addr Address to write to;
      * @param data Data to write.
+     * @see dev_write(addr_t, uint8_t)
      */
-    virtual void write(addr_t addr, uint8_t data) = 0;
+    void write(addr_t addr, uint8_t data);
+
+    /**
+     * Reset this device.
+     */
+    virtual void reset() = 0;
 
     /**
      * Return the number of addresses (or registers) handled by this device.
@@ -99,6 +123,25 @@ protected:
 
     virtual ~Device() {
     }
+
+    /**
+     * Read from a device address or register.
+     * @param addr Address to read from;
+     * @param mode Read mode (default is ReadMode::Read).
+     * @return The data stored at the specified address.
+     * @see ReadMode
+     */
+    virtual uint8_t dev_read(addr_t addr, ReadMode mode = ReadMode::Read) = 0;
+
+    /**
+     * Write a device address or register.
+     * @param addr Address to write to;
+     * @param data Data to write.
+     */
+    virtual void dev_write(addr_t addr, uint8_t data) = 0;
+
+    ReadObserverCb  _read_cb{};
+    WriteObserverCb _write_cb{};
 };
 
 }

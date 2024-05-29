@@ -346,14 +346,14 @@ public:
     void reset() override;
 
     /**
-     * @see Mos6581_::read()
+     * @see Mos6581_::dev_read()
      */
-    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
+    uint8_t dev_read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
-     * @see Mos6581_::write()
+     * @see Mos6581_::dev_write()
      */
-    void write(addr_t addr, uint8_t value) override;
+    void dev_write(addr_t addr, uint8_t value) override;
 
 private:
     /**

@@ -36,14 +36,14 @@ public:
     }
 
     /**
-     * @see Device::read()
+     * @see Device::dev_read()
      */
-    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
+    uint8_t dev_read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
-     * @see Device::write()
+     * @see Device::dev_write()
      */
-    void write(addr_t addr, uint8_t value) override;
+    void dev_write(addr_t addr, uint8_t value) override;
 
     /**
      * Get a string with reSID library version.

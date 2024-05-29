@@ -118,7 +118,7 @@ size_t Mos6569::size() const
     return Registers::REGMAX;
 }
 
-uint8_t Mos6569::read(addr_t addr, ReadMode mode)
+uint8_t Mos6569::dev_read(addr_t addr, ReadMode mode)
 {
     uint8_t data{};
 
@@ -295,7 +295,7 @@ uint8_t Mos6569::read(addr_t addr, ReadMode mode)
     }
 }
 
-void Mos6569::write(addr_t addr, uint8_t data)
+void Mos6569::dev_write(addr_t addr, uint8_t data)
 {
     switch (addr) {
     case REG_MIB_0_X:

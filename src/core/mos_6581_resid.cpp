@@ -40,12 +40,12 @@ Mos6581Resid::Mos6581Resid(std::string_view label, unsigned clkf)
     _resid->reset();
 }
 
-uint8_t Mos6581Resid::read(addr_t addr, ReadMode)
+uint8_t Mos6581Resid::dev_read(addr_t addr, ReadMode)
 {
     return _resid->read(addr);
 }
 
-void Mos6581Resid::write(addr_t addr, uint8_t value)
+void Mos6581Resid::dev_write(addr_t addr, uint8_t value)
 {
     _resid->write(addr, value);
 }

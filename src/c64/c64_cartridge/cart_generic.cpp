@@ -102,13 +102,13 @@ void CartGeneric::reset()
     propagate();
 }
 
-uint8_t CartGeneric::read(addr_t addr, ReadMode)
+uint8_t CartGeneric::dev_read(addr_t addr, ReadMode)
 {
     /* Addresses from $DE00 to $DFFF */
     return 255;
 }
 
-void CartGeneric::write(addr_t addr, uint8_t data)
+void CartGeneric::dev_write(addr_t addr, uint8_t data)
 {
     /* Addresses from $DE00 to $DFFF */
 }

@@ -37,7 +37,7 @@ void C64IO::reset()
     }
 }
 
-uint8_t C64IO::read(addr_t addr, ReadMode mode)
+uint8_t C64IO::dev_read(addr_t addr, ReadMode mode)
 {
     if (addr < SID_ADDR) {
         /*
@@ -86,7 +86,7 @@ uint8_t C64IO::read(addr_t addr, ReadMode mode)
     return 255;
 }
 
-void C64IO::write(addr_t addr, uint8_t value)
+void C64IO::dev_write(addr_t addr, uint8_t value)
 {
     if (addr < SID_ADDR) {
         /*

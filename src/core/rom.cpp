@@ -51,7 +51,7 @@ ROM::ROM(std::istream& is, size_t count)
     type(TYPE);
 }
 
-void ROM::write(addr_t addr, uint8_t data)
+void ROM::dev_write(addr_t addr, uint8_t data)
 {
 #if 0
     log.warn("{}({}): Write attempt at relative address ${:04x}, data ${:02x}. Ignored\n",

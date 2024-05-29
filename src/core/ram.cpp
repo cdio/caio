@@ -51,12 +51,12 @@ RAM::~RAM()
 {
 }
 
-uint8_t RAM::read(addr_t addr, ReadMode)
+uint8_t RAM::dev_read(addr_t addr, ReadMode)
 {
     return _data[addr];
 }
 
-void RAM::write(addr_t addr, uint8_t data)
+void RAM::dev_write(addr_t addr, uint8_t data)
 {
     _data[addr] = data;
 }

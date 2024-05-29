@@ -117,7 +117,7 @@ void CartC64GameSystem3::reset()
     propagate();
 }
 
-uint8_t CartC64GameSystem3::read(addr_t addr, ReadMode rmode)
+uint8_t CartC64GameSystem3::dev_read(addr_t addr, ReadMode rmode)
 {
     addr &= IO_ADDR_MASK;
     if (addr < 255 && rmode != ReadMode::Peek) {
@@ -130,7 +130,7 @@ uint8_t CartC64GameSystem3::read(addr_t addr, ReadMode rmode)
     return 255;
 }
 
-void CartC64GameSystem3::write(addr_t addr, uint8_t data)
+void CartC64GameSystem3::dev_write(addr_t addr, uint8_t data)
 {
     addr &= IO_ADDR_MASK;
     if (addr < 64) {

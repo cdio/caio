@@ -133,7 +133,7 @@ void CartOceanType1::reset()
     propagate();
 }
 
-uint8_t CartOceanType1::read(addr_t addr, ReadMode)
+uint8_t CartOceanType1::dev_read(addr_t addr, ReadMode)
 {
     if (addr == 0x0000) {
         /*
@@ -147,7 +147,7 @@ uint8_t CartOceanType1::read(addr_t addr, ReadMode)
     return 255;
 }
 
-void CartOceanType1::write(addr_t addr, uint8_t data)
+void CartOceanType1::dev_write(addr_t addr, uint8_t data)
 {
     addr &= IO_ADDR_MASK;
     if (addr == 0x0000) {

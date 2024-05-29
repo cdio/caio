@@ -76,7 +76,7 @@ public:
     constexpr static const addr_t ROML_LOAD_ADDR   = 0x8000;
     constexpr static const addr_t ROMH_LOAD_ADDR   = 0xA000;
 
-    CartOceanType1(const sptr_t<Crt>&crt)
+    CartOceanType1(const sptr_t<Crt>& crt)
         : Cartridge{TYPE, crt} {
     }
 
@@ -84,14 +84,14 @@ public:
     }
 
     /**
-     * @see Device::read()
+     * @see Device::dev_read()
      */
-    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read) override;
+    uint8_t dev_read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
-     * @see Device::write()
+     * @see Device::dev_write()
      */
-    void write(addr_t addr, uint8_t data) override;
+    void dev_write(addr_t addr, uint8_t data) override;
 
     /**
      * @see Device::to_string()

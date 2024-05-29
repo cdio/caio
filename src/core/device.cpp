@@ -20,6 +20,34 @@
 
 namespace caio {
 
+uint8_t Device::read(addr_t addr, ReadMode mode)
+{
+    if (_read_cb) {
+        _read_cb(addr, mode);
+    }
+
+    return dev_read(addr, mode);
+}
+
+void Device::write(addr_t addr, uint8_t data)
+{
+    if (_write_cb) {
+        _write_cb(addr, data);
+    }
+
+    dev_write(addr, data);
+}
+
+void Device::read_observer(const ReadObserverCb& cb)
+{
+    _read_cb = cb;
+}
+
+void Device::write_observer(const WriteObserverCb& cb)
+{
+    _write_cb = cb;
+}
+
 std::string Device::to_string() const
 {
     return std::format("{}, size {}", Name::to_string(), size());

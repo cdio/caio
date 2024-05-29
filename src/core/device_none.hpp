@@ -62,15 +62,17 @@ public:
     /**
      * This method does nothing.
      * @return The default value.
+     * @see Device::dev_read(addr_t, ReadMode)
      */
-    uint8_t read(addr_t, ReadMode) override {
+    uint8_t dev_read(addr_t, ReadMode) override {
         return _dvalue;
     }
 
     /**
      * This method does nothing.
+     * @see Device::dev_write(addr_t, uint8_t)
      */
-    void write(addr_t, uint8_t) override {
+    void dev_write(addr_t, uint8_t) override {
     }
 
     /**
