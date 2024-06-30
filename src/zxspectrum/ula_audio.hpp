@@ -64,7 +64,7 @@ public:
 
     /**
      * Beep.
-     * @param vol Beep volume (between 0 and 1);
+     * @param vol Beep volume (between 0 and 1).
      */
     void beep(float vol) {
         _beep = ((vol > 1.0f) ? 1.0f : (vol < 0.0f ? 0.0f : vol));
@@ -83,7 +83,7 @@ private:
      * @see audio_buffer(const std::function<ui::AudioBuffer()>&)
      * @see Clockable::tick(const Clock&)
      */
-    size_t tick(const Clock& clk);
+    size_t tick(const Clock& clk) override;
 
     /**
      * Clear the samples buffer.

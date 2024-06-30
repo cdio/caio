@@ -63,8 +63,8 @@ using pulse_t = std::tuple<bool, uint64_t>;
 
 /**
  * Pulse buffer.
- * Pulse buffer is a vector of pulses.
- * methods used to convert from bytes to pulses.
+ * Pulse buffer is a vector of pulses and provides
+ * methods to convert from bytes to pulses.
  */
 class PulseBuffer : public std::vector<pulse_t> {
 public:
@@ -82,8 +82,8 @@ public:
     void push_silence(uint64_t time);
     void push_pilot(size_t count);
     void push_sync();
-    void push_data(const std::span<const uint8_t>& buf);
-    void push_block(const TAPFile::Block& block);
+    void push_data(std::span<const uint8_t> buf);
+    void push_block(TAPFile::Block block);
 
 private:
     uint64_t _start{};
@@ -93,8 +93,8 @@ private:
  * Standard Header block.
  */
 struct HeaderBlock {
-    constexpr static uint8_t BLOCKTYPE_HEADER           = 0x00;
-    constexpr static uint8_t BLOCKTYPE_DATA             = 0xFF;
+    constexpr static const uint8_t BLOCKTYPE_HEADER     = 0x00;
+    constexpr static const uint8_t BLOCKTYPE_DATA       = 0xFF;
     constexpr static const uint8_t TYPE_BASIC_PRG       = 0x00;
     constexpr static const uint8_t TYPE_BASIC_NUMARR    = 0x01;
     constexpr static const uint8_t TYPE_BASIC_CHRARR    = 0x02;

@@ -73,7 +73,7 @@ void ULAVideo::palette(const RgbaTable& plt)
     _palette = plt;
 }
 
-void ULAVideo::render_line(const renderer_t& rl)
+void ULAVideo::render_line(const Renderer& rl)
 {
     _renderline_cb = rl;
 }
@@ -130,12 +130,12 @@ inline void ULAVideo::render_line()
     std::fill(_scanline.begin(), _scanline.end(), _border_colour);
 }
 
-inline const Rgba& ULAVideo::to_rgba(Colour code) const
+inline Rgba ULAVideo::to_rgba(Colour code) const
 {
     return _palette[static_cast<size_t>(code) % _palette.size()];
 }
 
-void ULAVideo::paint_byte(unsigned start, uint8_t bitmap, const Rgba& fg, const Rgba& bg)
+void ULAVideo::paint_byte(unsigned start, uint8_t bitmap, Rgba fg, Rgba bg)
 {
     if (start < _scanline.size()) {
         uint8_t bit = 128;
@@ -173,8 +173,8 @@ void ULAVideo::paint_display()
             std::swap(fgcode, bgcode);
         }
 
-        const auto& fg = to_rgba(fgcode);
-        const auto& bg = to_rgba(bgcode);
+        const auto fg = to_rgba(fgcode);
+        const auto bg = to_rgba(bgcode);
 
         paint_byte(LBORDER_WIDTH + (col << 3), bitmap, fg, bg);
     }

@@ -59,7 +59,7 @@ void PulseBuffer::push_sync()
     push_back({0, _start});
 }
 
-void PulseBuffer::push_data(const std::span<const uint8_t>& buf)
+void PulseBuffer::push_data(std::span<const uint8_t> buf)
 {
     for (auto byte : buf) {
         for (uint8_t bit = 128; bit; bit >>= 1) {
@@ -81,7 +81,7 @@ void PulseBuffer::push_data(const std::span<const uint8_t>& buf)
     push_back({1, _start});
 }
 
-void PulseBuffer::push_block(const TAPFile::Block& block)
+void PulseBuffer::push_block(TAPFile::Block block)
 {
     size_t pilot_count = (block[0] == HeaderBlock::BLOCKTYPE_HEADER ?
         PILOT_PULSE_COUNT_HEADER : PILOT_PULSE_COUNT_DATA);
@@ -124,7 +124,7 @@ void Tape::save(std::string_view path)
 
 void Tape::load(std::string_view path)
 {
-    auto spath = path;  /* _rx is destroyed but path could be a reference to _rx's path */
+    std::string spath{path};    /* _rx is destroyed but path could be a reference to _rx's path */
     _rx = {};
     _rx.path = spath;
     _rx.tap.load(spath);

@@ -278,14 +278,14 @@ public:
     constexpr static const addr_t DISPLAY_BASE_ADDR         = 0x0000;   /* Relative to the 16K RAM */
     constexpr static const addr_t COLOUR_ATTR_BASE_ADDR     = DISPLAY_BASE_ADDR + DISPLAY_CHARACTERS;
 
-    using renderer_t = std::function<void(unsigned, const ui::Scanline&)>;
+    using Renderer = std::function<void(unsigned, const ui::Scanline&)>;
 
     /**
      * Initialise this video controller.
      * @param cpu   CPU;
      * @param ram   RAM containing the video memory;
      * @param label Label assigned to this device.
-     * @see render_line(const renderer_t&)
+     * @see render_line(const Renderer&)
      */
     ULAVideo(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, std::string_view label);
 
@@ -296,7 +296,7 @@ public:
      * The render line callback must send the video output to the UI.
      * @param rl The render line callback.
      */
-    void render_line(const renderer_t& rl);
+    void render_line(const Renderer& rl);
 
     /**
      * Read a colour palette from disk.
@@ -332,11 +332,11 @@ private:
      * @return The number of clock cycles the must pass before calling this method again.
      * @see Clockable::tick(const Clock&)
      */
-    size_t tick(const Clock& clk);
+    size_t tick(const Clock& clk) override;
 
     /**
      * Render the current scanline.
-     * @see render_line(const renderer_t&)
+     * @see render_line(const Renderer&)
      */
     void render_line();
 
@@ -347,7 +347,7 @@ private:
      * @see Colour
      * @see _palette
      */
-    const Rgba& to_rgba(Colour code) const;
+    Rgba to_rgba(Colour code) const;
 
     /**
      * Paint 8 pixels in the current scanline.
@@ -356,7 +356,7 @@ private:
      * @param fg     Foreground colour;
      * @param bg     Background colour.
      */
-    void paint_byte(unsigned start, uint8_t bitmap, const Rgba& fg, const Rgba& bg);
+    void paint_byte(unsigned start, uint8_t bitmap, Rgba fg, Rgba bg);
 
     /**
      * Paint 8 pixels of the display area in the current coordinates in the scanline.
@@ -368,7 +368,7 @@ private:
     RgbaTable     _palette;
     ui::Scanline  _scanline;
 
-    renderer_t    _renderline_cb{};         /* Renderer callback                        */
+    Renderer      _renderline_cb{};         /* Renderer callback                        */
     int           _line{};                  /* Current scanline                         */
     unsigned      _cycle{};                 /* Current horizontal character position    */
     unsigned      _flash_counter{};         /* Counter for the flash attribute          */
