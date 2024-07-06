@@ -191,9 +191,16 @@ private:
 };
 
 /**
- * MOS6581 implementation from the specs.
- * The real 6581 chip does not respect its own specifications
- * consequently this implementation does not sound exactly like the real chip.
+ * MOS-6581 Sound Interfaace Device (SID).
+ * The real 6581 does not respect its own specifications consequently
+ * it is very difficult to implement an accurate emulator of this chip.
+ *
+ * This implementation is quite accurate but it is not (and it does
+ * not pretend to be) at the level of other solutions that used a big
+ * deal of reverse engineering such as reSID.
+ *
+ * Follows an extract of an interview done to Bob Yannes (the author
+ * of this chip):
  *
  * > "Can you give us a short overview of the SIDs internal architecture ?
  * > It's pretty brute-force, I didn't have time to be elegant. Each "voice" consisted of

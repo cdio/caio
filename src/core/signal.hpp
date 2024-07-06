@@ -59,8 +59,8 @@ constexpr fp_t exp(fp_t A0, fp_t A, fp_t t, fp_t T)
  */
 constexpr fp_t triangle(fp_t t, fp_t T)
 {
-    const fp_t slope = 4.0f / T;
-    const fp_t T50   = 0.5f * T;
+    const fp_t slope = 4.0 / T;
+    const fp_t T50   = 0.5 * T;
     return (t <= T50 ? slope * t - 1.0 : 1.0 - slope * (t - T50));
 }
 
@@ -143,7 +143,7 @@ struct PCoeffs {
     {
         if (den.size() > 0) {
             if (const auto a0 = den[0]; a0 != 1.0) {
-                auto fn = [a0](fp_t value) { return (value / a0); };
+                const auto fn = [a0](fp_t value) { return (value / a0); };
                 std::transform(num.begin(), num.end(), num.begin(), fn);
                 std::transform(den.begin(), den.end(), den.begin(), fn);
             }
@@ -253,10 +253,10 @@ std::array<fp_t, std::max(R, C)> poly_add(const std::array<fp_t, R>& a1, const s
 }
 
 /**
- * Add two pairs of coefficients into one.
+ * Add two pairs of coefficients.
  * @param c1 First pair of coefficients;
  * @param c2 Second pair of coefficeints.
- * @return The added coefficient pair.
+ * @return The resulting coefficient pair.
  */
 template<size_t M1, size_t N1, size_t M2, size_t N2>
 constexpr PCoeffs<std::max(M1, M2), std::max(N1, N2)> add(const PCoeffs<M1, N1>& c1, const PCoeffs<M2, N2>& c2)

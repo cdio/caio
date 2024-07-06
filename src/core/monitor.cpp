@@ -274,7 +274,7 @@ size_t Monitor::to_count(std::string_view str)
 
     } catch (const InvalidNumber& err) {
         _rd.write("Invalid value: {}\n", str);
-        throw err;
+        throw;
     }
 }
 
@@ -541,10 +541,10 @@ bool Monitor::bp_list(Monitor& mon, const Command::args_t& args)
     std::ostringstream os{};
 
     for (const auto& kv : mon._breakpoints) {
-        auto& addr = kv.first;
-        auto& cond = kv.second;
-        auto& cfn  = cond.first;
-        auto& cstr = cond.second;
+        const auto& addr = kv.first;
+        const auto& cond = kv.second;
+        const auto& cfn  = cond.first;
+        const auto& cstr = cond.second;
 
         os << "$" << caio::to_string(addr);
 

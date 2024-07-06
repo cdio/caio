@@ -209,7 +209,7 @@ ERROR_CLASS(UIError);
 /**
  * Argument check.
  * @param cond  Condition.
- * @param fmt   Mesage format string;
+ * @param fmt   Message format string;
  * @param args  Format string arguments.
  * @execption InvalidArgument if the specified condition is not met.
  */

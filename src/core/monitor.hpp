@@ -65,7 +65,7 @@ struct MonitoredCPU {
     mmap_cb_t     mmap{};       /* Get the memory mappings (address space)  */
     ebreak_cb_t   ebreak{};     /* Set a breakpoint on next instruction     */
     load_cb_t     load{};       /* Inject content of a file into memory     */
-    save_cb_t     save{};       /* Save a memory area as a file             */
+    save_cb_t     save{};       /* Write a memory area into a file          */
     loglevel_cb_t loglevel{};   /* Set/get the loglevel                     */
     regvalue_cb_t regvalue{};   /* Get a register's value given its name    */
     bpdoc_cb_t    bpdoc{};      /* Documentation on how to set breakpoints  */

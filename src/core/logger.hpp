@@ -144,7 +144,7 @@ public:
         if (is_debug()) {
             log(DEBUG_COLOR, fmt.get(), std::make_format_args(args...));
         }
-       return *this;
+        return *this;
     }
 
     /**

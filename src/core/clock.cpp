@@ -72,8 +72,8 @@ void Clock::del(const sptr_t<Clockable>& clkb)
 
 void Clock::run()
 {
+    const ssize_t sync_cycles = cycles(SYNC_TIME / 1'000'000.0f);
     ssize_t sched_cycle = 0;
-    ssize_t sync_cycles = cycles(SYNC_TIME / 1000000.0f);
     int64_t start = caio::now();
 
     while (!_stop)  {

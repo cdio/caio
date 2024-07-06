@@ -317,12 +317,12 @@ public:
     /**
      * Initialise a monitor for this CPU.
      * This CPU must be properly initialised (system mappings set) before this method can be called.
-     * The CPU monitor is initialised and a breakpoint is added at the reset address (vRESET),
+     * The CPU monitor is initialised and a breakpoint is added at the reset address (RESET_ADDR),
      * the monitor takes control as soon as this CPU is started.
      * @param ifd  Input file descriptor used to communicate with the user;
      * @param ofd  Output file descriptor used to communicate with the user;
      * @param load Monitor load callback (empty to use the default);
-     * @param save Monitor save calblack (empty to use the  default).
+     * @param save Monitor save callback (empty to use the default).
      * @see init()
      * @see monitor::monitored_cpu_defaults()
      * @see monitor::MonitoredCPU
@@ -348,7 +348,7 @@ public:
     void reset();
 
     /**
-     * Restart this CPU with predefined state.
+     * Restart this CPU with a predefined state.
      * @param regs Register values;
      * @param im   Interrupt mode;
      * @param iff1 IFF1 state;
@@ -524,7 +524,7 @@ public:
     void write(addr_t addr, uint8_t data);
 
     /**
-     * Get a string with the status of this CPU (regsiters and other values).
+     * Get a string with the status of this CPU (registers and other values).
      * @return A string with the status of this CPU.
      */
     std::string status() const;
@@ -606,7 +606,7 @@ private:
 
     /**
      * Opcode fetch and instruction decoding state machine.
-     * @param read_bus true to fetch the opcode sampling the data bus; false to fetch the opcode from memory.
+     * @param read_bus true to fetch the opcode by sampling the data bus; false to fetch it from memory.
      * @see _fstate
      * @see _opcode
      * @see _iprefix
@@ -648,7 +648,7 @@ private:
     /**
      * Disassemble a single instruction located at a specified address.
      * @param addr    Address to disassemble (after disassembly this value is
-     *                incremented with the position of the next instruction);
+     *                incremented to the position of the next instruction);
      * @param show_pc true if the position of the PC must be marked in the disassembled code;
      *                false otherwise.
      * @return A string with the disassembled instruction.
@@ -816,7 +816,7 @@ private:
     static const Instruction iy_instr_set[256];
     static const Instruction ix_bit_instr_set[256];
 
-    const Instruction*  _instr_set{main_instr_set};     /* Current istruction set lookup table  */
+    const Instruction*  _instr_set{main_instr_set};     /* Current instruction set lookup table */
     Prefix              _iprefix{Prefix::None};         /* Instruction prefix                   */
     addr_t              _iaddr{};                       /* Instruction address                  */
     uint8_t             _bit_displ{};                   /* Bit displacement argument            */

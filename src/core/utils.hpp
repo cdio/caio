@@ -68,7 +68,7 @@ T to_integer(fp_t value)
  * @see to_integer()
  */
 __attribute__((always_inline))
-static inline int16_t to_i16(fp_t value)
+inline int16_t to_i16(fp_t value)
 {
     return to_integer<int16_t>(value);
 }
@@ -79,7 +79,7 @@ static inline int16_t to_i16(fp_t value)
  * @return The aligned value.
  */
 template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
-constexpr static inline int align(T val)
+constexpr inline int align(T val)
 {
     return ((val + (sizeof(T) - 1)) & ~(sizeof(T) - 1));
 }
@@ -89,7 +89,7 @@ constexpr static inline int align(T val)
  * @see std::ceil()
  */
 template<typename T, std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
-constexpr static inline int ceil(T fval)
+constexpr inline int ceil(T fval)
 {
     int val = static_cast<int>(fval);
 
@@ -207,7 +207,7 @@ std::ostream& dump(std::ostream& os, const Iterator begin, const Iterator end, a
 template<typename C, typename = std::enable_if<is_container<C>::value>>
 std::ostream& dump(std::ostream& os, const C& cont, addr_t base = 0)
 {
-    return dump(os, cont.begin(), cont.end(), base);
+    return dump(os, std::begin(cont), std::end(cont), base);
 }
 
 /**
@@ -255,7 +255,7 @@ T to_number(std::string_view str)
  * @param bcd packed BCD.
  * @return The converted value.
  */
-constexpr static inline uint8_t bcd_to_bin(uint8_t bcd)
+constexpr inline uint8_t bcd_to_bin(uint8_t bcd)
 {
     return (((bcd >> 4) * 10) + (bcd & 15));
 }
@@ -265,9 +265,9 @@ constexpr static inline uint8_t bcd_to_bin(uint8_t bcd)
  * @param bin Binary number.
  * @return The converted packed BCD value.
  */
-constexpr static inline uint8_t bin_to_bcd(uint8_t bin)
+constexpr inline uint8_t bin_to_bcd(uint8_t bin)
 {
-    uint8_t t = bin / 10;
+    const uint8_t t = bin / 10;
     return ((t << 4) | (bin - t * 10));
 }
 
@@ -277,7 +277,7 @@ constexpr static inline uint8_t bin_to_bcd(uint8_t bin)
  * @param byte Byte to expand.
  * @return The expanded byte.
  */
-constexpr static inline uint16_t expand_bits(uint8_t byte)
+constexpr inline uint16_t expand_bits(uint8_t byte)
 {
     return ((byte & 0x80) ? 0xC000 : 0) |
            ((byte & 0x40) ? 0x3000 : 0) |
@@ -295,12 +295,12 @@ constexpr static inline uint16_t expand_bits(uint8_t byte)
  * @param byte Byte to expand.
  * @return The expanded byte.
  */
-constexpr static inline uint16_t expand_dibits(uint8_t byte)
+constexpr inline uint16_t expand_dibits(uint8_t byte)
 {
-    uint8_t d1 = byte & 0xC0;
-    uint8_t d2 = byte & 0x30;
-    uint8_t d3 = byte & 0x0C;
-    uint8_t d4 = byte & 0x03;
+    const uint8_t d1 = byte & 0xC0;
+    const uint8_t d2 = byte & 0x30;
+    const uint8_t d3 = byte & 0x0C;
+    const uint8_t d4 = byte & 0x03;
 
     return (d1 << 8) | (d1 << 6) |
            (d2 << 6) | (d2 << 4) |
@@ -309,17 +309,17 @@ constexpr static inline uint16_t expand_dibits(uint8_t byte)
 }
 
 /**
- * Convert 01 di-bits into 00 and 10 di-bits into 11.
+ * Convert 01 di-bits to 00 and 10 di-bits to 11.
  * 01011001 becomes 00001100.
  * @param byte Byte to convert.
  * @return The converted byte.
  */
-constexpr static inline uint8_t convert_01_10(uint8_t byte)
+constexpr inline uint8_t convert_01_10(uint8_t byte)
 {
-    uint8_t d1 = byte & 0xC0;
-    uint8_t d2 = byte & 0x30;
-    uint8_t d3 = byte & 0x0C;
-    uint8_t d4 = byte & 0x03;
+    const uint8_t d1 = byte & 0xC0;
+    const uint8_t d2 = byte & 0x30;
+    const uint8_t d3 = byte & 0x0C;
+    const uint8_t d4 = byte & 0x03;
 
     return ((d1 == 0x00 || d1 == 0x40) ? 0x00 : 0xC0) |
            ((d2 == 0x00 || d2 == 0x10) ? 0x00 : 0x30) |
@@ -342,13 +342,12 @@ void convert_01_10(C& bytes)
 }
 
 /**
- * Replace 01 and 10 di-bits with 11.
+ * Convert 01 and 10 di-bits to 11.
  * 01011000 becomes 11111100.
  * @param byte Byte to convert.
  * @return The converted byte.
- * @note Out of imagination for naming.
  */
-constexpr static inline uint8_t convert_01_10_to_11(uint8_t byte)
+constexpr inline uint8_t convert_01_10_to_11(uint8_t byte)
 {
     return ((byte & 0xC0) == 0x00 ? 0x00 : 0xC0) |
            ((byte & 0x30) == 0x00 ? 0x00 : 0x30) |
@@ -357,10 +356,9 @@ constexpr static inline uint8_t convert_01_10_to_11(uint8_t byte)
 }
 
 /**
- * Convert non null di-bits into 11.
+ * Convert non null di-bits to 11.
  * 01011000 becomes 11111100.
  * @param bytes Bytes to convert.
- * @note Out of immagination for naming.
  */
 template<typename C, typename = std::enable_if<is_container<C>::value>>
 void convert_01_10_to_11(C& bytes)
@@ -375,7 +373,7 @@ void convert_01_10_to_11(C& bytes)
  * The pattern is repeated until the entire destination buffer is filled.
  * @param dst     Destination buffer;
  * @param pattern Pattern;
- * @param random  If true, contaminate the destination buffer with some random values.
+ * @param random  True to contaminate the destination buffer with some random values.
  */
 template<typename T>
 void fill(std::span<uint8_t> dst, T pattern, bool random = false)
@@ -390,16 +388,17 @@ void fill(std::span<uint8_t> dst, T pattern, bool random = false)
 }
 
 /**
+ * Get the current time.
  * @return The current time in microseconds.
  */
-static inline uint64_t now()
+inline uint64_t now()
 {
     auto now = std::chrono::steady_clock::now().time_since_epoch();
     return static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(now).count());
 }
 
 /**
- * Delay the called thread by sleeping for a specified amount of time.
+ * Delay the calling thread by sleeping for a specified amount of time.
  * The actual sleep time depends on the scheduling mechanism
  * used by the running operating system.
  * @param delay Time to sleep (microseconds).

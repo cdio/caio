@@ -97,7 +97,7 @@ unsigned long long to_ulonglong(std::string_view str, size_t max)
     default:;
     }
 
-    char* err;
+    char* err{};
     unsigned long long val = std::strtoull(str.data() + pos, &err, base);
     if (*err != '\0' || val > max) {
         throw InvalidNumber{str};

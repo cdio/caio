@@ -91,12 +91,12 @@ public:
     /**
      * @see Mos6502::read()
      */
-    uint8_t read(addr_t addr, Device::ReadMode mode = Device::ReadMode::Read);
+    uint8_t read(addr_t addr, Device::ReadMode mode = Device::ReadMode::Read) override;
 
     /**
      * @see Mos6502::write()
      */
-    void write(addr_t addr, uint8_t data);
+    void write(addr_t addr, uint8_t data) override;
 
 private:
     uint8_t _iodir{};

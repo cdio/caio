@@ -80,7 +80,7 @@ public:
     }
 
     /**
-     * Get an iterator to the last element of this ROM + 1..
+     * Get an iterator to the last element of this ROM + 1.
      * @return An iterator to the last element +1.
      */
     buffer_cit_t end() const {

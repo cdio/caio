@@ -1103,8 +1103,8 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
      * 0003: 3E 3F         LD A, $3F
      * 0005: C3 61 02      JP $0261
      *
-     *  0         1         2         3
-     *  012345678901234567890123456789012345
+     * 0         1         2         3
+     * 012345678901234567890123456789012345
      */
     constexpr static const size_t HEX_SIZE = 20;
     constexpr static const size_t MNE_SIZE = 20;

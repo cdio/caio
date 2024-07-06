@@ -562,11 +562,13 @@ bool Mos6526::tick(Timer& timer, TimerMode mode)
             }
             break;
 
-        case TimerMode::CNT:
-        case TimerMode::TA_CNT:
-        default:
-//          throw NotImplemented{*this, "Timer mode not implemented: ${}", caio::to_string(static_cast<uint8_t>(mode))};
-            log.warn("{}: Timer mode not implemented: ${:02X}\n", Name::to_string(), static_cast<uint8_t>(mode));
+        case TimerMode::CNT:    /* Count pulses on /CNT */
+        case TimerMode::TA_CNT: /* Count Timer-A underflows when /CNT is low */
+            /*
+             * TODO
+             * /CNT input is not implemented (and it is normally pulled up).
+             */
+            break;
         }
 
         if (timer.is_underflow()) {

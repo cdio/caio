@@ -47,8 +47,7 @@ private:
      * Clockable tick method.
      * This method is called by Clock::tick() at specific clock intervals.
      * @param clk The caller clock.
-     * @return The number of clock cycles that must pass before this instance is called again;
-     * Clockable::HALT if the caller clock must be stopped (usually this happens when the application is terminated).
+     * @return The number of clock cycles before calling this instance again; HALT to terminate the clock emulation.
      * @see Clock::tick()
      */
     virtual size_t tick(const class Clock& clk) = 0;
