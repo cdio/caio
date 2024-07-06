@@ -1,23 +1,14 @@
-- Spectrum: Distorded audio signal
-- Spectrum: Test SNA snapshot format
-- UI:       GUI using WxWidgets
+- UI:       Find some SDL-GUI
             Windowed pseudo-terminals (logs and monitor)
             Configuration window
             Avoid interference between ALT/CTRL+xx and OS
+- UI:       Joystick label = gamepad name
+- NES test: The Young Indiana Jones Chronicles and Burai Fighter
 - vjoy:     move ALT-K handling from c64 to ui
-- signal:   Test all methods specially filters and kernels
-- signal:   Fast filters, fast convolution?
-- Monitor:  Monitor always active, use config value to enter it during boot.
-- 6502:     Tests suite
-- 6502:     Tests that don't work:
-            VICE-testprogs/SCPU/scputest
-            VICE-testprogs/CPU/kdormann
-            VICE-testprogs/general/banking00
-- SID:      Remove 3rdpary reSID library
-- VICII:    Fix sprite position (batman, turrican)
-- VICII:    Fix border colour during open-border mode
+- 6502:     Tests suite: trap12 is failing
+- SID:      Filter gain or shape? (ballad/channels dane)
+- C1541Fs:  Fastload mode (remove time emulation during load/save operations)
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
-- C1541Fs:  Support for P00 files
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
 - UI:       Fix disk widget activity when C1541 is in error condition.
 - UI:       Floppy widget: Disk progress
@@ -26,14 +17,18 @@
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
 - CBMBUS:   Refactor using pullups
-- C64:      C64 EasyFlash cartridge: eeprom support
-- Spectrum: .tzx
+- c64:      C64 EasyFlash cartridge: EEPROM support
+- c64:      Ughlympics and Bombjack: Start game
+- c64:      C64 EasyFlash cartridge: Turrican2 continue game?
+- c64:      Zaxxon cartridge: Wrong chargen
+- c64:      Ms-Pacman
 - misc:     Release/Snapshots packages: brew, rpm, deb, freebsd port
-- misc:     Use std::format (C++23)
+- misc:     std::string_view with libstdc++
 - misc:     Use fstream::native_handle() (C++26)
-- misc:     Port to Cpp2?
+- Spectrum: Distord audio signal
+- Spectrum: Test SNA format
 - Apple2
 - BBC Micro
-- Daewoo DPC-200
+- Daewoo DPC-200 (MSX)
 - NEC PC-8001
 - Amstrad CPC-464

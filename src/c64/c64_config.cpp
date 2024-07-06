@@ -26,7 +26,6 @@ namespace c64 {
 
 static const config::Option c64_options[] = {
     { KEY_PRGFILE,  SEC_C64, KEY_PRGFILE, DEFAULT_PRGFILE, config::Arg::Required, config::set_value         },
-    { KEY_RESID,    SEC_C64, KEY_RESID,   DEFAULT_RESID,   config::Arg::Optional, config::set_bool, "yes"   },
     { KEY_SWAPJOY,  SEC_C64, KEY_SWAPJOY, DEFAULT_SWAPJOY, config::Arg::Optional, config::set_bool, "yes"   },
     { KEY_UNIT_8,   SEC_C64, KEY_UNIT_8,  DEFAULT_UNIT_8,  config::Arg::Required, config::set_value         },
     { KEY_UNIT_9,   SEC_C64, KEY_UNIT_9,  DEFAULT_UNIT_9,  config::Arg::Required, config::set_value         }
@@ -39,12 +38,10 @@ std::string C64Cmdline::usage() const
     return std::format("{}\n\n"
         "Commodore 64 specific:\n"
         " --prg <prg>             Load a PRG file as soon as the basic is ready\n"
-        " --resid [yes|no]        Use the MOS6581 reSID library (default is {})\n"
         " --swapj [yes|no]        Swap Joysticks (default is {})\n"
         " --unit8 <dir>           Attach a disk drive as unit 8\n"
         " --unit9 <dir>           Attach a disk drive as unit 9",
         config::Cmdline::usage(),
-        DEFAULT_RESID,
         DEFAULT_SWAPJOY);
 }
 
@@ -63,7 +60,6 @@ std::string C64Cmdline::sname() const
 C64Config::C64Config(config::Section& sec)
     : Config{sec, "c64_"},
       prgfile{sec[KEY_PRGFILE]},
-      resid{config::is_true(sec[KEY_RESID])},
       swapj{config::is_true(sec[KEY_SWAPJOY])},
       unit8{sec[KEY_UNIT_8]},
       unit9{sec[KEY_UNIT_9]}
@@ -77,14 +73,12 @@ std::string C64Config::to_string() const
         "  Swap Joysticks:     {}\n"
         "  Attached PRG:       \"{}\"\n"
         "  Unit-8:             \"{}\"\n"
-        "  Unit-9:             \"{}\"\n"
-        "  Use reSID library:  {}",
+        "  Unit-9:             \"{}\"",
         Config::to_string(),
         (swapj ? "yes" : "no"),
         prgfile,
         unit8,
-        unit9,
-        (resid ? "yes" : "no"));
+        unit9);
 }
 
 }

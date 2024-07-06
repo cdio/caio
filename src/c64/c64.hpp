@@ -28,7 +28,7 @@
 #include "mos_6510.hpp"
 #include "mos_6526.hpp"
 #include "mos_6569.hpp"
-#include "mos_6581_i.hpp"
+#include "mos_6581.hpp"
 
 #include "c64_bus_controller.hpp"
 #include "c64_cartridge.hpp"
@@ -181,7 +181,7 @@ private:
     sptr_t<PLA>                 _pla{};
     sptr_t<Mos6510>             _cpu{};
     sptr_t<Mos6569>             _vic2{};
-    sptr_t<Mos6581_>            _sid{};
+    sptr_t<Mos6581>             _sid{};
     sptr_t<Mos6526>             _cia1{};
     sptr_t<Mos6526>             _cia2{};
     sptr_t<Cartridge>           _ioexp{};

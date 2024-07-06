@@ -31,7 +31,6 @@
 #include "version.hpp"
 
 #include "mos_6581.hpp"
-#include "mos_6581_resid.hpp"
 
 #include "c64_crt.hpp"
 
@@ -268,16 +267,9 @@ void C64::create_devices()
     _kernal = std::make_shared<ROM>(rompath(KERNAL_FNAME), KERNAL_DIGEST,  "KERNAL");
     _chargen = std::make_shared<ROM>(rompath(CHARGEN_FNAME), CHARGEN_DIGEST, "CHARGEN");
     _vram = std::make_shared<NibbleRAM>(VRAM_SIZE, "VRAM");
-
-    if (_conf.resid) {
-        _sid = std::make_shared<Mos6581Resid>(Mos6581Resid::version(), CLOCK_FREQ);
-    } else {
-        _sid = std::make_shared<Mos6581>("SID", CLOCK_FREQ);
-    }
-
+    _sid = std::make_shared<Mos6581>("SID", CLOCK_FREQ);
     _cia1 = std::make_shared<Mos6526>("CIA1");
     _cia2 = std::make_shared<Mos6526>("CIA2");
-
     _bus = std::make_shared<cbm_bus::Bus>("BUS");
     _busdev = std::make_shared<C64BusController>(_bus, _cia2);
 

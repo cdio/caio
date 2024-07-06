@@ -602,12 +602,12 @@ void Filter::generate()
 }
 
 Mos6581::Mos6581(std::string_view label, unsigned clkf)
-    : Mos6581_{label, clkf},
+    : Device{TYPE, label},
+      _samples_cycles{Clock::cycles(DT, clkf)},
       _voice_1{clkf, _voice_3},
       _voice_2{clkf, _voice_1},
       _voice_3{clkf, _voice_2}
 {
-    _samples_cycles = Clock::cycles(DT, clkf);
 }
 
 void Mos6581::reset()
@@ -795,6 +795,19 @@ void Mos6581::dev_write(addr_t addr, uint8_t value)
     }
 
     _last_value = value;
+}
+
+std::ostream& Mos6581::dump(std::ostream& os, addr_t base) const
+{
+    std::array<uint8_t, REGMAX> regs{};
+    std::fill(regs.begin(), regs.end(), 255);
+
+    regs[ADC_1] = peek(ADC_1);
+    regs[ADC_2] = peek(ADC_2);
+    regs[VOICE_3_OSC] = peek(VOICE_3_OSC);
+    regs[VOICE_3_ENV] = peek(VOICE_3_ENV);
+
+    return caio::dump(os, regs, base);
 }
 
 size_t Mos6581::tick(const Clock& clk)

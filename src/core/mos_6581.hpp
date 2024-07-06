@@ -18,11 +18,20 @@
  */
 #pragma once
 
-#include "mos_6581_i.hpp"
+#include "clock.hpp"
+#include "device.hpp"
 #include "signal.hpp"
+#include "ui.hpp"
+#include "utils.hpp"
 
 namespace caio {
 namespace mos_6581 {
+
+constexpr static const unsigned SAMPLING_RATE = 44100;
+constexpr static const float DT               = 1.0f / SAMPLING_RATE;
+constexpr static const float  SAMPLES_TIME    = 0.020f;
+constexpr static const size_t SAMPLES         = static_cast<size_t>(caio::ceil(SAMPLING_RATE * SAMPLES_TIME));
+constexpr static const size_t CHANNELS        = 1;
 
 class Oscillator {
 public:
@@ -329,14 +338,61 @@ private:
  * > source in the audio output, an analog switch was provided to turn off the audio output
  * > of Voice 3."
  *
- * @see Mos6581_
  * @see https://en.wikipedia.org/wiki/MOS_Technology_SID
  * @see https://www.c64-wiki.com/wiki/Commodore_64_Programmer%27s_Reference_Guide
  * @see http://www.sidmusic.org/sid/sidtech5.html
  * @see http://sidmusic.org/sid/yannes.html
  */
-class Mos6581 : public Mos6581_ {
+class Mos6581 : public Device, public Clockable {
 public:
+    constexpr static const char* TYPE = "MOS6581";
+
+    enum Registers {
+        VOICE_1_FREQ_LO         = 0x00,
+        VOICE_1_FREQ_HI         = 0x01,
+        VOICE_1_PULSE_WIDTH_LO  = 0x02,
+        VOICE_1_PULSE_WIDTH_HI  = 0x03,
+        VOICE_1_CONTROL         = 0x04,
+        VOICE_1_ATTACK_DECAY    = 0x05,
+        VOICE_1_SUSTAIN_RELEASE = 0x06,
+
+        VOICE_2_FREQ_LO         = 0x07,
+        VOICE_2_FREQ_HI         = 0x08,
+        VOICE_2_PULSE_WIDTH_LO  = 0x09,
+        VOICE_2_PULSE_WIDTH_HI  = 0x0A,
+        VOICE_2_CONTROL         = 0x0B,
+        VOICE_2_ATTACK_DECAY    = 0x0C,
+        VOICE_2_SUSTAIN_RELEASE = 0x0D,
+
+        VOICE_3_FREQ_LO         = 0x0E,
+        VOICE_3_FREQ_HI         = 0x0F,
+        VOICE_3_PULSE_WIDTH_LO  = 0x10,
+        VOICE_3_PULSE_WIDTH_HI  = 0x11,
+        VOICE_3_CONTROL         = 0x12,
+        VOICE_3_ATTACK_DECAY    = 0x13,
+        VOICE_3_SUSTAIN_RELEASE = 0x14,
+
+        FILTER_CUTOFF_LO        = 0x15,
+        FILTER_CUTOFF_HI        = 0x16,
+
+        FILTER_VOICE_CONTROL    = 0x17,
+        FILTER_MODE             = 0x18,
+
+        ADC_1                   = 0x19,
+        ADC_2                   = 0x1A,
+
+        VOICE_3_OSC             = 0x1B,
+        VOICE_3_ENV             = 0x1C,
+
+        UNUSED_1D               = 0x1D,
+        UNUSED_1E               = 0x1E,
+        UNUSED_1F               = 0x1F,
+
+        REGMAX
+    };
+
+    using AudioBufferCb = std::function<ui::AudioBuffer()>;
+
     /**
      * Initalise this SID instance.
      * @param label Label assigned to this instance;
@@ -348,19 +404,39 @@ public:
     }
 
     /**
-     * @see Mos6581_::reset()
+     * Set the audio buffer provider.
+     * @param abuf Audio buffer provider.
+     */
+    void audio_buffer(const AudioBufferCb& abuf) {
+        _audio_buffer = abuf;
+    }
+
+    /**
+     * @see Device::reset()
      */
     void reset() override;
 
     /**
-     * @see Mos6581_::dev_read()
+     * @see Device::size()
+     */
+    size_t size() const override {
+        return REGMAX;
+    }
+
+    /**
+     * @see Device::dev_read()
      */
     uint8_t dev_read(addr_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
-     * @see Mos6581_::dev_write()
+     * @see Device::dev_write()
      */
     void dev_write(addr_t addr, uint8_t value) override;
+
+    /**
+     * @see Device::dump()
+     */
+    std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
 
 private:
     /**
@@ -382,6 +458,7 @@ private:
 
     bool is_v3_active() const;
 
+    size_t                      _samples_cycles;
     Voice                       _voice_1;
     Voice                       _voice_2;
     Voice                       _voice_3;
@@ -398,6 +475,7 @@ private:
     size_t                      _sample_index{};
     size_t                      _prev_index{};
     uint8_t                     _last_value{};
+    AudioBufferCb               _audio_buffer{};
 };
 
 }

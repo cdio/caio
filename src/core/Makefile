@@ -88,17 +88,13 @@ CXXSRCS+=	mos_6502.cpp \
 		mos_6510.cpp \
 		mos_6526.cpp \
 		mos_6569.cpp \
-		mos_6581.cpp \
-		mos_6581_i.cpp \
-		mos_6581_resid.cpp
+		mos_6581.cpp
 
 INCS+=		mos_6502.hpp \
 		mos_6510.hpp \
 		mos_6526.hpp \
 		mos_6569.hpp \
-		mos_6581.hpp \
-		mos_6581_i.hpp \
-		mos_6581_resid.hpp
+		mos_6581.hpp
 
 CXXSRCS+=	zilog_z80.cpp \
 		zilog_z80_i_arith.cpp \

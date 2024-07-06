@@ -13,9 +13,11 @@ At the moment the following platforms are emulated:
 ### Commodore 64
 
 The emulation of the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
-reached beta status and almost all of the tested programs work (there are
-still some issues with few advanced games that use specific video/timing
-tricks).
+reached beta status. Most of the tested programs work (there are still some
+issues with few advanced games that use specific video/timing tricks).<br>
+It supports audio, joystick interfaces, the cartridge CRT format, and the
+C1541 disk drive unit (read and write), the D64 file format is not supported
+yet.
 
 ![c64-basic](images/c64-basic.gif "C64 - Basic")
 ![c64-gyruss](images/c64-gyruss.gif "C64 - Gyruss")
@@ -32,7 +34,8 @@ and 1K RAM. Soon after its introduction several RAMPACKs appeared, these
 extended the RAM up to 16K.<br>
 When the ZX-81 came out, its 8K ROM was also available for the ZX-80.<br>
 caio supports the original configuartion, the 16K RAM extension and
-the 8K ROM.
+the 8K ROM.<br>
+Tape files .O and .P are supported (read and write).
 
 ![zx80-4K-space-invaders](images/zx80-4K-space-invaders.gif "ZX80 - Space Invaders")
 ![zx80-4K-breakout](images/zx80-4K-breakout.gif "ZX80 - Breakout")
@@ -44,17 +47,19 @@ the 8K ROM.
 
 The emulation of the
 [Sinclair ZX-Spectrum 48K](https://en.wikipedia.org/wiki/ZX_Spectrum)
-reached beta status. Only the 48K version of this machine is emulated,
-it supports the cassette TAP file format and snapshot files Z80 and SNA.
+reached beta status. Only the 48K version of this machine is emulated.<br>
+It supports the integrated 1 bit audio, the Kempston joystick interface,
+the cassette TAP file format (read and write) and snapshot files Z80 and SNA.
 
 ![zxspectrum-48K-extreme](images/zxspectrum-48k-extreme.gif "ZX-Spectrum 48K - Extreme")
 ![zxspectrum-48K-jetset-willy](images/zxspectrum-48k-jetset-willy.gif "ZX-Spectrum 48K - JetSet Willy")
 ![zxspectrum-48K-olli-n-lissa](images/zxspectrum-48k-olli_n_lissa.gif "ZX-Spectrum 48K - Olli & Lissa - The Ghost of Shilmoore Castle")
 ![zxspectrum-48K-starquake](images/zxspectrum-48k-starquake.gif "ZX-Spectrum 48K - Starquake")
 
+
 ## Host platforms
 
-At the moment the supported host platforms are Linux and macOS.
+At the moment the supported host platforms are Linux and macOS.<br>
 
 
 ## Usage & Configuration

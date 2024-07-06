@@ -20,8 +20,7 @@ ROOT=		${abspath ../}
 
 include ${ROOT}/mk/config.mk
 
-DIRS=		resid \
-		sha2
+DIRS=		sha2
 
 CLEANDIRS=	${DIRS} \
 		tools \

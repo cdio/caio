@@ -144,7 +144,6 @@ and <options> are:
  ...
 Commodore C64 specific:
  --prg <prg>             Load a PRG file as soon as the basic is ready
- --resid [yes|no]        Use the MOS6581 reSID library (default is no)
  --swapj [yes|no]        Swap Joysticks (default is no)
  --unit8 <dir>           Attach a disk drive as unit 8
  --unit9 <dir>           Attach a disk drive as unit 9

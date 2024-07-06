@@ -26,13 +26,11 @@ namespace c64 {
 
 constexpr static const char* SEC_C64            = "c64";
 constexpr static const char* KEY_PRGFILE        = "prg";
-constexpr static const char* KEY_RESID          = "resid";
 constexpr static const char* KEY_SWAPJOY        = "swapj";
 constexpr static const char* KEY_UNIT_8         = "unit8";
 constexpr static const char* KEY_UNIT_9         = "unit9";
 
 constexpr static const char* DEFAULT_PRGFILE    = "";
-constexpr static const char* DEFAULT_RESID      = "no";
 constexpr static const char* DEFAULT_SWAPJOY    = "no";
 constexpr static const char* DEFAULT_UNIT_8     = "";
 constexpr static const char* DEFAULT_UNIT_9     = "";
@@ -51,7 +49,6 @@ public:
 
 struct C64Config : public config::Config {
     std::string prgfile{};
-    bool        resid{};
     bool        swapj{};
     std::string unit8{};
     std::string unit9{};
