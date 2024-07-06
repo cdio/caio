@@ -122,7 +122,7 @@ public:
      */
     Mos6502(const sptr_t<ASpace>& mmap, std::string_view type = TYPE, std::string_view label = LABEL)
         : Name{type, (label.empty() ? LABEL : label)} {
-        init(mmap);
+        Mos6502::init(mmap);
     }
 
     virtual ~Mos6502() {

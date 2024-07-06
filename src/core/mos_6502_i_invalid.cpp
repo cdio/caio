@@ -465,7 +465,7 @@ int Mos6502::i_KIL(Mos6502& self, addr_t addr)
      * Alias: HLT, JAM, CIM
      */
     self._halted = true;
-    log.debug("KIL instruction at ${:4X}, CPU halted\n", self._regs.PC);
+    log.debug("KIL instruction at ${:04X}, CPU halted\n", self._regs.PC);
     return 0;
 }
 
