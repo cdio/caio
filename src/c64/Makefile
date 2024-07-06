@@ -65,20 +65,20 @@ INCS+=		c64.hpp \
 		p00file.hpp \
 		prgfile.hpp
 
-CXXSRCS+=	c64_cartridge/cart_generic.cpp \
-		c64_cartridge/cart_simons_basic.cpp \
-		c64_cartridge/cart_ocean_type_1.cpp \
-		c64_cartridge/cart_easy_flash.cpp \
-		c64_cartridge/cart_magic_desk.cpp \
-		c64_cartridge/cart_c64_game_system_3.cpp \
-		c64_cartridge/cart_zaxxon.cpp
+CXXSRCS+=	c64_cart_generic.cpp \
+		c64_cart_simons_basic.cpp \
+		c64_cart_ocean_type_1.cpp \
+		c64_cart_easy_flash.cpp \
+		c64_cart_magic_desk.cpp \
+		c64_cart_c64_game_system_3.cpp \
+		c64_cart_zaxxon.cpp
 
-INCS+=		c64_cartridge/cart_generic.hpp \
-		c64_cartridge/cart_simons_basic.hpp \
-		c64_cartridge/cart_ocean_type_1.hpp \
-		c64_cartridge/cart_easy_flash.hpp \
-		c64_cartridge/cart_magic_desk.hpp \
-		c64_cartridge/cart_c64_game_system_3.hpp \
-		c64_cartridge/cart_zaxxon.hpp
+INCS+=		c64_cart_generic.hpp \
+		c64_cart_simons_basic.hpp \
+		c64_cart_ocean_type_1.hpp \
+		c64_cart_easy_flash.hpp \
+		c64_cart_magic_desk.hpp \
+		c64_cart_c64_game_system_3.hpp \
+		c64_cart_zaxxon.hpp
 
 include ${ROOT}/mk/lib.mk

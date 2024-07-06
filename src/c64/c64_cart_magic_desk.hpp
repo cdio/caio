@@ -20,7 +20,7 @@
 
 #include <array>
 
-#include "../c64_cartridge.hpp"
+#include "c64_cartridge.hpp"
 
 namespace caio {
 namespace commodore {

@@ -24,13 +24,13 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-#include "c64_cartridge/cart_c64_game_system_3.hpp"
-#include "c64_cartridge/cart_easy_flash.hpp"
-#include "c64_cartridge/cart_generic.hpp"
-#include "c64_cartridge/cart_ocean_type_1.hpp"
-#include "c64_cartridge/cart_magic_desk.hpp"
-#include "c64_cartridge/cart_simons_basic.hpp"
-#include "c64_cartridge/cart_zaxxon.hpp"
+#include "c64_cart_c64_game_system_3.hpp"
+#include "c64_cart_easy_flash.hpp"
+#include "c64_cart_generic.hpp"
+#include "c64_cart_ocean_type_1.hpp"
+#include "c64_cart_magic_desk.hpp"
+#include "c64_cart_simons_basic.hpp"
+#include "c64_cart_zaxxon.hpp"
 
 namespace caio {
 namespace commodore {

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "cart_c64_game_system_3.hpp"
+#include "c64_cart_c64_game_system_3.hpp"
 
 #include <sstream>
 

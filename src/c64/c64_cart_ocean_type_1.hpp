@@ -20,50 +20,67 @@
 
 #include <array>
 
-#include "../c64_cartridge.hpp"
+#include "c64_cartridge.hpp"
 
 namespace caio {
 namespace commodore {
 namespace c64 {
 
 /**
- * C64 Game System, System 3 Cartridge.
+ * Ocean type 1 Cartridge.
  *
  * Type     Size    Game    EXROM   ROML        ROMH    LOAD ADDRESS
  * ----------------------------------------------------------------------------
- *          512K    1       0                           $8000-$9FFF (Banks 0-3)
+ *          32K     0       0                           $8000-$9FFF (Banks 0-3)
  *
- * 64 banks of 8K each.
+ *          128K    0       0                           $8000-$9FFF (Banks 0-15)
  *
- * List of the known cartridges:
- *  C64GS 4-in-1      (Commodore)  (512 KiB)
- *  Last Ninja Remix  (System 3)   (512 KiB)
- *  Myth              (System 3)   (512 KiB)
+ *          256K    0       0                           $8000-$9FFF (Banks 0-15)
+ *                                                      $A000-$BFFF (Banks 16-31)
  *
- * ROM memory is organized in 8K banks located at $8000-$9FFF.
- * Bank switching is done by writing to address $DE00+X, where X is the bank number (STA $DE00,X).
- * For instance, to read from bank 3, address $DE03 is written to.
- * Reading from anywhere in the I/O-1 range will disable the cart.
+ *          512K    0       0                           $8000-$9FFF (Banks 0-63)    TERMINATOR 2
  *
- * The CRT file contains a string of CHIP blocks, each block with a start address of $8000,
- * length $2000 and the bank number in the bank field. In the cartridge header,
- * EXROM ($18) is set to 0, GAME ($19) is set to 1 to enable the 8 K ROM configuration.
+ * 32K, 128K, 256K or 512K sizes (4, 16, 32 or 64 banks of 8K each)
+ *
+ * Bank switching is done by writing to $DE00.
+ * The lower six bits give the bank number (ranging from 0-63), bit 7 is always set.
+ *
+ * Some known OCEAN cartridges:
+ *  Batman The Movie    (128K)
+ *  Battle Command      (128K)
+ *  Double Dragon       (128K)
+ *  Navy Seals          (128K)
+ *  Pang                (128K)
+ *  Robocop 3           (128K)
+ *  Space Gun           (128K)
+ *  Toki                (128K)
+ *  Chase H.Q. II       (256K)
+ *  Robocop 2           (256K)
+ *  Shadow of the Beast (256K)
+ *  Terminator 2        (512K)
+ *
+ * CRT "kung_fu_master.crt", name "kungfu", size 64, hwtype $0005, exrom 0, game 1,
+ *     chip(size 8208, type $0000, bank $0000, addr $8000, rsiz 8192),
+ *     chip(size 8208, type $0000, bank $0001, addr $8000, rsiz 8192),
+ *     chip(size 8208, type $0000, bank $0002, addr $8000, rsiz 8192),
+ *     chip(size 8208, type $0000, bank $0003, addr $8000, rsiz 8192)
  *
  * @see https://vice-emu.sourceforge.io/vice_17.html#SEC400
  * @see https://ist.uwaterloo.ca/~schepers/formats/CRT.TXT
  */
-class CartC64GameSystem3 : public Cartridge {
+class CartOceanType1 : public Cartridge {
 public:
-    constexpr static const char* TYPE           = "CART_C64_GAME_SYSTEM_3";
-    constexpr static const size_t ROM_SIZE      = 8192;
-    constexpr static const size_t MAX_BANKS     = 64;
-    constexpr static const addr_t ROM_LOAD_ADDR = 0x8000;
+    constexpr static const char* TYPE              = "CART_OCEAN_TYPE_1";
+    constexpr static const size_t ROM_SIZE         = 8192;
+    constexpr static const size_t MAX_BANKS        = 64;
+    constexpr static const addr_t ROML_LOAD_ADDR   = 0x8000;
+    constexpr static const addr_t ROMH_LOAD_ADDR   = 0xA000;
 
-    CartC64GameSystem3(const sptr_t<Crt>& crt)
+    CartOceanType1(const sptr_t<Crt>& crt)
         : Cartridge{TYPE, crt} {
     }
 
-    virtual ~CartC64GameSystem3() {
+    virtual ~CartOceanType1() {
     }
 
     /**
