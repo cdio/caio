@@ -33,6 +33,7 @@
 #include "c64_bus_controller.hpp"
 #include "c64_cartridge.hpp"
 #include "c64_config.hpp"
+#include "c64_io.hpp"
 #include "c64_joystick.hpp"
 #include "c64_keyboard.hpp"
 #include "c64_params.hpp"
@@ -149,8 +150,8 @@ private:
      * Load a .crt image and associate it to an I/O expansion device.
      * @return An I/O expansion device (Cartridge) attached to the specified image;
      * nullptr if the cartridge is not specified in the configuration.
-     * @exception InvalidCartridge if the specified file is not recognised as a cartrdige.
-     * @exception IOError if the specified file does not exists or cannot be opened.
+     * @exception InvalidCartridge if the specified file is not recognised as a cartridge.
+     * @exception IOError if the specified file does not exist or cannot be opened.
      * @see Cartridge
      * @see Crt
      */
@@ -166,17 +167,17 @@ private:
 
     /**
      * Process hot-keys.
-     * This method is indirectly called by the user interface.
+     * This method is called by the user interface.
      */
     void hotkeys(keyboard::Key key);
 
     C64Config                   _conf;
-    devptr_t                    _ram{};
-    devptr_t                    _basic{};
-    devptr_t                    _kernal{};
-    devptr_t                    _chargen{};
-    devptr_t                    _vram{};
-    devptr_t                    _io{};
+    sptr_t<RAM>                 _ram{};
+    sptr_t<ROM>                 _basic{};
+    sptr_t<ROM>                 _kernal{};
+    sptr_t<ROM>                 _chargen{};
+    sptr_t<NibbleRAM>           _vram{};
+    sptr_t<C64IO>               _io{};
     sptr_t<PLA>                 _pla{};
     sptr_t<Mos6510>             _cpu{};
     sptr_t<Mos6569>             _vic2{};

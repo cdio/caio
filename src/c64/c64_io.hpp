@@ -27,18 +27,18 @@ namespace c64 {
 
 /**
  * C64 I/O device.
- * This class is a container-device that embeds all the devices
- * connected to the C64 I/O space mapped from address $D000 to $DFFF.
+ * This class is a container for all the devices connected
+ * to the C64 I/O space mapped from address $D000 to $DFFF.
  *
- * $D000 - $D02E -- $0000 - $002E   VIC2 registers
- * $D02F - $D03F -- $002F - $003F   Fixed #$FF
- * $D040 - $D3FF -- $0040 - $03FF   Previous 2 repeated as 64 bytes blocks
- * $D400 - $D7FF -- $0400 - $07FF   SID registers (repeated as 32 bytes blocks)
- * $D800 - $DBFF -- $0800 - $0BFF   Color RAM (only low nibbles are settable)
- * $DC00 - $DCFF -- $0C00 - $0CFF   CIA #1 registers
- * $DD00 - $DDFF -- $0D00 - $0DFF   CIA #2 registers
- * $DE00 - $DEFF -- $0E00 - $0EFF   I/O #1 expansion
- * $DF00 - $DFFF -- $0F00 - $0FFF   I/O #2 expansion
+ *     $D000 - $D02E -- $0000 - $002E   VIC2 registers
+ *     $D02F - $D03F -- $002F - $003F   Fixed #$FF
+ *     $D040 - $D3FF -- $0040 - $03FF   Previous 2 repeated as 64 bytes blocks
+ *     $D400 - $D7FF -- $0400 - $07FF   SID registers (repeated as 32 bytes blocks)
+ *     $D800 - $DBFF -- $0800 - $0BFF   Color RAM (only low nibbles are settable)
+ *     $DC00 - $DCFF -- $0C00 - $0CFF   CIA #1 registers
+ *     $DD00 - $DDFF -- $0D00 - $0DFF   CIA #2 registers
+ *     $DE00 - $DEFF -- $0E00 - $0EFF   I/O #1 expansion
+ *     $DF00 - $DFFF -- $0F00 - $0FFF   I/O #2 expansion
  */
 class C64IO : public Device {
 public:

@@ -34,7 +34,6 @@
 #include "mos_6581_resid.hpp"
 
 #include "c64_crt.hpp"
-#include "c64_io.hpp"
 
 #include "c1541_factory.hpp"
 
@@ -151,18 +150,13 @@ void C64::reset()
         _basic->reset();
         _kernal->reset();
         _chargen->reset();
-
 //XXX     _bus->reset();
 //XXX     _busdev->reset();
-
         _cpu->write(0, 0);  /* Not necessary, PLA already sets the default mode */
         _cpu->write(1, 0);
         _pla->reset();
-
         _io->reset();       /* Resets: VIC2, SID, VRAM, CIA1, CIA2 and Cartridge */
-
         _cpu->reset();      /* The CPU is reset after IO and PLA otherwise it could take the wrong reset vector */
-
         _kbd->reset();
 
         if (_unit8) {
@@ -388,13 +382,13 @@ void C64::connect_devices()
     _vic2->irq(set_irq);
 
     /*
-     * Connect the CPU rdy pin to the VIC2 ba pin.
+     * Connect the CPU rdy pin to the VIC2 aec pin.
      */
     auto set_rdy = [this](bool active) {
         _cpu->rdy_pin(active);
     };
 
-    _vic2->ba(set_rdy);
+    _vic2->aec(set_rdy);
 
     /*
      * Load the VIC2 colour palette.
