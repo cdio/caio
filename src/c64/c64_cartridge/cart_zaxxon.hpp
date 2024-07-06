@@ -20,6 +20,9 @@
 
 #include <array>
 
+#include "rom.hpp"
+#include "types.hpp"
+
 #include "../c64_cartridge.hpp"
 
 namespace caio {
@@ -100,9 +103,9 @@ public:
 private:
     void roml_read_observer(addr_t addr, ReadMode mode);
 
-    devptr_t                         _roml{};
-    size_t                           _bank{};
-    std::array<devptr_t, ROMH_BANKS> _romsh{};
+    sptr_t<ROM>                         _roml{};
+    size_t                              _bank{};
+    std::array<sptr_t<ROM>, ROMH_BANKS> _romsh{};
 };
 
 }

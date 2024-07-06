@@ -82,7 +82,13 @@ void CartZaxxon::reset()
                 throw_invalid_cartridge(entry, "Invalid ROML size {}", chip.rsiz);
             }
 
-            _roml = rom;
+            /*
+             * Create a mirrored 8K ROM.
+             */
+            auto ram = std::make_shared<RAM>(2 * rom->size(), rom->label());
+            std::copy_n(static_pointer_cast<ROM>(rom)->begin(), rom->size(), ram->begin());
+            std::copy_n(ram->begin(), rom->size(), ram->begin() + rom->size());
+            _roml = static_pointer_cast<ROM>(ram);
             _roml->read_observer([this](addr_t addr, ReadMode mode) { roml_read_observer(addr, mode); });
 
         } else if (chip.addr == ROMH_BASE_ADDR) {
@@ -97,7 +103,7 @@ void CartZaxxon::reset()
                 throw_invalid_cartridge(entry, "Invalid ROMH bank {}", chip.bank);
             }
 
-            _romsh[chip.bank] = rom;
+            _romsh[chip.bank] = static_pointer_cast<ROM>(rom);
         }
     }
 
@@ -125,9 +131,7 @@ void CartZaxxon::roml_read_observer(addr_t addr, ReadMode mode)
      *   Bank 0: Read access to $8000-$8FFF
      *   Bank 1: Read access to $9000-$9FFF
      */
-    if (addr < ROMH_BASE_ADDR) {
-        _bank = (addr >= ROML_SIZE);
-    }
+    _bank = (addr >= ROML_SIZE);
 }
 
 std::string CartZaxxon::to_string() const
@@ -142,7 +146,7 @@ std::string CartZaxxon::to_string() const
 std::pair<ASpace::devmap_t, ASpace::devmap_t> CartZaxxon::getdev(addr_t addr, bool romh, bool roml)
 {
     if (roml) {
-       return {{_roml, 0x0000}, {}};
+       return {{_roml, addr - ROML_BASE_ADDR}, {}};
     }
 
     if (romh) {
