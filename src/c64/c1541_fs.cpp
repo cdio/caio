@@ -542,10 +542,8 @@ Status C1541Fs::copy(std::string_view param)
         return Status::NO_FILE_GIVEN;
     }
 
-    for (const auto& fname : catfiles) {
-        if (c1541::is_pattern(fname)) {
-            return Status::SYNTAX_ERROR;
-        }
+    if (std::any_of(catfiles.begin(), catfiles.end(), c1541::is_pattern)) {
+        return Status::SYNTAX_ERROR;
     }
 
     for (const auto& fname : catfiles) {

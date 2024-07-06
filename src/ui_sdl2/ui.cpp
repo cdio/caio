@@ -452,7 +452,6 @@ void UI::event_loop()
 {
     ::SDL_Event event{};
     int64_t start{};
-    int64_t delay{};
 
     while (!_stop) {
         start = caio::now() - start;
@@ -509,7 +508,7 @@ void UI::event_loop()
             signal_key = keyboard::KEY_NONE;
         }
 
-        delay = _fps_time - caio::now() + start;
+        int64_t delay = _fps_time - caio::now() + start;
         start = (delay > 0 ? caio::sleep(delay) - delay : 0);
     }
 }
@@ -1099,12 +1098,9 @@ void UI::joy_del(::SDL_JoystickID jid)
 
 void UI::attach_controllers()
 {
-    size_t count = 0;
-    for (const auto& ejoy : _joys) {
-        if (ejoy->joyid() == Joystick::JOYID_UNASSIGNED) {
-            ++count;
-        }
-    }
+    size_t count = std::count_if(_joys.begin(), _joys.end(), [](const auto& ejoy) {
+        return (ejoy->joyid() == Joystick::JOYID_UNASSIGNED);
+    });
 
     log.debug("ui: Unassigned emulated joysticks: {}\n", count);
 
