@@ -16,20 +16,26 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ../}
+ROOT=		${abspath ../../}
 
 include ${ROOT}/mk/config.mk
 
-DIRS=		imgui \
-		fonts \
-		sha2
+FONT_SRC=	UbuntuSansMono-Regular.ttf
 
-CLEANDIRS=	${DIRS} \
-		tools \
-		tests
+FONT_H=		font_${subst -,,${FONT_SRC:%.ttf=%.h}}
 
-DISTCLEANDIRS=	${CLEANDIRS}
+SYMBOL_NAME=	${FONT_H:%.h=%}
 
-DIRS+=		${EXTRA_3RDPARTY_DIRS}
+FONT2C=		../imgui/font2c/font2c
 
-include ${ROOT}/mk/dir.mk
+#CLEANFILES+=	${FONT_H}
+
+all debug: ${FONT_H}
+
+${FONT_H}: ${FONT2C} ${FONT_SRC}
+	${FONT2C} -base85 ${FONT_SRC} ${SYMBOL_NAME} > $@
+
+${FONT2C}:
+	${MAKE} ${MAKEARGS} -C ${dir $@}
+
+include ${ROOT}/mk/clean.mk

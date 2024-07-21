@@ -16,20 +16,30 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ../}
+ROOT=		${abspath ../../../}
 
+#DEBUG=		yes
 include ${ROOT}/mk/config.mk
 
-DIRS=		imgui \
-		fonts \
-		sha2
+LIB=		libimgui.a
 
-CLEANDIRS=	${DIRS} \
-		tools \
-		tests
+CXXSRCS=	imgui.cpp \
+		imgui_draw.cpp \
+		imgui_tables.cpp \
+		imgui_widgets.cpp \
+		imgui_impl_sdl2.cpp \
+		imgui_impl_sdlrenderer2.cpp \
+		imgui_stdlib.cpp \
+		imgui_demo.cpp
 
-DISTCLEANDIRS=	${CLEANDIRS}
+INCS=		imconfig.h \
+		imgui.h \
+		imgui_internal.h \
+		imstb_rectpack.h \
+		imstb_textedit.h \
+		imstb_truetype.h \
+		imgui_impl_sdl2.h \
+		imgui_impl_sdlrenderer2.h \
+		imgui_stdlib.h
 
-DIRS+=		${EXTRA_3RDPARTY_DIRS}
-
-include ${ROOT}/mk/dir.mk
+include ${ROOT}/mk/lib.mk

@@ -16,20 +16,12 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ROOT=		${abspath ../}
+ROOT=		${abspath ../../../}
 
 include ${ROOT}/mk/config.mk
 
-DIRS=		imgui \
-		fonts \
-		sha2
+BIN=		font2c
 
-CLEANDIRS=	${DIRS} \
-		tools \
-		tests
+CXXSRCS=	binary_to_compressed_c.cpp
 
-DISTCLEANDIRS=	${CLEANDIRS}
-
-DIRS+=		${EXTRA_3RDPARTY_DIRS}
-
-include ${ROOT}/mk/dir.mk
+include ${ROOT}/mk/bin.mk
