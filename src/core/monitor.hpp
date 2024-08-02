@@ -305,7 +305,7 @@ private:
      * @param str The string to convert.
      * @return The converted unsigned integner.
      * @exception InvalidNumber
-     * @see caio::to_number()
+     * @see utils::to_number()
      */
     //FIXME: move to utils
     size_t to_count(std::string_view str);

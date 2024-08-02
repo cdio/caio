@@ -151,9 +151,6 @@ public:
     constexpr static const char* CASSETTE_FNAME = "basic";
     constexpr static const char* CASSETTE_EXT   = ".o";
 
-    using buffer_t = std::vector<uint8_t>;
-    using buffer_it_t = buffer_t::iterator;
-
     /**
      * Initialise this cassette interface.
      * @param clk     System clock;
@@ -161,7 +158,7 @@ public:
      * @exception IOError if the specified cassette directory does not exist or it is not a directory.
      * @see ZX80Cassette(const sptr_t<Clock>&)
      */
-    ZX80CassetteO(const sptr_t<Clock>& clk, std::string_view cassdir);
+    ZX80CassetteO(const sptr_t<Clock>& clk, const fs::Path& cassdir);
 
     virtual ~ZX80CassetteO();
 
@@ -182,7 +179,7 @@ protected:
      * @see CASSETTE_FNAME
      * @see ZX80CassetteO(const sptr_t<Clock>&, std::string_view)
      */
-    std::string fname() const;
+    fs::Path fname() const;
 
     /**
      * Transmit a byte to this cassette.
@@ -208,7 +205,7 @@ protected:
      */
     int receive(RxCmd cmd = RxCmd::Read) override;
 
-    std::string _cassdir;   /* Cassette directory       */
+    fs::Path    _cassdir;   /* Cassette directory       */
 
     buffer_t    _buf{};     /* Data buffer              */
     buffer_it_t _it{};      /* Input buffer iterator    */
@@ -235,7 +232,7 @@ public:
      * @exception IOError if the specified cassette directory does not exist or it is not a directory.
      * @see ZX80CassetteO(const sptr_t<Clock>&, std::string_view)
      */
-    ZX80CassetteP(const sptr_t<Clock>& clk, std::string_view cassdir);
+    ZX80CassetteP(const sptr_t<Clock>& clk, const fs::Path& cassdir);
 
     virtual ~ZX80CassetteP();
 
@@ -259,7 +256,7 @@ private:
      * @param basename File name.
      * @return The full pathname.
      */
-    std::string fname(const std::string& basename) const;
+    fs::Path fname(const fs::Path& basename) const;
 
     /**
      * Extract a filename from the data buffer received from the ZX80.
@@ -293,8 +290,8 @@ private:
      */
     int receive(RxCmd cmd = RxCmd::Read) override;
 
-    fs::dir_t           _entries{};     /* .p filenames under the cassette directory    */
-    fs::dir_t::iterator _dirit{};       /* Entries iterator                             */
+    fs::Dir             _entries{};     /* .p filenames under the cassette directory    */
+    fs::Dir::iterator   _dirit{};       /* Entries iterator                             */
 };
 
 }

@@ -63,7 +63,7 @@ void RAM::dev_write(addr_t addr, uint8_t data)
 
 std::ostream& RAM::dump(std::ostream& os, addr_t base) const
 {
-    return caio::dump(os, _data, base);
+    return utils::dump(os, _data, base);
 }
 
 }

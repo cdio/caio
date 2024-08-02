@@ -24,6 +24,7 @@
 #include <string>
 #include <string_view>
 
+#include "fs.hpp"
 #include "types.hpp"
 #include "cbm_bus.hpp"
 
@@ -240,7 +241,7 @@ public:
      * @param path File, directory or device to attach to.
      * @exception IOError
      */
-    virtual void attach(std::string_view path) = 0;
+    virtual void attach(const fs::Path& path) = 0;
 
     /**
      * Reset this drive.

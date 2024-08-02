@@ -38,14 +38,15 @@ constexpr static size_t DIR_ENTRIES_LIMIT       = 256;
 constexpr static bool MATCH_CASE_INSENSITIVE    = true;
 constexpr static bool MATCH_CASE_SENSITIVE      = false;
 
-using dir_entry_t = std::pair<std::string, uint64_t>;
-using dir_t = std::vector<dir_entry_t>;
+using Path = std::filesystem::path;
+using DirEntry = std::pair<Path, uint64_t>;
+using Dir = std::vector<DirEntry>;
 
 /**
  * Return the value of the HOME environment variable.
  * @return A string with the value of the HOME environment variable.
  */
-std::string home();
+Path home();
 
 /**
  * Set a the proper home path.
@@ -54,14 +55,14 @@ std::string home();
  * @param path Path to fix.
  * @return The fixed path.
  */
-std::string fix_home(std::string_view path);
+Path fix_home(const Path& path);
 
 /**
- * std::filesystem::exists() wrapper
+ * std::filesystem::exists() wrapper.
  * @param path Pathname.
  * @return True if the specified file exists; false otherwise.
  */
-static inline bool exists(std::string_view path)
+static inline bool exists(const Path& path)
 {
     std::error_code ec{};
     return std::filesystem::exists(path, ec);
@@ -72,7 +73,7 @@ static inline bool exists(std::string_view path)
  * @param path Pathname.
  * @return True if the specified path is a directory; false otherwise.
  */
-static inline bool is_directory(std::string_view path)
+static inline bool is_directory(const Path& path)
 {
     std::error_code ec{};
     return std::filesystem::is_directory(path, ec);
@@ -83,7 +84,7 @@ static inline bool is_directory(std::string_view path)
  * @param path File name.
  * @return The file size or -1 if the file does not exist or it is not a file.
  */
-static inline std::uintmax_t file_size(std::string_view path)
+static inline std::uintmax_t file_size(const Path& path)
 {
     std::error_code ec{};
     return std::filesystem::file_size(path, ec);
@@ -100,26 +101,29 @@ static inline std::uintmax_t file_size(std::string_view path)
  * @param spath Search paths (used only if the file name does not contain a directory);
  * @param cwd   If true (and fname does not contain a directory) look for the file in the current working directory,
  *              if it is not found there then try the search paths.
- * @return The existing file name; an empty string if the file is not found.
+ * @return The existing file name; an empty path if the file is not found.
  */
-std::string search(std::string_view fname, const std::initializer_list<std::string_view>& spath = {},
-    bool cwd = false);
+Path search(const Path& fname, const std::initializer_list<const Path>& spath = {}, bool cwd = false);
 
 /**
- * Retrieve the basename of a full path.
+ * std::filesystem::path::filename() wrapper.
  * @param fullpath Full path name.
  * @return The basename.
- * @see dirname(std::string_view)
  */
-std::string_view basename(std::string_view fullpath);
+static inline Path basename(const Path& fullpath)
+{
+    return fullpath.filename();
+}
 
 /**
- * Retrieve the directory name of a full path.
+ * std::filesystem::path::parent_path() wrapper.
  * @param fullpath Full path name.
- * @return The directory name.
- * @see basename(std::string_view)
+ * @return The parent directory.
  */
-std::string_view dirname(std::string_view fullpath);
+static inline Path dirname(const Path& fullpath)
+{
+    return fullpath.parent_path();
+}
 
 /**
  * Concatenate files.
@@ -128,14 +132,18 @@ std::string_view dirname(std::string_view fullpath);
  * @param src Source file name.
  * @exception IOError
  */
-void concat(std::string_view dst, std::string_view src);
+void concat(const Path& dst, const Path& src);
 
 /**
- * Remove a file.
+ * std::filesystem::remove() wrapper.
  * @param fname File remove.
  * @return True on success; false on error.
  */
-bool unlink(std::string_view fname);
+static inline bool unlink(const Path& fname)
+{
+    std::error_code ec{};
+    return std::filesystem::remove(fname, ec);
+}
 
 /**
  * Match a file.
@@ -147,10 +155,10 @@ bool unlink(std::string_view fname);
  * @see MATCH_CASE_SENSITIVE
  * @see Unix manpage fnmatch(3)
  */
-bool match(std::string_view path, std::string_view pattern, bool icase = MATCH_CASE_SENSITIVE);
+bool match(const Path& path, const Path& pattern, bool icase = MATCH_CASE_SENSITIVE);
 
 /**
- * Get a directory listing.
+ * Get a (recursive) directory listing.
  * @param dirpath  Directory;
  * @param pattern  Matching pattern;
  * @param icase    MATCH_CASE_INSENSITIVE or MATCH_CASE_SENSITIVE;
@@ -160,11 +168,11 @@ bool match(std::string_view path, std::string_view pattern, bool icase = MATCH_C
  * @see MATCH_CASE_INSENSITIVE
  * @see MATCH_CASE_SENSITIVE
  */
-bool directory(std::string_view path, std::string_view pattern, bool icase,
-    const std::function<bool(std::string_view, uint64_t)>& callback);
+bool directory(const Path& path, const Path& pattern, bool icase,
+    const std::function<bool(const Path&, uint64_t)>& callback);
 
 /**
- * Get a directory listing.
+ * Get a (recursive) directory listing.
  * @param dirpath Directory;
  * @param pattern Matching pattern;
  * @param icase   MATCH_CASE_INSENSITIVE or MATCH_CASE_SENSITIVE;
@@ -176,7 +184,139 @@ bool directory(std::string_view path, std::string_view pattern, bool icase,
  * @see MATCH_CASE_INSENSITIVE
  * @see MATCH_CASE_SENSITIVE
  */
-dir_t directory(std::string_view path, std::string_view pattern, bool icase, size_t limit = DIR_ENTRIES_LIMIT);
+Dir directory(const Path& path, const Path& pattern, bool icase, size_t limit = DIR_ENTRIES_LIMIT);
+
+/**
+ * Interactive directory traversing.
+ */
+class IDir {
+public:
+    constexpr static const uint64_t REFRESH_TIME = 1'000'000; /* us */
+    constexpr static const char* ENTRY_BACK      = "..";
+
+    using FilterCb = std::function<Path(const Path&)>;
+
+    enum EntryType {
+        Dir     = 0x01,     /**< Take directory entries     */
+        File    = 0x02,     /**< Take regular file entries  */
+        All     = 0x03      /**< Take all entries           */
+    };
+
+    /**
+     * Initialise this interactive directory traverser.
+     * @param etype  Entry type to consider;
+     * @param eempty Empty entry.
+     * @see EntryType
+     */
+    IDir(EntryType etype, const std::string& eempty);
+
+    virtual ~IDir();
+
+    /**
+     * Set the entry filter callback.
+     * The filter decides whether a specific entry must
+     * be taken and optionally manipulates its name.
+     * @param efilter Filter callback.
+     */
+    void filter(const FilterCb& efilter);
+
+    /**
+     * Detect whether a filter callback is set.
+     * @return True if a filter is set; false otherwise.
+     * @see filter(const FilterCb&)
+     */
+    bool filter()
+    {
+        return static_cast<bool>(_efilter);
+    }
+
+    /**
+     * Reset this interactive directory traverser.
+     * @param path New path to traverse.
+     */
+    void reset(const fs::Path& path);
+
+    /**
+     * Refresh the internal state of this interactive directory traverser.
+     * The internal state is refreshed (the directory re-traversed again)
+     * when at least REFRESH_TIME microseconds have passed since the last
+     * refresh.
+     * @return True if a refresh was done; otherwise false.
+     */
+    virtual bool refresh();
+
+    /**
+     * Get the current traversed directory.
+     * @return The current directory.
+     */
+    Path path() const
+    {
+        return _path;
+    }
+
+    /**
+     * Detect whether there are entries in the current directory.
+     * @return True if there are no entries in the current directory; false otherwise.
+     */
+    bool empty() const
+    {
+        return (size() == 0);
+    }
+
+    /**
+     * Return the number of entries in the current directory.
+     * @return The number of directory entries in the current directory.
+     */
+    size_t size() const
+    {
+        return _entries.size();
+    }
+
+    /**
+     * Retrieve a directory entry.
+     * @param index Entry index.
+     * @return The specified entry.
+     */
+    Path operator[](size_t index) const
+    {
+        return _entries[index];
+    }
+
+    std::string_view empty_entry() const
+    {
+        return _eempty;
+    }
+
+protected:
+    bool time_to_refresh() const;
+    Path filter(const Path& entry) const;
+
+    EntryType               _etype;
+    std::string             _eempty;
+
+    uint64_t                _nrefresh{};
+    fs::Path                _path{};
+    std::vector<fs::Path>   _entries{};
+    FilterCb                _efilter{};
+};
+
+/**
+ * Interactive directory traversing that can navigate other directories.
+ */
+class IDirNav : public IDir {
+public:
+    /**
+     * Initialise this interactive directory traverser.
+     * @param etype  Entry type to consider;
+     * @param eempty Empty entry.
+     * @see IDir
+     */
+    IDirNav(EntryType etype, const std::string& eempty);
+
+    virtual ~IDirNav();
+
+    bool refresh() override;
+};
 
 /**
  * Load the contents of a file into memory.
@@ -190,7 +330,7 @@ dir_t directory(std::string_view path, std::string_view pattern, bool icase, siz
  * @see LOAD_MAXSIZ
  * @see buffer_t
  */
-buffer_t load(std::string_view fname, size_t maxsiz = 0);
+buffer_t load(const Path& fname, size_t maxsiz = 0);
 
 /**
  * Read data from an input stream and create a memory buffer.
@@ -214,7 +354,7 @@ buffer_t load(std::istream& is, size_t maxsiz = 0);
  * @see load(std::istream&)
  * @see save(std::ostream&, std::span<const uint8_t>)
  */
-void save(std::string_view fname, std::span<const uint8_t> buf,
+void save(const Path& fname, std::span<const uint8_t> buf,
     std::ios_base::openmode mode = std::ios_base::out | std::ios_base::trunc);
 
 /**

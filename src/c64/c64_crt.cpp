@@ -27,12 +27,11 @@ namespace caio {
 namespace commodore {
 namespace c64 {
 
-void Crt::open(std::string_view fname)
+void Crt::open(const fs::Path& fname)
 {
-    //FIXME libstdc++ not there yet   std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
-    std::ifstream is{std::string{fname}, std::ios_base::binary | std::ios_base::in};
+    std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
     if (!is) {
-        throw InvalidCartridge{"Can't open: {}: {}", fname, Error::to_string()};
+        throw InvalidCartridge{"Can't open: {}: {}", fname.string(), Error::to_string()};
     }
 
     _hdr   = {};
@@ -83,12 +82,12 @@ void Crt::open(std::istream& is)
             }
 
             default:
-                throw Error{"Invalid CHIP type: ${}", caio::to_string(ch.type)};
+                throw Error{"Invalid CHIP type: ${}", utils::to_string(ch.type)};
             }
         }
 
     } catch (const std::exception& err) {
-        throw InvalidCartridge{"{}: {}", _fname, err.what()};
+        throw InvalidCartridge{"{}: {}", _fname.string(), err.what()};
     }
 }
 
@@ -105,7 +104,7 @@ std::string Crt::to_string() const
 {
     std::stringstream ss{};
 
-    ss << "CRT " << std::quoted(_fname)
+    ss << "CRT " << std::quoted(_fname.string())
        << ", " << to_string(_hdr);
 
     for (const auto& ch : _chips) {
@@ -121,11 +120,10 @@ std::string Crt::name() const
         std::strlen(reinterpret_cast<const char*>(_hdr.name))};
 }
 
-bool Crt::is_crt(std::string_view fname)
+bool Crt::is_crt(const fs::Path& fname)
 {
     try {
-        //FIXME libstdc++ not there yet   std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
-        std::ifstream is{std::string{fname}, std::ios_base::binary | std::ios_base::in};
+        std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
         if (is) {
             Header hdr{};
             load_header(is, hdr);
@@ -186,7 +184,7 @@ std::string Crt::to_string(const Crt::Header& hdr)
 std::string Crt::to_string(const Crt::Chip& ch)
 {
     return std::format("size {}, type ${}, bank ${}, addr ${}, rsiz {}",
-        ch.size, caio::to_string(ch.type), caio::to_string(ch.bank), caio::to_string(ch.addr), ch.rsiz);
+        ch.size, utils::to_string(ch.type), utils::to_string(ch.bank), utils::to_string(ch.addr), ch.rsiz);
 }
 
 void Crt::to_host(Crt::Header& hdr)

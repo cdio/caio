@@ -716,7 +716,7 @@ private:
      * This array contains the mask of the background image and it is
      * used to detect collisions between the background image and sprites.
      */
-    std::array<uint8_t, caio::align(static_cast<uint64_t>(caio::ceil(WIDTH / 8.0) + 8))> _collision_data{};
+    std::array<uint8_t, utils::align(static_cast<uint64_t>(utils::ceil(WIDTH / 8.0) + 8))> _collision_data{};
 
     /*
      * Sprite-Sprite collision array.

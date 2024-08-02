@@ -58,6 +58,13 @@ struct C64Config : public config::Config {
     virtual ~C64Config() {
     }
 
+    bool operator==(const C64Config& other) const;
+
+    bool operator!=(const C64Config& other) const {
+        return !operator==(other);
+    }
+
+    void to_section(config::Section& sec) const override;
     std::string to_string() const override;
 };
 

@@ -52,14 +52,14 @@ public:
      * @param label   Label assigned to this RAM.
      * @see NO_RANDOM_VALUES
      * @see PUT_RANDOM_VALUES
-     * @see fill()
+     * @see utils::fill()
      */
     template<typename T>
     RAM(size_t size, T pattern, bool random, std::string_view label)
         : Device{TYPE, label},
           _data(size) {
         std::span<uint8_t> dst{_data.data(), _data.size()};
-        fill(dst, pattern, random);
+        utils::fill(dst, pattern, random);
     }
 
     /**

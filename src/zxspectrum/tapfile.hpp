@@ -44,7 +44,7 @@ public:
      * @exception IOError
      * @see load(std::string_view)
      */
-    TAPFile(std::string_view path = {});
+    TAPFile(const fs::Path& path = {});
 
     virtual ~TAPFile();
 
@@ -62,7 +62,7 @@ public:
      * @see FILE_SIZE_LIMIT
      * @see FILE_EXTENSION
      */
-    void load(std::string_view path);
+    void load(const fs::Path& path);
 
     /**
      * Retrieve the next block.
@@ -80,15 +80,15 @@ public:
      * @exception IOError
      * @see Block
      */
-    static void save(std::string_view fname, Block header, Block data);
+    static void save(const fs::Path& fname, Block header, Block data);
 
 private:
     void reset();
     bool more_data();
 
-    std::string         _path{};
-    fs::dir_t           _entries{};
-    fs::dir_t::iterator _dirit{};
+    fs::Path            _path{};
+    fs::Dir             _entries{};
+    fs::Dir::iterator   _dirit{};
     buffer_t            _buf{};
     size_t              _bufpos{};
 };

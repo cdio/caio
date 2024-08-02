@@ -40,7 +40,7 @@ public:
     constexpr static const char* TYPE               = "ULA-AUDIO";
     constexpr static const unsigned SAMPLING_RATE   = 44100;
     constexpr static const float  SAMPLES_TIME      = 0.020f;
-    constexpr static const size_t SAMPLES           = static_cast<size_t>(caio::ceil(SAMPLING_RATE * SAMPLES_TIME));
+    constexpr static const size_t SAMPLES           = static_cast<size_t>(utils::ceil(SAMPLING_RATE * SAMPLES_TIME));
     constexpr static const size_t CHANNELS          = 1;
 
     /**

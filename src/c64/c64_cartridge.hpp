@@ -23,6 +23,7 @@
 #include <memory>
 
 #include "aspace.hpp"
+#include "fs.hpp"
 #include "gpio.hpp"
 #include "c64_crt.hpp"
 
@@ -68,7 +69,7 @@ public:
      * @see c64::Crt
      * @see reset()
      */
-    static sptr_t<Cartridge> create(std::string_view fname);
+    static sptr_t<Cartridge> instance(const fs::Path& fname);
 
     virtual ~Cartridge() {
     }

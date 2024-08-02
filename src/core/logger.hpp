@@ -53,7 +53,7 @@ public:
     constexpr static const char* DEBUG_COLOR      = ANSI_FG ANSI_GREEN;
     constexpr static const char* INFO_COLOR       = ANSI_RESET;
 
-    constexpr static const char* DEFAULT_LOGFILE  = "/dev/tty";
+    constexpr static const char* DEFAULT_LOGFILE  = "/dev/null";
     constexpr static const char* DEFAULT_LOGLEVEL = NONE_STR;
 
     enum Level {

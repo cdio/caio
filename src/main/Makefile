@@ -26,7 +26,21 @@ CONFIG=		caio.conf
 DST_BIN=	${DST_BINDIR}/${BIN}
 DST_CONFIG=	${DST_SYSCONFDIR}/${CONFIG}
 
-CXXSRCS=	main.cpp
+CXXSRCS=	configurator.cpp \
+		editor.cpp \
+		editor_c64.cpp \
+		editor_zx80.cpp \
+		editor_zxsp.cpp \
+		guiapp.cpp \
+		main.cpp
+
+INCS=		configurator.hpp \
+		editor.hpp \
+		editor_c64.hpp \
+		editor_zx80.hpp \
+		editor_zxsp.hpp \
+		guiapp.hpp \
+		gui.hpp
 
 EXTRA_DEPS+=	${ROOT}/src/c64/libcaio_c64.a \
 		${ROOT}/src/zx80/libcaio_zx80.a \
@@ -34,6 +48,11 @@ EXTRA_DEPS+=	${ROOT}/src/c64/libcaio_c64.a \
 		${ROOT}/src/ui_sdl2/libcaio_ui_sdl2.a \
 		${ROOT}/src/core/libcaio_core.a \
 		${ROOT}/3rdparty/sha2/libsha2.a
+
+# Widget Toolkit
+CXXSRCS+=	dearimgui.cpp
+INCS+=		dearimgui.hpp
+EXTRA_DEPS+=	${ROOT}/3rdparty/imgui/libimgui/libimgui.a \
 
 CPPFLAGS+=	-I${ROOT}/src/c64 \
 		-I${ROOT}/src/zx80 \

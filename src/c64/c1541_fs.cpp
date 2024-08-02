@@ -22,7 +22,6 @@
 #include <iomanip>
 #include <regex>
 
-#include "fs.hpp"
 #include "logger.hpp"
 #include "types.hpp"
 #include "utils.hpp"
@@ -31,13 +30,14 @@ namespace caio {
 namespace commodore {
 namespace c1541 {
 
-void C1541Fs::attach(std::string_view path)
+void C1541Fs::attach(const fs::Path& path)
 {
     if (!path.empty() && (!fs::exists(path) || !fs::is_directory(path))) {
-        throw IOError{*this, "Can't attach: \"{}\": Not a directory", path};
+        throw IOError{*this, "Can't attach: \"{}\": Not a directory", path.string()};
     }
 
-    attached_path(std::format("{}{}", path, (path.size() && path.rfind("/") != path.size() - 1) ? "/" : ""));
+    const auto p = path.string();
+    attached_path(std::format("{}{}", p, (p.size() && p.rfind("/") != p.size() - 1) ? "/" : ""));
     reset();
 }
 
@@ -137,13 +137,12 @@ Status C1541Fs::open_dir(uint8_t ch, Channel& channel, std::string_view fname, F
 
     ss << to_basic(addr, {}, 0);
 
-    fs::directory(attached_path(), pattern, fs::MATCH_CASE_SENSITIVE,
-        [this, &ss, &addr, &root_len](std::string_view entry, uint64_t size) -> bool {
-            ss << to_basic(addr, entry.substr(root_len), size);
-            return true;
-        }
-    );
+    const auto filter = [this, &ss, &addr, &root_len](const fs::Path& entry, uint64_t size) -> bool {
+        ss << to_basic(addr, entry.string().substr(root_len), size);
+        return true;
+    };
 
+    fs::directory(attached_path(), pattern, fs::MATCH_CASE_SENSITIVE, filter);
     ss << to_basic(addr, {}, -1);
 
     channel.fname = fname;
@@ -217,7 +216,7 @@ Status C1541Fs::open_file(uint8_t ch, Channel& channel, std::string_view fname, 
              */
             const auto pattern = std::format("{}{}{}", attached_path(), c1541::pet_to_u8(fname), ext);
             fs::directory(attached_path(), pattern, fs::MATCH_CASE_SENSITIVE,
-                [&fullpath](std::string_view entry, uint64_t size) -> bool {
+                [&fullpath](const fs::Path& entry, uint64_t size) -> bool {
                     fullpath = entry;
                     return false;
                 }
@@ -356,7 +355,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
     }
 
     if (channel.pos == 0) {
-        channel.elapsed = caio::now();
+        channel.elapsed = utils::now();
     }
 
     ++channel.pos;
@@ -370,7 +369,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
     }
 
     if (channel.pos == channel.size) {
-        channel.elapsed = caio::now() - channel.elapsed;
+        channel.elapsed = utils::now() - channel.elapsed;
         if (log.is_debug()) {
             if (channel.elapsed != 0) {
                 float speed = channel.size / (channel.elapsed / 1000000.0f);
@@ -414,7 +413,7 @@ Status C1541Fs::channel_write(uint8_t ch, const buffer_t& buf)
         return Status::WRITE_ERROR;
     }
 
-    log.debug("{}: Write success, buffer size {}, data:\n{}\n", name(ch), buf.size(), caio::dump(buf));
+    log.debug("{}: Write success, buffer size {}, data:\n{}\n", name(ch), buf.size(), utils::dump(buf));
 
     return Status::OK;
 }
@@ -537,7 +536,7 @@ Status C1541Fs::copy(std::string_view param)
         return Status::FILE_EXISTS;
     }
 
-    auto catfiles = caio::split(result.str(2), ',');
+    auto catfiles = utils::split(result.str(2), ',');
     if (catfiles.size() == 0) {
         return Status::NO_FILE_GIVEN;
     }
@@ -626,21 +625,21 @@ Status C1541Fs::scratch(std::string_view param)
     std::string par{param};
 
     if (std::regex_match(par, result, re_scratch) && result.size() == 2) {
-        auto remove = [this](std::string_view entry, uint64_t size) -> bool {
+        auto remove = [this](const fs::Path& entry, uint64_t size) -> bool {
             if (!fs::unlink(entry)) {
-                log.error("{}: Can't scratch: \"{}\": {}\n", name(15), entry, Error::to_string());
+                log.error("{}: Can't scratch: \"{}\": {}\n", name(15), entry.string(), Error::to_string());
                 return false;
             }
-            log.debug("{}: File scratched: \"{}\"\n", name(15), entry);
+            log.debug("{}: File scratched: \"{}\"\n", name(15), entry.string());
             return true;
         };
 
-        auto fname = std::format("{}{}", attached_path(), c1541::pet_to_u8(result.str(1)));
+        fs::Path fname = std::format("{}{}", attached_path(), c1541::pet_to_u8(result.str(1)));
         bool success{};
 
         if (!fname.empty() && fs::exists(fname)) {
             success = remove(fname, 0);
-        } else if (c1541::is_pattern(fname)) {
+        } else if (c1541::is_pattern(fname.string())) {
             success = fs::directory(attached_path(), fname, fs::MATCH_CASE_SENSITIVE, remove);
         }
 

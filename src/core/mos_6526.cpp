@@ -170,16 +170,16 @@ Mos6526::Tod::TodData& Mos6526::Tod::TodData::operator++()
 
     if (tth == 10) {
         tth = 0;
-        auto bsec = caio::bcd_to_bin(sec) + 1;
+        auto bsec = utils::bcd_to_bin(sec) + 1;
 
         if (bsec == 60) {
             bsec = 0;
-            auto bmin = caio::bcd_to_bin(min) + 1;
+            auto bmin = utils::bcd_to_bin(min) + 1;
 
             if (bmin == 60) {
                 bmin = 0;
                 auto pm = ((hour & PM_BIT) ? 12 : 0);
-                auto bhour = caio::bcd_to_bin(hour & HOUR_MASK) + pm + 1;
+                auto bhour = utils::bcd_to_bin(hour & HOUR_MASK) + pm + 1;
 
                 if (bhour == 24) {
                     bhour = 0;
@@ -188,13 +188,13 @@ Mos6526::Tod::TodData& Mos6526::Tod::TodData::operator++()
                     pm = 12;
                 }
 
-                hour = caio::bin_to_bcd(bhour - pm) | (pm == 0 ? 0 : PM_BIT);
+                hour = utils::bin_to_bcd(bhour - pm) | (pm == 0 ? 0 : PM_BIT);
             }
 
-            min = caio::bin_to_bcd(bmin);
+            min = utils::bin_to_bcd(bmin);
         }
 
-        sec = caio::bin_to_bcd(bsec);
+        sec = utils::bin_to_bcd(bsec);
     }
 
     return *this;
@@ -512,7 +512,7 @@ std::ostream& Mos6526::dump(std::ostream& os, addr_t base) const
         peek(CRB)
     };
 
-    return caio::dump(os, regs, base);
+    return utils::dump(os, regs, base);
 }
 
 void Mos6526::irq(const OutputPinCb& irq_out)

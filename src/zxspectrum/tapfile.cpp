@@ -25,7 +25,7 @@ namespace caio {
 namespace sinclair {
 namespace zxspectrum {
 
-TAPFile::TAPFile(std::string_view path)
+TAPFile::TAPFile(const fs::Path& path)
 {
     load(path);
 }
@@ -36,26 +36,26 @@ TAPFile::~TAPFile()
 
 void TAPFile::reset()
 {
-    _path = {};
+    _path = "";
     _entries = {};
     _dirit = _entries.end();
     _buf = {};
     _bufpos = 0;
 }
 
-void TAPFile::load(std::string_view path)
+void TAPFile::load(const fs::Path& path)
 {
     reset();
 
     if (!path.empty()) {
         _path = fs::fix_home(path);
         if (!fs::exists(_path)) {
-            throw IOError{"{}: {}", _path, Error::to_string(ENOENT)};
+            throw IOError{"{}: {}", _path.string(), Error::to_string(ENOENT)};
         }
 
         auto isdir = fs::is_directory(_path);
 
-        log.debug("TAPFile: Loading: \"{}\", is_directory: {}\n", _path, isdir);
+        log.debug("TAPFile: Loading: \"{}\", is_directory: {}\n", _path.string(), isdir);
 
         if (isdir) {
             _entries = fs::directory(_path, FILE_PATTERN, fs::MATCH_CASE_INSENSITIVE);
@@ -71,12 +71,12 @@ void TAPFile::load(std::string_view path)
         /*
          * Remove files exceeding FILE_SIZE_LIMIT.
          */
-        fs::dir_t::iterator it{};
+        fs::Dir::iterator it{};
         do {
             for (it = _entries.begin(); it != _entries.end(); ++it) {
                 if (it->second > FILE_SIZE_LIMIT || it->second < 3) {
                     log.warn("TAPFile: Found: \"{}\", size: {}, min size: 3, max size: {}. Ignored\n",
-                        it->first, it->second, FILE_SIZE_LIMIT);
+                        it->first.string(), it->second, FILE_SIZE_LIMIT);
                     _entries.erase(it);
                     break;
                 }
@@ -88,7 +88,7 @@ void TAPFile::load(std::string_view path)
         }
 
         for (const auto& entry : _entries) {
-            log.debug("TAPFile: Found: \"{}\", size: {}\n", entry.first, entry.second);
+            log.debug("TAPFile: Found: \"{}\", size: {}\n", entry.first.string(), entry.second);
         }
     }
 }
@@ -105,7 +105,7 @@ bool TAPFile::more_data()
 
     const auto& fname = _dirit->first;
 
-    log.debug("TAPFile: Feeding file: \"{}\"\n", fname);
+    log.debug("TAPFile: Feeding file: \"{}\"\n", fname.string());
 
     _buf = fs::load(fname);
     _bufpos = 0;
@@ -129,7 +129,7 @@ TAPFile::Block TAPFile::next_block()
 
     _bufpos += 2 + block_size;
     if (_bufpos > _buf.size()) {
-        log.error("TAPFile: {}: Invalid block size: {}. TAP aborted.\n", (_dirit - 1)->first, block_size);
+        log.error("TAPFile: {}: Invalid block size: {}. TAP aborted.\n", (_dirit - 1)->first.string(), block_size);
         reset();
         return {};
     }
@@ -139,13 +139,13 @@ TAPFile::Block TAPFile::next_block()
     return {data, block_size};
 }
 
-void TAPFile::save(std::string_view fname, Block header, Block data)
+void TAPFile::save(const fs::Path& fname, Block header, Block data)
 {
     const auto fullpath = fs::fix_home(fname);
 
     std::ofstream os{fullpath, std::ios_base::out | std::ios_base::app};
     if (!os) {
-        throw IOError{"Can't open TAP file: {}: {}", fullpath, Error::to_string()};
+        throw IOError{"Can't open TAP file: {}: {}", fullpath.string(), Error::to_string()};
     }
 
     uint8_t size_lo = header.size() & 255;
@@ -154,7 +154,7 @@ void TAPFile::save(std::string_view fname, Block header, Block data)
     if (!os.write(reinterpret_cast<const char*>(&size_lo), 1) ||
         !os.write(reinterpret_cast<const char*>(&size_hi), 1) ||
         !os.write(reinterpret_cast<const char*>(header.data()), header.size())) {
-        throw IOError{"Can't save TAP header block: {}: {}", fullpath, Error::to_string()};
+        throw IOError{"Can't save TAP header block: {}: {}", fullpath.string(), Error::to_string()};
     }
 
     size_lo = data.size() & 255;
@@ -163,7 +163,7 @@ void TAPFile::save(std::string_view fname, Block header, Block data)
     if (!os.write(reinterpret_cast<const char*>(&size_lo), 1) ||
         !os.write(reinterpret_cast<const char*>(&size_hi), 1) ||
         !os.write(reinterpret_cast<const char*>(data.data()), data.size())) {
-        throw IOError{"Can't save TAP data block: {}: {}", fullpath, Error::to_string()};
+        throw IOError{"Can't save TAP data block: {}: {}", fullpath.string(), Error::to_string()};
     }
 }
 

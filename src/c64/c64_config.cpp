@@ -67,6 +67,24 @@ C64Config::C64Config(config::Section& sec)
     title += " - Commodore 64";
 }
 
+bool C64Config::operator==(const C64Config& other) const
+{
+    return (static_cast<const Config&>(*this) == static_cast<const Config&>(other) &&
+       prgfile == other.prgfile &&
+       swapj == other.swapj &&
+       unit8 == other.unit8 &&
+       unit9 == other.unit9);
+}
+
+void C64Config::to_section(config::Section& sec) const
+{
+    Config::to_section(sec);
+    sec[KEY_PRGFILE] = prgfile;
+    sec[KEY_SWAPJOY] = (swapj ? "yes" : "no");
+    sec[KEY_UNIT_8] = unit8;
+    sec[KEY_UNIT_9] = unit9;
+}
+
 std::string C64Config::to_string() const
 {
     return std::format("{}\n"

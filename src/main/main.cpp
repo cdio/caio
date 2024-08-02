@@ -32,6 +32,8 @@
 #include "zx80.hpp"
 #include "zxsp.hpp"
 
+#include "configurator.hpp"
+
 using namespace caio;
 
 template<class MACHINE, class CMDLINE>
@@ -71,7 +73,7 @@ static void terminate()
     std::exit(EXIT_FAILURE);
 }
 
-static void usage(const std::string& progname)
+static void usage(std::string_view progname)
 {
     std::cerr << "usage: " << progname << " <arch> [--help]\n"
                  "where arch is one of:\n";
@@ -86,11 +88,23 @@ static void usage(const std::string& progname)
 int main(int argc, const char** argv)
 {
     std::set_terminate(terminate);
-    std::string progname = *argv;
+    const auto progname = *argv;
+
+    static const auto run_gui = [](const char* progname) -> int {
+        auto& gui = ui::sdl2::ConfiguratorApp::instance(progname);
+        return gui.run();
+    };
+
+    if (argc == 1) {
+        /*
+         * No machine is specified: Run the selector GUI.
+         */
+        return run_gui(progname);
+    }
 
     std::string name{};
     if (argc > 1) {
-        name = argv[1];
+        name = utils::tolow(argv[1]);
         --argc;
         ++argv;
     }
@@ -105,7 +119,11 @@ int main(int argc, const char** argv)
         std::exit(EXIT_SUCCESS);
     }
 
-    auto it = machines.find(caio::tolow(name));
+    if (name == "gui") {
+        return run_gui(progname);
+    }
+
+    auto it = machines.find(name);
     if (it != machines.end()) {
         it->second(argc, argv);
         /* NOTREACHED */

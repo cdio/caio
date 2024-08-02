@@ -78,7 +78,7 @@ void RgbaTable::load(std::string_view fname)
     clear();
     std::string line{};
     while (std::getline(is, line)) {
-        line = caio::trim(line);
+        line = utils::trim(line);
 
         if (line.empty() || line[0] == '#') {
             continue;
@@ -92,7 +92,7 @@ void RgbaTable::load(std::string_view fname)
         }
 
         try {
-            auto value = caio::to_number<uint32_t>(line.c_str());
+            auto value = utils::to_number<uint32_t>(line.c_str());
             push_back(Rgba{value});
         } catch (const InvalidNumber&) {
             throw IOError{"Invalid line: {}", line};

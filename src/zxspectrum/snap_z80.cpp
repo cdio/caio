@@ -40,7 +40,7 @@ SnapZ80::~SnapZ80()
 bool SnapZ80::seems_like(std::string_view fname)
 {
     auto fullpath = fs::fix_home(fname);
-    auto lowcase = caio::tolow(fname);
+    auto lowcase = utils::tolow(fname);
     return (fs::exists(fullpath) && lowcase.ends_with(FILE_EXTENSION));
 }
 
@@ -114,7 +114,7 @@ void SnapZ80::load_v2(const buffer_t& raw)
      * Only plain 48K is supported (no extra hardware).
      */
     if (hdr->hw_mode != SnapZ80HeaderV23::HW_MODE_48K) {
-        throw_ioerror("Hardware mode not supported: $" + caio::to_string(hdr->hw_mode));
+        throw_ioerror("Hardware mode not supported: $" + utils::to_string(hdr->hw_mode));
     }
 
     if (hdr->I_rom_paged != 0x00) {
@@ -227,7 +227,7 @@ void SnapZ80::uncompress_v2(const buffer_t& raw, size_t rawoff)
             break;
 
         default:
-            throw_ioerror("Block page not supported: $" + caio::to_string(block->page));
+            throw_ioerror("Block page not supported: $" + utils::to_string(block->page));
         }
 
         rawoff += sizeof(*block);

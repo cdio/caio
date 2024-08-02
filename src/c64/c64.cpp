@@ -102,7 +102,7 @@ void C64::autorun(std::string_view pname)
 
 void C64::start()
 {
-    log.info("Starting {} - {}\n{}\n", caio::full_version(), _conf.title, to_string());
+    log.info("Starting {} - {}\n{}\n", full_version(), _conf.title, to_string());
 
     /*
      * The emulator runs on its own thread.
@@ -194,7 +194,7 @@ sptr_t<Cartridge> C64::attach_cartridge()
         throw IOError{"Can't load Cartridge: {}: {}", _conf.cartridge, Error::to_string(ENOENT)};
     }
 
-    auto cart = Cartridge::create(fpath);
+    auto cart = Cartridge::instance(fpath);
     return cart;
 }
 
@@ -286,12 +286,12 @@ void C64::create_devices()
 
     auto unit8 = fs::fix_home(_conf.unit8);
     if (!unit8.empty()) {
-        _unit8 = c1541::create(unit8, 8, _bus);
+        _unit8 = c1541::instance(unit8, 8, _bus);
     }
 
     auto unit9 = fs::fix_home(_conf.unit9);
     if (!unit9.empty()) {
-        _unit9 = c1541::create(unit9, 9, _bus);
+        _unit9 = c1541::instance(unit9, 9, _bus);
     }
 
     _kbd  = std::make_shared<C64Keyboard>("KBD");
@@ -461,10 +461,10 @@ void C64::create_ui()
 {
     std::string title = _conf.title;
     if (_ioexp) {
-        title = std::format("{} - {}", title, fs::basename(_ioexp->name()));
+        title = std::format("{} - {}", title, fs::basename(_ioexp->name()).string());
     }
     if (!_conf.prgfile.empty()) {
-        title = std::format("{} - {}", title, fs::basename(_conf.prgfile));
+        title = std::format("{} - {}", title, fs::basename(_conf.prgfile).string());
     }
 
     ui::Config uiconf {

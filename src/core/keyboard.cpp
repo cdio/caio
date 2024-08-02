@@ -18,6 +18,7 @@
  */
 #include "keyboard.hpp"
 
+#include <algorithm>
 #include <iomanip>
 #include <fstream>
 #include <regex>
@@ -160,6 +161,20 @@ std::string to_string(Key key)
     return (it == name_to_key.end() ? "" : it->first);
 }
 
+std::vector<std::string> key_names()
+{
+    std::vector<std::string> knames{};
+    std::transform(name_to_key.begin(), name_to_key.end(), std::back_inserter(knames), [](const auto& pair) {
+        return pair.first;
+    });
+    std::sort(knames.begin(), knames.end());
+
+    /* The last element is an invalid key name */
+    knames.push_back("");
+
+    return knames;
+}
+
 void Keyboard::load(std::string_view fname)
 {
     static const std::regex re_comment{"^[ \t]*#.*$", std::regex::extended};
@@ -190,7 +205,7 @@ void Keyboard::load(std::string_view fname)
         }
 
         try {
-            line = caio::toup(line);
+            line = utils::toup(line);
             if (!std::regex_match(line, result, re_line) || result.size() != 6) {
                 throw InvalidArgument{};
             }

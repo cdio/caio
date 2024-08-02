@@ -28,7 +28,7 @@
 namespace caio {
 namespace config {
 
-std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdline)
+std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdline, bool search_conf)
 {
     Confile def{cmdline.defaults()};
     auto [cline, pname] = cmdline.parse(argc, argv);
@@ -44,7 +44,7 @@ std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdl
         fname = it->second;
         log.debug("Configuration file: {}\n", fname);
         cfile.load(fname);
-    } else {
+    } else if (search_conf) {
         /*
          * Searh for the configuration file in standard directories.
          */
@@ -55,6 +55,8 @@ std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdl
             log.debug("Configuration file found: {}\n", fname);
             cfile.load(fname);
         }
+    } else {
+        log.debug("Configuration file not defined. Using default values\n");
     }
 
     const auto& sname = cmdline.sname();
@@ -70,6 +72,28 @@ std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdl
     merged.merge(def.extract(SEC_GENERIC));
 
     return {merged, pname};
+}
+
+void save(const fs::Path& fname, std::string_view sname, const Section& sec)
+{
+    std::ofstream os{fname, std::ios_base::out | std::ios_base::trunc};
+    if (!os) {
+        throw IOError{"Can't open file: {}: {}", fname.string(), Error::to_string(errno)};
+    }
+
+    try {
+        os << "[" << sname << "]\n";
+        std::for_each(sec.begin(), sec.end(), [&os](const std::pair<std::string, std::string>& kv) {
+            const auto& [key, value] = kv;
+            os << key << " =";
+            if (!value.empty()) {
+                os << " " << value;
+            }
+            os << "\n";
+        });
+    } catch (const std::exception& err) {
+        throw IOError{"Can't write file: {}: {}", fname.string(), err.what()};
+    }
 }
 
 VJoyConfig::VJoyConfig(Section& sec)
@@ -137,6 +161,40 @@ VJoyConfig::VJoyConfig(Section& sec)
     }
 }
 
+bool VJoyConfig::operator==(const VJoyConfig& other) const
+{
+    return enabled == other.enabled &&
+           up == other.up &&
+           down == other.down &&
+           left == other.left &&
+           right == other.right &&
+           fire == other.fire &&
+           a == other.a &&
+           b == other.b &&
+           x == other.x &&
+           y == other.y &&
+           back == other.back &&
+           guide == other.guide &&
+           start == other.start;
+}
+
+void VJoyConfig::to_section(Section& sec) const
+{
+    sec[KEY_VJOY] = (enabled ? "yes" : "no");
+    sec[KEY_VJOY_UP] = keyboard::to_string(up);
+    sec[KEY_VJOY_DOWN] = keyboard::to_string(down);
+    sec[KEY_VJOY_LEFT] = keyboard::to_string(left);
+    sec[KEY_VJOY_RIGHT] = keyboard::to_string(right);
+    sec[KEY_VJOY_FIRE] = keyboard::to_string(fire);
+    sec[KEY_VJOY_A] = keyboard::to_string(a);
+    sec[KEY_VJOY_B] = keyboard::to_string(b);
+    sec[KEY_VJOY_X] = keyboard::to_string(x);
+    sec[KEY_VJOY_Y] = keyboard::to_string(y);
+    sec[KEY_VJOY_BACK] = keyboard::to_string(back);
+    sec[KEY_VJOY_GUIDE] = keyboard::to_string(guide);
+    sec[KEY_VJOY_START] = keyboard::to_string(start);
+}
+
 Config::Config(Section& sec, std::string_view prefix)
     : title{"caio"},
       romdir{sec[KEY_ROMDIR]},
@@ -158,6 +216,45 @@ Config::Config(Section& sec, std::string_view prefix)
     if (scale < 1) {
         scale = 1;
     }
+}
+
+bool Config::operator==(const Config& other) const
+{
+    return (title == other.title &&
+       romdir == other.romdir &&
+       palette == other.palette &&
+       keymaps == other.keymaps &&
+       cartridge == other.cartridge &&
+       fps == other.fps &&
+       scale == other.scale &&
+       scanlines == other.scanlines &&
+       fullscreen == other.fullscreen &&
+       sresize == other.sresize &&
+       audio == other.audio &&
+       delay == other.delay &&
+       monitor == other.monitor &&
+       logfile == other.logfile &&
+       loglevel == other.loglevel &&
+       vjoy == other.vjoy);
+}
+
+void Config::to_section(Section& sec) const
+{
+    sec[KEY_ROMDIR] = romdir;
+    sec[KEY_PALETTE] = palette;
+    sec[KEY_KEYMAPS] = keymaps;
+    sec[KEY_CARTRIDGE] = cartridge;
+    sec[KEY_FPS] = std::format("{}", fps);
+    sec[KEY_SCALE] = std::format("{}", scale);
+    sec[KEY_SCANLINES] = scanlines;
+    sec[KEY_FULLSCREEN] = (fullscreen ? "yes" : "no");
+    sec[KEY_SRESIZE] = (sresize ? "yes" : "no");
+    sec[KEY_AUDIO] = (audio ? "yes" : "no");
+    sec[KEY_DELAY] = std::format("{:.1f}", delay);
+    sec[KEY_MONITOR] = (monitor ? "yes" : "no");
+    sec[KEY_LOGFILE] = logfile;
+    sec[KEY_LOGLEVEL] = loglevel;
+    vjoy.to_section(sec);
 }
 
 std::string Config::resolve(std::string_view name, std::string_view path, std::string_view prefix,

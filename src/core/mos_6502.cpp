@@ -492,7 +492,7 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
      * Print address and opcode.
      */
     std::ostringstream hex{};
-    hex << caio::to_string(addr) << ": " << caio::to_string(opcode);
+    hex << utils::to_string(addr) << ": " << utils::to_string(opcode);
     ++addr;
 
     /*
@@ -509,7 +509,7 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
             (v == '+' && ins.size != 2) ||
             (v == '^' && ins.size != 3)) {
             log.fatal("{}: Invalid instruction encoding: opcode: {}, size: {}, fmt: \"{}\"\n",
-                Name::type(), caio::to_string(opcode), ins.size, ins.format);
+                Name::type(), utils::to_string(opcode), ins.size, ins.format);
             /* NOTREACHED */
         }
 
@@ -523,26 +523,26 @@ std::string Mos6502::disass(addr_t& addr, bool show_pc)
 
         oplo = peek(addr++);
 
-        hex << " " << caio::to_string(oplo);
+        hex << " " << utils::to_string(oplo);
 
         switch (v) {
         case '*':
             /* Operand is an 8 bits value, must be disassembled as $00 or #$00 */
-            ops << caio::to_string(oplo);
+            ops << utils::to_string(oplo);
             break;
 
         case '^':
             /* Operand is a 16 bit value, must be disassembled as $0000 */
             ophi = peek(addr++);
             operand = (static_cast<addr_t>(ophi) << 8) | oplo;
-            hex << " " << caio::to_string(ophi);
-            ops << caio::to_string(operand);
+            hex << " " << utils::to_string(ophi);
+            ops << utils::to_string(operand);
             break;
 
         case '+':
             /* Operand is a relative address: The disassembled string must show the absolute address */
             operand = static_cast<int8_t>(oplo) + addr;
-            ops << caio::to_string(operand);
+            ops << utils::to_string(operand);
             break;
         }
 

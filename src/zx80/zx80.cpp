@@ -67,7 +67,7 @@ void ZX80::autorun(std::string_view pname)
 
 void ZX80::start()
 {
-    log.info("Starting {} - {}\n{}\n", caio::full_version(), _conf.title, to_string());
+    log.info("Starting {} - {}\n{}\n", full_version(), _conf.title, to_string());
 
     /*
      * The emulator runs on its own thread.

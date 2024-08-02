@@ -60,7 +60,7 @@ public:
      * @param data Image data.
      * @exception UIError
      */
-    void load(const std::span<const uint8_t>& data);
+    void load(std::span<const uint8_t> data);
 
     /**
      * Set the action callback.

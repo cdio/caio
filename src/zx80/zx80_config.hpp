@@ -61,6 +61,13 @@ struct ZX80Config : public config::Config {
     virtual ~ZX80Config() {
     }
 
+    bool operator==(const ZX80Config& other) const;
+
+    bool operator!=(const ZX80Config& other) const {
+        return !operator==(other);
+    }
+
+    void to_section(config::Section& sec) const override;
     std::string to_string() const override;
 };
 

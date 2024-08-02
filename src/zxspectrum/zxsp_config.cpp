@@ -65,6 +65,24 @@ ZXSpectrumConfig::ZXSpectrumConfig(config::Section& sec)
     title += " - Sinclair ZX-Spectrum 48K";
 }
 
+bool ZXSpectrumConfig::operator==(const ZXSpectrumConfig& other) const
+{
+    return (static_cast<const Config&>(*this) == static_cast<const Config&>(other) &&
+       otape == other.otape &&
+       itape == other.itape &&
+       fastload == other.fastload &&
+       snap == other.snap);
+}
+
+void ZXSpectrumConfig::to_section(config::Section& sec) const
+{
+    Config::to_section(sec);
+    sec[KEY_OTAPE] = otape;
+    sec[KEY_ITAPE] = itape;
+    sec[KEY_FASTLOAD] = (fastload ? "yes" : "no");
+    sec[KEY_SNAPSHOT] = snap;
+}
+
 std::string ZXSpectrumConfig::to_string() const
 {
     return std::format("{}\n"

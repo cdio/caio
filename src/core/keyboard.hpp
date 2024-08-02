@@ -22,6 +22,7 @@
 #include <map>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "joystick.hpp"
 #include "name.hpp"
@@ -185,6 +186,12 @@ Key to_key(const std::string& name);
  * @return The key name (an empty string if the key code is invalid).
  */
 std::string to_string(Key key);
+
+/**
+ * Get all the key names.
+ * @return A vector containing all the key names.
+ */
+std::vector<std::string> key_names();
 
 /**
  * Emulated keyboard.

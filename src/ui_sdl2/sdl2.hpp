@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <SDL.h>
+#include <SDL_image.h>
 
 #include "keyboard.hpp"
 #include "rgb.hpp"

@@ -27,20 +27,20 @@ namespace caio {
 namespace commodore {
 namespace c1541 {
 
-sptr_t<C1541> create(std::string_view path, uint8_t unit, const sptr_t<cbm_bus::Bus>& bus)
+sptr_t<C1541> instance(const fs::Path& path, uint8_t unit, const sptr_t<cbm_bus::Bus>& bus)
 {
     sptr_t<C1541> drive{};
 
     if (!fs::exists(path)) {
-        throw IOError{"Can't create C1541 instance: {}: {}", path, Error::to_string(ENOENT)};
+        throw IOError{"Can't create C1541 instance: {}: {}", path.string(), Error::to_string(ENOENT)};
     }
 
     try {
-        if (std::filesystem::is_directory(path)) {
+        if (fs::is_directory(path)) {
             drive = std::make_shared<C1541Fs>(unit, bus);
             drive->attach(path);
         } else {
-            throw IOError{"Can't create C1541 instance: {}: Unsupported format", path};
+            throw IOError{"Can't create C1541 instance: {}: Unsupported format", path.string()};
         }
     } catch (const std::filesystem::filesystem_error& err) {
         throw IOError{"Can't create C1541 instance: {}", err.what()};

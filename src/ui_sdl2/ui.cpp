@@ -454,7 +454,7 @@ void UI::event_loop()
     int64_t start{};
 
     while (!_stop) {
-        start = caio::now() - start;
+        start = utils::now() - start;
 
         while (::SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -496,7 +496,7 @@ void UI::event_loop()
             _panel->event(event);
         }
 
-        if (_mouse_visible && (caio::now() - _mouse_active_time) > MOUSE_INACTIVE_TIME) {
+        if (_mouse_visible && (utils::now() - _mouse_active_time) > MOUSE_INACTIVE_TIME) {
             ::SDL_ShowCursor(SDL_DISABLE);
             _mouse_visible = false;
         }
@@ -508,8 +508,8 @@ void UI::event_loop()
             signal_key = keyboard::KEY_NONE;
         }
 
-        int64_t delay = _fps_time - caio::now() + start;
-        start = (delay > 0 ? caio::sleep(delay) - delay : 0);
+        int64_t delay = _fps_time - utils::now() + start;
+        start = (delay > 0 ? utils::sleep(delay) - delay : 0);
     }
 }
 
@@ -764,7 +764,7 @@ void UI::mouse_event(const SDL_Event& event)
      */
     if (!_mouse_visible) {
         ::SDL_ShowCursor(SDL_ENABLE);
-        _mouse_active_time = caio::now();
+        _mouse_active_time = utils::now();
         _mouse_visible = true;
     }
 }

@@ -21,6 +21,7 @@
 #include <fstream>
 #include <vector>
 
+#include "fs.hpp"
 #include "types.hpp"
 #include "device.hpp"
 
@@ -182,7 +183,7 @@ public:
      * @exceptions InvalidCartridge
      * @see open(std::string_view)
      */
-    Crt(std::string_view fname) {
+    Crt(const fs::Path& fname) {
         open(fname);
     }
 
@@ -195,7 +196,7 @@ public:
      * @param fname Name of the CRT cartridge file to open.
      * @exception InvalidCartridge
      */
-    void open(std::string_view fname);
+    void open(const fs::Path& fname);
 
     /**
      * Get the hardware type of this CRT file.
@@ -254,7 +255,7 @@ public:
      * @param fname File name.
      * @return true if the specified file is a CRT file; false otherwise.
      */
-    static bool is_crt(std::string_view fname);
+    static bool is_crt(const fs::Path& fname);
 
     /**
      * Detect whether a CRT header is valid.
@@ -331,7 +332,7 @@ private:
      */
     static void to_host(Chip& ch);
 
-    std::string           _fname{};
+    fs::Path              _fname{};
     Header                _hdr{};
     std::vector<Chip>     _chips{};
     std::vector<devptr_t> _roms{};

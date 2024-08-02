@@ -58,7 +58,7 @@ Logger::Level Logger::parse_loglevel(std::string_view levels)
     for (auto it = std::sregex_iterator(lvls.begin(), lvls.end(), re_loglevel);
         it != std::sregex_iterator(); ++it) {
 
-        auto lstr = caio::trim(it->str());
+        auto lstr = utils::trim(it->str());
         Level l = Logger::to_loglevel(lstr);
         if (l == Level::Invalid) {
             /*

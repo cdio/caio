@@ -1,7 +1,7 @@
-- UI:       Find some SDL-GUI
-            Windowed pseudo-terminals (logs and monitor)
-            Configuration window
-            Avoid interference between ALT/CTRL+xx and OS
+- 3rdparty: SDL_Image as subtree
+- 3rdparty: Remove pkg_config from dependencies, use sdl2-config
+- mk:       Cross compile for macos-x86 (Apple does not support its own products)
+- UI:       Avoid interference between ALT/CTRL+xx and OS
 - UI:       Joystick label = gamepad name
 - NES test: The Young Indiana Jones Chronicles and Burai Fighter
 - vjoy:     move ALT-K handling from c64 to ui
@@ -10,6 +10,7 @@
 - C1541Fs:  Fastload mode (remove time emulation during load/save operations)
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
 - C1541Fs:  Check whether open channels can be re-opened w/o close (Ghosts and Gobblins)
+- UI:       Improve panel with imgui
 - UI:       Fix disk widget activity when C1541 is in error condition.
 - UI:       Floppy widget: Disk progress
 - UI:       Virtual joystick widget

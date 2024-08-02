@@ -212,19 +212,19 @@ fp_t Oscillator::tick()
         int16_t a = 0xFFFF;
 
         if (_type & WAVE_TRIANGLE) {
-            a &= caio::to_i16(signal::triangle(_t, _T) * ((_ring) ? _syncos.amplitude() : 1.0));
+            a &= utils::to_i16(signal::triangle(_t, _T) * ((_ring) ? _syncos.amplitude() : 1.0));
         }
 
         if (_type & WAVE_SAWTOOTH) {
-            a &= caio::to_i16(signal::sawtooth(_t, _T));
+            a &= utils::to_i16(signal::sawtooth(_t, _T));
         }
 
         if (_type & WAVE_PULSE) {
-            a &= caio::to_i16(signal::pulse(_t, _T * _width));
+            a &= utils::to_i16(signal::pulse(_t, _T * _width));
         }
 
         if (_type & WAVE_NOISE) {
-            a &= caio::to_i16(noise());
+            a &= utils::to_i16(noise());
         }
 
         _A = a / 32768.0;
@@ -642,10 +642,10 @@ uint8_t Mos6581::dev_read(addr_t addr, ReadMode)
         break;
 
     case VOICE_3_OSC:
-        return (to_i16(_voice_3.osc().amplitude()) >> 8);
+        return (utils::to_i16(_voice_3.osc().amplitude()) >> 8);
 
     case VOICE_3_ENV:
-        return (to_i16(_voice_3.env().amplitude()) >> 8);
+        return (utils::to_i16(_voice_3.env().amplitude()) >> 8);
 
     default:;
     }
@@ -807,7 +807,7 @@ std::ostream& Mos6581::dump(std::ostream& os, addr_t base) const
     regs[VOICE_3_OSC] = peek(VOICE_3_OSC);
     regs[VOICE_3_ENV] = peek(VOICE_3_ENV);
 
-    return caio::dump(os, regs, base);
+    return utils::dump(os, regs, base);
 }
 
 size_t Mos6581::tick(const Clock& clk)
@@ -851,7 +851,7 @@ void Mos6581::play()
         for (size_t i = 0; i < SAMPLES; ++i) {
             fp_t value = _v[i] * _volume + _v4[i] * 0.3;
             value = std::max<fp_t>(std::min<fp_t>(value, 0.8), -0.8);
-            v16[i] = caio::to_i16(value);
+            v16[i] = utils::to_i16(value);
         }
     }
 }

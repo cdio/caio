@@ -68,7 +68,7 @@ std::ostream& Cartridge::dump(std::ostream& os, addr_t base) const
         data[i] = peek(i);
     }
 
-    return caio::dump(os, data, base);
+    return utils::dump(os, data, base);
 }
 
 void Cartridge::add_ior(const Gpio::ior_t& ior, uint8_t mask)
@@ -113,7 +113,7 @@ void Cartridge::throw_invalid_cartridge(ssize_t entry, std::string_view errmsg)
     }
 }
 
-sptr_t<Cartridge> Cartridge::create(std::string_view fname)
+sptr_t<Cartridge> Cartridge::instance(const fs::Path& fname)
 {
     auto crt = std::make_shared<Crt>(fname);
 

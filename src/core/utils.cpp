@@ -23,6 +23,7 @@
 #include "sha2.h"
 
 namespace caio {
+namespace utils {
 
 std::string tolow(std::string_view str)
 {
@@ -140,4 +141,5 @@ std::string sha256(std::span<const uint8_t> buf)
     return os.str();
 }
 
+}
 }

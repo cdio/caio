@@ -45,13 +45,13 @@ void Floppy::render(const ::SDL_Rect& dstrect)
 
     if (!st.is_idle) {
         if (_prev_idle != st.is_idle) {
-            _start = caio::now();
+            _start = utils::now();
         }
 
-        _elapsed = caio::now() - _start;
+        _elapsed = utils::now() - _start;
         rect = (_elapsed < 500000 ? ::SDL_Rect{0, 0, 128, 128} : ::SDL_Rect{128, 0, 128, 128});
         if (_elapsed >= 1000000) {
-            _start = caio::now();
+            _start = utils::now();
         }
     }
 

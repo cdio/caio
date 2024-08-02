@@ -31,13 +31,13 @@ namespace config {
 
 bool is_true(std::string_view value)
 {
-    auto val = caio::tolow(value);
+    auto val = utils::tolow(value);
     return (val == "yes" || val == "ye" || val == "y");
 }
 
 bool is_false(std::string_view value)
 {
-    auto val = caio::tolow(value);
+    auto val = utils::tolow(value);
     return (val == "no" || val == "n");
 }
 
@@ -67,7 +67,7 @@ bool set_bool(Confile& cf, const Option& opt, std::string_view value)
 }
 
 static Option generic_options[] = {
-    { "conf",          SEC_GENERIC, KEY_CONFIG_FILE, CONFIG_FILE,         Arg::Required, set_value       },
+    { KEY_CONFIG_FILE, SEC_GENERIC, KEY_CONFIG_FILE, CONFIG_FILE,         Arg::Required, set_value       },
     { KEY_ROMDIR,      SEC_GENERIC, KEY_ROMDIR,      DEFAULT_ROMDIR,      Arg::Required, set_value       },
     { KEY_PALETTEDIR,  SEC_GENERIC, KEY_PALETTEDIR,  DEFAULT_PALETTEDIR,  Arg::Required, set_value       },
     { KEY_KEYMAPSDIR,  SEC_GENERIC, KEY_KEYMAPSDIR,  DEFAULT_KEYMAPSDIR,  Arg::Required, set_value       },
@@ -175,7 +175,9 @@ Confile Cmdline::defaults()
 
 std::pair<Confile, std::string> Cmdline::parse(int argc, const char** argv)
 {
-    CAIO_ASSERT(argc > 0 && argv != nullptr && *argv != nullptr);
+    if (argc <= 0 || argv == nullptr || *argv == nullptr) {
+        return {{}, {}};
+    }
 
     _progname = fs::basename(argv[0]);
     const auto& opts = options();

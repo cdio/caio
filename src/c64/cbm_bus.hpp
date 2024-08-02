@@ -407,7 +407,7 @@ public:
     }
 
     std::string param_str() const {
-        return caio::to_string({_param.data(), _param.size()});
+        return utils::to_string({_param.data(), _param.size()});
     }
 
     void command(uint8_t cmd) {

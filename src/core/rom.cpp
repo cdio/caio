@@ -61,7 +61,7 @@ void ROM::dev_write(addr_t addr, uint8_t data)
 
 std::string ROM::signature() const
 {
-    return caio::sha256(_data);
+    return utils::sha256(_data);
 }
 
 }

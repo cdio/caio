@@ -59,6 +59,13 @@ struct ZXSpectrumConfig : public config::Config {
     virtual ~ZXSpectrumConfig() {
     }
 
+    bool operator==(const ZXSpectrumConfig& other) const;
+
+    bool operator!=(const ZXSpectrumConfig& other) const {
+        return !operator==(other);
+    }
+
+    void to_section(config::Section& sec) const override;
     std::string to_string() const override;
 };
 

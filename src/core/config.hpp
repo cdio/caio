@@ -24,6 +24,7 @@
 #include <string_view>
 #include <utility>
 
+#include "fs.hpp"
 #include "keyboard.hpp"
 #include "logger.hpp"
 
@@ -168,7 +169,7 @@ public:
      * @exception IOError
      * @see load(std::string_view)
      */
-    Confile(std::string_view fname = {});
+    Confile(const fs::Path& fname = {});
 
     virtual ~Confile() {
     }
@@ -181,7 +182,7 @@ public:
      * @exception ConfigError
      * @exception IOError
      */
-    void load(std::string_view fname);
+    void load(const fs::Path& fname);
 
     /**
      * Return a configuration section.
@@ -207,7 +208,7 @@ public:
     std::map<std::string, Section>::const_iterator find(std::string_view sname) const;
 
     /**
-     * Return an interator following the last section of this configuration file.
+     * Return an iterator following the last section of this configuration file.
      * @return An iterator following the last section.
      */
     std::map<std::string, Section>::const_iterator end() const;
@@ -229,14 +230,14 @@ enum class Arg {
  * Command line option.
  */
 struct Option {
-    using set_cb_t = std::function<bool(class Confile&, const Option&, std::string_view)>;
+    using SetCb = std::function<bool(class Confile&, const Option&, std::string_view)>;
 
     std::string name{};     /* Command line option without the "--" prefix              */
     std::string sname{};    /* Section name                                             */
     std::string key{};      /* Key name                                                 */
     std::string dvalue{};   /* Default value                                            */
     Arg         type{};     /* Argument requisites                                      */
-    set_cb_t    fn{};       /* Value setter                                             */
+    SetCb       fn{};       /* Value setter                                             */
     std::string optval{};   /* Value to set when an optional argument is not provided   */
 };
 
@@ -326,18 +327,29 @@ private:
  *   1. Command line options
  *   2. Configuration file values
  *   3. Default values
- * @param argc    argc as received by main();
- * @param argv    argv as received by main();
- * @param cmdline Command line parser.
+ * @param argc        argc as received by main();
+ * @param argv        argv as received by main();
+ * @param cmdline     Command line parser;
+ * @param search_conf If the configuration file is not defined search it in standard directories (default is true)
  * @return A pair containing: A section with all the configuration values,
  * and a string containing the name of a program to launch (can be empty).
  */
-std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdline);
+std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdline, bool search_conf = true);
+
+/**
+ * Save a configuration section to file.
+ * If the file exists it is overwritten.
+ * @param fname File name;
+ * @param sname Section name;
+ * @param sec   Configuration section.
+ * @exception IOError
+ */
+void save(const fs::Path& fname, std::string_view sname, const Section& sec);
 
 /**
  * Virtual joystick configuration.
  */
-struct VJoyConfig : public VJoyKeys {
+struct VJoyConfig : VJoyKeys {
     bool enabled{};
 
     VJoyConfig() {
@@ -349,6 +361,18 @@ struct VJoyConfig : public VJoyKeys {
      * @exception InvalidArgument
      */
     VJoyConfig(Section& sec);
+
+    bool operator==(const VJoyConfig& other) const;
+
+    bool operator!=(const VJoyConfig& other) const {
+        return !operator==(other);
+    }
+
+    /**
+     * Fill a section with the configuration parameters.
+     * @param sec Destination section.
+     */
+    void to_section(Section& sec) const;
 };
 
 /**
@@ -356,10 +380,10 @@ struct VJoyConfig : public VJoyKeys {
  */
 struct Config {
     std::string title{};
-    std::string romdir{};
+    std::string romdir{};               // Path
     std::string palette{};
     std::string keymaps{};
-    std::string cartridge{};
+    std::string cartridge{};                // Path
     unsigned    fps{};
     unsigned    scale{};
     std::string scanlines{};
@@ -368,7 +392,7 @@ struct Config {
     bool        audio{};
     float       delay{};
     bool        monitor{};
-    std::string logfile{};
+    std::string logfile{};              // Path
     std::string loglevel{};
     VJoyConfig  vjoy{};
 
@@ -385,6 +409,18 @@ struct Config {
 
     virtual ~Config() {
     }
+
+    bool operator==(const Config& other) const;
+
+    bool operator!=(const Config& other) const {
+        return !operator==(other);
+    }
+
+    /**
+     * Fill a section with the configuration parameters.
+     * @param sec Destination section.
+     */
+    virtual void to_section(Section& sec) const;
 
     /**
      * Return a human readable string representation of this configuration.

@@ -260,12 +260,12 @@ bool ZX80Cassette::is_idle() const
         (_tx_state == State::Init || _tx_state == State::End));
 }
 
-ZX80CassetteO::ZX80CassetteO(const sptr_t<Clock>& clk, std::string_view cassdir)
+ZX80CassetteO::ZX80CassetteO(const sptr_t<Clock>& clk, const fs::Path& cassdir)
     : ZX80Cassette{clk},
       _cassdir{fs::fix_home(cassdir)}
 {
     if (!fs::is_directory(_cassdir)) {
-        throw IOError{"Invalid cassette directory: {}", cassdir};
+        throw IOError{"Invalid cassette directory: {}", cassdir.string()};
     }
 }
 
@@ -280,16 +280,16 @@ void ZX80CassetteO::restart()
     _it = _buf.end();
 }
 
-inline std::string ZX80CassetteO::fname() const
+inline fs::Path ZX80CassetteO::fname() const
 {
-    return (_cassdir + "/" + CASSETTE_FNAME + CASSETTE_EXT);
+    return (_cassdir.string() + "/" + CASSETTE_FNAME + CASSETTE_EXT);
 }
 
 void ZX80CassetteO::transmit(int data)
 {
     if (data == END_OF_FILE) {
         const auto& fullpath = fname();
-        log.debug("ZX80CassetteO: Saving file: {}\n", fullpath);
+        log.debug("ZX80CassetteO: Saving file: {}\n", fullpath.string());
         fs::save(fullpath, _buf);
         _buf.clear();
     } else {
@@ -301,7 +301,7 @@ int ZX80CassetteO::receive(RxCmd cmd)
 {
     if (cmd == RxCmd::Rewind) {
         const auto& fullpath = fname();
-        log.debug("ZX80CassetteO: Loading file: {}\n", fullpath);
+        log.debug("ZX80CassetteO: Loading file: {}\n", fullpath.string());
         _buf = fs::load(fullpath);
         _it = _buf.begin();
         return 0;
@@ -317,7 +317,7 @@ int ZX80CassetteO::receive(RxCmd cmd)
     return data;
 }
 
-ZX80CassetteP::ZX80CassetteP(const sptr_t<Clock>& clk, std::string_view cassdir)
+ZX80CassetteP::ZX80CassetteP(const sptr_t<Clock>& clk, const fs::Path& cassdir)
     : ZX80CassetteO{clk, cassdir}
 {
 }
@@ -368,9 +368,9 @@ ZX80CassetteP::~ZX80CassetteP()
 {
 }
 
-inline std::string ZX80CassetteP::fname(const std::string& basename) const
+inline fs::Path ZX80CassetteP::fname(const fs::Path& basename) const
 {
-    return (_cassdir + "/" + basename + CASSETTE_EXT);
+    return (_cassdir.string() + "/" + basename.string() + CASSETTE_EXT);
 }
 
 inline std::string ZX80CassetteP::extract_name()
@@ -408,7 +408,7 @@ void ZX80CassetteP::transmit(int data)
     if (data < 0) {
         auto name = extract_name();
         auto fullpath = fname(name);
-        log.debug("ZX80CassetteP: Saving file: {}\n", fullpath);
+        log.debug("ZX80CassetteP: Saving file: {}\n", fullpath.string());
         fs::save(fullpath, _buf);
         _buf.clear();
     } else {
@@ -419,11 +419,11 @@ void ZX80CassetteP::transmit(int data)
 int ZX80CassetteP::receive(RxCmd cmd)
 {
     if (cmd == RxCmd::Rewind) {
-        log.debug("ZX80CassetteP: Loading filenames from directory: {}\n", _cassdir);
+        log.debug("ZX80CassetteP: Loading filenames from directory: {}\n", _cassdir.string());
 
         _entries = fs::directory(_cassdir, CASSETTE_PATTERN, fs::MATCH_CASE_INSENSITIVE);
         for (const auto& entry : _entries) {
-            log.debug("ZX80CassetteP: Found: {}\n", entry.first);
+            log.debug("ZX80CassetteP: Found: {}\n", entry.first.string());
         }
 
         _dirit = _entries.begin();
@@ -443,7 +443,7 @@ int ZX80CassetteP::receive(RxCmd cmd)
         const auto& fullpath = entry.first;
         uint64_t filesize = entry.second;
 
-        log.debug("ZX80CassetteP: Loading file: {}, size: {}\n", fullpath, filesize);
+        log.debug("ZX80CassetteP: Loading file: {}, size: {}\n", fullpath.string(), filesize);
 
         _buf = fs::load(fullpath);
 

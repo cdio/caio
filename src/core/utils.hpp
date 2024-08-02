@@ -38,6 +38,7 @@
 #include "endian.hpp"
 
 namespace caio {
+namespace utils {
 
 /**
  * Convert an integer value to floating point.
@@ -413,4 +414,5 @@ uint64_t sleep(uint64_t delay);
  */
 std::string sha256(std::span<const uint8_t> buf);
 
+}
 }

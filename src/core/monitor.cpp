@@ -82,7 +82,7 @@ Expr::fn_t Expr::compile_argument(MonitoredCPU& cpu, std::string_view line)
             ++pos;
         }
 
-        std::string svalue = caio::tolow(line.substr(pos, last - pos + 1));
+        std::string svalue = utils::tolow(line.substr(pos, last - pos + 1));
 
         /*
          * Try to compile a literal value.
@@ -181,7 +181,7 @@ bool Monitor::run()
         _rd.write(prompt());
 
         std::string line = _rd.getline();
-        line = (line.empty() ? _prev_line : caio::trim(line));
+        line = (line.empty() ? _prev_line : utils::trim(line));
         if (line.empty() || line[0] == '#') {
             continue;
         }
@@ -229,7 +229,7 @@ bool Monitor::is_breakpoint(addr_t addr) const
             /*
              * Unconditional breakpoint.
              */
-            _rd.write("Breakpoint at ${}\n", caio::to_string(addr));
+            _rd.write("Breakpoint at ${}\n", utils::to_string(addr));
             return true;
         }
 
@@ -237,7 +237,7 @@ bool Monitor::is_breakpoint(addr_t addr) const
             /*
              * Conditional breakpoint.
              */
-            _rd.write("Conditional breakpoint at ${} {}\n", caio::to_string(addr), cond.second);
+            _rd.write("Conditional breakpoint at ${} {}\n", utils::to_string(addr), cond.second);
             return true;
         }
     }
@@ -257,7 +257,7 @@ std::string Monitor::prompt()
         os << _cpu.regs() << "\n";
     }
 
-    os << PROMPT_PREFIX << "$" << caio::to_string(_cpu.getpc()) << PROMPT_SUFFIX;
+    os << PROMPT_PREFIX << "$" << utils::to_string(_cpu.getpc()) << PROMPT_SUFFIX;
 
     return os.str();
 }
@@ -270,7 +270,7 @@ inline addr_t Monitor::to_addr(std::string_view str, addr_t defval)
 size_t Monitor::to_count(std::string_view str)
 {
     try {
-        return caio::to_number<size_t>(str);
+        return utils::to_number<size_t>(str);
 
     } catch (const InvalidNumber& err) {
         _rd.write("Invalid value: {}\n", str);
@@ -300,10 +300,10 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
     auto [ifd, ofd] = mon._rd.fds();
     Readline editor{ifd, ofd};
     while (true) {
-        editor.write("${}: ", caio::to_string(addr));
+        editor.write("${}: ", utils::to_string(addr));
 
         std::string line = editor.getline();
-        line = caio::trim(line);
+        line = utils::trim(line);
 
         if (line.empty() || line == ".") {
             /*
@@ -320,7 +320,7 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
         std::string str{};
         while (iss >> str) {
             try {
-                auto u8 = caio::to_number<uint8_t>(str);
+                auto u8 = utils::to_number<uint8_t>(str);
                 program.push_back(u8);
             } catch (const InvalidNumber&) {
                 /*
@@ -412,7 +412,7 @@ bool Monitor::dump(Monitor& mon, const Command::args_t& args)
     });
 
     std::ostringstream os{};
-    caio::dump(os, data, addr) << "\n";
+    utils::dump(os, data, addr) << "\n";
     mon._rd.write(os.str());
     return false;
 }
@@ -546,7 +546,7 @@ bool Monitor::bp_list(Monitor& mon, const Command::args_t& args)
         const auto& cfn  = cond.first;
         const auto& cstr = cond.second;
 
-        os << "$" << caio::to_string(addr);
+        os << "$" << utils::to_string(addr);
 
         if (cfn) {
             os << " " << cstr;
@@ -614,12 +614,12 @@ bool Monitor::load(Monitor& mon, const Command::args_t& args)
             addr_t addr{};
 
             if (args.size() > 2) {
-                addr = caio::to_number<addr_t>(args[2]);
+                addr = utils::to_number<addr_t>(args[2]);
             }
 
             auto [start, size] = mon._cpu.load(args[1], addr);
             mon._rd.write("load: {} loaded at ${}, size {} (${})\n",
-                args[1], caio::to_string(addr), size, caio::to_string(size));
+                args[1], utils::to_string(addr), size, utils::to_string(size));
         }
     } catch (const std::exception& e) {
         mon._rd.write("{}\n", e.what());
@@ -639,8 +639,8 @@ bool Monitor::save(Monitor& mon, const Command::args_t& args)
         }
 
         const auto& fname = args[1];
-        addr_t start = caio::to_number<addr_t>(args[2]);
-        addr_t end = caio::to_number<addr_t>(args[3]);
+        addr_t start = utils::to_number<addr_t>(args[2]);
+        addr_t end = utils::to_number<addr_t>(args[3]);
 
         if (end < start) {
             throw InvalidArgument{"End address smaller than start address"};

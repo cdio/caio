@@ -30,34 +30,36 @@
 
 #include "logger.hpp"
 #include "types.hpp"
+#include "utils.hpp"
 
 namespace caio {
 namespace fs {
 
-std::string home()
+Path home()
 {
     static const char* chome = std::getenv("HOME");
     return (chome == nullptr ? "" : chome);
 }
 
-std::string fix_home(std::string_view path)
+Path fix_home(const Path& path)
 {
-    if (!path.empty() && path[0] == '~') {
-        std::string newpath{path};
-        newpath.replace(0, 1, home() + "/");
+    const auto& p = path.string();
+    if (!p.empty() && p[0] == '~') {
+        std::string newpath{p};
+        newpath.replace(0, 1, home().string());
         return newpath;
     }
 
-    return std::string{path};
+    return path;
 }
 
-std::string search(std::string_view fname, const std::initializer_list<std::string_view>& spath, bool cwd)
+Path search(const Path& fname, const std::initializer_list<const Path>& spath, bool cwd)
 {
     if (fname.empty()) {
         return {};
     }
 
-    log.debug("Looking for file: {}: ", fname);
+    log.debug("Looking for file: {}: ", fname.string());
 
     auto name = basename(fname);
     if (name != fname) {
@@ -65,8 +67,8 @@ std::string search(std::string_view fname, const std::initializer_list<std::stri
          * A directory is specified in fname.
          */
         const auto fullpath = fix_home(fname);
-        if (exists(fullpath)) {
-            log.debug("Found: {}\n", fullpath);
+        if (fs::exists(fullpath)) {
+            log.debug("Found: {}\n", fullpath.string());
             return fullpath;
         }
     }
@@ -76,17 +78,18 @@ std::string search(std::string_view fname, const std::initializer_list<std::stri
          * Directory not specified in fname.
          * Search on the current working directory.
          */
-        log.debug("Looking for file: {}: ", name);
-        if (exists(name)) {
-            log.debug("Found: {}\n", name);
-            return std::string{fname};
+        log.debug("Looking for file: {}: ", name.string());
+        if (fs::exists(name)) {
+            log.debug("Found: {}\n", name.string());
+            return fname;
         }
     }
 
-    for (const auto& path : spath) {
-        std::string fullpath = std::format("{}/{}", fix_home(path), name);
-        log.debug("Trying {}...", fullpath);
-        if (exists(fullpath)) {
+    for (const auto& pth : spath) {
+        auto fullpath{fix_home(pth)};
+        fullpath /= name;
+        log.debug("Trying {}...", fullpath.string());
+        if (fs::exists(fullpath)) {
             log.debug("Found\n");
             return fullpath;
         }
@@ -96,30 +99,16 @@ std::string search(std::string_view fname, const std::initializer_list<std::stri
     return {};
 }
 
-std::string_view basename(std::string_view fullpath)
+void concat(const Path& dst, const Path& src)
 {
-    auto pos = fullpath.find_last_of("/");
-    return (pos == std::string::npos ? fullpath : fullpath.substr(pos + 1));
-}
-
-std::string_view dirname(std::string_view fullpath)
-{
-    auto pos = fullpath.find_last_of("/");
-    return (pos == std::string::npos ? "./" : fullpath.substr(0, pos));
-}
-
-void concat(std::string_view dst, std::string_view src)
-{
-    //FIXME libstdc++ not there yet   std::ifstream is{src, std::ios_base::in | std::ios_base::binary};
-    std::ifstream is{std::string{src}, std::ios_base::in | std::ios_base::binary};
+    std::ifstream is{src, std::ios_base::in | std::ios_base::binary};
     if (!is) {
-        throw IOError{"Can't open input file: {}: {}", src, Error::to_string(errno)};
+        throw IOError{"Can't open input file: {}: {}", src.string(), Error::to_string(errno)};
     }
 
-    //FIXME libstdc++ not there yet  std::ofstream os{dst, std::ios_base::out | std::ios_base::app | std::ios_base::binary};
-    std::ofstream os{std::string{dst}, std::ios_base::out | std::ios_base::app | std::ios_base::binary};
+    std::ofstream os{dst, std::ios_base::out | std::ios_base::app | std::ios_base::binary};
     if (!os) {
-        throw IOError{"Can't open output file: {}: {}", dst, Error::to_string(errno)};
+        throw IOError{"Can't open output file: {}: {}", dst.string(), Error::to_string(errno)};
     }
 
     try {
@@ -131,29 +120,25 @@ void concat(std::string_view dst, std::string_view src)
     }
 }
 
-bool unlink(std::string_view fname)
+bool match(const Path& path, const Path& pattern, bool icase)
 {
-    return (fname.empty() || !::unlink(fname.data()));
-}
-
-bool match(std::string_view path, std::string_view pattern, bool icase)
-{
-    const char* cpath = path.data();
-    const char* cpattern = pattern.data();
+    const char* cpath = path.c_str();
+    const char* cpattern = pattern.c_str();
     return (!::fnmatch(cpattern, cpath, FNM_NOESCAPE | (icase == MATCH_CASE_INSENSITIVE ? FNM_CASEFOLD : 0)));
 }
 
-bool directory(std::string_view path, std::string_view pattern, bool icase,
-    const std::function<bool(std::string_view, uint64_t)>& callback)
+template<typename ITERATOR_TYPE>
+bool _directory(const Path& path, const Path& pattern, bool icase,
+    const std::function<bool(const Path&, uint64_t)>& callback)
 {
-    const auto& end = std::filesystem::end(std::filesystem::recursive_directory_iterator{});
-    std::filesystem::recursive_directory_iterator it{path, std::filesystem::directory_options::skip_permission_denied};
+    const auto& end = std::filesystem::end(ITERATOR_TYPE{});
+    ITERATOR_TYPE it{path, std::filesystem::directory_options::skip_permission_denied};
 
     for (; it != end; ++it) {
         const auto& entry = it->path();
-        if (!std::filesystem::is_directory(entry) && fs::match(entry.c_str(), pattern, icase)) {
+        if (!std::filesystem::is_directory(entry) && fs::match(entry, pattern, icase)) {
             auto size = std::filesystem::file_size(entry);
-            if (callback(entry.c_str(), size) == false) {
+            if (callback(entry, size) == false) {
                 return false;
             }
         }
@@ -162,41 +147,47 @@ bool directory(std::string_view path, std::string_view pattern, bool icase,
     return true;
 }
 
-dir_t directory(std::string_view path, std::string_view pattern, bool icase, size_t limit)
+bool directory(const Path& path, const Path& pattern, bool icase,
+    const std::function<bool(const Path&, uint64_t)>& callback)
 {
-    dir_t entries{};
+    return _directory<std::filesystem::recursive_directory_iterator>(path, pattern, icase, callback);
+}
+
+Dir directory(const Path& path, const Path& pattern, bool icase, size_t limit)
+{
+    Dir entries{};
     bool limited = (limit != 0);
 
-    directory(path, pattern, icase, [&entries, &limit, limited](std::string_view entry, uint64_t size) -> bool {
+    const auto filter = [&entries, &limit, limited](const Path& entry, uint64_t size) -> bool {
         if (limited) {
             if (limit == 0) {
                 return false;
             }
             --limit;
         }
-        entries.push_back({std::string{entry}, size});
+        entries.push_back({entry, size});
         return true;
-    });
+    };
 
+    directory(path, pattern, icase, filter);
     return entries;
 }
 
-buffer_t load(std::string_view fname, size_t maxsiz)
+buffer_t load(const Path& fname, size_t maxsiz)
 {
     if (maxsiz == 0) {
         maxsiz = LOAD_MAXSIZ;
     }
 
-    //FIXME libstdc++ not there yet   std::ifstream is{fname, std::ios::in};
-    std::ifstream is{std::string{fname}, std::ios::in};
+    std::ifstream is{fname, std::ios::in};
     if (!is) {
-        throw IOError{"Can't load: {}: {}", fname, Error::to_string()};
+        throw IOError{"Can't load: {}: {}", fname.string(), Error::to_string()};
     }
 
     try {
         return load(is, maxsiz);
     } catch (const std::exception& err) {
-        throw IOError{"Can't load: {}: {}", fname, err.what()};
+        throw IOError{"Can't load: {}: {}", fname.string(), err.what()};
     }
 }
 
@@ -223,12 +214,11 @@ buffer_t load(std::istream& is, size_t maxsiz)
     return buf;
 }
 
-void save(std::string_view fname, std::span<const uint8_t> buf, std::ios_base::openmode mode)
+void save(const Path& fname, std::span<const uint8_t> buf, std::ios_base::openmode mode)
 {
-    //FIXME libstdc++ not there yet   std::ofstream os{fname, mode};
-    std::ofstream os{std::string{fname}, mode};
+    std::ofstream os{fname, mode};
     if (!os) {
-        throw IOError{"Can't save: {}: {}", fname, Error::to_string()};
+        throw IOError{"Can't save: {}: {}", fname.string(), Error::to_string()};
     }
 
     save(os, buf);
@@ -241,6 +231,155 @@ std::ostream& save(std::ostream& os, std::span<const uint8_t> buf)
     }
 
     return os;
+}
+
+IDir::IDir(EntryType etype, const std::string& eempty)
+    : _etype{etype},
+      _eempty{eempty}
+{
+}
+
+IDir::~IDir()
+{
+}
+
+void IDir::filter(const FilterCb& efilter)
+{
+    _efilter = efilter;
+    reset(_path);
+}
+
+inline Path IDir::filter(const Path& entry) const
+{
+    return (_efilter ? _efilter(entry) : entry);
+}
+
+void IDir::reset(const Path& path)
+{
+    std::error_code ec{};
+    bool isdir{};
+    const auto fpath = fix_home(path);
+    auto canon = std::filesystem::canonical(fpath, ec);
+    if (!ec) {
+        isdir = (std::filesystem::status(canon, ec).type() == std::filesystem::file_type::directory);
+    }
+
+    if (ec) {
+        /*
+         * Error getting the canonical path, default to the root directory.
+         */
+        if (_path.empty()) {
+            _path = "/";
+        }
+    } else {
+        /*
+         * Canonical path exists.
+         */
+        if (!isdir) {
+            canon = canon.parent_path();
+        }
+
+        if (_path.empty()) {
+            /*
+             * First time reset is called: Set the specified directory.
+             */
+            _path = canon;
+        } else {
+            /*
+             * This is not the first time reset is called.
+             */
+            if (path == "..") {
+                /*
+                 * Traverse the parent of the current path.
+                 */
+                _path = _path.parent_path();
+            } else {
+                /*
+                 * Traverse a new directory.
+                 */
+                _path = canon;
+            }
+        }
+    }
+
+    _entries.clear();
+    _nrefresh = 0;
+    refresh();
+}
+
+bool IDir::refresh()
+{
+    if (!time_to_refresh()) {
+        return false;
+    }
+
+    std::vector<Path> files{};
+    const bool want_dirs = (_etype & EntryType::Dir);
+    const bool want_files = (_etype & EntryType::File);
+
+    const auto flt = [this, &files, want_dirs, want_files](const Path& entry) {
+        std::error_code ec{};
+        if (want_dirs && std::filesystem::is_directory(entry, ec)) {
+            /* Add an ending slash to the entry name so the user knows it is a directory */
+            auto direntry = entry;
+            direntry /= "";
+            _entries.push_back(direntry);
+
+        } else if (!ec && want_files && std::filesystem::is_regular_file(entry, ec)) {
+            const auto filtered = filter(entry);
+            if (!filtered.empty()) {
+                files.push_back(filtered);
+            }
+        }
+
+        const size_t total = _entries.size() + files.size();
+        return (total < DIR_ENTRIES_LIMIT);
+    };
+
+    _entries.clear();
+    const auto& end = std::filesystem::end(std::filesystem::directory_iterator{});
+    std::filesystem::directory_iterator it{_path, std::filesystem::directory_options::skip_permission_denied};
+
+    for (; it != end; ++it) {
+        const auto& entry = it->path();
+        if (flt(entry) == false) {
+            break;
+        }
+    }
+
+    std::sort(_entries.begin(), _entries.end());
+    if (want_dirs && _entries.size() == 0) {
+        _entries.push_back(_path);
+    }
+
+    std::sort(files.begin(), files.end());
+    std::move(files.begin(), files.end(), std::back_inserter(_entries));
+    _entries.insert(_entries.begin(), _eempty);
+    _nrefresh = utils::now() + REFRESH_TIME;
+    return true;
+}
+
+inline bool IDir::time_to_refresh() const
+{
+    return (utils::now() >= _nrefresh);
+}
+
+IDirNav::IDirNav(EntryType etype, const std::string& eempty)
+    : IDir{etype, eempty}
+{
+}
+
+IDirNav::~IDirNav()
+{
+}
+
+bool IDirNav::refresh()
+{
+    if (!IDir::refresh()) {
+        return false;
+    }
+    _entries.insert(_entries.begin() + 1, ENTRY_BACK);
+    return true;
 }
 
 }

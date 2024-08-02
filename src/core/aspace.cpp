@@ -99,13 +99,13 @@ std::ostream& ASpace::dump(std::ostream& os) const
         const addr_t rend = rstart + _bsize - 1;
         const addr_t wend = wstart + _bsize - 1;
 
-        os << caio::to_string(astart) << "-" << caio::to_string(aend) << "    ";
+        os << utils::to_string(astart) << "-" << utils::to_string(aend) << "    ";
 
-        os << caio::to_string(rstart) << "-" << caio::to_string(rend) << " ";
+        os << utils::to_string(rstart) << "-" << utils::to_string(rend) << " ";
         os.width(25);
         os << rdev.first->label() << "  ";
 
-        os << caio::to_string(wstart) << "-" << caio::to_string(wend) << " ";
+        os << utils::to_string(wstart) << "-" << utils::to_string(wend) << " ";
         os.width(25);
         os << wdev.first->label() << "\n";
     }

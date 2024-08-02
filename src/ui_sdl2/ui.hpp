@@ -143,7 +143,7 @@ public:
     void audio_reset();
 
     /**
-     * Stop the driver.
+     * Stop the audio stream.
      * Once stopped in can be restarted using audio_reset().
      * @see audio_reset()
      */
@@ -178,9 +178,9 @@ public:
 
     /**
      * Get an audio buffer.
-     * This method must be called by an emulated system to get a buffer
-     * to be filled with generated audio samples; once the buffer is
-     * filled its dispatch() method must be called in order to deliver
+     * This method is called by an emulated audio system, it returns
+     * a buffer that must be filled with PCM audio samples; once the buffer
+     * is filled its dispatch() method must be called in order to deliver
      * it to the sound streaming subsystem (if the dispatch method is
      * not called the AudioBuffer's destructor will do it anyway).
      * @return An audio buffer.

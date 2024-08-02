@@ -79,7 +79,7 @@ void ZXSpectrum::autorun(std::string_view pname)
 
 void ZXSpectrum::start()
 {
-    log.info("Starting {} - {}\n{}\n", caio::full_version(), name(), to_string());
+    log.info("Starting {} - {}\n{}\n", full_version(), name(), to_string());
 
     /*
      * The emulator runs on its own thread.
@@ -187,7 +187,7 @@ void ZXSpectrum::attach_prg()
 
         reset(*snap);
 
-        _title = std::format("{} - {}", _conf.title, fs::basename(fname));
+        _title = std::format("{} - {}", _conf.title, fs::basename(fname).string());
     }
 }
 
@@ -210,7 +210,7 @@ void ZXSpectrum::create_devices()
 
     auto itape = fs::fix_home(_conf.itape);
     if (fs::exists(itape) && !fs::is_directory(itape)) {
-        _title = std::format("{} - {}", _conf.title, fs::basename(itape));
+        _title = std::format("{} - {}", _conf.title, fs::basename(itape).string());
     }
 }
 

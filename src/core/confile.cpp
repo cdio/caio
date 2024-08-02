@@ -22,30 +22,31 @@
 #include <regex>
 
 #include "utils.hpp"
+#include <iostream> //XXX
 
 namespace caio {
 namespace config {
 
-Confile::Confile(std::string_view fname)
+Confile::Confile(const fs::Path& fname)
     : _sections{}
 {
     load(fname);
 }
 
-void Confile::load(std::string_view fname)
+void Confile::load(const fs::Path& fname)
 {
     if (fname.empty()) {
         return;
     }
 
-    std::ifstream ifs{std::string{fname}};
+    std::ifstream ifs{fname};
     if (!ifs) {
-        throw IOError{"Can't open configuration file: {}: {}", fname, Error::to_string()};
+        throw IOError{"Can't open configuration file: {}: {}", fname.string(), Error::to_string()};
     }
 
     static const std::regex re_comment("^[ \t]*#.*$", std::regex::extended);
     static const std::regex re_section("^[ \t]*\\[[ \t]*([^[ \t\\]]+)[ \t]*\\].*$");
-    static const std::regex re_param("^[ \t]*([^ \t=]+)[ \t]*=[ \t]*([^ \t]*)[ \t]*$", std::regex::extended);
+    static const std::regex re_param("^[ \t]*([^ \t=]+)[ \t]*=[ \t]*(.*)[ \t]*$", std::regex::extended);
 
     std::smatch result{};
     std::string str{};
@@ -66,7 +67,7 @@ void Confile::load(std::string_view fname)
             /*
              * Section detected.
              */
-            auto sname = caio::tolow(result.str(1));
+            auto sname = utils::tolow(result.str(1));
             cursect = &_sections[sname];
             continue;
         }
@@ -75,7 +76,7 @@ void Confile::load(std::string_view fname)
             /*
              * Invalid entry.
              */
-            throw ConfigError{"{}: Invalid entry at line #{}: \"{}\"", fname, line, str};
+            throw ConfigError{"{}: Invalid entry at line #{}: \"{}\"", fname.string(), line, str};
         }
 
         /*
@@ -85,30 +86,29 @@ void Confile::load(std::string_view fname)
             /*
              * Key-value pair is not valid when a section is not defined (empty sections are not allowed).
              */
-            throw ConfigError{"{}: Entry without section at line #{}: \"{}\"", fname, line, str};
+            throw ConfigError{"{}: Entry without section at line #{}: \"{}\"", fname.string(), line, str};
         }
 
-        const auto key = caio::tolow(result.str(1));
-        const auto value = result[2];
-
+        const auto key = utils::tolow(result.str(1));
+        const auto value = result.str(2);
         (*cursect)[key] = value;
     }
 }
 
 Section& Confile::operator[](std::string_view sname)
 {
-    return _sections[caio::tolow(sname)];
+    return _sections[utils::tolow(sname)];
 }
 
 Section Confile::extract(std::string_view sname)
 {
-    auto nh = _sections.extract(caio::tolow(sname));
+    auto nh = _sections.extract(utils::tolow(sname));
     return (nh ? std::move(nh.mapped()) : Section{});
 }
 
 std::map<std::string, Section>::const_iterator Confile::find(std::string_view sname) const
 {
-    return _sections.find(caio::tolow(sname));
+    return _sections.find(utils::tolow(sname));
 }
 
 std::map<std::string, Section>::const_iterator Confile::end() const

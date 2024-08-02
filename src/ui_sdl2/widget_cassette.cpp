@@ -45,7 +45,7 @@ void Cassette::render(const ::SDL_Rect& dstrect)
 
     if (st.is_enabled && !st.is_idle) {
 
-        auto now = caio::now();
+        auto now = utils::now();
         auto elapsed = now - _start;
 
         if (elapsed >= 50'000) {

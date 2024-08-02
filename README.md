@@ -33,7 +33,7 @@ The [Sinclair ZX-80](https://en.wikipedia.org/wiki/ZX80) came with 4K ROM
 and 1K RAM. Soon after its introduction several RAMPACKs appeared, these
 extended the RAM up to 16K.<br>
 When the ZX-81 came out, its 8K ROM was also available for the ZX-80.<br>
-caio supports the original configuartion, the 16K RAM extension and
+caio supports the original configuration, the 16K RAM extension and
 the 8K ROM.<br>
 Tape files .O and .P are supported (read and write).
 

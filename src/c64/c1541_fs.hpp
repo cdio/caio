@@ -63,7 +63,7 @@ public:
     /**
      * @see C1541::attach()
      */
-    void attach(std::string_view path) override;
+    void attach(const fs::Path& path) override;
 
 private:
     /**

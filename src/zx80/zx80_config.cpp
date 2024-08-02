@@ -63,7 +63,29 @@ ZX80Config::ZX80Config(config::Section& sec)
       cassdir{sec[KEY_CASSDIR]},
       prgfile{sec[KEY_PRGFILE]}
 {
+    audio = false;
+    vjoy.enabled = false;
     title += " - Sinclair ZX-80";
+}
+
+bool ZX80Config::operator==(const ZX80Config& other) const
+{
+    return (static_cast<const Config&>(*this) == static_cast<const Config&>(other) &&
+       ram16 == other.ram16 &&
+       rom8 == other.rom8 &&
+       rvideo == other.rvideo &&
+       cassdir == other.cassdir &&
+       prgfile == other.prgfile);
+}
+
+void ZX80Config::to_section(config::Section& sec) const
+{
+    Config::to_section(sec);
+    sec[KEY_RAM_16K] = (ram16 ? "yes" : "no");
+    sec[KEY_ROM_8K] = (rom8 ? "yes" : "no");
+    sec[KEY_RVIDEO] = (rvideo ? "yes" : "no");
+    sec[KEY_CASSDIR] = cassdir;
+    sec[KEY_PRGFILE] = prgfile;
 }
 
 std::string ZX80Config::to_string() const

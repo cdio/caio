@@ -1122,7 +1122,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
      * Print address.
      */
     std::ostringstream hex{};
-    hex << caio::to_string(addr) << ":";
+    hex << utils::to_string(addr) << ":";
 
     /*
      * Print opcode.
@@ -1130,7 +1130,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
     bool multibyte{true};
     do {
         opcode = peek(addr++);
-        hex << " " << caio::to_string(opcode);
+        hex << " " << utils::to_string(opcode);
 
         ins = &iset[opcode];
         if (ins->type == ArgType::GW) {
@@ -1142,7 +1142,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
                     iset = ix_bit_instr_set;
                     oplo = peek(addr++);
                     has_oplo = true;
-                    hex << " " << caio::to_string(oplo);
+                    hex << " " << utils::to_string(oplo);
                 }
                 break;
             case I_IX:
@@ -1197,7 +1197,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
 
         if (!has_oplo) {
             oplo = peek(addr++);
-            hex << " " << caio::to_string(oplo);
+            hex << " " << utils::to_string(oplo);
         }
 
         switch (v) {
@@ -1209,15 +1209,15 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
              */
             switch (ins->type) {
             case ArgType::A8:
-                ops << caio::to_string(oplo);
+                ops << utils::to_string(oplo);
                 format = format.replace(pos, 1, ops.str());
                 break;
 
             case ArgType::A16:
                 ophi = peek(addr++);
                 operand = (static_cast<addr_t>(ophi) << 8) | oplo;
-                hex << " " << caio::to_string(ophi);
-                ops << caio::to_string(operand);
+                hex << " " << utils::to_string(ophi);
+                ops << utils::to_string(operand);
                 format = format.replace(pos, 1, ops.str());
                 break;
 
@@ -1245,11 +1245,11 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
             switch (ins->type) {
             case ArgType::A8:
             case ArgType::A8_Inv:
-                displ << sign << "$" << caio::to_string(oplo);
+                displ << sign << "$" << utils::to_string(oplo);
                 format.replace(pos, 1, displ.str());
                 break;
             case ArgType::A16:
-                displ << sign << "$" << caio::to_string(oplo);
+                displ << sign << "$" << utils::to_string(oplo);
                 format.replace(pos, 1, displ.str());
                 pos = format.find_first_of("*");
                 if (pos == std::string::npos) {
@@ -1259,7 +1259,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
                     /* NOTREACHED */
                 }
                 ophi = peek(addr++);
-                ops << caio::to_string(ophi);
+                ops << utils::to_string(ophi);
                 format = format.replace(pos, 1, ops.str());
                 break;
             default:
@@ -1275,7 +1275,7 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
              * The argument is an 8 bits relative address: The disassembled string must show the absolute address.
              */
             operand = static_cast<int8_t>(oplo) + addr;
-            ops << caio::to_string(operand);
+            ops << utils::to_string(operand);
             format = format.replace(pos, 1, ops.str());
             break;
         }

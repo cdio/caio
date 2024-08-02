@@ -41,7 +41,7 @@ SnapSNA::~SnapSNA()
 bool SnapSNA::seems_like(std::string_view fname)
 {
     auto fullpath = fs::fix_home(fname);
-    auto lowcase = caio::tolow(fname);
+    auto lowcase = utils::tolow(fname);
     return (fs::file_size(fullpath) == FILE_SIZE && lowcase.ends_with(FILE_EXTENSION));
 }
 

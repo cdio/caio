@@ -127,7 +127,7 @@ void CartEasyFlash::add_rom(size_t entry, const Crt::Chip& chip, const devptr_t&
         break;
 
     default:
-        throw_invalid_cartridge(entry, "Invalid load address ${}", caio::to_string(chip.addr));
+        throw_invalid_cartridge(entry, "Invalid load address ${}", utils::to_string(chip.addr));
 
     }
 

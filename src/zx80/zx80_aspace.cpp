@@ -310,15 +310,15 @@ std::ostream& ZX80ASpace::dump(std::ostream& os) const
         addr_t last = dev->size() - 1;
 
         /* Address range */
-        os << caio::to_string(addr) << "-" << caio::to_string<addr_t>(addr + last) << "    ";
+        os << utils::to_string(addr) << "-" << utils::to_string<addr_t>(addr + last) << "    ";
 
         /* Read maps */
-        os << caio::to_string<addr_t>(0) << "-" << caio::to_string(last) << " ";
+        os << utils::to_string<addr_t>(0) << "-" << utils::to_string(last) << " ";
         os.width(25);
         os << dev->label() << "  ";
 
         /* Write maps */
-        os << caio::to_string<addr_t>(0) << "-" << caio::to_string(last) << " ";
+        os << utils::to_string<addr_t>(0) << "-" << utils::to_string(last) << " ";
         os.width(25);
         os << dev->label() << "\n";
 
