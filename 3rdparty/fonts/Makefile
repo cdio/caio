@@ -30,7 +30,7 @@ FONT2C=		../imgui/font2c/font2c
 
 #CLEANFILES+=	${FONT_H}
 
-all debug: ${FONT_H}
+all debug install: ${FONT_H}
 
 ${FONT_H}: ${FONT2C} ${FONT_SRC}
 	${FONT2C} -base85 ${FONT_SRC} ${SYMBOL_NAME} > $@
