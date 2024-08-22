@@ -16,25 +16,20 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-MKDIR:=			${abspath ${dir ${lastword ${MAKEFILE_LIST}}}}
-OS:=			${shell uname -s}
-ARCH:=			${shell uname -m}
-ifeq (${ARCH}, x86_64)
-ARCH:=			amd64
-endif
-
-SYSDEP_MK:=		${MKDIR}/config.${OS}.mk
-
+MKDIR?=			${abspath ${dir ${lastword ${MAKEFILE_LIST}}}}
+OS?=			${shell uname -s}
+ARCH?=			${shell uname -m}
+SYSDEP_MK?=		${MKDIR}/config.${OS}.mk
 CWD:=			${abspath .}
 
 include ${SYSDEP_MK}
 
 CAT?=			cat
+CP?=			cp
 override CXX=		clang++
 CUT?=			cut
 CMAKE?=			cmake
 DIRNAME?=		dirname
-DPKG?=			dpkg
 DU?=			du
 ECHO?=			echo
 GIT?=			git
@@ -44,6 +39,7 @@ ID?=			id
 INSTALL?=		install
 override LD=		${CXX}
 LN?=			ln
+LNDIR?=			lndir
 override MKDEP=		${CXX}
 PERL?=			perl
 PKG_CONFIG?=		pkg-config
@@ -55,8 +51,8 @@ TOUCH?=			touch
 STRIP?=			strip
 UNAME?=			uname
 
-TOOLSDIR=		${abspath ${ROOT}}/3rdparty/tools
-TOOLS_BINDIR=		${TOOLSDIR}/bin
+TOOLS_DIR=		${abspath ${ROOT}}/3rdparty/tools
+TOOLS_BINDIR=		${TOOLS_DIR}/bin
 
 LIBDIR=			${abspath ${PREFIX}}/lib
 
@@ -101,17 +97,16 @@ MKDEP_FLAGS=		-MMD
 
 LN_FLAGS?=		-sf
 
-ifdef RELEASE
-VERSION=		${RELEASE:v%=%}
-else
-VERSION=		0.0.0
-endif
+LNDIR_FLAGS?=		-silent
+
+VERSION?=		${shell cat ${ROOT}/VERSION.txt}
 
 PREFIX?=		/opt/caio
 DST_BINDIR?=		${PREFIX}/bin
 DST_DATADIR?=		${PREFIX}/share/caio
 DST_SYSCONFDIR?=	${PREFIX}/etc/caio
 DST_HOMECONFDIR?=	${HOME}/.config/caio
+DST_DESKTOPDIR?=	${PREFIX}/share/applications
 
 OWNER:=			${shell ${ID} -u}
 GROUP:=			${shell ${ID} -g}

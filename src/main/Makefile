@@ -22,9 +22,22 @@ include ${ROOT}/mk/config.mk
 
 BIN=		caio
 CONFIG=		caio.conf
+ICON=		${ROOT}/src/icons/caio.png
 
 DST_BIN=	${DST_BINDIR}/${BIN}
 DST_CONFIG=	${DST_SYSCONFDIR}/${CONFIG}
+DST_ICON=	${DST_DATADIR}/icons/caio.png
+
+ifeq (${OS}, Darwin)
+DST_DESKTOP=
+else
+DST_DESKTOP=	${DST_DESKTOPDIR}/caio.desktop
+endif
+
+INSTALL_FILES=	${DST_BIN} \
+		${DST_CONFIG} \
+		${DST_ICON} \
+		${DST_DESKTOP}
 
 CXXSRCS=	configurator.cpp \
 		editor.cpp \
@@ -62,7 +75,7 @@ LDADD+=		${EXTRA_DEPS}
 
 include ${ROOT}/mk/bin.mk
 
-install: ${DST_BIN} ${DST_CONFIG} ${DST_README}
+install: ${INSTALL_FILES}
 
 ${DST_BIN}: ${BIN}
 	[ -d ${dir $@} ] || ${INSTALL} -d -m ${MODE_BINDIR} -o ${OWNER_BINDIR} -g ${GROUP_BINDIR} ${dir $@}
@@ -70,4 +83,26 @@ ${DST_BIN}: ${BIN}
 
 ${DST_CONFIG}: ${CONFIG}
 	[ -d ${dir $@} ] || ${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} ${dir $@}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${notdir $@} $@
+	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} $< $@
+
+${DST_ICON}: ${ICON}
+	[ -d ${dir $@} ] || ${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} ${dir $@}
+	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} $< $@
+
+ifneq (${OS}, Darwin)
+${DST_DESKTOP}:
+	[ -d ${dir $@} ] || ${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} ${dir $@}
+	${PRINTF} \
+	"[Desktop Entry]\n"\
+	"Version=1.0\n"\
+	"Type=Application\n"\
+	"Name=caio emulator\n"\
+	"Comment=8-bit Home Computers Emulator\n"\
+	"Exec=${DST_BIN}\n"\
+	"Icon=${DST_ICON}\n"\
+	"Terminal=false\n"\
+	"Categories=Game;\n"\
+	"StartupNotify=true\n"\
+	"Keywords=retro;retrogaming;retroprogramming;c64;cbm;commodore;sinclair;spectrum;zx;\n" > $@
+endif
+

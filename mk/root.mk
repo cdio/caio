@@ -16,25 +16,35 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
+ROOT=		${abspath .}
 
-#
-# RELEASE=	Required. Git branch or tag to build.
-#
-ROOT=		${abspath ..}
+DIRS=		3rdparty \
+		src \
+		data
 
-include ${ROOT}/mk/config.mk
+CLEANFILES+=	caio.app \
+		caio_*
 
-BIN_PKGNAME=	caio_${VERSION}_${ARCH}
-BIN_PKGFILE=	${BUILD_PREFIX}/${BIN_PKGNAME}.tgz
+CLEANDIRS=	${DIRS}
 
-BUILD_DIR=	${BUILD_PREFIX}/${BIN_PKGNAME}_tgz
+DISTCLEANDIRS=	${DIRS}
 
-.PHONY: bin-package
+.PHONY: distclean pacakge test dtest _test
 
-include ${ROOT}/mk/build.mk
+include ${ROOT}/mk/dir.mk
 
-bin-package: ${BIN_PKGFILE}
+package:
+	ROOT=${ROOT} PREFIX=${PREFIX} ${MAKE} ${MAKEARGS} -f ${ROOT}/mk/package.mk $@
 
-${BIN_PKGFILE}: ${BUILD_INSTALL_DONE}
-	${TAR} -zcf $@ -C ${BUILD_INSTALL_ROOT} .
+dtest: TARGET=debug
+dtest: _test
+
+test: TARGET=all
+test: _test
+
+_test:
+	${MAKE} ${MAKEARGS} -C 3rdparty/tests
+	${MAKE} ${MAKEARGS} -C src ${TARGET}
+	${MAKE} ${MAKEARGS} -C src/test ${TARGET}
+	${MAKE} ${MAKEARGS} -C src/test test
 

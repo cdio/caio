@@ -20,8 +20,7 @@ ROOT=		${abspath ../../..}
 
 include ${ROOT}/mk/config.mk
 
-BIN=		${BINDIR}/sjasm
-BINDIR?=	${abspath ..}/bin
+BIN=		${TOOLS_BINDIR}/sjasm
 
 BUILDIR=	build
 SRCBIN=		${BUILDIR}/sjasm

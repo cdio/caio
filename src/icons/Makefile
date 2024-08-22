@@ -20,6 +20,12 @@ ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
+# Application icon
+SRC_ICON=	caio.png
+DST_ICONDIR=	${DST_DATADIR}/icons
+DST_ICON=	${DST_ICONDIR}/caio.png
+
+# Internal icons (widgets)
 ICONS_PNG=	cassette_128x24.png \
 		floppy_128x2.png \
 		fullscreen_128x2.png \
@@ -38,9 +44,18 @@ CONVERT=	./png2cpp.sh
 
 .PHONY: all clean debug install
 
-all clean debug distclean install:
+all clean debug distclean:
 
 all: ${ALL}
 
+install: ${DST_ICON}
+
+${DST_ICON}: ${SRC_ICON} ${DST_ICONDIR}
+	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${SRC_ICON} $@
+
+${DST_ICONDIR}:
+	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
+
 %.hpp: %.png
 	${CONVERT} $< > $@
+

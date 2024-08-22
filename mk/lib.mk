@@ -20,7 +20,7 @@ CXXFLAGS+=
 
 CLEANFILES+=	${LIB}
 
-.PHONY:		_all all debug
+.PHONY:		_all all debug install
 
 all:
 	${MAKE} ${MAKEARGS} -j _all

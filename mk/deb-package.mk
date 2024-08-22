@@ -18,45 +18,50 @@
 #
 
 #
-# RELEASE=	Required. Git branch or tag to build.
+# Debian package.
 #
-ROOT=		${abspath ..}
+PKGNAME=		caio_${VERSION}-${ARCH}
+PKGFILE=		${ROOT}/${PKGNAME}.deb
 
-include ${ROOT}/mk/config.mk
+FAKE_INSTALL_DIR=	${ROOT}/${PKGNAME}_deb
+FAKE_PREFIX=		${FAKE_INSTALL_DIR}/usr
+DEB_CONTROL=		${FAKE_INSTALL_DIR}/DEBIAN/control
+DEB_SIZE=		${shell ${DU} --exclude ${DEB_CONTROL} -sk ${FAKE_INSTALL_DIR} | ${CUT} -f 1}
 
-DEB_PKGNAME=	caio_${VERSION}_${ARCH}
-DEB_PKGFILE=	${BUILD_PREFIX}/${DEB_PKGNAME}.deb
+DPKG?=			dpkg
 
-BUILD_DIR=	${BUILD_PREFIX}/${DEB_PKGNAME}_deb
+.PHONY: all bundle install package
 
-DEB_ROOT=	${BUILD_INSTALL_ROOT}
-DEB_CONTROL=	${DEB_ROOT}/DEBIAN/control
-DEB_SIZE=	${shell ${DU} --exclude ${DEB_CONTROL} -sk ${DEB_ROOT} | ${CUT} -f 1}
+package: ${PKGFILE}
 
-.PHONY: deb-package
+${PKGFILE}: bundle
+	${DPKG} -b ${FAKE_INSTALL_DIR} $@
 
-include ${ROOT}/mk/build.mk
+bundle: ${DEB_CONTROL}
 
-deb-package: PREFIX=/usr
-deb-package: MAKEARGS+="DST_SYSCONFDIR=${DEB_ROOT}/etc/caio"
-deb-package: MAKEARGS+="EXTRA_CPPFLAGS=-DD_SYSCONFDIR='\"/etc/caio\"'"
-deb-package: ${DEB_PKGFILE}
-
-${DEB_PKGFILE}: ${DEB_CONTROL}
-	${DPKG} -b ${DEB_ROOT} $@
-
-${DEB_CONTROL}: ${BUILD_INSTALL_DONE}
-	[ -d ${dir $@} ] || ${INSTALL} -d ${dir $@}
+${DEB_CONTROL}: install
+	[ -d ${dir $@} ] || ${INSTALL} -d -m 0755 ${dir $@}
 	${PRINTF} \
 	"Package: caio\n"\
 	"Version: ${VERSION}\n"\
 	"Architecture: ${ARCH}\n"\
 	"Priority: optional\n"\
 	"Essential: no\n"\
-	"Maintainer: caio developers <>\n"\
+	"Maintainer: caio developers\n"\
 	"Installed-Size: ${DEB_SIZE}\n"\
 	"Depends: libsdl2-2.0-0 (>= 2.0.0), libsdl2-image-2.0-0 (>= 2.0.0), libstdc++6 (>= 10.3.0)\n"\
 	"Replaces: caio\n"\
 	"Homepage: http://github.com/cdio/caio\n"\
-	"Description: 8 bit Home Computers Emulator.\n" > $@
+	"Description: 8-bit Home Computers Emulator.\n" > $@
+
+install: all
+	PREFIX=${FAKE_PREFIX} \
+	VERSION=${VERSION} \
+	${MAKE} ${MAKEARGS} $@
+
+all:
+	EXTRA_CPPFLAGS=-DD_SYSCONFDIR='\"/etc/caio\"' \
+	PREFIX="/usr" \
+	VERSION=${VERSION} \
+	${MAKE} ${MAKEARGS} $@
 

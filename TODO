@@ -1,6 +1,7 @@
+- mk:       macOS universal binary (arm + x86)
 - 3rdparty: SDL_Image as subtree
+- 3rdparty: SDL2 as subtree
 - 3rdparty: Remove pkg_config from dependencies, use sdl2-config
-- mk:       Cross compile for macos-x86 (Apple does not support its own products)
 - UI:       Avoid interference between ALT/CTRL+xx and OS
 - UI:       Joystick label = gamepad name
 - NES test: The Young Indiana Jones Chronicles and Burai Fighter
@@ -23,8 +24,7 @@
 - c64:      C64 EasyFlash cartridge: Turrican2 continue game?
 - c64:      Zaxxon cartridge: Wrong chargen
 - c64:      Ms-Pacman
-- misc:     Release/Snapshots packages: brew, rpm, deb, freebsd port
-- misc:     std::string_view with libstdc++
+- mk:       Release/Snapshot packages: brew, rpm, deb, freebsd port
 - misc:     Use fstream::native_handle() (C++26)
 - Spectrum: Distord audio signal
 - Spectrum: Test SNA format

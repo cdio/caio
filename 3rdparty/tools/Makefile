@@ -21,7 +21,8 @@ ROOT=		${abspath ../..}
 include ${ROOT}/mk/config.mk
 
 DIRS+=		dasm \
-		sjasm
+		sjasm \
+		lndir
 
 CLEANDIRS=	${DIRS}
 

@@ -16,17 +16,9 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-NPROC:=			${shell sysctl -n hw.ncpu}
-
 EXTRA_3RDPARTY_DIRS+=
-
 SYSDEP_CPPFLAGS+=	-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
-
 UI_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sdl2 sdl2_image}
-
 UI_LDADD+=		${shell ${PKG_CONFIG} --libs sdl2 sdl2_image}
-
-SHLIB_EXT=		dylib
-
 LIB_INCLUDE_BEGIN=	-Wl,-all_load
 LIB_INCLUDE_END=

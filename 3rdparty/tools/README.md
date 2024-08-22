@@ -19,3 +19,12 @@ Website - http://home.wanadoo.nl/smastijn/sjasm.html
 
 Repository (unofficial fork) - https://github.com/samsaga2/sjasm
 
+
+## lndir - create a shadow directory of symbolic links to another directory tree
+
+Originally this tool came along with the X11 system. Today most unix variants
+intergrate it into the base system.
+Unfortunatelly most distributions of Linux (if not all) do not include it
+in the base system.
+
+Repository: https://gitlab.freedesktop.org/xorg/util/lndir

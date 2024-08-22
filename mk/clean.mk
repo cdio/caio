@@ -20,7 +20,7 @@
 
 clean:
 ifdef CLEANFILES
-	-${RM} -r ${CLEANFILES}
+	-${RM} -rf ${CLEANFILES}
 endif
 ifdef CLEANDIRS
 	for d in ${CLEANDIRS}; do ${MAKE} ${MAKEARGS} -C$$d clean; done

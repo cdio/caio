@@ -18,21 +18,21 @@
 #
 include ${ROOT}/mk/config.mk
 
-.PHONY: all debug %-package
+ifeq (${VERSION}, 0.0.0)
+VERSION=	${shell date "+%Y%m%d"}-snapshot
+endif
 
-all debug install:
+ifeq (${OS}, Darwin)
+include ${ROOT}/mk/dmg-package.mk
 
-ifdef RELEASE
-%-package: package
-	${MAKE} ${MAKEARGS} -f ${ROOT}/mk/$@.mk $@
+else ifeq (${OS}, Linux)
+include ${ROOT}/mk/deb-package.mk
 
 else
-%-package:
+package:
 	@echo
-	@echo "==> Please specify build RELEASE=<branch>"
+	@echo "No package file defined for Operating System \"${OS}\""
 	@echo
 	@exit 1
 
 endif
-
-include ${ROOT}/mk/build.mk

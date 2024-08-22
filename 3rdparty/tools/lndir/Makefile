@@ -16,16 +16,19 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-
-#
-# RELEASE=	Required. Git branch or tag to build.
-#
-ROOT=		${abspath ..}
+ROOT=		${abspath ../../..}
 
 include ${ROOT}/mk/config.mk
 
-.PHONY: src-package
+BIN=		${TOOLS_BINDIR}/lndir
+SRCBIN=		lndir.c
 
-include ${ROOT}/mk/build.mk
+.PHONY: all debug install
 
-src-package: package
+all debug install: ${BIN}
+
+${BIN}: ${SRCBIN}
+	[ -d ${dir $@} ] || ${INSTALL} -m ${MODE_BINDIR} -d ${dir $@}
+	${CC} ${CPPFLAGS} ${CFLAGS} -o $@ $<
+
+include ${ROOT}/mk/clean.mk

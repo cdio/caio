@@ -18,31 +18,58 @@
 #
 ROOT=		${abspath .}
 
-DIRS=		3rdparty \
-		src \
-		data
+include ${ROOT}/mk/config.mk
 
-CLEANDIRS=	${DIRS}
+DEBUG?=
 
-DISTCLEANDIRS=	${DIRS}
+BUILD_DIR=	${ROOT}/build
 
-DISTCLEANFILES=	build
+ifeq (${DEBUG}, yes)
+BUILD_ROOT=	${BUILD_DIR}/${OS}_${ARCH}_debug
+else
+BUILD_ROOT=	${BUILD_DIR}/${OS}_${ARCH}
+endif
 
-.PHONY: distclean %-package test dtest _test
+LNDIRS=		3rdparty \
+		data \
+		mk \
+		src
 
-include ${ROOT}/mk/dir.mk
+DST_LNDIRS=	${LNDIRS:%=${BUILD_ROOT}/%}
+DST_MAKEFILE=	${BUILD_ROOT}/Makefile
+DST_VERSION=	${BUILD_ROOT}/VERSION.txt
 
-%-package:
-	${MAKE} ${MAKEARGS} ROOT=${ROOT} -f mk/package.mk $@
+DISTCLEANFILES=	${BUILD_DIR}
 
-dtest: TARGET=debug
-dtest: _test
+.PHONY: all build clean debug distclean install package ${DST_LNDIRS}
 
-test: TARGET=all
-test: _test
+all install clean package: build
+	${MAKE} ${MAKEARGS} -C ${BUILD_ROOT} $@
 
-_test:
-	${MAKE} ${MAKEARGS} -C 3rdparty/tests
-	${MAKE} ${MAKEARGS} -C src ${TARGET}
-	${MAKE} ${MAKEARGS} -C src/test ${TARGET}
-	${MAKE} ${MAKEARGS} -C src/test test
+debug:
+	${MAKE} ${MAKEARGS} DEBUG=yes all
+
+build: ${DST_LNDIRS} ${DST_MAKEFILE} ${DST_VERSION}
+
+${DST_MAKEFILE}:
+	${LN} ${LN_FLAGS} ${ROOT}/mk/root.mk $@
+
+${DST_VERSION}:
+	${LN} ${LN_FLAGS} ${ROOT}/${notdir $@} $@
+
+# Linux lacks lndir(1)
+ifeq (${OS}, Linux)
+${LNDIR}:
+	${MAKE} ${MAKEARGS} -C 3rdparty/tools/lndir install
+
+${DST_LNDIRS}: ${LNDIR}
+else
+${DST_LNDIRS}:
+endif
+	${INSTALL} -d -m 0755 $@
+	srcdir=`echo $@ | ${SED} -e 's,^${BUILD_ROOT},${ROOT},'`; ${LNDIR} ${LNDIR_FLAGS} $$srcdir $@
+
+distclean:
+	${RM} -rf ${DISTCLEANFILES}
+	${MAKE} ${MAKEARGS} -C ${ROOT}/3rdparty distclean
+

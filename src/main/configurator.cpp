@@ -281,6 +281,10 @@ void ConfiguratorApp::run_machine()
         return;
     }
 
+    ::close(STDOUT_FILENO);
+    ::close(STDIN_FILENO);
+    ::close(STDERR_FILENO);
+
     const auto& cfile = _configs[_centry].second;
     config::Confile cf{cfile};
     auto& sec = cf[SEC_NAME];
@@ -306,6 +310,8 @@ void ConfiguratorApp::run_machine()
             env_home.c_str(),
             nullptr
         };
+
+        ::execve(argv[0], const_cast<char**>(argv), const_cast<char**>(envp));
 #else
         const char* display = std::getenv("DISPLAY");
         if (display == NULL || *display == '\0') {
@@ -317,11 +323,9 @@ void ConfiguratorApp::run_machine()
             env_display.c_str(),
             nullptr
         };
+
+        ::execvpe(argv[0], const_cast<char**>(argv), const_cast<char**>(envp));
 #endif
-        ::close(STDOUT_FILENO);
-        ::close(STDIN_FILENO);
-        ::close(STDERR_FILENO);
-        ::execve(argv[0], const_cast<char**>(argv), const_cast<char**>(envp));
     }
 
     ::exit(EXIT_FAILURE);
