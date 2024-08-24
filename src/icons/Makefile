@@ -20,13 +20,9 @@ ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
-# Application icon
-SRC_ICON=	caio.png
-DST_ICONDIR=	${DST_DATADIR}/icons
-DST_ICON=	${DST_ICONDIR}/caio.png
+FONT_SRC=	DejaVuSansMNerdFontMono_Regular_stripped.ttf
 
-# Internal icons (widgets)
-ICONS_PNG=	cassette_128x24.png \
+ICONS_SRC=	cassette_128x24.png \
 		floppy_128x2.png \
 		fullscreen_128x2.png \
 		gamepad_128x3.png \
@@ -34,28 +30,30 @@ ICONS_PNG=	cassette_128x24.png \
 		reset_128.png \
 		volume_128x21.png
 
-ICONS_HPP=	${ICONS_PNG:%.png=%.hpp}
+FONT_HPP=	${FONT_SRC:%.ttf=%.hpp}
+ICONS_HPP=	${ICONS_SRC:%.png=%.hpp}
 
-ALL=		${ICONS_HPP}
+ALL=		${FONT_HPP} \
+		${ICONS_HPP}
 
-CONVERT=	./png2cpp.sh
+PNG2CPP=	./png2cpp.sh
+TTF2CPP=	${ROOT}/3rdparty/imgui/font2c/font2c
 
-.SUFFIXES=	.png .hpp
+.SUFFIXES=	.hpp .png .ttf
 
 .PHONY: all clean debug install
 
 all clean debug distclean:
 
-all: ${ALL}
-
-install: ${DST_ICON}
-
-${DST_ICON}: ${SRC_ICON} ${DST_ICONDIR}
-	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} ${SRC_ICON} $@
-
-${DST_ICONDIR}:
-	${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} $@
+all debug install: ${ALL}
 
 %.hpp: %.png
-	${CONVERT} $< > $@
+	${PNG2CPP} $< > $@
 
+%.hpp: %.ttf ${TTF2CPP}
+	${TTF2CPP} -base85 $< ${@:%.hpp=%} > $@
+
+${TTF2CPP}:
+	${MAKE} ${MAKEARGS} -j -C ${dir $@}
+
+include ${ROOT}/mk/clean.mk

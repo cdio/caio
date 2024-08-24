@@ -121,13 +121,6 @@ protected:
     virtual void render_directories(config::Config& cfg);
 
     /**
-      * Render the logging parameters and let the user edit them.
-      * @param cfg Generic configuration.
-      * @see generic_config()
-      */
-    virtual void render_logging(config::Config& cfg);
-
-    /**
      * Render the virtual joystick parameters and let the user edit them.
      */
     virtual void render_appearance(config::Config& cfg);

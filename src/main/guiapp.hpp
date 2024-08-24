@@ -37,7 +37,7 @@ namespace sdl2 {
  */
 class GuiApp : public Gui {
 public:
-    constexpr static const char* CONFDIR            = D_HOMECONFDIR;
+    constexpr static const char* USER_CONFDIR       = config::HOME_CONFDIR;
     constexpr static const char* INIFILE            = "caio.ini";
     constexpr static const int64_t FPS_FAST         = 20;
     constexpr static const int64_t FPS_SLOW         = 3;

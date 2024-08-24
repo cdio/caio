@@ -25,6 +25,9 @@ namespace caio {
 namespace ui {
 namespace sdl2 {
 
+constexpr static const uint32_t UNI32_LOCK_CLOSED = 0x0000F456;
+constexpr static const char* UNI_LOCK_CLOSED      = "\U0000F456";
+
 using Gui = dearimgui::Gui;
 
 }

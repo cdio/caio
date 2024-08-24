@@ -24,6 +24,7 @@ CWD:=			${abspath .}
 
 include ${SYSDEP_MK}
 
+AWK?=			awk
 CAT?=			cat
 CP?=			cp
 override CXX=		clang++
@@ -45,10 +46,12 @@ PERL?=			perl
 PKG_CONFIG?=		pkg-config
 PRINTF?=		printf
 RM?=			rm
+SDL2_CONFIG?=		sdl2-config
 SED?=			sed
 TAR?=			tar
 TOUCH?=			touch
 STRIP?=			strip
+SUDO?=			sudo
 UNAME?=			uname
 
 TOOLS_DIR=		${abspath ${ROOT}}/3rdparty/tools
@@ -70,12 +73,11 @@ CPPFLAGS+=		-I${CWD} \
 			-I${ROOT}/3rdparty/imgui \
 			-I${ROOT}/3rdparty/sha2
 
-CXXFLAGS+=		${SYSDEP_CXXFLAGS}
-
-CXXFLAGS+=		-Wall \
+CXXFLAGS+=		${UI_CXXFLAGS} \
+			${SYSDEP_CXXFLAGS} \
+			-std=c++20 \
+			-Wall \
 			-Werror
-
-CXXFLAGS+=		-std=c++20
 
 ifeq (${DEBUG}, yes)
 CPPFLAGS+=		-DD_DEBUG
@@ -84,14 +86,12 @@ CXXFLAGS+=		-O0 \
 			-fstandalone-debug
 else
 CXXFLAGS+=		-O3
-LDFLAGS+=
 endif
-
-CXXFLAGS+=		${UI_CXXFLAGS}
 
 ARFLAGS=		crs
 
 LDFLAGS?=
+LDFLAGS+=		${SYSDEP_LDFLAGS}
 
 MKDEP_FLAGS=		-MMD
 

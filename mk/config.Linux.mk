@@ -21,10 +21,16 @@ ARCH=			amd64
 endif
 
 LNDIR=			${TOOLS_BINDIR}/lndir
-LNDIR_FLAGS=
+
 EXTRA_3RDPARTY_DIRS+=
+
 SYSDEP_CPPFLAGS+=
-UI_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sdl2 SDL2_image}
-UI_LDADD+=		${shell ${PKG_CONFIG} --libs sdl2 SDL2_image}
+
 LIB_INCLUDE_BEGIN=	-Wl,--whole-archive
 LIB_INCLUDE_END=	-Wl,--no-whole-archive
+
+UI_CXXFLAGS+=		-I${ROOT}/3rdparty/sdl_image/SDL_image.subtree/include
+UI_CXXFLAGS+=		${shell ${SDL2_CONFIG} --cflags}
+
+UI_LDADD+=		${ROOT}/3rdparty/sdl_image/SDL_image/libSDL2_image.a
+UI_LDADD+=		${shell ${SDL2_CONFIG} --libs}

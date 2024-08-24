@@ -6,18 +6,21 @@
 
 External dependencies:
 * [clang-15.0](https://clang.llvm.org) or later
-* [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config)
+* [cmake](https://cmake.org/)
 * [SDL2](https://libsdl.org)
 
 ```
-    sudo apt install clang pkg-config libsdl2-dev libsdl2-image-dev
+sudo apt update && sudo apt install clang cmake libsdl2-dev
+```
+
+Compile and install:
+```
+make PREFIX=/usr/local
 ```
 ```
-    make PREFIX=/usr/local
+sudo make PREFIX=/usr/local install
 ```
-```
-    sudo make PREFIX=/usr/local install
-```
+
 The default `PREFIX` is `/opt/caio`.
 
 ### macOS
@@ -26,25 +29,52 @@ External dependencies:
 * [xcode](https://developer.apple.com/xcode)
 * xcode command line tools
 * [brew](https://brew.sh)
-* [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config)
+* [cmake](https://cmake.org/)
 * [SDL2](https://libsdl.org)
 
 To install xcode, xcode command line tools, and brew follow the instructions
-[here](https://developer.apple.com/xcode) and [here](https://brew.sh).
+[here](https://developer.apple.com/xcode) and [here](https://brew.sh), then:
 
 ```
-   xcode-select --install
+xcode-select --install
 ```
 ```
-   brew install pkg-config sdl2 sdl2_image
+brew update && brew install cmake sdl2
 ```
-Once these packages are installed and updated:
+
+Compile and install:
 
 ```
-    make PREFIX=/usr/local
+make PREFIX=/usr/local
 ```
 ```
-    sudo make PREFIX=/usr/local install
+sudo make PREFIX=/usr/local install
 ```
+
 The default `PREFIX` is `/opt/caio`.
 
+
+## Binary Packages
+
+### Linux
+
+Install the external dependencies specified in the previous section and
+run the following command to generate a debian package:
+
+```
+make package
+```
+
+The previous command could ask for the root password during the generation
+of the actual package.
+
+### macOS
+
+Install the external dependencies specified in the previous section and
+run the following command to generate dmg and pkg packages:
+
+```
+make package
+```
+
+Note that the generated packages are not signed.

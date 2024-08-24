@@ -102,7 +102,32 @@ GuiApp::GuiApp(const std::string& title)
 
     ::SDL_SetWindowIcon(_window.get(), _icon.get());
 
-    Gui::init(inifile(), Gui::FONT_SCALE, _window.get(), _renderer.get());
+    /*
+     * Widget Toolkit initialization.
+     */
+    static const auto font_ranges = []() -> std::span<const uint32_t> {
+        static const uint32_t ranges[] = {
+            0x00000020,         0x000000FF,         /* Latin-1 characters   */
+            UNI32_LOCK_CLOSED,  UNI32_LOCK_CLOSED,
+            0
+        };
+        return ranges;
+    };
+
+    static const auto font_sizes = []() -> std::span<const float> {
+        static const float sizes[] = {
+            10.0f, 11.0f, 12.0f, 14.0f, 16.0f, 18.0f, 21.0f, 24.0f, 26.0f, 28.0f, 32.0f
+        };
+        return sizes;
+    };
+
+    static const FontParams font_params{
+        .scale  = Gui::FONT_SCALE,
+        .sizes  = font_sizes,
+        .ranges = font_ranges
+    };
+
+    Gui::init(inifile(), _window.get(), _renderer.get(), font_params);
 }
 
 GuiApp::~GuiApp()
@@ -120,12 +145,14 @@ int GuiApp::run()
     auto prev_term = std::signal(SIGTERM, signal_handler);
     auto prev_quit = std::signal(SIGQUIT, signal_handler);
     auto prev_chld = std::signal(SIGCHLD, signal_handler);
-    if (prev_term == SIG_ERR || prev_quit == SIG_ERR || prev_chld == SIG_ERR) {
+    auto prev_pipe = std::signal(SIGPIPE, SIG_IGN);
+    if (prev_term == SIG_ERR || prev_quit == SIG_ERR || prev_chld == SIG_ERR || prev_pipe == SIG_ERR) {
         throw Error{"Can't set signal handler: {}\n", Error::to_string()};
     }
 
     event_loop();
 
+    std::signal(SIGPIPE, prev_pipe);
     std::signal(SIGCHLD, prev_chld);
     std::signal(SIGQUIT, prev_quit);
     std::signal(SIGTERM, prev_term);
@@ -167,11 +194,11 @@ void GuiApp::event_loop()
 #ifdef __APPLE__
                 _guikey = (event.key.keysym.mod & KMOD_GUI);
 #else
-                _guikey = (event.key.keysym.mod & KMOD_ALT);
+                _guikey = (event.key.keysym.mod & KMOD_CTRL);
 #endif
                 if (_guikey) {
                     /*
-                     * Handle ALT-'+' and ALT-'-'
+                     * Handle CTRL-'+' and CTRL-'-'
                      */
                     switch (event.key.keysym.sym) {
                     case SDLK_EQUALS:
@@ -210,7 +237,7 @@ void GuiApp::event_loop()
 
         /*
          * Immediate mode GUIs are very CPU consuming, minimize
-         * it with a varying frame rate based on the user activity.
+         * it with a varying frame rate based on user activity.
          */
         if (activity_counter > 0) {
             activity_counter -= FRAME_TIME_FAST;
@@ -230,7 +257,7 @@ void GuiApp::render_screen()
 
 const std::string& GuiApp::confdir()
 {
-    static std::string cdir = fs::fix_home(CONFDIR);
+    static std::string cdir = fs::fix_home(USER_CONFDIR);
     return cdir;
 }
 

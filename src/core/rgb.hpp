@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "endian.hpp"
+#include "fs.hpp"
 #include "types.hpp"
 
 namespace caio {
@@ -157,14 +158,14 @@ public:
      * @param fname File name.
      * @exception IOError
      */
-    void load(std::string_view fname);
+    void load(const fs::Path& fname);
 
     /**
      * Save this RGBA table to file.
      * @param fname File name.
      * @exception IOError
      */
-    void save(std::string_view fname);
+    void save(const fs::Path& fname);
 };
 
 /**

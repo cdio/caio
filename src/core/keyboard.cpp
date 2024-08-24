@@ -175,7 +175,7 @@ std::vector<std::string> key_names()
     return knames;
 }
 
-void Keyboard::load(std::string_view fname)
+void Keyboard::load(const fs::Path& fname)
 {
     static const std::regex re_comment{"^[ \t]*#.*$", std::regex::extended};
     static const std::regex re_line{"^[ \t]*([^ \t]+)[ \t]+(SHIFT)?[ \t]*(ALTGR)?[ \t]*([^ \t]+)[ \t]*(SHIFT)?[ \t]*$",
@@ -183,10 +183,9 @@ void Keyboard::load(std::string_view fname)
 
     clear_key_map();
 
-    //FIXME stdc++ not there yet std::ifstream is{fname, std::ios::binary | std::ios::in};
-    std::ifstream is{std::string{fname}, std::ios::binary | std::ios::in};
+    std::ifstream is{fname, std::ios::binary | std::ios::in};
     if (!is) {
-        throw IOError{"Can't open: {}: {}", fname, Error::to_string()};
+        throw IOError{"Can't open: {}: {}", fname.string(), Error::to_string()};
     }
 
     std::string line{};
@@ -219,7 +218,7 @@ void Keyboard::load(std::string_view fname)
             add_key_map(key_name, key_shift, key_altgr, impl_name, impl_shift);
 
         } catch (const InvalidArgument& err) {
-            throw InvalidArgument{"{}: Invalid entry at line #{}: \"{}\"", fname, lineno,
+            throw InvalidArgument{"{}: Invalid entry at line #{}: \"{}\"", fname.string(), lineno,
                 (err.what() == nullptr || *err.what() == '\0' ? line : err.what())};
         }
     }

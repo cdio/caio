@@ -42,4 +42,6 @@ INCS=		imconfig.h \
 		imgui_impl_sdlrenderer2.h \
 		imgui_stdlib.h
 
+CPPFLAGS+=	-DIMGUI_USE_WCHAR32
+
 include ${ROOT}/mk/lib.mk

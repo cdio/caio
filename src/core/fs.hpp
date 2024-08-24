@@ -18,13 +18,15 @@
  */
 #pragma once
 
+#include <unistd.h>
+
 #include <cstdint>
 #include <filesystem>
 #include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <span>
-#include <string_view>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -56,6 +58,26 @@ Path home();
  * @return The fixed path.
  */
 Path fix_home(const Path& path);
+
+/**
+ * Get the executable file full path.
+ * @return The executable file full path.
+ */
+Path exec_path();
+
+/**
+ * Get the executable file directory.
+ * @return The executable file directory.
+ * @see exec_path()
+ */
+Path exec_directory();
+
+/**
+ * Get the executable file name.
+ * @return The executable file name.
+ * @see exec_path()
+ */
+Path exec_filename();
 
 /**
  * std::filesystem::exists() wrapper.
@@ -99,11 +121,9 @@ static inline std::uintmax_t file_size(const Path& path)
  * the content of the HOME environment variable.
  * @param fname Name of the file to search;
  * @param spath Search paths (used only if the file name does not contain a directory);
- * @param cwd   If true (and fname does not contain a directory) look for the file in the current working directory,
- *              if it is not found there then try the search paths.
  * @return The existing file name; an empty path if the file is not found.
  */
-Path search(const Path& fname, const std::initializer_list<const Path>& spath = {}, bool cwd = false);
+Path search(const Path& fname, const std::initializer_list<const Path>& spath = {});
 
 /**
  * std::filesystem::path::filename() wrapper.
@@ -138,12 +158,9 @@ void concat(const Path& dst, const Path& src);
  * std::filesystem::remove() wrapper.
  * @param fname File remove.
  * @return True on success; false on error.
+ * @exception IOError
  */
-static inline bool unlink(const Path& fname)
-{
-    std::error_code ec{};
-    return std::filesystem::remove(fname, ec);
-}
+void unlink(const Path& fname);
 
 /**
  * Match a file.
@@ -164,7 +181,7 @@ bool match(const Path& path, const Path& pattern, bool icase = MATCH_CASE_SENSIT
  * @param icase    MATCH_CASE_INSENSITIVE or MATCH_CASE_SENSITIVE;
  * @param callback User defined callback (return false to stop directory traversing).
  * @return False if the callback stopped the traversal; true otherwise.
- * @see match(std::string_view, std::string_view)
+ * @see match(const Path&, const Path&, bool)
  * @see MATCH_CASE_INSENSITIVE
  * @see MATCH_CASE_SENSITIVE
  */
@@ -178,8 +195,8 @@ bool directory(const Path& path, const Path& pattern, bool icase,
  * @param icase   MATCH_CASE_INSENSITIVE or MATCH_CASE_SENSITIVE;
  * @param limit   Maximum number of entries (0 means no limits; default is DIR_ENTRIES_LIMIT).
  * @return The entries that match the specified pattern plus their size on disk.
- * @see directory(std::string_view, std::string_view, const std::function<void(std::string_view, uint64_t)>&)
- * @see match(cstd::string_view, std::string_view)
+ * @see directory(const Path&, const Path&, const std::function<void(const Path&, uint64_t)>&)
+ * @see match(const Path&, const Path&, bool)
  * @see DIR_ENTRIES_LIMIT
  * @see MATCH_CASE_INSENSITIVE
  * @see MATCH_CASE_SENSITIVE
@@ -193,6 +210,7 @@ class IDir {
 public:
     constexpr static const uint64_t REFRESH_TIME = 1'000'000; /* us */
     constexpr static const char* ENTRY_BACK      = "..";
+    constexpr static const size_t MAX_DIRS       = 2000;
 
     using FilterCb = std::function<Path(const Path&)>;
 
@@ -205,10 +223,12 @@ public:
     /**
      * Initialise this interactive directory traverser.
      * @param etype  Entry type to consider;
-     * @param eempty Empty entry.
+     * @param eempty Empty entry;
+     * @param elimit Directory entries limit (0 means not limit).
      * @see EntryType
+     * @see MAX_DIRS
      */
-    IDir(EntryType etype, const std::string& eempty);
+    IDir(EntryType etype, const std::string& eempty, size_t limit = MAX_DIRS);
 
     virtual ~IDir();
 
@@ -298,6 +318,7 @@ protected:
     fs::Path                _path{};
     std::vector<fs::Path>   _entries{};
     FilterCb                _efilter{};
+    size_t                  _elimit{};
 };
 
 /**
@@ -308,10 +329,12 @@ public:
     /**
      * Initialise this interactive directory traverser.
      * @param etype  Entry type to consider;
-     * @param eempty Empty entry.
+     * @param eempty Empty entry;
+     * @param elimit Directory entries limit (0 means not limit).
      * @see IDir
+     * @see MAX_DIRS
      */
-    IDirNav(EntryType etype, const std::string& eempty);
+    IDirNav(EntryType etype, const std::string& eempty, size_t elimit = MAX_DIRS);
 
     virtual ~IDirNav();
 
@@ -324,8 +347,8 @@ public:
  * @param maxsiz Maximum number of bytes to read (0 means LOAD_MAXSIZ).
  * @return A buffer with the contents of the file.
  * @exception IOError
- * @see load(std::istream&)
- * @see save(std::string_view, std::span<const uint8_t>, std::ios_base::openmode)
+ * @see load(std::istream&, size_t)
+ * @see save(const Path&, std::span<const uint8_t>, std::ios_base::openmode)
  * @see save(std::ostream&, std::span<const uint8_t>)
  * @see LOAD_MAXSIZ
  * @see buffer_t
@@ -338,8 +361,8 @@ buffer_t load(const Path& fname, size_t maxsiz = 0);
  * @param maxsiz Maximum number of bytes to read (0 means LOAD_MAXSIZ).
  * @return A buffer with the data read from the input stream.
  * @exception IOError
- * @see load(std::string_view)
- * @see save(std::string_view, std::span<const uint8_t>&, std::ios_base::openmode)
+ * @see load(const Path&, size_t)
+ * @see save(const Path&, std::span<const uint8_t>, std::ios_base::openmode)
  * @see save(std::ostream&, std::span<const uint8_t>&)
  */
 buffer_t load(std::istream& is, size_t maxsiz = 0);
@@ -350,8 +373,8 @@ buffer_t load(std::istream& is, size_t maxsiz = 0);
  * @param buf   Buffer to save;
  * @param mode  Open mode (by default, if the file exists it is truncated).
  * @exception IOError
- * @see load(std::string_view)
- * @see load(std::istream&)
+ * @see load(const Path&, size_t);
+ * @see load(std::istream&, size_t)
  * @see save(std::ostream&, std::span<const uint8_t>)
  */
 void save(const Path& fname, std::span<const uint8_t> buf,
@@ -361,9 +384,9 @@ void save(const Path& fname, std::span<const uint8_t> buf,
  * Send a buffer to an output stream.
  * @param os  Output stream;
  * @param buf Buffer.
- * @see load(std::string_view)
- * @see load(std::istream&)
- * @see save(std::string_view std::span<const uint8_t>, std::ios_base::openmode)
+ * @see load(const Path&, size_t)
+ * @see load(std::istream&, size_t)
+ * @see save(const Path&, std::span<const uint8_t>, std::ios_base::openmode)
  */
 std::ostream& save(std::ostream& os, std::span<const uint8_t> buf);
 

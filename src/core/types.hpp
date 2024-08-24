@@ -32,6 +32,7 @@
 #include <string>
 #include <string_view>
 #include <sstream>
+#include <system_error>
 #include <type_traits>
 #include <vector>
 

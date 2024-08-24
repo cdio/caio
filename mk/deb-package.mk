@@ -20,39 +20,50 @@
 #
 # Debian package.
 #
-PKGNAME=		caio_${VERSION}-${ARCH}
-PKGFILE=		${ROOT}/${PKGNAME}.deb
 
-FAKE_INSTALL_DIR=	${ROOT}/${PKGNAME}_deb
+# Naming convention: <name>_<version>-<rev>_<arch>.deb
+PKG_NAME=		caio_${PKG_VERSION}_${ARCH}
+PKG_FILE=		${ROOT}/${PKG_NAME}.deb
+PKG_VERSION=		${VERSION}-${REV}
+REV=			0
+
+FAKE_INSTALL_DIR=	${ROOT}/${PKG_NAME}_deb
 FAKE_PREFIX=		${FAKE_INSTALL_DIR}/usr
 DEB_CONTROL=		${FAKE_INSTALL_DIR}/DEBIAN/control
-DEB_SIZE=		${shell ${DU} --exclude ${DEB_CONTROL} -sk ${FAKE_INSTALL_DIR} | ${CUT} -f 1}
+
+DEB_SIZE:=		${shell ${DU} --exclude ${DEB_CONTROL} -sk ${FAKE_INSTALL_DIR} | ${CUT} -f 1}
+LIBSDL2_VERSION?=	${shell ${DPKG} --list | ${AWK} '$$2 ~ /libsdl2-2/ { sub("+.*", "", $$3); print $$3 }'}
+LIBSTDCPP_VERSION?=	${shell ${DPKG} --list | ${AWK} '$$2 ~ /libstdc\+\+6/ { sub("-.*", "", $$3); print $$3 }'}
 
 DPKG?=			dpkg
 
 .PHONY: all bundle install package
 
-package: ${PKGFILE}
+package: ${PKG_FILE}
 
-${PKGFILE}: bundle
-	${DPKG} -b ${FAKE_INSTALL_DIR} $@
+${PKG_FILE}: bundle
+	${SUDO} chown -R root:root ${FAKE_INSTALL_DIR}
+	${SUDO} ${DPKG} -b ${FAKE_INSTALL_DIR} $@
 
 bundle: ${DEB_CONTROL}
 
-${DEB_CONTROL}: install
+${DEB_CONTROL}: install ${ROOT}/mk/deb-package.mk
 	[ -d ${dir $@} ] || ${INSTALL} -d -m 0755 ${dir $@}
 	${PRINTF} \
 	"Package: caio\n"\
-	"Version: ${VERSION}\n"\
+	"Version: ${PKG_VERSION}\n"\
 	"Architecture: ${ARCH}\n"\
-	"Priority: optional\n"\
-	"Essential: no\n"\
 	"Maintainer: caio developers\n"\
 	"Installed-Size: ${DEB_SIZE}\n"\
-	"Depends: libsdl2-2.0-0 (>= 2.0.0), libsdl2-image-2.0-0 (>= 2.0.0), libstdc++6 (>= 10.3.0)\n"\
+	"Depends: libsdl2-2.0-0 (>= ${LIBSDL2_VERSION}), libstdc++6 (>= ${LIBSTDCPP_VERSION})\n"\
 	"Replaces: caio\n"\
+	"Section: games\n"\
+	"Priority: optional\n"\
+	"Essential: no\n"\
 	"Homepage: http://github.com/cdio/caio\n"\
-	"Description: 8-bit Home Computers Emulator.\n" > $@
+	"Description: 8-bit home computers emulator\n"\
+	" caio is an emulator of hardware platforms with a\n"\
+	" strong focus on old 8-bit home computers.\n" > $@
 
 install: all
 	PREFIX=${FAKE_PREFIX} \
@@ -60,7 +71,7 @@ install: all
 	${MAKE} ${MAKEARGS} $@
 
 all:
-	EXTRA_CPPFLAGS=-DD_SYSCONFDIR='\"/etc/caio\"' \
+	EXTRA_CPPFLAGS='${EXTRA_CPPFLAGS} -DD_SYSCONFDIR=\"/etc/caio\"' \
 	PREFIX="/usr" \
 	VERSION=${VERSION} \
 	${MAKE} ${MAKEARGS} $@

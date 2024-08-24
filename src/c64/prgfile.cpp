@@ -21,18 +21,16 @@
 #include <fstream>
 
 #include "endian.hpp"
-#include "fs.hpp"
 
 namespace caio {
 namespace commodore {
 namespace c64 {
 
-void PrgFile::load(std::string_view fname)
+void PrgFile::load(const fs::Path& fname)
 {
-    //FIXME libstdc++ not there yet   std::ifstream is{fname, std::ios::in};
-    std::ifstream is{std::string{fname}, std::ios::in};
+    std::ifstream is{fname, std::ios::in};
     if (!is) {
-        throw IOError{"Can't open PRG file: {}: {}", fname, Error::to_string()};
+        throw IOError{"Can't open PRG file: {}: {}", fname.string(), Error::to_string()};
     }
 
     load(is);
@@ -50,13 +48,12 @@ std::istream& PrgFile::load(std::istream& is)
     return is;
 }
 
-void PrgFile::save(std::string_view fname, addr_t addr)
+void PrgFile::save(const fs::Path& fname, addr_t addr)
 {
     if (!fname.empty()) {
-        //FIXME libstdc++ not there yet   std::ofstream os{fname, std::ios_base::out | std::ios_base::trunc};
-        std::ofstream os{std::string{fname}, std::ios_base::out | std::ios_base::trunc};
+        std::ofstream os{fname, std::ios_base::out | std::ios_base::trunc};
         if (!os) {
-            throw IOError{"Can't create PRG file: {}: {}", fname, Error::to_string()};
+            throw IOError{"Can't create PRG file: {}: {}", fname.string(), Error::to_string()};
         }
 
         save(os, addr);

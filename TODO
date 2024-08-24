@@ -1,8 +1,4 @@
 - mk:       macOS universal binary (arm + x86)
-- 3rdparty: SDL_Image as subtree
-- 3rdparty: SDL2 as subtree
-- 3rdparty: Remove pkg_config from dependencies, use sdl2-config
-- UI:       Avoid interference between ALT/CTRL+xx and OS
 - UI:       Joystick label = gamepad name
 - NES test: The Young Indiana Jones Chronicles and Burai Fighter
 - vjoy:     move ALT-K handling from c64 to ui
@@ -16,6 +12,7 @@
 - UI:       Floppy widget: Disk progress
 - UI:       Virtual joystick widget
 - UI:       Keyboard enabled/disabled widget
+- UI:       Snapshot image widget (+ hot-key)
 - C1541:    D64 support (emulate hardware)
 - CBMBUS:   Timeout (to recover from external problems)
 - CBMBUS:   Refactor using pullups
@@ -24,9 +21,8 @@
 - c64:      C64 EasyFlash cartridge: Turrican2 continue game?
 - c64:      Zaxxon cartridge: Wrong chargen
 - c64:      Ms-Pacman
-- mk:       Release/Snapshot packages: brew, rpm, deb, freebsd port
+- mk:       Packages: rpm, freebsd port
 - misc:     Use fstream::native_handle() (C++26)
-- Spectrum: Distord audio signal
 - Spectrum: Test SNA format
 - Apple2
 - BBC Micro

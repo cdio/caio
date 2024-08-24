@@ -24,6 +24,6 @@ all debug install test:
 	done
 
 ${DIRS}:
-	${MAKE} -C $@ ${MAKEARGS}
+	${MAKE} -C $@ -j ${MAKEARGS}
 
 include ${ROOT}/mk/clean.mk

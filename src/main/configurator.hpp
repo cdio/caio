@@ -1,4 +1,5 @@
-/* * Copyright (C) 2020 Claudio Castiglia
+/*
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -21,6 +22,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <tuple>
 #include <utility>
 
 #include "editor.hpp"
@@ -39,35 +41,35 @@ namespace sdl2 {
  */
 class ConfiguratorApp : public GuiApp {
 public:
-    constexpr static const char* FNAME_PATTERN          = "*.conf";
-    constexpr static const char* SEC_NAME               = ConfigEditor::SEC_NAME;;
-    constexpr static const char* KEY_MACHINE            = ConfigEditor::KEY_MACHINE;
-    constexpr static const uint64_t UPDATE_INTERVAL     = 1'000'000;
-    constexpr static const char* ID_ADD_CONFIG          = "Add configuration";
-    constexpr static const char* ID_RENAME_CONFIG       = "Rename configuration";
-    constexpr static const char* ID_DELETE_CONFIG       = "Delete configuration";
+    constexpr static const char* FNAME_PATTERN      = "*.conf";
+    constexpr static const char* MACHINES_DIR       = D_DATADIR "/machines";
+    constexpr static const char* SEC_NAME           = ConfigEditor::SEC_NAME;
+    constexpr static const char* KEY_MACHINE        = ConfigEditor::KEY_MACHINE;
+    constexpr static const uint64_t UPDATE_INTERVAL = 1'000'000;
+    constexpr static const char* ID_ADD_CONFIG      = "Add configuration";
+    constexpr static const char* ID_RENAME_CONFIG   = "Rename configuration";
+    constexpr static const char* ID_DELETE_CONFIG   = "Delete configuration";
 
     /**
      * Get the instance to the configurator.
-     * @param progname Program name as received by main().
      * @return A reference to the configurator.
      */
-    static ConfiguratorApp& instance(const fs::Path& progname);
+    static ConfiguratorApp& instance();
 
     virtual ~ConfiguratorApp();
 
 private:
-    using ConfigEntry = std::pair<std::string, fs::Path>;
+    /* ConfigEntry = std::tuple<read-only, name, path> */
+    using ConfigEntry = std::tuple<bool, std::string, fs::Path>;
     using ConfigVector = std::vector<ConfigEntry>;
     using LoadedConfigMap = std::map<fs::Path, uptr_t<ConfigEditor>>;
 
     /**
      * Initialise this configurator.
-     * @param progname Program name as received by main().
-     * @exception IOError If the default configurations cannot be created.
+     * @exception IOError
      * @see ConfigEditor::create_default_configurations()
      */
-    ConfiguratorApp(const fs::Path& progname);
+    ConfiguratorApp();
 
     /**
      * Render the main window.
@@ -113,13 +115,16 @@ private:
 
     /**
      * Set an error message.
+     * The error message is shown as soon as a new frame is rendered.
      * @param title Title;
      * @param msg   Error message.
+     * @see error_message_popup()
+     * @see render()
      */
     void error_message(const std::string& title, const std::string& msg);
 
     /**
-     * Run the emulator the selected configuration.
+     * Run the emulator using the current (user selected) configuration.
      */
     void run_machine();
 
@@ -136,7 +141,6 @@ private:
      */
     uptr_t<ConfigEditor>& editor_instance(const fs::Path& cfile);
 
-    fs::Path            _progname;              /* Program name as received by main in argv */
     ConfigVector        _configs{};             /* List of configurations                   */
     ssize_t             _centry{};              /* Selected configuration                   */
     uint64_t            _last_update{};         /* List of configurations last update time  */
@@ -149,6 +153,8 @@ private:
     std::string         _error_title{};         /* Error message title                      */
     std::string         _error_message{};       /* Error message                            */
     Size                _selector_pane_size{};  /* Size of the selector pane                */
+
+    int                 _child_pipe[2]{-1, -1}; /* Error messages from child processes      */
 };
 
 }

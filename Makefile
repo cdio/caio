@@ -41,9 +41,9 @@ DST_VERSION=	${BUILD_ROOT}/VERSION.txt
 
 DISTCLEANFILES=	${BUILD_DIR}
 
-.PHONY: all build clean debug distclean install package ${DST_LNDIRS}
+.PHONY: all build bundle clean debug distclean install package ${DST_LNDIRS}
 
-all install clean package: build
+all bundle install clean package: build
 	${MAKE} ${MAKEARGS} -C ${BUILD_ROOT} $@
 
 debug:
@@ -71,5 +71,5 @@ endif
 
 distclean:
 	${RM} -rf ${DISTCLEANFILES}
-	${MAKE} ${MAKEARGS} -C ${ROOT}/3rdparty distclean
+	for d in ${LNDIRS}; do ${MAKE} ${MAKEARGS} -C $$d distclean; done
 

@@ -18,11 +18,6 @@
 #
 CXXFLAGS+=	-I${ROOT}/lib
 
-CXXFLAGS+=	${UI_CXXFLAGS}
-
-LDADD+=		${UI_LDADD} \
-		-lpthread
-
 CLEANFILES+=	${BIN} \
 		${LN_BINS}
 

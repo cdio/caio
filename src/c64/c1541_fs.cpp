@@ -626,8 +626,10 @@ Status C1541Fs::scratch(std::string_view param)
 
     if (std::regex_match(par, result, re_scratch) && result.size() == 2) {
         auto remove = [this](const fs::Path& entry, uint64_t size) -> bool {
-            if (!fs::unlink(entry)) {
-                log.error("{}: Can't scratch: \"{}\": {}\n", name(15), entry.string(), Error::to_string());
+            try {
+                fs::unlink(entry);
+             } catch (const std::exception& err) {
+                log.error("{}: Can't scratch: \"{}\": {}\n", name(15), entry.string(), err.what());
                 return false;
             }
             log.debug("{}: File scratched: \"{}\"\n", name(15), entry.string());

@@ -61,7 +61,6 @@ namespace config {
 
 constexpr static const char* SYSTEM_CONFDIR      = D_SYSCONFDIR;
 constexpr static const char* HOME_CONFDIR        = D_HOMECONFDIR;
-constexpr static const char* CWD                 = ".";
 constexpr static const char* ROMDIR              = D_ROMDIR;
 constexpr static const char* PALETTEDIR          = D_PALETTEDIR;
 constexpr static const char* KEYMAPSDIR          = D_KEYMAPSDIR;
@@ -380,10 +379,10 @@ struct VJoyConfig : VJoyKeys {
  */
 struct Config {
     std::string title{};
-    std::string romdir{};               // Path
+    std::string romdir{};
     std::string palette{};
     std::string keymaps{};
-    std::string cartridge{};                // Path
+    std::string cartridge{};
     unsigned    fps{};
     unsigned    scale{};
     std::string scanlines{};
@@ -392,7 +391,7 @@ struct Config {
     bool        audio{};
     float       delay{};
     bool        monitor{};
-    std::string logfile{};              // Path
+    std::string logfile{};
     std::string loglevel{};
     VJoyConfig  vjoy{};
 
@@ -435,10 +434,10 @@ private:
      * @param path   Directory where the file is intended to be;
      * @param prefix Platform prefix;
      * @param ext    File extension.
-     * @return The resolved fullpath if the file is found (name or path + "/" + prefix + name + ext).
-     * @exception IOError if the file does not exist in the specified path.
+     * @return The resolved fullpath if the file is found (name or path + "/" + prefix + name + ext);
+     * otherwise the parameter name is returned.
      */
-    std::string resolve(std::string_view name, std::string_view path, std::string_view prefix, std::string_view ext);
+    fs::Path resolve(const fs::Path& name, const fs::Path& path, const fs::Path& prefix, const fs::Path& ext);
 };
 
 }

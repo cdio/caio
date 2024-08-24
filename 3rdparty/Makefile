@@ -21,7 +21,7 @@ ROOT=		${abspath ../}
 include ${ROOT}/mk/config.mk
 
 DIRS=		imgui \
-		fonts \
+		sdl_image \
 		sha2
 
 CLEANDIRS=	${DIRS} \

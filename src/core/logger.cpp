@@ -84,13 +84,12 @@ void Logger::loglevel(std::string_view lvs)
     _lv = Logger::parse_loglevel(lvs);
 }
 
-void Logger::logfile(std::string_view fname)
+void Logger::logfile(const fs::Path& fname)
 {
     if (!fname.empty()) {
-        //FIXME libstdc++ not there yet   std::ofstream ofs{fname};
-        std::ofstream ofs{std::string{fname}};
+        std::ofstream ofs{fname};
         if (!ofs) {
-            throw LoggerError{"Can't open logfile: {}", fname};
+            throw LoggerError{"Can't open logfile: {}", fname.string()};
         }
 
         _logfile = fname;

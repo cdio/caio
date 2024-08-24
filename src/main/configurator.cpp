@@ -18,6 +18,9 @@
  */
 #include "configurator.hpp"
 
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 #include <algorithm>
@@ -33,15 +36,20 @@ namespace caio {
 namespace ui {
 namespace sdl2 {
 
-ConfiguratorApp::ConfiguratorApp(const fs::Path& progname)
-    : GuiApp{"caio - Machine configurator"},
-      _progname{progname}
+ConfiguratorApp::ConfiguratorApp()
+    : GuiApp{"caio emulator"}
 {
+    if (::pipe(_child_pipe) < 0 || ::fcntl(_child_pipe[0], F_SETFL, O_NONBLOCK) < 0) {
+        throw IOError{"Can't create pipe: {}", Error::to_string()};
+    }
+
     ConfigEditor::create_default_configs();
 }
 
 ConfiguratorApp::~ConfiguratorApp()
 {
+    ::close(_child_pipe[0]);
+    ::close(_child_pipe[1]);
 }
 
 void ConfiguratorApp::render()
@@ -68,19 +76,27 @@ void ConfiguratorApp::render()
 bool ConfiguratorApp::buttons_pane()
 {
     button("Add", [](){ open_popup(ID_ADD_CONFIG); });
+
     sameline();
     button("Rename", [](){ open_popup(ID_RENAME_CONFIG); });
+
     sameline();
     button("Delete", [](){ open_popup(ID_DELETE_CONFIG); });
+
     sameline();
-    print(" "); sameline();//to_column(8);
+    print(" ");
+
+    sameline();
     bool run = button("Run");
-    to_column(-6);
+
+    to_column(-6.5);
     button((style() == Style::Dark ? "Light Mode" : "Dark Mode"), [this](){
         style((style() == Style::Dark) ? Style::Light : Style::Dark);
     });
+
     sameline();
     button("+", [](){ process_font_incdec(true); });
+
     sameline();
     button("-", [](){ process_font_incdec(false); });
 
@@ -96,8 +112,13 @@ void ConfiguratorApp::selector_pane()
     update_configs();
 
     for (ssize_t i = 0; i < _configs.size(); ++i) {
-        const auto& [name, _] = _configs[i];
-        select_table(name, _centry == i, [this, &i]() { _centry = i; });
+        /*
+         * The entry shown in the selector pane is encoded as prefix + name.
+         * prefix is used to mark whether the configuration file is read-only or read/write.
+         */
+        const auto& [read_only, name, _] = _configs[i];
+        const auto descr = std::string{(read_only ? UNI_LOCK_CLOSED : " ")} + " " + name;
+        select_table(descr, _centry == i, [this, &i]() { _centry = i; });
     }
 
     _selector_pane_size = section_size();
@@ -113,13 +134,19 @@ void ConfiguratorApp::editor_pane()
     begin_section("##editor-pane", {width, height});
 
     if (_centry >= 0) {
-        const auto& [cname, cfile] = _configs[_centry];
+        const auto& [read_only, cname, cfile] = _configs[_centry];
         print("Configuration: {}", cname);
         separator();
         try {
             auto& editor = editor_instance(cfile);
             if (editor) {
+                if (read_only) {
+                    begin_disabled();
+                }
                 editor->render();
+                if (read_only) {
+                    end_disabled();
+                }
             } else {
                 print("Can't load configurator editor\nMalformed configuration file: {}", cfile.string());
             }
@@ -142,14 +169,14 @@ void ConfiguratorApp::add_config_popup()
             separator();
 
             for (ssize_t i = 0; i < _configs.size(); ++i) {
-                const auto& [name, _] = _configs[i];
+                const auto& [read_only, name, path] = _configs[i];
                 select_table(name, _add_centry == i, [this, &i]() { _add_centry = i; });
             }
 
             separator();
 
             buttons_ok_cancel(
-                [this]() { _add_cname = _configs[_add_centry].first; },
+                [this]() { _add_cname = std::get<1>(_configs[_add_centry]); },
                 close_popup
             );
 
@@ -164,9 +191,15 @@ void ConfiguratorApp::add_config_popup()
             const auto flags = InputFlags::EnterReturnsTrue | InputFlags::AutoSelectAll | InputFlags::EscapeClearsAll;
             if (input("##enter-config-name", _add_cname, flags)) {
                 const auto cfile = ConfigEditor::config_path(_add_cname);
-                const auto& [_, base_cfile] = _configs[_add_centry];
-                fs::unlink(cfile);
-                fs::concat(cfile, base_cfile);
+                const auto& [read_only, name, orig_cfile] = _configs[_add_centry];
+                try {
+                    fs::unlink(cfile);
+                    fs::concat(cfile, orig_cfile);
+                } catch (const std::exception& err) {
+                    const auto title = std::format("Can't add new machine: {}", _add_cname);
+                    const auto errmsg = err.what();
+                    error_message(title, errmsg);
+                }
                 _add_cname = {};
                 _add_centry = 0;
                 close_popup();
@@ -185,7 +218,7 @@ void ConfiguratorApp::rename_config_popup()
 
     define_popup(ID_RENAME_CONFIG, [this]() {
         const auto it = _configs.begin() + _centry;
-        const auto& [cname, cfile] = *it;
+        const auto& [read_only, cname, cfile] = *it;
 
         if (_rename_cname.empty()) {
             _rename_cname = cname;
@@ -202,17 +235,19 @@ void ConfiguratorApp::rename_config_popup()
 
         const auto do_rename = [this, &cfile, &cname, &it]() {
             if (_rename_set && !_rename_cname.empty()) {
-                auto newcfile = ConfigEditor::config_path(_rename_cname);
+                auto newcfile = cfile;
+                newcfile.replace_filename(_rename_cname);
                 if (newcfile != cfile) {
-                    std::error_code ec{};
-                    std::filesystem::rename(cfile, newcfile, ec);
-                    if (ec) {
-                        error_message(std::format("Can't rename: {}", cname), ec.message());
-                    } else {
+                    try {
+                        std::filesystem::rename(cfile, newcfile);
                         _loaded_configs.erase(cfile);
                         _configs.erase(it);
                         ConfigEditor::create_default_configs();     /* Re-create default configurations */
                         close_popup();
+                    } catch (const std::exception& err) {
+                        const auto title = std::format("Can't rename: {}", cname);
+                        const auto errmsg = err.what();
+                        error_message(title, errmsg);
                     }
                 }
             }
@@ -227,18 +262,24 @@ void ConfiguratorApp::delete_config_popup()
 {
     define_popup(ID_DELETE_CONFIG, [this]() {
         auto it = _configs.begin() + _centry;
-        const auto& [cname, cfile] = *it;
+        const auto& [read_only, cname, cfile] = *it;
 
         print("Confirm delete configuration: {} ", cname);
         separator();
 
-        const auto do_delete = [this, &cfile, &it]() {
-            fs::unlink(cfile);
-            _loaded_configs.erase(cfile);
-            _configs.erase(it);
-            ConfigEditor::create_default_configs();     /* Re-create default configurations */
-            if (_centry > 0) {
-                --_centry;
+        const auto do_delete = [this, &cname, &cfile, &it]() {
+            try {
+                fs::unlink(cfile);
+                _loaded_configs.erase(cfile);
+                _configs.erase(it);
+                ConfigEditor::create_default_configs();     /* Re-create default configurations */
+                if (_centry > 0) {
+                    --_centry;
+                }
+            } catch (const std::exception& err) {
+                const auto title = std::format("Can't delete configuration: {}", cname);
+                const auto errmsg = err.what();
+                error_message(title, errmsg);
             }
             close_popup();
         };
@@ -249,11 +290,33 @@ void ConfiguratorApp::delete_config_popup()
 
 void ConfiguratorApp::error_message_popup()
 {
+    if (_error_message.empty()) {
+        /*
+         * Retrieve error messages from launched machines.
+         */
+        char buf[LINE_MAX];
+        ssize_t r = ::read(_child_pipe[0], buf, sizeof(buf));
+        if (r > 0) {
+            const std::string title{"Can't launch machine"};
+            const std::string errmsg{buf, static_cast<std::string::size_type>(r)};
+            error_message(title, errmsg);
+        }
+    }
+
+    /*
+     * If there is an error message open the error popup.
+     */
     if (!_error_message.empty()) {
         open_popup(_error_title);
     }
 
     define_popup(_error_title, [this]() {
+        if (_error_title.size() > _error_message.size()) {
+            /*
+             * Extend the window size so the entire title can be read.
+             */
+            _error_message.append(_error_title.size() - _error_message.size(), ' ');
+        }
         print(_error_message);
         separator();
         button_ok([this]() {
@@ -273,7 +336,9 @@ void ConfiguratorApp::run_machine()
 {
     const pid_t pid = ::fork();
     if (pid < 0) {
-        error_message("Can't run machine", std::format("Can't fork: {}\n", Error::to_string()));
+        const auto title = "Can't launch machine";
+        const auto errmsg = std::format("Can't fork: {}\n", Error::to_string());
+        error_message(title, errmsg);
         return;
     }
 
@@ -281,26 +346,31 @@ void ConfiguratorApp::run_machine()
         return;
     }
 
-    ::close(STDOUT_FILENO);
     ::close(STDIN_FILENO);
-    ::close(STDERR_FILENO);
+    ::close(STDOUT_FILENO);
+    ::dup2(_child_pipe[1], STDERR_FILENO);
 
-    const auto& cfile = _configs[_centry].second;
+    const auto& cfile = std::get<2>(_configs[_centry]);
     config::Confile cf{cfile};
     auto& sec = cf[SEC_NAME];
     auto& machine = sec[KEY_MACHINE];
 
     if (!machine.empty()) {
+        const auto progname = fs::exec_path();
         const char* argv[] = {
-            _progname.c_str(),
+            progname.c_str(),
             machine.c_str(),
+            "--logfile",
+            "/dev/stderr",
+            "--loglevel",
+            "error",
             "--conf",
             cfile.c_str(),
             nullptr
         };
 
         const char* home = std::getenv("HOME");
-        if (home == NULL || *home == '\0') {
+        if (home == nullptr || *home == '\0') {
             home = "/";
         }
         const auto env_home = std::format("HOME={}", home);
@@ -314,7 +384,7 @@ void ConfiguratorApp::run_machine()
         ::execve(argv[0], const_cast<char**>(argv), const_cast<char**>(envp));
 #else
         const char* display = std::getenv("DISPLAY");
-        if (display == NULL || *display == '\0') {
+        if (display == nullptr || *display == '\0') {
             display = ":0";
         }
         const auto env_display = std::format("DISPLAY={}", display);
@@ -326,6 +396,7 @@ void ConfiguratorApp::run_machine()
 
         ::execvpe(argv[0], const_cast<char**>(argv), const_cast<char**>(envp));
 #endif
+        (std::cerr << std::format("Can't execve: {}: {}", argv[0], Error::to_string())).flush();
     }
 
     ::exit(EXIT_FAILURE);
@@ -337,21 +408,56 @@ void ConfiguratorApp::update_configs()
     const bool update_time = ((now - _last_update) > UPDATE_INTERVAL) || !_configs.size();
 
     if (update_time) {
-        auto dir = fs::directory(confdir(), FNAME_PATTERN, fs::MATCH_CASE_SENSITIVE);
-        if (dir.size() == 0) {
-            _centry = -1;
-            return;
-        }
+        const std::string dirs[] = {
+            MACHINES_DIR,
+            confdir()
+        };
 
+        ConfigVector def{};
         _configs.clear();
 
-        std::for_each(dir.begin(), dir.end(), [this](const fs::DirEntry& entry) {
-            const auto& cfile = entry.first;
-            const std::string cname = cfile.stem();
-            _configs.push_back({cname, cfile});
+        for (const auto& path : dirs) {
+            try {
+                auto dir = fs::directory(path, FNAME_PATTERN, fs::MATCH_CASE_SENSITIVE);
+                if (dir.size()) {
+                    ConfigVector cv{};
+                    std::for_each(dir.begin(), dir.end(), [&cv, &def](const fs::DirEntry& entry) {
+                        const auto& cfile = entry.first;
+                        const std::string cname = cfile.stem();
+                        if (cname.starts_with("^")) {   /* Hack to mark default configurations */
+                            /*
+                             * Default (undestroyable) configuration.
+                             */
+                            def.push_back({{}, cname.substr(1), cfile});
+                        } else {
+                            /*
+                             * User configuration.
+                             */
+                            cv.push_back({{}, cname, cfile});
+                        }
+                    });
+                    std::sort(cv.begin(), cv.end());
+                    _configs.insert(_configs.end(), cv.begin(), cv.end());
+                }
+            } catch (const std::exception&) {
+            }
+        }
+
+        std::sort(def.begin(), def.end());
+        _configs.insert(_configs.begin(), def.begin(), def.end());
+
+        /*
+         * Mark read-only configuration files.
+         */
+        std::for_each(_configs.begin(), _configs.end(), [](ConfigEntry& entry) {
+            auto& [read_only, name, path] = entry;
+            read_only = (::access(path.c_str(), W_OK) < 0);
         });
 
-        std::sort(_configs.begin(), _configs.end());
+        if (_configs.size() == 0) {
+            _centry = -1;
+        }
+
         _last_update = now;
     }
 }
@@ -367,11 +473,11 @@ uptr_t<ConfigEditor>& ConfiguratorApp::editor_instance(const fs::Path& cfile)
     return it->second;
 }
 
-ConfiguratorApp& ConfiguratorApp::instance(const fs::Path& progname)
+ConfiguratorApp& ConfiguratorApp::instance()
 {
     static uptr_t<ConfiguratorApp> inst{};
     if (!inst) {
-        inst = uptr_t<ConfiguratorApp>{new ConfiguratorApp{progname}};
+        inst = uptr_t<ConfiguratorApp>{new ConfiguratorApp{}};
     }
     return *inst;
 }

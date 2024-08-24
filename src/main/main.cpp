@@ -18,8 +18,9 @@
  */
 #include <cstdlib>
 #include <exception>
-#include <iostream>
+#include <filesystem>
 #include <functional>
+#include <iostream>
 #include <map>
 
 #include "types.hpp"
@@ -87,19 +88,31 @@ static void usage(std::string_view progname)
 
 int main(int argc, const char** argv)
 {
-    std::set_terminate(terminate);
-    const auto progname = *argv;
-
-    static const auto run_gui = [](const char* progname) -> int {
-        auto& gui = ui::sdl2::ConfiguratorApp::instance(progname);
+    static const auto run_gui = []() -> int {
+#ifdef GUI_COMBO_PATH_RELATIVE
+        /*
+         * chdir to the binary's directory so the GUI
+         * looks for everything relative to that position.
+         * This is used to run self-contained bundles.
+         */
+        std::error_code ec{};
+        const auto bindir = fs::exec_directory();
+        std::filesystem::current_path(bindir, ec);
+        if (ec) {
+            caio::log.fatal("Can't change current working directory: {}: {}\n", bindir.string(), ec.message());
+        }
+#endif
+        auto& gui = ui::sdl2::ConfiguratorApp::instance();
         return gui.run();
     };
+
+    std::set_terminate(terminate);
 
     if (argc == 1) {
         /*
          * No machine is specified: Run the selector GUI.
          */
-        return run_gui(progname);
+        return run_gui();
     }
 
     std::string name{};
@@ -110,7 +123,7 @@ int main(int argc, const char** argv)
     }
 
     if (name == "" || name == "--help" || name == "-h" || name == "-?") {
-        usage(progname);
+        usage(argv[0]);
         std::exit(EXIT_FAILURE);
     }
 
@@ -120,7 +133,7 @@ int main(int argc, const char** argv)
     }
 
     if (name == "gui") {
-        return run_gui(progname);
+        return run_gui();
     }
 
     auto it = machines.find(name);

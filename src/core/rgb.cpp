@@ -67,12 +67,11 @@ Rgba operator+(Rgba color1, Rgba color2)
     };
 }
 
-void RgbaTable::load(std::string_view fname)
+void RgbaTable::load(const fs::Path& fname)
 {
-    //FIXME libstdc++ not there yet  std::ifstream is{fname, std::ios::binary | std::ios::in};
-    std::ifstream is{std::string{fname}, std::ios::binary | std::ios::in};
+    std::ifstream is{fname, std::ios::binary | std::ios::in};
     if (!is) {
-        throw IOError{"Can't open: {}: {}", fname, Error::to_string()};
+        throw IOError{"Can't open: {}: {}", fname.string(), Error::to_string()};
     }
 
     clear();
@@ -88,7 +87,7 @@ void RgbaTable::load(std::string_view fname)
          * Only the rrggbbaa format is supported.
          */
         if (line.size() != 8) {
-            throw IOError{"{}: Invalid line: {}", fname, line};
+            throw IOError{"{}: Invalid line: {}", fname.string(), line};
         }
 
         try {
@@ -102,18 +101,17 @@ void RgbaTable::load(std::string_view fname)
     is.close();
 }
 
-void RgbaTable::save(std::string_view fname)
+void RgbaTable::save(const fs::Path& fname)
 {
-    //FIXME libstdc++ not there yet   std::ofstream os{fname, std::ios::binary | std::ios::out | std::ios::trunc};
-    std::ofstream os{std::string{fname}, std::ios::binary | std::ios::out | std::ios::trunc};
+    std::ofstream os{fname, std::ios::binary | std::ios::out | std::ios::trunc};
     if (!os) {
-        throw IOError{"Can't create: {}: {}", fname, Error::to_string()};
+        throw IOError{"Can't create: {}: {}", fname.string(), Error::to_string()};
     }
 
     for (const auto& rgb : *this) {
         os << rgb.to_string() << "\n";
         if (!os) {
-            throw IOError{"Can't write: {}: {}", fname, Error::to_string()};
+            throw IOError{"Can't write: {}: {}", fname.string(), Error::to_string()};
         }
     }
 

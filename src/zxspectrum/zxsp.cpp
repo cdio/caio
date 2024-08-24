@@ -170,7 +170,7 @@ std::string ZXSpectrum::rompath(std::string_view fname) const
 void ZXSpectrum::attach_prg()
 {
     if (!_conf.snap.empty()) {
-        std::string fname{fs::search(_conf.snap, {}, true)};
+        std::string fname{fs::search(_conf.snap, {"./"})};
         if (fname.empty()) {
             throw IOError{"Can't load snapshot: {}: {}", _conf.snap, Error::to_string()};
         }
@@ -330,16 +330,6 @@ void ZXSpectrum::hotkeys(keyboard::Key key)
     switch (key) {
     case keyboard::KEY_ALT_J:
         break;
-
-    case keyboard::KEY_ALT_M:
-        /*
-         * Enter monitor on the next clock tick only if it is active.
-         */
-        if (!_conf.monitor) {
-            break;
-        }
-
-        /* PASSTHROUGH */
 
     case keyboard::KEY_CTRL_C:
         /*

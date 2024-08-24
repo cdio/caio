@@ -28,16 +28,9 @@ DST_BIN=	${DST_BINDIR}/${BIN}
 DST_CONFIG=	${DST_SYSCONFDIR}/${CONFIG}
 DST_ICON=	${DST_DATADIR}/icons/caio.png
 
-ifeq (${OS}, Darwin)
-DST_DESKTOP=
-else
-DST_DESKTOP=	${DST_DESKTOPDIR}/caio.desktop
-endif
-
 INSTALL_FILES=	${DST_BIN} \
 		${DST_CONFIG} \
-		${DST_ICON} \
-		${DST_DESKTOP}
+		${DST_ICON}
 
 CXXSRCS=	configurator.cpp \
 		editor.cpp \
@@ -55,23 +48,37 @@ INCS=		configurator.hpp \
 		guiapp.hpp \
 		gui.hpp
 
-EXTRA_DEPS+=	${ROOT}/src/c64/libcaio_c64.a \
+CPPFLAGS+=	-I${ROOT}/src/c64 \
+		-I${ROOT}/src/zx80 \
+		-I${ROOT}/src/zxspectrum
+
+EXTRA_LIBS+=	${ROOT}/src/c64/libcaio_c64.a \
 		${ROOT}/src/zx80/libcaio_zx80.a \
 		${ROOT}/src/zxspectrum/libcaio_zxspectrum.a \
 		${ROOT}/src/ui_sdl2/libcaio_ui_sdl2.a \
 		${ROOT}/src/core/libcaio_core.a \
 		${ROOT}/3rdparty/sha2/libsha2.a
 
+# UI Libraries
+LDADD+=		${UI_LDADD}
+
 # Widget Toolkit
 CXXSRCS+=	dearimgui.cpp
 INCS+=		dearimgui.hpp
-EXTRA_DEPS+=	${ROOT}/3rdparty/imgui/libimgui/libimgui.a \
+EXTRA_LIBS+=	${ROOT}/3rdparty/imgui/libimgui/libimgui.a
 
-CPPFLAGS+=	-I${ROOT}/src/c64 \
-		-I${ROOT}/src/zx80 \
-		-I${ROOT}/src/zxspectrum
+LDADD+=		${EXTRA_LIBS}
+EXTRA_DEPS+=	${EXTRA_LIBS}
 
-LDADD+=		${EXTRA_DEPS}
+# Xorg desktop
+ifneq (${OS}, Darwin)
+DESKTOP=	caio.desktop
+DESKTOP_SED=	${DESKTOP}.sed
+DST_DESKTOP=	${DST_DESKTOPDIR}/${DESKTOP}
+EXTRA_DEPS+=	./${DESKTOP}
+INSTALL_FILES+=	${DST_DESKTOP}
+CLEANFILES+=	${DESKTOP}
+endif
 
 include ${ROOT}/mk/bin.mk
 
@@ -90,19 +97,11 @@ ${DST_ICON}: ${ICON}
 	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} $< $@
 
 ifneq (${OS}, Darwin)
-${DST_DESKTOP}:
-	[ -d ${dir $@} ] || ${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} ${dir $@}
-	${PRINTF} \
-	"[Desktop Entry]\n"\
-	"Version=1.0\n"\
-	"Type=Application\n"\
-	"Name=caio emulator\n"\
-	"Comment=8-bit Home Computers Emulator\n"\
-	"Exec=${DST_BIN}\n"\
-	"Icon=${DST_ICON}\n"\
-	"Terminal=false\n"\
-	"Categories=Game;\n"\
-	"StartupNotify=true\n"\
-	"Keywords=retro;retrogaming;retroprogramming;c64;cbm;commodore;sinclair;spectrum;zx;\n" > $@
-endif
+${DESKTOP}: ${DESKTOP_SED}
+	${SED} -e 's,@BIN@,${DST_BIN},' -e 's,@ICON@,${DST_ICON},' $< > $@
 
+${DST_DESKTOP}: ${DESKTOP}
+	[ -d ${dir $@} ] || ${INSTALL} -d -m ${MODE_DATADIR} -o ${OWNER_DATADIR} -g ${GROUP_DATADIR} ${dir $@}
+	${INSTALL} -m ${MODE_DATA} -o ${OWNER_DATA} -g ${GROUP_DATA} $< $@
+
+endif

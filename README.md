@@ -62,14 +62,14 @@ the cassette TAP file format (read and write) and snapshot files Z80 and SNA.
 At the moment the supported host platforms are Linux and macOS.<br>
 
 
-## Usage & Configuration
-
-Refer to the [Usage & Configuration](doc/usage.md) guide.
-
-
 ## Compile & Install
 
 Refer to the [Compile & Install](doc/compile.md) guide.
+
+
+## Usage & Configuration
+
+Refer to the [Usage & Configuration](doc/usage.md) guide.
 
 
 ## Release

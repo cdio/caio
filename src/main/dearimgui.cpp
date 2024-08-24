@@ -33,17 +33,13 @@ namespace ui {
 namespace sdl2 {
 namespace dearimgui {
 
-#include "3rdparty/fonts/font_UbuntuSansMonoRegular.h"
-#define GUIFONT_NAME            font_UbuntuSansMonoRegular_compressed_data_base85
-
-static const float loaded_font_sizes[] = {
-    10.0f, 11.0f, 12.0f, 14.0f, 16.0f, 18.0f, 21.0f, 24.0f, 26.0f, 28.0f, 32.0f
-};
+#include "icons/DejaVuSansMNerdFontMono_Regular_stripped.hpp"
+#define GUIFONT_NAME        DejaVuSansMNerdFontMono_Regular_stripped_compressed_data_base85
 
 static std::vector<::ImFont*>           loaded_fonts{};
 static std::vector<::ImFont*>::iterator current_loaded_font{};
 
-void Gui::init(const std::string& inifile, float font_scale, ::SDL_Window* sdlwin, ::SDL_Renderer* sdlrend)
+void Gui::init(const std::string& inifile, ::SDL_Window* sdlwin, ::SDL_Renderer* sdlrend, const FontParams& fontp)
 {
     _inifile = inifile;
     _sdlwin  = sdlwin;
@@ -58,17 +54,19 @@ void Gui::init(const std::string& inifile, float font_scale, ::SDL_Window* sdlwi
 
     auto& io = ::ImGui::GetIO();
     io.ConfigFlags |= ::ImGuiConfigFlags_NavEnableKeyboard | ::ImGuiConfigFlags_NavEnableGamepad;
-    io.FontGlobalScale = font_scale;
+    io.FontGlobalScale = fontp.scale;
     io.IniFilename = (_inifile.empty() ? nullptr : _inifile.c_str());
     io.LogFilename = nullptr;
 
     style(Style::Light);
 
     /*
-     * Load caio gui fonts and set the first font as default.
+     * Load fonts and set the first font size as default.
      */
-    std::for_each(std::begin(loaded_font_sizes), std::end(loaded_font_sizes), [&io](float fsize) {
-        auto* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(GUIFONT_NAME, fsize);
+    const auto font_sizes = (fontp.sizes ? fontp.sizes() : std::span<float>{});
+    const auto font_ranges = (fontp.ranges ? fontp.ranges().data() : nullptr);
+    std::for_each(font_sizes.begin(), font_sizes.end(), [&io, &font_ranges](float fsize) {
+        auto* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(GUIFONT_NAME, fsize, nullptr, font_ranges);
         loaded_fonts.push_back(font);
     });
 
@@ -492,10 +490,17 @@ void Gui::combo_path(const std::string& msg, const std::string& id, std::string&
     }
 
     if (::ImGui::BeginCombo(id.c_str(), dst.c_str())) {
+        std::error_code ec{};
+#ifdef GUI_COMBO_PATH_RELATIVE
+        if (!dst.empty()) {
+            dst = std::filesystem::proximate(dst, ec);
+        }
+#endif
         idir.refresh();
         for (auto i = 0; i < idir.size(); ++i) {
-            const fs::Path& entry = idir[i];
-            bool is_selected = (entry == dst);
+            const auto& entry = idir[i];
+            const auto dstc = std::filesystem::weakly_canonical(dst, ec);
+            const bool is_selected = ((i == 0) ? dst.empty() : std::filesystem::equivalent(dstc, entry, ec));
             if (::ImGui::Selectable(entry.c_str(), is_selected, ::ImGuiSelectableFlags_DontClosePopups)) {
                 setter(idir, entry, dst);
             }

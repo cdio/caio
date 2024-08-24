@@ -175,7 +175,7 @@ void C64::reset()
 
 std::string C64::rompath(std::string_view fname)
 {
-    auto path = fs::search(fname, {_conf.romdir});
+    auto path = fs::search(fname, { _conf.romdir });
     if (path.empty()) {
         throw IOError{"Can't load ROM: {}: {}", fname, Error::to_string(ENOENT)};
     }
@@ -204,7 +204,7 @@ void C64::attach_prg()
         return;
     }
 
-    std::string prgfile{fs::search(_conf.prgfile)};
+    fs::Path prgfile{fs::search(_conf.prgfile)};
     if (prgfile.empty()) {
         throw IOError{"Can't load program: {}: {}", _conf.prgfile, Error::to_string()};
     }
@@ -213,7 +213,7 @@ void C64::attach_prg()
         PrgFile* prog{};
         const char* format{};
 
-        log.debug("Preloading program: {}\n", prgfile);
+        log.debug("Preloading program: {}\n", prgfile.string());
 
         try {
             prog = new P00File{prgfile};
@@ -615,16 +615,6 @@ void C64::hotkeys(keyboard::Key key)
             log.debug("Keyboard {}\n", (kact ? "active" : "inactive"));
         }
         break;
-
-    case keyboard::KEY_ALT_M:
-        /*
-         * Enter monitor on the next clock tick only if it is active.
-         */
-        if (!_conf.monitor) {
-            break;
-        }
-
-        /* PASSTHROUGH */
 
     case keyboard::KEY_CTRL_C:
         /*

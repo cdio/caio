@@ -2,7 +2,38 @@
 
 ## Usage & Configuration
 
-At the moment, the best way to launch caio is from the command line terminal:
+caio can be launched from a file browser or from a command line terminal.
+
+### Launching caio from a file browser
+
+When caio is installed in the system its icon should be visible from any
+file browser. When launched, a configurator GUI appears:
+
+<p align="center">
+<img src="../images/caio-gui.jpg" width="640" title="caio configurator">
+</p>
+
+The upper left corner contains buttons `Add`, `Delete`, `Rename` and `Run`,
+these are used to add, delete, rename, and run machine configurations
+respectively.
+
+The left pane below the buttons contains a selectable a list of machines
+and the right pane shows the specific configuration values for the selected
+entry.
+
+The upper right corner of the main window contains buttons to change from
+_Dark mode_ to _Light mode_ and vice versa, and buttons to increase/decrease
+the font size which can also be changed using **CTRL +** and **CTRL -**
+(under macOS it would be **command &#8984; +** and **command &#8984; -**).
+
+User defined configurations are stored in the `$HOME/.config/caio/` directory.
+<br>
+Note that this directory is *not* removed when caio is uninstalled from the
+system.
+
+
+### Launching caio from a command line terminal
+
 ```
 $ caio --help
 usage: caio <arch> [--help]
@@ -15,20 +46,22 @@ zxspectrum
 <details>
 <summary>Generic Configuration</summary>
 
-### Generic Configuration
+#### Generic Configuration
 
 Configuration parameters can be specified as command line options or as
-*key-value* pairs in a [configuration file](../src/main/caio.conf).<br>
+*key-value* pairs in a [configuration file](../src/main/caio.conf).
+<br>
 The configuration file contains two types of sections: One ***generic***
 section whose values are inherited by all platforms, and one ***specific***
-section for each emulated platform.<br>
+section for each emulated platform.
+<br>
 If a parameter is specified twice (as platform specific and generic), the
 platform specific value takes the precedence.
 
 The configuration file is searched in the following places (stop at first
 match):
 
-1. Command line option               `--conf`
+1. Command line option:              `--conf`
 2. User's configuration directory:   `$HOME/.config/caio/caio.conf`
 3. System's configuration directory: `$PREFIX/etc/caio/caio.conf`
 
@@ -68,65 +101,39 @@ Generic options as command line parameters:
  -h|--help               Print this message and exit
 ```
 
-Emulated platforms are not required to support all these options, unsupported
-parameters are ignored.
+#### Keyboard layout
 
-### Hot-Keys
+The keyboard layout depends on the emulated platform at it is set using the
+`keymaps` configuration option.
+<br>
+By default, keyboard mappings are stored in the `$FREFIX/share/caio/keymaps/`
+directory in the form of text files. This directory can be changed using the
+`keymapsdir` option.
+<br>
+The user can define new mappings by adding files into this directory.
 
-The following key combinations are accepted at runtime:
+#### Joysticks and Gamepads
 
-* `ALT-F` toggles between *windowed* and *fullscreen* modes.
-* `PAUSE` or `ALT-P` toggles between *pause* and *running* modes.
-* `ALT-J` swaps joysticks #1 and #2.
-* `ALT-K` toggles the status of the keyboard (active/inactive).
-* `ALT-M` enters the CPU monitor (if it is active). Like `CTRL-C`
-  on the terminal.
-* `CTRL-C` on the terminal enters the CPU monitor (if the monitor is not
-  active the emulation is terminated).
-* `ALT-V` toggles the visibility of the info panel.
+##### Gamepads:
 
-Under macOS, the `ALT` key is equivalent of the option key &#8997;.
+When a gamepad is detected it is automatically connected to an emulated
+joystick port.
 
-### Info Panel
+##### Virtual joystick:
 
-The Info Panel is a basic control panel containing widgets that allow minimal
-settings at runtime. It can be made visible/invisible with a mouse right
-click or using the `ALT-V` key combination.<br>
-The default panel widgets are:
+A virtual joystick is available and it can be enabled using the `vjoy`
+configuration option. The default mappings are:
+- Up: `KEY_NUMPAD_8`
+- Down: `KEY_NUMPAD_2`
+- Left: `KEY_NUMPAD_4`
+- Right: `KEY_NUMPAD_3`
+- Fire: `KEY_NUMPAD_5`
 
-* Toggle Fullscreen mode
-* Platform reset
-* Suspend/Resume emulation
-* Audio Volume control
+These mappings can be changed using parameters: `vjoy_up`, `vjoy_down`,
+`vjoy_left`, `vjoy_right`, and `vjoy_fire`.
 
-There are other widgets that depend on the specifc platform, such as:
-
-* Joystick status
-* Disk drive status
-* Cassette status
-
-### Joysticks
-
-* Gamepads or real joysticks:
-  When a real gamepad is detected and the emulated platform supports a
-  joystick it is attached to it.
-
-* Virtual Joystick:
-  A virtual joystick is available and it can be enabled using the `vjoy`
-  configuration option.
-  The default mappings are:
-    - UP: `KEY_NUMPAD_8`
-    - DOWN: `KEY_NUMPAD_2`
-    - LEFT: `KEY_NUMPAD_4`
-    - RIGHT: `KEY_NUMPAD_3`
-    - FIRE: `KEY_NUMPAD_5`
-
-  These mappings can be changed using the following configuration parameters:
-    - `vjoy_up`
-    - `vjoy_down`
-    - `vjoy_left`
-    - `vjoy_right`
-    - `vjoy_fire`
+When the virtual joystick is enabled it is automatically connected to an
+emulated joystick port.
 
 <hr>
 </details>
@@ -149,35 +156,32 @@ Commodore C64 specific:
  --unit9 <dir>           Attach a disk drive as unit 9
 ```
 
-#### Keyboard
+#### Keyboard layout
 
-The keyboard layout can be set using the `keymaps` configuration option
-(the default is [US-ANSI](https://en.wikipedia.org/wiki/File:ANSI_Keyboard_Layout_Diagram_with_Form_Factor.svg)).
-<br>
-For example, to use the italian layout:
-```
-    $ caio c64 --keymaps it
-```
+The following keyboard layouts are available for the C64:
 
-to use the [VICEKB](https://vice-emu.pokefinder.org/images/b/b8/C64keyboard.gif)
-positional layout:
-```
-    $ caio c64 --keymaps vice
-```
-
-At the moment the following layouts are available (not all of them fully
-tested):
-
-* Italian (it)
-* German (de)
-* Swiss (ch)
-* UK (gb)
-* US-ANSI (default)
-* VICEKB (vice)
+* [Italian (it)](https://upload.wikimedia.org/wikipedia/commons/e/e5/Italian_Keyboard_layout.svg)
+* [German (de)](https://en.wikipedia.org/wiki/QWERTZ#/media/File:German-Keyboard-Layout-T2-Version1-large.png)
+* [Swiss (ch)](https://en.wikipedia.org/wiki/QWERTZ#/media/File:KB_Swiss.svg)
+* [UK (gb)](https://upload.wikimedia.org/wikipedia/commons/d/da/KB_United_Kingdom.svg)
+* [US-ANSI (default)](https://upload.wikimedia.org/wikipedia/commons/3/37/ANSI_Keyboard_Layout_Diagram_with_Form_Factor.svg)
+* [VICEKB (vice)](https://vice-emu.pokefinder.org/images/b/b8/C64keyboard.gif)
 
 Like the [VICE](https://en.wikipedia.org/wiki/VICE) emulator, the `RESTORE`
 key is mapped as `Page-Up`, `RUN/STOP` as `ESC`, `CTRL` as `TAB` and
 `CBM` as `LEFT-CTRL`.
+
+For example, to use the italian layout:
+
+```
+$ caio c64 --keymaps it
+```
+
+To use the vice positional layout:
+
+```
+$ caio c64 --keymaps vice
+```
 
 #### Joysticks
 
@@ -187,14 +191,15 @@ one port is associated to the gamepad and the other to the virtual
 joystick.
 
 Unexpected results could occur when the same key is shared by both the
-emulated keyboard and the virtual joystick (both try to process the
+emulated keyboard and the virtual joystick (both try to process the same
 keystroke). To help deal with this situation the state of the emulated
 keyboard can be toggled (activated/deactivated) at runtime using the
-`ALT-K` key combination.<br>
+`ALT-K` key combination.
+<br>
 Games or other applications that use the keyboard in conjunction with the
-joystick should never share the same keys. If the default joystick keys are
-not available or just difficult to use, the user is always free to redefine
-both the keyboard keys and the virtual joystick as desired.
+virtual joystick should never share the same keys. If the default virtual
+joystick keys are not available or just difficult to use, the user is always
+free to redefine both the keyboard keys and the virtual joystick as desired.
 
 For more information refer to the Generic Configuration section.
 
@@ -203,50 +208,58 @@ For more information refer to the Generic Configuration section.
 There is an implementation of the
 [C1541](https://en.wikipedia.org/wiki/Commodore_1541) disk drive unit that
 access the host filesystem. Host directories are recursively traversed so it
-must be used with care.<br>
-Configuration options `unit8` and `unit9` must be used to associate a host
+must be used with care.
+<br>
+Configuration options `unit8` and `unit9` are be used to associate a host
 directory to a floppy disk.
 
 `D64` disk drive images are not supported yet.
 
-#### Examples:
+#### Examples
 
 The following command activates the horizontal scanlines visual effect, scales
 up the emulated screen resolution 3 times (that is, a 320x200 screen is scaled
-up to 960x600), loads and launches the cartridge named *ghostngobblins*:
+up to 960x600), loads and launches the cartridge named *ghostsngoblins*:
+
 ```
-    $ caio c64 --scanlines h --scale 3 --cart /games/c64/ghostngobblins.crt
+$ caio c64 --scanlines h --scale 3 --cart /games/c64/ghostsngoblins.crt
 ```
 
 The next command activates the advanced horizontal scanlines visual effect
 (note the captial H), in this mode the specified scale factor is doubled
 (that is, a 320x200 screen is scaled up to 1280x800), loads and launches the
-cartridge *Simon's Basic*:
+cartridge named *Simon's Basic*:
+
 ```
-    $ caio c64 --scanlines H --scale 2 --cart /apps/c64/simons_basic.crt
+$ caio c64 --scanlines H --scale 2 --cart /apps/c64/simons_basic.crt
 ```
 
 The next command loads and run a `PRG` program:
+
 ```
-    $ caio c64 --scale 3 --prg /games/c64/rambo.prg
+$ caio c64 --scale 3 --prg /games/c64/rambo.prg
 ```
 
 The program is injected directly into RAM while the emulator is suspended,
-this means that the previous command won't work for advanced or big files
+this means that the previous command won't work with advanced or big files
 that are expected to overwrite memory areas not configured as RAM. In that
 case configuration options `unit8` and `unit9` must be used as follows:
+
 ```
-    $ caio c64 --scale 3 --unit8 /games/c64
+$ caio c64 --scale 3 --unit8 /games/c64
 ```
+
 then, from basic:
+
 ```
 LOAD "RAMBO",8,1
 ```
 
 Cartridges and programs can be specified without using their specific
 command line options, in this case the format is auto-detected:
+
 ```
-    $ caio c64 --scale 3 /games/c64/ghostbusters.crt
+$ caio c64 --scale 3 /games/c64/ghostbusters.crt
 ```
 
 <hr>
@@ -271,37 +284,41 @@ Sinclair ZX80 specific:
  --prg <.o|.p>           Load a .o/.p file as soon as the basic is started
 ```
 
-The original Sinclair ZX-80 came with 4K ROM and 1K RAM. Several RAM upgrades
-were available at the time and caio supports the 16K RAM upgrade.
-An 8K ROM was also available for the ZX-80 and it is supported.
+The [Sinclair ZX-80](https://en.wikipedia.org/wiki/ZX80) came with 4K ROM
+and 1K RAM. Soon after its introduction several RAMPACKs appeared, these
+extended the RAM up to 16K.<br>
+When the ZX-81 came out, its 8K ROM was also available for the ZX-80.<br>
+caio supports the original configuration, the 16K RAM extension and
+the 8K ROM.
 
-The cassette interface is associated to a directory in the host filesystem,
-files contained there are considered part of a single tape (see the Cassette
-interface section below).
+#### Keyboard layout
 
-#### Keyboard
+The default keyboard layout is positional and depends on the installed ROM:
 
-The default keyboard layout depends on the installed ROM:
+4K ROM keyboard layout:
 
-##### 4K ROM keyboard layout:
+<p align="center"><img src="../images/zx80-4K-layout.jpg" width="430"></p>
 
-<img src="../images/zx80-4K-layout.jpg" width="430">
+8K ROM keyboard layout:
 
-##### 8K ROM keyboard layout:
-
-<img src="../images/zx80-8K-layout.jpg" width="430">
+<p align="center"><img src="../images/zx80-8K-layout.jpg" width="430"></p>
 
 #### Cassette interface
 
-The cassette interface is emulated and both cassette file formats
-***.o*** (4K ROM) and ***.p*** (8K ROM) are supported. Audio files
-(WAV, PCM, etc.) are not supported.
-<br>
-The behaviour of basic commands `LOAD` and `SAVE` depend on the ROM being
+The cassette interface is supported. It associates an emulated tape to a
+directory in the host filesystem so files contained there are considered
+part of a single big tape.
+
+Cassette file formats
+[.O](https://problemkaputt.de/zxdocs.htm#zx80zx81cassettefileimages) (4K ROM)
+and [.P](https://problemkaputt.de/zxdocs.htm#zx80zx81cassettefileimages)
+(8K ROM) are supported. Audio files (WAV, PCM, etc.) are not supported.
+
+The behaviour of _BASIC_ commands `LOAD` and `SAVE` depend on the ROM being
 used:
-- 4K ROM: The filename is *ALWAYS* set to `basic.o` and it is located under
-  the cassette directory. Because of this, a `SAVE` operation overwrites an
-  existing `basic.o` file.
+- 4K ROM: The filename is **always** set to `basic.o` and it is located under
+  the cassette directory. Because of this, a `SAVE` operation overwrites any
+  previously existing `basic.o` file.
 - 8K ROM: In the case of a `SAVE` operation, a file is created in the cassette
   directory using the name specified by the user.
   In the case of a `LOAD` operation, the content of all ***.p*** files present
@@ -310,16 +327,21 @@ used:
 
 See the `cassdir` configuration option.
 
+#### Preloading programs
+
 The `prg` configuration option can be used to automatically load a program as
-soon the basic is started by-passing the slow cassette interface. For example:
+soon the basic is started by-passing the slow cassette interface.
+For example:
+
 ```
-    $ caio zx80 --scale 2 --ram16 --prg /games/zx80/ZX80.4K.ROM.Pacman.o
+$ caio zx80 --scale 2 --ram16 --prg /games/zx80/ZX80.4K.ROM.Pacman.o
 ```
 
-Programs can be specified without using the `--prg` command line option,
-in this case the format is auto-detected:
+Programs can be specified without the `--prg` command line option, in this
+case the format is auto-detected:
+
 ```
-    $ caio zx80 --scale 2 --ram16 --rom8 yes /games/zx80/ZX80.8K.ROM.Kong.o
+$ caio zx80 --scale 2 --ram16 --rom8 yes /games/zx80/ZX80.8K.ROM.Kong.o
 ```
 
 #### Software
@@ -351,22 +373,28 @@ Sinclair ZX-Spectrum 48K specific:
  --snap <fname>          Load a snapshot image (Z80 or SNA formats)
 ```
 
-#### Keyboard
+#### Keyboard layout
 
-The default is the positional keyboard layout:
+The default keyboard layout is positional:
 
+<p align="center">
 <a href="https://upload.wikimedia.org/wikipedia/commons/3/33/ZXSpectrum48k.jpg">
-<img src="../images/640px-ZXSpectrum48k.jpg" width=430
+<img src="../images/640px-ZXSpectrum48k.jpg" width="430"
 title="ZX-Spectrum - Photo By Bill Bertram - Own work, CC BY-SA 2.5">
 </a>
+</p>
 
 The `CAPS SHIFT` key is mapped as `SHIFT` and the `SYMBOL SHIFT` key
 is mapped as `CTRL`.
 
 #### Joysticks
 
-The [Kempston](https://en.wikipedia.org/wiki/Kempston_Micro_Electronics)
-joystick interface is supported.<br>
+The ZX-Spectrum does not have native joystick ports. External devices from
+various vendors were used to add joystick support to this machine. One of the
+most common of these devices is the
+[Kempston](https://en.wikipedia.org/wiki/Kempston_Micro_Electronics)
+joystick interface which caio supports.
+
 If the virtual joystick is enabled (`vjoy` configuration option), the
 Kempston interface is automatically connected to it. If a gamepad is
 detected and the virtual joystick is **not** enabled then the Kempston
@@ -376,16 +404,17 @@ For more information refer to the Generic Configuration section.
 
 #### Cassette interface
 
-The cassette interface is emulated and it only supports the ***TAP***
-file format. Audio files (WAV, PCM, etc.) are not supported.
-
+The cassette interface is emulated and it supports the
+[TAP](https://sinclair.wiki.zxnet.co.uk/wiki/TAP_format) file format.
+Audio files (WAV, PCM, etc.) are not supported.
+<br>
 The cassette interface can be specified as a file or as a directory
 and there are two configuration options:
 
 - `tape`: Sets the input tape (*LOAD*)<br>
 If a directory is specified as input tape, the content of a number of *TAP*
-files found inside it are concatenated into a big virtual *TAP* which
-is then used as input tape.
+files found inside it are concatenated creating a big virtual *TAP* which
+is used as input tape.
 
 - `otape`: Sets the output tape (*SAVE*)<br>
 If a directory is specified as output tape, any SAVE operation creates
@@ -393,35 +422,114 @@ a new *TAP* file inside it.<br>
 If a file is specified as output tape, any SAVE operation appends data
 to it.
 
-The following command specifies the file *starquak.tap* as input tape,
-this file contains the game *Starquake*; the `fastload` option is used
-to accelerate loading:
+The following command specifies the file *starquak.tap* as input tape:
+
 ```
-    $ caio zxspectrum --fastload --tape /games/spectrum/starquak.tap
+$ caio zxspectrum --fastload --tape /games/spectrum/starquak.tap
 ```
 
-In order to load and run the actual game the command shown below must be
-entered from *BASIC*:
+The `fastload` option is used to disable time emulation during cassette
+load operations.
+
+In order to load and run the program stored inside that tape, the command
+shown below must be entered from *BASIC*:
+
 ```
-    LOAD ""
+LOAD ""
 ```
 
 #### Snapshots
 
 The `snap` option can be used to load a snapshot file.
-Supported formats are ***SNA*** and ***Z80***.<br>
-
+Supported formats are [SNA](https://sinclair.wiki.zxnet.co.uk/wiki/SNA_format)
+and [Z80](https://sinclair.wiki.zxnet.co.uk/wiki/Z80_format).
+<br>
 The following command launches the game called *Jet Set Willy* which is
 embedded inside a snapshot:
+
 ```
-    $ caio zxspectrum --snap /games/spectrum/Jet.Set.Willy.z80
+$ caio zxspectrum --snap /games/spectrum/Jet.Set.Willy.z80
 ```
 
 Snapshots can be specified without using the `--snap` command line option,
-in this case the snapshot format is auto-detected:
+in this case the format of the snapshot file is auto-detected:
+
 ```
-    $ caio zxspectrum /games/spectrum/elite.z80
+$ caio zxspectrum /games/spectrum/elite.z80
 ```
 
 <hr>
 </details>
+
+## Interacting with the emulator
+
+When a specific machine is launched (using one of the methods explained
+in the previous section) a new window appears running the specified emulated
+platform.
+
+### Hot-Keys
+
+The following key combinations are accepted:
+
+* `ALT-F` toggles between *windowed* and *fullscreen* modes.
+* `PAUSE` or `ALT-P` toggles between *pause* and *running* modes.
+* `ALT-J` swaps joysticks #1 and #2.
+* `ALT-K` toggles the status of the keyboard (active/inactive).
+* `CTRL-C` on the terminal enters the CPU monitor (if the monitor is not
+  active the emulation is terminated).
+* `ALT-V` toggles the visibility of the info panel.
+
+Under macOS the **command &#8984;** key must be used instead of the
+**ALT** key.
+
+### Info Panel
+
+The Info Panel is an informational panel containing widgets used to show
+status information of emulated devices and to control some aspects of the
+emulator (audio volume setting, pause, reset, etc.).
+<br>
+The Panel can be made visible/invisible clicking the mouse right button
+or using the `ALT-V` key combination.
+<br>
+The default panel widgets that appear on the screen are (from right to left):
+
+* Toggle Fullscreen mode
+* Platform reset
+* Suspend/Resume emulation
+* Audio Volume control
+
+There are other widgets that depend on the specifc emulated platform, such as:
+
+* Joystick status
+* Disk drive status
+* Cassette status
+
+<br>
+<p align="center">
+<img src="../images/caio-panel.jpg" width="640" title="caio panel">
+</p>
+
+The panel above shows the Commodore 64 disk unit 8 active, unit 9 disabled,
+joystick port #1 enabled and not swapped with joystick port #2 which is
+disabled.
+
+### Joysticks
+
+As explained in the Configuration section, when a gamepad is detected and
+the emulated platform supports one or more joystick ports, the gamepad is
+assigned to one of those ports.
+<br>
+When the virtual joystick is enabled and the emulated platform supports one
+or more joystick ports, the virtual joystick is assigned to one of those
+ports.
+
+When a gamepad is detected and the virtual joystick is enabled and the
+emulated platform supports more than one joystick port, the virtual joystick
+is assigned to one port and the gamepad to the other.
+
+Some platforms (such as the Commodore 64) share the internal keyboard matrix
+with joystick ports, this means that a virtual joystick sharing keys with the
+emulated keyboard can negatively interfere with it.
+Please refer to the specific platform configuration section to learn more
+about the virutal joystick and possible issues with the keyboard.
+

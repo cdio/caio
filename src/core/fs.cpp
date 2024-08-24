@@ -18,6 +18,10 @@
  */
 #include "fs.hpp"
 
+#ifdef __APPLE__
+#include <mach-o/dyld.h>    /* _NSGetExecutablePath */
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fnmatch.h>
@@ -53,7 +57,44 @@ Path fix_home(const Path& path)
     return path;
 }
 
-Path search(const Path& fname, const std::initializer_list<const Path>& spath, bool cwd)
+Path exec_path()
+{
+    static Path path{};
+    if (path.empty()) {
+        char buf[PATH_MAX] = { "" };
+#ifdef __APPLE__
+        uint32_t bufsiz = sizeof(buf);
+        _NSGetExecutablePath(buf, &bufsiz);
+
+#else   /* FIXME: *BSD */
+        ::readlink("/proc/self/exe", buf, sizeof(buf));
+
+#endif
+        path = buf;
+    }
+
+    return path;
+}
+
+Path exec_directory()
+{
+    static Path path{};
+    if (path.empty()) {
+        path = exec_path().parent_path();
+    }
+    return path;
+}
+
+Path exec_filename()
+{
+    static Path path{};
+    if (path.empty()) {
+        path = exec_path().filename();
+    }
+    return path;
+}
+
+Path search(const Path& fname, const std::initializer_list<const Path>& spath)
 {
     if (fname.empty()) {
         return {};
@@ -73,22 +114,10 @@ Path search(const Path& fname, const std::initializer_list<const Path>& spath, b
         }
     }
 
-    if (cwd) {
-        /*
-         * Directory not specified in fname.
-         * Search on the current working directory.
-         */
-        log.debug("Looking for file: {}: ", name.string());
-        if (fs::exists(name)) {
-            log.debug("Found: {}\n", name.string());
-            return fname;
-        }
-    }
-
     for (const auto& pth : spath) {
         auto fullpath{fix_home(pth)};
         fullpath /= name;
-        log.debug("Trying {}...", fullpath.string());
+        log.debug("Trying {}... ", fullpath.string());
         if (fs::exists(fullpath)) {
             log.debug("Found\n");
             return fullpath;
@@ -115,6 +144,15 @@ void concat(const Path& dst, const Path& src)
         is.unsetf(std::ios_base::skipws);
         std::copy(std::istream_iterator<uint8_t>(is), std::istream_iterator<uint8_t>(),
             std::ostream_iterator<uint8_t>(os));
+    } catch (const std::exception& err) {
+        throw IOError{err};
+    }
+}
+
+void unlink(const Path& fname)
+{
+    try {
+        std::filesystem::remove(fname);
     } catch (const std::exception& err) {
         throw IOError{err};
     }
@@ -233,9 +271,10 @@ std::ostream& save(std::ostream& os, std::span<const uint8_t> buf)
     return os;
 }
 
-IDir::IDir(EntryType etype, const std::string& eempty)
+IDir::IDir(EntryType etype, const std::string& eempty, size_t elimit)
     : _etype{etype},
-      _eempty{eempty}
+      _eempty{eempty},
+      _elimit{elimit}
 {
 }
 
@@ -313,9 +352,9 @@ bool IDir::refresh()
         return false;
     }
 
-    std::vector<Path> files{};
     const bool want_dirs = (_etype & EntryType::Dir);
     const bool want_files = (_etype & EntryType::File);
+    std::vector<Path> files{};
 
     const auto flt = [this, &files, want_dirs, want_files](const Path& entry) {
         std::error_code ec{};
@@ -333,16 +372,16 @@ bool IDir::refresh()
         }
 
         const size_t total = _entries.size() + files.size();
-        return (total < DIR_ENTRIES_LIMIT);
+        return ((_elimit == 0) || (total < _elimit));
     };
 
     _entries.clear();
-    const auto& end = std::filesystem::end(std::filesystem::directory_iterator{});
+    const auto end = std::filesystem::end(std::filesystem::directory_iterator{});
     std::filesystem::directory_iterator it{_path, std::filesystem::directory_options::skip_permission_denied};
 
     for (; it != end; ++it) {
         const auto& entry = it->path();
-        if (flt(entry) == false) {
+        if (!flt(entry)) {
             break;
         }
     }
@@ -364,8 +403,8 @@ inline bool IDir::time_to_refresh() const
     return (utils::now() >= _nrefresh);
 }
 
-IDirNav::IDirNav(EntryType etype, const std::string& eempty)
-    : IDir{etype, eempty}
+IDirNav::IDirNav(EntryType etype, const std::string& eempty, size_t elimit)
+    : IDir{etype, eempty, elimit}
 {
 }
 

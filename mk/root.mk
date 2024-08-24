@@ -29,11 +29,11 @@ CLEANDIRS=	${DIRS}
 
 DISTCLEANDIRS=	${DIRS}
 
-.PHONY: distclean pacakge test dtest _test
+.PHONY: distclean bundle pacakge test dtest _test
 
 include ${ROOT}/mk/dir.mk
 
-package:
+bundle package:
 	ROOT=${ROOT} PREFIX=${PREFIX} ${MAKE} ${MAKEARGS} -f ${ROOT}/mk/package.mk $@
 
 dtest: TARGET=debug

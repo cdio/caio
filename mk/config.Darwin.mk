@@ -17,8 +17,14 @@
 # with this program; if not, see http://www.gnu.org/licenses/
 #
 EXTRA_3RDPARTY_DIRS+=
+
 SYSDEP_CPPFLAGS+=	-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
-UI_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags sdl2 sdl2_image}
-UI_LDADD+=		${shell ${PKG_CONFIG} --libs sdl2 sdl2_image}
+
 LIB_INCLUDE_BEGIN=	-Wl,-all_load
 LIB_INCLUDE_END=
+
+UI_CXXFLAGS+=		-I${ROOT}/3rdparty/sdl_image/SDL_image.subtree/include
+UI_CXXFLAGS+=		${shell ${SDL2_CONFIG} --cflags}
+
+UI_LDADD+=		${ROOT}/3rdparty/sdl_image/SDL_image/libSDL2_image.a
+UI_LDADD+=		${shell ${SDL2_CONFIG} --static-libs}

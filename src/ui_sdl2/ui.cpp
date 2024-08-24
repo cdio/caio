@@ -537,6 +537,12 @@ void UI::win_event(const ::SDL_Event& event)
 
 void UI::kbd_event(const SDL_Event& event)
 {
+#ifdef __APPLE__
+    constexpr static const auto ALT = KMOD_GUI;
+#else
+    constexpr static const auto ALT = KMOD_ALT;
+#endif
+
     const auto& kevent = event.key;
     const auto& key = kevent.keysym;
 
@@ -547,7 +553,7 @@ void UI::kbd_event(const SDL_Event& event)
             break;
         }
 
-        if (key.mod & KMOD_ALT) {
+        if (key.mod & ALT) {
             /*
              * Handle ALT-xx hotkeys.
              */
@@ -571,13 +577,6 @@ void UI::kbd_event(const SDL_Event& event)
                  * Toggle virtual joystick/keyboard.
                  */
                 hotkeys(keyboard::KEY_ALT_K);
-                break;
-
-            case SDLK_m:
-                /*
-                 * Enter Monitor.
-                 */
-                hotkeys(keyboard::KEY_ALT_M);
                 break;
 
             case SDLK_p:

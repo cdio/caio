@@ -19,7 +19,6 @@
 #pragma once
 
 #include <cstdint>
-#include <string_view>
 
 #include "prgfile.hpp"
 #include "types.hpp"
@@ -47,9 +46,9 @@ public:
      * Load a P00 file.
      * @param fname If defined, name of the P00 file to load.
      * @exception IOError
-     * @see load(std::string_view)
+     * @see load(const fs::Path&)
      */
-    P00File(std::string_view fname = {}) {
+    P00File(const fs::Path& fname = {}) {
         P00File::load(fname);
     }
 
@@ -70,7 +69,7 @@ public:
      * @param fname Name of the P00 file to load.
      * @exception IOError
      */
-    void load(std::string_view fname) override;
+    void load(const fs::Path& fname) override;
 
     /**
      * Save this P00 file.
@@ -78,7 +77,7 @@ public:
      * @param addr  If non-zero, use this value as the P00's start address ignoring PrgFile::address().
      * @exception IOError
      */
-    void save(std::string_view fname, addr_t addr = 0) override;
+    void save(const fs::Path& fname, addr_t addr = 0) override;
 
 private:
     P00Header _hdr{};

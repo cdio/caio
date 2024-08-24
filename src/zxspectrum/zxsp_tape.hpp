@@ -100,15 +100,15 @@ struct HeaderBlock {
     constexpr static const uint8_t TYPE_BASIC_CHRARR    = 0x02;
     constexpr static const uint8_t TYPE_BINARY_CODE     = 0x03;
 
-    uint8_t block_type{};
+    uint8_t block_type;
 
     struct {
-        uint8_t  type{};
-        char     name[10]{};
-        uint16_t datalen{};
+        uint8_t  type;
+        char     name[10];
+        uint16_t datalen;
 
         union {
-            uint32_t params{};
+            uint32_t params;
             struct {                    /* Type BASIC_PRG */
                 uint16_t line;
                 uint16_t prog;
@@ -120,7 +120,7 @@ struct HeaderBlock {
         };
     } __attribute__((packed));
 
-    uint8_t parity{};
+    uint8_t parity;
 
 } __attribute__((packed));
 

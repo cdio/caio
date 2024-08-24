@@ -24,6 +24,7 @@
 #include <string_view>
 #include <vector>
 
+#include "fs.hpp"
 #include "joystick.hpp"
 #include "name.hpp"
 #include "types.hpp"
@@ -151,7 +152,6 @@ enum Key {
     KEY_ALT_GR          = KEY_RIGHT_ALT,
     KEY_ALT_J           = KEY_LEFT_ALT | KEY_J,
     KEY_ALT_K           = KEY_LEFT_ALT | KEY_K,
-    KEY_ALT_M           = KEY_LEFT_ALT | KEY_M,
     KEY_NONE            = -1
 };
 
@@ -217,7 +217,7 @@ public:
      * @see add_key_map()
      * @see clear_key_map()
      */
-    void load(std::string_view fname);
+    void load(const fs::Path& fname);
 
     /**
      * Assign a virtual joystick to an emulated joystick.

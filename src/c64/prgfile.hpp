@@ -21,9 +21,9 @@
 #include <cstdint>
 #include <iostream>
 #include <span>
-#include <string_view>
 #include <vector>
 
+#include "fs.hpp"
 #include "types.hpp"
 
 namespace caio {
@@ -44,9 +44,9 @@ public:
      * Load a PRG file.
      * @param fname If defined, name of the PRG file to load.
      * @exception IOError
-     * @see load(std::string_view)
+     * @see load(const fs::Path&)
      */
-    PrgFile(std::string_view fname = {}) {
+    PrgFile(const fs::Path& fname = {}) {
         PrgFile::load(fname);
     }
 
@@ -75,7 +75,7 @@ public:
      * @param fname Name of the PRG file to load.
      * @exception IOError
      */
-    virtual void load(std::string_view fname);
+    virtual void load(const fs::Path& fname);
 
     /**
      * Load a PRG file from an already open stream.
@@ -92,7 +92,7 @@ public:
      * @param addr  If non-zero, use this value as the PRG's start address ignoring address().
      * @exception IOError
      */
-    virtual void save(std::string_view fname, addr_t addr = 0);
+    virtual void save(const fs::Path& fname, addr_t addr = 0);
 
     /**
      * Save a PRG file.

@@ -257,10 +257,9 @@ void Config::to_section(Section& sec) const
     vjoy.to_section(sec);
 }
 
-std::string Config::resolve(std::string_view name, std::string_view path, std::string_view prefix,
-    std::string_view ext)
+fs::Path Config::resolve(const fs::Path& name, const fs::Path& path, const fs::Path& prefix, const fs::Path& ext)
 {
-    std::string fname{fs::search(name)};
+    fs::Path fname = fs::search(name);
     if (!fname.empty()) {
         /*
          * name is referencing an existing file.
@@ -271,13 +270,13 @@ std::string Config::resolve(std::string_view name, std::string_view path, std::s
     /*
      * Build the basename and search for the file in the specified path.
      */
-    fname = std::format("{}{}{}", prefix, name, ext);
-    std::string fullpath{fs::search(fname, {path})};
+    fname = std::format("{}{}{}", prefix.string(), name.string(), ext.string());
+    fs::Path fullpath = fs::search(fname, {path});
     if (!fullpath.empty()) {
         return fullpath;
     }
 
-    throw IOError{"File not found: name: {}, path: {}", fname, path};
+    return name;
 }
 
 std::string Config::to_string() const

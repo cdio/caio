@@ -18,61 +18,65 @@
 #
 
 #
-# MacOS application bundle and packages .pkg and .dmg.
+# MacOS application bundle and package files .pkg and .dmg.
 #
-PKGNAME=		caio_${VERSION}-${ARCH}
-PKGFILE=		${ROOT}/${PKGNAME}.pkg
-DMGFILE=		${ROOT}/${PKGNAME}.dmg
-DMGDIR=			${ROOT}/${PKGNAME}
+PKG_NAME=		caio_${VERSION}-${ARCH}
+PKG_FILE=		${ROOT}/${PKG_NAME}.pkg
+DMG_FILE=		${ROOT}/${PKG_NAME}.dmg
+DMG_DIR=		${ROOT}/${PKG_NAME}
 
 BUNDLE_NAME=		caio.app
 BUNDLE_DIR=		${ROOT}/${BUNDLE_NAME}
 BUNDLE_CONTENTS_DIR=	${BUNDLE_DIR}/Contents
 BUNDLE_BINDIR=		${BUNDLE_CONTENTS_DIR}/MacOS
-BUNDLE_RESOURCES_DIR=	${BUNDLE_CONTENTS_DIR}/Resources
+BUNDLE_DATADIR=		${BUNDLE_CONTENTS_DIR}/Resources
 BUNDLE_ICON_RELATIVE=	icons/caio.png
 BUNDLE_INFO_PLIST=	${BUNDLE_CONTENTS_DIR}/Info.plist
 
 INSTALL_DIR=		/Applications
-RUNTIME_RESOURCES_DIR=	${BUNDLE_RESOURCES_DIR:${ROOT}/%=${INSTALL_DIR}/%}
+RUNTIME_DATADIR=	../Resources
 
 CLEANFILES+=		${PACKAGES} \
 			${BUNDLE_DIR} \
-			${PKGNAME}
+			${PKG_NAME}
 
 MK_PACKAGE?=		productbuild
 MK_IMAGE?=		hdiutil
 
+CURRENT_YEAR:=		${shell date +"%Y"}
+
 .PHONY: all bundle install package
 
-package: ${DMGFILE} ${PKGFILE}
+package: ${DMG_FILE} ${PKG_FILE}
 
-${DMGFILE}: bundle
-	[ -d ${DMGDIR} ] || ${INSTALL} -d -m 0755 ${DMGDIR}
-	${CP} -Rp ${BUNDLE_DIR} ${DMGDIR}
-	cd ${DMGDIR} && ${LN} -sf ${INSTALL_DIR}
-	${MK_IMAGE} create -srcfolder ${DMGDIR} -format UDZO $@
+${DMG_FILE}: bundle
+	[ -d ${DMG_DIR} ] || ${INSTALL} -d -m 0755 ${DMG_DIR}
+	${CP} -Rp ${BUNDLE_DIR} ${DMG_DIR}
+	cd ${DMG_DIR} && ${LN} -sf ${INSTALL_DIR}
+	-${RM} $@
+	${MK_IMAGE} create -srcfolder ${DMG_DIR} -format UDZO $@
 
-${PKGFILE}: bundle
+${PKG_FILE}: bundle
 	${MK_PACKAGE} --component ${BUNDLE_DIR} ${INSTALL_DIR} $@
 
+bundle: EXTRA_CPPFLAGS+=-DGUI_COMBO_PATH_RELATIVE
 bundle: install ${BUNDLE_INFO_PLIST}
 
 install: all
 	DST_BINDIR="${BUNDLE_BINDIR}" \
-	DST_DATADIR="${BUNDLE_RESOURCES_DIR}" \
-	DST_SYSCONFDIR="${BUNDLE_RESOURCES_DIR}" \
-	PREFIX="${BUNDLE_RESOURCES_DIR}" \
+	DST_DATADIR="${BUNDLE_DATADIR}" \
+	DST_SYSCONFDIR="${BUNDLE_DATADIR}" \
+	PREFIX="${BUNDLE_DATADIR}" \
 	VERSION=${VERSION} \
 	${MAKE} ${MAKEARGS} $@
 
 all:
-	EXTRA_CPPFLAGS='-DD_SYSCONFDIR=\"${RUNTIME_RESOURCES_DIR}\" -DD_DATADIR=\"${RUNTIME_RESOURCES_DIR}\"' \
-	PREFIX="${RUNTIME_RESOURCES_DIR}" \
+	EXTRA_CPPFLAGS='${EXTRA_CPPFLAGS} -DD_SYSCONFDIR=\"${RUNTIME_DATADIR}\" -DD_DATADIR=\"${RUNTIME_DATADIR}\"' \
+	PREFIX="${RUNTIME_DATADIR}" \
 	VERSION=${VERSION} \
 	${MAKE} ${MAKEARGS} $@
 
-${BUNDLE_INFO_PLIST}: ${dir $@}
+${BUNDLE_INFO_PLIST}: ${dir $@} ${ROOT}/mk/dmg-package.mk
 	${PRINTF} \
 	"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"\
 	"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"\
@@ -95,7 +99,7 @@ ${BUNDLE_INFO_PLIST}: ${dir $@}
 	"	<key>CFBundleIconFile</key>\n"\
 	"	<string>${BUNDLE_ICON_RELATIVE}</string>\n"\
 	"	<key>NSHumanReadableCopyright</key>\n"\
-	"	<string>Copyright © 2020-2024 Claudio Castiglia</string>\n"\
+	"	<string>Copyright © 2020-${CURRENT_YEAR} Claudio Castiglia</string>\n"\
 	"</dict>\n"\
 	"</plist>\n" > $@
 

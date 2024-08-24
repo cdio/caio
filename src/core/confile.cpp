@@ -22,7 +22,6 @@
 #include <regex>
 
 #include "utils.hpp"
-#include <iostream> //XXX
 
 namespace caio {
 namespace config {

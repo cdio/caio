@@ -93,12 +93,6 @@ void ConfigEditor::render()
 
     _gui.newline();
 
-    _gui.begin_subsection("Logging:");
-    render_logging(cfg);
-    _gui.end_subsection();
-
-    _gui.newline();
-
     _gui.begin_subsection("Appearance:");
     render_appearance(cfg);
     _gui.end_subsection();
@@ -147,27 +141,6 @@ void ConfigEditor::render_directories(config::Config& cfg)
     }
 }
 
-void ConfigEditor::render_logging(config::Config& cfg)
-{
-    Logger::Level lv = Logger::parse_loglevel(cfg.loglevel);
-    bool log_error   = (lv & Logger::Level::Error);
-    bool log_warning = (lv & Logger::Level::Warn);
-    bool log_info    = (lv & Logger::Level::Info);
-    bool log_debug   = (lv & Logger::Level::Debug);
-
-    _gui.input_text("Logfile", "##logfile", cfg.logfile);
-    _gui.checkbox("Log Error messages", "##log-error", log_error);
-    _gui.checkbox("Log Warning messages", "##log-warning", log_warning);
-    _gui.checkbox("Log Info messages", "##log-info", log_info);
-    _gui.checkbox("Log Debug messages", "##log-debug", log_debug);
-
-    std::string loglevel = (log_error ? Logger::ERROR_STR + "|"s : "");
-    loglevel += (log_warning ? Logger::WARN_STR + "|"s : "");
-    loglevel += (log_info    ? Logger::INFO_STR + "|"s : "");
-    loglevel += (log_debug   ? Logger::DEBUG_STR + "|"s : Logger::NONE_STR);
-    cfg.loglevel = loglevel;
-}
-
 void ConfigEditor::render_appearance(config::Config& cfg)
 {
     constexpr static const size_t FPS_WIDTH = 4;
@@ -198,6 +171,7 @@ void ConfigEditor::render_vjoy(config::Config& cfg)
     config::VJoyConfig& vjoy = cfg.vjoy;
 
     _gui.checkbox("Enable virtual joystick", "##vjoy-enabled", vjoy.enabled);
+    _gui.begin_disabled(!vjoy.enabled);
     _gui.combo_key("UP key", "##key-up", vjoy.up);
     _gui.combo_key("DOWN Key", "##key-down", vjoy.down);
     _gui.combo_key("LEFT Key", "##key-left", vjoy.left);
@@ -210,6 +184,7 @@ void ConfigEditor::render_vjoy(config::Config& cfg)
     _gui.combo_key("BACK Key", "##key-back", vjoy.back);
     _gui.combo_key("GUIDE Key", "##key-guide", vjoy.guide);
     _gui.combo_key("START Key", "##key-start", vjoy.start);
+    _gui.end_disabled();
 }
 
 void ConfigEditor::render_specific()
@@ -263,9 +238,10 @@ void default_config(std::string_view description, std::string_view secname)
 
 void ConfigEditor::create_default_configs()
 {
-    default_config<commodore::c64::C64Cmdline>("Commodore 64", commodore::c64::SEC_C64);
-    default_config<sinclair::zx80::ZX80Cmdline>("Sinclair ZX-80", sinclair::zx80::SEC_ZX80);
-    default_config<sinclair::zxspectrum::ZXSpectrumCmdline>("Sinclair ZX-Spectrum 48K",
+    /* The ^ prefix is a hack to mark a default configuration */
+    default_config<commodore::c64::C64Cmdline>("^Commodore 64", commodore::c64::SEC_C64);
+    default_config<sinclair::zx80::ZX80Cmdline>("^Sinclair ZX-80", sinclair::zx80::SEC_ZX80);
+    default_config<sinclair::zxspectrum::ZXSpectrumCmdline>("^Sinclair ZX-Spectrum 48K",
         sinclair::zxspectrum::SEC_ZXSPECTRUM);
 }
 

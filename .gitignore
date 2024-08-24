@@ -1,6 +1,7 @@
 *.[oda]
 *.swp
 *.kdev*
+build
 cscope.*
 GPATH
 GRTAGS

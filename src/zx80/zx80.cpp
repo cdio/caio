@@ -313,16 +313,6 @@ void ZX80::hotkeys(keyboard::Key key)
     case keyboard::KEY_ALT_J:
         break;
 
-    case keyboard::KEY_ALT_M:
-        /*
-         * Enter monitor on the next clock tick only if it is active.
-         */
-        if (!_conf.monitor) {
-            break;
-        }
-
-        /* PASSTHROUGH */
-
     case keyboard::KEY_CTRL_C:
         /*
          * Enter monitor on the next clock tick.

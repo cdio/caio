@@ -18,11 +18,14 @@
  */
 #pragma once
 
+#include <cstdint>
 #include <format>
 #include <functional>
 #include <optional>
+#include <span>
 #include <string>
 
+#define IMGUI_USE_WCHAR32
 #include "3rdparty/imgui/libimgui/imgui.h"
 #include "3rdparty/imgui/libimgui/imgui_impl_sdl2.h"
 #include "3rdparty/imgui/libimgui/imgui_impl_sdlrenderer2.h"
@@ -68,11 +71,17 @@ public:
         EnterReturnsTrue    = ::ImGuiInputTextFlags_EnterReturnsTrue
     };
 
+    struct FontParams {
+        float scale;                                            /* Font scale                   */
+        std::function<std::span<const float>()> sizes{};        /* Font sizes to load           */
+        std::function<std::span<const uint32_t>()> ranges{};    /* Font glyph ranges to load    */
+    };
+
     using Size = ::ImVec2;
     using ActionCb = std::function<void()>;
     using FilterCb = fs::IDir::FilterCb;
 
-    void init(const std::string& inifile, float font_scale, ::SDL_Window* sdlwin, ::SDL_Renderer* sdlrend);
+    void init(const std::string& inifile, ::SDL_Window* sdlwin, ::SDL_Renderer* sdlrend, const FontParams& fontp);
 
     void release();
 

@@ -27,6 +27,7 @@
 #include <string>
 #include <string_view>
 
+#include "fs.hpp"
 #include "types.hpp"
 
 namespace caio {
@@ -98,7 +99,7 @@ public:
         return _lv;
     }
 
-    void logfile(std::string_view fname);
+    void logfile(const fs::Path& fname);
 
     std::string logfile() const {
         return _logfile;
