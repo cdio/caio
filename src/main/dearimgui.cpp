@@ -497,7 +497,7 @@ void Gui::combo_path(const std::string& msg, const std::string& id, std::string&
         }
 #endif
         idir.refresh();
-        for (auto i = 0; i < idir.size(); ++i) {
+        for (size_t i = 0; i < idir.size(); ++i) {
             const auto& entry = idir[i];
             const auto dstc = std::filesystem::weakly_canonical(dst, ec);
             const bool is_selected = ((i == 0) ? dst.empty() : std::filesystem::equivalent(dstc, entry, ec));

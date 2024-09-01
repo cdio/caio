@@ -1035,7 +1035,7 @@ void UI::render_screen()
 inline UI::joyptr_t UI::find_joystick(::SDL_JoystickID jid)
 {
     auto it = std::find_if(_joys.begin(), _joys.end(), [jid](const joyptr_t& joy) {
-        return (joy->joyid() == jid);
+        return (static_cast<::SDL_JoystickID>(joy->joyid()) == jid);
     });
 
     return (it == _joys.end() ? joyptr_t{} : *it);

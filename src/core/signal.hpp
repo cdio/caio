@@ -203,12 +203,12 @@ public:
         _x[_xpos] = sample;
         fp_t y = 0;
 
-        for (ssize_t m = 0; m < M; ++m) {
+        for (ssize_t m = 0; m < static_cast<ssize_t>(M); ++m) {
             auto pos = mod<ssize_t>(_xpos - m, M);
             y += _x[pos] * PCoeffs<M, N>::num[m];
         }
 
-        for (ssize_t n = 1; n < N; ++n) {
+        for (ssize_t n = 1; n < static_cast<ssize_t>(N); ++n) {
             auto pos = mod<ssize_t>(_ypos - n, N);
             y -= _y[pos] * PCoeffs<M, N>::den[n];
         }

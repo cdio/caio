@@ -67,7 +67,7 @@ Path exec_path()
         _NSGetExecutablePath(buf, &bufsiz);
 
 #else   /* FIXME: *BSD */
-        ::readlink("/proc/self/exe", buf, sizeof(buf));
+        [[maybe_unused]] auto _ = ::readlink("/proc/self/exe", buf, sizeof(buf));
 
 #endif
         path = buf;

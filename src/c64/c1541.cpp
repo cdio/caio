@@ -368,7 +368,7 @@ void C1541::command(std::string_view param)
 
         } else {
             auto it = std::find_if(commands.begin(), commands.end(), [&param](const DiskCommand& dc) -> bool {
-                return (param.find(dc.name) == 0 || param.find(dc.alias) == -1);
+                return (param.find(dc.name) == 0 || param.find(dc.alias) == param.npos);
             });
 
             st = (it == commands.end() ? Status::INVALID_COMMAND : command(it->code, param));

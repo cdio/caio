@@ -111,7 +111,7 @@ void ConfiguratorApp::selector_pane()
 
     update_configs();
 
-    for (ssize_t i = 0; i < _configs.size(); ++i) {
+    for (ssize_t i = 0; i < static_cast<ssize_t>(_configs.size()); ++i) {
         /*
          * The entry shown in the selector pane is encoded as prefix + name.
          * prefix is used to mark whether the configuration file is read-only or read/write.
@@ -168,7 +168,7 @@ void ConfiguratorApp::add_config_popup()
             print("Select machine to copy from: ");
             separator();
 
-            for (ssize_t i = 0; i < _configs.size(); ++i) {
+            for (ssize_t i = 0; i < static_cast<ssize_t>(_configs.size()); ++i) {
                 const auto& [read_only, name, path] = _configs[i];
                 select_table(name, _add_centry == i, [this, &i]() { _add_centry = i; });
             }

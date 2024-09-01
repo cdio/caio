@@ -29,7 +29,7 @@ void OFile::load(std::string_view fname)
 {
     *static_cast<std::vector<uint8_t>*>(this) = fs::load(fname);
     addr_t laddr = load_address();
-    addr_t sizoff = size_offset();
+    size_t sizoff = size_offset();
 
     if (sizoff + 2 < size()) {
         uint16_t size = le16toh(*reinterpret_cast<uint16_t*>(data() + sizoff));

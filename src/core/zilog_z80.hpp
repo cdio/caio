@@ -129,7 +129,7 @@ public:
                 uint8_t F;
                 uint8_t A;
             } __attribute__((packed));
-            uint16_t AF __attribute__((packed));
+            uint16_t AF;
         };
 
         union {
@@ -137,7 +137,7 @@ public:
                 uint8_t C;
                 uint8_t B;
             } __attribute__((packed));
-            uint16_t BC __attribute__((packed));
+            uint16_t BC;
         };
 
         union {
@@ -145,7 +145,7 @@ public:
                 uint8_t E;
                 uint8_t D;
             } __attribute__((packed));
-            uint16_t DE __attribute__((packed));
+            uint16_t DE;
         };
 
         union {
@@ -153,7 +153,7 @@ public:
                 uint8_t L;
                 uint8_t H;
             } __attribute__((packed));
-            uint16_t HL __attribute__((packed));
+            uint16_t HL;
         };
 
         union {
@@ -161,7 +161,7 @@ public:
                 uint8_t aF;
                 uint8_t aA;
             } __attribute__((packed));
-            uint16_t aAF __attribute__((packed));
+            uint16_t aAF;
         };
 
         union {
@@ -169,7 +169,7 @@ public:
                 uint8_t aC;
                 uint8_t aB;
             } __attribute__((packed));
-            uint16_t aBC __attribute__((packed));
+            uint16_t aBC;
         };
 
         union {
@@ -177,7 +177,7 @@ public:
                 uint8_t aE;
                 uint8_t aD;
             } __attribute__((packed));
-            uint16_t aDE __attribute__((packed));
+            uint16_t aDE;
         };
 
         union {
@@ -185,7 +185,7 @@ public:
                 uint8_t aL;
                 uint8_t aH;
             } __attribute__((packed));
-            uint16_t aHL __attribute__((packed));
+            uint16_t aHL;
         };
 
         union {
@@ -193,7 +193,7 @@ public:
                 uint8_t IXl;
                 uint8_t IXh;
             } __attribute__((packed));
-            uint16_t IX __attribute__((packed));
+            uint16_t IX;
         };
 
         union {
@@ -201,7 +201,7 @@ public:
                 uint8_t IYl;
                 uint8_t IYh;
             } __attribute__((packed));
-            uint16_t IY __attribute__((packed));
+            uint16_t IY;
         };
 
 #else   /* BIG ENDIAN */
@@ -210,7 +210,7 @@ public:
                 uint8_t A;
                 uint8_t F;
             } __attribute__((packed));
-            uint16_t AF __attribute__((packed));
+            uint16_t AF;
         };
 
         union {
@@ -218,7 +218,7 @@ public:
                 uint8_t B;
                 uint8_t C;
             } __attribute__((packed));
-            uint16_t BC __attribute__((packed));
+            uint16_t BC;
         };
 
         union {
@@ -226,7 +226,7 @@ public:
                 uint8_t D;
                 uint8_t E;
             } __attribute__((packed));
-            uint16_t DE __attribute__((packed));
+            uint16_t DE;
         };
 
         union {
@@ -234,7 +234,7 @@ public:
                 uint8_t H;
                 uint8_t L;
             } __attribute__((packed));
-            uint16_t HL __attribute__((packed));
+            uint16_t HL;
         };
 
         union {
@@ -242,7 +242,7 @@ public:
                 uint8_t aA;
                 uint8_t aF;
             } __attribute__((packed));
-            uint16_t aAF __attribute__((packed));
+            uint16_t aAF;
         };
 
         union {
@@ -250,7 +250,7 @@ public:
                 uint8_t aB;
                 uint8_t aC;
             } __attribute__((packed));
-            uint16_t aBC __attribute__((packed));
+            uint16_t aBC;
         };
 
         union {
@@ -258,7 +258,7 @@ public:
                 uint8_t aD;
                 uint8_t aE;
             } __attribute__((packed));
-            uint16_t aDE __attribute__((packed));
+            uint16_t aDE;
         };
 
         union {
@@ -266,7 +266,7 @@ public:
                 uint8_t aH;
                 uint8_t aL;
             } __attribute__((packed));
-            uint16_t aHL __attribute__((packed));
+            uint16_t aHL;
         };
 
         union {
@@ -274,7 +274,7 @@ public:
                 uint8_t IXh;
                 uint8_t IXl;
             } __attribute__((packed));
-            uint16_t IX __attribute__((packed));
+            uint16_t IX;
         };
 
         union {
@@ -282,7 +282,7 @@ public:
                 uint8_t IYh;
                 uint8_t IYl;
             } __attribute__((packed));
-            uint16_t IY __attribute__((packed));
+            uint16_t IY;
         };
 #endif
 

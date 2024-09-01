@@ -941,7 +941,7 @@ void Mos6569::g_access()
      * Display mode.
      */
     const CData& cd = _cdata[_col];
-    addr_t g_addr;
+    addr_t g_addr{};
 
     switch (_mode) {
     case VideoMode::TextStandard:

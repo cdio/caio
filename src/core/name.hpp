@@ -79,7 +79,7 @@ public:
         return to_string(_type, _label);
     }
 
-    constexpr static std::string to_string(std::string_view type, std::string_view label) {
+    static std::string to_string(std::string_view type, std::string_view label) {
         return std::format("{}({})", type, label);
     }
 

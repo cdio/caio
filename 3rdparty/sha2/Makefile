@@ -29,12 +29,10 @@ HDEPS=		${OBJS:%.o=%.d}
 
 CPPFLAGS=	-I.
 
-CFLAGS=		-Wall \
+CFLAGS+=	-Wall \
 		-Werror \
 		-fPIC \
 		-O3
-
-override CC=	clang
 
 CLEANFILES+=	${LIB} ${OBJS} ${HDEPS}
 

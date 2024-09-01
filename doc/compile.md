@@ -5,12 +5,11 @@
 ### Linux
 
 External dependencies:
-* [clang-15.0](https://clang.llvm.org) or later
 * [cmake](https://cmake.org/)
 * [SDL2](https://libsdl.org)
 
 ```
-sudo apt update && sudo apt install clang cmake libsdl2-dev
+sudo apt update && sudo apt install cmake libsdl2-dev
 ```
 
 Compile and install:

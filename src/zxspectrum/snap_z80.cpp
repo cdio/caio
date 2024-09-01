@@ -89,7 +89,7 @@ void SnapZ80::load_v2(const buffer_t& raw)
      * The specs says that sizeh and sizel specify the extended header size,
      * but actually it seems to be that size minus 2.
      */
-    auto ext_size = ((hdr->sizeh << 8) | hdr->sizel) + 2;
+    size_t ext_size = ((hdr->sizeh << 8) | hdr->sizel) + 2;
     if (raw.size() < ext_size) {
         throw_ioerror("Invalid version 23b. Size: " + std::to_string(ext_size));
     }
@@ -260,26 +260,26 @@ void SnapZ80::uncompress_v2(const buffer_t& raw, size_t rawoff)
 inline Z80::Registers SnapZ80::extract_registers(const SnapZ80HeaderV23* hdr)
 {
     Z80::Registers r{
-        .A   = hdr->A,
         .F   = hdr->F,
-        .B   = hdr->B,
+        .A   = hdr->A,
         .C   = hdr->C,
-        .D   = hdr->D,
+        .B   = hdr->B,
         .E   = hdr->E,
-        .H   = hdr->H,
+        .D   = hdr->D,
         .L   = hdr->L,
-        .aA  = hdr->aA,
+        .H   = hdr->H,
         .aF  = hdr->aF,
-        .aB  = hdr->aB,
+        .aA  = hdr->aA,
         .aC  = hdr->aC,
-        .aD  = hdr->aD,
+        .aB  = hdr->aB,
         .aE  = hdr->aE,
-        .aH  = hdr->aH,
+        .aD  = hdr->aD,
         .aL  = hdr->aL,
-        .IXh = hdr->IXh,
+        .aH  = hdr->aH,
         .IXl = hdr->IXl,
-        .IYh = hdr->IYh,
+        .IXh = hdr->IXh,
         .IYl = hdr->IYl,
+        .IYh = hdr->IYh,
         .I   = hdr->I,
         .R   = static_cast<uint8_t>((hdr->R & 0x7F) | ((hdr->flags & SnapZ80Header::FLAGS_R_BIT7) << 7)),
         .SP  = static_cast<uint16_t>((hdr->SPh << 8) | hdr->SPl),

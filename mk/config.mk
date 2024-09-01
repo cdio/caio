@@ -27,7 +27,7 @@ include ${SYSDEP_MK}
 AWK?=			awk
 CAT?=			cat
 CP?=			cp
-override CXX=		clang++
+CXX?=			clang++
 CUT?=			cut
 CMAKE?=			cmake
 DIRNAME?=		dirname

@@ -60,7 +60,7 @@ bool ZX80Cassette::read()
         return 0;
 
     case State::Sync:
-        if (elapsed < SYNC_DURATION) {
+        if (elapsed < static_cast<int64_t>(SYNC_DURATION)) {
             return 0;
         }
 
@@ -75,7 +75,7 @@ bool ZX80Cassette::read()
 
     case State::Data:
         if (_rx_count == 0) {
-            if (elapsed < BIT_SEPARATOR_TIME) {
+            if (elapsed < static_cast<int64_t>(BIT_SEPARATOR_TIME)) {
                 return 0;
             }
 
@@ -110,11 +110,11 @@ bool ZX80Cassette::read()
         /*
          * Bit transfer.
          */
-        if (elapsed < DATA_PULSE_TIME) {
+        if (elapsed < static_cast<int64_t>(DATA_PULSE_TIME)) {
             return 1;
         }
 
-        if (elapsed < 2 * DATA_PULSE_TIME) {
+        if (elapsed < 2 * static_cast<int64_t>(DATA_PULSE_TIME)) {
             return 0;
         }
 
@@ -138,8 +138,10 @@ bool ZX80Cassette::read()
         return 0;
 
     case State::End:
-        return 0;
+        break;
     }
+
+    return 0;
 }
 
 void ZX80Cassette::write(bool pulse)
