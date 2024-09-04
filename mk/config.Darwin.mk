@@ -16,6 +16,16 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
+ifeq (${ARCH}, arm64)
+override SDL2_CONFIG=	/opt/homebrew/bin/sdl2-config
+else
+override SDL2_CONFIG=	/usr/local/Homebrew/bin/sdl2-config
+CFLAGS+=		-arch x86_64
+CXXFLAGS+=		-arch x86_64
+CXXFLAGS+=		-Wno-nullability-completeness
+LDFLAGS+=		-arch x86_64
+endif
+
 EXTRA_3RDPARTY_DIRS+=
 
 SYSDEP_CPPFLAGS+=	-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include

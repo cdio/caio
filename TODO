@@ -1,4 +1,3 @@
-- mk:       macOS universal binary (arm + x86)
 - UI:       Joystick label = gamepad name
 - NES test: The Young Indiana Jones Chronicles and Burai Fighter
 - vjoy:     move ALT-K handling from c64 to ui
