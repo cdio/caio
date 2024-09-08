@@ -25,8 +25,10 @@ FONT_SRC=	DejaVuSansMNerdFontMono_Regular_stripped.ttf
 ICONS_SRC=	cassette_128x24.png \
 		floppy_128x2.png \
 		fullscreen_128x2.png \
-		gamepad_128x3.png \
+		gamepad_128x2.png \
+		keyboard_128x2.png \
 		pause_128x2.png \
+		photocamera_128x1.png \
 		reset_128.png \
 		volume_128x21.png
 
