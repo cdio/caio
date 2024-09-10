@@ -20,8 +20,7 @@ ROOT=		${abspath ../..}
 
 include ${ROOT}/mk/config.mk
 
-DIRS=		font2c \
-		libimgui
+DIRS=		libimgui
 
 CLEANDIRS=	${DIRS}
 
