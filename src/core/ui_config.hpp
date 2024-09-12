@@ -56,6 +56,7 @@ struct VideoConfig {
     SLEffect    sleffect{SLEffect::None};   /**< Scanlines effect.          */
     bool        fullscreen{};               /**< Start in fullscreen mode.  */
     bool        sresize{};                  /**< Smooth window resize.      */
+    std::string screenshotdir{};            /**< Screenshot directory.      */
 };
 
 /**

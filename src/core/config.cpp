@@ -211,10 +211,18 @@ Config::Config(Section& sec, std::string_view prefix)
       monitor{is_true(sec[KEY_MONITOR])},
       logfile{sec[KEY_LOGFILE]},
       loglevel{sec[KEY_LOGLEVEL]},
-      vjoy{sec}
+      vjoy{sec},
+      screenshotdir{fs::fix_home(sec[KEY_SCREENSHOTDIR])}
 {
     if (scale < 1) {
         scale = 1;
+    }
+
+    if (!fs::exists(screenshotdir)) {
+        /*
+         * Default to $HOME when the screenshot directory is invalid.
+         */
+        screenshotdir = fs::fix_home("~");
     }
 }
 
@@ -309,7 +317,8 @@ std::string Config::to_string() const
         "                 Y:   {}\n"
         "              back:   {}\n"
         "             guide:   {}\n"
-        "             start:   {}",
+        "             start:   {}\n"
+        "  Screenshot path:    {}\n",
         title, romdir, palette, keymaps, cartridge, fps, scale, scanlines,
         (fullscreen ? "yes" : "no"),
         (sresize ? "yes" : "no"),
@@ -330,7 +339,8 @@ std::string Config::to_string() const
         keyboard::to_string(vjoy.y),
         keyboard::to_string(vjoy.back),
         keyboard::to_string(vjoy.guide),
-        keyboard::to_string(vjoy.start));
+        keyboard::to_string(vjoy.start),
+        screenshotdir);
 }
 
 }

@@ -27,7 +27,7 @@ namespace widget {
 
 class Empty : public Widget {
 public:
-    Empty(::SDL_Renderer* _renderer);
+    Empty(const sptr_t<::SDL_Renderer>& _renderer);
 
     virtual ~Empty();
 

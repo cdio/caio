@@ -230,21 +230,22 @@ void ZX80::create_ui()
 {
     ui::Config uiconf {
         .audio = {
-            .enabled    = false,
-            .srate      = 0,
-            .channels   = 0,
-            .samples    = 0
+            .enabled        = false,
+            .srate          = 0,
+            .channels       = 0,
+            .samples        = 0
         },
         .video = {
-            .title      = _conf.title,
-            .width      = ZX80Video::WIDTH,
-            .height     = ZX80Video::HEIGHT,
-            .fps        = _conf.fps,
-            .scale      = _conf.scale,
-            .sleffect   = ui::to_sleffect(_conf.scanlines),
-            .fullscreen = _conf.fullscreen,
-            .sresize    = _conf.sresize,
-        },
+            .title          = _conf.title,
+            .width          = ZX80Video::WIDTH,
+            .height         = ZX80Video::HEIGHT,
+            .fps            = _conf.fps,
+            .scale          = _conf.scale,
+            .sleffect       = ui::to_sleffect(_conf.scanlines),
+            .fullscreen     = _conf.fullscreen,
+            .sresize        = _conf.sresize,
+            .screenshotdir  = _conf.screenshotdir
+        }
     };
 
     _ui = ui::UI::instance(uiconf);

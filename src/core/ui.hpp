@@ -39,7 +39,7 @@ using Scanline    = sdl2::Scanline;
 
 using UI          = sdl2::UI;
 using Panel       = sdl2::Panel;
-using Widget      = sdl2::Widget;
+using Widget      = sdl2::widget::Widget;
 
 namespace widget  = sdl2::widget;
 

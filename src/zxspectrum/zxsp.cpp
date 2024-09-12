@@ -233,21 +233,22 @@ void ZXSpectrum::create_ui()
 {
     ui::Config uiconf {
         .audio = {
-            .enabled    = _conf.audio,
-            .srate      = ULAAudio::SAMPLING_RATE,
-            .channels   = ULAAudio::CHANNELS,
-            .samples    = ULAAudio::SAMPLES
+            .enabled        = _conf.audio,
+            .srate          = ULAAudio::SAMPLING_RATE,
+            .channels       = ULAAudio::CHANNELS,
+            .samples        = ULAAudio::SAMPLES
         },
         .video = {
-            .title      = _title,
-            .width      = ULAVideo::WIDTH,
-            .height     = ULAVideo::HEIGHT,
-            .fps        = _conf.fps,
-            .scale      = _conf.scale,
-            .sleffect   = ui::to_sleffect(_conf.scanlines),
-            .fullscreen = _conf.fullscreen,
-            .sresize    = _conf.sresize,
-        },
+            .title          = _title,
+            .width          = ULAVideo::WIDTH,
+            .height         = ULAVideo::HEIGHT,
+            .fps            = _conf.fps,
+            .scale          = _conf.scale,
+            .sleffect       = ui::to_sleffect(_conf.scanlines),
+            .fullscreen     = _conf.fullscreen,
+            .sresize        = _conf.sresize,
+            .screenshotdir  = _conf.screenshotdir
+        }
     };
 
     _ui = ui::UI::instance(uiconf);
@@ -266,7 +267,8 @@ void ZXSpectrum::make_widgets()
         return ui::widget::Gamepad::Status{
             .id = 0,
             .is_connected = _joy->is_connected(),
-            .is_swapped = false
+            .is_swapped = false,
+            .name = _joy->name()
         };
     });
 

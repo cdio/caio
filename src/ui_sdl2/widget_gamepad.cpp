@@ -18,34 +18,62 @@
  */
 #include "ui_sdl2/widget_gamepad.hpp"
 
+#include <format>
+
+#include "sdl2.hpp"
+#include "utils.hpp"
+
 namespace caio {
 namespace ui {
 namespace sdl2 {
 namespace widget {
 
-#include "icons/gamepad_128x3.hpp"
+#include "icons/gamepad_128x2.hpp"
 
-Gamepad::Gamepad(::SDL_Renderer* renderer, const std::function<Status()>& upd)
-    : Widget{renderer},
-      _update{upd}
+bool Gamepad::Status::operator!=(const Status& other) const
 {
-    Widget::load(gamepad_128x3_png);
+    return ((id != other.id) ||
+            (is_connected != other.is_connected) ||
+            (is_swapped != other.is_swapped) ||
+            (name != other.name));
+}
+
+Gamepad::Gamepad(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd)
+    : Widget{renderer},
+      _update{upd},
+      _label{renderer}
+{
+    Widget::load(gamepad_128x2_png);
 }
 
 void Gamepad::render(const ::SDL_Rect& dstrect)
 {
-    static const ::SDL_Rect normal_rect{0, 0, 128, 128};
-    static const ::SDL_Rect swapped_0_rect{128, 0, 128, 128};
-    static const ::SDL_Rect swapped_1_rect{256, 0, 128, 128};
-
     Status st{};
     if (_update) {
         st = _update();
     }
 
-    auto colour = (st.is_connected ? ENABLED_COLOR : DISABLED_COLOR);
-    const auto& rect = (!st.is_swapped ? normal_rect : ((st.id % 2) == 0 ? swapped_0_rect : swapped_1_rect));
-    Widget::render(rect, dstrect, colour);
+    static const ::SDL_Rect enabled_rect{0, 0, 128, 128};
+    static const ::SDL_Rect disabled_rect{128, 0, 128, 128};
+
+    if (st.is_connected) {
+        Widget::render(enabled_rect, dstrect, ENABLED_COLOR);
+    } else {
+        Widget::render(disabled_rect, dstrect, DISABLED_COLOR);
+    }
+
+    if (st != _prev_status) {
+        if (std::string_view{st.name}.empty()) {
+            const auto str = std::format("#{}", st.id + 1);
+            _label.reset(str, DISABLED_COLOR);
+        } else {
+            const auto str = utils::trim(std::format("{:.{}}", st.name, Label::LABEL_MAX_COLS));
+            _label.reset(str, ENABLED_COLOR);
+        }
+        _prev_status = st;
+    }
+
+    _label.render(dstrect);
 }
 
 }

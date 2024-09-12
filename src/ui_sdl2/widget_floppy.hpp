@@ -28,11 +28,12 @@ namespace widget {
 class Floppy : public Widget {
 public:
     struct Status {
-        bool is_attached{};
-        bool is_idle{};
+        bool    is_attached;
+        bool    is_idle;
+        float   progress;
     };
 
-    Floppy(::SDL_Renderer* renderer, const std::function<Status()>& upd);
+    Floppy(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd);
 
     virtual ~Floppy() {
     }

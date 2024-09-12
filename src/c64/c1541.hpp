@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <tuple>
 
 #include "fs.hpp"
 #include "types.hpp"
@@ -216,7 +217,7 @@ enum class FileType {
  */
 class C1541 : public cbm_bus::Device {
 public:
-    constexpr static const char* TYPE = "C1541";
+    constexpr static const char* TYPE        = "C1541";
 
     /**
      * Initialise this C1541 drive.
@@ -271,6 +272,15 @@ public:
      */
     std::string to_string() const override;
 
+    /**
+     * Get the progress status.
+     * @return A value indicating the current progress for an
+     * ongoing load operation (-1 = no progress, 0..1 = current progress).
+     */
+    float progress() const {
+        return _progress;
+    }
+
 protected:
     /**
      * Get the name of a channel.
@@ -305,11 +315,11 @@ protected:
     /**
      * Read a value from a channel.
      * @param ch Channel.
-     * @return The read value and a status code.
+     * @return The read value, the status code, and the progress indicator (0..1).
      * @see ReadByte
      * @see Status
      */
-    virtual std::pair<ReadByte, Status> channel_read(uint8_t ch) = 0;
+    virtual std::tuple<ReadByte, Status, float> channel_read(uint8_t ch) = 0;
 
     /**
      * Put back a previously read value.
@@ -426,8 +436,9 @@ private:
      */
     bool check_attached();
 
-    std::string   _attached_path{};
-    StatusChannel _statusch{Status::OK};
+    std::string     _attached_path{};
+    StatusChannel   _statusch{Status::OK};
+    float           _progress{-1.0f};       /* Progress of load operation */
 
     constexpr static const size_t COMMANDS = 35;
     static std::array<DiskCommand, COMMANDS> commands;

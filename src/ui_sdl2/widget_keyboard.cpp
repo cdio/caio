@@ -16,38 +16,36 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_sdl2/widget_pause.hpp"
+#include "ui_sdl2/widget_keyboard.hpp"
+
+#include "utils.hpp"
 
 namespace caio {
 namespace ui {
 namespace sdl2 {
 namespace widget {
 
-#include "icons/pause_128x2.hpp"
+#include "icons/keyboard_128x2.hpp"
 
-Pause::Pause(const sptr_t<::SDL_Renderer>& renderer, const std::function<bool()>& upd)
+Keyboard::Keyboard(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd)
     : Widget{renderer},
       _update{upd}
 {
-    Widget::load(pause_128x2_png);
+    Widget::load(keyboard_128x2_png);
 }
 
-void Pause::render(const ::SDL_Rect& dstrect)
+void Keyboard::render(const ::SDL_Rect& dstrect)
 {
-    static const ::SDL_Rect running_rect{0, 0, 128, 128};
-    static const ::SDL_Rect paused_rect{128, 0, 128, 128};
-    bool is_paused{};
+    auto color = ENABLED_COLOR;
 
-    if (_update) {
-        is_paused = _update();
+    Status st{};
+    if (!_update) {
+        color = DISABLED_COLOR;
+    } else {
+        st = _update();
     }
 
-    if (_rect.x == -1 || _is_paused != is_paused) {
-        _rect = (is_paused ? paused_rect : running_rect);
-        _is_paused = is_paused;
-    }
-
-    Widget::render(_rect, dstrect);
+    Widget::render(::SDL_Rect{128 * (!st.is_enabled), 0, 128, 128}, dstrect, color);
 }
 
 }

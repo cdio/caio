@@ -16,24 +16,14 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-ifeq (${ARCH}, x86_64)
-ARCH=			amd64
-endif
+ROOT=		${abspath ../..}
 
-LNDIR=			${TOOLS_BINDIR}/lndir
+include ${ROOT}/mk/config.mk
 
-EXTRA_3RDPARTY_DIRS+=
+DIRS=		sdl_image \
+		sdl_ttf
 
-SYSDEP_CPPFLAGS+=
+CLEANDIRS=	${DIRS}
+DISTCLEANDIRS=	${CLEANDIRS}
 
-LIB_INCLUDE_BEGIN=	-Wl,--whole-archive
-LIB_INCLUDE_END=	-Wl,--no-whole-archive
-
-UI_CXXFLAGS+=		-I${ROOT}/3rdparty/sdl_image/SDL_image.subtree/include
-			-I${ROOT}/3rdparty/sdl_ttf/SDL_ttf.subtree
-
-UI_CXXFLAGS+=		${shell ${SDL2_CONFIG} --cflags}
-
-UI_LDADD+=		${ROOT}/3rdparty/sdl_image/SDL_image/libSDL2_image.a
-UI_LDADD+=		${ROOT}/3rdparty/sdl_ttf/SDL_ttf/libSDL2_ttf.a
-UI_LDADD+=		${shell ${SDL2_CONFIG} --libs}
+include ${ROOT}/mk/dir.mk

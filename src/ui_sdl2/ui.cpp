@@ -22,10 +22,12 @@
 #include <cmath>
 #include <csignal>
 #include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include <memory>
 
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 
 #include "endian.hpp"
 #include "icon.hpp"
@@ -34,7 +36,9 @@
 
 #include "ui_sdl2/widget_empty.hpp"
 #include "ui_sdl2/widget_fullscreen.hpp"
+#include "ui_sdl2/widget_keyboard.hpp"
 #include "ui_sdl2/widget_pause.hpp"
+#include "ui_sdl2/widget_photocamera.hpp"
 #include "ui_sdl2/widget_reset.hpp"
 #include "ui_sdl2/widget_volume.hpp"
 
@@ -81,7 +85,8 @@ UI::UI(const ui::Config& conf)
     : _conf{conf}
 {
     if (::SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0 ||
-        ::IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG) {
+        ::IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG ||
+        ::TTF_Init() != 0) {
         throw UIError{"Can't initialise SDL library: {}", sdl_error()};
     }
 
@@ -135,54 +140,79 @@ UI::UI(const ui::Config& conf)
     }
 
     /*
-     * Initialise main window, renderers and textures.
+     * Create the main window.
      */
-    _window = ::SDL_CreateWindow(_conf.video.title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+    auto* windowp = ::SDL_CreateWindow(_conf.video.title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         _win_width, _win_height, SDL_WINDOW_RESIZABLE);
 
-    if (_window == nullptr) {
+    if (windowp == nullptr) {
         throw UIError{"Can't create main window: {}", sdl_error()};
     }
 
+    _window = sptr_t<::SDL_Window>{windowp, ::SDL_DestroyWindow};
+
+    /*
+     * Create the main window icon.
+     */
     const Image& ico = icon();
 
 #ifdef __LITTLE_ENDIAN__
-    _icon = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()), ico.width, ico.height, 32,
-        ico.width * 4, SDL_PIXELFORMAT_ABGR8888);
+    auto* iconp = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
+        ico.width, ico.height, 32, ico.width * 4, SDL_PIXELFORMAT_ABGR8888);
 #else
-    _icon = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()), ico.width, ico.height, 32,
-        ico.width * 4, SDL_PIXELFORMAT_RGBA8888);
+    auto *iconp = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
+        ico.width, ico.height, 32, ico.width * 4, SDL_PIXELFORMAT_RGBA8888);
 #endif
 
-    if (_icon == nullptr) {
-        throw UIError{"Can't create main window icon: {}", sdl_error()};
+    if (iconp == nullptr) {
+        throw UIError{"Can't create window icon: {}", sdl_error()};
     }
 
-    ::SDL_SetWindowIcon(_window, _icon);
+    _icon = uptrd_t<::SDL_Surface>{iconp, ::SDL_FreeSurface};
+    ::SDL_SetWindowIcon(_window.get(), _icon.get());
 
-    _renderer = ::SDL_CreateRenderer(_window, -1, 0);
-    if (_renderer == nullptr) {
+    /*
+     * Create the renderer.
+     */
+    auto* rendp = ::SDL_CreateRenderer(_window.get(), -1, 0);
+    if (rendp == nullptr) {
         throw UIError{"Can't create renderer: {}", sdl_error()};
     }
 
-    if (::SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND) < 0) {
+    _renderer = sptr_t<::SDL_Renderer>{rendp, ::SDL_DestroyRenderer};
+
+    if (::SDL_SetRenderDrawBlendMode(_renderer.get(), SDL_BLENDMODE_BLEND) < 0) {
         throw UIError{"Can't set renderer blend mode: {}", sdl_error()};
     }
 
+    /*
+     * Create the raw (rgba) screen (this is filled with the emulated video data).
+     */
     _screen_raw = std::vector<Rgba>(vconf.width * vconf.height, CRT_COLOR);
 
-    _screen_tex = ::SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+    /*
+     * Create the raw screen texture.
+     */
+    auto* screenp = ::SDL_CreateTexture(_renderer.get(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
         _tex_width, _tex_height);
 
-    if (_screen_tex == nullptr) {
+    if (screenp == nullptr) {
         throw UIError{"Can't create screen texture: {}", sdl_error()};
     }
 
+    _screen_tex = sptr_t<::SDL_Texture>{screenp, ::SDL_DestroyTexture};
+
+    /*
+     * Set fullscreen/normal mode.
+     */
     _is_fullscreen = false;
     if (vconf.fullscreen) {
         toggle_fullscreen();
     }
 
+    /*
+     * Initialise audio system and create the info panel.
+     */
     audio_reset();
     create_panel();
 }
@@ -196,26 +226,14 @@ UI::~UI()
 
     _panel = {};
 
-    if (_window != nullptr) {
-        ::SDL_DestroyWindow(_window);
-    }
-
-    if (_renderer != nullptr) {
-        /*
-         * This also destroys the textures associated to the renderer.
-         */
-        ::SDL_DestroyRenderer(_renderer);
-    }
-
-    ::SDL_FreeSurface(_icon);
     ::IMG_Quit();
     ::SDL_Quit();
 }
 
 void UI::title(const std::string& title)
 {
-    if (_window != nullptr) {
-        ::SDL_SetWindowTitle(_window, title.c_str());
+    if (_window) {
+        ::SDL_SetWindowTitle(_window.get(), title.c_str());
     }
 }
 
@@ -358,7 +376,7 @@ sptr_t<Panel> UI::panel()
     return _panel;
 }
 
-::SDL_Renderer* UI::renderer()
+sptr_t<::SDL_Renderer> UI::renderer()
 {
     return _renderer;
 }
@@ -407,14 +425,24 @@ void UI::create_panel()
     }
     auto volume = std::make_shared<widget::Volume>(_renderer, getvol, setvol);
 
+    const auto kbd_status = [this]() { return widget::Keyboard::Status{ .is_enabled = _kbd->is_enabled()}; };
+    const auto kbd_toggle = [this]() { _kbd->enable(!_kbd->is_enabled()); };
+    auto keyboard = std::make_shared<widget::Keyboard>(_renderer, kbd_status);
+    keyboard->action(kbd_toggle);
+
+    auto photocam = std::make_shared<widget::PhotoCamera>(_renderer);
+    photocam->action([this]() { screenshot(); });
+
     auto empty = std::make_shared<widget::Empty>(_renderer);
 
-    _panel->add(fullscreen, Panel::Just::RIGHT);
-    _panel->add(reset, Panel::Just::RIGHT);
-    _panel->add(pause, Panel::Just::RIGHT);
-    _panel->add(volume, Panel::Just::RIGHT);
-    _panel->add(empty, Panel::Just::RIGHT);
-    _panel->add(empty, Panel::Just::RIGHT);
+    _panel->add(fullscreen, Panel::Just::Right);
+    _panel->add(photocam, Panel::Just::Right);
+    _panel->add(empty, Panel::Just::Right);
+    _panel->add(reset, Panel::Just::Right);
+    _panel->add(pause, Panel::Just::Right);
+    _panel->add(volume, Panel::Just::Right);
+    _panel->add(keyboard, Panel::Just::Right);
+    _panel->add(empty, Panel::Just::Right);
 }
 
 void UI::toggle_panel_visibility()
@@ -560,35 +588,45 @@ void UI::kbd_event(const SDL_Event& event)
             switch (key.sym) {
             case SDLK_f:
                 /*
-                 * Toggle Fullscreen mode.
+                 * Toggle Fullscreen mode (ALT-F).
                  */
                 toggle_fullscreen();
                 break;
 
             case SDLK_j:
                 /*
-                 * Swap Joysticks.
+                 * Swap Joysticks (ALT-J).
                  */
                 hotkeys(keyboard::KEY_ALT_J);
                 break;
 
             case SDLK_k:
                 /*
-                 * Toggle virtual joystick/keyboard.
+                 * Enable/Disable the emulated keyboard (ALT-K).
                  */
-                hotkeys(keyboard::KEY_ALT_K);
+                _kbd->enable(!_kbd->is_enabled());
+                log.debug("Keyboard {}\n", (_kbd->is_enabled() ? "enabled" : "disabled"));
                 break;
 
             case SDLK_p:
                 /*
-                 * Toggle Pause mode.
+                 * Toggle Pause mode (ALT-P).
                  */
                 pause(paused() ^ true);
                 break;
 
+            case SDLK_s:
+                /*
+                 * Screenshot (ALT+SHIFT+S).
+                 */
+                if (key.mod & KMOD_SHIFT) {
+                    screenshot();
+                }
+                break;
+
             case SDLK_v:
                 /*
-                 * Toggle Panel visibility.
+                 * Toggle Panel visibility (ALT+V).
                  */
                 toggle_panel_visibility();
                 break;
@@ -598,7 +636,7 @@ void UI::kbd_event(const SDL_Event& event)
 
         } else if (key.sym == SDLK_PAUSE) {
             /*
-             * Toggle Pause mode.
+             * Toggle Pause mode (PAUSE key).
              */
             hotkeys(keyboard::KEY_PAUSE);
 
@@ -606,9 +644,7 @@ void UI::kbd_event(const SDL_Event& event)
             /*
              * Handle normal keyboard key press.
              */
-            if (!_panel->visible()) {
-                _kbd->key_pressed(to_key(key.scancode));
-            }
+            _kbd->key_pressed(to_key(key.scancode));
         }
         break;
 
@@ -619,7 +655,7 @@ void UI::kbd_event(const SDL_Event& event)
              */
             toggle_panel_visibility();
 
-        } else if (!_panel->visible() && _kbd) {
+        } else if (_kbd) {
             _kbd->key_released(to_key(kevent.keysym.scancode));
         }
         break;
@@ -774,7 +810,7 @@ void UI::toggle_fullscreen()
         /*
          * Leave fullscreen.
          */
-        if (::SDL_SetWindowFullscreen(_window, 0) < 0) {
+        if (::SDL_SetWindowFullscreen(_window.get(), 0) < 0) {
             log.error("ui: Can't leave fullscreen mode: {}\n", sdl_error());
             return;
         }
@@ -785,7 +821,7 @@ void UI::toggle_fullscreen()
         /*
          * Enter fullscreen.
          */
-        if (::SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN_DESKTOP) < 0) {
+        if (::SDL_SetWindowFullscreen(_window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) < 0) {
             log.error("ui: Can't enter fullscreen mode: {}\n", sdl_error());
             return;
         }
@@ -886,7 +922,7 @@ void UI::postrender_effects()
     default:;
     }
 
-    if (::SDL_SetRenderDrawColor(_renderer, SCANLINE_COLOR.r, SCANLINE_COLOR.g, SCANLINE_COLOR.b, alpha) < 0) {
+    if (::SDL_SetRenderDrawColor(_renderer.get(), SCANLINE_COLOR.r, SCANLINE_COLOR.g, SCANLINE_COLOR.b, alpha) < 0) {
         log.error("ui: Can't set render draw color: {}\n", sdl_error());
         return;
     }
@@ -909,7 +945,7 @@ void UI::postrender_effects()
         rect.h = skip / 2;
         for (int y = 1; y < height; y += skip) {
             rect.y = y;
-            ::SDL_RenderFillRect(_renderer, &rect);
+            ::SDL_RenderFillRect(_renderer.get(), &rect);
         }
         break;
 
@@ -918,7 +954,7 @@ void UI::postrender_effects()
         rect.w = skip / 2;
         for (int x = 0; x < width; x += skip) {
             rect.x = x;
-            ::SDL_RenderFillRect(_renderer, &rect);
+            ::SDL_RenderFillRect(_renderer.get(), &rect);
         }
         break;
 
@@ -931,7 +967,7 @@ void UI::render_screen()
     uint32_t* dst{nullptr};
     int pitch{};
 
-    if (::SDL_LockTexture(_screen_tex, nullptr, reinterpret_cast<void**>(&dst), &pitch) < 0) {
+    if (::SDL_LockTexture(_screen_tex.get(), nullptr, reinterpret_cast<void**>(&dst), &pitch) < 0) {
         throw UIError{"Can't lock texture: {}", sdl_error()};
     }
 
@@ -1017,11 +1053,11 @@ void UI::render_screen()
         break;
     }
 
-    ::SDL_UnlockTexture(_screen_tex);
+    ::SDL_UnlockTexture(_screen_tex.get());
 
-    if (::SDL_SetRenderDrawColor(_renderer, CRT_COLOR.r, CRT_COLOR.g, CRT_COLOR.b, CRT_COLOR.a) < 0 ||
-        ::SDL_RenderClear(_renderer) < 0 ||
-        ::SDL_RenderCopy(_renderer, _screen_tex, nullptr, &_screen_rect) < 0) {
+    if (::SDL_SetRenderDrawColor(_renderer.get(), CRT_COLOR.r, CRT_COLOR.g, CRT_COLOR.b, CRT_COLOR.a) < 0 ||
+        ::SDL_RenderClear(_renderer.get()) < 0 ||
+        ::SDL_RenderCopy(_renderer.get(), _screen_tex.get(), nullptr, &_screen_rect) < 0) {
         throw IOError{"Can't copy texture: {}", sdl_error()};
     }
 
@@ -1029,7 +1065,7 @@ void UI::render_screen()
 
     _panel->render(_win_width, _win_height);
 
-    ::SDL_RenderPresent(_renderer);
+    ::SDL_RenderPresent(_renderer.get());
 }
 
 inline UI::joyptr_t UI::find_joystick(::SDL_JoystickID jid)
@@ -1077,7 +1113,7 @@ void UI::joy_add(int devid)
     auto gcptr = uptr_t<::SDL_GameController, void(*)(::SDL_GameController*)>{gc, ::SDL_GameControllerClose};
     _sdl_joys.emplace(jid, std::move(gcptr));
 
-    ejoy->reset(jid);
+    ejoy->reset(jid, name);
 
     log.debug("ui: Game controller added: devid {} \"{}\", jid {}, controller {:p}\n",
         devid, name, jid, static_cast<void*>(gc));
@@ -1109,7 +1145,41 @@ void UI::attach_controllers()
             --count;
         }
     }
+}
 
+void UI::screenshot() const
+{
+    /*
+     * Native size and no rendering effects.
+     */
+    const int w = _conf.video.width;
+    const int h = _conf.video.height;
+
+    void* pixels = const_cast<Rgba*>(_screen_raw.data());
+
+    const uptrd_t<::SDL_Surface> image{
+        ::SDL_CreateRGBSurfaceWithFormatFrom(pixels, w, h, 32, w * 4, SDL_PIXELFORMAT_RGBA8888),
+        ::SDL_FreeSurface
+    };
+
+    if (!image) {
+        throw UIError{"Can't create screenshot image: {}", sdl_error()};
+    }
+
+    struct std::tm tm{};
+    const time_t now = std::time(nullptr);
+    if (::localtime_r(&now, &tm) == nullptr) {
+        throw UIError{"Can't get local time: {}", Error::to_string()};
+    }
+
+    char buf[20]{};
+    std::strftime(buf, sizeof(buf), "%Y-%m-%d_%H.%M.%S", &tm);
+
+    const auto fname = std::format("{}/{}{}.png", _conf.video.screenshotdir, SCREENSHOT_PREFIX, buf);
+
+    if (::IMG_SavePNG(image.get(), fname.c_str()) < 0) {
+        throw UIError{"Can't save screenshot image: {}", sdl_error()};
+    }
 }
 
 }

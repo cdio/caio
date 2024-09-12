@@ -316,8 +316,9 @@ ReadByte C1541::read(uint8_t ch)
         return _statusch.read();
     }
 
-    auto [rb, st] = channel_read(ch);
+    const auto [rb, st, pr] = channel_read(ch);
     _statusch = st;
+    _progress = pr;
     return rb;
 }
 

@@ -30,6 +30,7 @@
 #include "mos_6569.hpp"
 #include "mos_6581.hpp"
 
+#include "c1541_factory.hpp"
 #include "c64_bus_controller.hpp"
 #include "c64_cartridge.hpp"
 #include "c64_config.hpp"
@@ -43,6 +44,8 @@
 namespace caio {
 namespace commodore {
 namespace c64 {
+
+using C1541 = commodore::c1541::C1541;
 
 /**
  * Commodore 64 emulator.
@@ -187,8 +190,8 @@ private:
     sptr_t<Cartridge>           _ioexp{};
     sptr_t<cbm_bus::Bus>        _bus{};
     sptr_t<C64BusController>    _busdev{};
-    sptr_t<cbm_bus::Device>     _unit8{};
-    sptr_t<cbm_bus::Device>     _unit9{};
+    sptr_t<C1541>               _unit8{};
+    sptr_t<C1541>               _unit9{};
     sptr_t<Clock>               _clk{};
     sptr_t<C64Keyboard>         _kbd{};
     sptr_t<Joystick>            _joy1{};

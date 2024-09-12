@@ -34,13 +34,18 @@ namespace sdl2 {
 namespace dearimgui {
 
 #include "icons/DejaVuSansMNerdFontMono_Regular_stripped.hpp"
-#define GUIFONT_NAME        DejaVuSansMNerdFontMono_Regular_stripped_compressed_data_base85
+#define FONT_NAME       DejaVuSansMNerdFontMono_Regular_stripped_ttf
 
+static buffer_t                         ttf{};
 static std::vector<::ImFont*>           loaded_fonts{};
 static std::vector<::ImFont*>::iterator current_loaded_font{};
 
 void Gui::init(const std::string& inifile, ::SDL_Window* sdlwin, ::SDL_Renderer* sdlrend, const FontParams& fontp)
 {
+    if (ttf.size() == 0) {
+        ttf = utils::base64_decode({FONT_NAME, std::size(FONT_NAME)});
+    }
+
     _inifile = inifile;
     _sdlwin  = sdlwin;
     _sdlrend = sdlrend;
@@ -65,8 +70,12 @@ void Gui::init(const std::string& inifile, ::SDL_Window* sdlwin, ::SDL_Renderer*
      */
     const auto font_sizes = (fontp.sizes ? fontp.sizes() : std::span<float>{});
     const auto font_ranges = (fontp.ranges ? fontp.ranges().data() : nullptr);
-    std::for_each(font_sizes.begin(), font_sizes.end(), [&io, &font_ranges](float fsize) {
-        auto* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(GUIFONT_NAME, fsize, nullptr, font_ranges);
+
+    ::ImFontConfig font_config{};
+    font_config.FontDataOwnedByAtlas = false;
+
+    std::for_each(font_sizes.begin(), font_sizes.end(), [&io, &font_ranges, &font_config](float fsize) {
+        auto* font = io.Fonts->AddFontFromMemoryTTF(ttf.data(), ttf.size(), fsize, &font_config, font_ranges);
         loaded_fonts.push_back(font);
     });
 

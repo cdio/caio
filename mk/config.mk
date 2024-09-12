@@ -70,7 +70,6 @@ CPPFLAGS+=		-I${CWD} \
 			-I${ROOT} \
 			-I${ROOT}/src \
 			-I${ROOT}/src/core \
-			-I${ROOT}/3rdparty/imgui \
 			-I${ROOT}/3rdparty/sha2
 
 CXXFLAGS+=		${UI_CXXFLAGS} \

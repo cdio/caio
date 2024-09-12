@@ -27,7 +27,7 @@ namespace widget {
 
 class Reset : public Widget {
 public:
-    Reset(::SDL_Renderer* _renderer, const std::function<bool()>& is_paused);
+    Reset(const sptr_t<::SDL_Renderer>& _renderer, const std::function<bool()>& is_paused);
 
     virtual ~Reset() {
     }

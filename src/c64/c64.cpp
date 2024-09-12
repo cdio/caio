@@ -1,4 +1,5 @@
 /*
+ * #endif
  * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
@@ -469,21 +470,22 @@ void C64::create_ui()
 
     ui::Config uiconf {
         .audio = {
-            .enabled    = _conf.audio,
-            .srate      = mos_6581::SAMPLING_RATE,
-            .channels   = mos_6581::CHANNELS,
-            .samples    = mos_6581::SAMPLES
+            .enabled        = _conf.audio,
+            .srate          = mos_6581::SAMPLING_RATE,
+            .channels       = mos_6581::CHANNELS,
+            .samples        = mos_6581::SAMPLES
         },
         .video = {
-            .title      = title,
-            .width      = Mos6569::WIDTH,
-            .height     = Mos6569::HEIGHT,
-            .fps        = _conf.fps,
-            .scale      = _conf.scale,
-            .sleffect   = ui::to_sleffect(_conf.scanlines),
-            .fullscreen = _conf.fullscreen,
-            .sresize    = _conf.sresize
-        },
+            .title          = title,
+            .width          = Mos6569::WIDTH,
+            .height         = Mos6569::HEIGHT,
+            .fps            = _conf.fps,
+            .scale          = _conf.scale,
+            .sleffect       = ui::to_sleffect(_conf.scanlines),
+            .fullscreen     = _conf.fullscreen,
+            .sresize        = _conf.sresize,
+            .screenshotdir  = _conf.screenshotdir
+        }
     };
 
     _ui = ui::UI::instance(uiconf);
@@ -496,14 +498,14 @@ void C64::make_widgets()
      */
     auto floppy8 = ui::make_widget<ui::widget::Floppy>(_ui, [this]() {
         using Status = ui::widget::Floppy::Status;
-        return (_unit8 ? Status{.is_attached = true, .is_idle = _unit8->is_idle()} :
-                         Status{.is_attached = false, .is_idle = true});
+        return (_unit8 ? Status{ .is_attached = true,  .is_idle = _unit8->is_idle(), .progress = _unit8->progress()} :
+                         Status{ .is_attached = false, .is_idle = true, .progress = -1.0f});
     });
 
     auto floppy9 = ui::make_widget<ui::widget::Floppy>(_ui, [this]() {
         using Status = ui::widget::Floppy::Status;
-        return (_unit9 ? Status{.is_attached = true, .is_idle = _unit9->is_idle()} :
-                         Status{.is_attached = false, .is_idle = true});
+        return (_unit9 ? Status{ .is_attached = true,  .is_idle = _unit9->is_idle(), .progress = _unit9->progress()} :
+                         Status{ .is_attached = false, .is_idle = true, .progress = -1.0f});
     });
 
     /*
@@ -513,7 +515,8 @@ void C64::make_widgets()
         ui::widget::Gamepad::Status st{
             .id = 0,
             .is_connected = (_conf.swapj ? _joy2->is_connected() : _joy1->is_connected()),
-            .is_swapped = _conf.swapj
+            .is_swapped = _conf.swapj,
+            .name = (_conf.swapj ? _joy2->name() : _joy1->name()),
         };
         return st;
     });
@@ -522,7 +525,8 @@ void C64::make_widgets()
         ui::widget::Gamepad::Status st{
             .id = 1,
             .is_connected = (_conf.swapj ? _joy1->is_connected() : _joy2->is_connected()),
-            .is_swapped = _conf.swapj
+            .is_swapped = _conf.swapj,
+            .name = (_conf.swapj ? _joy1->name() : _joy2->name()),
         };
         return st;
     });
@@ -603,17 +607,6 @@ void C64::hotkeys(keyboard::Key key)
          */
         _conf.swapj ^= true;
         log.debug("Joysticks {}swapped\n", (_conf.swapj ? "" : "un"));
-        break;
-
-    case keyboard::KEY_ALT_K:
-        /*
-         * Toggle virtual joystick active status.
-         */
-        if (_conf.vjoy.enabled) {
-            bool kact = _kbd->active() ^ true;
-            _kbd->active(kact);
-            log.debug("Keyboard {}\n", (kact ? "active" : "inactive"));
-        }
         break;
 
     case keyboard::KEY_CTRL_C:

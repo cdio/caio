@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 #include <string_view>
 
 #include "name.hpp"
@@ -54,6 +55,7 @@ public:
     constexpr static unsigned JOYID_INVALID    = static_cast<unsigned>(-1);
     constexpr static unsigned JOYID_UNASSIGNED = JOYID_INVALID;
     constexpr static unsigned JOYID_VIRTUAL    = 255;
+    constexpr static const char* VJOY_NAME     = "Virtual Joystick";
 
     /**
      * Initialise this joystick.
@@ -75,9 +77,10 @@ public:
      * this joystick to a real game controller.
      * @param jid Identifier assigned to this joystick.
      */
-    void reset(unsigned jid = JOYID_INVALID) {
+    void reset(unsigned jid = JOYID_INVALID, std::string_view name = "") {
         _joyid = jid;
         _position = 0;
+        _name = name;
     }
 
     /**
@@ -122,10 +125,19 @@ public:
         return _port;
     }
 
+    /*
+     * Get the name of the associated gamepad.
+     * @return The name of the associated gamepad if this joystick is connected to one; otherwise an empty string.
+     */
+    const std::string& name() const {
+        return _name;
+    }
+
 private:
     Port        _port;
     unsigned    _joyid{JOYID_INVALID};
     uint16_t    _position{};
+    std::string _name{};
 };
 
 }

@@ -322,25 +322,25 @@ Status C1541Fs::channel_close(uint8_t ch)
     return Status::OK;
 }
 
-std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
+std::tuple<ReadByte, Status, float> C1541Fs::channel_read(uint8_t ch)
 {
     //TODO: PRGs are loaded on 401 not 801
 
     auto& channel = _channels[ch];
 
     if (!channel.is_open()) {
-        return {{}, Status::FILE_NOT_OPEN};
+        return {{}, Status::FILE_NOT_OPEN, -1.0f};
     }
 
     if (channel.is_write()) {
-        return {{}, Status::FILE_OPEN_FOR_WRITE};
+        return {{}, Status::FILE_OPEN_FOR_WRITE, -1.0f};
     }
 
     if (channel.pos >= channel.size) {
         /*
          * EOF.
          */
-        return {{}, Status::OK};
+        return {{}, Status::OK, -1.0f};
     }
 
     auto& is = (channel.mode == OpenMode::DIR ?
@@ -351,7 +351,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
     is.read(reinterpret_cast<char *>(&value), 1);
     if (is.fail()) {
         log.error("{}: Can't read: \"{}\": {}\n", name(ch), channel.fname, Error::to_string());
-        return {{}, Status::READ_ERROR};
+        return {{}, Status::READ_ERROR, -1.0f};
     }
 
     if (channel.pos == 0) {
@@ -360,10 +360,11 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
 
     ++channel.pos;
 
+    const size_t part = channel.size / 10;
+    const float progress = (is_last ? 1.0f : static_cast<float>(channel.pos) / channel.size);
     if (log.is_debug()) {
-        size_t part = channel.size / 10;
         if (part == 0 || (channel.pos % part) == 0 || is_last) {
-            float perc = (100.0f * channel.pos) / channel.size;
+            const float perc = 100.0f * progress;
             log.debug("{}: Read {} of {} bytes ({:.1f}%)\n", name(ch), channel.pos, channel.size, perc);
         }
     }
@@ -378,7 +379,7 @@ std::pair<ReadByte, Status> C1541Fs::channel_read(uint8_t ch)
         }
     }
 
-    return {ReadByte{value, is_last}, Status::OK};
+    return {ReadByte{value, is_last}, Status::OK, progress};
 }
 
 void C1541Fs::channel_push_back(uint8_t ch)

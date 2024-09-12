@@ -28,12 +28,15 @@ namespace widget {
 class Gamepad : public Widget {
 public:
     struct Status {
-        int  id;
-        bool is_connected;
-        bool is_swapped;
+        int         id{-1};
+        bool        is_connected{};
+        bool        is_swapped{};
+        std::string name{};
+
+        bool operator!=(const Status& other) const;
     };
 
-    Gamepad(::SDL_Renderer* renderer, const std::function<Status()>& upd);
+    Gamepad(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd);
 
     virtual ~Gamepad() {
     }
@@ -42,6 +45,8 @@ public:
 
 private:
     std::function<Status()> _update;
+    Label                   _label;
+    Status                  _prev_status{};
 };
 
 }

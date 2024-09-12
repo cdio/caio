@@ -37,15 +37,18 @@ namespace sdl2 {
  */
 class Panel {
 public:
-    constexpr static const Rgba FRAME_COLOR      = { 0xFF, 0x00, 0x00, 0x80 };
-    constexpr static const Rgba BG_COLOR         = { 0x00, 0x00, 0x00, 0x80 };
-    constexpr static float WIDTH_RATIO           = 0.618f;
-    constexpr static float HEIGHT_RATIO          = WIDTH_RATIO / 4.0f;
-    constexpr static const float THICKNESS_RATIO = WIDTH_RATIO / 30.0f;
+    constexpr static const Rgba FRAME_COLOR         = { 0xFF, 0x00, 0x00, 0x80 };
+    constexpr static const Rgba BG_COLOR            = { 0x00, 0x00, 0x00, 0x80 };
+    constexpr static float WIDTH_RATIO              = 0.618f;
+    constexpr static float HEIGHT_RATIO             = WIDTH_RATIO / 4.0f;
+    constexpr static const float THICKNESS_RATIO    = WIDTH_RATIO / 30.0f;
+    constexpr static const int WIDGET_MAGNIFICATION = 5;
 
-    enum Just {
-        LEFT  = 0,
-        RIGHT = 1
+    using Widget = widget::Widget;
+
+    enum class Just {
+        Left  = 0,
+        Right = 1
     };
 
     /**
@@ -54,7 +57,7 @@ public:
      * @exception UIError
      * @see reset()
      */
-    Panel(::SDL_Renderer* renderer = nullptr);
+    Panel(const sptr_t<::SDL_Renderer>& renderer = {});
 
     virtual ~Panel();
 
@@ -63,7 +66,7 @@ public:
      * @param renderer Renderer;
      * @exception UIError
      */
-    void reset(::SDL_Renderer* renderer = nullptr);
+    void reset(const sptr_t<::SDL_Renderer>& renderer = {});
 
     /**
      * Set the panel visibility.
@@ -94,22 +97,22 @@ public:
     /**
      * Add a widget to this panel.
      * @param widget Widget to add;
-     * @param just   Justification (Just::LEFT or Just::RIGHT);
+     * @param just   Justification;
      * @return true if the widget was added, false if there is no room for a new widget in the panel.
+     * @see Just
      */
-    void add(const sptr_t<Widget>& widget, Just just = Just::LEFT);
+    void add(const sptr_t<Widget>& widget, Just just = Just::Left);
 
 private:
-    using just_rect_widget_t = std::tuple<Just, ::SDL_Rect, sptr_t<Widget>>;
+    using JustRectWidget = std::tuple<Just, ::SDL_Rect, sptr_t<Widget>>;
 
-    std::vector<just_rect_widget_t>::const_iterator find_widget(int x, int y);
+    std::vector<JustRectWidget>::const_iterator find_widget(int x, int y);
 
-    bool                            _visible{};         /* Panel visibility                 */
-    ::SDL_Renderer*                 _renderer{nullptr}; /* Renderer                         */
-    ::SDL_Texture*                  _tex{nullptr};      /* Panel texture                    */
-    ::SDL_Rect                      _ext_rect{};        /* Panel rectangle                  */
-    sptr_t<Widget>                  _cur_widget{};      /* Widget under the mouse cursor    */
-    std::vector<just_rect_widget_t> _widgets{};         /* Panel widgets                    */
+    bool                        _visible{};     /* Panel visibility                 */
+    sptr_t<::SDL_Renderer>      _renderer{};    /* Renderer                         */
+    ::SDL_Rect                  _ext_rect{};    /* Panel rectangle                  */
+    sptr_t<Widget>              _cur_widget{};  /* Widget under the mouse cursor    */
+    std::vector<JustRectWidget> _widgets{};     /* Panel widgets                    */
 };
 
 }

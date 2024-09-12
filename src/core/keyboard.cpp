@@ -234,13 +234,17 @@ void Keyboard::vjoystick(const VJoyKeys& vjoykeys, const sptr_t<Joystick>& vjoy)
 
     _vjoy = vjoy;
     if (_vjoy) {
-        _vjoy->reset(Joystick::JOYID_VIRTUAL);
+        _vjoy->reset(Joystick::JOYID_VIRTUAL, Joystick::VJOY_NAME);
         _vjoykeys = vjoykeys;
     }
 }
 
 void Keyboard::key_pressed(Key key)
 {
+    if (_kbd_enabled) {
+        pressed(key);
+    }
+
     if (_vjoy) {
         const auto& jport = _vjoy->port();
         uint16_t pos = _vjoy->position();
@@ -259,10 +263,6 @@ void Keyboard::key_pressed(Key key)
                (key == _vjoykeys.start  ? jport.start : 0))))))))))));
 
         _vjoy->position(pos);
-    }
-
-    if (_kbd_active) {
-        pressed(key);
     }
 }
 
@@ -288,7 +288,7 @@ void Keyboard::key_released(Key key)
         _vjoy->position(pos);
     }
 
-    if (_kbd_active) {
+    if (_kbd_enabled) {
         released(key);
     }
 }

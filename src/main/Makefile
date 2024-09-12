@@ -65,6 +65,7 @@ LDADD+=		${UI_LDADD}
 # Widget Toolkit
 CXXSRCS+=	dearimgui.cpp
 INCS+=		dearimgui.hpp
+CPPFLAGS+=	-I${ROOT}/3rdparty/imgui
 EXTRA_LIBS+=	${ROOT}/3rdparty/imgui/libimgui/libimgui.a
 
 LDADD+=		${EXTRA_LIBS}

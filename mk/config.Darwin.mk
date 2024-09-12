@@ -17,14 +17,16 @@
 # with this program; if not, see http://www.gnu.org/licenses/
 #
 ifeq (${ARCH}, arm64)
-override SDL2_CONFIG=	/opt/homebrew/bin/sdl2-config
+HOMEBREW_DIR=		/opt/homebrew
 else
-override SDL2_CONFIG=	/usr/local/Homebrew/bin/sdl2-config
+HOMEBREW_DIR=		/usr/local/Homebrew
 CFLAGS+=		-arch x86_64
 CXXFLAGS+=		-arch x86_64
 CXXFLAGS+=		-Wno-nullability-completeness
 LDFLAGS+=		-arch x86_64
 endif
+
+override SDL2_CONFIG=	${HOMEBREW_DIR}/bin/sdl2-config
 
 EXTRA_3RDPARTY_DIRS+=
 
@@ -33,8 +35,18 @@ SYSDEP_CPPFLAGS+=	-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/incl
 LIB_INCLUDE_BEGIN=	-Wl,-all_load
 LIB_INCLUDE_END=
 
-UI_CXXFLAGS+=		-I${ROOT}/3rdparty/sdl_image/SDL_image.subtree/include
-UI_CXXFLAGS+=		${shell ${SDL2_CONFIG} --cflags}
+UI_CXXFLAGS+=		-I${ROOT}/3rdparty/sdl2/sdl_image/SDL_image.subtree/include \
+			-I${ROOT}/3rdparty/sdl2/sdl_ttf/SDL_ttf.subtree
 
-UI_LDADD+=		${ROOT}/3rdparty/sdl_image/SDL_image/libSDL2_image.a
+UI_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags freetype2 libpng} \
+			${shell ${SDL2_CONFIG} --cflags}
+
+UI_LDADD+=		${ROOT}/3rdparty/sdl2/sdl_image/SDL_image/libSDL2_image.a \
+			${ROOT}/3rdparty/sdl2/sdl_ttf/SDL_ttf/libSDL2_ttf.a \
+			${HOMEBREW_DIR}/opt/freetype/lib/libfreetype.a \
+			${HOMEBREW_DIR}/opt/libpng/lib/libpng.a
+
 UI_LDADD+=		${shell ${SDL2_CONFIG} --static-libs}
+
+UI_LDADD+=		-lbz2 \
+			-lz

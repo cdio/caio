@@ -414,5 +414,12 @@ uint64_t sleep(uint64_t delay);
  */
 std::string sha256(std::span<const uint8_t> buf);
 
+/**
+ * Base 64 decoder.
+ * @param src Encoded buffer.
+ * @return A buffer with the decoded data.
+ */
+buffer_t base64_decode(const std::span<const uint8_t>& src);
+
 }
 }

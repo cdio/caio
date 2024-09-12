@@ -27,7 +27,7 @@ namespace widget {
 
 class Pause : public Widget {
 public:
-    Pause(::SDL_Renderer* _renderer, const std::function<bool()>& upd = {});
+    Pause(const sptr_t<::SDL_Renderer>& _renderer, const std::function<bool()>& upd = {});
 
     virtual ~Pause() {
     }

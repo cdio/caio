@@ -199,9 +199,9 @@ std::vector<std::string> key_names();
  */
 class Keyboard : public Name {
 public:
-    constexpr static const char* TYPE = "KBD";
-    constexpr static const bool SHIFT = true;
-    constexpr static const bool NONE  = false;
+    constexpr static const char* TYPE   = "KBD";
+    constexpr static const bool SHIFT   = true;
+    constexpr static const bool NONE    = false;
 
     Keyboard() {
     }
@@ -233,20 +233,20 @@ public:
 
     /**
      * Return the status of this keyboard.
-     * @return The status of this keyboard (true if active, false if inactive).
-     * @see active(bool)
+     * @return The status of this keyboard (true if enabled, false if disabled).
+     * @see enable(bool)
      */
-    bool active() const {
-        return _kbd_active;
+    bool is_enabled() const {
+        return _kbd_enabled;
     }
 
     /**
      * Set the status of this keyboard.
      * Note that the status of the keyboard does not affect the virtual joystick.
-     * @param act true to activate the keyboard; false to deactivate it.
+     * @param en true to enable; false to disable.
      */
-    void active(bool act) {
-        _kbd_active = act;
+    void enable(bool en) {
+        _kbd_enabled = en;
     }
 
     /**
@@ -324,7 +324,7 @@ protected:
 private:
     VJoyKeys            _vjoykeys{};
     sptr_t<Joystick>    _vjoy{};
-    bool                _kbd_active{true};
+    bool                _kbd_enabled{true};
 };
 
 }

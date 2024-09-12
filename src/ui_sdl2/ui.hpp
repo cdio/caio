@@ -42,7 +42,9 @@ namespace ui {
 namespace sdl2 {
 
 /**
- * SDL2 User Interface.
+ * Emulator User Interface.
+ * This class implements the user interface used by
+ * the actual emulator and it uses SDL2 as backend.
  */
 class UI {
 public:
@@ -54,6 +56,7 @@ public:
     constexpr static const float ADV_SCANLINE_REFLECTION    = 0.4f;
     constexpr static const uint64_t MOUSE_INACTIVE_TIME     = 2'000'000;    /* us */
     constexpr static const uint8_t PANEL_BUTTON             = SDL_BUTTON_RIGHT;
+    constexpr static const char* SCREENSHOT_PREFIX          = "caio_screenshot_";
 
     using keybptr_t     = sptr_t<Keyboard>;
     using joyptr_t      = sptr_t<Joystick>;
@@ -227,7 +230,15 @@ public:
      * Get the backend renderer.
      * @return A raw pointer to the backend renderer.
      */
-    ::SDL_Renderer* renderer();
+    sptr_t<::SDL_Renderer> renderer();
+
+    /**
+     * Take a screenshot.
+     * The screenshot is saved as a PNG file using the
+     * name: SCREENSHOT_PREFIX + "YYYY-MM-DD-hh.mm.ss".
+     * @exception UIError
+     */
+    void screenshot() const;
 
 private:
     /**
@@ -346,37 +357,37 @@ private:
      */
     void attach_controllers();
 
-    Config                      _conf{};                /* UI configuration                                   */
-    uint64_t                    _fps_time{};            /* FPS in microseconds                                */
-    keybptr_t                   _kbd{};                 /* Emulated keyboard                                  */
-    std::vector<joyptr_t>       _joys{};                /* List of emulated joysticks                         */
-    hotkeys_cb_t                _hotkeys_cb{};          /* User defined hot-keys callback                     */
-    std::function<void(bool)>   _pause_cb{};            /* Pause callback                                     */
-    std::function<bool()>       _ispause_cb{};          /* Pause status callback                              */
-    std::function<void()>       _reset_cb{};            /* Reset callback                                     */
+    Config                      _conf{};                    /* UI configuration                                   */
+    uint64_t                    _fps_time{};                /* FPS in microseconds                                */
+    keybptr_t                   _kbd{};                     /* Emulated keyboard                                  */
+    std::vector<joyptr_t>       _joys{};                    /* List of emulated joysticks                         */
+    hotkeys_cb_t                _hotkeys_cb{};              /* User defined hot-keys callback                     */
+    std::function<void(bool)>   _pause_cb{};                /* Pause callback                                     */
+    std::function<bool()>       _ispause_cb{};              /* Pause status callback                              */
+    std::function<void()>       _reset_cb{};                /* Reset callback                                     */
 
-    int                         _win_width{};           /* Width of the main window                           */
-    int                         _win_height{};          /* Height of the main window                          */
-    int                         _tex_width{};           /* Width of the emulated screen                       */
-    int                         _tex_height{};          /* Height of the emulated screen                      */
-    int                         _screen_width{};        /* Width of the scaled emulated screen                */
-    int                         _screen_height{};       /* Height of the scaled emulated screen               */
-    float                       _screen_ratio{};        /* Aspect ratio of the emulated screen                */
-    float                       _screen_scale{};        /* Current screen scale factor                        */
-    bool                        _is_fullscreen{};       /* Fullscreen mode                                    */
-    std::atomic_bool            _stop{};                /* True if the main loop must be stopped              */
-    uint64_t                    _mouse_active_time{};   /* Inactivity time until the cursor becomes invisible */
-    bool                        _mouse_visible{true};   /* Whether the mouse cursor is visible or not         */
+    int                         _win_width{};               /* Width of the main window                           */
+    int                         _win_height{};              /* Height of the main window                          */
+    int                         _tex_width{};               /* Width of the emulated screen                       */
+    int                         _tex_height{};              /* Height of the emulated screen                      */
+    int                         _screen_width{};            /* Width of the scaled emulated screen                */
+    int                         _screen_height{};           /* Height of the scaled emulated screen               */
+    float                       _screen_ratio{};            /* Aspect ratio of the emulated screen                */
+    float                       _screen_scale{};            /* Current screen scale factor                        */
+    bool                        _is_fullscreen{};           /* Fullscreen mode                                    */
+    std::atomic_bool            _stop{};                    /* True if the main loop must be stopped              */
+    uint64_t                    _mouse_active_time{};       /* Inactivity time until the cursor becomes invisible */
+    bool                        _mouse_visible{true};       /* Whether the mouse cursor is visible or not         */
 
-    ::SDL_Window*               _window{nullptr};       /* Main window                                        */
-    ::SDL_Renderer*             _renderer{nullptr};     /* Main window renderer                               */
-    ::SDL_Surface*              _icon{nullptr};         /* Main window icon                                   */
-    std::vector<Rgba>           _screen_raw{};          /* Emulated screen raw RGBA data                      */
-    ::SDL_Texture*              _screen_tex{nullptr};   /* Emulated screen texture ready to be rendered       */
-    ::SDL_Rect                  _screen_rect{};         /* Emulated screen rendering coordinates              */
-    sptr_t<Panel>               _panel{};               /* Info Panel                                         */
+    sptr_t<::SDL_Renderer>      _renderer{};                /* Main window renderer                               */
+    uptrd_t<::SDL_Surface>      _icon{nullptr, nullptr};    /* Main window icon                                   */
+    sptr_t<::SDL_Window>        _window{};                  /* Main window                                        */
+    std::vector<Rgba>           _screen_raw{};              /* Emulated screen raw RGBA data                      */
+    sptr_t<::SDL_Texture>       _screen_tex{};              /* Emulated screen texture ready to be rendered       */
+    ::SDL_Rect                  _screen_rect{};             /* Emulated screen rendering coordinates              */
+    sptr_t<Panel>               _panel{};                   /* Info Panel                                         */
 
-    AudioStream                 _audio_stream{};        /* Audio driver                                       */
+    AudioStream                 _audio_stream{};            /* Audio driver                                       */
 
     std::map<::SDL_JoystickID, std::unique_ptr<::SDL_GameController, void(*)(::SDL_GameController*)>> _sdl_joys{};
 };

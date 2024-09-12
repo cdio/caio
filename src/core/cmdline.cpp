@@ -67,36 +67,37 @@ bool set_bool(Confile& cf, const Option& opt, std::string_view value)
 }
 
 static Option generic_options[] = {
-    { KEY_CONFIG_FILE, SEC_GENERIC, KEY_CONFIG_FILE, CONFIG_FILE,         Arg::Required, set_value       },
-    { KEY_ROMDIR,      SEC_GENERIC, KEY_ROMDIR,      DEFAULT_ROMDIR,      Arg::Required, set_value       },
-    { KEY_PALETTEDIR,  SEC_GENERIC, KEY_PALETTEDIR,  DEFAULT_PALETTEDIR,  Arg::Required, set_value       },
-    { KEY_KEYMAPSDIR,  SEC_GENERIC, KEY_KEYMAPSDIR,  DEFAULT_KEYMAPSDIR,  Arg::Required, set_value       },
-    { KEY_PALETTE,     SEC_GENERIC, KEY_PALETTE,     DEFAULT_PALETTE,     Arg::Required, set_value       },
-    { KEY_KEYMAPS,     SEC_GENERIC, KEY_KEYMAPS,     DEFAULT_KEYMAPS,     Arg::Required, set_value       },
-    { KEY_CARTRIDGE,   SEC_GENERIC, KEY_CARTRIDGE,   DEFAULT_CARTRIDGE,   Arg::Required, set_value       },
-    { KEY_FPS,         SEC_GENERIC, KEY_FPS,         DEFAULT_FPS,         Arg::Required, set_value       },
-    { KEY_SCALE,       SEC_GENERIC, KEY_SCALE,       DEFAULT_SCALE,       Arg::Required, set_value       },
-    { KEY_SCANLINES,   SEC_GENERIC, KEY_SCANLINES,   DEFAULT_SCANLINES,   Arg::Required, set_value       },
-    { KEY_FULLSCREEN,  SEC_GENERIC, KEY_FULLSCREEN,  DEFAULT_FULLSCREEN,  Arg::Optional, set_bool, "yes" },
-    { KEY_SRESIZE,     SEC_GENERIC, KEY_SRESIZE,     DEFAULT_SRESIZE,     Arg::Optional, set_bool, "yes" },
-    { KEY_AUDIO,       SEC_GENERIC, KEY_AUDIO,       DEFAULT_AUDIO,       Arg::Optional, set_bool, "yes" },
-    { KEY_DELAY,       SEC_GENERIC, KEY_DELAY,       DEFAULT_DELAY,       Arg::Required, set_value       },
-    { KEY_MONITOR,     SEC_GENERIC, KEY_MONITOR,     DEFAULT_MONITOR,     Arg::Optional, set_bool, "yes" },
-    { KEY_LOGFILE,     SEC_GENERIC, KEY_LOGFILE,     DEFAULT_LOGFILE,     Arg::Required, set_value       },
-    { KEY_LOGLEVEL,    SEC_GENERIC, KEY_LOGLEVEL,    DEFAULT_LOGLEVEL,    Arg::Required, set_value       },
-    { KEY_VJOY,        SEC_GENERIC, KEY_VJOY,        DEFAULT_VJOY,        Arg::Optional, set_bool, "yes" },
-    { KEY_VJOY_UP,     SEC_GENERIC, KEY_VJOY_UP,     DEFAULT_VJOY_UP,     Arg::Required, set_value       },
-    { KEY_VJOY_DOWN,   SEC_GENERIC, KEY_VJOY_DOWN,   DEFAULT_VJOY_DOWN,   Arg::Required, set_value       },
-    { KEY_VJOY_LEFT,   SEC_GENERIC, KEY_VJOY_LEFT,   DEFAULT_VJOY_LEFT,   Arg::Required, set_value       },
-    { KEY_VJOY_RIGHT,  SEC_GENERIC, KEY_VJOY_RIGHT,  DEFAULT_VJOY_RIGHT,  Arg::Required, set_value       },
-    { KEY_VJOY_FIRE,   SEC_GENERIC, KEY_VJOY_FIRE,   DEFAULT_VJOY_FIRE,   Arg::Required, set_value       },
-    { KEY_VJOY_A,      SEC_GENERIC, KEY_VJOY_A,      DEFAULT_VJOY_A,      Arg::Required, set_value       },
-    { KEY_VJOY_B,      SEC_GENERIC, KEY_VJOY_B,      DEFAULT_VJOY_B,      Arg::Required, set_value       },
-    { KEY_VJOY_X,      SEC_GENERIC, KEY_VJOY_X,      DEFAULT_VJOY_X,      Arg::Required, set_value       },
-    { KEY_VJOY_Y,      SEC_GENERIC, KEY_VJOY_Y,      DEFAULT_VJOY_Y,      Arg::Required, set_value       },
-    { KEY_VJOY_BACK,   SEC_GENERIC, KEY_VJOY_BACK,   DEFAULT_VJOY_BACK,   Arg::Required, set_value       },
-    { KEY_VJOY_GUIDE,  SEC_GENERIC, KEY_VJOY_GUIDE,  DEFAULT_VJOY_GUIDE,  Arg::Required, set_value       },
-    { KEY_VJOY_START,  SEC_GENERIC, KEY_VJOY_START,  DEFAULT_VJOY_START,  Arg::Required, set_value       },
+    { KEY_CONFIG_FILE,      SEC_GENERIC, KEY_CONFIG_FILE,   CONFIG_FILE,            Arg::Required, set_value       },
+    { KEY_ROMDIR,           SEC_GENERIC, KEY_ROMDIR,        DEFAULT_ROMDIR,         Arg::Required, set_value       },
+    { KEY_PALETTEDIR,       SEC_GENERIC, KEY_PALETTEDIR,    DEFAULT_PALETTEDIR,     Arg::Required, set_value       },
+    { KEY_KEYMAPSDIR,       SEC_GENERIC, KEY_KEYMAPSDIR,    DEFAULT_KEYMAPSDIR,     Arg::Required, set_value       },
+    { KEY_PALETTE,          SEC_GENERIC, KEY_PALETTE,       DEFAULT_PALETTE,        Arg::Required, set_value       },
+    { KEY_KEYMAPS,          SEC_GENERIC, KEY_KEYMAPS,       DEFAULT_KEYMAPS,        Arg::Required, set_value       },
+    { KEY_CARTRIDGE,        SEC_GENERIC, KEY_CARTRIDGE,     DEFAULT_CARTRIDGE,      Arg::Required, set_value       },
+    { KEY_FPS,              SEC_GENERIC, KEY_FPS,           DEFAULT_FPS,            Arg::Required, set_value       },
+    { KEY_SCALE,            SEC_GENERIC, KEY_SCALE,         DEFAULT_SCALE,          Arg::Required, set_value       },
+    { KEY_SCANLINES,        SEC_GENERIC, KEY_SCANLINES,     DEFAULT_SCANLINES,      Arg::Required, set_value       },
+    { KEY_FULLSCREEN,       SEC_GENERIC, KEY_FULLSCREEN,    DEFAULT_FULLSCREEN,     Arg::Optional, set_bool, "yes" },
+    { KEY_SRESIZE,          SEC_GENERIC, KEY_SRESIZE,       DEFAULT_SRESIZE,        Arg::Optional, set_bool, "yes" },
+    { KEY_AUDIO,            SEC_GENERIC, KEY_AUDIO,         DEFAULT_AUDIO,          Arg::Optional, set_bool, "yes" },
+    { KEY_DELAY,            SEC_GENERIC, KEY_DELAY,         DEFAULT_DELAY,          Arg::Required, set_value       },
+    { KEY_MONITOR,          SEC_GENERIC, KEY_MONITOR,       DEFAULT_MONITOR,        Arg::Optional, set_bool, "yes" },
+    { KEY_LOGFILE,          SEC_GENERIC, KEY_LOGFILE,       DEFAULT_LOGFILE,        Arg::Required, set_value       },
+    { KEY_LOGLEVEL,         SEC_GENERIC, KEY_LOGLEVEL,      DEFAULT_LOGLEVEL,       Arg::Required, set_value       },
+    { KEY_VJOY,             SEC_GENERIC, KEY_VJOY,          DEFAULT_VJOY,           Arg::Optional, set_bool, "yes" },
+    { KEY_VJOY_UP,          SEC_GENERIC, KEY_VJOY_UP,       DEFAULT_VJOY_UP,        Arg::Required, set_value       },
+    { KEY_VJOY_DOWN,        SEC_GENERIC, KEY_VJOY_DOWN,     DEFAULT_VJOY_DOWN,      Arg::Required, set_value       },
+    { KEY_VJOY_LEFT,        SEC_GENERIC, KEY_VJOY_LEFT,     DEFAULT_VJOY_LEFT,      Arg::Required, set_value       },
+    { KEY_VJOY_RIGHT,       SEC_GENERIC, KEY_VJOY_RIGHT,    DEFAULT_VJOY_RIGHT,     Arg::Required, set_value       },
+    { KEY_VJOY_FIRE,        SEC_GENERIC, KEY_VJOY_FIRE,     DEFAULT_VJOY_FIRE,      Arg::Required, set_value       },
+    { KEY_VJOY_A,           SEC_GENERIC, KEY_VJOY_A,        DEFAULT_VJOY_A,         Arg::Required, set_value       },
+    { KEY_VJOY_B,           SEC_GENERIC, KEY_VJOY_B,        DEFAULT_VJOY_B,         Arg::Required, set_value       },
+    { KEY_VJOY_X,           SEC_GENERIC, KEY_VJOY_X,        DEFAULT_VJOY_X,         Arg::Required, set_value       },
+    { KEY_VJOY_Y,           SEC_GENERIC, KEY_VJOY_Y,        DEFAULT_VJOY_Y,         Arg::Required, set_value       },
+    { KEY_VJOY_BACK,        SEC_GENERIC, KEY_VJOY_BACK,     DEFAULT_VJOY_BACK,      Arg::Required, set_value       },
+    { KEY_VJOY_GUIDE,       SEC_GENERIC, KEY_VJOY_GUIDE,    DEFAULT_VJOY_GUIDE,     Arg::Required, set_value       },
+    { KEY_VJOY_START,       SEC_GENERIC, KEY_VJOY_START,    DEFAULT_VJOY_START,     Arg::Required, set_value       },
+    { KEY_SCREENSHOTDIR,    SEC_GENERIC, KEY_SCREENSHOTDIR, DEFAULT_SCREENSHOTDIR,  Arg::Required, set_value       }
 };
 
 std::string Cmdline::usage() const
@@ -141,6 +142,7 @@ std::string Cmdline::usage() const
         " --vjoy-back <keyname>   Virtual joystick BACK key\n"
         " --vjoy-guide <keyname>  Virtual joystick GUIDE key\n"
         " --vjoy-start <keyname>  Virtual joystick START key\n"
+        " --screenshotdir <sdir>  Screenshot directory (default is {})\n"
         " -v|--version            Show version information and exit\n"
         " -h|--help               Print this message and exit",
         _progname,
@@ -158,7 +160,8 @@ std::string Cmdline::usage() const
         DEFAULT_VJOY_DOWN,
         DEFAULT_VJOY_LEFT,
         DEFAULT_VJOY_RIGHT,
-        DEFAULT_VJOY_FIRE);
+        DEFAULT_VJOY_FIRE,
+        DEFAULT_SCREENSHOTDIR);
 }
 
 Confile Cmdline::defaults()

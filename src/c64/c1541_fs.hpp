@@ -26,7 +26,6 @@
 #include <memory>
 #include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "fs.hpp"
@@ -122,7 +121,7 @@ private:
     /**
      * @see C1541::channel_read()
      */
-    std::pair<ReadByte, Status> channel_read(uint8_t ch) override;
+    std::tuple<ReadByte, Status, float> channel_read(uint8_t ch) override;
 
     /**
      * @see C1541::channel_push_back()

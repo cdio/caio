@@ -27,7 +27,7 @@ namespace widget {
 
 #include "icons/cassette_128x24.hpp"
 
-Cassette::Cassette(::SDL_Renderer* renderer, const std::function<Status()>& upd)
+Cassette::Cassette(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd)
     : Widget{renderer},
       _update{upd}
 {

@@ -16,39 +16,31 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_sdl2/widget_pause.hpp"
+#pragma once
+
+#include "ui_sdl2/widget.hpp"
 
 namespace caio {
 namespace ui {
 namespace sdl2 {
 namespace widget {
 
-#include "icons/pause_128x2.hpp"
+class Keyboard : public Widget {
+public:
+    struct Status {
+        bool is_enabled{};
+    };
 
-Pause::Pause(const sptr_t<::SDL_Renderer>& renderer, const std::function<bool()>& upd)
-    : Widget{renderer},
-      _update{upd}
-{
-    Widget::load(pause_128x2_png);
-}
+    Keyboard(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd);
 
-void Pause::render(const ::SDL_Rect& dstrect)
-{
-    static const ::SDL_Rect running_rect{0, 0, 128, 128};
-    static const ::SDL_Rect paused_rect{128, 0, 128, 128};
-    bool is_paused{};
-
-    if (_update) {
-        is_paused = _update();
+    virtual ~Keyboard() {
     }
 
-    if (_rect.x == -1 || _is_paused != is_paused) {
-        _rect = (is_paused ? paused_rect : running_rect);
-        _is_paused = is_paused;
-    }
+    void render(const ::SDL_Rect& dstrect) override;
 
-    Widget::render(_rect, dstrect);
-}
+private:
+    std::function<Status()> _update;
+};
 
 }
 }

@@ -27,7 +27,7 @@ namespace widget {
 
 class Fullscreen : public Widget {
 public:
-    Fullscreen(::SDL_Renderer* _renderer, const std::function<bool()>& upd);
+    Fullscreen(const sptr_t<::SDL_Renderer>& _renderer, const std::function<bool()>& upd);
 
     virtual ~Fullscreen() {
     }

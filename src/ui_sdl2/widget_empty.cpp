@@ -23,7 +23,7 @@ namespace ui {
 namespace sdl2 {
 namespace widget {
 
-Empty::Empty(::SDL_Renderer* renderer)
+Empty::Empty(const sptr_t<::SDL_Renderer>& renderer)
     : Widget{renderer}
 {
 }

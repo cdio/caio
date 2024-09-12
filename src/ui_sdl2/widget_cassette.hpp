@@ -34,7 +34,7 @@ public:
         bool is_idle{};
     };
 
-    Cassette(::SDL_Renderer* renderer, const std::function<Status()>& upd);
+    Cassette(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd);
 
     virtual ~Cassette() {
     }

@@ -25,7 +25,7 @@ namespace widget {
 
 #include "icons/fullscreen_128x2.hpp"
 
-Fullscreen::Fullscreen(::SDL_Renderer* renderer, const std::function<bool()>& upd)
+Fullscreen::Fullscreen(const sptr_t<::SDL_Renderer>& renderer, const std::function<bool()>& upd)
     : Widget{renderer},
       _update{upd}
 {

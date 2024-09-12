@@ -26,7 +26,7 @@ namespace caio {
 namespace ui {
 namespace sdl2 {
 
-Panel::Panel(::SDL_Renderer* renderer)
+Panel::Panel(const sptr_t<::SDL_Renderer>& renderer)
 {
     reset(renderer);
 }
@@ -36,15 +36,11 @@ Panel::~Panel()
     reset();
 }
 
-void Panel::reset(::SDL_Renderer* renderer)
+void Panel::reset(const sptr_t<::SDL_Renderer>& renderer)
 {
     _renderer = renderer;
 
-    if (_tex != nullptr) {
-        ::SDL_DestroyTexture(_tex);
-    }
-
-    if (_renderer != nullptr) {
+    if (_renderer) {
         int displays = ::SDL_GetNumVideoDisplays();
         if (displays <= 0) {
             throw UIError{"panel: Can't get number of displays: {}", sdl_error()};
@@ -60,13 +56,6 @@ void Panel::reset(::SDL_Renderer* renderer)
             if (dmode.w > max_width) {
                 max_width = dmode.w;
             }
-        }
-
-        _tex = ::SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
-            max_width, max_width * HEIGHT_RATIO);
-
-        if (_tex == nullptr) {
-            throw UIError{"panel: Can't create texture: {}", sdl_error()};
         }
     }
 }
@@ -96,120 +85,143 @@ void Panel::event(const ::SDL_Event& event)
         return;
     }
 
-    auto& rect = std::get<1>(*it);
-    auto& widget = std::get<2>(*it);
-    widget->event(event, rect);
+    const auto& [_, rect, widget] = *it;
     _cur_widget = widget;
+    widget->event(event, rect);
 }
 
 void Panel::render(int width, int height)
 {
-    if (visible()) {
-        int N = _widgets.size();
-        int wc_width = WIDTH_RATIO * width;
+    if (!visible()) {
+        return;
+    }
 
-        int ww = wc_width / N;
-        if (ww > static_cast<int>(Widget::WIDTH)) {
-            ww = Widget::WIDTH;
-        }
+    const int N = _widgets.size();
+    const int wc_width = WIDTH_RATIO * width;
 
-        int wh = ww / Widget::RATIO;
-        int wx = (width - N * ww) / 2;
+    /*
+     * Width and height of widgets.
+     */
+    const int ww = wc_width / N;
+    const int wh = ww / widget::RATIO;
 
-        int ext_h = height * HEIGHT_RATIO;
-        if (wh > ext_h) {
-            ext_h = wh;
-        }
+    /*
+     * Starting horizontal position for left and right justified widgets.
+     */
+    const int left_wx = (width - N * ww) / 2;
+    const int right_wx = left_wx + ww * (N - 1);
 
-        int ext_y = (height - ext_h) / 2;
-        int wy = ext_y + (ext_h - wh) / 2;
-        int rev_wx = wx + ww * (N - 1);
+    /*
+     * Vertical position and height of the container panel.
+     */
+    const int candidate_panel_height = height * HEIGHT_RATIO;
+    const int ext_h = (candidate_panel_height < wh ? wh : candidate_panel_height);
+    const int ext_y = (height - ext_h) / 2;
 
-        /*
-         * Panel external rectangle (frame).
-         */
-        _ext_rect = {
-            .x = 0,
-            .y = ext_y,
-            .w = width,
-            .h = ext_h
-        };
+    /*
+     * Vertical position for all the widgets.
+     */
+    const int wy = ext_y + (ext_h - wh) / 2;
 
-        int frame_thickness = ext_h * THICKNESS_RATIO;
+    /*
+     * Panel external rectangle (frame).
+     */
+    _ext_rect = {
+        .x = 0,
+        .y = ext_y,
+        .w = width,
+        .h = ext_h
+    };
 
-        /*
-         * Panel internal rectangle.
-         */
-        ::SDL_Rect int_rect{
-            .x = 0,
-            .y = ext_y + frame_thickness,
-            .w = width,
-            .h = ext_h - 2 * frame_thickness
-        };
+    const int frame_thickness = ext_h * THICKNESS_RATIO;
 
-        /*
-         * Draw panel.
-         */
-        ::SDL_SetRenderDrawColor(_renderer, FRAME_COLOR.r, FRAME_COLOR.g, FRAME_COLOR.b, FRAME_COLOR.a);
-        ::SDL_RenderFillRect(_renderer, &_ext_rect);
+    /*
+     * Panel internal rectangle.
+     */
+    ::SDL_Rect int_rect{
+        .x = 0,
+        .y = ext_y + frame_thickness,
+        .w = width,
+        .h = ext_h - 2 * frame_thickness
+    };
 
-        ::SDL_SetRenderDrawColor(_renderer, BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
-        ::SDL_RenderFillRect(_renderer, &int_rect);
+    /*
+     * Draw panel.
+     */
+    ::SDL_SetRenderDrawColor(_renderer.get(), FRAME_COLOR.r, FRAME_COLOR.g, FRAME_COLOR.b, FRAME_COLOR.a);
+    ::SDL_RenderFillRect(_renderer.get(), &_ext_rect);
 
-        /*
-         * Left justified widget rectangle.
-         */
-        ::SDL_Rect wid_rect{
-            .x = wx,
-            .y = wy,
-            .w = ww,
-            .h = wh
-        };
+    ::SDL_SetRenderDrawColor(_renderer.get(), BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
+    ::SDL_RenderFillRect(_renderer.get(), &int_rect);
 
-        /*
-         * Right justified widget rectangle.
-         */
-        ::SDL_Rect wid_rev_rect{
-            .x = rev_wx,
-            .y = wy,
-            .w = ww,
-            .h = wh
-        };
+    /*
+     * Coordinates for the next left justified widget.
+     */
+    ::SDL_Rect wid_rect{
+        .x = left_wx,
+        .y = wy,
+        .w = ww,
+        .h = wh
+    };
 
-        /*
-         * Draw widgets.
-         */
-        for (auto& tup : _widgets) {
-            auto just = std::get<0>(tup);
-            auto& rect = std::get<1>(tup);
-            auto& widget = std::get<2>(tup);
-            if (widget) {
-                if (just == Just::LEFT) {
-                    rect = wid_rect;
-                    wid_rect.x += ww;
-                } else {
-                    rect = wid_rev_rect;
-                    wid_rev_rect.x -= ww;
-                }
+    /*
+     * Coordinates for the next right justified widget.
+     */
+    ::SDL_Rect wid_rev_rect{
+        .x = right_wx,
+        .y = wy,
+        .w = ww,
+        .h = wh
+    };
 
-                if (widget == _cur_widget && widget->enabled()) {
-                    /*
-                     * Draw a rectangle around the widget under the mouse cursor.
-                     */
-                    ::SDL_SetRenderDrawColor(_renderer, FRAME_COLOR.r, FRAME_COLOR.g, FRAME_COLOR.b, FRAME_COLOR.a);
-                    ::SDL_RenderFillRect(_renderer, &rect);
-
-                    auto irect = rect;
-                    irect.x += frame_thickness;
-                    irect.y += frame_thickness;
-                    irect.w -= 2 * frame_thickness;
-                    irect.h -= 2 * frame_thickness;
-                    ::SDL_SetRenderDrawColor(_renderer, BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
-                    ::SDL_RenderFillRect(_renderer, &irect);
-                }
-
-                widget->render(rect);
+    /*
+     * Draw widgets.
+     */
+    for (auto& tup : _widgets) {
+        auto& [just, wrect, widget] = tup;
+        if (widget) {
+            if (just == Just::Left) {
+                wrect = wid_rect;
+                wid_rect.x += ww;
+            } else {
+                wrect = wid_rev_rect;
+                wid_rev_rect.x -= ww;
             }
+
+            if (widget == _cur_widget && widget->enabled()) {
+                /*
+                 * Draw a rectangle around the (enabled) widget under the mouse cursor.
+                 */
+                ::SDL_Rect erect{
+                    .x = wrect.x,
+                    .y = _ext_rect.y,
+                    .w = wrect.w,
+                    .h = _ext_rect.h
+                };
+
+                ::SDL_SetRenderDrawColor(_renderer.get(), FRAME_COLOR.r, FRAME_COLOR.g, FRAME_COLOR.b, FRAME_COLOR.a);
+                ::SDL_RenderFillRect(_renderer.get(), &erect);
+
+                ::SDL_Rect irect{
+                    .x = erect.x + frame_thickness,
+                    .y = erect.y + frame_thickness,
+                    .w = erect.w - 2 * frame_thickness,
+                    .h = erect.h - 2 * frame_thickness
+                };
+
+                ::SDL_SetRenderDrawColor(_renderer.get(), BG_COLOR.r, BG_COLOR.g, BG_COLOR.b, BG_COLOR.a);
+                ::SDL_RenderFillRect(_renderer.get(), &irect);
+
+                /*
+                 * Increase the size of the (enabled) widget under the mouse cursor.
+                 */
+                wrect.x -= WIDGET_MAGNIFICATION;
+                wrect.y -= WIDGET_MAGNIFICATION;
+                wrect.w += 2 * WIDGET_MAGNIFICATION;
+                wrect.h += 2 * WIDGET_MAGNIFICATION;
+            }
+
+            widget->render(wrect);
         }
     }
 }
@@ -219,11 +231,16 @@ void Panel::add(const sptr_t<Widget>& widget, Panel::Just just)
     _widgets.push_back({just, {}, widget});
 }
 
-std::vector<Panel::just_rect_widget_t>::const_iterator Panel::find_widget(int x, int y)
+std::vector<Panel::JustRectWidget>::const_iterator Panel::find_widget(int x, int y)
 {
-    auto it = std::find_if(_widgets.begin(), _widgets.end(), [x, y](const just_rect_widget_t& tup) {
-        auto& rect = std::get<1>(tup);
-        auto& widget = std::get<2>(tup);
+    auto it = std::find_if(_widgets.begin(), _widgets.end(), [this, x, y](const JustRectWidget& tup) {
+        const auto& [_, wrect, widget] = tup;
+        const ::SDL_Rect rect = {
+            .x = wrect.x,
+            .y = _ext_rect.y,
+            .w = wrect.w,
+            .h = _ext_rect.h
+        };
         return (widget && in_rect(x, y, rect));
     });
 

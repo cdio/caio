@@ -32,7 +32,9 @@ CXXSRCS+=	sdl2.cpp \
 		widget_floppy.cpp \
 		widget_fullscreen.cpp \
 		widget_gamepad.cpp \
+		widget_keyboard.cpp \
 		widget_pause.cpp \
+		widget_photocamera.cpp \
 		widget_reset.cpp \
 		widget_volume.cpp
 
@@ -46,7 +48,9 @@ INCS+=		sdl2.hpp \
 		widget_floppy.hpp \
 		widget_fullscreen.hpp \
 		widget_gamepad.hpp \
+		widget_keyboard.hpp \
 		widget_pause.hpp \
+		widget_photocamera.hpp \
 		widget_reset.hpp \
 		widget_volume.hpp
 

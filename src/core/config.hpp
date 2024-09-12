@@ -56,85 +56,92 @@
 #define D_KEYMAPSDIR        D_DATADIR "/keymaps"
 #endif
 
+#ifndef D_SCREENSHOTDIR
+#define D_SCREENSHOTDIR     "~/Desktop"
+#endif
+
 namespace caio {
 namespace config {
 
-constexpr static const char* SYSTEM_CONFDIR      = D_SYSCONFDIR;
-constexpr static const char* HOME_CONFDIR        = D_HOMECONFDIR;
-constexpr static const char* ROMDIR              = D_ROMDIR;
-constexpr static const char* PALETTEDIR          = D_PALETTEDIR;
-constexpr static const char* KEYMAPSDIR          = D_KEYMAPSDIR;
+constexpr static const char* SYSTEM_CONFDIR         = D_SYSCONFDIR;
+constexpr static const char* HOME_CONFDIR           = D_HOMECONFDIR;
+constexpr static const char* ROMDIR                 = D_ROMDIR;
+constexpr static const char* PALETTEDIR             = D_PALETTEDIR;
+constexpr static const char* KEYMAPSDIR             = D_KEYMAPSDIR;
+constexpr static const char* SCREENSHOTDIR          = D_SCREENSHOTDIR;
 
-constexpr static const char* PALETTEFILE_EXT     = ".plt";
-constexpr static const char* KEYMAPSFILE_EXT     = ".kbd";
+constexpr static const char* PALETTEFILE_EXT        = ".plt";
+constexpr static const char* KEYMAPSFILE_EXT        = ".kbd";
 
-constexpr static const char* CONFIG_FILE         = "caio.conf";
-constexpr static const char* KEY_CONFIG_FILE     = "conf";
+constexpr static const char* CONFIG_FILE            = "caio.conf";
+constexpr static const char* KEY_CONFIG_FILE        = "conf";
 
 /*
  * Generic configuration file section and default values.
  */
-constexpr static const char* SEC_GENERIC         = "generic";
+constexpr static const char* SEC_GENERIC            = "generic";
 
-constexpr static const char* KEY_ROMDIR          = "romdir";
-constexpr static const char* KEY_PALETTEDIR      = "palettedir";
-constexpr static const char* KEY_KEYMAPSDIR      = "keymapsdir";
-constexpr static const char* KEY_PALETTE         = "palette";
-constexpr static const char* KEY_KEYMAPS         = "keymaps";
-constexpr static const char* KEY_CARTRIDGE       = "cart";
-constexpr static const char* KEY_FPS             = "fps";
-constexpr static const char* KEY_SCALE           = "scale";
-constexpr static const char* KEY_SCANLINES       = "scanlines";
-constexpr static const char* KEY_FULLSCREEN      = "fullscreen";
-constexpr static const char* KEY_SRESIZE         = "sresize";
-constexpr static const char* KEY_AUDIO           = "audio";
-constexpr static const char* KEY_DELAY           = "delay";
-constexpr static const char* KEY_MONITOR         = "monitor";
-constexpr static const char* KEY_LOGFILE         = "logfile";
-constexpr static const char* KEY_LOGLEVEL        = "loglevel";
-constexpr static const char* KEY_VJOY            = "vjoy";
-constexpr static const char* KEY_VJOY_UP         = "vjoy-up";
-constexpr static const char* KEY_VJOY_DOWN       = "vjoy-down";
-constexpr static const char* KEY_VJOY_LEFT       = "vjoy-left";
-constexpr static const char* KEY_VJOY_RIGHT      = "vjoy-right";
-constexpr static const char* KEY_VJOY_FIRE       = "vjoy-fire";
-constexpr static const char* KEY_VJOY_A          = "vjoy-a";
-constexpr static const char* KEY_VJOY_B          = "vjoy-b";
-constexpr static const char* KEY_VJOY_X          = "vjoy-x";
-constexpr static const char* KEY_VJOY_Y          = "vjoy-y";
-constexpr static const char* KEY_VJOY_BACK       = "vjoy-back";
-constexpr static const char* KEY_VJOY_GUIDE      = "vjoy-guide";
-constexpr static const char* KEY_VJOY_START      = "vjoy-start";
+constexpr static const char* KEY_ROMDIR             = "romdir";
+constexpr static const char* KEY_PALETTEDIR         = "palettedir";
+constexpr static const char* KEY_KEYMAPSDIR         = "keymapsdir";
+constexpr static const char* KEY_PALETTE            = "palette";
+constexpr static const char* KEY_KEYMAPS            = "keymaps";
+constexpr static const char* KEY_CARTRIDGE          = "cart";
+constexpr static const char* KEY_FPS                = "fps";
+constexpr static const char* KEY_SCALE              = "scale";
+constexpr static const char* KEY_SCANLINES          = "scanlines";
+constexpr static const char* KEY_FULLSCREEN         = "fullscreen";
+constexpr static const char* KEY_SRESIZE            = "sresize";
+constexpr static const char* KEY_AUDIO              = "audio";
+constexpr static const char* KEY_DELAY              = "delay";
+constexpr static const char* KEY_MONITOR            = "monitor";
+constexpr static const char* KEY_LOGFILE            = "logfile";
+constexpr static const char* KEY_LOGLEVEL           = "loglevel";
+constexpr static const char* KEY_VJOY               = "vjoy";
+constexpr static const char* KEY_VJOY_UP            = "vjoy-up";
+constexpr static const char* KEY_VJOY_DOWN          = "vjoy-down";
+constexpr static const char* KEY_VJOY_LEFT          = "vjoy-left";
+constexpr static const char* KEY_VJOY_RIGHT         = "vjoy-right";
+constexpr static const char* KEY_VJOY_FIRE          = "vjoy-fire";
+constexpr static const char* KEY_VJOY_A             = "vjoy-a";
+constexpr static const char* KEY_VJOY_B             = "vjoy-b";
+constexpr static const char* KEY_VJOY_X             = "vjoy-x";
+constexpr static const char* KEY_VJOY_Y             = "vjoy-y";
+constexpr static const char* KEY_VJOY_BACK          = "vjoy-back";
+constexpr static const char* KEY_VJOY_GUIDE         = "vjoy-guide";
+constexpr static const char* KEY_VJOY_START         = "vjoy-start";
+constexpr static const char* KEY_SCREENSHOTDIR      = "screenshotdir";
 
-constexpr static const char* DEFAULT_ROMDIR      = ROMDIR;
-constexpr static const char* DEFAULT_PALETTEDIR  = PALETTEDIR;
-constexpr static const char* DEFAULT_KEYMAPSDIR  = KEYMAPSDIR;
-constexpr static const char* DEFAULT_PALETTE     = "";
-constexpr static const char* DEFAULT_KEYMAPS     = "";
-constexpr static const char* DEFAULT_CARTRIDGE   = "";
-constexpr static const char* DEFAULT_FPS         = "50";
-constexpr static const char* DEFAULT_SCALE       = "1";
-constexpr static const char* DEFAULT_SCANLINES   = "n";
-constexpr static const char* DEFAULT_FULLSCREEN  = "no";
-constexpr static const char* DEFAULT_SRESIZE     = "yes";
-constexpr static const char* DEFAULT_AUDIO       = "yes";
-constexpr static const char* DEFAULT_DELAY       = "1";
-constexpr static const char* DEFAULT_MONITOR     = "no";
-constexpr static const char* DEFAULT_LOGFILE     = Logger::DEFAULT_LOGFILE;
-constexpr static const char* DEFAULT_LOGLEVEL    = Logger::DEFAULT_LOGLEVEL;
-constexpr static const char* DEFAULT_VJOY        = "no";
-constexpr static const char* DEFAULT_VJOY_UP     = "KEY_NUMPAD_8";
-constexpr static const char* DEFAULT_VJOY_DOWN   = "KEY_NUMPAD_2";
-constexpr static const char* DEFAULT_VJOY_LEFT   = "KEY_NUMPAD_4";
-constexpr static const char* DEFAULT_VJOY_RIGHT  = "KEY_NUMPAD_6";
-constexpr static const char* DEFAULT_VJOY_FIRE   = "KEY_NUMPAD_5";
-constexpr static const char* DEFAULT_VJOY_A      = "";
-constexpr static const char* DEFAULT_VJOY_B      = "";
-constexpr static const char* DEFAULT_VJOY_X      = "";
-constexpr static const char* DEFAULT_VJOY_Y      = "";
-constexpr static const char* DEFAULT_VJOY_BACK   = "";
-constexpr static const char* DEFAULT_VJOY_GUIDE  = "";
-constexpr static const char* DEFAULT_VJOY_START  = "";
+constexpr static const char* DEFAULT_ROMDIR         = ROMDIR;
+constexpr static const char* DEFAULT_PALETTEDIR     = PALETTEDIR;
+constexpr static const char* DEFAULT_KEYMAPSDIR     = KEYMAPSDIR;
+constexpr static const char* DEFAULT_PALETTE        = "";
+constexpr static const char* DEFAULT_KEYMAPS        = "";
+constexpr static const char* DEFAULT_CARTRIDGE      = "";
+constexpr static const char* DEFAULT_FPS            = "50";
+constexpr static const char* DEFAULT_SCALE          = "1";
+constexpr static const char* DEFAULT_SCANLINES      = "n";
+constexpr static const char* DEFAULT_FULLSCREEN     = "no";
+constexpr static const char* DEFAULT_SRESIZE        = "yes";
+constexpr static const char* DEFAULT_AUDIO          = "yes";
+constexpr static const char* DEFAULT_DELAY          = "1";
+constexpr static const char* DEFAULT_MONITOR        = "no";
+constexpr static const char* DEFAULT_LOGFILE        = Logger::DEFAULT_LOGFILE;
+constexpr static const char* DEFAULT_LOGLEVEL       = Logger::DEFAULT_LOGLEVEL;
+constexpr static const char* DEFAULT_VJOY           = "no";
+constexpr static const char* DEFAULT_VJOY_UP        = "KEY_NUMPAD_8";
+constexpr static const char* DEFAULT_VJOY_DOWN      = "KEY_NUMPAD_2";
+constexpr static const char* DEFAULT_VJOY_LEFT      = "KEY_NUMPAD_4";
+constexpr static const char* DEFAULT_VJOY_RIGHT     = "KEY_NUMPAD_6";
+constexpr static const char* DEFAULT_VJOY_FIRE      = "KEY_NUMPAD_5";
+constexpr static const char* DEFAULT_VJOY_A         = "";
+constexpr static const char* DEFAULT_VJOY_B         = "";
+constexpr static const char* DEFAULT_VJOY_X         = "";
+constexpr static const char* DEFAULT_VJOY_Y         = "";
+constexpr static const char* DEFAULT_VJOY_BACK      = "";
+constexpr static const char* DEFAULT_VJOY_GUIDE     = "";
+constexpr static const char* DEFAULT_VJOY_START     = "";
+constexpr static const char* DEFAULT_SCREENSHOTDIR  = SCREENSHOTDIR;
 
 /**
  * Configuration file section.
@@ -394,6 +401,7 @@ struct Config {
     std::string logfile{};
     std::string loglevel{};
     VJoyConfig  vjoy{};
+    std::string screenshotdir{};
 
     /**
      * Initialise this configuration structure.

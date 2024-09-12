@@ -27,7 +27,7 @@ namespace widget {
 
 #include "icons/floppy_128x2.hpp"
 
-Floppy::Floppy(::SDL_Renderer* renderer, const std::function<Status()>& upd)
+Floppy::Floppy(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd)
     : Widget{renderer},
       _update{upd}
 {
@@ -55,8 +55,12 @@ void Floppy::render(const ::SDL_Rect& dstrect)
         }
     }
 
-    auto colour = (st.is_attached ? ENABLED_COLOR : DISABLED_COLOR);
-    Widget::render(rect, dstrect, colour);
+    auto color = (st.is_attached ? ENABLED_COLOR : DISABLED_COLOR);
+    Widget::render(rect, dstrect, color);
+
+    if (!st.is_idle && st.progress >= 0.0f) {
+        render_progress(st.progress, dstrect);
+    }
 }
 
 }

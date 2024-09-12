@@ -160,7 +160,9 @@ std::string sdl_error()
 
 bool in_rect(int x, int y, const ::SDL_Rect& rect)
 {
-    return ((x >= rect.x && x < rect.x + rect.w) && (y >= rect.y && y < rect.y + rect.h));
+    const int xmax = rect.x + rect.w;
+    const int ymax = rect.y + rect.h;
+    return ((x >= rect.x && x < xmax) && (y >= rect.y && y < ymax));
 }
 
 }

@@ -16,39 +16,37 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "ui_sdl2/widget_pause.hpp"
+#pragma once
+
+#include "ui_sdl2/widget.hpp"
 
 namespace caio {
 namespace ui {
 namespace sdl2 {
 namespace widget {
 
-#include "icons/pause_128x2.hpp"
+class PhotoCamera : public Widget {
+public:
+    constexpr static const float ANIMATION_TIME = 2.0f;
 
-Pause::Pause(const sptr_t<::SDL_Renderer>& renderer, const std::function<bool()>& upd)
-    : Widget{renderer},
-      _update{upd}
-{
-    Widget::load(pause_128x2_png);
-}
+    PhotoCamera(sptr_t<::SDL_Renderer>& renderer);
 
-void Pause::render(const ::SDL_Rect& dstrect)
-{
-    static const ::SDL_Rect running_rect{0, 0, 128, 128};
-    static const ::SDL_Rect paused_rect{128, 0, 128, 128};
-    bool is_paused{};
-
-    if (_update) {
-        is_paused = _update();
+    virtual ~PhotoCamera()
+    {
     }
 
-    if (_rect.x == -1 || _is_paused != is_paused) {
-        _rect = (is_paused ? paused_rect : running_rect);
-        _is_paused = is_paused;
+    void action(const std::function<void()>& act)
+    {
+        Widget::action(act);
     }
 
-    Widget::render(_rect, dstrect);
-}
+    void action() override;
+
+    void render(const ::SDL_Rect& dstrect) override;
+
+private:
+    float _atime{ANIMATION_TIME};
+};
 
 }
 }

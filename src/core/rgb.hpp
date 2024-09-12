@@ -149,7 +149,7 @@ public:
      * @param fname Name of the file containing the colour table.
      * @exception IOError
      */
-    RgbaTable(std::string_view fname) {
+    RgbaTable(const fs::Path& fname) {
         load(fname);
     }
 
