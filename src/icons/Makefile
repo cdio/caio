@@ -39,7 +39,7 @@ ALL=		${FONT_HPP} \
 		${ICONS_HPP}
 
 PNG2CPP=	./png2cpp.sh
-TTF2CPP=	${ROOT}/3rdparty/imgui/font2c/font2c
+TTF2CPP=	./ttf2cpp.sh
 
 .SUFFIXES=	.hpp .png .ttf
 
@@ -53,7 +53,7 @@ all debug install: ${ALL}
 	${PNG2CPP} $< > $@
 
 %.hpp: %.ttf ${TTF2CPP}
-	${TTF2CPP} -base85 $< ${@:%.hpp=%} > $@
+	${TTF2CPP} $< ${@:%.hpp=%} > $@
 
 ${TTF2CPP}:
 	${MAKE} ${MAKEARGS} -j -C ${dir $@}

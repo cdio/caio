@@ -17,10 +17,10 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, see http://www.gnu.org/licenses/
 #
-PNG="$1"
+TTF="$1"
 
-NAME="${PNG%%.png}_png"
-SIZE=$(ls -l ${PNG} | awk '{print $5'})
+NAME="${TTF%%.ttf}_ttf"
+SIZE=$(ls -l ${TTF} | awk '{print $5'})
 
 cat <<-END
 /*
@@ -42,13 +42,12 @@ cat <<-END
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 /*
- * Automatically generated from ${PNG}
+ * Automatically generated from ${TTF}
  */
 static const uint8_t ${NAME}[] = {
 END
 
-hexdump -ve '16/1 "\\x%02x" "\n"' ${PNG} | \
-	sed -e 's,\\x  ,,g' -e 's,^,    ",' -e 's,$,",'
+openssl enc -e -base64 -in ${TTF} | sed -e 's,^,    ",' -e 's,$,",'
 
 cat <<-END
 };
