@@ -29,8 +29,8 @@ CXXSRCS=	imgui.cpp \
 		imgui_widgets.cpp \
 		imgui_impl_sdl2.cpp \
 		imgui_impl_sdlrenderer2.cpp \
-		imgui_stdlib.cpp \
-		imgui_demo.cpp
+		imgui_stdlib.cpp
+#		imgui_demo.cpp
 
 INCS=		imconfig.h \
 		imgui.h \
