@@ -30,25 +30,6 @@ MAKEFILE=	${BUILDIR}/Makefile
 CMAKE_FLAGS+=	-DBUILD_SHARED_LIBS=OFF \
 		-DSDL2TTF_SAMPLES=OFF
 
-#		-DSDL2TTF_FREETYPE_VENDORED=OFF \
-		-DSDL2TTF_HARFBUZZ=ON \
-
-#CPPFLAGS+=	-I${abspath ..}/freetype/freetype.git/include
-#XXX .git
-
-#CMAKE_FLAGS+=	-DCMAKE_C_FLAGS='${CPPFALGS}'
-
-#XXX ifeq (${OS}, Darwin)
-#XXX CMAKE_FLAGS+=	-DCMAKE_OSX_ARCHITECTURES=${ARCH}
-#XXX
-#XXX ifeq (${ARCH}, x86_64)
-#XXX CMAKE_FLAGS+=	-DCMAKE_FIND_ROOT_PATH=/usr/local/Homebrew
-#XXX else
-#XXX CMAKE_FLAGS+=	-DCMAKE_FIND_ROOT_PATH=/opt/homebrew
-#XXX endif
-#XXX
-#XXX endif	# Darwin
-
 DISTCLEANFILES=	${BUILDIR}
 
 .PHONY: all debug clean distclean install
