@@ -22,7 +22,7 @@ include ${ROOT}/mk/config.mk
 
 FONT_SRC=	DejaVuSansMNerdFontMono_Regular_stripped.ttf
 
-ICONS_SRC=	cassette_128x24.png \
+ICONS_SRC=	cassette_128x23.png \
 		floppy_128x2.png \
 		fullscreen_128x2.png \
 		gamepad_128x2.png \

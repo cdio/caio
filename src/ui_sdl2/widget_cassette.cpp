@@ -25,13 +25,13 @@ namespace ui {
 namespace sdl2 {
 namespace widget {
 
-#include "icons/cassette_128x24.hpp"
+#include "icons/cassette_128x23.hpp"
 
 Cassette::Cassette(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd)
     : Widget{renderer},
       _update{upd}
 {
-    Widget::load(cassette_128x24_png);
+    Widget::load(cassette_128x23_png);
 }
 
 void Cassette::render(const ::SDL_Rect& dstrect)
@@ -44,16 +44,15 @@ void Cassette::render(const ::SDL_Rect& dstrect)
     ::SDL_Rect rect{0, 0, 128, 128};
 
     if (st.is_enabled && !st.is_idle) {
-
         auto now = utils::now();
         auto elapsed = now - _start;
 
         if (elapsed >= 50'000) {
             _start = now;
-            _pos = (_pos + 1) % POSITIONS;
+            _pos = (_pos + 1) % ANIMATED_POSITIONS;
         }
 
-        rect.x = 128 * _pos;
+        rect.x = 128 * (_pos + 1);
     }
 
     Widget::render(rect, dstrect, (st.is_enabled ? ENABLED_COLOR : DISABLED_COLOR));

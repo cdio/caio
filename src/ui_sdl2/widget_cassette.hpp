@@ -27,7 +27,7 @@ namespace widget {
 
 class Cassette : public Widget {
 public:
-    constexpr static const size_t POSITIONS = 24;
+    constexpr static const size_t ANIMATED_POSITIONS = 22;
 
     struct Status {
         bool is_enabled{};
