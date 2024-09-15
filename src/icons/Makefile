@@ -52,10 +52,7 @@ all debug install: ${ALL}
 %.hpp: %.png
 	${PNG2CPP} $< > $@
 
-%.hpp: %.ttf ${TTF2CPP}
+%.hpp: %.ttf
 	${TTF2CPP} $< ${@:%.hpp=%} > $@
-
-${TTF2CPP}:
-	${MAKE} ${MAKEARGS} -j -C ${dir $@}
 
 include ${ROOT}/mk/clean.mk
