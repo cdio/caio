@@ -166,9 +166,11 @@ public:
 
     /**
      * Initialise this keyboard.
-     * @param label Label assigned to this keyboard.
+     * @param label   Label assigned to this keyboard;
+     * @param enabled Enable/disable keyboard.
+     * @see Keyboard::enable(bool)
      */
-    ZX80Keyboard(const std::string& label);
+    ZX80Keyboard(const std::string& label, bool enabled);
 
     virtual ~ZX80Keyboard() {
     }

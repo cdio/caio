@@ -88,7 +88,7 @@ GuiApp::GuiApp(const std::string& title)
 
     const Image& ico = icon();
 
-#ifdef __LITTLE_ENDIAN__
+#if __BYTE_ORDER == __LITTLE_ENDIAN
     _icon = Surface_uptr{::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
         ico.width, ico.height, 32, ico.width * 4, SDL_PIXELFORMAT_ABGR8888), ::SDL_FreeSurface};
 #else

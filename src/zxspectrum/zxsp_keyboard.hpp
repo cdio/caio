@@ -142,9 +142,11 @@ public:
 
     /**
      * Initialise this keyboard.
-     * @param label Label assigned to this keyboard.
+     * @param label   Label assigned to this keyboard;
+     * @param enabled Enable/disable keyboard.
+     * @see Keyboard::enable(bool)
      */
-    ZXSpectrumKeyboard(std::string_view label);
+    ZXSpectrumKeyboard(std::string_view label, bool enabled);
 
     virtual ~ZXSpectrumKeyboard() {
     }

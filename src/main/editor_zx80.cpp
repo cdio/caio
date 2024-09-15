@@ -47,11 +47,10 @@ void ConfigEditorZX80::render_audio(config::Config& cfg)
     _gui.end_disabled();
 }
 
-void ConfigEditorZX80::render_vjoy(config::Config& cfg)
+void ConfigEditorZX80::render_keyboard(config::Config& cfg)
 {
-    _gui.begin_disabled();
-    ConfigEditor::render_vjoy(cfg);
-    _gui.end_disabled();
+    _gui.checkbox("Enable keyboard", "##kbd-enabled", cfg.keyboard);
+    _gui.combo_keymaps(cfg.keymaps, _keymaps, machine_prefix());
 }
 
 void ConfigEditorZX80::render_appearance(config::Config& cfg)

@@ -109,8 +109,8 @@ void ConfigEditor::render(bool ronly)
 
     _gui.newline();
 
-    _gui.begin_subsection("Virtual Joystick:");
-    render_vjoy(cfg);
+    _gui.begin_subsection("Keyboard:");
+    render_keyboard(cfg);
     _gui.end_subsection();
 
     _gui.newline();
@@ -167,7 +167,6 @@ void ConfigEditor::render_appearance(config::Config& cfg)
     _gui.input_int("Scale", "##scale", reinterpret_cast<int&>(cfg.scale), SCALE_WIDTH, scale_cond);
     _gui.combo_scanlines(cfg.scanlines);
     _gui.combo_palette(cfg.palette, _palette, machine_prefix());
-    _gui.combo_keymaps(cfg.keymaps, _keymaps, machine_prefix());
     _gui.combo_statusbar(cfg.statusbar);
 }
 
@@ -176,10 +175,13 @@ void ConfigEditor::render_audio(config::Config& cfg)
     _gui.checkbox("Enable audio", "##audio", cfg.audio);
 }
 
-void ConfigEditor::render_vjoy(config::Config& cfg)
+void ConfigEditor::render_keyboard(config::Config& cfg)
 {
     config::VJoyConfig& vjoy = cfg.vjoy;
 
+    _gui.checkbox("Enable keyboard", "##kbd-enabled", cfg.keyboard);
+    _gui.combo_keymaps(cfg.keymaps, _keymaps, machine_prefix());
+    _gui.newline();
     _gui.checkbox("Enable virtual joystick", "##vjoy-enabled", vjoy.enabled);
     _gui.begin_disabled(!vjoy.enabled);
     _gui.combo_key("UP key", "##key-up", vjoy.up);

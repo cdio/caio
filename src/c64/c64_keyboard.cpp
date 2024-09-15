@@ -273,8 +273,8 @@ C64Keyboard::MatrixKey C64Keyboard::to_c64(const std::string& name)
     return (it == name_to_c64.end() ? MatrixKey::KEY_NONE : it->second);
 }
 
-C64Keyboard::C64Keyboard(std::string_view label, const std::function<void()>& restore_cb)
-    : Keyboard{label},
+C64Keyboard::C64Keyboard(std::string_view label, bool enabled, const std::function<void()>& restore_cb)
+    : Keyboard{label, enabled},
       _restore_cb{restore_cb},
       _key_to_c64{default_key_to_c64}
 {

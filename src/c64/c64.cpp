@@ -294,7 +294,7 @@ void C64::create_devices()
         _unit9 = c1541::instance(unit9, 9, _bus);
     }
 
-    _kbd  = std::make_shared<C64Keyboard>("KBD");
+    _kbd  = std::make_shared<C64Keyboard>("KBD", _conf.keyboard);
     _joy1 = std::make_shared<Joystick>(joystick_port, "JOY1");
     _joy2 = std::make_shared<Joystick>(joystick_port, "JOY2");
 

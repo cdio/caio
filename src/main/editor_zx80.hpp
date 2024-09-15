@@ -37,7 +37,7 @@ public:
 
 private:
     void            render_audio(config::Config& cfg) override;
-    void            render_vjoy(config::Config& cfg) override;
+    void            render_keyboard(config::Config& cfg) override;
     void            render_appearance(config::Config& cfg) override;
     void            render_specific() override;
     bool            is_changed() const override;

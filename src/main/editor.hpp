@@ -132,9 +132,9 @@ protected:
     virtual void render_audio(config::Config& cfg);
 
     /**
-     * Render the virtual joystick parameters and let the user edit them.
+     * Render the keyboard parameters and let the user edit them.
      */
-    virtual void render_vjoy(config::Config& cfg);
+    virtual void render_keyboard(config::Config& cfg);
 
     /**
      * Render the machine specific parameters and let the user edit them.

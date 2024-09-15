@@ -230,7 +230,8 @@ void ConfiguratorApp::rename_config_popup()
         const auto do_rename = [this, &cfile, &cname, &it]() {
             if (_rename_set && !_rename_cname.empty()) {
                 auto newcfile = cfile;
-                newcfile.replace_filename(_rename_cname);
+                const auto ext = cfile.extension();
+                newcfile.replace_filename(_rename_cname).replace_extension(ext);
                 if (newcfile != cfile) {
                     try {
                         std::filesystem::rename(cfile, newcfile);

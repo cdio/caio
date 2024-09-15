@@ -211,6 +211,7 @@ Config::Config(Section& sec, std::string_view prefix)
       monitor{is_true(sec[KEY_MONITOR])},
       logfile{sec[KEY_LOGFILE]},
       loglevel{sec[KEY_LOGLEVEL]},
+      keyboard{is_true(sec[KEY_KEYBOARD])},
       vjoy{sec},
       screenshotdir{fs::fix_home(sec[KEY_SCREENSHOTDIR])},
       statusbar{sec[KEY_STATUSBAR]}
@@ -244,6 +245,7 @@ bool Config::operator==(const Config& other) const
        monitor == other.monitor &&
        logfile == other.logfile &&
        loglevel == other.loglevel &&
+       keyboard == other.keyboard &&
        vjoy == other.vjoy &&
        screenshotdir == other.screenshotdir &&
        statusbar == other.statusbar);
@@ -265,6 +267,7 @@ void Config::to_section(Section& sec) const
     sec[KEY_MONITOR] = (monitor ? "yes" : "no");
     sec[KEY_LOGFILE] = logfile;
     sec[KEY_LOGLEVEL] = loglevel;
+    sec[KEY_KEYBOARD] = (keyboard ? "yes" : "no");
     vjoy.to_section(sec);
     sec[KEY_SCREENSHOTDIR] = screenshotdir;
     sec[KEY_STATUSBAR] = statusbar;
@@ -310,6 +313,7 @@ std::string Config::to_string() const
         "  CPU Monitor:        {}\n"
         "  Log file:           \"{}\"\n"
         "  Log level:          {}\n"
+        "  Keyboard enabled:   {}\n"
         "  Virtual Joystick:   {}\n"
         "                up:   {}\n"
         "              down:   {}\n"
@@ -333,6 +337,7 @@ std::string Config::to_string() const
         (monitor ? "yes" : "no"),
         logfile,
         loglevel,
+        (keyboard ? "yes" : "no"),
         (vjoy.enabled ? "yes" : "no"),
         keyboard::to_string(vjoy.up),
         keyboard::to_string(vjoy.down),

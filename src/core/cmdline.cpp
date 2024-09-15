@@ -84,6 +84,7 @@ static Option generic_options[] = {
     { KEY_MONITOR,          SEC_GENERIC, KEY_MONITOR,       DEFAULT_MONITOR,        Arg::Optional, set_bool, "yes" },
     { KEY_LOGFILE,          SEC_GENERIC, KEY_LOGFILE,       DEFAULT_LOGFILE,        Arg::Required, set_value       },
     { KEY_LOGLEVEL,         SEC_GENERIC, KEY_LOGLEVEL,      DEFAULT_LOGLEVEL,       Arg::Required, set_value       },
+    { KEY_KEYBOARD,         SEC_GENERIC, KEY_KEYBOARD,      DEFAULT_KEYBOARD,       Arg::Optional, set_bool, "yes" },
     { KEY_VJOY,             SEC_GENERIC, KEY_VJOY,          DEFAULT_VJOY,           Arg::Optional, set_bool, "yes" },
     { KEY_VJOY_UP,          SEC_GENERIC, KEY_VJOY_UP,       DEFAULT_VJOY_UP,        Arg::Required, set_value       },
     { KEY_VJOY_DOWN,        SEC_GENERIC, KEY_VJOY_DOWN,     DEFAULT_VJOY_DOWN,      Arg::Required, set_value       },
@@ -130,6 +131,7 @@ std::string Cmdline::usage() const
         "                         (default is {})\n"
         " --loglevel <lv>         Loglevel, bitwise combination of:\n"
         "                         none|error|warn|info|debug|all (default is {})\n"
+        " --keyboard [yes|no]     Enable keyboard at startup (default is {})\n"
         " --vjoy [yes|no]         Enable virtual joystick (default is {})\n"
         " --vjoy-up <keyname>     Virtual joystick UP key (default is {})\n"
         " --vjoy-down <keyname>   Virtual joystick DOWN key (default is {})\n"
@@ -160,6 +162,7 @@ std::string Cmdline::usage() const
         DEFAULT_MONITOR,
         DEFAULT_LOGFILE,
         DEFAULT_LOGLEVEL,
+        DEFAULT_KEYBOARD,
         DEFAULT_VJOY,
         DEFAULT_VJOY_UP,
         DEFAULT_VJOY_DOWN,

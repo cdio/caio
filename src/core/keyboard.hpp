@@ -316,14 +316,15 @@ public:
     virtual void clear_key_map() = 0;
 
 protected:
-    Keyboard(std::string_view label = {})
-        : Name{TYPE, label} {
+    Keyboard(std::string_view label = {}, bool enabled = true)
+        : Name{TYPE, label},
+          _kbd_enabled{enabled} {
     }
 
 private:
+    bool                _kbd_enabled{true};
     VJoyKeys            _vjoykeys{};
     sptr_t<Joystick>    _vjoy{};
-    bool                _kbd_enabled{true};
 };
 
 }

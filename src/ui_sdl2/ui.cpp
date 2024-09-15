@@ -148,11 +148,11 @@ UI::UI(const ui::Config& conf)
      */
     const Image& ico = icon();
 
-#ifdef __LITTLE_ENDIAN__
+#if __BYTE_ORDER == __LITTLE_ENDIAN
     auto* iconp = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
         ico.width, ico.height, 32, ico.width * 4, SDL_PIXELFORMAT_ABGR8888);
 #else
-    auto *iconp = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
+    auto* iconp = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
         ico.width, ico.height, 32, ico.width * 4, SDL_PIXELFORMAT_RGBA8888);
 #endif
 
@@ -668,13 +668,7 @@ void UI::kbd_event(const SDL_Event& event)
         break;
 
     case SDL_KEYUP:
-        if (key.sym == SDLK_ESCAPE && _panel->visible()) {
-            /*
-             * If the panel is active, the ESC key deactivates it.
-             */
-            toggle_panel_visibility();
-
-        } else if (_kbd) {
+        if (_kbd) {
             _kbd->key_released(to_key(kevent.keysym.scancode));
         }
         break;

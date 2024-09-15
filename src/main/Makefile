@@ -59,9 +59,6 @@ EXTRA_LIBS+=	${ROOT}/src/c64/libcaio_c64.a \
 		${ROOT}/src/core/libcaio_core.a \
 		${ROOT}/3rdparty/sha2/libsha2.a
 
-# UI Libraries
-LDADD+=		${UI_LDADD}
-
 # Widget Toolkit
 CXXSRCS+=	dearimgui.cpp
 INCS+=		dearimgui.hpp
@@ -71,12 +68,15 @@ EXTRA_LIBS+=	${ROOT}/3rdparty/imgui/libimgui/libimgui.a
 LDADD+=		${EXTRA_LIBS}
 EXTRA_DEPS+=	${EXTRA_LIBS}
 
+# UI Libraries
+LDADD+=		${UI_LDADD}
+
 # Xorg desktop
 ifneq (${OS}, Darwin)
 DESKTOP=	caio.desktop
 DESKTOP_SED=	${DESKTOP}.sed
 DST_DESKTOP=	${DST_DESKTOPDIR}/${DESKTOP}
-EXTRA_DEPS+=	./${DESKTOP}
+EXTRA_DEPS+=	${abspath .}/${DESKTOP}
 INSTALL_FILES+=	${DST_DESKTOP}
 CLEANFILES+=	${DESKTOP}
 endif
