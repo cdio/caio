@@ -29,11 +29,16 @@ SYSDEP_CPPFLAGS+=
 LIB_INCLUDE_BEGIN=	-Wl,--whole-archive
 LIB_INCLUDE_END=	-Wl,--no-whole-archive
 
-UI_CXXFLAGS+=		-I${ROOT}/3rdparty/sdl_image/SDL_image.subtree/include
-			-I${ROOT}/3rdparty/sdl_ttf/SDL_ttf.subtree
+UI_CXXFLAGS+=		-I${ROOT}/3rdparty/sdl2/sdl_image/SDL_image.subtree/include \
+			-I${ROOT}/3rdparty/sdl2/sdl_ttf/SDL_ttf.subtree
 
-UI_CXXFLAGS+=		${shell ${SDL2_CONFIG} --cflags}
+UI_CXXFLAGS+=		${shell ${PKG_CONFIG} --cflags freetype2} \
+			${shell ${SDL2_CONFIG} --cflags}
 
-UI_LDADD+=		${ROOT}/3rdparty/sdl_image/SDL_image/libSDL2_image.a
-UI_LDADD+=		${ROOT}/3rdparty/sdl_ttf/SDL_ttf/libSDL2_ttf.a
+UI_LDADD+=		${ROOT}/3rdparty/sdl2/sdl_image/SDL_image/libSDL2_image.a \
+			${ROOT}/3rdparty/sdl2/sdl_ttf/SDL_ttf/libSDL2_ttf.a \
+			${ROOT}/3rdparty/sdl2/sdl_ttf/SDL_ttf/libSDL2_ttf.a \
+			${shell ${PKG_CONFIG} --libs freetype2}
+
 UI_LDADD+=		${shell ${SDL2_CONFIG} --libs}
+

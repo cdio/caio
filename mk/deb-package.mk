@@ -34,6 +34,7 @@ DEB_CONTROL=		${FAKE_INSTALL_DIR}/DEBIAN/control
 DEB_SIZE:=		${shell ${DU} --exclude ${DEB_CONTROL} -sk ${FAKE_INSTALL_DIR} | ${CUT} -f 1}
 LIBSDL2_VERSION?=	${shell ${DPKG} --list | ${AWK} '$$2 ~ /libsdl2-2/ { sub("+.*", "", $$3); print $$3 }'}
 LIBSTDCPP_VERSION?=	${shell ${DPKG} --list | ${AWK} '$$2 ~ /libstdc\+\+6/ { sub("-.*", "", $$3); print $$3 }'}
+FREETYPE_VERSION?=	${shell ${DPKG} --list | ${AWK} '$$2 ~ /libfreetype6/ { sub("+.*", "", $$3); print $$3 }'}
 
 DPKG?=			dpkg
 
@@ -55,7 +56,7 @@ ${DEB_CONTROL}: install ${ROOT}/mk/deb-package.mk
 	"Architecture: ${ARCH}\n"\
 	"Maintainer: caio developers\n"\
 	"Installed-Size: ${DEB_SIZE}\n"\
-	"Depends: libsdl2-2.0-0 (>= ${LIBSDL2_VERSION}), libstdc++6 (>= ${LIBSTDCPP_VERSION})\n"\
+	"Depends: libsdl2-2.0-0 (>= ${LIBSDL2_VERSION}), libfreetype6 (>= ${FREETYPE_VERSION}), libstdc++6 (>= ${LIBSTDCPP_VERSION})\n"\
 	"Replaces: caio\n"\
 	"Section: games\n"\
 	"Priority: optional\n"\
