@@ -6,10 +6,12 @@
 
 External dependencies:
 * [cmake](https://cmake.org/)
+* [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config)
+* [freetype](https://www.freetype.org/)
 * [SDL2](https://libsdl.org)
 
 ```
-sudo apt update && sudo apt install cmake libsdl2-dev
+sudo apt update && sudo apt install cmake pkg-config libfreetype-dev libsdl2-dev
 ```
 
 Compile and install:
@@ -29,6 +31,8 @@ External dependencies:
 * xcode command line tools
 * [brew](https://brew.sh)
 * [cmake](https://cmake.org/)
+* [pkg-config](https://www.freedesktop.org/wiki/Software/pkg-config)
+* [freetype](https://www.freetype.org/)
 * [SDL2](https://libsdl.org)
 
 To install xcode, xcode command line tools, and brew follow the instructions
@@ -38,7 +42,7 @@ To install xcode, xcode command line tools, and brew follow the instructions
 xcode-select --install
 ```
 ```
-brew update && brew install cmake sdl2
+brew update && brew upgrade && brew install cmake pkg-config freetype sdl2
 ```
 
 Compile and install:
@@ -77,3 +81,4 @@ make package
 ```
 
 Note that the generated packages are not signed.
+

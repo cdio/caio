@@ -69,6 +69,7 @@ Command line options take precedence over those defined in the configuration
 file.
 
 Generic options as command line parameters:
+
 ```
  --conf <cfile>          Configuration file
  --romdir <romdir>       ROMs directory
@@ -88,15 +89,28 @@ Generic options as command line parameters:
  --delay <delay>         Clock delay factor (default is 1)
  --monitor [yes|no]      Activate the CPU monitor (default is no)
  --logfile <file>        Send log information to the specified destination
-                         (default is /dev/tty)
+                         (default is /dev/null)
  --loglevel <lv>         Loglevel, bitwise combination of:
                          none|error|warn|info|debug|all (default is none)
+ --keyboard [yes|no]     Enable keyboard at startup (default is yes)
  --vjoy [yes|no]         Enable virtual joystick (default is no)
  --vjoy-up <keyname>     Virtual joystick UP key (default is KEY_NUMPAD_8)
  --vjoy-down <keyname>   Virtual joystick DOWN key (default is KEY_NUMPAD_2)
  --vjoy-left <keyname>   Virtual joystick LEFT key (default is KEY_NUMPAD_4)
  --vjoy-right <keyname>  Virtual joystick RIGHT key (default is KEY_NUMPAD_6)
  --vjoy-fire <keyname>   Virtual joystick FIRE key (default is KEY_NUMPAD_5)
+ --vjoy-a <keyname>      Virtual joystick A key
+ --vjoy-b <keyname>      Virtual joystick B key
+ --vjoy-x <keyname>      Virtual joystick X key
+ --vjoy-y <keyname>      Virtual joystick Y key
+ --vjoy-back <keyname>   Virtual joystick BACK key
+ --vjoy-guide <keyname>  Virtual joystick GUIDE key
+ --vjoy-start <keyname>  Virtual joystick START key
+ --screenshotdir <sdir>  Screenshot directory (default is ~/Desktop)
+ --statusbar <pos>       Status bar position, one of:
+                         none, center, north, south, east, west,
+                         north-east, north-west, south-east, south-west
+                         (default is "south")
  -v|--version            Show version information and exit
  -h|--help               Print this message and exit
 ```
@@ -475,9 +489,10 @@ The following key combinations are accepted:
 * `PAUSE` or `ALT-P` toggles between *pause* and *running* modes.
 * `ALT-J` swaps joysticks #1 and #2.
 * `ALT-K` toggles the status of the keyboard (active/inactive).
+* `ALT-V` toggles the visibility of the info panel.
+* `ALT-SHIFT-S` takes a screenshot.
 * `CTRL-C` on the terminal enters the CPU monitor (if the monitor is not
   active the emulation is terminated).
-* `ALT-V` toggles the visibility of the info panel.
 
 Under macOS the **command &#8984;** key must be used instead of the
 **ALT** key.
@@ -506,12 +521,24 @@ There are other widgets that depend on the specifc emulated platform, such as:
 
 <br>
 <p align="center">
-<img src="../images/caio-panel.jpg" width="640" title="caio panel">
+<img src="../images/caio-panel.png" width="640" title="caio panel">
 </p>
 
-The panel above shows the Commodore 64 disk unit 8 active, unit 9 disabled,
-joystick port #1 enabled and not swapped with joystick port #2 which is
-disabled.
+The panel above shows the Commodore 64 disk drive unit 8 active, disk drive
+unit 9 disabled, joystick port #1 enabled and connected to the virtual
+joystick, it is not swapped with joystick port #2 which is disabled.
+
+### Status Bar
+
+Besides the Info Panel, there is a small status bar that appears when the
+state of one or more devices is changed (disk activity, tape activity, etc.).
+
+This bar appears only when the Info Panel is not shown and its position
+on the screen can be configured by the user.
+
+<p align="center">
+<img src="../images/caio-statusbar.png" width="640" title="caio status bar">
+</p>
 
 ### Joysticks
 
