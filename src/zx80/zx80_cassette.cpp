@@ -304,7 +304,11 @@ int ZX80CassetteO::receive(RxCmd cmd)
     if (cmd == RxCmd::Rewind) {
         const auto& fullpath = fname();
         log.debug("ZX80CassetteO: Loading file: {}\n", fullpath.string());
-        _buf = fs::load(fullpath);
+        try {
+            _buf = fs::load(fullpath);
+        } catch (const std::exception&) {
+            _buf = {};
+        }
         _it = _buf.begin();
         return 0;
     }

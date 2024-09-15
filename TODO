@@ -1,6 +1,6 @@
-- UI:       Joystick label = gamepad name
+- misc:     Test on macos-x86
+- c64:      reset problem (mos vs ricoh?)
 - NES test: The Young Indiana Jones Chronicles and Burai Fighter
-- vjoy:     move ALT-K handling from c64 to ui
 - 6502:     Tests suite: trap12 is failing
 - SID:      Filter gain or shape? (ballad/channels dane)
 - C1541Fs:  Fastload mode (remove time emulation during load/save operations)
