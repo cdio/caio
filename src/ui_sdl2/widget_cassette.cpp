@@ -34,16 +34,26 @@ Cassette::Cassette(const sptr_t<::SDL_Renderer>& renderer, const std::function<S
     Widget::load(cassette_128x23_png);
 }
 
+void Cassette::update()
+{
+    if (_update) {
+       _status = _update();
+    }
+}
+
+bool Cassette::is_idle()
+{
+    update();
+    return _status.is_idle;
+}
+
 void Cassette::render(const ::SDL_Rect& dstrect)
 {
-    Status st{};
-    if (_update) {
-       st = _update();
-    }
-
     ::SDL_Rect rect{0, 0, 128, 128};
 
-    if (st.is_enabled && !st.is_idle) {
+    update();
+
+    if (_status.is_enabled && !_status.is_idle) {
         auto now = utils::now();
         auto elapsed = now - _start;
 
@@ -55,7 +65,7 @@ void Cassette::render(const ::SDL_Rect& dstrect)
         rect.x = 128 * (_pos + 1);
     }
 
-    Widget::render(rect, dstrect, (st.is_enabled ? ENABLED_COLOR : DISABLED_COLOR));
+    Widget::render(rect, dstrect, (_status.is_enabled ? ENABLED_COLOR : DISABLED_COLOR));
 }
 
 }

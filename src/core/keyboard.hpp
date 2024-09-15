@@ -151,7 +151,6 @@ enum Key {
     KEY_CTRL_C          = 0x0100,
     KEY_ALT_GR          = KEY_RIGHT_ALT,
     KEY_ALT_J           = KEY_LEFT_ALT | KEY_J,
-    KEY_ALT_K           = KEY_LEFT_ALT | KEY_K,
     KEY_NONE            = -1
 };
 

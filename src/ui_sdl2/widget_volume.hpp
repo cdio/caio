@@ -37,8 +37,8 @@ public:
      * @exception UIError
      * @see Widget::load(const std::span<const uint8_t>&)
      */
-    Volume(const sptr_t<::SDL_Renderer>& renderer, const std::function<float()>& getvol,
-        const std::function<void(float)>& setvol);
+    Volume(const sptr_t<::SDL_Renderer>& renderer, const std::function<float()>& getvol = {},
+        const std::function<void(float)>& setvol = {});
 
     virtual ~Volume() {
     }
@@ -55,7 +55,6 @@ private:
     Label                       _label;
     std::function<float()>      _getvol;
     std::function<void(float)>  _setvol;
-
     int                         _volidx{-1};
     int                         _prev_volidx{};
     ::SDL_Rect                  _rect{0, 0, 128, 128};

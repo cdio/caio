@@ -1,5 +1,4 @@
 /*
- * #endif
  * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
@@ -484,7 +483,8 @@ void C64::create_ui()
             .sleffect       = ui::to_sleffect(_conf.scanlines),
             .fullscreen     = _conf.fullscreen,
             .sresize        = _conf.sresize,
-            .screenshotdir  = _conf.screenshotdir
+            .screenshotdir  = _conf.screenshotdir,
+            .statusbar      = _conf.statusbar
         }
     };
 
@@ -496,13 +496,13 @@ void C64::make_widgets()
     /*
      * Floppy disks presence and idle status.
      */
-    auto floppy8 = ui::make_widget<ui::widget::Floppy>(_ui, [this]() {
+    _floppy8 = ui::make_widget<ui::widget::Floppy>(_ui, [this]() {
         using Status = ui::widget::Floppy::Status;
         return (_unit8 ? Status{ .is_attached = true,  .is_idle = _unit8->is_idle(), .progress = _unit8->progress()} :
                          Status{ .is_attached = false, .is_idle = true, .progress = -1.0f});
     });
 
-    auto floppy9 = ui::make_widget<ui::widget::Floppy>(_ui, [this]() {
+    _floppy9 = ui::make_widget<ui::widget::Floppy>(_ui, [this]() {
         using Status = ui::widget::Floppy::Status;
         return (_unit9 ? Status{ .is_attached = true,  .is_idle = _unit9->is_idle(), .progress = _unit9->progress()} :
                          Status{ .is_attached = false, .is_idle = true, .progress = -1.0f});
@@ -511,7 +511,7 @@ void C64::make_widgets()
     /*
      * Joystick presence and swap status.
      */
-    auto gamepad1 = ui::make_widget<ui::widget::Gamepad>(_ui, [this]() {
+    _gamepad1 = ui::make_widget<ui::widget::Gamepad>(_ui, [this]() {
         ui::widget::Gamepad::Status st{
             .id = 0,
             .is_connected = (_conf.swapj ? _joy2->is_connected() : _joy1->is_connected()),
@@ -521,7 +521,7 @@ void C64::make_widgets()
         return st;
     });
 
-    auto gamepad2 = ui::make_widget<ui::widget::Gamepad>(_ui, [this]() {
+    _gamepad2 = ui::make_widget<ui::widget::Gamepad>(_ui, [this]() {
         ui::widget::Gamepad::Status st{
             .id = 1,
             .is_connected = (_conf.swapj ? _joy1->is_connected() : _joy2->is_connected()),
@@ -535,17 +535,18 @@ void C64::make_widgets()
         /*
          * Click on a gamepad widget swaps joysticks.
          */
-        hotkeys(keyboard::KEY_ALT_J);
+        _conf.swapj ^= true;
+        log.debug("Joysticks {}swapped\n", (_conf.swapj ? "" : "un"));
     };
 
-    gamepad1->action(swapj_action);
-    gamepad2->action(swapj_action);
+    _gamepad1->action(swapj_action);
+    _gamepad2->action(swapj_action);
 
     auto panel = _ui->panel();
-    panel->add(floppy8);
-    panel->add(floppy9);
-    panel->add(gamepad1);
-    panel->add(gamepad2);
+    panel->add(_floppy8);
+    panel->add(_floppy9);
+    panel->add(_gamepad1);
+    panel->add(_gamepad2);
 }
 
 void C64::connect_ui()
@@ -597,7 +598,7 @@ void C64::connect_ui()
 void C64::hotkeys(keyboard::Key key)
 {
     /*
-     * This methods is called in the context of the UI thread
+     * hotkeys() is called in the context of the UI thread
      * (see connect_ui()).
      */
     switch (key) {
@@ -605,8 +606,9 @@ void C64::hotkeys(keyboard::Key key)
         /*
          * Swap joysticks.
          */
-        _conf.swapj ^= true;
-        log.debug("Joysticks {}swapped\n", (_conf.swapj ? "" : "un"));
+        _gamepad1->action();    /* Swap action, gamepad1 visible on status bar */
+        _gamepad2->action();    /* Swap action, gamepad2 visible on status bar */
+        _gamepad1->action();    /* Swap action, swap value as excepted         */
         break;
 
     case keyboard::KEY_CTRL_C:

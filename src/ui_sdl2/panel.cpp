@@ -20,15 +20,16 @@
 
 #include <algorithm>
 
+#include "utils.hpp"
 #include "ui_sdl2/sdl2.hpp"
 
 namespace caio {
 namespace ui {
 namespace sdl2 {
 
-Panel::Panel(const sptr_t<::SDL_Renderer>& renderer)
+Panel::Panel(const sptr_t<::SDL_Renderer>& renderer, const std::string& statusbar)
 {
-    reset(renderer);
+    reset(renderer, statusbar);
 }
 
 Panel::~Panel()
@@ -36,7 +37,7 @@ Panel::~Panel()
     reset();
 }
 
-void Panel::reset(const sptr_t<::SDL_Renderer>& renderer)
+void Panel::reset(const sptr_t<::SDL_Renderer>& renderer, const std::string& statusbar)
 {
     _renderer = renderer;
 
@@ -58,6 +59,27 @@ void Panel::reset(const sptr_t<::SDL_Renderer>& renderer)
             }
         }
     }
+
+    _sb_position = sb_str2pos(statusbar);
+}
+
+int Panel::sb_str2pos(const std::string& strpos)
+{
+    static const std::map<std::string, int> str2pos{
+        { "center",     SB_POSITION_CENTER                      },
+        { "north",      SB_POSITION_NORTH                       },
+        { "south",      SB_POSITION_SOUTH                       },
+        { "east",       SB_POSITION_EAST                        },
+        { "west",       SB_POSITION_WEST                        },
+        { "north-east", SB_POSITION_NORTH | SB_POSITION_EAST    },
+        { "north-west", SB_POSITION_NORTH | SB_POSITION_WEST    },
+        { "south-east", SB_POSITION_SOUTH | SB_POSITION_EAST    },
+        { "south-west", SB_POSITION_SOUTH | SB_POSITION_WEST    },
+        { "none",       SB_DISABLED                             },
+    };
+
+    const auto it = str2pos.find(utils::tolow(strpos));
+    return (it != str2pos.end() ? it->second : SB_DEFAULT_POSITION);
 }
 
 void Panel::visible(bool is_visible)
@@ -93,6 +115,10 @@ void Panel::event(const ::SDL_Event& event)
 void Panel::render(int width, int height)
 {
     if (!visible()) {
+        /*
+         * If the panel is not visible render the status bar.
+         */
+        render_statusbar(width, height);
         return;
     }
 
@@ -146,7 +172,7 @@ void Panel::render(int width, int height)
     };
 
     /*
-     * Draw panel.
+     * Render panel.
      */
     ::SDL_SetRenderDrawColor(_renderer.get(), FRAME_COLOR.r, FRAME_COLOR.g, FRAME_COLOR.b, FRAME_COLOR.a);
     ::SDL_RenderFillRect(_renderer.get(), &_ext_rect);
@@ -175,7 +201,7 @@ void Panel::render(int width, int height)
     };
 
     /*
-     * Draw widgets.
+     * Render widgets.
      */
     for (auto& tup : _widgets) {
         auto& [just, wrect, widget] = tup;
@@ -222,6 +248,92 @@ void Panel::render(int width, int height)
             }
 
             widget->render(wrect);
+        }
+    }
+}
+
+void Panel::render_statusbar(int width, int height)
+{
+    if (_sb_position == SB_DISABLED) {
+        return;
+    }
+
+    size_t N{};
+    for (const auto& tup : _widgets) {
+        N += static_cast<size_t>(!std::get<sptr_t<Widget>>(tup)->is_idle());
+    }
+
+    if (N == 0) {
+        return;
+    }
+
+    const int sb_h = (1.0f + SB_WID_HEIGHT_FACT) *
+        ((height * SB_HEIGHT_FACT) < SB_MIN_HEIGHT ? SB_MIN_HEIGHT : height * SB_HEIGHT_FACT);
+
+    const int ww = sb_h * widget::RATIO;
+    const int wh = sb_h * SB_WID_HEIGHT_FACT;
+
+    ++N;    /* Space for left and righ borders (the size of each border is half of a widget's width) */
+
+    const int sb_w = N * ww + (N + 1) * SB_WID_SEPARATOR;
+
+    /* Center the status bar and apply modifiers */
+    int sb_x = (width - sb_w) / 2;
+    int sb_y = height / 2 - sb_h;
+
+    if (_sb_position & SB_POSITION_NORTH) {
+        sb_y = 0;
+    }
+
+    if (_sb_position & SB_POSITION_SOUTH) {
+        sb_y = height - sb_h;
+    }
+
+    if (_sb_position & SB_POSITION_EAST) {
+        sb_x = width - sb_w;
+    }
+
+    if (_sb_position & SB_POSITION_WEST) {
+        sb_x = 0;
+    }
+
+    ::SDL_Rect sb_rect{sb_x, sb_y, sb_w, sb_h};
+
+    const int delta_w = ww + SB_WID_SEPARATOR;
+    const int wx = sb_x + SB_WID_SEPARATOR + delta_w / 2;
+    const int right_wx = sb_x + sb_w - ww - SB_WID_SEPARATOR - delta_w / 2;
+    const int wy = sb_y;
+
+    ::SDL_Rect wl_rect{
+        .x = wx,
+        .y = wy,
+        .w = ww,
+        .h = wh
+    };
+
+    ::SDL_Rect wr_rect{
+        .x = right_wx,
+        .y = wy,
+        .w = ww,
+        .h = wh
+    };
+
+    /*
+     * Render the status bar rectangle
+     * and the widgets inside it.
+     */
+    ::SDL_SetRenderDrawColor(_renderer.get(), SB_COLOR.r, SB_COLOR.g, SB_COLOR.b, SB_COLOR.a);
+    ::SDL_RenderFillRect(_renderer.get(), &sb_rect);
+
+    for (const auto& [just, wrect, widget] : _widgets) {
+        if (!widget->is_idle()) {
+            if (just == Just::Left) {
+                widget->render(wl_rect);
+                wl_rect.x += delta_w;
+            } else {
+                widget->render(wr_rect);
+                wr_rect.x -= delta_w;
+            }
         }
     }
 }

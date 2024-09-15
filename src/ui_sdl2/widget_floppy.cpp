@@ -34,18 +34,32 @@ Floppy::Floppy(const sptr_t<::SDL_Renderer>& renderer, const std::function<Statu
     Widget::load(floppy_128x2_png);
 }
 
+void Floppy::update()
+{
+    if (_update) {
+       _status = _update();
+    }
+}
+
+bool Floppy::is_idle()
+{
+    update();
+    return _status.is_idle;
+}
+
 void Floppy::render(const ::SDL_Rect& dstrect)
 {
-    Status st{};
-    if (_update) {
-       st = _update();
-    }
-
     ::SDL_Rect rect{0, 0, 128, 128};
 
-    if (!st.is_idle) {
-        if (_prev_idle != st.is_idle) {
+    update();
+
+    if (_status.is_idle) {
+        _prev_idle = true;
+
+    } else {
+        if (_prev_idle != _status.is_idle) {
             _start = utils::now();
+            _prev_idle = _status.is_idle;
         }
 
         _elapsed = utils::now() - _start;
@@ -55,11 +69,11 @@ void Floppy::render(const ::SDL_Rect& dstrect)
         }
     }
 
-    auto color = (st.is_attached ? ENABLED_COLOR : DISABLED_COLOR);
+    auto color = (_status.is_attached ? ENABLED_COLOR : DISABLED_COLOR);
     Widget::render(rect, dstrect, color);
 
-    if (!st.is_idle && st.progress >= 0.0f) {
-        render_progress(st.progress, dstrect);
+    if (!_status.is_idle && _status.progress >= 0.0f) {
+        render_progress(_status.progress, dstrect);
     }
 }
 

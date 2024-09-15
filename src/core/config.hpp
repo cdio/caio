@@ -111,6 +111,7 @@ constexpr static const char* KEY_VJOY_BACK          = "vjoy-back";
 constexpr static const char* KEY_VJOY_GUIDE         = "vjoy-guide";
 constexpr static const char* KEY_VJOY_START         = "vjoy-start";
 constexpr static const char* KEY_SCREENSHOTDIR      = "screenshotdir";
+constexpr static const char* KEY_STATUSBAR          = "statusbar";
 
 constexpr static const char* DEFAULT_ROMDIR         = ROMDIR;
 constexpr static const char* DEFAULT_PALETTEDIR     = PALETTEDIR;
@@ -142,6 +143,7 @@ constexpr static const char* DEFAULT_VJOY_BACK      = "";
 constexpr static const char* DEFAULT_VJOY_GUIDE     = "";
 constexpr static const char* DEFAULT_VJOY_START     = "";
 constexpr static const char* DEFAULT_SCREENSHOTDIR  = SCREENSHOTDIR;
+constexpr static const char* DEFAULT_STATUSBAR      = "south";
 
 /**
  * Configuration file section.
@@ -402,6 +404,7 @@ struct Config {
     std::string loglevel{};
     VJoyConfig  vjoy{};
     std::string screenshotdir{};
+    std::string statusbar{};
 
     /**
      * Initialise this configuration structure.

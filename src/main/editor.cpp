@@ -74,12 +74,16 @@ void ConfigEditor::restore(const std::string& key)
     }
 }
 
-void ConfigEditor::render()
+void ConfigEditor::render(bool ronly)
 {
     config::Config& cfg = generic_config();
     config::Config prev = cfg;
 
     _gui.begin_section("##config-editor");
+
+    if (ronly) {
+        _gui.begin_disabled();
+    }
 
     _gui.begin_subsection("Machine:");
     _gui.print(machine_name());
@@ -116,6 +120,10 @@ void ConfigEditor::render()
     _gui.newline();
     _gui.newline();
 
+    if (ronly) {
+        _gui.end_disabled();
+    }
+
     _gui.end_section();
 
     if (is_changed()) {
@@ -131,6 +139,7 @@ void ConfigEditor::render_directories(config::Config& cfg)
     _gui.combo_directory("ROMs directory", "##romdir", cfg.romdir, _romdir);
     _gui.combo_directory("Key Mappings directory", "##keymapsdir", keymapsdir, _keymapsdir);
     _gui.combo_directory("Palette directory", "##palettedir", palettedir, _palettedir);
+    _gui.combo_directory("Screenshot directory", "##screenshotdir", cfg.screenshotdir, _screenshotdir);
 
     if (palettedir != _palette.path()) {
         _palette.reset(palettedir);
@@ -159,6 +168,7 @@ void ConfigEditor::render_appearance(config::Config& cfg)
     _gui.combo_scanlines(cfg.scanlines);
     _gui.combo_palette(cfg.palette, _palette, machine_prefix());
     _gui.combo_keymaps(cfg.keymaps, _keymaps, machine_prefix());
+    _gui.combo_statusbar(cfg.statusbar);
 }
 
 void ConfigEditor::render_audio(config::Config& cfg)

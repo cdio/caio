@@ -485,6 +485,55 @@ void Gui::combo_scanlines(std::string& dst)
     }
 }
 
+void Gui::combo_statusbar(std::string& dst)
+{
+    static const std::string label = "Status bar position";
+    static const std::string id = "##statusbar";
+    static const char* position_names[]{
+        "None",
+        "Center",
+        "North",
+        "South",
+        "Easth",
+        "West",
+        "North-East",
+        "North-West",
+        "South-East",
+        "South-West"
+    };
+    static const char* position_codes[]{
+        "none",
+        "center",
+        "north",
+        "south",
+        "easth",
+        "west",
+        "north-east",
+        "north-west",
+        "south-east",
+        "south-west"
+    };
+    static const auto code_to_index = [](std::string_view code) -> int {
+        if (const auto it = std::find(std::begin(position_codes), std::end(position_codes), code);
+            it != std::end(position_codes)) {
+            return (it - std::begin(position_codes));
+        }
+        return 0;
+    };
+    const float fwidth = font_width();
+    int index = code_to_index(utils::tolow(dst));
+    int prev_index = index;
+
+    print(label);
+    cursor_to_valuecol();
+    ::ImGui::SetNextItemWidth(10 * fwidth);
+    ::ImGui::Combo(id.c_str(), &index, position_names, std::size(position_names), std::size(position_names));
+
+    if (index != prev_index) {
+        dst = position_codes[index];
+    }
+}
+
 void Gui::combo_path(const std::string& msg, const std::string& id, std::string& dst, fs::IDir& idir,
     const SetterCb& setter, unsigned width)
 {

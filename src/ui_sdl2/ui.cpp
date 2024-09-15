@@ -34,14 +34,6 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
-#include "ui_sdl2/widget_empty.hpp"
-#include "ui_sdl2/widget_fullscreen.hpp"
-#include "ui_sdl2/widget_keyboard.hpp"
-#include "ui_sdl2/widget_pause.hpp"
-#include "ui_sdl2/widget_photocamera.hpp"
-#include "ui_sdl2/widget_reset.hpp"
-#include "ui_sdl2/widget_volume.hpp"
-
 namespace caio {
 namespace ui {
 namespace sdl2 {
@@ -384,64 +376,92 @@ sptr_t<::SDL_Renderer> UI::renderer()
 void UI::create_panel()
 {
     /*
-     * Default panel widgets (from right to left):
-     * Fullscreen, Reset, Pause, Volume.
+     * Info panel.
      */
-    _panel = std::make_shared<Panel>(_renderer);
+    _panel = std::make_shared<Panel>(_renderer, _conf.video.statusbar);
 
-    auto fullscreen = std::make_shared<widget::Fullscreen>(_renderer, [this]() { return _is_fullscreen; });
-    fullscreen->action([this]() {
+    /*
+     * Fullscreen widget.
+     */
+    _wid_fullscreen = std::make_shared<widget::Fullscreen>(_renderer, [this]() {
+        return _is_fullscreen;
+    });
+    _wid_fullscreen->action([this]() {
         toggle_fullscreen();
     });
 
-    auto paused_cb = [this]() {
+    /*
+     * Photo-camera (screenshot) widget.
+     */
+    _wid_photocamera = std::make_shared<widget::PhotoCamera>(_renderer);
+    _wid_photocamera->action([this]() {
+        screenshot();
+    });
+
+    /*
+     * Reset widget.
+     */
+    const auto paused_cb = [this]() {
         return paused();
     };
 
-    auto reset = std::make_shared<widget::Reset>(_renderer, paused_cb);
-    reset->action([this]() {
+    _wid_reset = std::make_shared<widget::Reset>(_renderer, paused_cb);
+    _wid_reset->action([this]() {
         if (_reset_cb) {
             _reset_cb();
         }
     });
 
-    auto pause = std::make_shared<widget::Pause>(_renderer, paused_cb);
-    pause->action([this]() {
-        this->pause(paused() ^ true);
+    /*
+     * Pause widget.
+     */
+    _wid_pause = std::make_shared<widget::Pause>(_renderer, paused_cb);
+    _wid_pause->action([this]() {
+        pause(paused() ^ true);
     });
 
-    std::function<float()> getvol = {};
-    std::function<void(float)> setvol = {};
+    /*
+     * Volume control widget.
+     */
     if (audio_enabled()) {
-        getvol = [this]() {
-            /* Get volume */
+        const auto getvol = [this]() {
             return audio_volume();
         };
-
-        setvol = [this](float vol) {
-            /* Set volume */
+        const auto setvol = [this](float vol) {
             audio_volume(vol);
         };
+        _wid_volume = std::make_shared<widget::Volume>(_renderer, getvol, setvol);
+    } else {
+        _wid_volume = std::make_shared<widget::Volume>(_renderer);
     }
-    auto volume = std::make_shared<widget::Volume>(_renderer, getvol, setvol);
 
-    const auto kbd_status = [this]() { return widget::Keyboard::Status{ .is_enabled = _kbd->is_enabled()}; };
-    const auto kbd_toggle = [this]() { _kbd->enable(!_kbd->is_enabled()); };
-    auto keyboard = std::make_shared<widget::Keyboard>(_renderer, kbd_status);
-    keyboard->action(kbd_toggle);
+    /*
+     * Enable/Disable Keybaord widget.
+     */
+    const auto kbd_status = [this]() {
+        return widget::Keyboard::Status{ .is_enabled = _kbd->is_enabled()};
+    };
 
-    auto photocam = std::make_shared<widget::PhotoCamera>(_renderer);
-    photocam->action([this]() { screenshot(); });
+    const auto kbd_toggle = [this]() {
+        _kbd->enable(!_kbd->is_enabled());
+        log.debug("Keyboard {}\n", (_kbd->is_enabled() ? "enabled" : "disabled"));
+    };
 
+    _wid_keyboard = std::make_shared<widget::Keyboard>(_renderer, kbd_status);
+    _wid_keyboard->action(kbd_toggle);
+
+    /*
+     * Empty widget used as separator.
+     */
     auto empty = std::make_shared<widget::Empty>(_renderer);
 
-    _panel->add(fullscreen, Panel::Just::Right);
-    _panel->add(photocam, Panel::Just::Right);
+    _panel->add(_wid_fullscreen, Panel::Just::Right);
+    _panel->add(_wid_photocamera, Panel::Just::Right);
     _panel->add(empty, Panel::Just::Right);
-    _panel->add(reset, Panel::Just::Right);
-    _panel->add(pause, Panel::Just::Right);
-    _panel->add(volume, Panel::Just::Right);
-    _panel->add(keyboard, Panel::Just::Right);
+    _panel->add(_wid_reset, Panel::Just::Right);
+    _panel->add(_wid_pause, Panel::Just::Right);
+    _panel->add(_wid_volume, Panel::Just::Right);
+    _panel->add(_wid_keyboard, Panel::Just::Right);
     _panel->add(empty, Panel::Just::Right);
 }
 
@@ -590,7 +610,7 @@ void UI::kbd_event(const SDL_Event& event)
                 /*
                  * Toggle Fullscreen mode (ALT-F).
                  */
-                toggle_fullscreen();
+                _wid_fullscreen->action();
                 break;
 
             case SDLK_j:
@@ -604,15 +624,14 @@ void UI::kbd_event(const SDL_Event& event)
                 /*
                  * Enable/Disable the emulated keyboard (ALT-K).
                  */
-                _kbd->enable(!_kbd->is_enabled());
-                log.debug("Keyboard {}\n", (_kbd->is_enabled() ? "enabled" : "disabled"));
+                _wid_keyboard->action();
                 break;
 
             case SDLK_p:
                 /*
                  * Toggle Pause mode (ALT-P).
                  */
-                pause(paused() ^ true);
+                _wid_pause->action();
                 break;
 
             case SDLK_s:
@@ -620,7 +639,7 @@ void UI::kbd_event(const SDL_Event& event)
                  * Screenshot (ALT+SHIFT+S).
                  */
                 if (key.mod & KMOD_SHIFT) {
-                    screenshot();
+                    _wid_photocamera->action();
                 }
                 break;
 
@@ -638,7 +657,7 @@ void UI::kbd_event(const SDL_Event& event)
             /*
              * Toggle Pause mode (PAUSE key).
              */
-            hotkeys(keyboard::KEY_PAUSE);
+            _wid_pause->action();
 
         } else if (_kbd) {
             /*

@@ -57,6 +57,7 @@ struct VideoConfig {
     bool        fullscreen{};               /**< Start in fullscreen mode.  */
     bool        sresize{};                  /**< Smooth window resize.      */
     std::string screenshotdir{};            /**< Screenshot directory.      */
+    std::string statusbar{};                /**< Status bar position.       */
 };
 
 /**

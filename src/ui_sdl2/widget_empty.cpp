@@ -37,6 +37,11 @@ bool Empty::enabled() const
     return false;
 }
 
+bool Empty::is_idle()
+{
+    return true;
+}
+
 void Empty::render(const ::SDL_Rect& dstrect)
 {
 }

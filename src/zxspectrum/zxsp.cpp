@@ -247,7 +247,8 @@ void ZXSpectrum::create_ui()
             .sleffect       = ui::to_sleffect(_conf.scanlines),
             .fullscreen     = _conf.fullscreen,
             .sresize        = _conf.sresize,
-            .screenshotdir  = _conf.screenshotdir
+            .screenshotdir  = _conf.screenshotdir,
+            .statusbar      = _conf.statusbar
         }
     };
 

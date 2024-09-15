@@ -36,6 +36,13 @@
 #include "ui_sdl2/sdl2.hpp"
 #include "ui_sdl2/audio.hpp"
 #include "ui_sdl2/panel.hpp"
+#include "ui_sdl2/widget_empty.hpp"
+#include "ui_sdl2/widget_fullscreen.hpp"
+#include "ui_sdl2/widget_keyboard.hpp"
+#include "ui_sdl2/widget_pause.hpp"
+#include "ui_sdl2/widget_photocamera.hpp"
+#include "ui_sdl2/widget_reset.hpp"
+#include "ui_sdl2/widget_volume.hpp"
 
 namespace caio {
 namespace ui {
@@ -386,10 +393,16 @@ private:
     sptr_t<::SDL_Texture>       _screen_tex{};              /* Emulated screen texture ready to be rendered       */
     ::SDL_Rect                  _screen_rect{};             /* Emulated screen rendering coordinates              */
     sptr_t<Panel>               _panel{};                   /* Info Panel                                         */
+    sptr_t<widget::Fullscreen>  _wid_fullscreen{};
+    sptr_t<widget::Reset>       _wid_reset{};
+    sptr_t<widget::Pause>       _wid_pause{};
+    sptr_t<widget::Volume>      _wid_volume{};
+    sptr_t<widget::Keyboard>    _wid_keyboard{};
+    sptr_t<widget::PhotoCamera> _wid_photocamera{};
 
     AudioStream                 _audio_stream{};            /* Audio driver                                       */
 
-    std::map<::SDL_JoystickID, std::unique_ptr<::SDL_GameController, void(*)(::SDL_GameController*)>> _sdl_joys{};
+    std::map<::SDL_JoystickID, uptrd_t<::SDL_GameController>> _sdl_joys{};
 };
 
 }

@@ -97,7 +97,8 @@ static Option generic_options[] = {
     { KEY_VJOY_BACK,        SEC_GENERIC, KEY_VJOY_BACK,     DEFAULT_VJOY_BACK,      Arg::Required, set_value       },
     { KEY_VJOY_GUIDE,       SEC_GENERIC, KEY_VJOY_GUIDE,    DEFAULT_VJOY_GUIDE,     Arg::Required, set_value       },
     { KEY_VJOY_START,       SEC_GENERIC, KEY_VJOY_START,    DEFAULT_VJOY_START,     Arg::Required, set_value       },
-    { KEY_SCREENSHOTDIR,    SEC_GENERIC, KEY_SCREENSHOTDIR, DEFAULT_SCREENSHOTDIR,  Arg::Required, set_value       }
+    { KEY_SCREENSHOTDIR,    SEC_GENERIC, KEY_SCREENSHOTDIR, DEFAULT_SCREENSHOTDIR,  Arg::Required, set_value       },
+    { KEY_STATUSBAR,        SEC_GENERIC, KEY_STATUSBAR,     DEFAULT_STATUSBAR,      Arg::Required, set_value       }
 };
 
 std::string Cmdline::usage() const
@@ -143,6 +144,10 @@ std::string Cmdline::usage() const
         " --vjoy-guide <keyname>  Virtual joystick GUIDE key\n"
         " --vjoy-start <keyname>  Virtual joystick START key\n"
         " --screenshotdir <sdir>  Screenshot directory (default is {})\n"
+        " --statusbar <pos>       Status bar position, one of:\n"
+        "                         none, center, north, south, east, west,\n"
+        "                         north-east, north-west, south-east, south-west\n"
+        "                         (default is \"{}\")\n"
         " -v|--version            Show version information and exit\n"
         " -h|--help               Print this message and exit",
         _progname,
@@ -161,7 +166,8 @@ std::string Cmdline::usage() const
         DEFAULT_VJOY_LEFT,
         DEFAULT_VJOY_RIGHT,
         DEFAULT_VJOY_FIRE,
-        DEFAULT_SCREENSHOTDIR);
+        DEFAULT_SCREENSHOTDIR,
+        DEFAULT_STATUSBAR);
 }
 
 Confile Cmdline::defaults()

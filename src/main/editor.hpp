@@ -98,9 +98,10 @@ public:
 
     /**
      * Render the configuration parameters and let the user edit them.
+     * @param ronly True if the configuration cannot be edited; false otherwise.
      * @see render_specifics()
      */
-    void render();
+    void render(bool ronly);
 
 protected:
     /**
@@ -167,6 +168,7 @@ protected:
     fs::IDirNav     _romdir{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
     fs::IDirNav     _keymapsdir{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
     fs::IDirNav     _palettedir{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
+    fs::IDirNav     _screenshotdir{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
     fs::IDir        _palette{fs::IDir::EntryType::File, Gui::ENTRY_EMPTY};
     fs::IDir        _keymaps{fs::IDir::EntryType::File, Gui::ENTRY_EMPTY};
 };

@@ -32,6 +32,14 @@ Fullscreen::Fullscreen(const sptr_t<::SDL_Renderer>& renderer, const std::functi
     Widget::load(fullscreen_128x2_png);
 }
 
+void Fullscreen::action()
+{
+    /* Avoid default action */
+    if (_action) {
+        _action();
+    }
+}
+
 void Fullscreen::render(const ::SDL_Rect& dstrect)
 {
     bool is_fullscreen{};

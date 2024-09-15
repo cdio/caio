@@ -28,9 +28,9 @@ namespace widget {
 class Floppy : public Widget {
 public:
     struct Status {
-        bool    is_attached;
-        bool    is_idle;
-        float   progress;
+        bool    is_attached{};
+        bool    is_idle{true};
+        float   progress{};
     };
 
     Floppy(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd);
@@ -38,12 +38,17 @@ public:
     virtual ~Floppy() {
     }
 
+    bool is_idle() override;
+
     void render(const ::SDL_Rect& dstrect) override;
 
 private:
+    void update();
+
     std::function<Status()> _update;
     int64_t                 _start{};
     int64_t                 _elapsed{};
+    Status                  _status{};
     bool                    _prev_idle{};
 };
 

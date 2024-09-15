@@ -134,19 +134,13 @@ void ConfiguratorApp::editor_pane()
     begin_section("##editor-pane", {width, height});
 
     if (_centry >= 0) {
-        const auto& [read_only, cname, cfile] = _configs[_centry];
+        const auto& [ronly, cname, cfile] = _configs[_centry];
         print("Configuration: {}", cname);
         separator();
         try {
             auto& editor = editor_instance(cfile);
             if (editor) {
-                if (read_only) {
-                    begin_disabled();
-                }
-                editor->render();
-                if (read_only) {
-                    end_disabled();
-                }
+                editor->render(ronly);
             } else {
                 print("Can't load configurator editor\nMalformed configuration file: {}", cfile.string());
             }

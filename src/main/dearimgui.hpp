@@ -141,6 +141,7 @@ public:
     static void checkbox(const std::string& msg, const std::string& id, bool& dst);
 
     static void combo_scanlines(std::string& dst);
+    static void combo_statusbar(std::string& dst);
     static void combo_key(const std::string& msg, const std::string& id, keyboard::Key& key);
 
     static void combo_directory(const std::string& msg, const std::string& id, std::string& dst, fs::IDir& dir);

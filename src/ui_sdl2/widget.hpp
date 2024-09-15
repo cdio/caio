@@ -107,6 +107,7 @@ constexpr static const float RATIO                  = static_cast<float>(WIDTH) 
 class Widget {
 public:
     constexpr static const uint8_t ACTION_BUTTON        = SDL_BUTTON_LEFT;
+    constexpr static const uint64_t ACTION_TIME         = 2'000'000;
     constexpr static const Rgba DISABLED_COLOR          = { 255, 255, 255,  64 };   /* Colour modulators */
     constexpr static const Rgba ENABLED_COLOR           = { 255, 255, 255, 255 };
     constexpr static const Rgba PROGRESS_BORDER_COLOR   = { 255,   0,   0, 255 };
@@ -136,6 +137,12 @@ public:
     void load(const std::span<const uint8_t> data);
 
     /**
+     * Tell whether an action period is ongoing.
+     * @return True if an action period is ongoing; false otherwise.
+     */
+    bool is_action_period() const;
+
+    /**
      * Set the action callback.
      * The action callback is called when the ACTION_BUTTON is pressed.
      * @param act Action callback
@@ -145,6 +152,8 @@ public:
 
     /**
      * Call the action callback.
+     * Call the action callback and start the action period.
+     * @see start_action_period()
      */
     virtual void action();
 
@@ -153,6 +162,13 @@ public:
      * @return True (default) if this widget is enabled; false otherwise.
      */
     virtual bool enabled() const;
+
+    /**
+     * Get the idle status.
+     * @return True if an action period is ongoing; false otherwise.
+     * @see is_action_period()
+     */
+    virtual bool is_idle();
 
     /**
      * Process SDL events.
@@ -195,33 +211,40 @@ protected:
 
     /**
      * Render part of this widget.
+     * Render part of this widget and, if the action period is started, update it.
      * @param srcrect Part of this widget to render;
      * @param dstrect Destination coordinates.
+     * @see update_action_period()
      */
     void render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect);
 
     /**
      * Render part of this widget.
+     * Render part of this widget and, if the action period is started, update it.
      * @param srcrect Part of this widget to render;
      * @param dstrect Destination coordinates;
      * @param color   Colour modulator.
      * @see color_modulator(Rgba)
+     * @see update_action_period()
      */
     void render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect, Rgba color);
 
     /**
      * Render part of this widget rotated and or flipped.
+     * Render part of this widget and, if the action period is started, update it.
      * @param srcrect Part of this widget to render;
      * @param dstrect Destination coordinates;
      * @param centre  Rotation centre;
      * @param angle   Rotation angle (in degrees);
      * @param flip    Type of flip.
+     * @see update_action_period()
      */
     void render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect, const ::SDL_Point& centre, float angle,
         ::SDL_RendererFlip flip);
 
     /**
      * Render part of this widget rotated and or flipped.
+     * Render part of this widget and, if the action period is started, update it.
      * @param srcrect Part of this widget to render;
      * @param dstrect Destination coordinates;
      * @param centre  Rotation centre;
@@ -229,6 +252,7 @@ protected:
      * @param flip    Type of flip;
      * @param color   Colour modulator.
      * @see color_modulator(Rgba)
+     * @see update_action_period()
      */
     void render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect, const ::SDL_Point& centre, float angle,
         ::SDL_RendererFlip flip, Rgba color);
@@ -247,9 +271,25 @@ protected:
      */
     void render_rect(const ::SDL_Rect& rect, Rgba color);
 
+    /**
+     * Start the action period.
+     * The action period is started when the action method is called.
+     * The widget implementation decides how to be rendered during this time.
+     */
+    void start_action_period();
+
+    /**
+     * Update the action period.
+     * The action period terminates when its elapsed time reaches ACTION_TIME us.
+     * @see ACTION_TIME
+     */
+    void update_action_period();
+
     sptr_t<::SDL_Renderer>  _renderer{};
     uptrd_t<::SDL_Texture>  _texture{nullptr, nullptr};
     std::function<void()>   _action{};
+    bool                    _is_action_period{};
+    uint64_t                _action_time{};
 
     static Widget* pressed_widget;  /* Last widget that received a button press event */
 };
@@ -268,6 +308,7 @@ public:
     Label(const sptr_t<::SDL_Renderer>& renderer = {});
 
     void reset(const std::string& label, Rgba color = LABEL_COLOR);
+
     void render(const ::SDL_Rect& dstrect);
 
 private:

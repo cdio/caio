@@ -32,6 +32,13 @@ public:
     virtual ~Pause() {
     }
 
+    void action(const std::function<void()>& act)
+    {
+        Widget::action(act);
+    }
+
+    void action() override;
+
     void render(const ::SDL_Rect& dstrect) override;
 
 private:

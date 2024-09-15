@@ -32,6 +32,14 @@ Pause::Pause(const sptr_t<::SDL_Renderer>& renderer, const std::function<bool()>
     Widget::load(pause_128x2_png);
 }
 
+void Pause::action()
+{
+    /* Avoid default action */
+    if (_action) {
+        _action();
+    }
+}
+
 void Pause::render(const ::SDL_Rect& dstrect)
 {
     static const ::SDL_Rect running_rect{0, 0, 128, 128};

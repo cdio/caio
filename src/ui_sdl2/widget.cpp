@@ -104,12 +104,18 @@ void Widget::action()
 {
     if (_action) {
         _action();
+        start_action_period();
     }
 }
 
 bool Widget::enabled() const
 {
     return true;
+}
+
+bool Widget::is_idle()
+{
+    return (!is_action_period());
 }
 
 void Widget::event(const ::SDL_Event& event, const ::SDL_Rect& rect)
@@ -153,6 +159,7 @@ void Widget::event(const ::SDL_Event& event, const ::SDL_Rect& rect)
 
 void Widget::render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect)
 {
+    update_action_period();
     if (::SDL_RenderCopy(_renderer.get(), _texture.get(), &srcrect, &dstrect) < 0) {
         throw UIError{"Can't SDL_RenderCopy: {}", sdl_error()};
     }
@@ -169,6 +176,7 @@ void Widget::render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect, Rgba c
 void Widget::render(const ::SDL_Rect& srcrect, const ::SDL_Rect& dstrect, const ::SDL_Point& centre, float angle,
     ::SDL_RendererFlip flip)
 {
+    update_action_period();
     if (::SDL_RenderCopyEx(_renderer.get(), _texture.get(), &srcrect, &dstrect, angle, &centre, flip) < 0) {
         throw UIError{"Can't SDL_RenderCopyEx: {}", sdl_error()};
     }
@@ -258,6 +266,24 @@ void Widget::color_modulator(Rgba color)
         ::SDL_SetTextureAlphaMod(_texture.get(), color.a) < 0) {
         throw UIError{"Can't SDL_SetTexture{{Color,Alpha}}Mod: {}", sdl_error()};
     }
+}
+
+void Widget::start_action_period()
+{
+    _is_action_period = true;
+    _action_time = utils::now();
+}
+
+void Widget::update_action_period()
+{
+    if (_is_action_period && (utils::now() > (_action_time + ACTION_TIME))) {
+        _is_action_period = false;
+    }
+}
+
+bool Widget::is_action_period() const
+{
+    return _is_action_period;
 }
 
 Label::Label(const sptr_t<::SDL_Renderer>& renderer)

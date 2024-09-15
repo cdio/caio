@@ -212,7 +212,8 @@ Config::Config(Section& sec, std::string_view prefix)
       logfile{sec[KEY_LOGFILE]},
       loglevel{sec[KEY_LOGLEVEL]},
       vjoy{sec},
-      screenshotdir{fs::fix_home(sec[KEY_SCREENSHOTDIR])}
+      screenshotdir{fs::fix_home(sec[KEY_SCREENSHOTDIR])},
+      statusbar{sec[KEY_STATUSBAR]}
 {
     if (scale < 1) {
         scale = 1;
@@ -243,7 +244,9 @@ bool Config::operator==(const Config& other) const
        monitor == other.monitor &&
        logfile == other.logfile &&
        loglevel == other.loglevel &&
-       vjoy == other.vjoy);
+       vjoy == other.vjoy &&
+       screenshotdir == other.screenshotdir &&
+       statusbar == other.statusbar);
 }
 
 void Config::to_section(Section& sec) const
@@ -263,6 +266,8 @@ void Config::to_section(Section& sec) const
     sec[KEY_LOGFILE] = logfile;
     sec[KEY_LOGLEVEL] = loglevel;
     vjoy.to_section(sec);
+    sec[KEY_SCREENSHOTDIR] = screenshotdir;
+    sec[KEY_STATUSBAR] = statusbar;
 }
 
 fs::Path Config::resolve(const fs::Path& name, const fs::Path& path, const fs::Path& prefix, const fs::Path& ext)
@@ -318,7 +323,8 @@ std::string Config::to_string() const
         "              back:   {}\n"
         "             guide:   {}\n"
         "             start:   {}\n"
-        "  Screenshot path:    {}\n",
+        "  Screenshot path:    \"{}\"\n"
+        "  Status bar:         \"{}\"",
         title, romdir, palette, keymaps, cartridge, fps, scale, scanlines,
         (fullscreen ? "yes" : "no"),
         (sresize ? "yes" : "no"),
@@ -340,7 +346,8 @@ std::string Config::to_string() const
         keyboard::to_string(vjoy.back),
         keyboard::to_string(vjoy.guide),
         keyboard::to_string(vjoy.start),
-        screenshotdir);
+        screenshotdir,
+        statusbar);
 }
 
 }

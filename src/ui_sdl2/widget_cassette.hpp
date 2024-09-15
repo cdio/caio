@@ -39,12 +39,17 @@ public:
     virtual ~Cassette() {
     }
 
+    bool is_idle() override;
+
     void render(const ::SDL_Rect& dstrect) override;
 
 private:
-    std::function<Status()> _update;
+    void update();
+
+    std::function<Status()> _update{};
     int64_t                 _start{};
     int                     _pos{};
+    Status                  _status{};
 };
 
 }

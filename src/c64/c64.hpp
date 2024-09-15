@@ -197,6 +197,10 @@ private:
     sptr_t<Joystick>            _joy1{};
     sptr_t<Joystick>            _joy2{};
     sptr_t<ui::UI>              _ui{};
+    sptr_t<ui::widget::Floppy>  _floppy8{};
+    sptr_t<ui::widget::Floppy>  _floppy9{};
+    sptr_t<ui::widget::Gamepad> _gamepad1{};
+    sptr_t<ui::widget::Gamepad> _gamepad2{};
 };
 
 }

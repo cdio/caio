@@ -33,6 +33,8 @@ public:
 
     bool enabled() const override;
 
+    bool is_idle() override;
+
     void render(const ::SDL_Rect& dstrect) override;
 };
 
