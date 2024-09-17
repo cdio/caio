@@ -42,19 +42,14 @@ public:
      * @see load()
      * @exception IOError if an error occurs while trying to load the specified file.
      */
-    History(std::string_view fname = {})
-        : _histfname{fname} {
-        load();
-    }
+    History(std::string_view fname = {});
 
     /**
      * Release this instance.
      * If a file name was specified, the history is saved before this instance is destroyed.
      * @see save()
      */
-    virtual ~History() {
-        save();
-    }
+    virtual ~History();
 
     History& operator=(History&& other);
 

@@ -32,6 +32,20 @@
 namespace caio {
 namespace readline {
 
+History::History(std::string_view fname)
+    : _histfname{fname}
+{
+    load();
+}
+
+History::~History()
+{
+    try {
+        save();
+    } catch (...) {
+    }
+}
+
 History& History::operator=(History&& other)
 {
     _histfname = other._histfname;
