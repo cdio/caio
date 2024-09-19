@@ -25,6 +25,7 @@
 #include "utils.hpp"
 
 namespace caio {
+namespace mos {
 namespace mos_6581 {
 
 constexpr static const unsigned SAMPLING_RATE = 44100;
@@ -479,7 +480,8 @@ private:
 };
 
 }
+}
 
-using Mos6581 = mos_6581::Mos6581;
+using Mos6581 = mos::mos_6581::Mos6581;
 
 }

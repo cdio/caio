@@ -19,6 +19,7 @@
 #include "mos_6502.hpp"
 
 namespace caio {
+namespace mos {
 
 int Mos6502::i_BPL(Mos6502& self, addr_t rel)
 {
@@ -203,4 +204,5 @@ int Mos6502::i_NOP(Mos6502& self, addr_t)
     return 0;
 }
 
+}
 }

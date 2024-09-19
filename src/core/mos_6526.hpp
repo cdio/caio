@@ -28,6 +28,7 @@
 #include "pin.hpp"
 
 namespace caio {
+namespace mos {
 
 /**
  * MOS6526 (CIA) emulator.
@@ -245,5 +246,9 @@ private:
     uint8_t     _icr_data{};
     uint8_t     _icr_mask{};
 };
+
+}
+
+using Mos6526 = mos::Mos6526;
 
 }

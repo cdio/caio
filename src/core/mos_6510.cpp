@@ -19,6 +19,7 @@
 #include "mos_6510.hpp"
 
 namespace caio {
+namespace mos {
 
 uint8_t Mos6510::read(addr_t addr, Device::ReadMode mode)
 {
@@ -53,4 +54,5 @@ void Mos6510::write(addr_t addr, uint8_t value)
     Mos6502::write(addr, value);
 }
 
+}
 }

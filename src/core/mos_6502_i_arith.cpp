@@ -19,6 +19,7 @@
 #include "mos_6502.hpp"
 
 namespace caio {
+namespace mos {
 
 int Mos6502::i_AND_imm(Mos6502& self, addr_t value)
 {
@@ -525,4 +526,5 @@ int Mos6502::i_ROR(Mos6502& self, addr_t addr)
     return 0;
 }
 
+}
 }

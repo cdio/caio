@@ -22,6 +22,7 @@
 #include "mos_6502.hpp"
 
 namespace caio {
+namespace mos {
 
 /**
  * MOS 6510 emulator.
@@ -102,5 +103,9 @@ private:
     uint8_t _iodir{};
     Gpio    _ioport{};
 };
+
+}
+
+using Mos6510 = mos::Mos6510;
 
 }

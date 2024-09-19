@@ -37,6 +37,7 @@
 #include "utils.hpp"
 
 namespace caio {
+namespace mos {
 
 /**
  * MOS 6502 emulator.
@@ -722,5 +723,9 @@ protected:
 
     static int i_KIL       (Mos6502&, addr_t);
 };
+
+}
+
+using Mos6502 = mos::Mos6502;
 
 }

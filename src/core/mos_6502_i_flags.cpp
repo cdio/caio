@@ -19,6 +19,7 @@
 #include "mos_6502.hpp"
 
 namespace caio {
+namespace mos {
 
 int Mos6502::i_CLC(Mos6502& self, addr_t)
 {
@@ -90,4 +91,5 @@ int Mos6502::i_SED(Mos6502& self, addr_t)
     return 0;
 }
 
+}
 }

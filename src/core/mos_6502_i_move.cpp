@@ -19,6 +19,7 @@
 #include "mos_6502.hpp"
 
 namespace caio {
+namespace mos {
 
 int Mos6502::i_LDA_imm(Mos6502& self, addr_t value)
 {
@@ -271,4 +272,5 @@ int Mos6502::i_PHP(Mos6502& self, addr_t)
     return 0;
 }
 
+}
 }

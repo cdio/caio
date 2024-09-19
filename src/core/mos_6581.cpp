@@ -25,6 +25,7 @@
 #include "ui.hpp"
 
 namespace caio {
+namespace mos {
 namespace mos_6581 {
 
 /*
@@ -876,5 +877,6 @@ inline bool Mos6581::is_v3_active() const
     return !(_voice_3_filtered && _voice_3_off);
 }
 
+}
 }
 }

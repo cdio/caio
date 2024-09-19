@@ -24,6 +24,7 @@
 #include "utils.hpp"
 
 namespace caio {
+namespace mos {
 
 Mos6526::Timer::Timer(Mos6526& dev, uint8_t pbit)
     : _dev{dev},
@@ -602,4 +603,5 @@ inline void Mos6526::irq_out(bool active)
     }
 }
 
+}
 }

@@ -19,6 +19,7 @@
 #include "mos_6502.hpp"
 
 namespace caio {
+namespace mos {
 
 int Mos6502::i_SLO(Mos6502& self, addr_t addr)
 {
@@ -469,4 +470,5 @@ int Mos6502::i_KIL(Mos6502& self, addr_t addr)
     return 0;
 }
 
+}
 }

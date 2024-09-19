@@ -24,6 +24,7 @@
 #include "monitor.hpp"
 
 namespace caio {
+namespace mos {
 
 const Mos6502::Instruction Mos6502::instr_set[256] = {
     { "BRK",            Mos6502::i_BRK,         MODE_NONE,  7,  1   },  /* 00 */
@@ -764,4 +765,5 @@ void Mos6502::write(addr_t addr, uint8_t data)
     _mmap->write(addr, data);
 }
 
+}
 }
