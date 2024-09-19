@@ -56,7 +56,7 @@ public:
     constexpr static const addr_t S_base  = 0x0100;
     constexpr static const uint8_t S_init = 0xFF;
 
-    using breakpoint_cb_t = std::function<void(Mos6502&, void*)>;
+    using BreakpointCb = std::function<void(Mos6502&, void*)>;
 
     enum AddressingMode {
         MODE_NONE,
@@ -200,7 +200,7 @@ public:
      * @param addr Address;
      * @param cb   Method to call when the breakpoint hits.
      */
-    void bpadd(addr_t addr, const breakpoint_cb_t& cb, void* arg);
+    void bpadd(addr_t addr, const BreakpointCb& cb, void* arg);
 
     /**
      * Delete a breakpoint on a memory address.
@@ -420,7 +420,7 @@ protected:
     bool            _decimal_en{true};
 
     std::atomic_bool _break{};
-    std::map<addr_t, std::pair<breakpoint_cb_t, void*>> _breakpoints{};
+    std::map<addr_t, std::pair<BreakpointCb, void*>> _breakpoints{};
 
     static const Instruction instr_set[256];
 

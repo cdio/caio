@@ -41,7 +41,7 @@ public:
     constexpr static const uint8_t P5    = 0x20;
     constexpr static const uint8_t PALL  = P0 | P1 | P2 | P3 | P4 | P5;
 
-    using breakpoint_cb_t = std::function<void(Mos6510&, void*)>;
+    using BreakpointCb = std::function<void(Mos6510&, void*)>;
 
     using ior_t = Gpio::ior_t;
     using iow_t = Gpio::iow_t;
@@ -84,8 +84,8 @@ public:
      * Add a breakpoint on a memory address.
      * @see Mos6502::bpadd()
      */
-    void bpadd(addr_t addr, const breakpoint_cb_t& cb, void* arg) {
-        Mos6502::bpadd(addr, *reinterpret_cast<const Mos6502::breakpoint_cb_t*>(&cb), arg);
+    void bpadd(addr_t addr, const BreakpointCb& cb, void* arg) {
+        Mos6502::bpadd(addr, *reinterpret_cast<const Mos6502::BreakpointCb*>(&cb), arg);
     }
 
     /**

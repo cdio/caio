@@ -63,7 +63,7 @@ public:
     constexpr static const bool FORCED_INSTRUCTION  = true;
     constexpr static const bool FETCH_FROM_DATABUS  = true;
 
-    using breakpoint_cb_t = std::function<void(Z80&, void*)>;
+    using BreakpointCb = std::function<void(Z80&, void*)>;
 
     enum class Cycle {
         T1,
@@ -464,7 +464,7 @@ public:
      * @param cb   Method to call when the breakpoint is hit;
      * @param arg  Generic argument sent to the callback.
      */
-    void bpadd(addr_t addr, const breakpoint_cb_t& cb, void* arg);
+    void bpadd(addr_t addr, const BreakpointCb& cb, void* arg);
 
     /**
      * Delete a breakpoint on a memory address.
@@ -807,7 +807,7 @@ private:
     Cycle            _tx{};
     uint8_t          _opcode{};
     std::atomic_bool _break{};
-    std::map<addr_t, std::pair<breakpoint_cb_t, void*>> _breakpoints{};
+    std::map<addr_t, std::pair<BreakpointCb, void*>> _breakpoints{};
 
     static const Instruction main_instr_set[256];
     static const Instruction bit_instr_set[256];

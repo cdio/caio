@@ -1327,7 +1327,7 @@ void Z80::ebreak()
     _break = true;
 }
 
-void Z80::bpadd(addr_t addr, const breakpoint_cb_t& cb, void* arg)
+void Z80::bpadd(addr_t addr, const BreakpointCb& cb, void* arg)
 {
     _breakpoints[addr] = {cb, arg};
 }
