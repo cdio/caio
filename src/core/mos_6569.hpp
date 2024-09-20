@@ -30,6 +30,7 @@
 #include "aspace.hpp"
 #include "clock.hpp"
 #include "device.hpp"
+#include "fs.hpp"
 #include "pin.hpp"
 #include "rgb.hpp"
 #include "ui.hpp"
@@ -367,7 +368,7 @@ public:
      * @exception IOError See RgbaTable::load().
      * @see palette(const RgbaTable&)
      */
-    void palette(std::string_view fname);
+    void palette(const fs::Path& fname);
 
     /**
      * Set a colour palette from memory.

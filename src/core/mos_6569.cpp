@@ -72,7 +72,7 @@ void Mos6569::render_line(const Renderer& rl)
     _render_line = rl;
 }
 
-void Mos6569::palette(std::string_view fname)
+void Mos6569::palette(const fs::Path& fname)
 {
     if (!fname.empty()) {
         _palette.load(fname);
