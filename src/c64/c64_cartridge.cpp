@@ -60,17 +60,6 @@ size_t Cartridge::size() const
     return IO_SIZE;
 }
 
-std::ostream& Cartridge::dump(std::ostream& os, addr_t base) const
-{
-    std::array<uint8_t, IO_SIZE> data{};
-
-    for (size_t i = 0; i < IO_SIZE; ++i) {
-        data[i] = peek(i);
-    }
-
-    return utils::dump(os, data, base);
-}
-
 void Cartridge::add_ior(const Gpio::ior_t& ior, uint8_t mask)
 {
     _ioport.add_ior(ior, mask);

@@ -18,6 +18,8 @@
  */
 #include "device.hpp"
 
+#include "utils.hpp"
+
 namespace caio {
 
 uint8_t Device::read(addr_t addr, ReadMode mode)
@@ -51,6 +53,14 @@ void Device::write_observer(const WriteObserverCb& cb)
 std::string Device::to_string() const
 {
     return std::format("{}, size {}", Name::to_string(), size());
+}
+
+std::ostream& Device::dump(std::ostream& os, addr_t base) const
+{
+    addr_t r{};
+    uint8_t regs[size()];
+    std::for_each(regs, regs + size(), [this, &r](uint8_t& reg) { reg = peek(r++); });
+    return utils::dump(os, regs, regs + size(), base);
 }
 
 }

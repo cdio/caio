@@ -503,14 +503,6 @@ void Mos6569::dev_write(addr_t addr, uint8_t data)
     }
 }
 
-std::ostream& Mos6569::dump(std::ostream& os, addr_t base) const
-{
-    uint8_t regs[Registers::REGMAX];
-    uint8_t r{};
-    std::for_each(std::begin(regs), std::end(regs), [this, &r](uint8_t& reg) { reg = peek(r++); });
-    return utils::dump(os, regs, base);
-}
-
 size_t Mos6569::tick(const Clock& clk)
 {
     bool aec_pin = _aec_pin;
@@ -1489,6 +1481,5 @@ inline void Mos6569::update_collision_data_mcm(unsigned start, uint8_t bitmap)
      */
     update_collision_data(start, utils::convert_01_10(bitmap));
 }
-
 }
 }

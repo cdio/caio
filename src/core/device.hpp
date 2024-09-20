@@ -114,7 +114,7 @@ public:
      * @param base Base address.
      * @return The output stream.
      */
-    virtual std::ostream& dump(std::ostream& os, addr_t base = 0) const = 0;
+    virtual std::ostream& dump(std::ostream& os, addr_t base = 0) const;
 
 protected:
     Device(std::string_view type, std::string_view label)

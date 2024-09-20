@@ -492,30 +492,6 @@ void Mos6526::dev_write(addr_t addr, uint8_t data)
     }
 }
 
-std::ostream& Mos6526::dump(std::ostream& os, addr_t base) const
-{
-    std::array<uint8_t, REGMAX> regs{
-        peek(PRA),
-        peek(PRB),
-        peek(DDRA),
-        peek(DDRB),
-        peek(TALO),
-        peek(TAHI),
-        peek(TBLO),
-        peek(TBHI),
-        peek(TOD_10THS),
-        peek(TOD_SEC),
-        peek(TOD_MIN),
-        peek(TOD_HR),
-        peek(SDR),
-        peek(ICR),
-        peek(CRA),
-        peek(CRB)
-    };
-
-    return utils::dump(os, regs, base);
-}
-
 void Mos6526::irq(const OutputPinCb& irq_out)
 {
     _irq_out = irq_out;

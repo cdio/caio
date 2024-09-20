@@ -208,11 +208,6 @@ public:
     void dev_write(addr_t addr, uint8_t data) override;
 
     /**
-     * @see Device::dump()
-     */
-    std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
-
-    /**
      * Set the IRQ pin callback.
      * The IRQ pin callback is called when the status of the IRQ output pin of this device is changed.
      * @param irq_out IRQ output pin callback.

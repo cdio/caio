@@ -416,11 +416,6 @@ public:
     void dev_write(addr_t addr, uint8_t data) override;
 
     /**
-     * @see Device::dump()
-     */
-    std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
-
-    /**
      * Get the video mode from video flags.
      * @param ecm Extended text colour mode flag;
      * @param bmm Bitmap mode flag;

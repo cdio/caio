@@ -96,11 +96,6 @@ public:
     size_t size() const override;
 
     /**
-     * @see Device::dump()
-     */
-    std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
-
-    /**
      * Add an input callback.
      * @param ior  Input callback;
      * @param mask Bits used by the callback.
