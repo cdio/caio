@@ -321,12 +321,17 @@ std::string Z80::Registers::to_string() const
         I, R, IX, IY, SP, PC, memptr);
 }
 
-Z80::Z80(std::string_view type, std::string_view label)
-    : Name{type, (label.empty() ? LABEL : label)}
+Z80::Z80(const sptr_t<ASpace>& mmap)
+    : Z80{LABEL, mmap}
 {
 }
 
-Z80::Z80(const sptr_t<ASpace>& mmap, std::string_view type, std::string_view label)
+Z80::Z80(std::string_view label, const sptr_t<ASpace>& mmap)
+    : Z80{TYPE, label, mmap}
+{
+}
+
+Z80::Z80(std::string_view type, std::string_view label, const sptr_t<ASpace>& mmap)
     : Name{type, (label.empty() ? LABEL : label)}
 {
     init(mmap);
@@ -338,10 +343,10 @@ Z80::~Z80()
 
 void Z80::init(const sptr_t<ASpace>& mmap)
 {
-    CAIO_ASSERT(mmap.get() != nullptr);
-
-    _mmap = mmap;
-    Z80::reset();
+    if (mmap) {
+        _mmap = mmap;
+        Z80::reset();
+    }
 }
 
 void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const monitor::save_cb_t& save)

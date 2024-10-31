@@ -30,8 +30,8 @@ class NibbleRAM : public RAM {
 public:
     constexpr static const char* TYPE = "4-BIT RAM";
 
-    NibbleRAM(size_t size, std::string_view label)
-        : RAM{size, label} {
+    NibbleRAM(std::string_view label, size_t size)
+        : RAM{label, size} {
         type(TYPE);
     }
 

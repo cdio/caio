@@ -29,47 +29,60 @@ class ROM : public RAM {
 public:
     constexpr static const char* TYPE = "ROM";
 
+    ROM();
+
     /**
      * Initialise this ROM with data from a buffer.
+     * @param label Label;
      * @param first Input iterator first element;
-     * @param last  Input iterator last element + 1;
-     * @param label Label assigned to this ROM.
+     * @param last  Input iterator last element + 1.
      */
     template<typename Iterator>
-    ROM(Iterator first, Iterator last, std::string_view label)
-        : RAM{first, last, label} {
+    ROM(std::string_view label, Iterator first, Iterator last)
+        : RAM{label, first, last} {
         type(TYPE);
     }
 
     /**
      * Initialise this ROM with data from a file.
-     * @param fname  Name of the file;
-     * @param digest Signature (SHA-256 digest the file must have);
-     * @param label  Label assigned to this ROM.
+     * @param label  Label;
+     * @param fname  File name;
+     * @param digest Signature (SHA-256 digest the file must have).
      * @exception IOError If the specified signature is not equal to the calculated one.
      * @see signature()
      * @see RAM::RAM(std::string_view size_t, std::string_view)
      */
-    ROM(std::string_view fname, std::string_view digest, std::string_view label);
+    ROM(std::string_view label, const fs::Path& fname, std::string_view digest);
 
     /**
      * Initialise this ROM with data from a file.
-     * @param fname  Name of the file;
-     * @param size   Size the file must have (0 not to check size);
-     * @param label  Label assigned to this ROM.
+     * @param label Label;
+     * @param fname File name;
+     * @param size  Size the file must have (0 not to check size).
      * @exception IOError If the size of the file is not equal to the specified size.
-     * @see RAM:RAM(std::string_view size_t, std::string_view)
+     * @see RAM:RAM(std::string_view, size_t)
      */
-    ROM(std::string_view fname, size_t size, std::string_view label);
+    ROM(std::string_view label, const fs::Path& fname, size_t size);
 
     /**
      * Initialise this ROM with data from an input stream.
+     * @param label Label;
      * @param is    Input stream to read from;
-     * @param count Number of bytes to read (0 means fs::LOAD_MAXSIZ bytes);
+     * @param count Number of bytes to read (0 means fs::LOAD_MAXSIZ bytes).
      * @exception IOError If the input stream is emptied before the specified amount of bytes are read.
      * @see RAM::RAM(std::istream&, size_t)
      */
-    ROM(std::istream& is, size_t count = 0);
+    ROM(std::string_view label, std::istream& is, size_t count = 0);
+
+    /**
+     * Move operator.
+     * @param other The ROM to move into this one.
+     * @return This ROM.
+     */
+    ROM& operator=(ROM&& other) {
+        static_cast<RAM&>(*this) = std::move(other);
+        return *this;
+    }
 
     /**
      * Get an iterator to the first element of this ROM.

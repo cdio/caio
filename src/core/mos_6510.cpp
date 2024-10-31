@@ -21,6 +21,25 @@
 namespace caio {
 namespace mos {
 
+Mos6510::Mos6510(const sptr_t<ASpace>& mmap)
+    : Mos6510{TYPE, LABEL, mmap}
+{
+}
+
+Mos6510::Mos6510(std::string_view label, const sptr_t<ASpace>& mmap)
+    : Mos6510{TYPE, label, mmap}
+{
+}
+
+Mos6510::Mos6510(std::string_view type, std::string_view label, const sptr_t<ASpace>& mmap)
+    : Mos6502{type, label, mmap}
+{
+}
+
+Mos6510::~Mos6510()
+{
+}
+
 uint8_t Mos6510::read(addr_t addr, Device::ReadMode mode)
 {
     switch (addr) {

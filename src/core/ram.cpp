@@ -19,36 +19,49 @@
 #include "ram.hpp"
 
 #include "types.hpp"
-#include "fs.hpp"
 
 namespace caio {
 
-RAM::RAM(size_t size, std::string_view label)
+RAM::RAM()
+    : Device{TYPE, {}},
+      _data{}
+{
+}
+
+RAM::RAM(std::string_view label, size_t size)
     : Device{TYPE, label},
       _data(size)
 {
 }
 
-RAM::RAM(std::string_view fname, size_t count, std::string_view label)
+RAM::RAM(std::string_view label, const fs::Path& fname, size_t count)
     : Device{TYPE, label},
       _data{fs::load(fname, count)}
 {
 }
 
-RAM::RAM(std::istream& is, size_t count)
-    : Device{TYPE, {}},
+RAM::RAM(std::string_view label, std::istream& is, size_t count)
+    : Device{TYPE, label},
       _data{fs::load(is, count)}
 {
 }
 
 RAM::RAM(RAM&& other)
-    : Device{TYPE, other.label()},
+    : Device{other.type(), other.label()},
       _data{std::move(other._data)}
 {
 }
 
 RAM::~RAM()
 {
+}
+
+RAM& RAM::operator=(RAM&& other)
+{
+    type(other.type());
+    label(other.label());
+    _data = std::move(other._data);
+    return *this;
 }
 
 uint8_t RAM::dev_read(addr_t addr, ReadMode)

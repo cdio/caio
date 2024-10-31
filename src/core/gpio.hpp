@@ -44,11 +44,11 @@ public:
     const ADDR addr_type{};
     const DATA data_type{};
 
-    using ior_t = std::function<DATA(ADDR)>;
-    using iow_t = std::function<void(ADDR, DATA, bool)>;
+    using IorCb = std::function<DATA(ADDR)>;
+    using IowCb = std::function<void(ADDR, DATA, bool)>;
 
-    using ior_mask_t = std::pair<ior_t, DATA>;
-    using iow_mask_t = std::pair<iow_t, DATA>;
+    using IorMask = std::pair<IorCb, DATA>;
+    using IowMask = std::pair<IowCb, DATA>;
 
     explicit Gpio_() {
     }
@@ -58,7 +58,7 @@ public:
      * @param ior  Input callback;
      * @param mask Data bits used by the callback.
      */
-    void add_ior(const ior_t& ior, DATA mask) {
+    void add_ior(const IorCb& ior, DATA mask) {
         _iors.push_back({ior, mask});
     }
 
@@ -67,7 +67,7 @@ public:
      * @param iow  Output callback;
      * @param mask Data bits used by the callback.
      */
-    void add_iow(const iow_t& iow, DATA mask) {
+    void add_iow(const IowCb& iow, DATA mask) {
         _iows.push_back({iow, mask});
     }
 
@@ -102,8 +102,8 @@ public:
     }
 
 private:
-    std::vector<ior_mask_t> _iors{};
-    std::vector<iow_mask_t> _iows{};
+    std::vector<IorMask> _iors{};
+    std::vector<IowMask> _iows{};
 };
 
 /**

@@ -175,6 +175,21 @@ std::vector<std::string> key_names()
     return knames;
 }
 
+Keyboard::Keyboard(bool enabled)
+    : Keyboard{LABEL, enabled}
+{
+}
+
+Keyboard::Keyboard(std::string_view label, bool enabled)
+    : Name{TYPE, label},
+      _kbd_enabled{enabled}
+{
+}
+
+Keyboard::~Keyboard()
+{
+}
+
 void Keyboard::load(const fs::Path& fname)
 {
     static const std::regex re_comment{"^[ \t]*#.*$", std::regex::extended};

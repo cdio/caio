@@ -37,14 +37,14 @@ namespace caio {
 namespace zilog {
 
 /**
- * Zilog Z80 emulator.
+ * Zilog Z80 microprocessor.
  * @see Z80 CPU User Manual UM008011-0816
  * @see The Undocumented Z80 Documented - Sean Young
  */
 class Z80 : public Clockable, public Name {
 public:
     constexpr static const char* TYPE               = "Z80";
-    constexpr static const char* LABEL              = "CPU";
+    constexpr static const char* LABEL              = "cpu";
 
     constexpr static const addr_t RESET_ADDR        = 0x0000;
     constexpr static const addr_t NMI_ADDR          = 0x0066;
@@ -298,19 +298,27 @@ public:
 
     /**
      * Initialise this CPU.
-     * @param type  CPU type;
-     * @param label CPU label.
+     * @param mmap System mappings.
+     * @see Z80(std::string_view, std::string_view, const sptr_t<ASpace>& mmap)
      */
-    Z80(std::string_view type = TYPE, std::string_view label = LABEL);
+    Z80(const sptr_t<ASpace>& mmap = {});
 
     /**
      * Initialise this CPU.
-     * @param mmap  System mappings;
-     * @param type  CPU type;
-     * @param label CPU label.
+     * @param label Label;
+     * @param mmap  System mappings.
+     * @see Z80(std::string_view, std::string_view, const sptr_t<ASpace>& mmap)
+     */
+    Z80(std::string_view label, const sptr_t<ASpace>& mmap);
+
+    /**
+     * Initialise this CPU.
+     * @param type  Type;
+     * @param label Label;
+     * @param mmap  System mappings.
      * @see ASpace
      */
-    Z80(const sptr_t<ASpace>& mmap, std::string_view type = TYPE, std::string_view label = LABEL);
+    Z80(std::string_view type, std::string_view label, const sptr_t<ASpace>& mmap);
 
     virtual ~Z80();
 

@@ -40,8 +40,8 @@ public:
      * @param value true to activate this pull-up (drive it low), false to de-activate it (drive it high).
      * @return this
      */
-    PullUp& operator=(bool value) {
-        /* Impemented this way to emulate edge triggered interrupts */
+    PullUp& operator=(bool value)
+    {
         if (value) {
             ++_count;
         } else if (_count) {
@@ -55,14 +55,16 @@ public:
      * @return true if this pull-up is active (it is being driven
      * low by at least one connected device); false otherwise.
      */
-    operator bool() const {
+    operator bool() const
+    {
         return _count;
     }
 
     /**
      * Reset this pull-up (de-activate or drive it high).
      */
-    void reset() {
+    void reset()
+    {
         _count = 0;
     }
 

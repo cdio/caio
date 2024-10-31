@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "device.hpp"
+#include "fs.hpp"
 #include "utils.hpp"
 
 namespace caio {
@@ -37,25 +38,27 @@ public:
     constexpr static const bool PUT_RANDOM_VALUES = true;
     constexpr static const bool NO_RANDOM_VALUES = false;
 
+    RAM();
+
     /**
      * Initialise this RAM with zeros.
-     * @param size  Size of this RAM;
-     * @param label Label assigned to this RAM.
+     * @param label Label;
+     * @param size  Size.
      */
-    RAM(size_t size, std::string_view label);
+    RAM(std::string_view label, size_t size);
 
     /**
      * Initialise this RAM with a repeating pattern.
-     * @param size    Size of this RAM;
+     * @param label   Label;
+     * @param size    Size;
      * @param pattern Pattern;
-     * @param random  If true contaminate this RAM with some random values;
-     * @param label   Label assigned to this RAM.
+     * @param random  If true contaminate this RAM with some random values.
      * @see NO_RANDOM_VALUES
      * @see PUT_RANDOM_VALUES
      * @see utils::fill()
      */
     template<typename T>
-    RAM(size_t size, T pattern, bool random, std::string_view label)
+    RAM(std::string_view label, size_t size, T pattern, bool random)
         : Device{TYPE, label},
           _data(size) {
         std::span<uint8_t> dst{_data.data(), _data.size()};
@@ -64,40 +67,48 @@ public:
 
     /**
      * Initialise this RAM with data from a buffer.
+     * @param label Label;
      * @param first Input iterator first element;
-     * @param last  Input iterator last element + 1;
-     * @param label Label assigned to this RAM.
+     * @param last  Input iterator last element + 1.
      */
     template<typename Iterator>
-    RAM(Iterator first, Iterator last, std::string_view label)
+    RAM(std::string_view label, Iterator first, Iterator last)
         : Device{TYPE, label},
           _data{first, last} {
     }
 
     /**
      * Initialise this RAM with data from a file.
-     * @param fname Name of the file;
-     * @param count Number of bytes to read (0 means fs::LOAD_MAXSIZ bytes);
-     * @param label Label assigned to this RAM.
+     * @param label Label;
+     * @param fname File name;
+     * @param count Number of bytes to read (0 means fs::LOAD_MAXSIZ bytes).
      * @exception IOError If count exceeds the size of the file.
      * @see fs::LOAD_MAXSIZ
      * @see fs::load()
      */
-    RAM(std::string_view fname, size_t count, std::string_view label);
+    RAM(std::string_view label, const fs::Path& fname, size_t count);
 
     /**
      * Initialise this RAM with data from an input stream.
+     * @param label Label;
      * @param is    Input stream to read from;
-     * @param count Number of bytes to read (0 means fs::LOAD_MAXSIZ bytes);
+     * @param count Number of bytes to read (0 means fs::LOAD_MAXSIZ bytes).
      * @exception IOError If the input stream is empited before the specified amount of bytes are read.
      */
-    RAM(std::istream& is, size_t count = 0);
+    RAM(std::string_view label, std::istream& is, size_t count = 0);
 
     /**
      * Initialise this RAM moving another RAM.
      * @param other The RAM to move;
      */
     RAM(RAM&& other);
+
+    /**
+     * Initialise this RAM moving another RAM.
+     * @param other The RAM to move;
+     * @return This RAM.
+     */
+    RAM& operator=(RAM&& other);
 
     virtual ~RAM();
 

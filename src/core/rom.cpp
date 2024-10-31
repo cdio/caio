@@ -20,33 +20,38 @@
 
 #include <fstream>
 
-#include "fs.hpp"
 #include "logger.hpp"
 #include "utils.hpp"
 
 namespace caio {
 
-ROM::ROM(std::string_view fname, std::string_view digest, std::string_view label)
-    : RAM{fname, 0, label}
+ROM::ROM()
+    : RAM{}
+{
+    type(TYPE);
+}
+
+ROM::ROM(std::string_view label, const fs::Path& fname, std::string_view digest)
+    : RAM{label, fname, 0}
 {
     type(TYPE);
     auto sign = signature();
     if (digest != sign) {
-        throw IOError{*this, "{}: Invalid signature: Expected: {}, Calculated: {}", fname, digest, sign};
+        throw IOError{*this, "{}: Invalid signature: Expected: {}, Calculated: {}", fname.string(), digest, sign};
     }
 }
 
-ROM::ROM(std::string_view fname, size_t size, std::string_view label)
-    : RAM{fname, size, label}
+ROM::ROM(std::string_view label, const fs::Path& fname, size_t size)
+    : RAM{label, fname, size}
 {
     type(TYPE);
     if (size > 0 && _data.size() != size) {
-        throw IOError{*this, "{}: Invalid file size: It must be {}", fname, std::to_string(size)};
+        throw IOError{*this, "{}: Invalid file size: It must be {}", fname.string(), std::to_string(size)};
     }
 }
 
-ROM::ROM(std::istream& is, size_t count)
-    : RAM{is, count}
+ROM::ROM(std::string_view label, std::istream& is, size_t count)
+    : RAM{label, is, count}
 {
     type(TYPE);
 }

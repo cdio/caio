@@ -96,6 +96,13 @@ INCS+=		mos_6502.hpp \
 		mos_6569.hpp \
 		mos_6581.hpp
 
+CXXSRCS+=	ricoh_2a03.cpp \
+		ricoh_2a03_apu.cpp \
+		ricoh_2c02.cpp
+
+INCS+=		ricoh_2a03.hpp \
+		ricoh_2c02.hpp
+
 CXXSRCS+=	zilog_z80.cpp \
 		zilog_z80_i_arith.cpp \
 		zilog_z80_i_bit.cpp \

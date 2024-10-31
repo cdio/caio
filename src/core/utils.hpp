@@ -370,6 +370,23 @@ void convert_01_10_to_11(C& bytes)
 }
 
 /**
+ * Reverse bits within a byte.
+ * @param byte Byte to reverse.
+ * @return The reversed byte.
+ */
+constexpr inline uint8_t reverse(uint8_t byte)
+{
+    return ((byte & 0x01) << 7) |
+           ((byte & 0x02) << 5) |
+           ((byte & 0x04) << 3) |
+           ((byte & 0x08) << 1) |
+           ((byte & 0x10) >> 1) |
+           ((byte & 0x20) >> 3) |
+           ((byte & 0x40) >> 5) |
+           ((byte & 0x80) >> 7);
+}
+
+/**
  * Fill a buffer with a pattern and optional random values.
  * The pattern is repeated until the entire destination buffer is filled.
  * @param dst     Destination buffer;

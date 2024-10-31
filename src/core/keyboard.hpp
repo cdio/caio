@@ -146,6 +146,7 @@ enum Key {
     KEY_LEFT_ALT        = 0x0800,
     KEY_RIGHT_ALT       = 0x0400,
     KEY_FN              = 0x0200,
+    KEY_COMMAND         = 0x0100,
 
     /* Special codes */
     KEY_CTRL_C          = 0x0100,
@@ -199,14 +200,27 @@ std::vector<std::string> key_names();
 class Keyboard : public Name {
 public:
     constexpr static const char* TYPE   = "KBD";
+    constexpr static const char* LABEL  = "kbd";
     constexpr static const bool SHIFT   = true;
+    constexpr static const bool ALTGR   = true;
     constexpr static const bool NONE    = false;
 
-    Keyboard() {
-    }
+    /**
+     * Initialise this keyboard.
+     * @param enabled True to enable; false otherwise.
+     * @see enable(bool)
+     */
+    Keyboard(bool enabled = true);
 
-    virtual ~Keyboard() {
-    }
+    /**
+     * Initialise this keyboard.
+     * @param label   label;
+     * @param enabled True to enable; false otherwise.
+     * @see enable(bool)
+     */
+    Keyboard(std::string_view label, bool enabled = true);
+
+    virtual ~Keyboard();
 
     /**
      * Load a key mappings table from a file.
@@ -314,12 +328,6 @@ public:
      * @see add_key_map()
      */
     virtual void clear_key_map() = 0;
-
-protected:
-    Keyboard(std::string_view label = {}, bool enabled = true)
-        : Name{TYPE, label},
-          _kbd_enabled{enabled} {
-    }
 
 private:
     bool                _kbd_enabled{true};

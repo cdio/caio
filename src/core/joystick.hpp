@@ -29,7 +29,6 @@ namespace joystick {
 
 /**
  * Joystick port.
- * Port values cannot be 0 and must not share bits.
  */
 struct Port {
     uint16_t up{};
@@ -47,7 +46,9 @@ struct Port {
 };
 
 /**
- * Emulated joystick.
+ * Joystick interface.
+ * Interface between a physical gamepad connected to the
+ * host platform and a joystick as the emulated system sees it.
  */
 class Joystick : public Name {
 public:
@@ -59,16 +60,18 @@ public:
 
     /**
      * Initialise this joystick.
-     * @param jport Joystick port;
-     * @param label Label assigned to this joystick.
-     * @see JoyPort
+     * @param label Label assigned to this joystick;
+     * @param jport Joystick port.
+     * @see Port
      */
-    Joystick(const Port& port, std::string_view label = {})
+    Joystick(std::string_view label, const Port& port)
         : Name{TYPE, label},
-          _port{port} {
+          _port{port}
+    {
     }
 
-    virtual ~Joystick() {
+    virtual ~Joystick()
+    {
     }
 
     /**
@@ -77,7 +80,8 @@ public:
      * this joystick to a real game controller.
      * @param jid Identifier assigned to this joystick.
      */
-    void reset(unsigned jid = JOYID_INVALID, std::string_view name = "") {
+    void reset(unsigned jid = JOYID_INVALID, std::string_view name = "")
+    {
         _joyid = jid;
         _position = 0;
         _name = name;
@@ -86,18 +90,20 @@ public:
     /**
      * Set the current joystick position.
      * @param pos A bitwise combination of the joystick port values.
-     * @see JoyPort
+     * @see Port
      */
-    void position(uint8_t pos) {
+    void position(uint16_t pos)
+    {
         _position = pos;
     }
 
     /**
      * Get the joystick positions.
      * @return A bitwise combination of the current joystick port values.
-     * @see JoyPort
+     * @see Port
      */
-    uint8_t position() const {
+    uint16_t position() const
+    {
         return _position;
     }
 
@@ -105,7 +111,8 @@ public:
      * Get the connection status of this joystick.
      * @return True if there is a real game controller behind this joystick; false otherwise.
      */
-    bool is_connected() const {
+    bool is_connected() const
+    {
         return (_joyid != JOYID_INVALID);
     }
 
@@ -113,7 +120,8 @@ public:
      * Return the identifier of this joystick.
      * @return The joystick id.
      */
-    unsigned joyid() const {
+    unsigned joyid() const
+    {
         return _joyid;
     }
 
@@ -121,7 +129,8 @@ public:
      * Get the joystick port.
      * @return A constant reference to the joystick port.
      */
-    const Port& port() const {
+    const Port& port() const
+    {
         return _port;
     }
 
@@ -129,7 +138,8 @@ public:
      * Get the name of the associated gamepad.
      * @return The name of the associated gamepad if this joystick is connected to one; otherwise an empty string.
      */
-    const std::string& name() const {
+    const std::string& name() const
+    {
         return _name;
     }
 

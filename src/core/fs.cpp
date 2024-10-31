@@ -65,10 +65,10 @@ Path exec_path()
 #ifdef __APPLE__
         uint32_t bufsiz = sizeof(buf);
         _NSGetExecutablePath(buf, &bufsiz);
-
-#else   /* FIXME: *BSD */
+#elif defined __linux__
         [[maybe_unused]] auto _ = ::readlink("/proc/self/exe", buf, sizeof(buf));
-
+#else
+#error "Implement exec_path() under this OS"
 #endif
         path = buf;
     }

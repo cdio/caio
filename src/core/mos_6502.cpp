@@ -318,6 +318,34 @@ std::string Mos6502::Registers::to_string() const
         A, X, Y, P, to_string(static_cast<Flags>(P)), S, PC);
 }
 
+Mos6502::Mos6502(const sptr_t<ASpace>& mmap)
+    : Mos6502{TYPE, LABEL, mmap}
+{
+}
+
+Mos6502::Mos6502(std::string_view label, const sptr_t<ASpace>& mmap)
+    : Mos6502{TYPE, label, mmap}
+{
+}
+
+Mos6502::Mos6502(std::string_view type, std::string_view label, const sptr_t<ASpace>& mmap)
+    : Name{type, label}
+{
+    Mos6502::init(mmap);
+}
+
+Mos6502::~Mos6502()
+{
+}
+
+void Mos6502::init(const sptr_t<ASpace>& mmap)
+{
+    if (mmap) {
+        _mmap = mmap;
+        reset();
+    }
+}
+
 void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const monitor::save_cb_t& save)
 {
     CAIO_ASSERT(ifd >= 0 && ofd >= 0);
@@ -389,15 +417,6 @@ void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, con
     _monitor->add_breakpoint(read_addr(vRESET));
 }
 
-void Mos6502::init(const sptr_t<ASpace>& mmap)
-{
-    if (mmap) {
-        _mmap = mmap;
-    }
-
-    reset();
-}
-
 void Mos6502::loglevel(std::string_view lvs)
 {
     _log.loglevel(lvs);
@@ -410,13 +429,18 @@ Loglevel Mos6502::loglevel() const
 
 void Mos6502::reset()
 {
+    /* Power up */
     _regs = {
+        .A  = 0,
+        .X  = 0,
+        .Y  = 0,
         .PC = read_addr(vRESET),
-        .S  = S_init
+        .S  = S_init,
+        .P  = 0
     };
 
-    _halted = false;
     flag(0);
+    _halted = false;
 }
 
 bool Mos6502::irq_pin(bool active)
@@ -434,6 +458,11 @@ bool Mos6502::nmi_pin(bool active)
 bool Mos6502::rdy_pin(bool active)
 {
     _rdy_pin = active;
+    return _rdy_pin;
+}
+
+bool Mos6502::rdy_pin() const
+{
     return _rdy_pin;
 }
 

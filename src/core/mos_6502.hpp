@@ -40,7 +40,7 @@ namespace caio {
 namespace mos {
 
 /**
- * MOS 6502 emulator.
+ * MOS 6502 microprocessor.
  * @see https://www.nesdev.org/6502_cpu.txt
  * @see https://www.nesdev.org/extra_instructions.txt
  * @see https://www.nesdev.org/undocumented_opcodes.txt
@@ -48,14 +48,14 @@ namespace mos {
 class Mos6502 : public Clockable, public Name {
 public:
     constexpr static const char* TYPE     = "MOS6502";
-    constexpr static const char* LABEL    = "CPU";
+    constexpr static const char* LABEL    = "cpu";
 
     constexpr static const addr_t vNMI    = 0xFFFA;
     constexpr static const addr_t vRESET  = 0xFFFC;
     constexpr static const addr_t vIRQ    = 0xFFFE;
 
     constexpr static const addr_t S_base  = 0x0100;
-    constexpr static const uint8_t S_init = 0xFF;
+    constexpr static const uint8_t S_init = 0x00;
 
     using BreakpointCb = std::function<void(Mos6502&, void*)>;
 
@@ -107,27 +107,30 @@ public:
 
     /**
      * Initialise this CPU.
-     * @param type  CPU type;
-     * @param label CPU label.
+     * @param mmap System mappings.
+     * @see Mos6502(std::string_view, const sptr_t<ASpace>&)
      */
-    Mos6502(std::string_view type = TYPE, std::string_view label = LABEL)
-        : Name{type, label} {
-    }
+    Mos6502(const sptr_t<ASpace>& mmap = {});
 
     /**
      * Initialise this CPU.
-     * @param mmap  System mappings;
-     * @param type  CPU type;
-     * @param label CPU label.
+     * @param label Label;
+     * @param mmap  System mappings.
+     * @see Mos6502(std::string_view, std::string_view, const sptr_t<ASpace>&)
+     */
+    Mos6502(std::string_view label, const sptr_t<ASpace>& mmap);
+
+    /**
+     * Initialise this CPU.
+     * @param type  Type;
+     * @param label Label;
+     * @param mmap  System mappings.
+     * @see Name
      * @see ASpace
      */
-    Mos6502(const sptr_t<ASpace>& mmap, std::string_view type = TYPE, std::string_view label = LABEL)
-        : Name{type, (label.empty() ? LABEL : label)} {
-        Mos6502::init(mmap);
-    }
+    Mos6502(std::string_view type, std::string_view label, const sptr_t<ASpace>& mmap);
 
-    virtual ~Mos6502() {
-    }
+    virtual ~Mos6502();
 
     /**
      * Initialise this CPU.
@@ -163,7 +166,7 @@ public:
     /**
      * Restart this CPU.
      */
-    void reset();
+    virtual void reset();
 
     /**
      * Trigger an IRQ.
@@ -188,6 +191,12 @@ public:
      * @see single_step()
      */
     bool rdy_pin(bool active);
+
+    /**
+     * Get the status of the RDY line.
+     * @return The status of the RDY pin.
+     */
+    bool rdy_pin() const;
 
     /**
      * External breakpoint.

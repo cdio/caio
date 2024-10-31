@@ -327,7 +327,7 @@ std::string Config::to_string() const
         "              back:   {}\n"
         "             guide:   {}\n"
         "             start:   {}\n"
-        "  Screenshot path:    \"{}\"\n"
+        "  Screenshots path:   \"{}\"\n"
         "  Status bar:         \"{}\"",
         title, romdir, palette, keymaps, cartridge, fps, scale, scanlines,
         (fullscreen ? "yes" : "no"),

@@ -115,10 +115,7 @@ static inline std::uintmax_t file_size(const Path& path)
 /**
  * Search for a file.
  * If the file name specifies a directory it is searched as it is, the search paths are ignored.
- * If the file name does not specify a directory and cwd is true the file is first searched on
- * the current working directory.
- * A staring '~' character in fname or spaths is replaced with
- * the content of the HOME environment variable.
+ * A staring '~' character in fname or spaths is replaced with the content of the HOME environment variable.
  * @param fname Name of the file to search;
  * @param spath Search paths (used only if the file name does not contain a directory);
  * @return The existing file name; an empty path if the file is not found.
