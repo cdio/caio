@@ -41,7 +41,7 @@ public:
     RAM();
 
     /**
-     * Initialise this RAM with zeros.
+     * Initialise this RAM and fill it with zeros.
      * @param label Label;
      * @param size  Size.
      */
@@ -81,7 +81,7 @@ public:
      * Initialise this RAM with data from a file.
      * @param label Label;
      * @param fname File name;
-     * @param count Number of bytes to read (0 means fs::LOAD_MAXSIZ bytes).
+     * @param count Bytes to read (0 means fs::LOAD_MAXSIZ bytes).
      * @exception IOError If count exceeds the size of the file.
      * @see fs::LOAD_MAXSIZ
      * @see fs::load()
@@ -92,8 +92,8 @@ public:
      * Initialise this RAM with data from an input stream.
      * @param label Label;
      * @param is    Input stream to read from;
-     * @param count Number of bytes to read (0 means fs::LOAD_MAXSIZ bytes).
-     * @exception IOError If the input stream is empited before the specified amount of bytes are read.
+     * @param count Bytes to read (0 means fs::LOAD_MAXSIZ bytes).
+     * @exception IOError If the input stream is empited before the specified amount of bytes is read.
      */
     RAM(std::string_view label, std::istream& is, size_t count = 0);
 
@@ -104,8 +104,8 @@ public:
     RAM(RAM&& other);
 
     /**
-     * Initialise this RAM moving another RAM.
-     * @param other The RAM to move;
+     * Move operator.
+     * @param other The RAM to move.
      * @return This RAM.
      */
     RAM& operator=(RAM&& other);
@@ -116,7 +116,8 @@ public:
      * Get an iterator to the first element of this RAM.
      * @return An iterator to the first element.
      */
-    buffer_it_t begin() {
+    buffer_it_t begin()
+    {
         return _data.begin();
     }
 
@@ -124,37 +125,49 @@ public:
      * Get an iterator to the last element of this RAM +1.
      * @return An iterator to the last element +1.
      */
-    buffer_it_t end() {
+    buffer_it_t end()
+    {
         return _data.end();
     }
 
     /**
      * @see Device::reset()
      */
-    void reset() override {
+    void reset() override
+    {
     }
 
     /**
      * @see Device::size()
      */
-    size_t size() const override {
+    size_t size() const override
+    {
         return _data.size();
     }
 
     /**
      * @see Device::dev_read()
      */
-    uint8_t dev_read(addr_t addr, ReadMode mode = ReadMode::Read) override;
+    uint8_t dev_read(size_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
      * @see Device::dev_write()
      */
-    void dev_write(addr_t addr, uint8_t data) override;
+    void dev_write(size_t addr, uint8_t data) override;
 
     /**
      * @see Device::dump()
      */
-    std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
+    std::ostream& dump(std::ostream& os, size_t base = 0) const override;
+
+    /**
+     * Direct access to the RAM data.
+     * @return A reference to the internal data buffer.
+     */
+    const buffer_t& buffer() const
+    {
+        return _data;
+    }
 
 protected:
     buffer_t _data{};

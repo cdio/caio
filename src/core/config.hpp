@@ -177,7 +177,7 @@ public:
      * @param fname Name of the configuration file to read or an empty string.
      * @exception ConfigError
      * @exception IOError
-     * @see load(std::string_view)
+     * @see load(const fs::Path&)
      */
     Confile(const fs::Path& fname = {});
 
@@ -453,6 +453,12 @@ private:
      */
     fs::Path resolve(const fs::Path& name, const fs::Path& path, const fs::Path& prefix, const fs::Path& ext);
 };
+
+/**
+ * Persistent data directory.
+ * @return A path to the persistent data directory.
+ */
+fs::Path storage_path();
 
 }
 }

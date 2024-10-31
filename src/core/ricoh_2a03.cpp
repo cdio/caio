@@ -30,10 +30,10 @@ RP2A03::RP2A03(size_t clkf, const sptr_t<ASpace>& mmap)
 }
 
 RP2A03::RP2A03(std::string_view label, size_t clkf, const sptr_t<ASpace>& mmap)
-    : Mos6502{TYPE, label, {}},
+    : Mos6502{TYPE, label, mmap},
       _apu{*this, clkf / CPU_DIVIDER}
 {
-    RP2A03::init(mmap);
+    decimal_enable(false);
 }
 
 RP2A03::~RP2A03()
@@ -60,16 +60,20 @@ void RP2A03::bpadd(addr_t addr, const BreakpointCb& cb, void* arg)
     Mos6502::bpadd(addr, *reinterpret_cast<const Mos6502::BreakpointCb*>(&cb), arg);
 }
 
-void RP2A03::init(const sptr_t<ASpace>& mmap)
-{
-    Mos6502::init(mmap);    /* CPU reset done here */
-    decimal_enable(false);
-}
-
 void RP2A03::reset()
 {
     Mos6502::reset();
+    decimal_enable(false);
     _regs.S -= 3;
+
+    _oamdma_addr = 0;
+    _oamdma_size = 0;
+    _oamdma_data = 0;
+    _oamdma_loaded = 0;
+
+    _apu.reset();
+    rdy_pin(0);
+
     write(SND_CHN, 0);
     write(PORT2_FRAMECNT, 0);   /* Enable frame counter IRQ */
 }

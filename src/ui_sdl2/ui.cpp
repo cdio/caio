@@ -25,6 +25,7 @@
 #include <ctime>
 #include <iostream>
 #include <memory>
+#include <thread>
 
 #include <SDL_image.h>
 #include <SDL_ttf.h>
@@ -213,8 +214,9 @@ UI::~UI()
 {
     stop();
 
-    //XXX FIXME stop does not mean that we can destroy the elements below
-    //          we need to make sure the main loop is ended before doing that.
+    while (_running) {
+        std::this_thread::yield();
+    }
 
     _panel = {};
 
@@ -439,7 +441,7 @@ void UI::create_panel()
      * Enable/Disable Keybaord widget.
      */
     const auto kbd_status = [this]() {
-        return widget::Keyboard::Status{ .is_enabled = _kbd->is_enabled()};
+        return widget::Keyboard::Status{.is_enabled = _kbd->is_enabled()};
     };
 
     const auto kbd_toggle = [this]() {
@@ -472,6 +474,8 @@ void UI::toggle_panel_visibility()
 
 void UI::run()
 {
+    _running = true;
+
     auto old_handler = std::signal(SIGINT, signal_handler);
     if (old_handler == SIG_ERR) {
         throw UIError{"Can't set SIGINT handler: {}", Error::to_string()};
@@ -494,6 +498,8 @@ void UI::run()
     std::signal(SIGINT, old_handler);
     std::signal(SIGSEGV, old_handler);
     std::signal(SIGABRT, old_handler);
+
+    _running = false;
 }
 
 void UI::event_loop()

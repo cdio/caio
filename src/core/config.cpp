@@ -19,6 +19,7 @@
 #include "config.hpp"
 
 #include <cstdlib>
+#include <fstream>
 
 #include "fs.hpp"
 #include "logger.hpp"
@@ -353,6 +354,15 @@ std::string Config::to_string() const
         keyboard::to_string(vjoy.start),
         screenshotdir,
         statusbar);
+}
+
+fs::Path storage_path()
+{
+    static fs::Path dir{};
+    if (dir.empty()) {
+        dir = fs::fix_home(D_HOMECONFDIR);
+    }
+    return dir;
 }
 
 }

@@ -262,19 +262,19 @@ void C64::attach_prg()
 
 void C64::create_devices()
 {
-    _ram = std::make_shared<RAM>(RAM_SIZE, RAM_INIT_PATTERN1, RAM::PUT_RANDOM_VALUES, "RAM");
-    _basic = std::make_shared<ROM>(rompath(BASIC_FNAME), BASIC_DIGEST, "BASIC");
-    _kernal = std::make_shared<ROM>(rompath(KERNAL_FNAME), KERNAL_DIGEST,  "KERNAL");
-    _chargen = std::make_shared<ROM>(rompath(CHARGEN_FNAME), CHARGEN_DIGEST, "CHARGEN");
-    _vram = std::make_shared<NibbleRAM>(VRAM_SIZE, "VRAM");
-    _sid = std::make_shared<Mos6581>("SID", CLOCK_FREQ);
-    _cia1 = std::make_shared<Mos6526>("CIA1");
-    _cia2 = std::make_shared<Mos6526>("CIA2");
-    _bus = std::make_shared<cbm_bus::Bus>("BUS");
+    _ram = std::make_shared<RAM>("ram", RAM_SIZE, RAM_INIT_PATTERN1, RAM::PUT_RANDOM_VALUES);
+    _basic = std::make_shared<ROM>("basic", rompath(BASIC_FNAME), BASIC_DIGEST);
+    _kernal = std::make_shared<ROM>("kernal", rompath(KERNAL_FNAME), KERNAL_DIGEST);
+    _chargen = std::make_shared<ROM>("chargen", rompath(CHARGEN_FNAME), CHARGEN_DIGEST);
+    _vram = std::make_shared<NibbleRAM>("vram", VRAM_SIZE);
+    _sid = std::make_shared<Mos6581>("sid", CLOCK_FREQ);
+    _cia1 = std::make_shared<Mos6526>("cia1");
+    _cia2 = std::make_shared<Mos6526>("cia2");
+    _bus = std::make_shared<cbm_bus::Bus>("bus");
     _busdev = std::make_shared<C64BusController>(_bus, _cia2);
 
     auto vic2_mmap = std::make_shared<Vic2ASpace>(_cia2, _ram, _chargen);
-    _vic2 = std::make_shared<Mos6569>("VIC2", vic2_mmap, _vram);
+    _vic2 = std::make_shared<Mos6569>("vic2", vic2_mmap, _vram);
 
     _ioexp = attach_cartridge();
     _io = std::make_shared<C64IO>(_vic2, _sid, _vram, _cia1, _cia2, _ioexp);
@@ -282,7 +282,7 @@ void C64::create_devices()
     _pla = std::make_shared<PLA>(_ram, _basic, _kernal, _chargen, _io);
     _cpu = std::make_shared<Mos6510>(_pla);
 
-    _clk = std::make_shared<Clock>("CLK", CLOCK_FREQ, _conf.delay);
+    _clk = std::make_shared<Clock>("clk", CLOCK_FREQ, _conf.delay);
 
     auto unit8 = fs::fix_home(_conf.unit8);
     if (!unit8.empty()) {
@@ -294,9 +294,9 @@ void C64::create_devices()
         _unit9 = c1541::instance(unit9, 9, _bus);
     }
 
-    _kbd  = std::make_shared<C64Keyboard>("KBD", _conf.keyboard);
-    _joy1 = std::make_shared<Joystick>(joystick_port, "JOY1");
-    _joy2 = std::make_shared<Joystick>(joystick_port, "JOY2");
+    _kbd  = std::make_shared<C64Keyboard>(_conf.keyboard);
+    _joy1 = std::make_shared<Joystick>("joy1", joystick_port);
+    _joy2 = std::make_shared<Joystick>("joy2", joystick_port);
 
     if (_conf.vjoy.enabled) {
         _kbd->vjoystick(_conf.vjoy, _joy1);
@@ -470,9 +470,9 @@ void C64::create_ui()
     ui::Config uiconf {
         .audio = {
             .enabled        = _conf.audio,
-            .srate          = mos_6581::SAMPLING_RATE,
-            .channels       = mos_6581::CHANNELS,
-            .samples        = mos_6581::SAMPLES
+            .srate          = mos::mos_6581::SAMPLING_RATE,
+            .channels       = mos::mos_6581::CHANNELS,
+            .samples        = mos::mos_6581::SAMPLES
         },
         .video = {
             .title          = title,

@@ -46,6 +46,23 @@ struct Port {
 };
 
 /**
+ * Get the offset of a port member given its name.
+ * @param name Name of the port member.
+ * @return The offset to the member within the port structure;
+ * -1 if the name does not correespond to a port member.
+ * @see Port
+ */
+ssize_t port_name_to_offset(std::string_view name);
+
+/**
+ * Get the name of a port member given its offset.
+ * @param offset Offset to the member.
+ * @return The name of the member if the offset is valid; otherwise an empty string.
+ * @see Port
+ */
+std::string port_offset_to_string(ssize_t offset);
+
+/**
  * Joystick interface.
  * Interface between a physical gamepad connected to the
  * host platform and a joystick as the emulated system sees it.

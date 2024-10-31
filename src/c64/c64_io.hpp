@@ -94,17 +94,17 @@ public:
     /**
      * @see Device::dev_read()
      */
-    uint8_t dev_read(addr_t addr, ReadMode mode = ReadMode::Read) override;
+    uint8_t dev_read(size_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
      * @see Device::dev_write()
      */
-    void dev_write(addr_t addr, uint8_t data) override;
+    void dev_write(size_t addr, uint8_t data) override;
 
     /**
      * @see Device::dump();
      */
-    std::ostream& dump(std::ostream& os, addr_t base = 0) const override;
+    std::ostream& dump(std::ostream& os, size_t base = 0) const override;
 
 private:
     devptr_t _vic2{};

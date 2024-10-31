@@ -50,6 +50,9 @@ debug:
 	${MAKE} ${MAKEARGS} DEBUG=yes all
 
 build: ${DST_LNDIRS} ${DST_MAKEFILE} ${DST_VERSION}
+ifeq (${OS}, Darwin)	# Remove Apple junk
+	-xattr -rc * 2> /dev/null
+endif
 
 ${DST_MAKEFILE}:
 	${LN} ${LN_FLAGS} ${ROOT}/mk/root.mk $@

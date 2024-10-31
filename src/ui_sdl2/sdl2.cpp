@@ -133,7 +133,9 @@ static std::map<::SDL_Scancode, keyboard::Key> sdl_to_key{
 
     { SDL_SCANCODE_RCTRL,           keyboard::KEY_RIGHT_CTRL        },
     { SDL_SCANCODE_RSHIFT,          keyboard::KEY_RIGHT_SHIFT       },
-    { SDL_SCANCODE_RALT,            keyboard::KEY_RIGHT_ALT         }
+    { SDL_SCANCODE_RALT,            keyboard::KEY_RIGHT_ALT         },
+    { SDL_SCANCODE_LGUI,            keyboard::KEY_LEFT_COMMAND      },
+    { SDL_SCANCODE_RGUI,            keyboard::KEY_RIGHT_COMMAND     }
 
 #if 0
     SDL_SCANCODE_NONUSHASH = 50,    // ISO USB keyboards actually use this code instead of 49 for the same key
@@ -141,9 +143,6 @@ static std::map<::SDL_Scancode, keyboard::Key> sdl_to_key{
     SDL_SCANCODE_CAPSLOCK = 57,
     SDL_SCANCODE_INSERT = 73,       // Insert on PC, help on some Mac keyboards (but does send code 73, not 117)
     SDL_SCANCODE_NUMLOCKCLEAR = 83, // Num lock on PC, clear on Mac keyboards
-
-    SDL_SCANCODE_LGUI = 227,        // Windows, command (apple), meta
-    SDL_SCANCODE_RGUI = 231,        // Windows, command (apple), meta
 #endif
 };
 

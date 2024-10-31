@@ -22,7 +22,6 @@
 #include <cstdio>
 #include <cstdint>
 #include <format>
-#include <fstream>
 #include <map>
 #include <string>
 #include <string_view>
@@ -69,6 +68,8 @@ public:
 
     Logger();
 
+    virtual ~Logger();
+
     bool is_level(Level lv) const {
         return (_lv & lv);
     }
@@ -100,6 +101,8 @@ public:
     }
 
     void logfile(const fs::Path& fname);
+
+    void logfile(int fd);
 
     std::string logfile() const {
         return _logfile;
@@ -165,7 +168,7 @@ public:
 
 private:
     Level         _lv;
-    std::ofstream _os;
+    int           _fd{-1};
     std::string   _logfile{};
 
     static std::map<std::string, Logger::Level> loglevels;

@@ -13,8 +13,8 @@ file browser. When launched, a configurator GUI appears:
 <img src="../images/caio-gui.jpg" width="640" title="caio configurator">
 </p>
 
-The upper left corner contains buttons `Add`, `Delete`, `Rename` and `Run`,
-these are used to add, delete, rename, and run machine configurations
+The upper left corner contains buttons `Add`, `'Rename', Delete`, and `Run`,
+these are used to add, rename, delete, and run machine configurations
 respectively.
 
 The left pane below the buttons contains a selectable a list of machines
@@ -39,6 +39,7 @@ $ caio --help
 usage: caio <arch> [--help]
 where arch is one of:
 c64
+nes
 zx80
 zxspectrum
 ```
@@ -279,6 +280,94 @@ $ caio c64 --scale 3 /games/c64/ghostbusters.crt
 <hr>
 </details>
 <details>
+<summary>NES (Nintendo Entertainment System)</summary>
+
+### NES (Nintendo Entertainment System)
+
+```
+$ caio nes --help
+usage: nes <options> [<file>]
+where <file> is the name of a program, cartridge or
+snapshot to launch (the file format is auto-detected)
+and <options> are:
+ ...
+NES (Nintendo Entertainment System) specific:
+ --ntsc [yes|no]         Use the resolution of an old NTSC TV set
+                         (default is yes)
+ --swapj [yes|no]        Swap Joysticks (default is no)
+ --button-up <bt>        Map the controller UP button to a gamepad button
+                         (default is UP)
+ --button-down <bt>      Map the controller DOWN button to a gamepad button
+                         (default is DOWN)
+ --button-left <bt>      Map the controller LEFT button to a gamepad button
+                         (default is LEFT)
+ --button-right <bt>     Map the controller RIGHT button to a gamepad button
+                         (default is RIGHT)
+ --button-a <bt>         Map the controller A button to a gamepad button
+                         (default is A)
+ --button-b <bt>         Map the controller B button to a gamepad button
+                         (default is B)
+ --button-select <bt>    Map the controller SELECT button to a gamepad button
+                         (default is GUIDE)
+ --button-start <bt>     Map the controller START button to a gamepad button
+                         (default is START)
+ where <bt> is one of:
+ UP, DOWN, LEFT, RIGHT, FIRE, A, B, X, Y, START, BACK, GUIDE
+```
+
+#### Keyboard layout
+
+NES Family BASIC keyboard layout:
+
+<p align="center">
+<a href="https://www.nesdev.org/wiki/File:Family_keyboard.svg">
+<img src="../images/nes_1572px-Family_keyboard.svg.png" width="430">
+</a>
+</p>
+
+The default key mappings is positional, with the exception of the following
+keys:
+```
+ NES Keyboard    PC Keyboard
+-----------------------------------
+ STOP            BACKSLASH \
+ CTR             TAB
+ ]               ALTGR ;
+ KANA            ALTGR '
+ _               ALTGR+SHIFT /
+ GRPH            Left CTRL
+ YEN             ` (GRAVE ACCENT)
+```
+
+#### Joysticks
+
+Both standard NES controller ports are supported. If the virtual joystick
+is enabled, the first port is assigned to it and the second port is assigned
+to an eventual gamepad. This default can be reverted using the `swapj`
+option or the `ALT-J` key combination.
+
+#### Examples
+
+The following command scales up the emulated screen resolution 3 times
+(that is, a 256x224 screen is scaled up to 768x672), loads and launches
+the cartridge named *Super Mario Bros.*
+
+```
+$ caio nes --scanlines n --scale 3 --cart /games/nes/super_mario_bros.nes
+```
+
+The next command activates the advanced horizontal scanlines visual effect
+(note the captial H), in this mode the specified scale factor is doubled
+(that is, a 256x224 screen is scaled up to 1024x896), loads and launches the
+cartridge named *Castelvania*:
+
+```
+$ caio nes --scanlines H --scale 2 --cart /games/nes/castelvania.nes
+```
+
+<hr>
+</details>
+<details>
 <summary>Sinclair ZX-80</summary>
 
 ### Sinclair ZX-80
@@ -488,7 +577,7 @@ The following key combinations are accepted:
 * `ALT-F` toggles between *windowed* and *fullscreen* modes.
 * `PAUSE` or `ALT-P` toggles between *pause* and *running* modes.
 * `ALT-J` swaps joysticks #1 and #2.
-* `ALT-K` toggles the status of the keyboard (active/inactive).
+* `ALT-K` toggles the status of the emulated keyboard (active/inactive).
 * `ALT-V` toggles the visibility of the info panel.
 * `ALT-SHIFT-S` takes a screenshot.
 * `CTRL-C` on the terminal enters the CPU monitor (if the monitor is not

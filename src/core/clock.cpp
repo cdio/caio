@@ -76,6 +76,8 @@ void Clock::run()
     ssize_t sched_cycle = 0;
     int64_t start = utils::now();
 
+    _stop = false;
+
     while (!_stop)  {
         while (_suspend && !_stop) {
             /*
@@ -102,9 +104,9 @@ void Clock::run()
              * Calculate the time required for the host system
              * to execute sync_cycles emulated clock cycles.
              */
-            int64_t end = utils::now();
-            int64_t elapsed = end - start;
-            int64_t wait_time = SYNC_TIME - elapsed;
+            const int64_t end = utils::now();
+            const int64_t elapsed = end - start;
+            const int64_t wait_time = SYNC_TIME - elapsed;
             if (wait_time < 0) {
                 /*
                  * Slow host system.
@@ -127,9 +129,9 @@ void Clock::run()
              * Adjust for this situation.
              */
             start = utils::now();
-            ssize_t delayed_cycles = cycles((start - end) / (_delay * 1000000.0f));
-            ssize_t wait_cycles = cycles(wait_time / 1000000.0f);
-            ssize_t extra_cycles = delayed_cycles - wait_cycles;
+            const ssize_t delayed_cycles = cycles((start - end) / (_delay * 1000000.0f));
+            const ssize_t wait_cycles = cycles(wait_time / 1000000.0f);
+            const ssize_t extra_cycles = delayed_cycles - wait_cycles;
             sched_cycle = -extra_cycles;
         }
     }

@@ -145,7 +145,6 @@ private:
     ssize_t             _centry{};              /* Selected configuration                   */
     uint64_t            _last_update{};         /* List of configurations last update time  */
     LoadedConfigMap     _loaded_configs{};      /* Loaded configurations                    */
-
     ssize_t             _add_centry{};          /* Add config entry to copy from            */
     std::string         _add_cname{};           /* Add config name                          */
     std::string         _rename_cname{};        /* Rename config name                       */
@@ -153,8 +152,7 @@ private:
     std::string         _error_title{};         /* Error message title                      */
     std::string         _error_message{};       /* Error message                            */
     Size                _selector_pane_size{};  /* Size of the selector pane                */
-
-    int                 _child_pipe[2]{-1, -1}; /* Error messages from child processes      */
+    int                 _child_pipe[2]{-1, -1}; /* Messages from child processes            */
 };
 
 }

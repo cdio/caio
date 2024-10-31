@@ -44,6 +44,9 @@ RAM::RAM(std::string_view label, std::istream& is, size_t count)
     : Device{TYPE, label},
       _data{fs::load(is, count)}
 {
+    if (_data.size() != count) {
+        throw IOError{"Unexpected EOF: Read bytes: {}, required: {}", _data.size(), count};
+    }
 }
 
 RAM::RAM(RAM&& other)
@@ -64,17 +67,17 @@ RAM& RAM::operator=(RAM&& other)
     return *this;
 }
 
-uint8_t RAM::dev_read(addr_t addr, ReadMode)
+uint8_t RAM::dev_read(size_t addr, ReadMode)
 {
     return _data[addr];
 }
 
-void RAM::dev_write(addr_t addr, uint8_t data)
+void RAM::dev_write(size_t addr, uint8_t data)
 {
     _data[addr] = data;
 }
 
-std::ostream& RAM::dump(std::ostream& os, addr_t base) const
+std::ostream& RAM::dump(std::ostream& os, size_t base) const
 {
     return utils::dump(os, _data, base);
 }

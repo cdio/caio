@@ -85,11 +85,11 @@ void CartZaxxon::reset()
             /*
              * Create a mirrored 8K ROM.
              */
-            auto ram = std::make_shared<RAM>(2 * rom->size(), rom->label());
+            auto ram = std::make_shared<RAM>(rom->label(), 2 * rom->size());
             std::copy_n(static_pointer_cast<ROM>(rom)->begin(), rom->size(), ram->begin());
             std::copy_n(ram->begin(), rom->size(), ram->begin() + rom->size());
             _roml = static_pointer_cast<ROM>(ram);
-            _roml->read_observer([this](addr_t addr, ReadMode mode) { roml_read_observer(addr, mode); });
+            _roml->read_observer([this](size_t addr, ReadMode mode) { roml_read_observer(addr, mode); });
 
         } else if (chip.addr == ROMH_BASE_ADDR) {
             /*
@@ -115,16 +115,16 @@ void CartZaxxon::reset()
     propagate(true);    /* Force propagation of mode */
 }
 
-uint8_t CartZaxxon::dev_read(addr_t, ReadMode)
+uint8_t CartZaxxon::dev_read(size_t, ReadMode)
 {
     return 255;
 }
 
-void CartZaxxon::dev_write(addr_t, uint8_t)
+void CartZaxxon::dev_write(size_t, uint8_t)
 {
 }
 
-void CartZaxxon::roml_read_observer(addr_t addr, ReadMode mode)
+void CartZaxxon::roml_read_observer(size_t addr, ReadMode mode)
 {
     /*
      * Bank selection:

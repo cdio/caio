@@ -221,11 +221,20 @@ ZX80Keyboard::MatrixKey ZX80Keyboard::to_zx80(const std::string& name)
     return (it == name_to_zx80.end() ? MatrixKey::KEY_NONE : it->second);
 }
 
-ZX80Keyboard::ZX80Keyboard(const std::string& label, bool enabled)
+ZX80Keyboard::ZX80Keyboard(bool enabled)
+    : ZX80Keyboard{LABEL, enabled}
+{
+}
+
+ZX80Keyboard::ZX80Keyboard(std::string_view label, bool enabled)
     : Keyboard{label, enabled},
       _key_to_zx80{default_key_to_zx80}
 {
     _matrix.fill(0);
+}
+
+ZX80Keyboard::~ZX80Keyboard()
+{
 }
 
 void ZX80Keyboard::reset()

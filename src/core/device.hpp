@@ -43,20 +43,20 @@ public:
         Read        /**< A read operation could change the internal state of the device.    */
     };
 
-    using ReadObserverCb  = std::function<void(addr_t, ReadMode)>;
-    using WriteObserverCb = std::function<void(addr_t, uint8_t)>;
+    using ReadObserverCb  = std::function<void(size_t, ReadMode)>;
+    using WriteObserverCb = std::function<void(size_t, uint8_t)>;
 
     /**
      * Set a device read observer.
      * @param cb Observer callback.
-     * @see read(addr_t, ReadMode)
+     * @see read(size_t, ReadMode)
      */
     void read_observer(const ReadObserverCb& cb);
 
     /**
      * Set a device write observer.
      * @param cb Observer callback.
-     * @see write(addr_t, uint8_t)
+     * @see write(size_t, uint8_t)
      */
     void write_observer(const WriteObserverCb& cb);
 
@@ -73,17 +73,17 @@ public:
      * @param addr Address to read from;
      * @param mode Read mode (default is ReadMode::Read).
      * @return The data stored at the specified address.
-     * @see dev_read(addr_t, ReadMode mode)
+     * @see dev_read(size_t, ReadMode mode)
      * @see ReadMode
      */
-    uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read);
+    uint8_t read(size_t addr, ReadMode mode = ReadMode::Read);
 
     /**
      * Read from an address or register without changing the device's internal state.
      * @param addr Address to read from;
      * @return The data stored at the specified address.
      */
-    uint8_t peek(addr_t addr) const {
+    uint8_t peek(size_t addr) const {
         return const_cast<Device*>(this)->read(addr, ReadMode::Peek);
     }
 
@@ -93,9 +93,9 @@ public:
      * the actual device write operation through dev_write().
      * @param addr Address to write to;
      * @param data Data to write.
-     * @see dev_write(addr_t, uint8_t)
+     * @see dev_write(size_t, uint8_t)
      */
-    void write(addr_t addr, uint8_t data);
+    void write(size_t addr, uint8_t data);
 
     /**
      * Reset this device.
@@ -114,7 +114,7 @@ public:
      * @param base Base address.
      * @return The output stream.
      */
-    virtual std::ostream& dump(std::ostream& os, addr_t base = 0) const;
+    virtual std::ostream& dump(std::ostream& os, size_t base = 0) const;
 
 protected:
     Device(std::string_view type, std::string_view label)
@@ -131,14 +131,14 @@ protected:
      * @return The data stored at the specified address.
      * @see ReadMode
      */
-    virtual uint8_t dev_read(addr_t addr, ReadMode mode = ReadMode::Read) = 0;
+    virtual uint8_t dev_read(size_t addr, ReadMode mode = ReadMode::Read) = 0;
 
     /**
      * Write a device address or register.
      * @param addr Address to write to;
      * @param data Data to write.
      */
-    virtual void dev_write(addr_t addr, uint8_t data) = 0;
+    virtual void dev_write(size_t addr, uint8_t data) = 0;
 
     ReadObserverCb  _read_cb{};
     WriteObserverCb _write_cb{};

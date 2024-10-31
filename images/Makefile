@@ -21,8 +21,6 @@ ROOT=		${abspath ..}
 include ${ROOT}/mk/config.mk
 
 IMAGES=		c64-basic.gif \
-		c64-giana.gif \
-		c64-gyruss.gif \
 		c64-q-bert.gif \
 		c64-turrican.gif \
 		c64-uridium.gif \
@@ -38,7 +36,8 @@ IMAGES=		c64-basic.gif \
 		zxspectrum-48k-starquake.gif
 
 # External
-IMAGES+=	640px-ZXSpectrum48k.jpg
+IMAGES+=	640px-ZXSpectrum48k.jpg \
+		nes_1572px-Family_keyboard.svg.png
 
 README=		${ROOT}/README.md
 

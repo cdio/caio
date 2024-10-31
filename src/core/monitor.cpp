@@ -171,6 +171,7 @@ Monitor::Monitor(int ifd, int ofd, MonitoredCPU&& cpu)
     : _rd{ifd, ofd},
       _cpu{cpu}
 {
+    _cpu.logfile(ofd);
 }
 
 bool Monitor::run()

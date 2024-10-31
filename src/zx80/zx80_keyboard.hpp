@@ -23,6 +23,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
@@ -168,12 +169,19 @@ public:
      * Initialise this keyboard.
      * @param label   Label assigned to this keyboard;
      * @param enabled Enable/disable keyboard.
+     * @see ZX80Keyboard(std::string_view, bool enabled)
+     */
+    ZX80Keyboard(bool enabled = true);
+
+    /**
+     * Initialise this keyboard.
+     * @param label   Label assigned to this keyboard;
+     * @param enabled Enable/disable keyboard.
      * @see Keyboard::enable(bool)
      */
-    ZX80Keyboard(const std::string& label, bool enabled);
+    ZX80Keyboard(std::string_view label, bool enabled = true);
 
-    virtual ~ZX80Keyboard() {
-    }
+    virtual ~ZX80Keyboard();
 
     /**
      * @see Keyboard::reset()

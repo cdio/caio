@@ -30,6 +30,7 @@
 #include "version.hpp"
 
 #include "c64.hpp"
+#include "nes.hpp"
 #include "zx80.hpp"
 #include "zxsp.hpp"
 
@@ -37,8 +38,10 @@
 
 using namespace caio;
 
+static const char* progname;
+
 template<class MACHINE, class CMDLINE>
-[[noreturn]] void machine_main(int argc, const char** argv)
+int machine_main(int argc, const char** argv)
 {
     try {
         CMDLINE cmdline{};
@@ -49,20 +52,20 @@ template<class MACHINE, class CMDLINE>
 
         MACHINE machine{sec};
         machine.run(pname);
-
-        std::exit(EXIT_SUCCESS);
+        return 0;
 
     } catch (const std::exception& err) {
         std::cerr << MACHINE::name() << ": Error: " << err.what() << "\n";
     }
 
-    std::exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
 }
 
 #define MACHINE_ENTRY(name, nm, type)         { name, machine_main<nm::type, nm::type ## Cmdline> }
 
-static std::map<std::string, std::function<void(int, const char**)>> machines = {
+static std::map<std::string, std::function<int(int, const char**)>> machines = {
     MACHINE_ENTRY("c64",        commodore::c64,         C64),
+    MACHINE_ENTRY("nes",        nintendo::nes,          NES),
     MACHINE_ENTRY("zx80",       sinclair::zx80,         ZX80),
     MACHINE_ENTRY("zxspectrum", sinclair::zxspectrum,   ZXSpectrum)
 };
@@ -74,7 +77,7 @@ static void terminate()
     std::exit(EXIT_FAILURE);
 }
 
-static void usage(std::string_view progname)
+static void usage()
 {
     std::cerr << "usage: " << progname << " <arch> [--help]\n"
                  "where arch is one of:\n";
@@ -106,6 +109,7 @@ int main(int argc, const char** argv)
         return gui.run();
     };
 
+    progname = argv[0];
     std::set_terminate(terminate);
 
     if (argc == 1) {
@@ -123,7 +127,7 @@ int main(int argc, const char** argv)
     }
 
     if (name == "" || name == "--help" || name == "-h" || name == "-?") {
-        usage(argv[0]);
+        usage();
         std::exit(EXIT_FAILURE);
     }
 
@@ -138,8 +142,7 @@ int main(int argc, const char** argv)
 
     auto it = machines.find(name);
     if (it != machines.end()) {
-        it->second(argc, argv);
-        /* NOTREACHED */
+        return it->second(argc, argv);
     }
 
     std::cerr << "Unknown emulator: " << name << "\n";

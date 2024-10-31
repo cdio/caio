@@ -192,17 +192,17 @@ void ZX80::attach_prg()
 void ZX80::create_devices()
 {
     _ram = (_conf.ram16 ?
-        std::make_shared<RAM>(EXTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES, "RAM16") :
-        std::make_shared<RAM>(INTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES, "RAM1"));
+        std::make_shared<RAM>("ram16", EXTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES) :
+        std::make_shared<RAM>("ram1", INTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES));
 
     _rom = (_conf.rom8 ?
-        std::make_shared<ROM>(rompath(ROM8_FNAME), ROM8_DIGEST, "ROM8") :
-        std::make_shared<ROM>(rompath(ROM_FNAME), ROM_DIGEST, "ROM4"));
+        std::make_shared<ROM>("rom8", rompath(ROM8_FNAME), ROM8_DIGEST) :
+        std::make_shared<ROM>("rom4", rompath(ROM_FNAME), ROM_DIGEST));
 
-    _clk   = std::make_shared<Clock>("CLK", CLOCK_FREQ, _conf.delay);
-    _cpu   = std::make_shared<Z80>(Z80::TYPE, "CPU");
-    _video = std::make_shared<ZX80Video>(_clk, _conf.rvideo, "VID");
-    _kbd   = std::make_shared<ZX80Keyboard>("KBD", _conf.keyboard);
+    _clk   = std::make_shared<Clock>("clk", CLOCK_FREQ, _conf.delay);
+    _cpu   = std::make_shared<Z80>();
+    _video = std::make_shared<ZX80Video>("vid", _clk, _conf.rvideo);
+    _kbd   = std::make_shared<ZX80Keyboard>(_conf.keyboard);
 
     _cass = (_conf.rom8 ?
         std::make_shared<ZX80CassetteP>(_clk, _conf.cassdir) :

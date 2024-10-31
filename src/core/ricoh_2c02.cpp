@@ -38,12 +38,14 @@ RgbaTable RP2C02::builtin_palette{
     0xE6E397FF, 0xD1EE97FF, 0xBFF3A9FF, 0xB5F2C9FF, 0xB5EBEEFF, 0xB8B8B8FF, 0x000000FF, 0x000000FF
 };
 
-RP2C02::RP2C02(std::string_view label, const sptr_t<ASpace>& mmap)
+RP2C02::RP2C02(std::string_view label, const sptr_t<ASpace>& mmap, bool ntsc)
     : Device{TYPE, label},
       Clockable{},
       _mmap{mmap},
       _scanline(WIDTH),
-      _palette{builtin_palette}
+      _palette{builtin_palette},
+      _visible_y_start{VISIBLE_Y_START + ntsc * 8},
+      _visible_y_end{VISIBLE_Y_END - ntsc * 8}
 {
 }
 
@@ -81,16 +83,14 @@ bool RP2C02::sync_pin(bool active)
 
 void RP2C02::reset()
 {
-    /* Device::reset() */
 }
 
 size_t RP2C02::size() const
 {
-    /* Device::size() */
     return MMIO_Registers::REGMAX;
 }
 
-uint8_t RP2C02::dev_read(addr_t addr, Device::ReadMode mode)
+uint8_t RP2C02::dev_read(size_t addr, Device::ReadMode mode)
 {
     uint8_t data{};
 
@@ -172,7 +172,7 @@ uint8_t RP2C02::dev_read(addr_t addr, Device::ReadMode mode)
     return _last_mmio_write;
 }
 
-void RP2C02::dev_write(addr_t addr, uint8_t value)
+void RP2C02::dev_write(size_t addr, uint8_t value)
 {
     addr &= REGMASK;
 
@@ -383,7 +383,7 @@ size_t RP2C02::tick(const Clock& clk)
 {
     if (_sync_pin) {
         /*
-         * Vidoe output disabled.
+         * Video output disabled.
          */
         return 1;
     }
@@ -597,7 +597,7 @@ size_t RP2C02::tick(const Clock& clk)
              */
             if (_rasterline < VISIBLE_Y_END - 1) {
                 const unsigned nextline = _rasterline + 1;
-                for (auto spindex = 0; spindex < SPRITES; ++spindex) {
+                for (size_t spindex = 0; spindex < SPRITES; ++spindex) {
                     _sp_overflow = sprite_evaluation(spindex, nextline);
                     if (_sp_overflow) {
                         break;
@@ -630,8 +630,8 @@ size_t RP2C02::tick(const Clock& clk)
 
 inline void RP2C02::render_line()
 {
-    if (!_vblank && _rasterline >= VISIBLE_Y_START && _rasterline < VISIBLE_Y_END && _render_line) {
-        _render_line(_rasterline - VISIBLE_Y_START, _scanline);
+    if (!_vblank && _rasterline >= _visible_y_start && _rasterline < _visible_y_end && _render_line) {
+        _render_line(_rasterline - _visible_y_start, _scanline);
     }
 
     std::fill(_scanline.begin(), _scanline.end(), backdrop_color());
@@ -739,7 +739,7 @@ inline void RP2C02::fetch_bg_pattern(TileData& tile, bool plane)
 
 bool RP2C02::sprite_evaluation(uint8_t spindex, unsigned line)
 {
-    /* XXX TODO sprite overflow bug */
+    /* XXX TODO implement the sprite overflow bug */
     if (_oam_sec_count < SEC_SPRITES) {
         const Oam sprite = *reinterpret_cast<Oam*>(&_oam[spindex * sizeof(Oam)]);
         const unsigned height = 8 + 8 * _sp_8x16;
@@ -915,7 +915,7 @@ void RP2C02::paint_sprite(uint8_t spindex)
 
 void RP2C02::paint_sprites()
 {
-    for (auto sp = 0; sp < _oam_sec_count; ++sp) {
+    for (size_t sp = 0; sp < _oam_sec_count; ++sp) {
         paint_sprite(sp);
     }
 }

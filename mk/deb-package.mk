@@ -70,6 +70,7 @@ install: all
 	PREFIX=${FAKE_PREFIX} \
 	VERSION=${VERSION} \
 	${MAKE} ${MAKEARGS} $@
+	mv ${FAKE_PREFIX}/etc ${FAKE_INSTALL_DIR}
 
 all:
 	EXTRA_CPPFLAGS='${EXTRA_CPPFLAGS} -DD_SYSCONFDIR=\"/etc/caio\"' \

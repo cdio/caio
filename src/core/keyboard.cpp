@@ -142,7 +142,8 @@ static std::map<std::string, Key> name_to_key{
     KEY_ENTRY(KEY_RIGHT_CTRL),
     KEY_ENTRY(KEY_LEFT_ALT),
     KEY_ENTRY(KEY_RIGHT_ALT),
-    KEY_ENTRY(KEY_FN)
+    KEY_ENTRY(KEY_LEFT_COMMAND),
+    KEY_ENTRY(KEY_RIGHT_COMMAND)
 };
 
 Key to_key(const std::string& name)

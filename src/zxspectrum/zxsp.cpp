@@ -194,11 +194,11 @@ void ZXSpectrum::attach_prg()
 void ZXSpectrum::create_devices()
 {
     _clk  = std::make_shared<Clock>("clk", CLOCK_FREQ, _conf.delay);
-    _cpu  = std::make_shared<Z80>(Z80::TYPE, "cpu");
-    _ram  = std::make_shared<RAM>(RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES, "ram");
-    _rom  = std::make_shared<ROM>(rompath(ROM_FNAME), ROM_DIGEST, "rom");
-    _kbd  = std::make_shared<ZXSpectrumKeyboard>("kbd", _conf.keyboard);
-    _joy  = std::make_shared<Joystick>(kempston::joystick_port, "kempston");
+    _cpu  = std::make_shared<Z80>();
+    _ram  = std::make_shared<RAM>("ram", RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES);
+    _rom  = std::make_shared<ROM>("rom", rompath(ROM_FNAME), ROM_DIGEST);
+    _kbd  = std::make_shared<ZXSpectrumKeyboard>(_conf.keyboard);
+    _joy  = std::make_shared<Joystick>("kempston", kempston::joystick_port);
     _tape = std::make_shared<ZXSpectrumTape>(_clk, _conf.itape, _conf.otape, _conf.fastload);
     _ula  = std::make_shared<ULA>(_cpu, _ram, _rom, _kbd, _joy, _tape);
 

@@ -18,9 +18,12 @@
  */
 #include "logger.hpp"
 
+#include <fcntl.h>
+#include <unistd.h>
+
 #include <climits>
 #include <cstdlib>
-#include <iomanip>
+#include <cstring>
 #include <iterator>
 #include <regex>
 
@@ -62,7 +65,7 @@ Logger::Level Logger::parse_loglevel(std::string_view levels)
         Level l = Logger::to_loglevel(lstr);
         if (l == Level::Invalid) {
             /*
-             * Malformed levels string.
+             * Malformed level string.
              */
             throw LoggerError{"Invalid log level: \"{}\", complete log level argument: \"{}\"", lstr, levels};
         }
@@ -76,7 +79,41 @@ Logger::Level Logger::parse_loglevel(std::string_view levels)
 Logger::Logger()
     : _lv{Logger::parse_loglevel(DEFAULT_LOGLEVEL)}
 {
-    _os.open(DEFAULT_LOGFILE);
+    Logger::logfile(DEFAULT_LOGFILE);
+}
+
+Logger::~Logger()
+{
+    if (_fd >= 0) {
+        ::close(_fd);
+    }
+}
+
+void Logger::logfile(const fs::Path& fname)
+{
+    const int fd = ::open(fname.c_str(), O_WRONLY);
+    if (fd < 0) {
+        throw LoggerError{"Can't open logfile: {}: {}\n", fname.c_str(), Error::to_string()};
+    }
+
+    try {
+        logfile(fd);
+    } catch (const LoggerError& err) {
+        ::close(fd);
+        throw err;
+    }
+}
+
+void Logger::logfile(int fd)
+{
+    if (_fd >= 0) {
+        ::close(_fd);
+    }
+
+    _fd = ::dup(fd);
+    if (_fd < 0) {
+        throw LoggerError{"Can't duplicate file descriptor: {}", Error::to_string()};
+    }
 }
 
 void Logger::loglevel(std::string_view lvs)
@@ -84,24 +121,12 @@ void Logger::loglevel(std::string_view lvs)
     _lv = Logger::parse_loglevel(lvs);
 }
 
-void Logger::logfile(const fs::Path& fname)
-{
-    if (!fname.empty()) {
-        std::ofstream ofs{fname};
-        if (!ofs) {
-            throw LoggerError{"Can't open logfile: {}", fname.string()};
-        }
-
-        _logfile = fname;
-        _os = std::move(ofs);
-    }
-}
-
 Logger& Logger::log(std::string_view color, std::string_view fmt, std::format_args args)
 {
-    _os << color;
-    std::vformat_to(std::ostream_iterator<char>(_os), fmt, args);
-    (_os << ANSI_RESET).flush();
+    ::write(_fd, color.data(), color.size());
+    const auto msg = std::vformat(fmt, args);
+    ::write(_fd, msg.data(), msg.size());
+    ::write(_fd, ANSI_RESET, std::strlen(ANSI_RESET));
     return *this;
 }
 

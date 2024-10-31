@@ -634,7 +634,7 @@ void Mos6581::reset()
     _last_value   = 0;
 }
 
-uint8_t Mos6581::dev_read(addr_t addr, ReadMode)
+uint8_t Mos6581::dev_read(size_t addr, ReadMode)
 {
     switch (addr) {
     case ADC_1:
@@ -654,7 +654,7 @@ uint8_t Mos6581::dev_read(addr_t addr, ReadMode)
     return _last_value;
 }
 
-void Mos6581::dev_write(addr_t addr, uint8_t value)
+void Mos6581::dev_write(size_t addr, uint8_t value)
 {
     switch (addr) {
     case VOICE_1_FREQ_LO:
@@ -798,7 +798,7 @@ void Mos6581::dev_write(addr_t addr, uint8_t value)
     _last_value = value;
 }
 
-std::ostream& Mos6581::dump(std::ostream& os, addr_t base) const
+std::ostream& Mos6581::dump(std::ostream& os, size_t base) const
 {
     std::array<uint8_t, REGMAX> regs{};
     std::fill(regs.begin(), regs.end(), 255);

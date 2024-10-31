@@ -33,6 +33,7 @@ CXXSRCS=	aspace.cpp \
 		rom.cpp \
 		fs.cpp \
 		icon.cpp \
+		joystick.cpp \
 		keyboard.cpp \
 		logger.cpp \
 		monitor.cpp \
@@ -50,6 +51,7 @@ INCS=		aspace.hpp \
 		device.hpp \
 		device_none.hpp \
 		ram.hpp \
+		ram_bank.hpp \
 		rom.hpp \
 		dispatcher.hpp \
 		endian.hpp \

@@ -73,12 +73,12 @@ public:
     /**
      * @see Device::dev_read()
      */
-    uint8_t dev_read(addr_t addr, ReadMode mode = ReadMode::Read) override;
+    uint8_t dev_read(size_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
      * @see Device::dev_write()
      */
-    void dev_write(addr_t addr, uint8_t data) override;
+    void dev_write(size_t addr, uint8_t data) override;
 
     /**
      * @see Device::to_string()
@@ -101,7 +101,7 @@ public:
     void reset() override;
 
 private:
-    void roml_read_observer(addr_t addr, ReadMode mode);
+    void roml_read_observer(size_t addr, ReadMode mode);
 
     sptr_t<ROM>                         _roml{};
     size_t                              _bank{};

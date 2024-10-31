@@ -121,8 +121,8 @@ namespace rp2c02 {
  *     |                             PRE-RENDER                              |      | 1               |
  *     +---------------------------------------------------------------------+     -+-               -+-
  *
- * Most NTSC TV show only 256x224 instead of the 256x240 screen, clipping off the
- * upper 8 and bottom 8 lines.
+ * Most NTSC TV sets show only 256x224 instead of the 256x240 screen,
+ * clipping off the upper 8 and bottom 8 lines.
  *
  * ### Clock frequency and video signals:
  *
@@ -173,6 +173,7 @@ public:
     constexpr static const unsigned VBLANK_HEIGHT           = 20;
     constexpr static const unsigned WIDTH                   = VISIBLE_WIDTH;
     constexpr static const unsigned HEIGHT                  = VISIBLE_HEIGHT;
+    constexpr static const unsigned NTSC_HEIGHT             = VISIBLE_HEIGHT - 16;
     constexpr static const unsigned COLUMNS                 = 32;
     constexpr static const unsigned ROWS                    = 30;
 
@@ -289,15 +290,16 @@ public:
      */
     struct SpritePixel : TilePixel {
         uint8_t spindex{};          /* Sprite index (0-63)                  */
-        bool    bgpri{};            /* Background priority                  */
+        bool    bgpri{};            /* Background priority over sprites     */
     };
 
     /**
      * Initialise this PPU.
      * @param label PPU label;
-     * @param mmap  Memory mappings (PPU bus).
+     * @param mmap  Memory mappings (PPU bus);
+     * @param ntsc  Enable NTSC mode (224 lines instead of 240).
      */
-    RP2C02(std::string_view label, const sptr_t<ASpace>& mmap);
+    RP2C02(std::string_view label, const sptr_t<ASpace>& mmap, bool ntsc);
 
     virtual ~RP2C02();
 
@@ -352,12 +354,12 @@ private:
     /**
      * @see Device::dev_read()
      */
-    uint8_t dev_read(addr_t addr, ReadMode mode = ReadMode::Read) override;
+    uint8_t dev_read(size_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
      * @see Device::dev_write()
      */
-    void dev_write(addr_t addr, uint8_t data) override;
+    void dev_write(size_t addr, uint8_t data) override;
 
     /**
      * Set/clear the IRQ output pin.
@@ -500,16 +502,16 @@ private:
     Rgba palette_color(size_t rindex) const;
 
     /**
-     * Get backdrop (default) RGBA color.
+     * Get the backdrop (default) RGBA color.
      * @return The backdrop RGBA color.
      * @see _palette
      */
     Rgba backdrop_color() const;
 
     /**
-     * Detect a forced vblank condition.
-     * Forced vblank occurs then both sprites and background rendering are disabled.
-     * @return True if forced vblank is enabled; false otherwise.
+     * Detect a forced VBlank condition.
+     * Forced VBlank occurs when both sprites and background rendering are disabled.
+     * @return True if forced VBlank is enabled; false otherwise.
      */
     bool is_forced_vblank() const;
 
@@ -533,9 +535,11 @@ private:
      */
     void scroll_y_inc();
 
-    sptr_t<ASpace>  _mmap;                                  /* PPU Bus                                  */
+    sptr_t<ASpace>  _mmap;                                  /* PPU bus memory mappings                  */
     ui::Scanline    _scanline;                              /* Current scanline pixel data              */
     RgbaTable       _palette;                               /* Color palette                            */
+    unsigned        _visible_y_start;                       /* Starting Y visible coordinate            */
+    unsigned        _visible_y_end;                         /* Ending Y visible coordinate              */
 
     RendererCb      _render_line{};                         /* Scanline renderer callback               */
     Registers       _regs{};                                /* Internal registers                       */

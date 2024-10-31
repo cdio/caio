@@ -34,7 +34,6 @@ Panel::Panel(const sptr_t<::SDL_Renderer>& renderer, const std::string& statusba
 
 Panel::~Panel()
 {
-    reset();
 }
 
 void Panel::reset(const sptr_t<::SDL_Renderer>& renderer, const std::string& statusbar)
@@ -58,9 +57,9 @@ void Panel::reset(const sptr_t<::SDL_Renderer>& renderer, const std::string& sta
                 max_width = dmode.w;
             }
         }
-    }
 
-    _sb_position = sb_str2pos(statusbar);
+        _sb_position = sb_str2pos(statusbar);
+    }
 }
 
 int Panel::sb_str2pos(const std::string& strpos)

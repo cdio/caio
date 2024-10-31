@@ -294,7 +294,9 @@ void ConfiguratorApp::error_message_popup()
         if (r > 0) {
             const std::string title{"Can't launch machine"};
             const std::string errmsg{buf, static_cast<std::string::size_type>(r)};
-            error_message(title, errmsg);
+            if (errmsg.find("rror") != std::string::npos) {
+                error_message(title, errmsg);
+            }
         }
     }
 

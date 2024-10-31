@@ -131,7 +131,7 @@ void CartMagicDesk::reset()
     mode(GameExromMode::MODE_8K);   /* Invalid mode on the only magic desk cartridge I tested, force 8K mode */
 }
 
-uint8_t CartMagicDesk::dev_read(addr_t addr, ReadMode)
+uint8_t CartMagicDesk::dev_read(size_t addr, ReadMode)
 {
     addr &= IO_ADDR_MASK;
     if (addr == 0x0000) {
@@ -148,7 +148,7 @@ uint8_t CartMagicDesk::dev_read(addr_t addr, ReadMode)
     return 255;
 }
 
-void CartMagicDesk::dev_write(addr_t addr, uint8_t data)
+void CartMagicDesk::dev_write(size_t addr, uint8_t data)
 {
     addr &= IO_ADDR_MASK;
     if (addr == 0x0000) {

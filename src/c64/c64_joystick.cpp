@@ -42,7 +42,7 @@ namespace c64 {
  * | Joy 1       |                         Fire    Right   Left    Down    Up     |       |
  * +-------------+----------------------------------------------------------------+-------+
  *
- * Source: https://www.c64-wiki.com/wiki/Keyboard
+ * See https://www.c64-wiki.com/wiki/Keyboard
  */
 constexpr static const uint16_t JOY_PORT_UP     = Mos6526::P0;
 constexpr static const uint16_t JOY_PORT_DOWN   = Mos6526::P1;

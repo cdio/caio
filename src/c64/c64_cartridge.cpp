@@ -60,12 +60,12 @@ size_t Cartridge::size() const
     return IO_SIZE;
 }
 
-void Cartridge::add_ior(const Gpio::ior_t& ior, uint8_t mask)
+void Cartridge::add_ior(const Gpio::IorCb& ior, uint8_t mask)
 {
     _ioport.add_ior(ior, mask);
 }
 
-void Cartridge::add_iow(const Gpio::iow_t& iow, uint8_t mask)
+void Cartridge::add_iow(const Gpio::IowCb& iow, uint8_t mask)
 {
     _ioport.add_iow(iow, mask);
 }

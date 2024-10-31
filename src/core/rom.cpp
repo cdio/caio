@@ -37,7 +37,7 @@ ROM::ROM(std::string_view label, const fs::Path& fname, std::string_view digest)
     type(TYPE);
     auto sign = signature();
     if (digest != sign) {
-        throw IOError{*this, "{}: Invalid signature: Expected: {}, Calculated: {}", fname.string(), digest, sign};
+        throw IOError{*this, "{}: Invalid signature: Expected: {}, calculated: {}", fname.string(), digest, sign};
     }
 }
 
@@ -56,12 +56,8 @@ ROM::ROM(std::string_view label, std::istream& is, size_t count)
     type(TYPE);
 }
 
-void ROM::dev_write(addr_t addr, uint8_t data)
+void ROM::dev_write(size_t addr, uint8_t data)
 {
-#if 0
-    log.warn("{}({}): Write attempt at relative address ${:04x}, data ${:02x}. Ignored\n",
-        type(), label(), addr, data);
-#endif
 }
 
 std::string ROM::signature() const

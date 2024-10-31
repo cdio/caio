@@ -139,6 +139,14 @@ public:
 
     /**
      * Initialise this C64 keyboard.
+     * @param enabled    Enable/disable keyboard;
+     * @param restore_cb Callback to call when the RESTORE key is pressed.
+     * @see Keyboard::enable(bool)
+     */
+    C64Keyboard(bool enabled = true, const std::function<void()>& restore_cb = {});
+
+    /**
+     * Initialise this C64 keyboard.
      * @param label      Label assigned to this keyboard;
      * @param enabled    Enable/disable keyboard;
      * @param restore_cb Callback to call when the RESTORE key is pressed.

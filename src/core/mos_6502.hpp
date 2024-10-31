@@ -151,6 +151,13 @@ public:
     void init_monitor(int ifd, int ofd, const monitor::load_cb_t& load = {}, const monitor::save_cb_t& save = {});
 
     /**
+     * Set the log file.
+     * @param fd Output file descriptor.
+     * @see Logger::logfile(int)
+     */
+    void logfile(int fd);
+
+    /**
      * Set the single-step log level.
      * @param lvs Log level string to set.
      * @see Logger::loglevel(std::string_view)

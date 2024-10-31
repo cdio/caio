@@ -22,7 +22,7 @@
 
 namespace caio {
 
-uint8_t Device::read(addr_t addr, ReadMode mode)
+uint8_t Device::read(size_t addr, ReadMode mode)
 {
     if (_read_cb) {
         _read_cb(addr, mode);
@@ -31,7 +31,7 @@ uint8_t Device::read(addr_t addr, ReadMode mode)
     return dev_read(addr, mode);
 }
 
-void Device::write(addr_t addr, uint8_t data)
+void Device::write(size_t addr, uint8_t data)
 {
     if (_write_cb) {
         _write_cb(addr, data);
@@ -55,9 +55,9 @@ std::string Device::to_string() const
     return std::format("{}, size {}", Name::to_string(), size());
 }
 
-std::ostream& Device::dump(std::ostream& os, addr_t base) const
+std::ostream& Device::dump(std::ostream& os, size_t base) const
 {
-    addr_t r{};
+    size_t r{};
     uint8_t regs[size()];
     std::for_each(regs, regs + size(), [this, &r](uint8_t& reg) { reg = peek(r++); });
     return utils::dump(os, regs, regs + size(), base);

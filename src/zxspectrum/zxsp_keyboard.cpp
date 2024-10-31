@@ -177,11 +177,20 @@ ZXSpectrumKeyboard::MatrixKey ZXSpectrumKeyboard::to_spectrum(const std::string&
     return (it == name_to_spectrum.end() ? MatrixKey::KEY_NONE : it->second);
 }
 
+ZXSpectrumKeyboard::ZXSpectrumKeyboard(bool enabled)
+    : ZXSpectrumKeyboard{LABEL, enabled}
+{
+}
+
 ZXSpectrumKeyboard::ZXSpectrumKeyboard(std::string_view label, bool enabled)
     : Keyboard{label, enabled},
       _key_to_spectrum{default_key_to_spectrum}
 {
     _matrix.fill(0);
+}
+
+ZXSpectrumKeyboard::~ZXSpectrumKeyboard()
+{
 }
 
 void ZXSpectrumKeyboard::reset()

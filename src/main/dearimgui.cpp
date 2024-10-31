@@ -427,6 +427,22 @@ void Gui::checkbox(const std::string& msg, const std::string& id, bool& dst)
     ::ImGui::Checkbox(id.c_str(), &dst);
 }
 
+void Gui::combo_select(const std::string& label, const std::string& id, const char** list, size_t size,
+    std::string& dst)
+{
+    const float fwidth = font_width();
+
+    print(label);
+    cursor_to_valuecol();
+    ::ImGui::SetNextItemWidth(10 * fwidth);
+
+    const auto it = std::find(list, list + size, dst);
+    int index = (it == list + size ? -1 : it - list);
+
+    ::ImGui::Combo(id.c_str(), &index, list, size, size);
+    dst = list[index];
+}
+
 void Gui::combo_key(const std::string& msg, const std::string& id, keyboard::Key& key)
 {
     constexpr static const int SHOW_ITEMS = 10;

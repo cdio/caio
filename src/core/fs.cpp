@@ -32,6 +32,8 @@
 #include <iterator>
 #include <sstream>
 
+#include "sha2.h"
+
 #include "logger.hpp"
 #include "types.hpp"
 #include "utils.hpp"
@@ -269,6 +271,38 @@ std::ostream& save(std::ostream& os, std::span<const uint8_t> buf)
     }
 
     return os;
+}
+
+std::string sha256(const fs::Path& fname)
+{
+    std::ifstream is{fname};
+    return sha256(is);
+}
+
+std::string sha256(std::ifstream& is)
+{
+    uint8_t buf[BUFSIZ];
+
+    SHA2_CTX ctx{};
+    uint8_t md[SHA256_DIGEST_LENGTH];
+    SHA256Init(&ctx);
+
+    while (is) {
+        is.read(reinterpret_cast<char*>(buf), sizeof(buf));
+        const auto size = is.gcount();
+        if (size > 0) {
+            SHA256Update(&ctx, buf, size);
+        }
+    }
+
+    SHA256Final(md, &ctx);
+
+    std::ostringstream os{};
+    for (uint8_t value : md) {
+        os << utils::to_string(value);
+    }
+
+    return os.str();
 }
 
 IDir::IDir(EntryType etype, const std::string& eempty, size_t elimit)

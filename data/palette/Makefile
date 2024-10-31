@@ -29,6 +29,8 @@ PALETTES=	c64_vice-rgb.plt \
 		c64_colodore.plt \
 		c64_c64-wiki.plt \
 		c64_arne.plt \
+		nes_2C02G_wiki.plt \
+		nes_Accurate.plt \
 		zx80_bw.plt \
 		zxspectrum_df.plt
 

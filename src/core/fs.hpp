@@ -387,5 +387,21 @@ void save(const Path& fname, std::span<const uint8_t> buf,
  */
 std::ostream& save(std::ostream& os, std::span<const uint8_t> buf);
 
+/**
+ * Calculate the SHA-256 signature of a file.
+ * @param fname File name.
+ * @return The hash value as a string.
+ * @see sha256(std::ifstream&)
+ */
+std::string sha256(const fs::Path& fname);
+
+/**
+ * Calculate the SHA-256 of values coming from an input stream.
+ * @param is Input stream.
+ * @return The hash value as a string.
+ * @see sha256(const fs::Path&)
+ */
+std::string sha256(std::ifstream& is);
+
 }
 }

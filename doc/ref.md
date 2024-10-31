@@ -8,6 +8,8 @@
 
 [reSID: MOS6581 emulator](https://github.com/daglem/reSID)
 
+[NES reference guide](https://www.nesdev.org/wiki/NES_reference_guide)
+
 [Gran't Sinclair ZX80 Homebuilt hardware page](http://searle.x10host.com/zx80/zx80.html)
 
 [no$zx ZX80/81 docs](https://problemkaputt.de/zxdocs.htm)

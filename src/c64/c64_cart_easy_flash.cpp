@@ -140,7 +140,7 @@ void CartEasyFlash::add_ram(size_t entry, const Crt::Chip& chip, const devptr_t&
     DEBUG("{}({}): Chip {}: RAM device: {}\n", type(), name(), entry, Crt::to_string(chip));
 }
 
-uint8_t CartEasyFlash::dev_read(addr_t addr, ReadMode mode)
+uint8_t CartEasyFlash::dev_read(size_t addr, ReadMode mode)
 {
     /*
      * 256 bytes of RAM mapped into the I/O-2 range.
@@ -184,7 +184,7 @@ uint8_t CartEasyFlash::dev_read(addr_t addr, ReadMode mode)
     return 255;
 }
 
-void CartEasyFlash::dev_write(addr_t addr, uint8_t data)
+void CartEasyFlash::dev_write(size_t addr, uint8_t data)
 {
     /*
      * 256 bytes of RAM mapped into the I/O-2 range.

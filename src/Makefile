@@ -23,6 +23,7 @@ DIRS=		icons \
 		ui_sdl2
 
 DIRS+=		c64 \
+		nes \
 		zx80 \
 		zxspectrum
 

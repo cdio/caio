@@ -124,7 +124,7 @@ private:
 
     std::atomic_bool         _stop{};
     bool                     _paused{true};
-    SDL_AudioDeviceID        _devid{};
+    ::SDL_AudioDeviceID      _devid{};
     LockedQueue<samples_i16> _free_queue{};
     LockedQueue<samples_i16> _playing_queue{};
     float                    _volume{DEFAULT_VOLUME};

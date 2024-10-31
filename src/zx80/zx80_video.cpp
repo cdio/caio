@@ -33,7 +33,7 @@ RgbaTable ZX80Video::builtin_palette{
     0xCFCFCFFF
 };
 
-ZX80Video::ZX80Video(const sptr_t<Clock>& clk, bool rvideo, std::string_view label)
+ZX80Video::ZX80Video(std::string_view label, const sptr_t<Clock>& clk, bool rvideo)
     : Name{TYPE, label},
       _clk{clk},
       _rvideo{rvideo},
@@ -43,7 +43,7 @@ ZX80Video::ZX80Video(const sptr_t<Clock>& clk, bool rvideo, std::string_view lab
     CAIO_ASSERT(clk.get() != nullptr);
 }
 
-void ZX80Video::palette(std::string_view fname)
+void ZX80Video::palette(const fs::Path& fname)
 {
     if (!fname.empty()) {
         _palette.load(fname);
@@ -55,7 +55,7 @@ void ZX80Video::palette(const RgbaTable& plt)
     _palette = plt;
 }
 
-void ZX80Video::render_line(const renderer_t& rl)
+void ZX80Video::render_line(const RendererCb& rl)
 {
     _renderline_cb = rl;
 }
@@ -68,7 +68,7 @@ inline void ZX80Video::render_line()
     }
 }
 
-void ZX80Video::clear_screen(const cls_t& cls)
+void ZX80Video::clear_screen(const ClsCb& cls)
 {
     _cls_cb = cls;
 }

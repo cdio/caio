@@ -234,10 +234,8 @@ uint8_t DmcReader::pop()
 
 void DmcReader::reset()
 {
-    if (_enabled) {
-        _addr = _start;
-        _remaining = _len;
-    }
+    _addr = _start;
+    _remaining = _len;
 }
 
 bool DmcShifter::tick()
@@ -251,6 +249,15 @@ void DmcShifter::reset(uint8_t sample)
 {
     _sample = sample;
     _bit = 1;
+}
+
+void Dmc::reset()
+{
+    _enabled = false;
+    _reader = {};
+    _shifter = {};
+    _silence = true;
+    _out = 0;
 }
 
 void Dmc::tick()
@@ -278,6 +285,14 @@ Apu::Apu(RP2A03& cpu, size_t cpu_clkf)
     : _cpu{cpu},
       _srate_cycles{Clock::cycles(AUDIO_DT, cpu_clkf)}
 {
+}
+
+void Apu::reset()
+{
+    frame_irq_ack();
+    dmc_irq_ack();
+    _dmc.reset();
+    _apos = 0;
 }
 
 void Apu::audio_buffer(const AudioBufferCb& abuf)
@@ -410,7 +425,7 @@ void Apu::tick()
     ++_sample_cycle;
     if (_sample_cycle == _srate_cycles) {
         /*
-         * Sample audio and play.
+         * Sample audio and play it.
          */
         _sample_cycle = 0;
         play();
@@ -434,7 +449,7 @@ int16_t Apu::mixed_sample() const
     p12 = (p12 == 0.0f ? 0.0f : 95.88f / ((8128.0f / p12) + 100.0f));
     tnd = (tnd == 0.0f ? 0.0f : 159.79f / ((1.0f / tnd) + 100.0f));
 
-    const int16_t sample = ((p12 + tnd) - 0.5f) * (32768.0f * 0.9f);
+    const int16_t sample = ((p12 + tnd) - 0.5f) * (32767.0f * 0.9f);
     return sample;
 }
 

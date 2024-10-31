@@ -19,6 +19,7 @@
 #include "config.hpp"
 
 #include <format>
+#include <fstream>
 #include <regex>
 
 #include "utils.hpp"

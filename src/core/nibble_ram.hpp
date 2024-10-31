@@ -41,7 +41,8 @@ public:
     /**
      * @see RAM::dev_write()
      */
-    void dev_write(addr_t addr, uint8_t value) override {
+    void dev_write(size_t addr, uint8_t value) override
+    {
         RAM::dev_write(addr, 0xF0 | value);
     }
 };

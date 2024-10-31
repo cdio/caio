@@ -22,6 +22,7 @@
 #include "utils.hpp"
 
 #include "editor_c64.hpp"
+#include "editor_nes.hpp"
 #include "editor_zx80.hpp"
 #include "editor_zxsp.hpp"
 
@@ -212,6 +213,7 @@ uptr_t<ConfigEditor> ConfigEditor::make_editor(Gui& gui, const fs::Path& cfile)
 
     static const std::map<std::string, uptr_t<ConfigEditor>(*)(Gui&, const fs::Path&, config::Section&&)> editors{
         { "c64",        INSTANTIATOR(ConfigEditorC64)          },
+        { "nes",        INSTANTIATOR(ConfigEditorNES)          },
         { "zx80",       INSTANTIATOR(ConfigEditorZX80)         },
         { "zxspectrum", INSTANTIATOR(ConfigEditorZXSpectrum)   }
     };
@@ -252,6 +254,7 @@ void ConfigEditor::create_default_configs()
 {
     /* The ^ prefix is a hack to mark a default configuration */
     default_config<commodore::c64::C64Cmdline>("^Commodore 64", commodore::c64::SEC_C64);
+    default_config<nintendo::nes::NESCmdline>("^NES", nintendo::nes::SEC_NES);
     default_config<sinclair::zx80::ZX80Cmdline>("^Sinclair ZX-80", sinclair::zx80::SEC_ZX80);
     default_config<sinclair::zxspectrum::ZXSpectrumCmdline>("^Sinclair ZX-Spectrum 48K",
         sinclair::zxspectrum::SEC_ZXSPECTRUM);

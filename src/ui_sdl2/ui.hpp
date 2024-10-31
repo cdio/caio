@@ -383,6 +383,7 @@ private:
     float                       _screen_scale{};            /* Current screen scale factor                        */
     bool                        _is_fullscreen{};           /* Fullscreen mode                                    */
     std::atomic_bool            _stop{};                    /* True if the main loop must be stopped              */
+    std::atomic_bool            _running{};                 /* True if the main loop is not running               */
     uint64_t                    _mouse_active_time{};       /* Inactivity time until the cursor becomes invisible */
     bool                        _mouse_visible{true};       /* Whether the mouse cursor is visible or not         */
 

@@ -62,17 +62,17 @@ public:
     /**
      * This method does nothing.
      * @return The default value.
-     * @see Device::dev_read(addr_t, ReadMode)
+     * @see Device::dev_read(size_t, ReadMode)
      */
-    uint8_t dev_read(addr_t, ReadMode) override {
+    uint8_t dev_read(size_t, ReadMode) override {
         return _dvalue;
     }
 
     /**
      * This method does nothing.
-     * @see Device::dev_write(addr_t, uint8_t)
+     * @see Device::dev_write(size_t, uint8_t)
      */
-    void dev_write(addr_t, uint8_t) override {
+    void dev_write(size_t, uint8_t) override {
     }
 
     /**
@@ -80,7 +80,7 @@ public:
      * @param os Output stream.
      * @return The output stream.
      */
-    std::ostream& dump(std::ostream& os, addr_t = 0) const override {
+    std::ostream& dump(std::ostream& os, size_t = 0) const override {
         return os;
     }
 

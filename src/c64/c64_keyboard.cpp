@@ -43,7 +43,7 @@ namespace c64 {
  * | Joy 1       |                         Fire    Right   Left    Down    Up     |       |
  * +-------------+----------------------------------------------------------------+-------+
  *
- * Source: https://www.c64-wiki.com/wiki/Keyboard
+ * See https://www.c64-wiki.com/wiki/Keyboard
  */
 using MatrixKey = C64Keyboard::MatrixKey;
 
@@ -273,6 +273,11 @@ C64Keyboard::MatrixKey C64Keyboard::to_c64(const std::string& name)
     return (it == name_to_c64.end() ? MatrixKey::KEY_NONE : it->second);
 }
 
+C64Keyboard::C64Keyboard(bool enabled, const std::function<void()>& restore_cb)
+    : C64Keyboard{LABEL, enabled, restore_cb}
+{
+}
+
 C64Keyboard::C64Keyboard(std::string_view label, bool enabled, const std::function<void()>& restore_cb)
     : Keyboard{label, enabled},
       _restore_cb{restore_cb},
@@ -385,8 +390,8 @@ void C64Keyboard::write(uint8_t row)
     _scanrow = row;
 }
 
-void C64Keyboard::add_key_map(const std::string& key_name, bool key_shift, bool key_altgr, const std::string& impl_name,
-    bool impl_shift)
+void C64Keyboard::add_key_map(const std::string& key_name, bool key_shift, bool key_altgr,
+    const std::string& impl_name, bool impl_shift)
 {
     auto key = keyboard::to_key(key_name);
     if (key == keyboard::KEY_NONE) {

@@ -76,7 +76,8 @@ CXXFLAGS+=		${UI_CXXFLAGS} \
 			${SYSDEP_CXXFLAGS} \
 			-std=c++20 \
 			-Wall \
-			-Werror
+			-Werror \
+			-Wno-unused-result
 
 ifeq (${DEBUG}, yes)
 CPPFLAGS+=		-DD_DEBUG

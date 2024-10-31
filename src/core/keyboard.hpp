@@ -145,11 +145,11 @@ enum Key {
     KEY_RIGHT_CTRL      = 0x1000,
     KEY_LEFT_ALT        = 0x0800,
     KEY_RIGHT_ALT       = 0x0400,
-    KEY_FN              = 0x0200,
-    KEY_COMMAND         = 0x0100,
+    KEY_LEFT_COMMAND    = 0x0200,
+    KEY_RIGHT_COMMAND   = 0x0100,
 
     /* Special codes */
-    KEY_CTRL_C          = 0x0100,
+    KEY_CTRL_C          = 0x0001'0000,
     KEY_ALT_GR          = KEY_RIGHT_ALT,
     KEY_ALT_J           = KEY_LEFT_ALT | KEY_J,
     KEY_NONE            = -1

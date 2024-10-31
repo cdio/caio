@@ -20,6 +20,7 @@
 
 #include "clock.hpp"
 #include "device.hpp"
+#include "fs.hpp"
 #include "name.hpp"
 #include "rgb.hpp"
 #include "ui.hpp"
@@ -85,8 +86,8 @@ public:
     constexpr static unsigned WIDTH                  = VISIBLE_WIDTH;
     constexpr static unsigned HEIGHT                 = VISIBLE_HEIGHT;
 
-    using renderer_t = std::function<void(unsigned, const ui::Scanline&)>;
-    using cls_t      = std::function<void(const Rgba&)>;
+    using RendererCb = std::function<void(unsigned, const ui::Scanline&)>;
+    using ClsCb      = std::function<void(const Rgba&)>;
 
     enum {
         BLACK = 0,
@@ -100,7 +101,7 @@ public:
      * @param label Label assigned to this device.
      * @see render_line(const renderer_t&)
      */
-    ZX80Video(const sptr_t<Clock>& clk, bool rvideo, std::string_view label);
+    ZX80Video(std::string_view label, const sptr_t<Clock>& clk, bool rvideo);
 
     virtual ~ZX80Video() {
     }
@@ -110,23 +111,23 @@ public:
      * The render line callback must send the video output to the UI.
      * @param rl The render line callback.
      */
-    void render_line(const renderer_t& rl);
+    void render_line(const RendererCb& rl);
 
     /**
      * Set the clear screen callback.
      * The clear screen callback must call the UI's clear screen method.
      * @param cls The clear screen callback.
      */
-    void clear_screen(const cls_t& cls);
+    void clear_screen(const ClsCb& cls);
 
     /**
      * Read a colour palette from disk.
      * @param fname Palette file name.
      * @exception IOError
      * @see palette(const RgbaTable&)
-     * @see RgbaTable::load(std::string_view)
+     * @see RgbaTable::load(const fs::Path&)
      */
-    void palette(std::string_view fname);
+    void palette(const fs::Path& fname);
 
     /**
      * Set a colour palette.
@@ -205,8 +206,8 @@ private:
     RgbaTable     _palette;                 /* Colour palette                   */
     ui::Scanline  _scanline;                /* Current scanline pixel data      */
 
-    renderer_t    _renderline_cb{};         /* Renderer callback                */
-    cls_t         _cls_cb{};                /* Clear screen callback            */
+    RendererCb    _renderline_cb{};         /* Renderer callback                */
+    ClsCb         _cls_cb{};                /* Clear screen callback            */
     int           _line{};                  /* Current raster line              */
     unsigned      _column{LBORDER_START};   /* Current horizontal position      */
     size_t        _vsync_count{};           /* Number of vsync pulses           */

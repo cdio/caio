@@ -329,9 +329,12 @@ Mos6502::Mos6502(std::string_view label, const sptr_t<ASpace>& mmap)
 }
 
 Mos6502::Mos6502(std::string_view type, std::string_view label, const sptr_t<ASpace>& mmap)
-    : Name{type, label}
+    : Name{type, label},
+      _mmap{mmap}
 {
-    Mos6502::init(mmap);
+    if (_mmap) {
+        Mos6502::reset();
+    }
 }
 
 Mos6502::~Mos6502()
@@ -415,6 +418,11 @@ void Mos6502::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, con
 
     _monitor = std::make_unique<Monitor>(ifd, ofd, std::move(monitor_funcs));
     _monitor->add_breakpoint(read_addr(vRESET));
+}
+
+void Mos6502::logfile(int fd)
+{
+    _log.logfile(fd);
 }
 
 void Mos6502::loglevel(std::string_view lvs)

@@ -142,14 +142,20 @@ public:
 
     /**
      * Initialise this keyboard.
+     * @param enabled Enable/disable keyboard.
+     * @see ZXSpectrumKeyboard(std::string_view, bool enabled)
+     */
+    ZXSpectrumKeyboard(bool enabled = true);
+
+    /**
+     * Initialise this keyboard.
      * @param label   Label assigned to this keyboard;
      * @param enabled Enable/disable keyboard.
-     * @see Keyboard::enable(bool)
+     * @see Keyboard(std::string_view, bool enabled)
      */
-    ZXSpectrumKeyboard(std::string_view label, bool enabled);
+    ZXSpectrumKeyboard(std::string_view label, bool enabled = true);
 
-    virtual ~ZXSpectrumKeyboard() {
-    }
+    virtual ~ZXSpectrumKeyboard();
 
     /**
      * @see Keyboard::reset()

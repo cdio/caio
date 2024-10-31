@@ -36,6 +36,7 @@
 namespace caio {
 namespace monitor {
 
+//XXX remove _t
 using regs_cb_t     = std::function<std::string()>;
 using getpc_cb_t    = std::function<addr_t()>;
 using setpc_cb_t    = std::function<void(addr_t)>;
@@ -46,6 +47,7 @@ using mmap_cb_t     = std::function<sptr_t<ASpace>()>;
 using ebreak_cb_t   = std::function<void()>;
 using load_cb_t     = std::function<std::pair<addr_t, addr_t>(std::string_view, addr_t)>;
 using save_cb_t     = std::function<void(std::string_view, addr_t, addr_t)>;
+using LogfileCb     = std::function<void(int)>;
 using loglevel_cb_t = std::function<Loglevel(std::string_view)>;
 using regvalue_cb_t = std::function<uint16_t(std::string_view)>;
 using bpdoc_cb_t    = std::function<std::string(std::string_view)>;
@@ -66,6 +68,7 @@ struct MonitoredCPU {
     ebreak_cb_t   ebreak{};     /* Set a breakpoint on next instruction     */
     load_cb_t     load{};       /* Inject content of a file into memory     */
     save_cb_t     save{};       /* Write a memory area into a file          */
+    LogfileCb     logfile{};    /* Set the logfile file descriptor          */
     loglevel_cb_t loglevel{};   /* Set/get the loglevel                     */
     regvalue_cb_t regvalue{};   /* Get a register's value given its name    */
     bpdoc_cb_t    bpdoc{};      /* Documentation on how to set breakpoints  */
@@ -150,6 +153,10 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
                 }
                 fs::save(fname, buf);
             }
+        },
+
+        .logfile = [cpu](int fd) {
+            cpu->logfile(fd);
         },
 
         .loglevel = [cpu](std::string_view lv) {

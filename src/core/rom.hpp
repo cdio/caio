@@ -39,7 +39,8 @@ public:
      */
     template<typename Iterator>
     ROM(std::string_view label, Iterator first, Iterator last)
-        : RAM{label, first, last} {
+        : RAM{label, first, last}
+    {
         type(TYPE);
     }
 
@@ -60,7 +61,7 @@ public:
      * @param fname File name;
      * @param size  Size the file must have (0 not to check size).
      * @exception IOError If the size of the file is not equal to the specified size.
-     * @see RAM:RAM(std::string_view, size_t)
+     * @see RAM::RAM(std::string_view, size_t)
      */
     ROM(std::string_view label, const fs::Path& fname, size_t size);
 
@@ -68,7 +69,7 @@ public:
      * Initialise this ROM with data from an input stream.
      * @param label Label;
      * @param is    Input stream to read from;
-     * @param count Number of bytes to read (0 means fs::LOAD_MAXSIZ bytes).
+     * @param count Bytes to read (0 means fs::LOAD_MAXSIZ bytes).
      * @exception IOError If the input stream is emptied before the specified amount of bytes are read.
      * @see RAM::RAM(std::istream&, size_t)
      */
@@ -79,7 +80,20 @@ public:
      * @param other The ROM to move into this one.
      * @return This ROM.
      */
-    ROM& operator=(ROM&& other) {
+    ROM& operator=(ROM&& other)
+    {
+        static_cast<RAM&>(*this) = std::move(other);
+        type(TYPE);
+        return *this;
+    }
+
+    /**
+     * Move operator.
+     * @param other The RAM to move into this ROM.
+     * @return This ROM.
+     */
+    ROM& operator=(RAM&& other)
+    {
         static_cast<RAM&>(*this) = std::move(other);
         return *this;
     }
@@ -88,7 +102,8 @@ public:
      * Get an iterator to the first element of this ROM.
      * @return An iterator to the first element.
      */
-    buffer_cit_t begin() const {
+    buffer_cit_t begin() const
+    {
         return _data.cbegin();
     }
 
@@ -96,15 +111,16 @@ public:
      * Get an iterator to the last element of this ROM + 1.
      * @return An iterator to the last element +1.
      */
-    buffer_cit_t end() const {
+    buffer_cit_t end() const
+    {
         return _data.cend();
     }
 
     /**
      * This method does nothing.
-     * @see Device::dev_write(addr_t, uint8_t)
+     * @see Device::dev_write(size_t, uint8_t)
      */
-    void dev_write(addr_t addr, uint8_t data) override;
+    void dev_write(size_t addr, uint8_t data) override;
 
     /**
      * Calculate the signature of this ROM.

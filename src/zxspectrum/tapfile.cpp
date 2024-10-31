@@ -18,6 +18,8 @@
  */
 #include "tapfile.hpp"
 
+#include <fstream>
+
 #include "endian.hpp"
 #include "logger.hpp"
 

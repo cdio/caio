@@ -35,6 +35,7 @@ INSTALL_FILES=	${DST_BIN} \
 CXXSRCS=	configurator.cpp \
 		editor.cpp \
 		editor_c64.cpp \
+		editor_nes.cpp \
 		editor_zx80.cpp \
 		editor_zxsp.cpp \
 		guiapp.cpp \
@@ -43,16 +44,19 @@ CXXSRCS=	configurator.cpp \
 INCS=		configurator.hpp \
 		editor.hpp \
 		editor_c64.hpp \
+		editor_nes.hpp \
 		editor_zx80.hpp \
 		editor_zxsp.hpp \
 		guiapp.hpp \
 		gui.hpp
 
 CPPFLAGS+=	-I${ROOT}/src/c64 \
+		-I${ROOT}/src/nes \
 		-I${ROOT}/src/zx80 \
 		-I${ROOT}/src/zxspectrum
 
 EXTRA_LIBS+=	${ROOT}/src/c64/libcaio_c64.a \
+		${ROOT}/src/nes/libcaio_nes.a \
 		${ROOT}/src/zx80/libcaio_zx80.a \
 		${ROOT}/src/zxspectrum/libcaio_zxspectrum.a \
 		${ROOT}/src/ui_sdl2/libcaio_ui_sdl2.a \

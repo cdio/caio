@@ -455,6 +455,11 @@ void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const m
     _monitor->add_breakpoint(RESET_ADDR);
 }
 
+void Z80::logfile(int fd)
+{
+    _log.logfile(fd);
+}
+
 void Z80::loglevel(std::string_view ll)
 {
     if (!empty(ll)) {

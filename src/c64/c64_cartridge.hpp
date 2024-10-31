@@ -101,7 +101,7 @@ public:
      * @param mask Bits used by the callback.
      * @see Gpio::add_ior()
      */
-    void add_ior(const Gpio::ior_t& ior, uint8_t mask);
+    void add_ior(const Gpio::IorCb& ior, uint8_t mask);
 
     /**
      * Add an ouput callback.
@@ -109,7 +109,7 @@ public:
      * @param mask Bits used by the callback.
      * @see Gpio::add_iow()
      */
-    void add_iow(const Gpio::iow_t& iow, uint8_t mask);
+    void add_iow(const Gpio::IowCb& iow, uint8_t mask);
 
     /**
      * Retrieve the cartridge internal device that must handle a specific memory address.

@@ -380,6 +380,8 @@ public:
         return _consumed;
     }
 
+    void stop();
+
 private:
     void reset();
 
@@ -421,6 +423,8 @@ public:
     constexpr static const size_t RATE_TABLE_SIZE = 16;
     constexpr static const size_t RATE_TABLE_MASK = 15;
 
+    void reset();
+
     void enable(bool en)
     {
         _enabled = en;
@@ -443,7 +447,7 @@ public:
 
     void rate(uint8_t rindex)
     {
-        _timer.period(rate_table[rindex & RATE_TABLE_MASK] >> 1);   /* Rate table un CPU cycles */
+        _timer.period(rate_table[rindex & RATE_TABLE_MASK] >> 1);   /* Rate table in CPU cycles */
     }
 
     void sample_load(uint8_t sample)
@@ -540,6 +544,11 @@ public:
      * @param clk CPU clock frequency.
      */
     Apu(class RP2A03& cpu, size_t cpu_clkf);
+
+    /**
+     * reset this APU.
+     */
+    void reset();
 
     /**
      * Set the audio buffer provider.
@@ -764,7 +773,6 @@ public:
      * Initialise this CPU.
      * @param clkf System clock frequency (3 times the desired CPU frequency);
      * @param mmap System mappings.
-     * @see init(const sptr_t<ASpace>&)
      * @see ASpace
      */
     RP2A03(size_t clkf, const sptr_t<ASpace>& mmap = {});
@@ -774,20 +782,11 @@ public:
      * @param label Label;
      * @param clkf  Clock frequency (3 times the desired CPU frequency);
      * @param mmap  System mappings.
-     * @see init(const sptr_t<ASpace>&)
      * @see ASpace
      */
     RP2A03(std::string_view label, size_t clkf, const sptr_t<ASpace>& mmap);
 
     virtual ~RP2A03();
-
-    /**
-     * Initialise and reset this CPU.
-     * @param mmap System mappings.
-     * @see reset()
-     * @see ASpace
-     */
-    void init(const sptr_t<ASpace>& mmap);
 
     /**
      * @see Apu::audio_buffer(const AudioBufferCb&)

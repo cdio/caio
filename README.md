@@ -6,6 +6,7 @@ home computers.
 At the moment the following platforms are emulated:
 
 - Commodore 64
+- NES
 - Sinclair ZX-80
 - Sinclair ZX-Spectrum 48K
 
@@ -20,11 +21,24 @@ C1541 disk drive unit (read and write), the D64 file format is not supported
 yet.
 
 ![c64-basic](images/c64-basic.gif "C64 - Basic")
-![c64-gyruss](images/c64-gyruss.gif "C64 - Gyruss")
 ![c64-q-bert](images/c64-q-bert.gif "C64 - Q*Bert")
 ![c64-uridium](images/c64-uridium.gif "C64 - Uridium")
-![c64-giana](images/c64-giana.gif "C64 - Great Giana Sisters")
 ![c64-turrican](images/c64-turrican.gif "C64 - Turrican")
+
+
+### NES (Nintendo Entertainment System)
+
+The emulation of the [NES](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
+platform is completed but not all the cartridge
+[mappers](https://www.nesdev.org/wiki/Mapper) are implemented, yet.
+The [Family BASIC keyboard](https://en.wikipedia.org/wiki/Family_BASIC)
+is supported.<br>
+Only the NTSC version of this machine is implemented so games for the USA and
+Japan markets should run without any problems.
+
+![nes-mario](images/nes-mario.gif "NES - Super Mario Bros.")
+![nes-contra](images/nes-contra.gif "NES - Contra")
+![nes-pacman](images/nes-pacman.gif "NES - Pac-Man")
 
 
 ### Sinclair ZX-80
@@ -48,7 +62,7 @@ Tape files .O and .P are supported (read and write).
 The emulation of the
 [Sinclair ZX-Spectrum 48K](https://en.wikipedia.org/wiki/ZX_Spectrum)
 reached beta status. Only the 48K version of this machine is emulated.<br>
-It supports the integrated 1 bit audio, the Kempston joystick interface,
+caio supports the integrated 1 bit audio, the Kempston joystick interface,
 the cassette TAP file format (read and write) and snapshot files Z80 and SNA.
 
 ![zxspectrum-48K-extreme](images/zxspectrum-48k-extreme.gif "ZX-Spectrum 48K - Extreme")
@@ -77,6 +91,7 @@ Refer to the [Usage & Configuration](doc/usage.md) guide.
 The first release is underway and it includes the following platforms:
 
 * [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
+* [NES (Nintendo Entertainment System)](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
 * [Sinclair ZX-80](https://en.wikipedia.org/wiki/ZX80)
 * [Sinclair ZX-Spectrum 48K](https://en.wikipedia.org/wiki/ZX_Spectrum)
 

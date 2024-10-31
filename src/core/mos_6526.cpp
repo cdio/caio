@@ -323,7 +323,7 @@ size_t Mos6526::size() const
     return REGMAX;
 }
 
-uint8_t Mos6526::dev_read(addr_t addr, ReadMode mode)
+uint8_t Mos6526::dev_read(size_t addr, ReadMode mode)
 {
     switch (addr) {
     case PRA:
@@ -391,7 +391,7 @@ uint8_t Mos6526::dev_read(addr_t addr, ReadMode mode)
     }
 }
 
-void Mos6526::dev_write(addr_t addr, uint8_t data)
+void Mos6526::dev_write(size_t addr, uint8_t data)
 {
     switch (addr) {
     case PRA:

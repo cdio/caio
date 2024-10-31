@@ -37,7 +37,7 @@ void C64IO::reset()
     }
 }
 
-uint8_t C64IO::dev_read(addr_t addr, ReadMode mode)
+uint8_t C64IO::dev_read(size_t addr, ReadMode mode)
 {
     if (addr < SID_ADDR) {
         /*
@@ -86,7 +86,7 @@ uint8_t C64IO::dev_read(addr_t addr, ReadMode mode)
     return 255;
 }
 
-void C64IO::dev_write(addr_t addr, uint8_t value)
+void C64IO::dev_write(size_t addr, uint8_t value)
 {
     if (addr < SID_ADDR) {
         /*
@@ -139,7 +139,7 @@ void C64IO::dev_write(addr_t addr, uint8_t value)
     }
 }
 
-std::ostream& C64IO::dump(std::ostream& os, addr_t base) const
+std::ostream& C64IO::dump(std::ostream& os, size_t base) const
 {
     /*
      * $D000 - $D02E -- $0000 - $002E   VIC2 registers
@@ -152,19 +152,19 @@ std::ostream& C64IO::dump(std::ostream& os, addr_t base) const
      * $DE00 - $DEFF -- $0E00 - $0EFF   I/O #1 expansion
      * $DF00 - $DFFF -- $0F00 - $0FFF   I/O #2 expansion
      */
-    constexpr static const addr_t FF_SIZE = 0x40 - 0x2f;
+    constexpr static const size_t FF_SIZE = 0x40 - 0x2f;
     static struct FF : std::array<uint8_t, FF_SIZE> {
         FF() {
             std::fill(begin(), end(), 255);
         }
     } ff;
 
-    for (addr_t offset = VIC2_ADDR; offset < SID_ADDR; offset += 0x40) {
+    for (size_t offset = VIC2_ADDR; offset < SID_ADDR; offset += 0x40) {
         _vic2->dump(os, base + offset);
         utils::dump(os, ff.begin(), ff.end(), base + offset + _cia2->size());
     }
 
-    for (addr_t offset = 0; offset < 1024; offset += 32) {
+    for (size_t offset = 0; offset < 1024; offset += 32) {
         _sid->dump(os, base + SID_ADDR + offset);
     }
 
