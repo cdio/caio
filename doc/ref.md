@@ -6,8 +6,6 @@
 
 [Zimmers.net file archives](http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/c64/)
 
-[reSID: MOS6581 emulator](https://github.com/daglem/reSID)
-
 [NES reference guide](https://www.nesdev.org/wiki/NES_reference_guide)
 
 [Gran't Sinclair ZX80 Homebuilt hardware page](http://searle.x10host.com/zx80/zx80.html)

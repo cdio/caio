@@ -13,7 +13,7 @@ file browser. When launched, a configurator GUI appears:
 <img src="../images/caio-gui.jpg" width="640" title="caio configurator">
 </p>
 
-The upper left corner contains buttons `Add`, `'Rename', Delete`, and `Run`,
+The upper left corner contains buttons `Add`, `Rename`, `Delete`, and `Run`,
 these are used to add, rename, delete, and run machine configurations
 respectively.
 
@@ -359,10 +359,10 @@ $ caio nes --scanlines n --scale 3 --cart /games/nes/super_mario_bros.nes
 The next command activates the advanced horizontal scanlines visual effect
 (note the captial H), in this mode the specified scale factor is doubled
 (that is, a 256x224 screen is scaled up to 1024x896), loads and launches the
-cartridge named *Castelvania*:
+cartridge named *Castlevania*:
 
 ```
-$ caio nes --scanlines H --scale 2 --cart /games/nes/castelvania.nes
+$ caio nes --scanlines H --scale 2 --cart /games/nes/castlevania.nes
 ```
 
 <hr>
@@ -598,9 +598,11 @@ or using the `ALT-V` key combination.
 The default panel widgets that appear on the screen are (from right to left):
 
 * Toggle Fullscreen mode
+* Take screenshot
 * Platform reset
 * Suspend/Resume emulation
 * Audio Volume control
+* Enable/Disable keyboard
 
 There are other widgets that depend on the specifc emulated platform, such as:
 
