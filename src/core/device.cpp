@@ -58,9 +58,9 @@ std::string Device::to_string() const
 std::ostream& Device::dump(std::ostream& os, size_t base) const
 {
     size_t r{};
-    uint8_t regs[size()];
-    std::for_each(regs, regs + size(), [this, &r](uint8_t& reg) { reg = peek(r++); });
-    return utils::dump(os, regs, regs + size(), base);
+    buffer_t regs(size());
+    std::generate(std::begin(regs), std::end(regs), [this, &r]() { return peek(r++); });
+    return utils::dump(os, regs, base);
 }
 
 }
