@@ -851,7 +851,7 @@ void Mos6581::play()
     if (v16) {
         for (size_t i = 0; i < SAMPLES; ++i) {
             fp_t value = _v[i] * _volume + _v4[i] * 0.3;
-            value = std::max<fp_t>(std::min<fp_t>(value, 0.8), -0.8);
+            value = std::clamp(value, -0.8, 0.8);
             v16[i] = utils::to_i16(value);
         }
     }
