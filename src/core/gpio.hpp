@@ -41,8 +41,8 @@ template<typename ADDR, typename DATA,
     std::enable_if_t<std::is_unsigned<DATA>::value, bool> = true>
 class Gpio_ {
 public:
-    const ADDR addr_type{};
-    const DATA data_type{};
+    using addr_type = ADDR;
+    using data_type = DATA;
 
     using IorCb = std::function<DATA(ADDR)>;
     using IowCb = std::function<void(ADDR, DATA, bool)>;
