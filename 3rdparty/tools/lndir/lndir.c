@@ -49,8 +49,15 @@ in this Software without prior written authorization from The Open Group.
 #include "config.h"
 #endif
 
+#if 0
 #include <X11/Xos.h>
 #include <X11/Xfuncproto.h>
+#else
+#define _X_ATTRIBUTE_PRINTF(...)
+#define _X_NORETURN
+#include <unistd.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
