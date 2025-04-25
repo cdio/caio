@@ -148,7 +148,7 @@ public:
      * @param load Monitor load callback (empty for default);
      * @param save Monitor save calblack (empty for default).
      */
-    void init_monitor(int ifd, int ofd, const monitor::load_cb_t& load = {}, const monitor::save_cb_t& save = {});
+    void init_monitor(int ifd, int ofd, const monitor::LoadCb& load = {}, const monitor::SaveCb& save = {});
 
     /**
      * Set the log file.

@@ -349,7 +349,7 @@ void Z80::init(const sptr_t<ASpace>& mmap)
     }
 }
 
-void Z80::init_monitor(int ifd, int ofd, const monitor::load_cb_t& load, const monitor::save_cb_t& save)
+void Z80::init_monitor(int ifd, int ofd, const monitor::LoadCb& load, const monitor::SaveCb& save)
 {
     CAIO_ASSERT(ifd >= 0 && ofd >= 0);
 

@@ -36,21 +36,20 @@
 namespace caio {
 namespace monitor {
 
-//XXX remove _t
-using regs_cb_t     = std::function<std::string()>;
-using getpc_cb_t    = std::function<addr_t()>;
-using setpc_cb_t    = std::function<void(addr_t)>;
-using peek_cb_t     = std::function<uint8_t(addr_t)>;
-using write_cb_t    = std::function<void(addr_t, uint8_t)>;
-using disass_cb_t   = std::function<void(std::ostream&, addr_t, size_t, bool)>;
-using mmap_cb_t     = std::function<sptr_t<ASpace>()>;
-using ebreak_cb_t   = std::function<void()>;
-using load_cb_t     = std::function<std::pair<addr_t, addr_t>(std::string_view, addr_t)>;
-using save_cb_t     = std::function<void(std::string_view, addr_t, addr_t)>;
-using LogfileCb     = std::function<void(int)>;
-using loglevel_cb_t = std::function<Loglevel(std::string_view)>;
-using regvalue_cb_t = std::function<uint16_t(std::string_view)>;
-using bpdoc_cb_t    = std::function<std::string(std::string_view)>;
+using RegsCb     = std::function<std::string()>;
+using GetpcCb    = std::function<addr_t()>;
+using SetpcCb    = std::function<void(addr_t)>;
+using PeekCb     = std::function<uint8_t(addr_t)>;
+using WriteCb    = std::function<void(addr_t, uint8_t)>;
+using DisassCb   = std::function<void(std::ostream&, addr_t, size_t, bool)>;
+using MmapCb     = std::function<sptr_t<ASpace>()>;
+using EbreakCb   = std::function<void()>;
+using LoadCb     = std::function<std::pair<addr_t, addr_t>(std::string_view, addr_t)>;
+using SaveCb     = std::function<void(std::string_view, addr_t, addr_t)>;
+using LogfileCb  = std::function<void(int)>;
+using LoglevelCb = std::function<Loglevel(std::string_view)>;
+using RegvalueCb = std::function<uint16_t(std::string_view)>;
+using BpdocCb    = std::function<std::string(std::string_view)>;
 
 /**
  * Monitored CPU.
@@ -58,20 +57,20 @@ using bpdoc_cb_t    = std::function<std::string(std::string_view)>;
  * by any CPU that wants to be monitored.
  */
 struct MonitoredCPU {
-    regs_cb_t     regs{};       /* Registers as string                      */
-    getpc_cb_t    getpc{};      /* Get the program counter                  */
-    setpc_cb_t    setpc{};      /* Set the program counter                  */
-    peek_cb_t     peek{};       /* Peek memory                              */
-    write_cb_t    write{};      /* Write memory                             */
-    disass_cb_t   disass{};     /* Disassembly a memory address             */
-    mmap_cb_t     mmap{};       /* Get the memory mappings (address space)  */
-    ebreak_cb_t   ebreak{};     /* Set a breakpoint on next instruction     */
-    load_cb_t     load{};       /* Inject content of a file into memory     */
-    save_cb_t     save{};       /* Write a memory area into a file          */
-    LogfileCb     logfile{};    /* Set the logfile file descriptor          */
-    loglevel_cb_t loglevel{};   /* Set/get the loglevel                     */
-    regvalue_cb_t regvalue{};   /* Get a register's value given its name    */
-    bpdoc_cb_t    bpdoc{};      /* Documentation on how to set breakpoints  */
+    RegsCb      regs{};         /* Registers as string                      */
+    GetpcCb     getpc{};        /* Get the program counter                  */
+    SetpcCb     setpc{};        /* Set the program counter                  */
+    PeekCb      peek{};         /* Peek memory                              */
+    WriteCb     write{};        /* Write memory                             */
+    DisassCb    disass{};       /* Disassemble a memory address             */
+    MmapCb      mmap{};         /* Get the memory mappings (address space)  */
+    EbreakCb    ebreak{};       /* Set a breakpoint on next instruction     */
+    LoadCb      load{};         /* Inject content of a file into memory     */
+    SaveCb      save{};         /* Write a memory area into a file          */
+    LogfileCb   logfile{};      /* Set the logfile file descriptor          */
+    LoglevelCb  loglevel{};     /* Set/get the loglevel                     */
+    RegvalueCb  regvalue{};     /* Get a register's value given its name    */
+    BpdocCb     bpdoc{};        /* Documentation on how to set breakpoints  */
 
     operator bool() const {
         return (regs && getpc && setpc && peek && write && disass && mmap &&

@@ -335,7 +335,7 @@ public:
      * @see monitor::monitored_cpu_defaults()
      * @see monitor::MonitoredCPU
      */
-    void init_monitor(int ifd, int ofd, const monitor::load_cb_t& load = {}, const monitor::save_cb_t& save = {});
+    void init_monitor(int ifd, int ofd, const monitor::LoadCb& load = {}, const monitor::SaveCb& save = {});
 
     /**
      * Set the log file.
