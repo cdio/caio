@@ -44,7 +44,6 @@ CXXSRCS+=	c64.cpp \
 		c64_config.cpp \
 		c64_crt.cpp \
 		c64_io.cpp \
-		c64_joystick.cpp \
 		c64_keyboard.cpp \
 		c64_pla.cpp \
 		c64_vic2_aspace.cpp \

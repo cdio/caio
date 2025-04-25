@@ -295,8 +295,8 @@ void C64::create_devices()
     }
 
     _kbd  = std::make_shared<C64Keyboard>(_conf.keyboard);
-    _joy1 = std::make_shared<Joystick>("joy1", joystick_port);
-    _joy2 = std::make_shared<Joystick>("joy2", joystick_port);
+    _joy1 = std::make_shared<Joystick>("joy1", joystick_port());
+    _joy2 = std::make_shared<Joystick>("joy2", joystick_port());
 
     if (_conf.vjoy.enabled) {
         _kbd->vjoystick(_conf.vjoy, _joy1);

@@ -198,7 +198,7 @@ void ZXSpectrum::create_devices()
     _ram  = std::make_shared<RAM>("ram", RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES);
     _rom  = std::make_shared<ROM>("rom", rompath(ROM_FNAME), ROM_DIGEST);
     _kbd  = std::make_shared<ZXSpectrumKeyboard>(_conf.keyboard);
-    _joy  = std::make_shared<Joystick>("kempston", kempston::joystick_port);
+    _joy  = std::make_shared<Joystick>("kempston", kempston::joystick_port());
     _tape = std::make_shared<ZXSpectrumTape>(_clk, _conf.itape, _conf.otape, _conf.fastload);
     _ula  = std::make_shared<ULA>(_cpu, _ram, _rom, _kbd, _joy, _tape);
 

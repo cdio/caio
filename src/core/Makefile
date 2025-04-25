@@ -78,7 +78,6 @@ INCS=		aspace.hpp \
 		utils.hpp \
 		version.hpp
 
-CXXSRCS+=	kempston.cpp
 INCS+=		kempston.hpp
 
 CXXSRCS+=	mos_6502.cpp \

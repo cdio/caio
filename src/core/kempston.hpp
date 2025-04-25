@@ -42,7 +42,23 @@ constexpr static const uint16_t JOY_MASK       = D0 | D1 | D2 | D3 | D4;
 /**
  * Kempston interface joystick port.
  */
-extern JoystickPort joystick_port;
+constexpr JoystickPort joystick_port()
+{
+    return {
+        .up     = JOY_PORT_UP,
+        .down   = JOY_PORT_DOWN,
+        .left   = JOY_PORT_LEFT,
+        .right  = JOY_PORT_RIGHT,
+        .fire   = JOY_PORT_FIRE,
+        .a      = 0,
+        .b      = 0,
+        .x      = 0,
+        .y      = 0,
+        .back   = 0,
+        .guide  = 0,
+        .start  = 0
+    };
+}
 
 }
 }
