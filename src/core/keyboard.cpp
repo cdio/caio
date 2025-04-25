@@ -226,10 +226,10 @@ void Keyboard::load(const fs::Path& fname)
             }
 
             const auto& key_name  = result.str(1);
-            bool key_shift        = (result.str(2) == "SHIFT" ? true : false);
-            bool key_altgr        = (result.str(3) == "ALTGR" ? true : false);
+            bool key_shift        = (result.str(2) == "SHIFT");
+            bool key_altgr        = (result.str(3) == "ALTGR");
             const auto& impl_name = result.str(4);
-            bool impl_shift       = (result.str(5) == "SHIFT" ? true : false);
+            bool impl_shift       = (result.str(5) == "SHIFT");
 
             add_key_map(key_name, key_shift, key_altgr, impl_name, impl_shift);
 
