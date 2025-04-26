@@ -30,6 +30,6 @@ debug: all
 	${SJASM} $<
 
 ${SJASM}:
-	${MAKE} ${MARKEARGS} -C${TOOLSDIR} all
+	${MAKE} ${MARKEARGS} -C${TOOLS_DIR} all
 
 include ${ROOT}/mk/clean.mk

@@ -40,12 +40,23 @@ TESTS=		z80docflags.out \
 
 # XXX		z80ccfscr.out \
 
+TESTS_DIR=	${ROOT}/3rdparty/tests/z80/rak/src
+
+TESTS_MAKEDIR=	${TESTS_DIR}/..
+
+_TESTS=		${TESTS:%=${TESTS_DIR}/%}
+
 .PHONY: all clean debug install test
 
-include ${ROOT}/mk/bin.mk
+all: ${_TESTS} ${BIN}
 
-test: ${BIN}
+test: all
 	${BIN} -b ${TESTS}
+
+${_TESTS}:
+	${MAKE} ${MAKEARGS} -C${TESTS_MAKEDIR}
+
+include ${ROOT}/mk/bin.mk
 
 install:
 

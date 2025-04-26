@@ -36,8 +36,8 @@ namespace test {
 
 Z80Test::Z80Test(const std::string &fname)
     : _clk{std::make_shared<Clock>("clk", CLOCK_FREQ, 0)},
-      _ram{std::make_shared<RAM>(65536, "ram")},
-      _rom{std::make_shared<ROM>(fname, 0, "rom")},
+      _ram{std::make_shared<RAM>("ram", 65536)},
+      _rom{std::make_shared<ROM>("rom", fname, 0)},
       _cpu{std::make_shared<Z80>()},
       _mmap{std::make_shared<Z80TestASpace>(_cpu, _ram, _rom, std::cout)}
 {
