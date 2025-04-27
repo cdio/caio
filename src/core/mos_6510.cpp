@@ -40,6 +40,12 @@ Mos6510::~Mos6510()
 {
 }
 
+void Mos6510::reset()
+{
+    Mos6502::reset();
+    _iodir = 0;
+}
+
 uint8_t Mos6510::read(addr_t addr, Device::ReadMode mode)
 {
     switch (addr) {

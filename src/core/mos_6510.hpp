@@ -31,15 +31,15 @@ class Mos6510 : public Mos6502 {
 public:
     constexpr static const char* TYPE    = "MOS6510";
 
-    constexpr static const addr_t PORT_0 = 0x0000;  /* Data direction register  */
-    constexpr static const addr_t PORT_1 = 0x0001;  /* I/O port                 */
+    constexpr static const addr_t PORT_0 = 0x0000;  /* Data direction register (0=input, 1=input/ouput) */
+    constexpr static const addr_t PORT_1 = 0x0001;  /* I/O port */
 
-    constexpr static const uint8_t P0    = 0x01;
-    constexpr static const uint8_t P1    = 0x02;
-    constexpr static const uint8_t P2    = 0x04;
-    constexpr static const uint8_t P3    = 0x08;
-    constexpr static const uint8_t P4    = 0x10;
-    constexpr static const uint8_t P5    = 0x20;
+    constexpr static const uint8_t P0    = D0;
+    constexpr static const uint8_t P1    = D1;
+    constexpr static const uint8_t P2    = D2;
+    constexpr static const uint8_t P3    = D3;
+    constexpr static const uint8_t P4    = D4;
+    constexpr static const uint8_t P5    = D5;
     constexpr static const uint8_t PALL  = P0 | P1 | P2 | P3 | P4 | P5;
 
     using BreakpointCb = std::function<void(Mos6510&, void*)>;
@@ -78,7 +78,7 @@ public:
      * Add an input callback.
      * @param ior  Input callback;
      * @param mask Ports (as bit-mask) used by the callback.
-     * @see Gpio::add_ior()
+     * @see Gpio::add_ior(const IorCb&, DATA)
      */
     void add_ior(const IorCb& ior, uint8_t mask)
     {
@@ -89,7 +89,7 @@ public:
      * Add an ouput callback.
      * @param iow  Output callback;
      * @param mask Ports (as bit-mask) used by the callback.
-     * @see Gpio::add_iow()
+     * @see Gpio::add_iow(const IowCb&, DATA)
      */
     void add_iow(const IowCb& iow, uint8_t mask)
     {
@@ -98,7 +98,7 @@ public:
 
     /**
      * Add a breakpoint on a memory address.
-     * @see Mos6502::bpadd()
+     * @see Mos6502::bpadd(addr_t, const BreakpointCb&, void*)
      */
     void bpadd(addr_t addr, const BreakpointCb& cb, void* arg)
     {
@@ -106,14 +106,19 @@ public:
     }
 
     /**
-     * @see Mos6502::read()
+     * @see Mos6502::read(addr_t, Device::ReadMode)
      */
     uint8_t read(addr_t addr, Device::ReadMode mode = Device::ReadMode::Read) override;
 
     /**
-     * @see Mos6502::write()
+     * @see Mos6502::write(addr_t, uint8_t)
      */
     void write(addr_t addr, uint8_t data) override;
+
+    /**
+     * @see Mos6502::reset()
+     */
+    void reset() override;
 
 private:
     uint8_t _iodir{};
