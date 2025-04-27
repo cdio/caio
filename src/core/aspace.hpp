@@ -79,12 +79,12 @@ public:
     using bank_t = std::array<devmap_t, BLOCKS>;
 
     /**
-     * @see Device::read()
+     * @see Device::read(size_t, Device::ReadMode)
      */
     virtual uint8_t read(addr_t addr, ReadMode mode = ReadMode::Read);
 
     /**
-     * @see Device::write()
+     * @see Device::write(size_t, uint8_t)
      */
     virtual void write(addr_t addr, uint8_t value);
 
@@ -95,7 +95,7 @@ public:
     }
 
     /**
-     * @see Device::peek()
+     * @see Device::peek(size_t)
      */
     uint8_t peek(addr_t addr) const {
         return const_cast<ASpace*>(this)->read(addr, ReadMode::Peek);
