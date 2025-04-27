@@ -28,6 +28,7 @@ C64_ARGS=	c64 \
 		--romdir ${ROOT}/data/roms \
 		--scale 2 \
 		--loglevel all \
+		--delay 0 \
 		--unit8 ${UNIT8_DIR}
 
 UNIT8_DIR=	./unit8

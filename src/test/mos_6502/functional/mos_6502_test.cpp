@@ -36,9 +36,9 @@ using namespace std::literals::string_literals;
 namespace caio {
 namespace test {
 
-Mos6502Test::Mos6502Test(std::string_view fname)
+Mos6502Test::Mos6502Test(const fs::Path& fname)
     : _clk{std::make_shared<Clock>("clk", CLOCK_FREQ, 0)},
-      _ram{std::make_shared<RAM>(fname, 65536, "ram")},
+      _ram{std::make_shared<RAM>("ram", fname, 65536)},
       _cpu{std::make_shared<Mos6502>()},
       _io{STDIN_FILENO, STDOUT_FILENO},
       _mmap{std::make_shared<Mos6502TestASpace>(_cpu, _ram, _io)}

@@ -34,7 +34,12 @@ TEST=		funct.bin
 TEST_ASM=	${TEST:%.bin=%.a65}
 TEST_DEP=	report.i65
 
+ifeq (${OS}, Darwin)
+DOSBOX=		dosbox-staging
+else
 DOSBOX=		dosbox
+endif
+
 UNZIP=		unzip
 AS65=		AS65-DOS.EXE
 AS65_ZIP=	${ROOT}/3rdparty/tests/6502/6502_65C02_functional_tests/as65_142.zip

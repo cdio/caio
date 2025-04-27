@@ -19,9 +19,9 @@
 #pragma once
 
 #include <memory>
-#include <string_view>
 
 #include "clock.hpp"
+#include "fs.hpp"
 #include "ram.hpp"
 #include "mos_6502.hpp"
 #include "readline.hpp"
@@ -38,7 +38,7 @@ constexpr static const unsigned CLOCK_FREQ = 985248;
  */
 class Mos6502Test {
 public:
-    Mos6502Test(std::string_view fname);
+    Mos6502Test(const fs::Path& fname);
 
     void run(bool autostart);
 
