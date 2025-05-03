@@ -22,8 +22,6 @@ endif
 
 LNDIR=			${TOOLS_BINDIR}/lndir
 
-EXTRA_3RDPARTY_DIRS+=
-
 SYSDEP_CPPFLAGS+=
 
 LIB_INCLUDE_BEGIN=	-Wl,--whole-archive

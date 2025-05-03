@@ -28,8 +28,6 @@ endif
 
 override SDL2_CONFIG=	${HOMEBREW_DIR}/bin/sdl2-config
 
-EXTRA_3RDPARTY_DIRS+=
-
 SYSDEP_CPPFLAGS+=	-I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
 
 LIB_INCLUDE_BEGIN=	-Wl,-all_load

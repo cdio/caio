@@ -130,3 +130,4 @@ MODE_BIN?=		0755
 MODE_DATA?=		0644
 
 HOME:=			${shell echo ~}
+
