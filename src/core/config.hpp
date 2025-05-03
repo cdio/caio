@@ -19,9 +19,9 @@
 #pragma once
 
 #include <functional>
-#include <map>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <utility>
 
 #include "fs.hpp"
@@ -151,7 +151,7 @@ constexpr static const char* DEFAULT_STATUSBAR      = "south";
  * Configuration file section.
  * A section contains key-value pairs.
  */
-using Section = std::map<std::string, std::string>;
+using Section = std::unordered_map<std::string, std::string>;
 
 /**
  * Configuration file.
@@ -215,16 +215,16 @@ public:
      * @return An iterator to the section; or end() if the section does not exist.
      * @see end()
      */
-    std::map<std::string, Section>::const_iterator find(std::string_view sname) const;
+    std::unordered_map<std::string, Section>::const_iterator find(std::string_view sname) const;
 
     /**
      * Return an iterator following the last section of this configuration file.
      * @return An iterator following the last section.
      */
-    std::map<std::string, Section>::const_iterator end() const;
+    std::unordered_map<std::string, Section>::const_iterator end() const;
 
 private:
-    std::map<std::string, Section> _sections;
+    std::unordered_map<std::string, Section> _sections;
 };
 
 /**

@@ -20,10 +20,10 @@
 
 #include <atomic>
 #include <functional>
-#include <map>
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <utility>
 
 #include "keyboard.hpp"
@@ -403,7 +403,7 @@ private:
 
     AudioStream                 _audio_stream{};            /* Audio driver                                       */
 
-    std::map<::SDL_JoystickID, uptrd_t<::SDL_GameController>> _sdl_joys{};
+    std::unordered_map<::SDL_JoystickID, uptrd_t<::SDL_GameController>> _sdl_joys{};
 };
 
 }

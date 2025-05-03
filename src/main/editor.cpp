@@ -211,7 +211,7 @@ uptr_t<ConfigEditor> ConfigEditor::make_editor(Gui& gui, const fs::Path& cfile)
             return std::make_unique<editor_type>(gui, cfile, std::move(sec));                   \
     }
 
-    static const std::map<std::string, uptr_t<ConfigEditor>(*)(Gui&, const fs::Path&, config::Section&&)> editors{
+    static const std::unordered_map<std::string, uptr_t<ConfigEditor>(*)(Gui&, const fs::Path&, config::Section&&)> editors{
         { "c64",        INSTANTIATOR(ConfigEditorC64)          },
         { "nes",        INSTANTIATOR(ConfigEditorNES)          },
         { "zx80",       INSTANTIATOR(ConfigEditorZX80)         },

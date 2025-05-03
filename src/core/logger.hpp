@@ -22,9 +22,9 @@
 #include <cstdio>
 #include <cstdint>
 #include <format>
-#include <map>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 
 #include "fs.hpp"
 #include "types.hpp"
@@ -171,7 +171,7 @@ private:
     int           _fd{-1};
     std::string   _logfile{};
 
-    static std::map<std::string, Logger::Level> loglevels;
+    static std::unordered_map<std::string, Logger::Level> loglevels;
 };
 
 using Loglevel = Logger::Level;

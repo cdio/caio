@@ -23,6 +23,7 @@
 #include <fstream>
 #include <regex>
 #include <sstream>
+#include <unordered_map>
 
 #include "types.hpp"
 #include "utils.hpp"
@@ -33,7 +34,7 @@
 namespace caio {
 namespace keyboard {
 
-static std::map<std::string, Key> name_to_key{
+static std::unordered_map<std::string, Key> name_to_key{
     KEY_ENTRY(KEY_ESC),
     KEY_ENTRY(KEY_F1),
     KEY_ENTRY(KEY_F2),

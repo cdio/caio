@@ -106,12 +106,12 @@ Section Confile::extract(std::string_view sname)
     return (nh ? std::move(nh.mapped()) : Section{});
 }
 
-std::map<std::string, Section>::const_iterator Confile::find(std::string_view sname) const
+std::unordered_map<std::string, Section>::const_iterator Confile::find(std::string_view sname) const
 {
     return _sections.find(utils::tolow(sname));
 }
 
-std::map<std::string, Section>::const_iterator Confile::end() const
+std::unordered_map<std::string, Section>::const_iterator Confile::end() const
 {
     return _sections.end();
 }

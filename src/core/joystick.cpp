@@ -19,14 +19,14 @@
 #include "joystick.hpp"
 
 #include <cstddef>
-#include <map>
+#include <unordered_map>
 
 #include "utils.hpp"
 
 namespace caio {
 namespace joystick {
 
-static const std::map<std::string, ssize_t> gamepad_name_to_port{
+static const std::unordered_map<std::string, ssize_t> gamepad_name_to_port{
     { "UP",     offsetof(Port, up)    },
     { "DOWN",   offsetof(Port, down)  },
     { "LEFT",   offsetof(Port, left)  },
@@ -44,22 +44,17 @@ static const std::map<std::string, ssize_t> gamepad_name_to_port{
 ssize_t port_name_to_offset(std::string_view name)
 {
     const auto it = gamepad_name_to_port.find(utils::toup(name));
-    if (it == gamepad_name_to_port.end()) {
-        return -1;
-    }
-
-    return it->second;
+    return (it == gamepad_name_to_port.end() ? -1 : it->second);
 }
 
 std::string port_offset_to_string(ssize_t offset)
 {
-    for (const auto& [name, off] : gamepad_name_to_port) {
-        if (offset == off) {
-            return name;
-        }
-    }
+    const auto it = std::find_if(std::begin(gamepad_name_to_port), std::end(gamepad_name_to_port),
+        [offset](const auto& pair) {
+            return (offset == pair.second);
+    });
 
-    return "";
+    return (it == std::end(gamepad_name_to_port) ? "" : it->first);
 }
 
 }

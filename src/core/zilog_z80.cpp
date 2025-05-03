@@ -366,7 +366,7 @@ void Z80::init_monitor(int ifd, int ofd, const monitor::LoadCb& load, const moni
     };
 
     auto regvalue = [this](std::string_view rname) -> uint16_t {
-        static std::map<std::string, std::function<int(const Z80&)>> regvals{
+        static std::unordered_map<std::string, std::function<int(const Z80&)>> regvals{
             { "ra",    [](const Z80& cpu) { return cpu._regs.A;     }},
             { "rf",    [](const Z80& cpu) { return cpu._regs.F;     }},
             { "raf",   [](const Z80& cpu) { return cpu._regs.AF;    }},

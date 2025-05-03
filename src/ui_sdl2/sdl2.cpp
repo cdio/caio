@@ -18,13 +18,13 @@
  */
 #include "ui_sdl2/sdl2.hpp"
 
-#include <map>
+#include <unordered_map>
 
 namespace caio {
 namespace ui {
 namespace sdl2 {
 
-static std::map<::SDL_Scancode, keyboard::Key> sdl_to_key{
+static std::unordered_map<::SDL_Scancode, keyboard::Key> sdl_to_key{
     { SDL_SCANCODE_A,               keyboard::KEY_A                 },
     { SDL_SCANCODE_B,               keyboard::KEY_B                 },
     { SDL_SCANCODE_C,               keyboard::KEY_C                 },

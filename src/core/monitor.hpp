@@ -20,10 +20,10 @@
 
 #include <cstdint>
 #include <functional>
-#include <map>
 #include <memory>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -316,13 +316,12 @@ private:
     //FIXME: move to utils
     size_t to_count(std::string_view str);
 
-    Readline                 _rd{};
-    MonitoredCPU             _cpu{};
-
-    bool                     _is_running{};
-    std::string              _prev_line{};
-    std::string              _prev_fn{};
-    std::map<addr_t, cond_t> _breakpoints{};
+    Readline                           _rd{};
+    MonitoredCPU                       _cpu{};
+    bool                               _is_running{};
+    std::string                        _prev_line{};
+    std::string                        _prev_fn{};
+    std::unordered_map<addr_t, cond_t> _breakpoints{};
 
     static bool assemble    (Monitor& mon, const Command::args_t& args);
     static bool disassemble (Monitor& mon, const Command::args_t& args);

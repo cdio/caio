@@ -31,7 +31,7 @@
 
 namespace caio {
 
-std::map<std::string, Logger::Level> Logger::loglevels = {
+std::unordered_map<std::string, Logger::Level> Logger::loglevels = {
     { ERROR_STR,    Logger::Error   },
     { WARN_STR,     Logger::Warn    },
     { INFO_STR,     Logger::Info    },
@@ -91,7 +91,7 @@ Logger::~Logger()
 
 void Logger::logfile(const fs::Path& fname)
 {
-    const int fd = ::open(fname.c_str(), O_WRONLY);
+    const int fd = ::open(fname.c_str(), O_WRONLY | O_CREAT, 0644);
     if (fd < 0) {
         throw LoggerError{"Can't open logfile: {}: {}\n", fname.c_str(), Error::to_string()};
     }

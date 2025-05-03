@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <map>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 #include <tuple>
 #include <utility>
@@ -62,7 +62,7 @@ private:
     /* ConfigEntry = std::tuple<read-only, name, path> */
     using ConfigEntry = std::tuple<bool, std::string, fs::Path>;
     using ConfigVector = std::vector<ConfigEntry>;
-    using LoadedConfigMap = std::map<fs::Path, uptr_t<ConfigEditor>>;
+    using LoadedConfigMap = std::unordered_map<fs::Path, uptr_t<ConfigEditor>>;
 
     /**
      * Initialise this configurator.

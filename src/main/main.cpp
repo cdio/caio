@@ -21,7 +21,7 @@
 #include <filesystem>
 #include <functional>
 #include <iostream>
-#include <map>
+#include <unordered_map>
 
 #include "types.hpp"
 #include "config.hpp"
@@ -63,7 +63,7 @@ int machine_main(int argc, const char** argv)
 
 #define MACHINE_ENTRY(name, nm, type)         { name, machine_main<nm::type, nm::type ## Cmdline> }
 
-static std::map<std::string, std::function<int(int, const char**)>> machines = {
+static std::unordered_map<std::string, std::function<int(int, const char**)>> machines = {
     MACHINE_ENTRY("c64",        commodore::c64,         C64),
     MACHINE_ENTRY("nes",        nintendo::nes,          NES),
     MACHINE_ENTRY("zx80",       sinclair::zx80,         ZX80),

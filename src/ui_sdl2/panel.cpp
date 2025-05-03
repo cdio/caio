@@ -64,7 +64,7 @@ void Panel::reset(const sptr_t<::SDL_Renderer>& renderer, const std::string& sta
 
 int Panel::sb_str2pos(const std::string& strpos)
 {
-    static const std::map<std::string, int> str2pos{
+    static const std::unordered_map<std::string, int> str2pos{
         { "center",     SB_POSITION_CENTER                      },
         { "north",      SB_POSITION_NORTH                       },
         { "south",      SB_POSITION_SOUTH                       },

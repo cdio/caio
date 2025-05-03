@@ -20,7 +20,7 @@
 
 #include <atomic>
 #include <functional>
-#include <map>
+#include <unordered_map>
 #include <utility>
 
 #include "aspace.hpp"
@@ -822,7 +822,7 @@ private:
     Cycle            _tx{};
     uint8_t          _opcode{};
     std::atomic_bool _break{};
-    std::map<addr_t, std::pair<BreakpointCb, void*>> _breakpoints{};
+    std::unordered_map<addr_t, std::pair<BreakpointCb, void*>> _breakpoints{};
 
     static const Instruction main_instr_set[256];
     static const Instruction bit_instr_set[256];
