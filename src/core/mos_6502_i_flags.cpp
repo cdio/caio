@@ -47,7 +47,12 @@ int Mos6502::i_CLI(Mos6502& self, addr_t)
      * Clear Interrupt flag
      * CLI              - 58 - 2 cycles.
      */
-    self.flag_I(false);
+    if (self.test_I()) {
+        /*
+         * Delay setting of flag I.
+         */
+        self._delayed_I = false;
+    }
     return 0;
 }
 
@@ -57,7 +62,12 @@ int Mos6502::i_SEI(Mos6502& self, addr_t)
      * Set Interrupt flag
      * SEI              - 78 - 2 cycles
      */
-    self.flag_I(true);
+    if (!self.test_I()) {
+        /*
+         * Delay setting of flag I.
+         */
+        self._delayed_I = true;
+    }
     return 0;
 }
 

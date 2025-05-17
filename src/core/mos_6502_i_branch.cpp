@@ -27,11 +27,7 @@ int Mos6502::i_BPL(Mos6502& self, addr_t rel)
      * Branch (jump) relative if positive
      * BPL $r8          - 10 - 2 cycles, (3 if branched to same page, 4 if branched to another page)
      */
-    if (!self.test_N()) {
-        self.take_branch(rel);
-    }
-
-    return 0;
+    return (!self.test_N() ? self.take_branch(rel) : 0);
 }
 
 int Mos6502::i_BMI(Mos6502& self, addr_t rel)
@@ -40,11 +36,7 @@ int Mos6502::i_BMI(Mos6502& self, addr_t rel)
      * Branch (jump) relative if negative
      * BMI $r8          - 30 - 2 cycles, (3 if branched to same page, 4 if branched to another page)
      */
-    if (self.test_N()) {
-        self.take_branch(rel);
-    }
-
-    return 0;
+    return (self.test_N() ? self.take_branch(rel) : 0);
 }
 
 int Mos6502::i_BVC(Mos6502& self, addr_t rel)
@@ -53,11 +45,7 @@ int Mos6502::i_BVC(Mos6502& self, addr_t rel)
      * Branch (jump) relative if overflow is not set
      * BVC $r8          - 50 - 2 cycles, (3 if branched to same page, 4 if branched to another page)
      */
-    if (!self.test_V()) {
-        self.take_branch(rel);
-    }
-
-    return 0;
+    return (!self.test_V() ? self.take_branch(rel) : 0);
 }
 
 int Mos6502::i_BVS(Mos6502& self, addr_t rel)
@@ -66,11 +54,7 @@ int Mos6502::i_BVS(Mos6502& self, addr_t rel)
      * Branch (jump) relative if overflow is set
      * BVS $r8          - 70 - 2 cycles, (3 if branched to same page, 4 if branched to another page)
      */
-    if (self.test_V()) {
-        self.take_branch(rel);
-    }
-
-    return 0;
+    return (self.test_V() ? self.take_branch(rel) : 0);
 }
 
 int Mos6502::i_BCC(Mos6502& self, addr_t rel)
@@ -79,11 +63,7 @@ int Mos6502::i_BCC(Mos6502& self, addr_t rel)
      * Branch (jump) relative if carry is not set
      * BCC $r8          - 90 - 2 cycles, (3 if branched to same page, 4 if branched to another page)
      */
-    if (!self.test_C()) {
-        self.take_branch(rel);
-    }
-
-    return 0;
+    return (!self.test_C() ? self.take_branch(rel) : 0);
 }
 
 int Mos6502::i_BCS(Mos6502& self, addr_t rel)
@@ -92,11 +72,7 @@ int Mos6502::i_BCS(Mos6502& self, addr_t rel)
      * Branch (jump) relative if carry is set
      * BCS $r8          - B0 - 2 cycles, (3 if branched to same page, 4 if branched to another page)
      */
-    if (self.test_C()) {
-        self.take_branch(rel);
-    }
-
-    return 0;
+    return (self.test_C() ? self.take_branch(rel) : 0);
 }
 
 int Mos6502::i_BNE(Mos6502& self, addr_t rel)
@@ -105,11 +81,7 @@ int Mos6502::i_BNE(Mos6502& self, addr_t rel)
      * Branch (jump) relative if not zero
      * BNE $r8          - D0 - 2 cycles, (3 if branched to same page, 4 if branched to another page)
      */
-    if (!self.test_Z()) {
-        self.take_branch(rel);
-    }
-
-    return 0;
+    return (!self.test_Z() ? self.take_branch(rel) : 0);
 }
 
 int Mos6502::i_BEQ(Mos6502& self, addr_t rel)
@@ -118,11 +90,7 @@ int Mos6502::i_BEQ(Mos6502& self, addr_t rel)
      * Branch (jump) relative if zero
      * BEQ $r8          - F0 - 2 cycles, (3 if branched to same page, 4 if branched to another page)
      */
-    if (self.test_Z()) {
-        self.take_branch(rel);
-    }
-
-    return 0;
+    return (self.test_Z() ? self.take_branch(rel) : 0);
 }
 
 int Mos6502::i_BRK(Mos6502& self, addr_t)
@@ -138,8 +106,7 @@ int Mos6502::i_BRK(Mos6502& self, addr_t)
     self.push_addr(self._regs.PC + 1);
     self.push(self._regs.P | Flags::B);
     self.flag(Flags::I);
-    addr_t addr = self.read_addr(vIRQ);
-    self._regs.PC = addr;
+    self._regs.PC = self.read_addr(vIRQ);
     return 0;
 }
 
@@ -151,6 +118,7 @@ int Mos6502::i_RTI(Mos6502& self, addr_t)
      * P = pop() & ~Flags::B
      * PC = pop()
      */
+    self.read(S_base | self._regs.S);    /* Dummy read from stack */
     self._regs.P = (self.pop() & ~Flags::B) | Flags::_;
     self._regs.PC = self.pop_addr();
     return 0;
@@ -162,7 +130,7 @@ int Mos6502::i_JSR(Mos6502& self, addr_t addr)
      * Jump to subroutine
      * JSR $0000        - 20 - 6 cycles
      */
-    addr = self.read_addr(self._regs.PC - 2);
+    self.read(S_base | self._regs.S);   /* Dummy read from stack */
     self.push_addr(self._regs.PC - 1);  /* The pushed value is the last byte of the JSR instruction */
     self._regs.PC = addr;
     return 0;
@@ -174,8 +142,10 @@ int Mos6502::i_RTS(Mos6502& self, addr_t)
      * Return from subroutine
      * RTS              - 60 - 6 cycles
      */
-    addr_t ra = self.pop_addr() + 1;   /* The popped value is the last byte of the JSR instruction */
-    self._regs.PC = ra;
+    self.read(S_base | self._regs.S);   /* Dummy read from stack */
+    const addr_t ra = self.pop_addr();
+    self.read(ra);                      /* Dummy read from new PC - 1 */
+    self._regs.PC = ra + 1;             /* The popped value is the last byte of the JSR instruction */
     return 0;
 }
 

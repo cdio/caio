@@ -234,6 +234,7 @@ int Mos6502::i_PLA(Mos6502& self, addr_t)
      * PLA              - 68
      * Flags: N Z
      */
+    self.read(S_base | self._regs.S);   /* Dummy read from stack */
     self._regs.A = self.pop();
     self.set_N(self._regs.A);
     self.set_Z(self._regs.A);
@@ -257,7 +258,19 @@ int Mos6502::i_PLP(Mos6502& self, addr_t)
      * PLP              - 28
      * P = pop() & ~Flags::B
      */
-    self._regs.P = (self.pop() & ~Flags::B) | Flags::_;
+    self.read(S_base | self._regs.S);   /* Dummy read from stack */
+
+    const auto saved_P = self.pop();
+    const auto saved_I = saved_P & Flags::I;
+    const auto curr_I  = self._regs.P & Flags::I;
+
+    /* Delay setting of flag I */
+    self._regs.P = (saved_P & ~(Flags::B | Flags::I)) | Flags::_ | curr_I;
+
+    if (saved_I != curr_I) {
+        self._delayed_I = saved_I;
+    }
+
     return 0;
 }
 

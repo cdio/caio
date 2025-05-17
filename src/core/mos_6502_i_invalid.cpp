@@ -114,7 +114,7 @@ int Mos6502::i_SAX(Mos6502& self, addr_t addr)
      * SAX $00, Y       - 97 - 4 cycles
      * Flags: -
      */
-    uint8_t value = self._regs.A & self._regs.X;
+    const uint8_t value = self._regs.A & self._regs.X;
     self.write(addr, value);
     return 0;
 }
@@ -127,28 +127,19 @@ int Mos6502::i_LXA(Mos6502& self, addr_t value)
      * Alias: ATX, LAX immediate
      * Flags: N Z
      *
-     * "Two different functions have been discovered for LAX, opcode $AB. One
-     * is A = X = ANE (see above) and the other, encountered with 6510 and
-     * 8502, is less complicated A = X = (A & #byte). However, according to
-     * what is reported, the version altering only the lowest bits of each
-     * nybble seems to be more common.
-     * What happens, is that $AB loads a value into both A and X, ANDing the
-     * low bit of each nybble with the corresponding bit of the old
-     * A. However, there are exceptions. Sometimes the low bit is cleared
-     * even when A contains a '1', and sometimes other bits are cleared. The
-     * exceptions seem random (they change every time I run the test). Oops -
-     * that was in decimal mode. Much the same with D=0.
-     * What causes the randomness?  Probably it is that it is marginal logic
-     * levels - when too much wired-anding goes on, some of the signals get
-     * very close to the threshold. Perhaps we're seeing some of them step
-     * over it. The low bit of each nybble is special, since it has to cope
-     * with carry differently (remember decimal mode). We never see a '0'
-     * turn into a '1'.
-     * Since these instructions are unpredictable, they should not be used."
+     * "This opcode ORs the A register with CONST, ANDs the result with an
+     * immediate value, and then stores the result in both A and X.
+     * N and Z are set according to the value of the accumulator before the
+     * instruction executed.
+     * Instability: CONST is chip- and/or temperature dependent (common values
+     * may be $ee, $00, $ff, ...). Some dependency on the RDY line. Bit 0 and
+     * Bit 4 are “weaker” than the other bits, and may drop to 0 in the first
+     * cycle of DMA when RDY goes low."
      *
-     * see https://www.nesdev.org/6502_cpu.txt
+     * see NMOS 6510 - Unintended Opcodes
      */
-    uint8_t res = (self._regs.A & 0x11 & value) | (value & ~0x11);
+    constexpr static const uint8_t CONST = 0xFF; /* Common values are 00, EE, or FF */
+    const uint8_t res = (self._regs.A | CONST) & value;
     self._regs.A = self._regs.X = res;
     self.set_N(self._regs.A);
     self.set_Z(self._regs.A);
@@ -288,14 +279,14 @@ int Mos6502::i_ARR_imm(Mos6502& self, addr_t value)
      */
     self._regs.A &= (value & 255);
 
-    uint8_t hiA = self._regs.A >> 4;
-    uint8_t loA = self._regs.A & 15;
-    bool prev_b6 = self._regs.A & D6;
+    const uint8_t hiA = self._regs.A >> 4;
+    const uint8_t loA = self._regs.A & 15;
+    const bool prev_b6 = self._regs.A & D6;
 
     self._regs.A = self.logic_ror(self._regs.A);
 
-    bool b6 = self._regs.A & D6;
-    bool b5 = self._regs.A & D5;
+    const bool b6 = self._regs.A & D6;
+    const bool b5 = self._regs.A & D5;
 
     if (self.decimal_mode()) {
         self.flag_V(prev_b6 != b6);
@@ -361,7 +352,7 @@ int Mos6502::i_SBX_imm(Mos6502& self, addr_t value)
      *
      * See https://www.pagetable.com/c64ref/6502/?tab=2#SBX
      */
-    int result = static_cast<int>(self._regs.A & self._regs.X) - static_cast<int>(value);
+    const int result = static_cast<int>(self._regs.A & self._regs.X) - static_cast<int>(value);
     self._regs.X = result & 0xFF;
     self.flag_C(result >= 0);
     self.set_N(self._regs.X);
@@ -378,14 +369,14 @@ int Mos6502::i_SHA(Mos6502& self, addr_t addr)
      * Alias: SAH, AXA, AHY
      * Flags: -
      *
-     * "Stores A AND X AND (high-byte of addr. + 1) at addr.
+     * "Stores A AND X AND (high-byte of addr + 1) at addr.
      * unstable: sometimes 'AND (H+1)' is dropped, page boundary crossings
      * may not work (with the high-byte of the value used as the high-byte of the address)
      * A AND X AND (H+1) -> M"
      *
      * See https://www.masswerk.at/nowgobang/2021/6502-illegal-opcodes
      */
-    uint8_t value = self._regs.A & self._regs.X & ((addr >> 8) + 1);
+    const uint8_t value = self._regs.A & self._regs.X & ((addr >> 8) + 1);
     self.write(addr, value);
     return 0;
 }
@@ -394,12 +385,19 @@ int Mos6502::i_SHY(Mos6502& self, addr_t addr)
 {
     /*
      * Store Y AND (high-byte of addr + 1) at addr
-     * SHY $0000, X     - 95 - 5 cycles
+     * SHY $0000, X     - 9C - 5 cycles
      *
      * See https://www.masswerk.at/nowgobang/2021/6502-illegal-opcodes
+     *
+     * The code below is the only way to pass the gblargg instruction test.
      */
-    uint8_t value = self._regs.Y & ((addr >> 8) + 1);
-    self.write(addr + self._regs.X, value);
+    const addr_t dst = addr + self._regs.X;
+    const bool crossed = self.page_crossed(addr, dst);
+    if (!crossed) {
+        const uint8_t hi = (addr + 1) >> 8;
+        const uint8_t value = self._regs.Y & hi;
+        self.write(dst, value);
+    }
     return 0;
 }
 
@@ -410,16 +408,23 @@ int Mos6502::i_SHX(Mos6502& self, addr_t addr)
      * SHX $0000, Y     - 9E - 5 cycles
      * Alias: SXA, SXH, XAS
      *
-     * "Stores X AND (high-byte of addr. + 1) at addr.
+     * "Stores X AND (high-byte of addr + 1) at addr.
      * unstable: sometimes 'AND (H+1)' is dropped, page boundary
      * crossings may not work (with the high-byte of the value used
      * as the high-byte of the address)
      * X AND (H+1) -> M"
      *
      * See https://www.masswerk.at/nowgobang/2021/6502-illegal-opcodes
+     *
+     * The code below is the only way to pass the gblargg instruction test.
      */
-    uint8_t value = self._regs.X & ((addr >> 8) + 1);
-    self.write(addr + self._regs.Y, value);
+    const addr_t dst = addr + self._regs.Y;
+    const bool crossed = self.page_crossed(addr, dst);
+    if (!crossed) {
+        const uint8_t hi = (addr + 1) >> 8;
+        const uint8_t value = self._regs.X & hi;
+        self.write(dst, value);
+    }
     return 0;
 }
 
@@ -438,8 +443,9 @@ int Mos6502::i_SHS(Mos6502& self, addr_t addr)
      * See https://www.masswerk.at/nowgobang/2021/6502-illegal-opcodes
      */
     self._regs.S = self._regs.A & self._regs.X;
-    uint8_t value = self._regs.S & ((addr >> 8) + 1);
-    self.write(addr + self._regs.Y, value);
+    const addr_t base = addr - self._regs.Y;
+    const uint8_t value = self._regs.S & ((base >> 8) + 1);
+    self.write(addr, value);
     return 0;
 }
 
@@ -451,7 +457,7 @@ int Mos6502::i_LAS(Mos6502& self, addr_t addr)
      * Alias: LAE, LAR, AST
      * Flags: N Z
      */
-    uint8_t value = self.read(addr);
+    const uint8_t value = self.read(addr);
     self._regs.A = self._regs.X = self._regs.S = self._regs.S & value;
     self.set_N(self._regs.A);
     self.set_Z(self._regs.A);

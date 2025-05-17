@@ -20,11 +20,12 @@
 
 #include <atomic>
 #include <functional>
-#include <map>
 #include <memory>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <utility>
 
 #include "aspace.hpp"
@@ -40,22 +41,25 @@ namespace caio {
 namespace mos {
 
 /**
- * MOS 6502 microprocessor.
+ * MOS 6502 NMOS microprocessor.
  * @see https://www.nesdev.org/6502_cpu.txt
  * @see https://www.nesdev.org/extra_instructions.txt
  * @see https://www.nesdev.org/undocumented_opcodes.txt
+ * @see https://csdb.dk/release/?id=212346
  */
 class Mos6502 : public Clockable, public Name {
 public:
-    constexpr static const char* TYPE     = "MOS6502";
-    constexpr static const char* LABEL    = "cpu";
+    constexpr static const char* TYPE           = "MOS6502";
+    constexpr static const char* LABEL          = "cpu";
 
-    constexpr static const addr_t vNMI    = 0xFFFA;
-    constexpr static const addr_t vRESET  = 0xFFFC;
-    constexpr static const addr_t vIRQ    = 0xFFFE;
+    constexpr static const addr_t vNMI          = 0xFFFA;
+    constexpr static const addr_t vRESET        = 0xFFFC;
+    constexpr static const addr_t vIRQ          = 0xFFFE;
 
-    constexpr static const addr_t S_base  = 0x0100;
-    constexpr static const uint8_t S_init = 0x00;
+    constexpr static const addr_t S_base        = 0x0100;
+    constexpr static const uint8_t S_init       = 0x00;
+
+    constexpr static const bool NO_DUMMY_READ   = false;
 
     using BreakpointCb = std::function<void(Mos6502&, void*)>;
 
@@ -90,7 +94,7 @@ public:
         int (*fn)(Mos6502&, addr_t);        /* Instruction callback                         */
         AddressingMode mode;                /* Addressing mode                              */
         size_t cycles;                      /* Clock cycles consumed by this instruction    */
-        size_t size;                        /* Size of the instruction (in bytes)           */
+        bool dummy_read{true};              /* Instruction with dummy reads                 */
     };
 
     struct Registers {
@@ -106,16 +110,19 @@ public:
     };
 
     /**
-     * Initialise this CPU.
+     * Initialise this CPU using the default type and label.
      * @param mmap System mappings.
+     * @see LABEL
+     * @see TYPE
      * @see Mos6502(std::string_view, const sptr_t<ASpace>&)
      */
     Mos6502(const sptr_t<ASpace>& mmap = {});
 
     /**
-     * Initialise this CPU.
+     * Initialise this CPU using the default type.
      * @param label Label;
      * @param mmap  System mappings.
+     * @see TYPE
      * @see Mos6502(std::string_view, std::string_view, const sptr_t<ASpace>&)
      */
     Mos6502(std::string_view label, const sptr_t<ASpace>& mmap);
@@ -140,18 +147,19 @@ public:
 
     /**
      * Initialise a monitor for this CPU.
-     * This CPU must be properly initialised (system mappings set) before this method can be called.
      * The CPU monitor is initialised and a breakpoint is added at the reset address (vRESET),
      * the monitor takes control as soon as this CPU is started.
      * @param ifd  Input file descriptor used to communicate with the user;
      * @param ofd  Output file descriptor used to communicate with the user.
-     * @param load Monitor load callback (empty for default);
-     * @param save Monitor save calblack (empty for default).
+     * @param load Load callback (empty for default);
+     * @param save Save calblack (empty for default).
+     * @see monitor::LoadCb
+     * @see monitor::SaveCb
      */
     void init_monitor(int ifd, int ofd, const monitor::LoadCb& load = {}, const monitor::SaveCb& save = {});
 
     /**
-     * Set the log file.
+     * Set the log file descriptor.
      * @param fd Output file descriptor.
      * @see Logger::logfile(int)
      */
@@ -213,14 +221,14 @@ public:
     void ebreak();
 
     /**
-     * Add a breakpoint on a memory address.
+     * Add a breakpoint at a memory address.
      * @param addr Address;
      * @param cb   Method to call when the breakpoint hits.
      */
     void bpadd(addr_t addr, const BreakpointCb& cb, void* arg);
 
     /**
-     * Delete a breakpoint on a memory address.
+     * Delete a breakpoint at a memory address.
      * @param addr Address.
      */
     void bpdel(addr_t addr);
@@ -236,51 +244,49 @@ public:
      * @param os      Output stream;
      * @param start   Start address with the machine code to disassemble;
      * @param count   Number of instructions to disassemble.
-     * @param show_pc true if the position of the PC must be marked in the disassembled code; false otherwise (default).
+     * @param show_pc true if the position of the PC must be marked in the disassembled code; false otherwise.
      */
     void disass(std::ostream& os, addr_t start, size_t count, bool show_pc = false);
 
     /**
-     * Read an address from an address.
-     * @param addr Address to read from.
-     * @return The 16 bits value.
-     * @exception InvalidReadAddress
-     * @see read()
-     */
-    addr_t read_addr(size_t addr);
-
-    /**
-     * Write an address into an address.
-     * @param addr  Address to write to;
-     * @param value 16 bits value to write.
-     * @exception InvalidWriteAddress
-     * @see write()
-     */
-    void write_addr(addr_t addr, addr_t data);
-
-    /**
-     * @see Device::read()
+     * @see Device::read(size_t, Device::Readmode)
      */
     virtual uint8_t read(addr_t addr, Device::ReadMode mode = Device::ReadMode::Read);
 
     /**
-     * @see Device::peek()
+     * @see Device::peek(size_t)
      */
     virtual uint8_t peek(addr_t addr) const {
         return const_cast<Mos6502*>(this)->read(addr, Device::ReadMode::Peek);
     }
 
     /**
-     * @see Device::write()
+     * @see Device::write(size_t, uint8_t)
      */
     virtual void write(addr_t addr, uint8_t data);
+
+    /**
+     * Read a 16-bit value from an address.
+     * @param addr Address to read from.
+     * @return The 16-bit value.
+     * @see read(addr_t)
+     */
+    addr_t read_addr(addr_t addr);
+
+    /**
+     * Write an address into an address.
+     * @param addr  Address to write to;
+     * @param value 16 bits value to write.
+     * @see write(addr_t, uint8_t)
+     */
+    void write_addr(addr_t addr, addr_t data);
 
 protected:
     /**
      * Tick event method.
      * This method is called by the clock and executes a single CPU instruction.
      * If the monitor is not running the current instruction is executed.
-     * If the monitor is running and a monitor-breakpoint is set on the current PC address
+     * If the monitor is running and a monitor-breakpoint is set at the current PC address
      * the monitor's run method is called instead.
      * @param clk The caller clock.
      * @return The number of clock cycles consumed (the clock will call this method again after
@@ -312,8 +318,37 @@ protected:
     size_t single_step();
 
     /**
+     * Read a 16-bit value from an address applying the page boundary bug.
+     * @param addr Address to read from.
+     * @return The 16-bit value.
+     * @see read_addr(addr_t)
+     */
+    addr_t read_addr_bug(addr_t addr);
+
+    /**
+     * Detect page boundary crossing.
+     * @param addr1 First address;
+     * @param addr2 Second address.
+     * @return true if the specified addresses belong to different pages; false otherwise.
+     */
+    bool page_crossed(addr_t addr1, addr_t addr2) const {
+        return ((addr1 & 0xFF00) != (addr2 & 0xFF00));
+    }
+
+    /**
+     * Detect page boundary crossing.
+     * @param addr   Initial address;
+     * @param offset Relative indexing offset.
+     * @return true if the page is crossed; false otherwise.
+     */
+    bool page_crossed_rel(addr_t addr, int8_t offset) const
+    {
+        return page_crossed(addr, addr + offset);
+    }
+
+    /**
      * Enable/disable support for decimal mode.
-     * If decimal mode is disabled the D flag is ignored and binary operations are performed.
+     * If decimal mode is disabled the D flag is ignored on arithmetic operatons.
      * @param act Enable/disable flag.
      */
     void decimal_enable(int act) {
@@ -321,8 +356,8 @@ protected:
     }
 
     /**
-     * Get the decimal mode status.
-     * @return True if the decimal mode is enabled and the decimal flag is set; false otherwise.
+     * Get the decimal mode.
+     * @return true if the decimal mode is enabled and the decimal flag is set; false otherwise.
      */
     bool decimal_mode() const {
         return (_decimal_en && test_D());
@@ -413,40 +448,47 @@ protected:
     }
 
     void push_addr(addr_t value) {
-        uint8_t hi = (value >> 8) & 0xff;
-        uint8_t lo = value & 0xff;
+        const uint8_t hi = (value >> 8) & 0xff;
+        const uint8_t lo = value & 0xff;
         push(hi);
         push(lo);
     }
 
     addr_t pop_addr() {
-        uint8_t lo = pop();
-        addr_t hi = pop();
-        addr_t addr = (hi << 8) | lo;
+        const uint8_t lo = pop();
+        const addr_t hi = pop();
+        const addr_t addr = (hi << 8) | lo;
         return addr;
     }
 
-    Logger          _log{};
-    uptr_t<Monitor> _monitor{};
-    Registers       _regs{};
-    sptr_t<ASpace>  _mmap{};
-    IRQPin          _irq_pin{};
-    IRQPin          _nmi_pin{};
-    InputPin        _rdy_pin{true};
-    bool            _halted{};
-    bool            _decimal_en{true};
+    Logger              _log{};
+    uptr_t<Monitor>     _monitor{};
+    Registers           _regs{};
+    sptr_t<ASpace>      _mmap{};
+    IRQPin              _irq_pin{};
+    IRQPin              _nmi_pin{};
+    InputPin            _rdy_pin{true};
+    bool                _halted{};
+    bool                _decimal_en{true};
+    std::optional<bool> _delayed_I{};
 
     std::atomic_bool _break{};
-    std::map<addr_t, std::pair<BreakpointCb, void*>> _breakpoints{};
+    std::unordered_map<addr_t, std::pair<BreakpointCb, void*>> _breakpoints{};
 
     static const Instruction instr_set[256];
 
     /**
      * Relative branch helper.
      * @param rel Address to jump relative to the current PC position.
+     * @return The number of extra cycles required to take the branch.
      */
-    void take_branch(int8_t rel) {
+    size_t take_branch(int8_t rel) {
+        const auto crossed = page_crossed_rel(_regs.PC, rel);
         _regs.PC += rel;
+        if (crossed) {
+            read(_regs.PC);     /* Dummy read */
+        }
+        return (1 + crossed);
     }
 
     /**
@@ -455,7 +497,7 @@ protected:
      * @return v1 & v2
      */
     uint8_t logic_and(uint8_t v1, uint8_t v2) {
-        uint8_t r = v1 & v2;
+        const uint8_t r = v1 & v2;
         set_N(r);
         set_Z(r);
         return r;
@@ -467,7 +509,7 @@ protected:
      * @return v1 | v2.
      */
     uint8_t logic_or(uint8_t v1, uint8_t v2) {
-        uint8_t r = v1 | v2;
+        const uint8_t r = v1 | v2;
         set_N(r);
         set_Z(r);
         return r;
@@ -479,7 +521,7 @@ protected:
      * @return v1 ^ v2
      */
     uint8_t logic_eor(uint8_t v1, uint8_t v2) {
-        uint8_t r = v1 ^ v2;
+        const uint8_t r = v1 ^ v2;
         set_N(r);
         set_Z(r);
         return r;
@@ -504,7 +546,7 @@ protected:
      * @return The rotated value.
      */
     uint8_t logic_rol(uint8_t v) {
-        uint8_t c = (test_C() ? 1 : 0);
+        const uint8_t c = (test_C() ? 1 : 0);
         flag_C(v & 0x80);
         v = (v << 1) | c;
         set_N(v);
@@ -531,7 +573,7 @@ protected:
      * @return The rotated value.
      */
     uint8_t logic_ror(uint8_t v) {
-        uint8_t c = (test_C() ? 0x80 : 0);
+        const uint8_t c = (test_C() ? 0x80 : 0);
         flag_C(v & 0x01);
         v = (v >> 1) | c;
         set_N(v);
@@ -544,8 +586,8 @@ protected:
      * Flags: N Z C
      */
     void cmp(uint8_t v1, uint8_t v2) {
-        int sum = v1 - v2;
-        uint8_t r = static_cast<uint8_t>(sum & 0xFF);
+        const int sum = v1 - v2;
+        const uint8_t r = static_cast<uint8_t>(sum & 0xFF);
         set_N(r);
         set_Z(r);
         flag_C(v1 >= v2);
