@@ -1,6 +1,8 @@
-- c64/nes:  Reset problem
+- Gamepad:  linux (left joystick), mac (apple messing around as usual)
+- c64/nes:  Reset problem (c64/ughlympics)
+- c64:      Bomjack joystick
+- nes:      mapper 2: Life force
 - nes:      Limit all audio signals to fs/2
-- nes:      Castlevania, fix upper lines scroll (timing method used?)
 - nes:      Sprite overflow bug
 - nes:      Test The Young Indiana Jones Chronicles and Burai Fighter
 - 2A03:     Dump of memory mapped registers
@@ -8,7 +10,6 @@
 - misc:     Test on macos-x86
 - misc:     Unify base machine (common base class for all platforms)
 - main:     Refactor configurator using a real gui toolkit (wxWidgets?)
-- 6502:     Tests suite: trap12 is failing
 - SID:      Filter gain or shape? (ballad/channels dane)
 - C1541Fs:  Fastload mode (remove time emulation during load/save operations)
 - C1541Fs:  Fix: Open "@S:URIDIUM HIGH/REM": 62 - "FILE NOT FOUND"
@@ -18,10 +19,9 @@
 - CBMBUS:   Timeout (to recover from external problems)
 - CBMBUS:   Refactor using pullups
 - c64:      C64 EasyFlash cartridge: EEPROM support
-- c64:      Ughlympics and Bombjack: Start game
+- c64:      Ughlympics and Bombjack: Joystick fire
 - c64:      C64 EasyFlash cartridge: Turrican2 continue game?
 - c64:      Zaxxon cartridge: Wrong chargen
-- c64:      Ms-Pacman
 - misc:     Use fstream::native_handle() (C++26)
 - Spectrum: Test SNA format
 - Apple2

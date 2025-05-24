@@ -33,7 +33,7 @@ platform is completed but not all the cartridge
 [mappers](https://www.nesdev.org/wiki/Mapper) are implemented, yet.
 The [Family BASIC keyboard](https://en.wikipedia.org/wiki/Family_BASIC)
 is supported.<br>
-Only the NTSC version of this machine is implemented so games for the USA and
+Only the NTSC version of this machine is supported so games for the USA and
 Japan markets should run without any problems.
 
 ![nes-mario](images/nes-mario.gif "NES - Super Mario Bros.")

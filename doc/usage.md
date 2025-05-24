@@ -2,12 +2,12 @@
 
 ## Usage & Configuration
 
-caio can be launched from a file browser or from a command line terminal.
+caio can be launched from a filesystem navigator from a command line terminal.
 
-### Launching caio from a file browser
+### Launching caio from a filesystem navigator
 
 When caio is installed in the system its icon should be visible from any
-file browser. When launched, a configurator GUI appears:
+filesystem navigator. When launched, a configurator GUI appears:
 
 <p align="center">
 <img src="../images/caio-gui.jpg" width="640" title="caio configurator">
