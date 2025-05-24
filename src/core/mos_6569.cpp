@@ -532,6 +532,7 @@ size_t Mos6569::tick(const Clock& clk)
         break;
 
     case 1:
+        trigger_irq_if(REG_INTERRUPT_RST, _stored_raster == _raster_counter);
         break;
 
     case 2:
@@ -570,7 +571,6 @@ size_t Mos6569::tick(const Clock& clk)
         break;
 
     case 12:
-        trigger_irq_if(REG_INTERRUPT_RST, _stored_raster == _raster_counter);   /* FIXME cycles 0 and 1 */
         break;
 
     case 13:
