@@ -280,14 +280,14 @@ constexpr inline uint8_t bin_to_bcd(uint8_t bin)
  */
 constexpr inline uint16_t expand_bits(uint8_t byte)
 {
-    return ((byte & 0x80) ? 0xC000 : 0) |
-           ((byte & 0x40) ? 0x3000 : 0) |
-           ((byte & 0x20) ? 0x0C00 : 0) |
-           ((byte & 0x10) ? 0x0300 : 0) |
-           ((byte & 0x08) ? 0x00C0 : 0) |
-           ((byte & 0x04) ? 0x0030 : 0) |
-           ((byte & 0x02) ? 0x000C : 0) |
-           ((byte & 0x01) ? 0x0003 : 0);
+    return (((byte & 0x80) != 0) * 0xC000) |
+           (((byte & 0x40) != 0) * 0x3000) |
+           (((byte & 0x20) != 0) * 0x0C00) |
+           (((byte & 0x10) != 0) * 0x0300) |
+           (((byte & 0x08) != 0) * 0x00C0) |
+           (((byte & 0x04) != 0) * 0x0030) |
+           (((byte & 0x02) != 0) * 0x000C) |
+           (((byte & 0x01) != 0) * 0x0003);
 }
 
 /**
@@ -322,10 +322,10 @@ constexpr inline uint8_t convert_01_10(uint8_t byte)
     const uint8_t d3 = byte & 0x0C;
     const uint8_t d4 = byte & 0x03;
 
-    return ((d1 == 0x00 || d1 == 0x40) ? 0x00 : 0xC0) |
-           ((d2 == 0x00 || d2 == 0x10) ? 0x00 : 0x30) |
-           ((d3 == 0x00 || d3 == 0x04) ? 0x00 : 0x0C) |
-           ((d4 == 0x00 || d4 == 0x01) ? 0x00 : 0x03);
+    return ((d1 != 0x00 && d1 != 0x40) * 0xC0) |
+           ((d2 != 0x00 && d2 != 0x10) * 0x30) |
+           ((d3 != 0x00 && d3 != 0x04) * 0x0C) |
+           ((d4 != 0x00 && d4 != 0x01) * 0x03);
 }
 
 /**
@@ -350,10 +350,10 @@ void convert_01_10(C& bytes)
  */
 constexpr inline uint8_t convert_01_10_to_11(uint8_t byte)
 {
-    return ((byte & 0xC0) == 0x00 ? 0x00 : 0xC0) |
-           ((byte & 0x30) == 0x00 ? 0x00 : 0x30) |
-           ((byte & 0x0C) == 0x00 ? 0x00 : 0x0C) |
-           ((byte & 0x03) == 0x00 ? 0x00 : 0x03);
+    return (((byte & 0xC0) != 0x00) * 0xC0) |
+           (((byte & 0x30) != 0x00) * 0x30) |
+           (((byte & 0x0C) != 0x00) * 0x0C) |
+           (((byte & 0x03) != 0x00) * 0x03);
 }
 
 /**
