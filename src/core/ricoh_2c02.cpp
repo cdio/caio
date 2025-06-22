@@ -107,15 +107,15 @@ uint8_t RP2C02::dev_read(size_t addr, Device::ReadMode mode)
          *  +----------------------> VBlank period started (cleared after read)
          *
          * D7 set at cycle 1 of scanline 241 (POST_RENDER_LINE + 1).
-         * D7 cleared at cycle 1 of PRE_RENDER_LINE (see tick() method).
+         * D7 cleared at cycle 1 of PRE_RENDER_LINE (see tick()).
          */
         data = (_last_mmio_write & 0b0001'1111) |
                (_sp_overflow << 5) |
                (_sp_0_hit << 6) |
                (_vblank_flag << 7);
-        _vblank_flag = 0;
-        _regs.w = 0;
+        _vblank_flag = false;
         irq_out(false);
+        _regs.w = 0;
         return data;
 
     case OAMADDR:
@@ -394,7 +394,7 @@ size_t RP2C02::tick(const Clock& clk)
          */
         _vblank = true;
         _cycle = 0;
-        _rasterline = VBLANK_START;
+        ++_rasterline;
         return CYCLES;
     }
 
@@ -496,12 +496,12 @@ size_t RP2C02::tick(const Clock& clk)
             /*
              * Horizontal bits copied from t to v:
              *   A14 A13 A12 A11 A10 A9  A8  A7  A6  A5  A4  A3  A2  A1  A0
+             *    Y   Y   Y   Y   X   Y   Y   Y   Y   Y   X   X   X   X   X
              *    |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
              *    |   |   |   |   |   |   |   |   |   |   +---+---+---+---+-> Coarse X scroll
              *    |   |   |   |   |   +---+---+---+---+---------------------> Coarse Y scroll
              *    |   |   |   +---+-----------------------------------------> Nametable select
              *    +---+---+-------------------------------------------------> Fine Y scroll
-             *    Y   Y   Y   Y   X   Y   Y   Y   Y   Y   X   X   X   X   X
              */
             constexpr static const addr_t MASK = 0b0111'1011'1110'0000;
             _regs.v = (_regs.v & MASK) | (_regs.t & ~MASK);
@@ -512,12 +512,12 @@ size_t RP2C02::tick(const Clock& clk)
                 /*
                  * Vertical bits copied from t to v:
                  *   A14 A13 A12 A11 A10 A9  A8  A7  A6  A5  A4  A3  A2  A1  A0
+                 *    Y   Y   Y   Y   X   Y   Y   Y   Y   Y   X   X   X   X   X
                  *    |   |   |   |   |   |   |   |   |   |   |   |   |   |   |
                  *    |   |   |   |   |   |   |   |   |   |   +---+---+---+---+-> Coarse X scroll
                  *    |   |   |   |   |   +---+---+---+---+---------------------> Coarse Y scroll
                  *    |   |   |   +---+-----------------------------------------> Nametable select
                  *    +---+---+-------------------------------------------------> Fine Y scroll
-                 *    Y   Y   Y   Y   X   Y   Y   Y   Y   Y   X   X   X   X   X
                  */
                 constexpr static const addr_t MASK = 0b0000'0100'0001'1111;
                 _regs.v = (_regs.v & MASK) | (_regs.t & ~MASK);
@@ -546,7 +546,7 @@ size_t RP2C02::tick(const Clock& clk)
                 break;
             case 0:
                 fetch_bg_pattern(tile, 1);
-                ++_fetch_tile;
+                _fetch_tile = (_fetch_tile + 1) % std::size(_tiles);
                 scroll_x_coarse_inc();
                 break;
             default:;
@@ -568,7 +568,7 @@ size_t RP2C02::tick(const Clock& clk)
          * during the previous scanline.
          */
         switch (_cycle) {
-        case 64:
+        case 1 ... 64:
             /*
              * Cycles 1-64: OAM secondary buffer cleared.
              */
@@ -589,9 +589,10 @@ size_t RP2C02::tick(const Clock& clk)
                 const uint8_t addr = _oam_addr & 0xF8;
                 std::copy_n(&_oam[addr], 8, &_oam[0]);
             }
-            break;
 
-        case 256:
+            /* PASSTHROUGH */
+
+        case 66 ... 256:
             /*
              * Cyles 65-256: Sprite evaluation.
              */
@@ -617,12 +618,16 @@ size_t RP2C02::tick(const Clock& clk)
         }
     }
 
-    _cycle = (_cycle + 1) % CYCLES;
-    if (_cycle == 0) {
+    ++_cycle;
+    if (_cycle >= CYCLES) {
         paint_scanline();
         render_line();
         paint_sprites();
-        _rasterline = (_rasterline + 1) % SCANLINES;
+        _cycle = 0;
+        ++_rasterline;
+        if (_rasterline == SCANLINES) {
+            _rasterline = 0;
+        }
     }
 
     return 1;

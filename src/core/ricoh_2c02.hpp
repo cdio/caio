@@ -569,8 +569,8 @@ private:
     bool            _sp_0_hit{};                            /* Sprite 0 hit                             */
     bool            _sp_overflow{};                         /* Sprite overflow                          */
     unsigned        _sp_0_hit_cycle{INVALID_X_COORDINATE};  /* Sprite 0 hit cycle                       */
-    bool            _vblank_flag{};                         /* VBlank status flags (PPUSTATUS)          */
     bool            _vblank{};                              /* VBlank period                            */
+    bool            _vblank_flag{};                         /* VBlank status flags (PPUSTATUS)          */
 
     uint8_t         _oam_addr{};                            /* OAM address                              */
     uint8_t         _oam[SPRITES * sizeof(Oam)]{};          /* OAM data                                 */
@@ -586,7 +586,7 @@ private:
     unsigned        _cycle{};                               /* Current cycle                            */
 
     TileData        _tiles[TILES];                          /* Tile data buffer                         */
-    size_t          _fetch_tile{2};                         /* Tile index being fetched                 */
+    size_t          _fetch_tile{TILES - 1};                 /* Tile index being fetched                 */
     size_t          _paint_tile{0};                         /* Tile index being painted                 */
 
     static RgbaTable builtin_palette;
