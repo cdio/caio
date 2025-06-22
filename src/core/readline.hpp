@@ -22,8 +22,8 @@
 #include <format>
 #include <span>
 #include <string>
-#include <string_view>
 
+#include "fs.hpp"
 #include "types.hpp"
 
 namespace caio {
@@ -38,11 +38,11 @@ public:
 
     /**
      * Iitialise this instance and optionally fill it with history data from a file.
-     * @param fname The name of the history file to read (or an empty string).
+     * @param fname The name of the history file to read.
      * @see load()
      * @exception IOError if an error occurs while trying to load the specified file.
      */
-    History(std::string_view fname = {});
+    History(const fs::Path& fname = {});
 
     /**
      * Release this instance.
@@ -101,7 +101,7 @@ private:
      */
     void save();
 
-    std::string                      _histfname;
+    fs::Path                         _histfname;
     size_t                           _cursor{};
     size_t                           _current{};
     std::array<std::string, HISTSIZ> _history{};
@@ -134,7 +134,7 @@ public:
      * so they can be closed after this method returns.
      */
     //TODO: replace with iostream and native_handle() (C++26)
-    Readline(int ifd = -1, int ofd = -1, std::string_view histfname = {});
+    Readline(int ifd = -1, int ofd = -1, const fs::Path& histfname = {});
 
     virtual ~Readline() {
         close();
@@ -233,7 +233,7 @@ private:
 
     /**
      * Close the (duplicated) input/output file descriptors.
-     * @see Readline(int ifd, int, std::string_view)
+     * @see Readline(int ifd, int, const fs::Path&)
      */
     void close();
 

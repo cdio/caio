@@ -32,7 +32,7 @@
 namespace caio {
 namespace readline {
 
-History::History(std::string_view fname)
+History::History(const fs::Path& fname)
     : _histfname{fname}
 {
     load();
@@ -48,12 +48,11 @@ History::~History()
 
 History& History::operator=(History&& other)
 {
-    _histfname = other._histfname;
+    _histfname = std::move(other._histfname);
     _cursor = other._cursor;
     _current = other._current;
     _history = std::move(other._history);
 
-    other._histfname = {};
     other._cursor = {};
     other._current = {};
     other._history = {};
@@ -120,9 +119,9 @@ void History::load()
         std::ifstream is{_histfname, std::ios::binary | std::ios::in};
         if (!is) {
             if (errno != ENOENT) {
-                throw IOError{"Can't open: {}: {}", _histfname, Error::to_string()};
+                throw IOError{"Can't open: {}: {}", _histfname.string(), Error::to_string()};
             }
-            log.warn("Unable to load history file: {}: {}\n", _histfname, Error::to_string(errno));
+            log.warn("Unable to load history file: {}: {}\n", _histfname.string(), Error::to_string(errno));
         }
 
         std::string line{};
@@ -146,9 +145,9 @@ void History::save()
         std::ofstream os{_histfname, std::ios::binary | std::ios::out | std::ios::trunc};
         if (!os) {
             if (errno != ENOENT) {
-                throw IOError{"Can't open: {}: {}", _histfname, Error::to_string()};
+                throw IOError{"Can't open: {}: {}", _histfname.string(), Error::to_string()};
             }
-            log.warn("Unable to save history file: {}: {}\n", _histfname, Error::to_string(errno));
+            log.warn("Unable to save history file: {}: {}\n", _histfname.string(), Error::to_string(errno));
         }
 
         for (size_t pos = 0; pos < _current; ++pos) {
@@ -159,7 +158,7 @@ void History::save()
     }
 }
 
-Readline::Readline(int ifd, int ofd, std::string_view histfname)
+Readline::Readline(int ifd, int ofd, const fs::Path& histfname)
     : _ifd{-1},
       _ofd{-1},
       _history{histfname}
