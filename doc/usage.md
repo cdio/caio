@@ -2,7 +2,8 @@
 
 ## Usage & Configuration
 
-caio can be launched from a filesystem navigator from a command line terminal.
+caio can be launched from a filesystem navigator or from a command line
+terminal.
 
 ### Launching caio from a filesystem navigator
 

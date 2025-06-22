@@ -6,7 +6,7 @@ home computers.
 At the moment the following platforms are emulated:
 
 - Commodore 64
-- NES
+- NES (Nintendo Entertainment System)
 - Sinclair ZX-80
 - Sinclair ZX-Spectrum 48K
 

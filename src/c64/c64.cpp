@@ -314,8 +314,8 @@ void C64::connect_devices()
                          ((data & PLA::HIRAM)  ? Mos6510::P1 : 0) |
                          ((data & PLA::CHAREN) ? Mos6510::P2 : 0);
 
-        /* Cassette input pins not implemented */
-        cpuval |= (Mos6510::P4 | Mos6510::P5);  /* pull-ups */
+        /* Cassette input not implemented */
+        cpuval |= Mos6510::P4 | Mos6510::P5;
         return cpuval;
     };
 
@@ -374,13 +374,13 @@ void C64::connect_devices()
     _vic2->irq(set_irq);
 
     /*
-     * Connect the CPU rdy pin to the VIC2 aec pin.
+     * Connect the CPU rdy pin and the PLA to the VIC2 aec pin.
      */
-    auto set_rdy = [this](bool active) {
+    auto set_aec = [this](bool active) {
         _cpu->rdy_pin(active);
     };
 
-    _vic2->aec(set_rdy);
+    _vic2->aec(set_aec);
 
     /*
      * Load the VIC2 colour palette.

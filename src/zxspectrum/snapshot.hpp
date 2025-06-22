@@ -31,7 +31,7 @@ namespace sinclair {
 namespace zxspectrum {
 
 /**
- * Snapshot base class
+ * Snapshot base class.
  * A snapshot is an image of a running system. It usually
  * contains the status of the cpu registers and the content
  * of the RAM as it-was when the snapshot was created.
