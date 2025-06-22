@@ -181,7 +181,7 @@ const Mos6502::Instruction Mos6502::instr_set[256] = {
     { "SAX $^",         Mos6502::i_SAX,         MODE_ABS,   4,                  },  /* 8F */
 
     { "BCC $+",         Mos6502::i_BCC,         MODE_REL,   2,                  },  /* 90 */
-    { "STA ($*), Y",    Mos6502::i_STA,         MODE_IND_Y, 6,                  },  /* 91 */
+    { "STA ($*), Y",    Mos6502::i_STA,         MODE_IND_Y, 6,  NO_DUMMY_READ   },  /* 91 */
     { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2,                  },  /* 92 */
     { "SHA ($*), Y",    Mos6502::i_SHA,         MODE_IND_Y, 6,  NO_DUMMY_READ   },  /* 93 */
     { "STY $*, X",      Mos6502::i_STY,         MODE_ZP_X,  4,                  },  /* 94 */
@@ -193,7 +193,7 @@ const Mos6502::Instruction Mos6502::instr_set[256] = {
     { "TXS",            Mos6502::i_TXS,         MODE_NONE,  2,                  },  /* 9A */
     { "SHS $^, Y",      Mos6502::i_SHS,         MODE_ABS_Y, 5,  NO_DUMMY_READ   },  /* 9B */
     { "SHY $^, X",      Mos6502::i_SHY,         MODE_ABS,   5,  NO_DUMMY_READ   },  /* 9C */
-    { "STA $^, X",      Mos6502::i_STA,         MODE_ABS_X, 5,                  },  /* 9D */
+    { "STA $^, X",      Mos6502::i_STA,         MODE_ABS_X, 5,  NO_DUMMY_READ   },  /* 9D */
     { "SHX $^, Y",      Mos6502::i_SHX,         MODE_ABS,   5,  NO_DUMMY_READ   },  /* 9E */
     { "SHA $^, Y",      Mos6502::i_SHA,         MODE_ABS_Y, 5,  NO_DUMMY_READ   },  /* 9F */
 
@@ -297,7 +297,7 @@ const Mos6502::Instruction Mos6502::instr_set[256] = {
     { "NOP $^, X",      Mos6502::i_NOP,         MODE_ABS_X, 4,                  },  /* FC */
     { "SBC $^, X",      Mos6502::i_SBC,         MODE_ABS_X, 4,                  },  /* FD */
     { "INC $^, X",      Mos6502::i_INC,         MODE_ABS_X, 7,  NO_DUMMY_READ   },  /* FE */
-    { "ISC $^, X",      Mos6502::i_ISC,         MODE_ABS_X, 7,  NO_DUMMY_READ   }    /* FF */
+    { "ISC $^, X",      Mos6502::i_ISC,         MODE_ABS_X, 7,  NO_DUMMY_READ   }   /* FF */
 };
 
 std::string Mos6502::Registers::to_string(Mos6502::Flags fl)
