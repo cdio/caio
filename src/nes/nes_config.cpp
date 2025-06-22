@@ -181,7 +181,7 @@ std::string NESConfig::to_string() const
         "  A button:           \"{}\"\n"
         "  B button:           \"{}\"\n"
         "  SELECT button:      \"{}\"\n"
-        "  START button:       \"{}\"\n",
+        "  START button:       \"{}\"",
         Config::to_string(),
         (ntsc ? "yes" : "no"),
         (swapj ? "yes" : "no"),

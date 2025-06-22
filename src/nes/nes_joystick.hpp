@@ -28,7 +28,7 @@ namespace nintendo {
 namespace nes {
 
 /**
- * NES controller button configuration
+ * NES controller button configuration.
  * Members point to an offset within a Port.
  * @see joystick::Port
  */
@@ -91,8 +91,10 @@ class NESJoystick : public Joystick {
 public:
     /**
      * Initialise this joystick.
-     * @param label Label assigned to this joystick.
+     * @param label   Label assigned to this joystick.
+     * @param buttons Buttons configuration.
      * @see Joystick
+     * @see NESButtonConfig
      */
     NESJoystick(std::string_view label, const NESButtonConfig& buttons)
         : Joystick{label, to_port(buttons)}
@@ -109,7 +111,7 @@ public:
     {
     }
 
-    ~NESJoystick()
+    virtual ~NESJoystick()
     {
     }
 

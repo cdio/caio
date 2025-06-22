@@ -48,7 +48,6 @@ Mapper_002::Mapper_002(const fs::Path& fname, const iNES::Header& hdr, std::ifst
     };
 
     write_observer(lo_bank_switcher);
-
 }
 
 Mapper_002::~Mapper_002()
