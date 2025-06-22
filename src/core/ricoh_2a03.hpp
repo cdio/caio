@@ -76,7 +76,7 @@ public:
     /**
      * Timer tick.
      * When the counter reaches 0 it reloads the period value.
-     * @return True if the counter reached 0; false otherwise.
+     * @return true if the counter reached 0; false otherwise.
      * @see reset()
      */
     bool tick();
@@ -581,7 +581,7 @@ public:
 
     /**
      * Set the Frame Counter parameters.
-     * @param irq_en True to enable IRQ on FrameCounter:Mode::MODE_4_STEPS; false otherwise;
+     * @param irq_en true to enable IRQ on FrameCounter:Mode::MODE_4_STEPS; false otherwise;
      * @param mode   Runing mode.
      * @see FrameCounter::Mode
      */
@@ -712,7 +712,8 @@ private:
  *    0000-3FFF         4000    Generic area        Address space mappings
  *    4000-4017         0018    APU and I/O         Internal
  *    4018-401F         0008    Test mode           Internal (active through TST pin)
- *    4020-FFFF         BFE0    Generic area        Address space mappings
+ *    4020-40FF         00E0    Unallocated
+ *    4100-FFFF         BF00    Generic area        Address space mappings
  *
  * @see Mos6502
  * @see https://www.nesdev.org/wiki/CPU
@@ -722,7 +723,7 @@ public:
     constexpr static const char* TYPE               = "RP2A03";
     constexpr static const size_t CPU_DIVIDER       = 3;
     constexpr static const addr_t REG_ADDR_START    = 0x4000;
-    constexpr static const addr_t REG_ADDR_END      = 0x4020;
+    constexpr static const addr_t REG_ADDR_END      = 0x4100;
     constexpr static const addr_t OAMDATA_ADDR      = 0x2004;
     constexpr static const uint8_t IOPORT_OUT       = 0x00;             /* OUT0-2 */
     constexpr static const uint8_t IOPORT_IN1       = 0x00;             /* /OE1   */
@@ -822,12 +823,12 @@ public:
     void reset() override;
 
     /**
-     * @see Mos6502::read()
+     * @see Mos6502::read(addr_t, Device::ReadMode)
      */
     uint8_t read(addr_t addr, Device::ReadMode mode = Device::ReadMode::Read) override;
 
     /**
-     * @see Mos6502::write()
+     * @see Mos6502::write(addr_t, uint8_t)
      */
     void write(addr_t addr, uint8_t data) override;
 
@@ -852,23 +853,23 @@ private:
 
     /**
      * Get the status of the OAM DMA transfer.
-     * @return True if the OAM DMA data transfer is active; false otherwise.
+     * @return true if the OAM DMA data transfer is active; false otherwise.
      */
     bool oamdma_is_running() const;
 
     /**
      * OAM DMA transfer cycle.
      * Data is read on GET cycles and written on PUT cycles.
-     * @param put_cycle True: PUT cycle, false: GET cycle.
-     * @return True if the OAM DMA transfer is still active; false otherwise.
+     * @param put_cycle true: PUT cycle, false: GET cycle.
+     * @return true if the OAM DMA transfer is still active; false otherwise.
      */
     bool oamdma_transfer(bool put_cycle);
 
     /**
      * DMC DMA transfer cycle.
      * Data is read on GET cycles and sent to the APU's DCM unit.
-     * @param put_cycle True: PUT cycle, false: GET cycle.
-     * @return True if the DMC DMA transfer is still active; false otherwise.
+     * @param put_cycle true: PUT cycle, false: GET cycle.
+     * @return true if the DMC DMA transfer is still active; false otherwise.
      */
     bool dmcdma_transfer(bool put_cycle);
 
@@ -877,7 +878,7 @@ private:
      * If one or both DMC and OAM DMA data transfers are active
      * the CPU is halted and the DMA transfers take control.
      * When both DMA transfers terminate the CPU is un-halted.
-     * @param put_cycle True: PUT cycle, false: GET cycle.
+     * @param put_cycle true: PUT cycle, false: GET cycle.
      */
     void dma_transfer(bool put_cycle);
 

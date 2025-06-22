@@ -74,8 +74,10 @@ void RP2A03::reset()
     _apu.reset();
     rdy_pin(0);
 
-    write(SND_CHN, 0);
-    write(PORT2_FRAMECNT, 0);   /* Enable frame counter IRQ */
+    _ioport.iow(0, 0);
+    _ioport.iow(1, 0);
+    RP2A03::write(SND_CHN, 0);
+    RP2A03::write(PORT2_FRAMECNT, 0);   /* Enable frame counter IRQ */
 }
 
 inline bool RP2A03::oamdma_is_running() const
