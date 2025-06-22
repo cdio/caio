@@ -346,15 +346,18 @@ void Apu::frame_reset(bool irq_en, FrameCounter::Mode mode)
         frame_irq_ack();
     }
 
-    _framecnt = FrameCounter{
-        .irq_en = irq_en,
-        .mode = mode,
-    };
+    if (mode == FrameCounter::MODE_4_STEPS) {
+        _framecnt.irq_en = irq_en;
 
-    if (mode == FrameCounter::MODE_5_STEPS) {
+    } else {
         frame_quarter_tick();
         frame_half_tick();
     }
+
+    /* Reset */
+    _framecnt.mode = mode;
+    _framecnt.cycle = 0;
+    _framecnt.step = 0;
 }
 
 void Apu::frame_quarter_tick()
