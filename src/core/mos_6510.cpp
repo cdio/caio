@@ -53,7 +53,7 @@ uint8_t Mos6510::read(addr_t addr, Device::ReadMode mode)
         return _iodir;
 
     case PORT_1:
-        return _ioport.ior(0);
+        return (Mos6502::read(addr, mode) & (~PALL | _iodir)) | (_ioport.ior(0) & ~_iodir);
 
     default:;
     }
@@ -63,20 +63,20 @@ uint8_t Mos6510::read(addr_t addr, Device::ReadMode mode)
 
 void Mos6510::write(addr_t addr, uint8_t value)
 {
+    Mos6502::write(addr, value);
+
     switch (addr) {
     case PORT_0:
         _iodir = value;
-        return;
+        break;
 
     case PORT_1:
         value = (value & _iodir) | (_ioport.ior(0) & ~_iodir);
         _ioport.iow(0, value);
-        return;
+        break;
 
     default:;
     }
-
-    Mos6502::write(addr, value);
 }
 
 }
