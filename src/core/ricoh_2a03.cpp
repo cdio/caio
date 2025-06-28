@@ -68,8 +68,7 @@ void RP2A03::reset()
 
     _oamdma_addr = 0;
     _oamdma_size = 0;
-    _oamdma_data = 0;
-    _oamdma_loaded = 0;
+    _oamdma_data.reset();
 
     _apu.reset();
     rdy_pin(0);
@@ -89,18 +88,18 @@ inline void RP2A03::oamdma_start(addr_t addr)
 {
     _oamdma_addr = addr;
     _oamdma_size = 256;
-    _oamdma_loaded = false;
+    _oamdma_data.reset();
 }
 
 bool RP2A03::oamdma_transfer(bool put_cycle)
 {
     if (put_cycle) {
-        if (_oamdma_loaded) {
+        if (_oamdma_data.has_value()) {
             /*
              * Write data previously read during the GET cycle.
              */
-            _mmap->write(OAMDATA_ADDR, _oamdma_data);
-            _oamdma_loaded = false;
+            _mmap->write(OAMDATA_ADDR, _oamdma_data.value());
+            _oamdma_data.reset();
             --_oamdma_size;
         }
     } else if (_oamdma_size) {
@@ -108,7 +107,6 @@ bool RP2A03::oamdma_transfer(bool put_cycle)
          * GET cycle.
          */
         _oamdma_data = _mmap->read(_oamdma_addr);
-        _oamdma_loaded = true;
         ++_oamdma_addr;
     }
 
@@ -139,7 +137,7 @@ void RP2A03::dma_transfer(bool put_cycle)
 
     if (active && rdy_pin()) {
         /*
-         * CPU halted on GET cycle.
+         * The CPU can be halted on GET cycles.
          */
         if (!put_cycle) {
             /*
@@ -156,6 +154,7 @@ void RP2A03::dma_transfer(bool put_cycle)
         return;
     }
 
+    //XXX implement priority? dmc over oam when dmc is get
     if (dmc_active) {
         dmc_active = dmcdma_transfer(put_cycle);
     }
@@ -167,7 +166,7 @@ void RP2A03::dma_transfer(bool put_cycle)
     active = dmc_active || oam_active;
     if (!active) {
         /*
-         * DMA ended, unhalt the CPU.
+         * DMA transfer ended, unhalt the CPU.
          */
         rdy_pin(true);
     }
@@ -175,19 +174,22 @@ void RP2A03::dma_transfer(bool put_cycle)
 
 size_t RP2A03::tick(const Clock& clk)
 {
-    _even_tick ^= 1;
     dma_transfer(_even_tick);
+    _even_tick ^= 1;
 
     _apu.tick();
 
-    if (_cpu_cycles == 0) {
-        _cpu_cycles = Mos6502::tick(clk);
-        if (_cpu_cycles == HALT) {
-            return HALT;
+    if (rdy_pin()) {
+        if (_cpu_cycles == 0) {
+            _cpu_cycles = Mos6502::tick(clk);
+            if (_cpu_cycles == HALT) {
+                return HALT;
+            }
         }
+
+        --_cpu_cycles;
     }
 
-    --_cpu_cycles;
     return CPU_DIVIDER;
 }
 
@@ -214,13 +216,13 @@ uint8_t RP2A03::read(addr_t addr, Device::ReadMode mode)
              * - Frame interrupt flag cleared after read.
              * - If an interrupt flag is set during read, it will be read as 1 but it is not cleared.
              */
-            data = (_apu.pulse1().lc().is_running()     ? D0 : 0) |
-                   (_apu.pulse2().lc().is_running()     ? D1 : 0) |
-                   (_apu.triangle().lc().is_running()   ? D2 : 0) |
-                   (_apu.noise().lc().is_running()      ? D3 : 0) |
-                   (_apu.dmc().is_running()             ? D4 : 0) |
-                   (_apu.frame_irq_flag()               ? D6 : 0) |
-                   (_apu.dmc_irq_flag()                 ? D7 : 0) |
+            data = (_apu.pulse1().lc().is_running()   * D0) |
+                   (_apu.pulse2().lc().is_running()   * D1) |
+                   (_apu.triangle().lc().is_running() * D2) |
+                   (_apu.noise().lc().is_running()    * D3) |
+                   (_apu.dmc().is_running()           * D4) |
+                   (_apu.frame_irq_flag()             * D6) |
+                   (_apu.dmc_irq_flag()               * D7) |
                    (_mmap->data_bus() & D5);
             _apu.frame_irq_ack();
             return data;

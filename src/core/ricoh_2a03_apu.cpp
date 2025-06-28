@@ -116,7 +116,7 @@ void Envelope::tick()
 
 void Sweep::reset(bool enable, uint8_t period, bool negate, uint8_t shift)
 {
-    _enabled = enable && (_shift != 0);     /* Shift = 0 behaves like enable = 0 */
+    _enabled = enable;
     _divider.period(period);
     _negate = negate;
     _shift = shift;
@@ -126,18 +126,14 @@ void Sweep::reset(bool enable, uint8_t period, bool negate, uint8_t shift)
 
 void Sweep::calculate_target()
 {
-    const auto period = _pulse.timer().period();
-    auto change = period >> _shift;
+    const int period = _pulse.timer().period();
+    int change = period >> _shift;
 
     if (_negate) {
         change = -change - _onec;
     }
 
-    auto target = period + change;
-    if (target < 0) {
-        target = 0;
-    }
-
+    const int target = std::max(0, period + change);
     _target = static_cast<uint16_t>(target);
     _muted = (period < 8) || (_target > 0x7FF);
 }
@@ -452,7 +448,8 @@ int16_t Apu::mixed_sample() const
     p12 = (p12 == 0.0f ? 0.0f : 95.88f / ((8128.0f / p12) + 100.0f));
     tnd = (tnd == 0.0f ? 0.0f : 159.79f / ((1.0f / tnd) + 100.0f));
 
-    const int16_t sample = ((p12 + tnd) - 0.5f) * (32767.0f * 0.9f);
+    const float fsample = _filter(p12 + tnd);
+    const int16_t sample = utils::to_i16(fsample - 0.5f);
     return sample;
 }
 

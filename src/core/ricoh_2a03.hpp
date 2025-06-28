@@ -19,9 +19,11 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 
 #include "gpio.hpp"
 #include "mos_6502.hpp"
+#include "signal.hpp"
 #include "ui.hpp"
 #include "utils.hpp"
 
@@ -33,8 +35,7 @@ constexpr static const size_t AUDIO_CHANNELS        = 1;
 constexpr static const unsigned AUDIO_SAMPLING_RATE = 44100;
 constexpr static const float AUDIO_DT               = 1.0f / AUDIO_SAMPLING_RATE;
 constexpr static const float AUDIO_SAMPLES_TIME     = 0.020f;
-constexpr static const size_t AUDIO_SAMPLES         = static_cast<size_t>(
-                                                        utils::ceil(AUDIO_SAMPLING_RATE * AUDIO_SAMPLES_TIME));
+constexpr static const size_t AUDIO_SAMPLES         = utils::ceil(AUDIO_SAMPLING_RATE * AUDIO_SAMPLES_TIME);
 
 /**
  * Divider (11-bit cyclic counter).
@@ -522,6 +523,9 @@ private:
 class Apu {
 public:
     constexpr static const unsigned FRAMECNT_DIVIDER = 3728;
+    constexpr static const float HIPASS_LO_FC        = 90.0;
+    constexpr static const float HIPASS_HI_FC        = 440.0;
+    constexpr static const float LOPASS_FC           = 14000.0;
 
     using AudioBufferCb = std::function<ui::AudioBuffer()>;
 
@@ -546,7 +550,7 @@ public:
     Apu(class RP2A03& cpu, size_t cpu_clkf);
 
     /**
-     * reset this APU.
+     * Reset this APU.
      */
     void reset();
 
@@ -559,13 +563,13 @@ public:
 
     /**
      * Get the status of the Frame interrupt flag.
-     * @return The frame interrupt flag.
+     * @return The status of the frame interrupt flag.
      */
     bool frame_irq_flag();
 
     /**
      * Get the status of the DMC interrupt flag.
-     * @return The frame interrupt flag.
+     * @return The status of the DMC interrupt flag.
      */
     bool dmc_irq_flag();
 
@@ -581,7 +585,7 @@ public:
 
     /**
      * Set the Frame Counter parameters.
-     * @param irq_en true to enable IRQ on FrameCounter:Mode::MODE_4_STEPS; false otherwise;
+     * @param irq_en true to enable IRQ on FrameCounter::Mode::MODE_4_STEPS; false otherwise;
      * @param mode   Runing mode.
      * @see FrameCounter::Mode
      */
@@ -636,18 +640,24 @@ private:
     void play();
 
     class RP2A03&   _cpu;
-    bool            _even_tick{};               /* CPU frequency divider    */
-    FrameCounter    _framecnt{};                /* Frame counter            */
-    Pulse           _pulse1{true};              /* Pulse-1 wave generator   */
-    Pulse           _pulse2{false};             /* Pulse-2 wave generator   */
-    Triangle        _triangle{};                /* Triangle wave generator  */
-    Noise           _noise{};                   /* Noise wave generator     */
-    Dmc             _dmc{};                     /* DMC wave generator       */
-    AudioBufferCb   _audio_buffer{};            /* Audio buffer provider    */
-    int16_t         _abuf[AUDIO_SAMPLES];       /* Samples buffer           */
-    size_t          _apos{};                    /* Samples buffer position  */
-    size_t          _srate_cycles;              /* Sampling rate in cycles  */
-    size_t          _sample_cycle{};            /* Sample cycle counter     */
+    bool            _even_tick{};           /* CPU frequency divider    */
+    FrameCounter    _framecnt{};            /* Frame counter            */
+    Pulse           _pulse1{true};          /* Pulse-1 wave generator   */
+    Pulse           _pulse2{false};         /* Pulse-2 wave generator   */
+    Triangle        _triangle{};            /* Triangle wave generator  */
+    Noise           _noise{};               /* Noise wave generator     */
+    Dmc             _dmc{};                 /* DMC wave generator       */
+    AudioBufferCb   _audio_buffer{};        /* Audio buffer provider    */
+    int16_t         _abuf[AUDIO_SAMPLES];   /* Samples buffer           */
+    size_t          _apos{};                /* Samples buffer position  */
+    size_t          _srate_cycles;          /* Sampling rate in cycles  */
+    size_t          _sample_cycle{};        /* Sample cycle counter     */
+
+    mutable signal::Filter<2, 2> _filter{
+        signal::iir_hipass20(HIPASS_LO_FC, AUDIO_SAMPLING_RATE) +
+        signal::iir_hipass20(HIPASS_HI_FC, AUDIO_SAMPLING_RATE) +
+        signal::iir_lopass20(LOPASS_FC, AUDIO_SAMPLING_RATE)
+    };
 };
 
 /**
@@ -867,7 +877,7 @@ private:
 
     /**
      * DMC DMA transfer cycle.
-     * Data is read on GET cycles and sent to the APU's DCM unit.
+     * Data is read on GET cycles and sent to the APU's DCM unit on PUT cycles.
      * @param put_cycle true: PUT cycle, false: GET cycle.
      * @return true if the DMC DMA transfer is still active; false otherwise.
      */
@@ -882,14 +892,13 @@ private:
      */
     void dma_transfer(bool put_cycle);
 
-    Apu     _apu;               /* Audio processing unit            */
-    bool    _even_tick{};       /* APU clock tick                   */
-    addr_t  _oamdma_addr{};     /* OAM DMA source address           */
-    addr_t  _oamdma_size{};     /* OAM DMA byte to transfer         */
-    addr_t  _oamdma_data{};     /* OAM DMA data being transferred   */
-    bool    _oamdma_loaded{};   /* OAM DMA data loaded              */
-    Gpio    _ioport{};          /* OUT0-OUT1, /OE1, /OE2            */
-    size_t  _cpu_cycles{};      /* CPU cycles count-down            */
+    Apu                     _apu;               /* Audio processing unit            */
+    bool                    _even_tick{};       /* APU clock tick                   */
+    addr_t                  _oamdma_addr{};     /* OAM DMA source address           */
+    addr_t                  _oamdma_size{};     /* OAM DMA byte to transfer         */
+    std::optional<uint8_t>  _oamdma_data{};     /* OAM DMA data being transferred   */
+    Gpio                    _ioport{};          /* OUT0-OUT1, /OE1, /OE2            */
+    size_t                  _cpu_cycles{};      /* 6502 cycles count-down           */
 };
 
 }
