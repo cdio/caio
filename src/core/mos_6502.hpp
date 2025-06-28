@@ -471,6 +471,7 @@ protected:
     bool                _halted{};
     bool                _decimal_en{true};
     std::optional<bool> _delayed_I{};
+    bool                _delayed_irq{};
 
     std::atomic_bool _break{};
     std::unordered_map<addr_t, std::pair<BreakpointCb, void*>> _breakpoints{};
@@ -484,9 +485,10 @@ protected:
      */
     size_t take_branch(int8_t rel) {
         const auto crossed = page_crossed_rel(_regs.PC, rel);
+        _delayed_irq = !crossed;    /* Skip interrupt sampling */
         _regs.PC += rel;
         if (crossed) {
-            read(_regs.PC);     /* Dummy read */
+            read(_regs.PC);         /* Dummy read */
         }
         return (1 + crossed);
     }

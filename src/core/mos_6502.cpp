@@ -745,39 +745,48 @@ size_t Mos6502::single_step()
     }
 
     /*
-     * Sample interrupts.
+     * A taken branch w/o page crossed delays IRQ sampling.
+     * XXX test
      */
-    const bool is_nmi = _nmi_pin;
-    addr_t isr_addr{};
-    if (is_nmi) {
-        _nmi_pin.reset();                   /* Reset the pin to simulate an edge triggered interrupt */
-        isr_addr = read_addr(vNMI);
-    } else if (is_irq_enabled() && _irq_pin) {
-        isr_addr = read_addr(vIRQ);
-    }
+    if (_delayed_irq) {
+        _delayed_irq = false;
 
-    if (isr_addr) {
+    } else {
         /*
-         * Prepare to serve the interrupt.
+         * Sample interrupts.
          */
-        read_addr(_regs.PC);                /* Dummy reads at PC and PC + 1 */
-        push_addr(_regs.PC);
-        push(_regs.P | ((_delayed_I && _delayed_I.value()) * Flags::I));    /* SEI */
-        _regs.PC = isr_addr;
-        flag(Flags::I);
-        if (_log.is_debug()) {
-            _log.debug("Detected {} interrupt. Extra cycles=7\n", (is_nmi ? "NMI" : "IRQ"));
+        const bool is_nmi = _nmi_pin;
+        addr_t isr_addr{};
+        if (is_nmi) {
+            _nmi_pin.reset();               /* Reset the pin to simulate an edge triggered interrupt */
+            isr_addr = read_addr(vNMI);
+        } else if (is_irq_enabled() && _irq_pin) {
+            isr_addr = read_addr(vIRQ);
         }
 
-        cycles += 7;
-    }
+        if (isr_addr) {
+            /*
+             * Prepare to serve the interrupt.
+             */
+            read_addr(_regs.PC);            /* Dummy reads at PC and PC + 1 */
+            push_addr(_regs.PC);
+            push(_regs.P | ((_delayed_I && _delayed_I.value()) * Flags::I));    /* SEI */
+            _regs.PC = isr_addr;
+            flag(Flags::I);
+            if (_log.is_debug()) {
+                _log.debug("Detected {} interrupt. Extra cycles=7\n", (is_nmi ? "NMI" : "IRQ"));
+            }
 
-    if (_delayed_I) {
-        /*
-         * I flag is set after interrupt sampling.
-         */
-        flag_I(_delayed_I.value());
-        _delayed_I.reset();
+            cycles += 7;
+        }
+
+        if (_delayed_I) {
+            /*
+             * I flag is set after interrupt sampling.
+             */
+            flag_I(_delayed_I.value());
+            _delayed_I.reset();
+        }
     }
 
     return cycles;
