@@ -239,13 +239,15 @@ std::array<fp_t, std::max(R, C)> poly_add(const std::array<fp_t, R>& a1, const s
 {
     static_assert((R != 0) && (C != 0), "Invalid input array size");
     constexpr size_t N = std::max(R, C);
-    std::array<fp_t, N> arr{(R > C ? a1 : a2)};
+    std::array<fp_t, N>arr{};
     if (R > C) {
+        std::copy(a1.begin(), a1.end(), arr.begin());
         for (size_t i = 0; i < C; ++i) {
             arr[i] += a2[i];
         }
     } else {
-        for (size_t i = 0; i < C; ++i) {
+        std::copy(a2.begin(), a2.end(), arr.begin());
+        for (size_t i = 0; i < R; ++i) {
             arr[i] += a1[i];
         }
     }
@@ -266,6 +268,89 @@ constexpr PCoeffs<std::max(M1, M2), std::max(N1, N2)> add(const PCoeffs<M1, N1>&
         .den = poly_add(c1.den, c2.den)
     };
     return result.normalize();
+}
+
+/**
+ * Return the set of coefficients for a first order low-pass filter.
+ * Roll-off is 20 dB/dec (6 dB/oct).
+ *
+ *                 1
+ *   H(s) = ---------------
+ *            1 + s / w0
+ *
+ * @param f0 Resonance frequency;
+ * @param fs Sampling frequency.
+ * @return The normalized filter coefficients.
+ */
+constexpr PCoeffs<2, 2> iir_lopass20(fp_t f0, fp_t fs)
+{
+    const fp_t w  = Pi * f0 / fs;
+
+    const fp_t b0 = w;
+    const fp_t b1 = w;
+
+    const fp_t a0 = w + 1.0;
+    const fp_t a1 = w - 1.0;
+
+    return { { b0 / a0, b1 / a0 }, { 1.0, a1 / a0 } };
+}
+
+/**
+ * Return the set of coefficients for a first order high-pass filter.
+ * Roll-off is 20 dB/dec (6 dB/oct).
+ *
+ *               s / w0
+ *   H(s) = ---------------
+ *            1 + s / w0
+ *
+ * @param fc Resonance frequency;
+ * @param fs Sampling frequency.
+ * @return The normalized filter coefficients.
+ */
+constexpr PCoeffs<2, 2> iir_hipass20(fp_t f0, fp_t fs)
+{
+    const fp_t w  = Pi * f0 / fs;
+
+    const fp_t b0 =  1.0;
+    const fp_t b1 = -1.0;
+
+    const fp_t a0 = w + 1.0;
+    const fp_t a1 = w - 1.0;
+
+    return { { b0 / a0, b1 / a0 }, { 1.0, a1 / a0 } };
+}
+
+/**
+ * Return the set of coefficients for a first order band-pass filter.
+ * Roll-off is 20 dB/dec (6 dB/oct).
+ *
+ *                     s / wh
+ *   H(s) = -----------------------------
+ *            (1 + s / wh) (1 + s / wl)
+ *
+ * @param fc Cut-off frequency;
+ * @param Q  Q factor;
+ * @param fs Sampling frequency.
+ * @return The normalized filter coefficients.
+ */
+constexpr PCoeffs<3, 3> iir_bapass20(fp_t fc, fp_t Q, fp_t fs)
+{
+    fp_t df = fc / (2.0 * Q);
+    fp_t fh = std::max<fp_t>(fc - df, 0.0);
+    fp_t fl = std::min<fp_t>(fc + df, fs / 2.0);
+
+    const fp_t wh = Pi * fh / fs;
+    const fp_t wl = Pi * fl / fs;
+
+    const fp_t b0 = wl;
+    const fp_t b1 = 0.0;
+    const fp_t b2 = -wl;
+
+    const fp_t a0 = (wh + 1.0) * (wl + 1.0);
+    const fp_t a1 = (wh + 1.0) * (wl - 1.0) + (wh - 1.0) * (wl + 1.0);
+    const fp_t a2 = (wl - 1.0) * (wh - 1.0);
+
+    return { { b0 / a0, b1 / a0, b2 / a0 }, { 1.0, a1 / a0, a2 / a0 } };
 }
 
 /**
@@ -326,39 +411,6 @@ constexpr PCoeffs<3, 3> iir_hipass40(fp_t f0, fp_t Q, fp_t fs)
     const fp_t b2 =  1.0 / a0;
 
     return { { b0, b1, b2 }, { 1.0, a1, a2 } };
-}
-
-/**
- * Return the set of coefficients for a first order band-pass filter.
- * Roll-off is 20 dB/dec (6 dB/oct).
- *
- *                     s / wh
- *   H(s) = -----------------------------
- *            (1 + s / wh) (1 + s / wl)
- *
- * @param fc Cut-off frequency;
- * @param Q  Q factor;
- * @param fs Sampling frequency.
- * @return The normalized filter coefficients.
- */
-constexpr PCoeffs<3, 3> iir_bapass20(fp_t fc, fp_t Q, fp_t fs)
-{
-    fp_t df = fc / (2.0 * Q);
-    fp_t fh = std::max<fp_t>(fc - df, 0.0);
-    fp_t fl = std::min<fp_t>(fc + df, fs / 2.0);
-
-    const fp_t wh = Pi * fh / fs;
-    const fp_t wl = Pi * fl / fs;
-
-    const fp_t b0 = wl;
-    const fp_t b1 = 0.0;
-    const fp_t b2 = -wl;
-
-    const fp_t a0 = (wh + 1.0) * (wl + 1.0);
-    const fp_t a1 = (wh + 1.0) * (wl - 1.0) + (wh - 1.0) * (wl + 1.0);
-    const fp_t a2 = (wl - 1.0) * (wh - 1.0);
-
-    return { { b0 / a0, b1 / a0, b2 / a0 }, { 1.0, a1 / a0, a2 / a0 } };
 }
 
 /**
