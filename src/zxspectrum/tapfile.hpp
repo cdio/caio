@@ -42,7 +42,7 @@ public:
      * Load a TAP file or directory.
      * @param path TAP file name or directory.
      * @exception IOError
-     * @see load(std::string_view)
+     * @see load(const fs::Path&)
      */
     TAPFile(const fs::Path& path = {});
 

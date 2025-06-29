@@ -67,7 +67,7 @@ public:
      * @param vol Beep volume (between 0 and 1).
      */
     void beep(float vol) {
-        _beep = ((vol > 1.0f) ? 1.0f : (vol < 0.0f ? 0.0f : vol));
+        _beep = std::clamp(vol, 0.0f, 1.0f);
     }
 
 private:
