@@ -25,17 +25,18 @@ namespace ricoh {
 namespace rp2c02 {
 
 /*
- * https://www.nesdev.org/wiki/PPU_palettes#2C02
+ * Accurate palette.
+ * https://www.nesdev.org/NESTechFAQ.htm#accuratepal
  */
 RgbaTable RP2C02::builtin_palette{
-    0x626262FF, 0x012090FF, 0x240BA0FF, 0x470090FF, 0x600062FF, 0x6A0024FF, 0x601100FF, 0x472700FF,
-    0x243C00FF, 0x014A00FF, 0x004F00FF, 0x004724FF, 0x003662FF, 0x000000FF, 0x000000FF, 0x000000FF,
-    0xABABABFF, 0x1F56E1FF, 0x4D39FFFF, 0x7E23EFFF, 0xA31BB7FF, 0xB42264FF, 0xAC370EFF, 0x8C5500FF,
-    0x5E7200FF, 0x2D8800FF, 0x079000FF, 0x008947FF, 0x00739DFF, 0x000000FF, 0x000000FF, 0x000000FF,
-    0xFFFFFFFF, 0x67ACFFFF, 0x958DFFFF, 0xC875FFFF, 0xF26AFFFF, 0xFF6FC5FF, 0xFF836AFF, 0xE6A01FFF,
-    0xB8BF00FF, 0x85D801FF, 0x5BE335FF, 0x45DE88FF, 0x49CAE3FF, 0x4E4E4EFF, 0x000000FF, 0x000000FF,
-    0xFFFFFFFF, 0xBFE0FFFF, 0xD1D3FFFF, 0xE6C9FFFF, 0xF7C3FFFF, 0xFFC4EEFF, 0xFFCBC9FF, 0xF7D7A9FF,
-    0xE6E397FF, 0xD1EE97FF, 0xBFF3A9FF, 0xB5F2C9FF, 0xB5EBEEFF, 0xB8B8B8FF, 0x000000FF, 0x000000FF
+    0x808080FF, 0x003DA6FF, 0x0012B0FF, 0x440096FF, 0xA1005EFF, 0xC70028FF, 0xBA0600FF, 0x8C1700FF,
+    0x5C2F00FF, 0x104500FF, 0x054A00FF, 0x00472EFF, 0x004166FF, 0x000000FF, 0x050505FF, 0x050505FF,
+    0xC7C7C7FF, 0x0077FFFF, 0x2155FFFF, 0x8237FAFF, 0xEB2FB5FF, 0xFF2950FF, 0xFF2200FF, 0xD63200FF,
+    0xC46200FF, 0x358000FF, 0x058F00FF, 0x008A55FF, 0x0099CCFF, 0x212121FF, 0x090909FF, 0x090909FF,
+    0xFFFFFFFF, 0x0FD7FFFF, 0x69A2FFFF, 0xD480FFFF, 0xFF45F3FF, 0xFF618BFF, 0xFF8833FF, 0xFF9C12FF,
+    0xFABC20FF, 0x9FE30EFF, 0x2BF035FF, 0x0CF0A4FF, 0x05FBFFFF, 0x5E5E5EFF, 0x0D0D0DFF, 0x0D0D0DFF,
+    0xFFFFFFFF, 0xA6FCFFFF, 0xB3ECFFFF, 0xDAABEBFF, 0xFFA8F9FF, 0xFFABB3FF, 0xFFD2B0FF, 0xFFEFA6FF,
+    0xFFF79CFF, 0xD7E895FF, 0xA6EDAFFF, 0xA2F2DAFF, 0x99FFFCFF, 0xDDDDDDFF, 0x111111FF, 0x111111FF
 };
 
 RP2C02::RP2C02(std::string_view label, const sptr_t<ASpace>& mmap, bool ntsc)
@@ -113,9 +114,30 @@ uint8_t RP2C02::dev_read(size_t addr, Device::ReadMode mode)
                (_sp_overflow << 5) |
                (_sp_0_hit << 6) |
                (_vblank_flag << 7);
+
         _vblank_flag = false;
         irq_out(false);
         _regs.w = 0;
+
+        /*
+         * TODO: Does it make sense to implement this?
+         *
+         * "Reading $2002 within a few PPU clocks of when VBL is set
+         *  results in special-case behavior.
+         *  Reading one PPU clock before reads it as clear and never
+         *  sets the flag or generates NMI for that frame.
+         *  Reading on the same PPU clock or one later reads it as set,
+         *  clears it, and suppresses the NMI for that frame.
+         *  Reading two or more PPU clocks before/after it's set behaves
+         *  normally (reads flag's value, clears it, and doesn't affect NMI
+         *  operation).
+         *  This suppression behavior is due to the $2002 read
+         *  pulling the NMI line back up too quickly after it drops (NMI is
+         *  active low) for the CPU to see it. (CPU inputs like NMI are
+         *  sampled each clock.)"
+         *
+         * https://www.nesdev.org/wiki/PPU_frame_timing
+         */
         return data;
 
     case OAMADDR:
@@ -390,7 +412,7 @@ size_t RP2C02::tick(const Clock& clk)
 
     if (_rasterline == POST_RENDER_LINE) {
         /*
-         * VBlank period starts at this line.
+         * VBlank period started.
          */
         _vblank = true;
         _cycle = 0;
@@ -399,28 +421,31 @@ size_t RP2C02::tick(const Clock& clk)
     }
 
     if (_rasterline == VBLANK_START) {
-        if (_cycle == 0) {
+        switch (_cycle) {
+        case 1:
+            /*
+             * VBlank flag and IRQ.
+             */
+            _vblank_flag = true;
+            if (_irq_enabled) {
+                irq_out(true);
+            }
+
+            /* PASSTHROUGH */
+
+        case 0:
             /*
              * Idle cycle.
              */
-            _cycle = 1;
+            ++_cycle;
             return 1;
+
+        default:;
         }
 
-        /*
-         * Set the VBlank flag.
-         */
-        _vblank_flag = true;
-        if (_irq_enabled) {
-            irq_out(true);
-        }
-
-        /*
-         * Do nothing until the VBlank period is ended.
-         */
         _cycle = 0;
         _rasterline = PRE_RENDER_LINE;
-        return (VBLANK_END - VBLANK_START) * CYCLES - 1;
+        return (VBLANK_END - VBLANK_START) * CYCLES - 2;
     }
 
     /*
@@ -430,7 +455,7 @@ size_t RP2C02::tick(const Clock& clk)
         /*
          * Idle cycle.
          */
-        _cycle = 1;
+        ++_cycle;
         return 1;
     }
 
@@ -624,10 +649,7 @@ size_t RP2C02::tick(const Clock& clk)
         render_line();
         paint_sprites();
         _cycle = 0;
-        ++_rasterline;
-        if (_rasterline == SCANLINES) {
-            _rasterline = 0;
-        }
+        _rasterline = (_rasterline + 1) % SCANLINES;
     }
 
     return 1;
@@ -639,7 +661,7 @@ inline void RP2C02::render_line()
         _render_line(_rasterline - _visible_y_start, _scanline);
     }
 
-    std::fill(_scanline.begin(), _scanline.end(), backdrop_color());
+    std::fill(std::begin(_scanline), std::end(_scanline), backdrop_color());
 }
 
 inline void RP2C02::fetch_tilech(TileData& tile)
