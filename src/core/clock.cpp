@@ -35,19 +35,22 @@ Clock::Clock(std::string_view label, size_t freq, float delay)
       _freq{freq},
       _delay{delay}
 {
+    sync(SYNC_TIME);
 }
 
 Clock::Clock(size_t freq, float delay)
-    : Name{TYPE, {}},
-      _freq{freq},
-      _delay{delay}
+    : Clock{"", freq, delay}
+{
+}
+
+Clock::~Clock()
 {
 }
 
 void Clock::add(const sptr_t<Clockable>& clkb)
 {
     if (clkb) {
-        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&clkb](const clockable_pair_t& pair) -> bool {
+        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&clkb](const ClockablePair& pair) -> bool {
             return (pair.first.get() == clkb.get());
         });
 
@@ -60,7 +63,7 @@ void Clock::add(const sptr_t<Clockable>& clkb)
 void Clock::del(const sptr_t<Clockable>& clkb)
 {
     if (clkb) {
-        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&clkb](const clockable_pair_t& pair) -> bool {
+        auto it = std::find_if(_clockables.begin(), _clockables.end(), [&clkb](const ClockablePair& pair) -> bool {
             return (pair.first.get() == clkb.get());
         });
 
@@ -72,7 +75,6 @@ void Clock::del(const sptr_t<Clockable>& clkb)
 
 void Clock::run()
 {
-    const ssize_t sync_cycles = cycles(SYNC_TIME / 1'000'000.0f);
     ssize_t sched_cycle = 0;
     int64_t start = utils::now();
 
@@ -99,41 +101,43 @@ void Clock::run()
 
         ++sched_cycle;
 
-        if (sched_cycle == sync_cycles) {
-            /*
-             * Calculate the time required for the host system
-             * to execute sync_cycles emulated clock cycles.
-             */
-            const int64_t end = utils::now();
-            const int64_t elapsed = end - start;
-            const int64_t wait_time = SYNC_TIME - elapsed;
-            if (wait_time < 0) {
-                /*
-                 * Slow host system.
-                 */
-//                log.warn("{}: Slow host system, delayed of {}us\n", Name::to_string(), -wait_time);
-                sched_cycle = 0;
-                start = utils::now();
-                continue;
-            }
-
-            /*
-             * Suspend the execution of this clock until the
-             * time expected by the emulated system is reached.
-             */
-            std::this_thread::sleep_for(std::chrono::microseconds{static_cast<int64_t>(wait_time * _delay)});
-
-            /*
-             * Don't expect the operating system' scheduler to be real-time,
-             * this thread probably slept far more than requested.
-             * Adjust for this situation.
-             */
-            start = utils::now();
-            const ssize_t delayed_cycles = cycles((start - end) / (_delay * 1000000.0f));
-            const ssize_t wait_cycles = cycles(wait_time / 1000000.0f);
-            const ssize_t extra_cycles = delayed_cycles - wait_cycles;
-            sched_cycle = -extra_cycles;
+	if (sched_cycle < _sync_cycles) {
+            continue;
         }
+
+        /*
+         * Calculate the time required for the host system
+         * to execute _sync_cycles emulated clock cycles.
+         */
+        const int64_t end = utils::now();
+        const int64_t run_time = end - start;
+        const int64_t wait_time = _sync_time - run_time;
+        if (wait_time < 0) {
+            /*
+             * Slow host system.
+             */
+//            log.warn("{}: Slow host or late sync, delay of {} us\n", Name::to_string(), wait_time);
+            start = end;
+            sched_cycle = 0;
+            continue;
+        }
+
+        /*
+         * Suspend the execution of this clock until the
+         * time expected by the emulated system is reached.
+         */
+        std::this_thread::sleep_for(std::chrono::microseconds{static_cast<int64_t>(wait_time * _delay)});
+
+        /*
+         * This thread probably slept far more than requested.
+         * Adjust for this situation.
+         */
+        start = utils::now();
+        const ssize_t sleep_cycles = cycles((start - end) / (_delay * 1'000'000.0f));
+        const ssize_t wait_cycles = cycles(wait_time / 1'000'000.0f);
+        const ssize_t extra_cycles = sleep_cycles - wait_cycles;
+
+        sched_cycle = -extra_cycles;
     }
 }
 

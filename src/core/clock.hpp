@@ -62,16 +62,15 @@ private:
 class Clock : public Name {
 public:
     constexpr static const char* TYPE = "CLK";
-    constexpr static const int64_t SYNC_TIME = 20000;
+    constexpr static const float SYNC_TIME = 0.020f;   /* Default sync time (50Hz) */
 
-    using clockable_pair_t = std::pair<sptr_t<Clockable>, size_t>;
+    using ClockablePair = std::pair<sptr_t<Clockable>, size_t>;
 
     /**
      * Initialise this clock.
      * @param label Label assigned to this clock;
      * @param freq  Frequency (in Hz);
      * @param delay The speed delay (1.0f is normal speed).
-     * @see delay(float)
      */
     Clock(std::string_view label = {}, size_t freq = {}, float delay = 1.0f);
 
@@ -79,11 +78,26 @@ public:
      * Initialise this clock.
      * @param freq  Frequency (in Hz);
      * @param delay The speed delay (1.0f is normal speed).
-     * @see delay(float)
      */
     Clock(size_t freq, float delay = 1.0f);
 
-    virtual ~Clock() {
+    virtual ~Clock();
+
+    /**
+     * Synchronise the emulated system with the real time.
+     * By default the clock self synchronises each SYNC_TIME seconds;
+     * devices can call this method to change this value.
+     * @param stime Time since the last sync (seconds).
+     */
+    void sync(float stime)
+    {
+        _sync_time = static_cast<int64_t>(stime * 1'000'000.0f);
+        _sync_cycles = cycles(stime);
+    }
+
+    void sync(float stime) const
+    {
+        const_cast<Clock*>(this)->sync(stime);
     }
 
     /**
@@ -91,7 +105,8 @@ public:
      * @return The frequency of this clock in Hz.
      * @see freq(size_t)
      */
-    size_t freq() const {
+    size_t freq() const
+    {
         return _freq;
     }
 
@@ -100,7 +115,8 @@ public:
      * @param freq Frequency (in Hz).
      * @see freq()
      */
-    void freq(size_t freq) {
+    void freq(size_t freq)
+    {
         _freq = freq;
     }
 
@@ -109,7 +125,8 @@ public:
      * @return The speed delay for this clock (1.0 is normal speed, 2.0 is half the speed. etc.).
      * @see delay(float)
      */
-    float delay() const {
+    float delay() const
+    {
         return _delay;
     }
 
@@ -121,7 +138,8 @@ public:
      * @see delay()
      * @see freq(size_t)
      */
-    void delay(float delay) {
+    void delay(float delay)
+    {
         _delay = delay;
     }
 
@@ -131,7 +149,8 @@ public:
      * (does not emulate the actual time expected from the emulated system).
      * @param on true to activate; false to deactivate.
      */
-    void fullspeed(bool on) {
+    void fullspeed(bool on)
+    {
         _fullspeed = on;
     }
 
@@ -139,7 +158,8 @@ public:
      * Return the status of the full-speed mode.
      * @return true if full-speed mode is active; false otherwise.
      */
-    bool fullspeed() const {
+    bool fullspeed() const
+    {
         return _fullspeed;
     }
 
@@ -187,7 +207,8 @@ public:
      * to return back from the run() method.
      * @see run()
      */
-    void stop() {
+    void stop()
+    {
         _stop = true;
     }
 
@@ -199,7 +220,8 @@ public:
      * @see paused()
      * @see toggle_pause()
      */
-    void pause(bool susp = true) {
+    void pause(bool susp = true)
+    {
         _suspend = susp;
     }
 
@@ -219,7 +241,8 @@ public:
      * @see pause()
      * @see paused()
      */
-    void toggle_pause() {
+    void toggle_pause()
+    {
         _suspend = (_suspend ? false : true);
     }
 
@@ -229,7 +252,8 @@ public:
      * @see pause()
      * @see toggle_pause()
      */
-    bool paused() const {
+    bool paused() const
+    {
         return _suspend;
     }
 
@@ -244,7 +268,8 @@ public:
      * @param secs Time interval (seconds).
      * @return The clock cycles corresponding to the specified time interval.
      */
-    size_t cycles(float secs) const {
+    size_t cycles(float secs) const
+    {
         return cycles(secs, _freq);
     }
 
@@ -253,7 +278,8 @@ public:
      * @param cycles Cycles.
      * @return The time interval corresponding to the specified clock cycles.
      */
-    float time(size_t cycles) const {
+    float time(size_t cycles) const
+    {
         return time(cycles, _freq);
     }
 
@@ -270,7 +296,8 @@ public:
      * @param freq Clock frequency (Hz).
      * @return The clock cycles corresponding to the specified time interval.
      */
-    constexpr static size_t cycles(float secs, size_t freq) {
+    constexpr static size_t cycles(float secs, size_t freq)
+    {
         return static_cast<size_t>(secs * freq);
     }
 
@@ -280,18 +307,21 @@ public:
      * @param freq   Clock frequency (Hz).
      * @return The time interval corresponding to the specified cycles.
      */
-    constexpr static float time(size_t cycles, size_t freq) {
+    constexpr static float time(size_t cycles, size_t freq)
+    {
         return (cycles / static_cast<float>(freq));
     }
 
 private:
-    size_t                        _freq;
-    float                         _delay;
-    bool                          _fullspeed{};
-    uint64_t                      _ticks{};
-    std::atomic_bool              _stop{};
-    std::atomic_bool              _suspend{};
-    std::vector<clockable_pair_t> _clockables{};
+    size_t                      _freq;
+    float                       _delay;
+    int64_t                     _sync_time;
+    ssize_t                     _sync_cycles;
+    bool                        _fullspeed{};
+    uint64_t                    _ticks{};
+    std::atomic_bool            _stop{};
+    std::atomic_bool            _suspend{};
+    std::vector<ClockablePair>  _clockables{};
 };
 
 }
