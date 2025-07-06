@@ -211,7 +211,7 @@ public:
 
     constexpr static const size_t TILES                     = 3;            /* Tile data buffer size                */
 
-    using RendererCb = std::function<void(unsigned, const ui::Scanline&)>;
+    using RendererCb = std::function<bool(unsigned, const ui::Scanline&)>;
 
     /*
      * Memory mapped registers (CPU Bus).
@@ -378,7 +378,7 @@ private:
     /**
      * Render the current scanline.
      * This method calls the renderer callback.
-     * After rendering the scanline is clared using the backdrop color.
+     * After rendering the scanline is cleared using the backdrop color.
      * @see render_line(const RendererCb&)
      * @see backdrop_color()
      */

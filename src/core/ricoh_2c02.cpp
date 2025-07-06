@@ -658,10 +658,10 @@ size_t RP2C02::tick(const Clock& clk)
 inline void RP2C02::render_line()
 {
     if (!_vblank && _rasterline >= _visible_y_start && _rasterline < _visible_y_end && _render_line) {
-        _render_line(_rasterline - _visible_y_start, _scanline);
+        const unsigned line = _rasterline - _visible_y_start;
+        _render_line(line, _scanline);
+        std::fill(_scanline.begin(), _scanline.end(), backdrop_color());
     }
-
-    std::fill(std::begin(_scanline), std::end(_scanline), backdrop_color());
 }
 
 inline void RP2C02::fetch_tilech(TileData& tile)
