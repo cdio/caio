@@ -101,7 +101,7 @@ void Clock::run()
 
         ++sched_cycle;
 
-	if (sched_cycle < _sync_cycles) {
+        if (sched_cycle < _sync_cycles) {
             continue;
         }
 

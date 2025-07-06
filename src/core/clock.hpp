@@ -62,7 +62,7 @@ private:
 class Clock : public Name {
 public:
     constexpr static const char* TYPE = "CLK";
-    constexpr static const float SYNC_TIME = 0.020f;   /* Default sync time (50Hz) */
+    constexpr static const float SYNC_TIME = 1.0f / 60.0f;  /* Default sync time to 60Hz */
 
     using ClockablePair = std::pair<sptr_t<Clockable>, size_t>;
 
