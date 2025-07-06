@@ -459,8 +459,7 @@ void Apu::play()
     if (_apos == std::size(_abuf)) {
         _apos = 0;
         if (_audio_buffer) {
-            auto buf = _audio_buffer();
-            if (buf) {
+            if (auto buf = _audio_buffer(); buf) {
                 std::copy(std::begin(_abuf), std::end(_abuf), std::begin(buf));
             }
         }

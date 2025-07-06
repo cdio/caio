@@ -34,7 +34,7 @@ namespace rp2a03 {
 constexpr static const size_t AUDIO_CHANNELS        = 1;
 constexpr static const unsigned AUDIO_SAMPLING_RATE = 44100;
 constexpr static const float AUDIO_DT               = 1.0f / AUDIO_SAMPLING_RATE;
-constexpr static const float AUDIO_SAMPLES_TIME     = 0.020f;
+constexpr static const float AUDIO_SAMPLES_TIME     = 1.0f / 30.0f;
 constexpr static const size_t AUDIO_SAMPLES         = utils::ceil(AUDIO_SAMPLING_RATE * AUDIO_SAMPLES_TIME);
 
 /**
