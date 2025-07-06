@@ -19,6 +19,7 @@
 #pragma once
 
 #include <mutex>
+#include <optional>
 #include <queue>
 
 namespace caio {
@@ -30,32 +31,34 @@ public:
     }
 
     LockedQueue(LockedQueue&& lq)
-        : _queue{static_cast<const std::queue<T>&&>(lq)} {
+        : _queue{static_cast<const std::queue<T>&&>(lq)}
+    {
     }
 
-    virtual ~LockedQueue() {
+    virtual ~LockedQueue()
+    {
     }
 
-    void clear() {
+    void clear()
+    {
         std::scoped_lock<std::mutex> _{_qlock};
         _queue = {};
     }
 
-    void push(const T&& value) {
+    void push(const T&& value)
+    {
         std::scoped_lock<std::mutex> _{_qlock};
         _queue.push(std::move(value));
     }
 
-    T pop() {
+    std::optional<T> pop() {
         std::scoped_lock<std::mutex> _{_qlock};
+        if (_queue.empty()) {
+            return {};
+        }
         auto val = std::move(_queue.front());
         _queue.pop();
         return val;
-    }
-
-    T& back() {
-        std::scoped_lock<std::mutex> _{_qlock};
-        return _queue.back();
     }
 
     size_t size() const {

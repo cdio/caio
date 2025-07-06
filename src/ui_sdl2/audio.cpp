@@ -121,16 +121,13 @@ AudioBuffer AudioStream::buffer()
         _playing_queue.push(std::move(buf));
     };
 
-    if (_stop) {
-        return {{}, {}};
+    if (!_stop && _free_queue.size() != 0) {
+        if (auto buf = _free_queue.pop(); buf.has_value()) {
+            return {dispatcher, std::move(buf.value())};
+        }
     }
 
-    if (_free_queue.size() == 0) {
-//        log.warn("ui: audio: No free buffers available\n");
-        return {{}, {}};
-    }
-
-    return {dispatcher, _free_queue.pop()};
+    return {{}, {}};
 }
 
 void AudioStream::stream_data(AudioStream* self, uint8_t* stream, int len)
@@ -140,7 +137,15 @@ void AudioStream::stream_data(AudioStream* self, uint8_t* stream, int len)
         return;
     }
 
-    auto samples = self->_playing_queue.pop();
+    auto osamples = self->_playing_queue.pop();
+    if (!osamples) {
+        /*
+         * No more buffers to play.
+         */
+        return;
+    }
+
+    auto samples = osamples.value();
     int16_t* data = reinterpret_cast<int16_t*>(stream);
     size_t datasiz = std::min<size_t>(len >> 1, samples.size());
     if (datasiz < samples.size()) {
