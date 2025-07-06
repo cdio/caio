@@ -87,14 +87,21 @@ void NES::start()
                 break;
             }
 
-            _reset = false;
+            /*
+             * Clock stopped by a reset request.
+             */
             _clk->pause();
             _clk->reset();
             _kbd->reset();
+            _ram->reset();
             _cart->reset();
+            _ppu_mmap->reset();
             _ppu->reset();
+            _cpu_mmap->reset();
             _cpu->reset();
+            _kbd->reset();
             _clk->pause(false);
+            _reset = false;
         }
 
         _ui->stop();
@@ -221,7 +228,7 @@ void NES::connect_devices()
         auto& sjoy2 = (_conf.swapj ? _joy1 : _joy2);
         switch (addr) {
         case RP2A03::IOPORT_IN1:
-            data = (data & (D7 | D6 | D5)) | sjoy1->data();
+            data = (data & (D7 | D6 | D5 | D4 | D3 | D2)) | sjoy1->data();
             sjoy1->clk();
             break;
         case RP2A03::IOPORT_IN2:
@@ -359,7 +366,7 @@ void NES::connect_ui()
      * Connect the video output.
      */
     _ppu->render_line([this](unsigned line, const ui::Scanline& scanline) {
-        _ui->render_line(line, scanline);
+        return _ui->render_line(line, scanline);
     });
 
     /*
@@ -385,9 +392,9 @@ void NES::hotkeys(keyboard::Key key)
         /*
          * Swap joysticks.
          */
-        _gamepad1->action();    /* Swap action, gamepad1 visible on status bar */
-        _gamepad2->action();    /* Swap action, gamepad2 visible on status bar */
-        _gamepad1->action();    /* Swap action, swap value as excepted         */
+        _gamepad1->action();    /* Make gamepad1 visible on status bar */
+        _gamepad2->action();    /* Make gamepad2 visible on status bar */
+        _gamepad1->action();    /* Swap action as expected             */
         break;
 
     case keyboard::KEY_CTRL_C:
