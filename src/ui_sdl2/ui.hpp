@@ -21,6 +21,7 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <semaphore>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -399,6 +400,7 @@ private:
     sptr_t<::SDL_Window>        _window{};                  /* Main window                                        */
     RawScreen                   _screen_raw[2]{};           /* Raw screen RGBA data buffers                       */
     size_t                      _raw_index{};               /* Raw screen buffer being filled                     */
+    std::binary_semaphore       _raw_sem{0};                /* Raw screen semaphore                               */
     sptr_t<::SDL_Texture>       _screen_tex{};              /* Emulated screen texture ready to be rendered       */
     ::SDL_Rect                  _screen_rect{};             /* Emulated screen rendering coordinates              */
 

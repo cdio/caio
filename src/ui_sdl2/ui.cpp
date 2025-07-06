@@ -359,6 +359,7 @@ bool UI::render_line(unsigned line, const Scanline& sline)
 
     if (line + 1 == _conf.video.height) {
         _raw_index ^= 1;
+        _raw_sem.release();
         return true;
     }
 
@@ -523,7 +524,6 @@ void UI::run()
 void UI::event_loop()
 {
     ::SDL_Event event{};
-    size_t prev_index{};
 
     while (!_stop) {
         while (::SDL_PollEvent(&event)) {
@@ -576,10 +576,8 @@ void UI::event_loop()
             signal_key = keyboard::KEY_NONE;
         }
 
-        if (prev_index != _raw_index) {
-            render_screen();
-            prev_index = _raw_index;
-        }
+        _raw_sem.acquire();
+        render_screen();
     }
 }
 
