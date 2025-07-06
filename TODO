@@ -1,13 +1,15 @@
-- Gamepad:  linux (left joystick), mac (apple messing around as usual)
+- Gamepad:  fix macos
+- ui:       Remove fps setting
+- misc:     Snapshots (save/restore machine state) + widget
+- ui:       Screenshot from texture?
 - c64/nes:  Reset problem (c64/ughlympics)
-- c64:      Bomjack joystick
+- c64:      Bomjack/ughlympics joystick fire
 - nes:      mapper 2: Life force
-- nes:      Limit all audio signals to fs/2
 - nes:      Sprite overflow bug
 - nes:      Test The Young Indiana Jones Chronicles and Burai Fighter
 - 2A03:     Dump of memory mapped registers
 - icons:    Fix png2cpp.sh under linux (gnu hexdump problems)
-- misc:     Test on macos-x86
+- misc:     Cross-compile and Test on macos-x86
 - misc:     Unify base machine (common base class for all platforms)
 - main:     Refactor configurator using a real gui toolkit (wxWidgets?)
 - SID:      Filter gain or shape? (ballad/channels dane)
@@ -19,10 +21,10 @@
 - CBMBUS:   Timeout (to recover from external problems)
 - CBMBUS:   Refactor using pullups
 - c64:      C64 EasyFlash cartridge: EEPROM support
-- c64:      Ughlympics and Bombjack: Joystick fire
 - c64:      C64 EasyFlash cartridge: Turrican2 continue game?
 - c64:      Zaxxon cartridge: Wrong chargen
 - misc:     Use fstream::native_handle() (C++26)
+- ui:       Migration to SDL-3
 - Spectrum: Test SNA format
 - Apple2
 - BBC Micro
