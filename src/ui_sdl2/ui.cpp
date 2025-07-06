@@ -777,13 +777,21 @@ void UI::joy_event(const ::SDL_Event& event)
             auto it = _sdl_joys.find(jid);
             auto* gc = it->second.get();
 
-            int16_t ix = ::SDL_GameControllerGetAxis(gc, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTX);
-            int16_t iy = ::SDL_GameControllerGetAxis(gc, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTY);
+            int16_t ix{};
+            int16_t iy{};
 
-            if (ix < 2 && ix > -2 && iy < 2 && iy > -2) {
-                /* Right joystick has the priority over the left joystick */
+            switch (event.caxis.axis) {
+            case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX:
+            case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTY:
                 ix = ::SDL_GameControllerGetAxis(gc, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTX);
                 iy = ::SDL_GameControllerGetAxis(gc, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_LEFTY);
+                break;
+            case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTX:
+            case SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTY:
+                ix = ::SDL_GameControllerGetAxis(gc, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTX);
+                iy = ::SDL_GameControllerGetAxis(gc, SDL_GameControllerAxis::SDL_CONTROLLER_AXIS_RIGHTY);
+                break;
+            default:;
             }
 
             const auto& jport = ejoy->port();
