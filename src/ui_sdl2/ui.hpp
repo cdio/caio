@@ -65,9 +65,10 @@ public:
     constexpr static const uint8_t PANEL_BUTTON             = SDL_BUTTON_RIGHT;
     constexpr static const char* SCREENSHOT_PREFIX          = "caio_screenshot_";
 
-    using keybptr_t     = sptr_t<Keyboard>;
-    using joyptr_t      = sptr_t<Joystick>;
-    using hotkeys_cb_t  = std::function<void(keyboard::Key)>;
+    using KeyboardPtr   = sptr_t<Keyboard>;
+    using JoystickPtr   = sptr_t<Joystick>;
+    using HotkeysCb     = std::function<void(keyboard::Key)>;
+    using RawScreen     = std::vector<Rgba>;
 
     /**
      * Get the instance to the user interface.
@@ -98,19 +99,19 @@ public:
      * Set the emulated keyboard.
      * @param kbd Keyboard to set.
      */
-    void keyboard(const keybptr_t& kbd);
+    void keyboard(const KeyboardPtr& kbd);
 
     /**
      * Set the emulated joysticks and associate connected gamepads to them.
      * @param il Joysticks to set.
      */
-    void joystick(const std::initializer_list<joyptr_t>& il);
+    void joystick(const std::initializer_list<JoystickPtr>& il);
 
     /**
      * Set the hot-keys callback.
      * @param hotkeys_cb Callback.
      */
-    void hotkeys(const hotkeys_cb_t& hotkeys_cb);
+    void hotkeys(const HotkeysCb& hotkeys_cb);
 
     /**
      * Set the pause callbacks.
@@ -199,12 +200,19 @@ public:
     AudioBuffer audio_buffer();
 
     /**
+     * Get the index of the raw buffer ready to be rendered.
+     * @return The index of the raw buffer to render.
+     */
+    size_t raw_index();
+
+    /**
      * Render a scanline.
      * This method must be called by an emulated video controller to render a scanline.
      * @param line  Number of scanline to render;
      * @param sline Scanline pixel data.
+     * @return true if the last line of the screen was rendered; false otherwise.
      */
-    void render_line(unsigned line, const Scanline& sline);
+    bool render_line(unsigned line, const Scanline& sline);
 
     /**
      * Fill the screen with a colour.
@@ -235,7 +243,7 @@ public:
 
     /**
      * Get the backend renderer.
-     * @return A raw pointer to the backend renderer.
+     * @return A pointer to the backend renderer.
      */
     sptr_t<::SDL_Renderer> renderer();
 
@@ -245,7 +253,7 @@ public:
      * name: SCREENSHOT_PREFIX + "YYYY-MM-DD-hh.mm.ss".
      * @exception UIError
      */
-    void screenshot() const;
+    void screenshot();
 
 private:
     /**
@@ -357,7 +365,7 @@ private:
      * @return The requested emulated joystick on success;
      * nullptr if the SDL joystick is not associated to an emulated joystick.
      */
-    joyptr_t find_joystick(::SDL_JoystickID jid);
+    JoystickPtr find_joystick(::SDL_JoystickID jid);
 
     /**
      * Find and associate game controllers to unassigned emulated joysticks.
@@ -365,10 +373,9 @@ private:
     void attach_controllers();
 
     Config                      _conf{};                    /* UI configuration                                   */
-    uint64_t                    _fps_time{};                /* FPS in microseconds                                */
-    keybptr_t                   _kbd{};                     /* Emulated keyboard                                  */
-    std::vector<joyptr_t>       _joys{};                    /* List of emulated joysticks                         */
-    hotkeys_cb_t                _hotkeys_cb{};              /* User defined hot-keys callback                     */
+    KeyboardPtr                 _kbd{};                     /* Emulated keyboard                                  */
+    std::vector<JoystickPtr>    _joys{};                    /* List of emulated joysticks                         */
+    HotkeysCb                   _hotkeys_cb{};              /* User defined hot-keys callback                     */
     std::function<void(bool)>   _pause_cb{};                /* Pause callback                                     */
     std::function<bool()>       _ispause_cb{};              /* Pause status callback                              */
     std::function<void()>       _reset_cb{};                /* Reset callback                                     */
@@ -390,9 +397,11 @@ private:
     sptr_t<::SDL_Renderer>      _renderer{};                /* Main window renderer                               */
     uptrd_t<::SDL_Surface>      _icon{nullptr, nullptr};    /* Main window icon                                   */
     sptr_t<::SDL_Window>        _window{};                  /* Main window                                        */
-    std::vector<Rgba>           _screen_raw{};              /* Emulated screen raw RGBA data                      */
+    RawScreen                   _screen_raw[2]{};           /* Raw screen RGBA data buffers                       */
+    size_t                      _raw_index{};               /* Raw screen buffer being filled                     */
     sptr_t<::SDL_Texture>       _screen_tex{};              /* Emulated screen texture ready to be rendered       */
     ::SDL_Rect                  _screen_rect{};             /* Emulated screen rendering coordinates              */
+
     sptr_t<Panel>               _panel{};                   /* Info Panel                                         */
     sptr_t<widget::Fullscreen>  _wid_fullscreen{};
     sptr_t<widget::Reset>       _wid_reset{};

@@ -107,7 +107,7 @@ bool AudioStream::is_paused() const
 
 void AudioStream::volume(float vol)
 {
-    _volume = std::max(0.0f, std::min(1.0f, vol));
+    _volume = std::clamp(vol, 0.0f, 1.0f);
 }
 
 float AudioStream::volume() const

@@ -85,7 +85,6 @@ UI::UI(const ui::Config& conf)
 
     auto& vconf = _conf.video;
 
-    _fps_time = 1'000'000 / vconf.fps;
     _screen_ratio = vconf.width / static_cast<float>(vconf.height);
 
     switch (vconf.sleffect) {
@@ -150,12 +149,13 @@ UI::UI(const ui::Config& conf)
     const Image& ico = icon();
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-    auto* iconp = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
-        ico.width, ico.height, 32, ico.width * 4, SDL_PIXELFORMAT_ABGR8888);
+    constexpr static const uint32_t pixel_format = SDL_PIXELFORMAT_ABGR8888;
 #else
-    auto* iconp = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
-        ico.width, ico.height, 32, ico.width * 4, SDL_PIXELFORMAT_RGBA8888);
+    constexpr static const uint32_t pixel_format = SDL_PIXELFORMAT_RGBA8888;
 #endif
+
+    auto* iconp = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
+        ico.width, ico.height, 32, ico.width * 4, pixel_format);
 
     if (iconp == nullptr) {
         throw UIError{"Can't create window icon: {}", sdl_error()};
@@ -167,7 +167,7 @@ UI::UI(const ui::Config& conf)
     /*
      * Create the renderer.
      */
-    auto* rendp = ::SDL_CreateRenderer(_window.get(), -1, 0);
+    auto* rendp = ::SDL_CreateRenderer(_window.get(), -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     if (rendp == nullptr) {
         throw UIError{"Can't create renderer: {}", sdl_error()};
     }
@@ -179,9 +179,11 @@ UI::UI(const ui::Config& conf)
     }
 
     /*
-     * Create the raw (rgba) screen (this is filled with the emulated video data).
+     * Create the raw (rgba) screen buffers.
      */
-    _screen_raw = std::vector<Rgba>(vconf.width * vconf.height, CRT_COLOR);
+    const size_t screen_size = vconf.width * vconf.height;
+    _screen_raw[0] = RawScreen(screen_size, CRT_COLOR);
+    _screen_raw[1] = RawScreen(screen_size, CRT_COLOR);
 
     /*
      * Create the raw screen texture.
@@ -218,7 +220,7 @@ UI::~UI()
         std::this_thread::yield();
     }
 
-    _panel = {};
+    _panel = {};    /* Destroy the panel before SDL is terminated */
 
     ::IMG_Quit();
     ::SDL_Quit();
@@ -231,17 +233,17 @@ void UI::title(const std::string& title)
     }
 }
 
-void UI::keyboard(const keybptr_t& kbd)
+void UI::keyboard(const KeyboardPtr& kbd)
 {
     _kbd = kbd;
 }
 
-void UI::joystick(const std::initializer_list<joyptr_t>& il)
+void UI::joystick(const std::initializer_list<JoystickPtr>& il)
 {
     _joys = il;
 }
 
-void UI::hotkeys(const hotkeys_cb_t& hotkeys_cb)
+void UI::hotkeys(const HotkeysCb& hotkeys_cb)
 {
     _hotkeys_cb = hotkeys_cb;
 }
@@ -335,24 +337,38 @@ AudioBuffer UI::audio_buffer()
     return {{}, {}};
 }
 
-void UI::render_line(unsigned line, const Scanline& sline)
+inline size_t UI::raw_index()
+{
+    return (_raw_index ^ 1);
+}
+
+bool UI::render_line(unsigned line, const Scanline& sline)
 {
     if (_stop) {
 //        log.debug("ui: Can't render line: System is stopped\n");
-        return;
+        return false;
     }
 
     if (line >= _conf.video.height || sline.size() != _conf.video.width) {
-        log.warn("ui: Can't render line: Invalid raster line {}, size {}. Ignored\n", line, sline.size());
-        return;
+        log.fatal("ui: Can't render line: Invalid raster line {}, size {}.\n", line, sline.size());
+        /* NOTREACHED */
     }
 
-    std::copy(sline.begin(), sline.end(), _screen_raw.begin() + line * _conf.video.width);
+    auto& raw = _screen_raw[_raw_index];
+    std::copy(sline.begin(), sline.end(), raw.begin() + line * _conf.video.width);
+
+    if (line + 1 == _conf.video.height) {
+        _raw_index ^= 1;
+        return true;
+    }
+
+    return false;
 }
 
 void UI::clear_screen(Rgba color)
 {
-    std::fill(_screen_raw.begin(), _screen_raw.end(), color);
+    auto& raw = _screen_raw[raw_index()];
+    std::fill(raw.begin(), raw.end(), color);
 }
 
 void UI::stop()
@@ -476,16 +492,18 @@ void UI::run()
 {
     _running = true;
 
-    auto old_handler = std::signal(SIGINT, signal_handler);
-    if (old_handler == SIG_ERR) {
+    const auto prev_int = std::signal(SIGINT, signal_handler);
+    if (prev_int == SIG_ERR) {
         throw UIError{"Can't set SIGINT handler: {}", Error::to_string()};
     }
 
-    if (std::signal(SIGSEGV, signal_handler) == SIG_ERR) {
+    const auto prev_segv = std::signal(SIGSEGV, signal_handler);
+    if (prev_segv == SIG_ERR) {
         throw UIError{"Can't set SIGSEGV handler: {}", Error::to_string()};
     }
 
-    if (std::signal(SIGABRT, signal_handler) == SIG_ERR) {
+    const auto prev_abrt = std::signal(SIGABRT, signal_handler);
+    if (prev_abrt == SIG_ERR) {
         throw UIError{"Can't set SIGABRT handler: {}", Error::to_string()};
     }
 
@@ -495,9 +513,9 @@ void UI::run()
     event_loop();
     audio_stop();
 
-    std::signal(SIGINT, old_handler);
-    std::signal(SIGSEGV, old_handler);
-    std::signal(SIGABRT, old_handler);
+    std::signal(SIGINT, prev_int);
+    std::signal(SIGSEGV, prev_segv);
+    std::signal(SIGABRT, prev_abrt);
 
     _running = false;
 }
@@ -505,11 +523,9 @@ void UI::run()
 void UI::event_loop()
 {
     ::SDL_Event event{};
-    int64_t start{};
+    size_t prev_index{};
 
     while (!_stop) {
-        start = utils::now() - start;
-
         while (::SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_QUIT:
@@ -555,15 +571,15 @@ void UI::event_loop()
             _mouse_visible = false;
         }
 
-        render_screen();
-
         if (signal_key != keyboard::KEY_NONE) {
             hotkeys(signal_key);
             signal_key = keyboard::KEY_NONE;
         }
 
-        int64_t delay = _fps_time - utils::now() + start;
-        start = (delay > 0 ? utils::sleep(delay) - delay : 0);
+        if (prev_index != _raw_index) {
+            render_screen();
+            prev_index = _raw_index;
+        }
     }
 }
 
@@ -686,7 +702,7 @@ void UI::kbd_event(const SDL_Event& event)
 void UI::joy_event(const ::SDL_Event& event)
 {
     int jid{};
-    joyptr_t ejoy{};
+    JoystickPtr ejoy{};
 
     switch (event.type) {
     case SDL_CONTROLLERDEVICEADDED:
@@ -990,16 +1006,11 @@ void UI::render_screen()
         throw UIError{"Can't lock texture: {}", sdl_error()};
     }
 
-#if 0
-    // Is this necessary?
-    if (pitch / _conf.video.width != 4) {
-        log.fatal("ui: Invalid pitch: {}\n", pitch);
-    }
-#endif
+    auto& raw = _screen_raw[raw_index()];
 
     switch (_conf.video.sleffect) {
     case SLEffect::None:
-        std::transform(_screen_raw.begin(), _screen_raw.end(), dst, [](Rgba px) {
+        std::transform(raw.begin(), raw.end(), dst, [](Rgba px) {
             return px.u32;
         });
         break;
@@ -1012,7 +1023,7 @@ void UI::render_screen()
          * Pixel values are increased to compensate for the loss of luminosity due to
          * these fake scanlines.
          */
-        std::transform(_screen_raw.begin(), _screen_raw.end(), dst, [](Rgba px) {
+        std::transform(raw.begin(), raw.end(), dst, [](Rgba px) {
             return (px * SCANLINE_LUMINOSITY).u32;
         });
         break;
@@ -1026,7 +1037,7 @@ void UI::render_screen()
          * luminosity caused by the "empty" lines.
          */
         unsigned line = 0;
-        for (auto it = _screen_raw.begin(); it != _screen_raw.end(); it += _conf.video.width) {
+        for (auto it = raw.begin(); it != raw.end(); it += _conf.video.width) {
             std::for_each(it, it + _conf.video.width, [&dst, &line, this](Rgba px) {
                 Rgba pixel{px * ADV_SCANLINE_LUMINOSITY};
                 Rgba refle{px * ADV_SCANLINE_REFLECTION};
@@ -1053,7 +1064,7 @@ void UI::render_screen()
          * luminosity caused by the "empty" lines.
          */
         unsigned x = 0;
-        for (auto it = _screen_raw.begin(); it != _screen_raw.end(); it += _conf.video.width) {
+        for (auto it = raw.begin(); it != raw.end(); it += _conf.video.width) {
             std::for_each(it, it + _conf.video.width, [&dst, &x, this](Rgba px) {
                 Rgba pixel{px * ADV_SCANLINE_LUMINOSITY};
                 Rgba refle{px * ADV_SCANLINE_REFLECTION};
@@ -1087,13 +1098,13 @@ void UI::render_screen()
     ::SDL_RenderPresent(_renderer.get());
 }
 
-inline UI::joyptr_t UI::find_joystick(::SDL_JoystickID jid)
+inline UI::JoystickPtr UI::find_joystick(::SDL_JoystickID jid)
 {
-    auto it = std::find_if(_joys.begin(), _joys.end(), [jid](const joyptr_t& joy) {
+    auto it = std::find_if(_joys.begin(), _joys.end(), [jid](const JoystickPtr& joy) {
         return (static_cast<::SDL_JoystickID>(joy->joyid()) == jid);
     });
 
-    return (it == _joys.end() ? joyptr_t{} : *it);
+    return (it == _joys.end() ? JoystickPtr{} : *it);
 }
 
 void UI::joy_add(int devid)
@@ -1166,7 +1177,7 @@ void UI::attach_controllers()
     }
 }
 
-void UI::screenshot() const
+void UI::screenshot()
 {
     /*
      * Native size and no rendering effects.
@@ -1174,7 +1185,8 @@ void UI::screenshot() const
     const int w = _conf.video.width;
     const int h = _conf.video.height;
 
-    void* pixels = const_cast<Rgba*>(_screen_raw.data());
+    const auto& raw = _screen_raw[raw_index()];
+    void* pixels = const_cast<Rgba*>(raw.data());
 
     const uptrd_t<::SDL_Surface> image{
         ::SDL_CreateRGBSurfaceWithFormatFrom(pixels, w, h, 32, w * 4, SDL_PIXELFORMAT_RGBA8888),
