@@ -8,4 +8,4 @@ Icon=@ICON@
 Terminal=false
 Categories=Game;
 StartupNotify=true
-Keywords=retro;retrogaming;retroprogramming;c64;cbm;commodore;sinclair;spectrum;zx;
+Keywords=c64;cbm;commodore;nes;nintendo;retro;retrogaming;retroprogramming;sinclair;spectrum;zx;

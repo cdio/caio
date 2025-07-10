@@ -96,11 +96,11 @@ Generic options as command line parameters:
                          none|error|warn|info|debug|all (default is none)
  --keyboard [yes|no]     Enable keyboard at startup (default is yes)
  --vjoy [yes|no]         Enable virtual joystick (default is no)
- --vjoy-up <keyname>     Virtual joystick UP key (default is KEY_NUMPAD_8)
+ --vjoy-up <keyname>     Virtual joystick UP key (default is KEY_NUMPAD_5)
  --vjoy-down <keyname>   Virtual joystick DOWN key (default is KEY_NUMPAD_2)
- --vjoy-left <keyname>   Virtual joystick LEFT key (default is KEY_NUMPAD_4)
- --vjoy-right <keyname>  Virtual joystick RIGHT key (default is KEY_NUMPAD_6)
- --vjoy-fire <keyname>   Virtual joystick FIRE key (default is KEY_NUMPAD_5)
+ --vjoy-left <keyname>   Virtual joystick LEFT key (default is KEY_NUMPAD_1)
+ --vjoy-right <keyname>  Virtual joystick RIGHT key (default is KEY_NUMPAD_3)
+ --vjoy-fire <keyname>   Virtual joystick FIRE key (default is KEY_LEFT_ALT)
  --vjoy-a <keyname>      Virtual joystick A key
  --vjoy-b <keyname>      Virtual joystick B key
  --vjoy-x <keyname>      Virtual joystick X key
@@ -139,17 +139,17 @@ joystick port.
 
 A virtual joystick is available and it can be enabled using the `vjoy`
 configuration option. The default mappings are:
-- Up: `KEY_NUMPAD_8`
+- Up: `KEY_NUMPAD_5`
 - Down: `KEY_NUMPAD_2`
-- Left: `KEY_NUMPAD_4`
+- Left: `KEY_NUMPAD_1`
 - Right: `KEY_NUMPAD_3`
-- Fire: `KEY_NUMPAD_5`
+- Fire: `KEY_LEFT_ALT`
 
 These mappings can be changed using parameters: `vjoy_up`, `vjoy_down`,
 `vjoy_left`, `vjoy_right`, and `vjoy_fire`.
 
-When the virtual joystick is enabled it is automatically connected to an
-emulated joystick port.
+When the virtual joystick is enabled it is automatically connected to the
+first emulated joystick port.
 
 <hr>
 </details>
@@ -202,15 +202,20 @@ $ caio c64 --keymaps vice
 #### Joysticks
 
 The Commodore 64 has two joystick ports. If a gamepad is detected it is
-attached to one of these ports. If the virtual joystick is also enabled
-one port is associated to the gamepad and the other to the virtual
-joystick.
+connected to the first avaiable emulated joystick port.
 
+That is, if the virtual joystick is not enabled, the gamepad is connected
+to the first C64 joystick port.
+If the virtual joystick is enabled, it is connected to the first port and
+the gamepad to the second port.
+<br>
+This default can be changed using the `swapj` option or the `ALT-J` key
+combination.
+<br>
 Unexpected results could occur when the same key is shared by both the
 emulated keyboard and the virtual joystick (both try to process the same
-keystroke). To help deal with this situation the state of the emulated
-keyboard can be toggled (activated/deactivated) at runtime using the
-`ALT-K` key combination.
+keystroke). To help deal with this situation the keyboard can be enabled
+or disbled at runtime using the `ALT-K` key combination.
 <br>
 Games or other applications that use the keyboard in conjunction with the
 virtual joystick should never share the same keys. If the default virtual
@@ -343,8 +348,8 @@ keys:
 #### Joysticks
 
 Both standard NES controller ports are supported. If the virtual joystick
-is enabled, the first port is assigned to it and the second port is assigned
-to an eventual gamepad. This default can be reverted using the `swapj`
+is enabled, the first port is connected to it and the second port is connected
+to an eventual gamepad. This default can be changed using the `swapj`
 option or the `ALT-J` key combination.
 
 #### Examples
@@ -636,15 +641,14 @@ on the screen can be configured by the user.
 
 As explained in the Configuration section, when a gamepad is detected and
 the emulated platform supports one or more joystick ports, the gamepad is
-assigned to one of those ports.
+connected to the first avaiable joystick port.
 <br>
 When the virtual joystick is enabled and the emulated platform supports one
-or more joystick ports, the virtual joystick is assigned to one of those
-ports.
+or more joystick ports, the virtual joystick is connected to the first port.
 
 When a gamepad is detected and the virtual joystick is enabled and the
 emulated platform supports more than one joystick port, the virtual joystick
-is assigned to one port and the gamepad to the other.
+is connected to the first port and the gamepad to the second.
 
 Some platforms (such as the Commodore 64) share the internal keyboard matrix
 with joystick ports, this means that a virtual joystick sharing keys with the
