@@ -576,7 +576,10 @@ void UI::event_loop()
             signal_key = keyboard::KEY_NONE;
         }
 
-        _raw_sem.acquire();
+        if (!paused()) {
+            _raw_sem.acquire();
+        }
+
         render_screen();
     }
 }
