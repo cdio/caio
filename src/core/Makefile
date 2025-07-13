@@ -37,6 +37,7 @@ CXXSRCS=	aspace.cpp \
 		keyboard.cpp \
 		logger.cpp \
 		monitor.cpp \
+		platform.cpp \
 		readline.cpp \
 		rgb.cpp \
 		signal.cpp \
@@ -68,6 +69,7 @@ INCS=		aspace.hpp \
 		name.hpp \
 		nibble_ram.hpp \
 		pin.hpp \
+		platform.hpp \
 		pullup.hpp \
 		readline.hpp \
 		rgb.hpp \

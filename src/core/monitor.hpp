@@ -44,8 +44,8 @@ using WriteCb    = std::function<void(addr_t, uint8_t)>;
 using DisassCb   = std::function<void(std::ostream&, addr_t, size_t, bool)>;
 using MmapCb     = std::function<sptr_t<ASpace>()>;
 using EbreakCb   = std::function<void()>;
-using LoadCb     = std::function<std::pair<addr_t, addr_t>(std::string_view, addr_t)>;
-using SaveCb     = std::function<void(std::string_view, addr_t, addr_t)>;
+using LoadCb     = std::function<std::pair<addr_t, addr_t>(const fs::Path&, addr_t)>;
+using SaveCb     = std::function<void(const fs::Path&, addr_t, addr_t)>;
 using LogfileCb  = std::function<void(int)>;
 using LoglevelCb = std::function<Loglevel(std::string_view)>;
 using RegvalueCb = std::function<uint16_t(std::string_view)>;
@@ -133,7 +133,7 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
             return cpu->ebreak();
         },
 
-        .load = [cpu](std::string_view fname, addr_t start) -> std::pair<addr_t, addr_t> {
+        .load = [cpu](const fs::Path& fname, addr_t start) -> std::pair<addr_t, addr_t> {
             auto buf = fs::load(fname);
             addr_t addr = start;
             for (auto c : buf) {
@@ -142,7 +142,7 @@ MonitoredCPU monitored_cpu_defaults(CPU* cpu)
             return {start, buf.size()};
         },
 
-        .save = [cpu](std::string_view fname, addr_t start, addr_t end) {
+        .save = [cpu](const fs::Path& fname, addr_t start, addr_t end) {
             ssize_t size = end - start;
             if (size > 0) {
                 std::vector<uint8_t> buf{};

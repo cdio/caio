@@ -1,0 +1,181 @@
+/*
+ * Copyright (C) 2020 Claudio Castiglia
+ *
+ * This file is part of caio.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, see http://www.gnu.org/licenses/
+ */
+#pragma once
+
+#include <string>
+#include <string_view>
+
+#include "clock.hpp"
+#include "config.hpp"
+#include "fs.hpp"
+#include "types.hpp"
+#include "ui.hpp"
+
+namespace caio {
+
+/**
+ * Commodore 64 emulator.
+ */
+class Platform {
+public:
+    using UI = ui::UI;
+    using Config = config::Config;
+
+    Platform();
+
+    virtual ~Platform();
+
+    /**
+     * Build this platform and start it.
+     * This method returns on error or when the user terminates the emulator through the UI.
+     * @param pname If not empty, name of a program or cartridge to launch (its format is auto-detected).
+     * @see detect_format(fs::Path&)
+     * @see start()
+     */
+    virtual void run(const fs::Path& pname);
+
+    /**
+     * Return a human readable string describing the components that build this platform.
+     * @return A human readable string representation of this platform.
+     */
+    virtual std::string to_string() const;
+
+    /**
+     * Get the name of this platform.
+     * @return The name of this platform.
+     */
+    virtual std::string_view name() const = 0;
+
+protected:
+    /**
+     * Return the user interface.
+     * @return The user interface.
+     */
+    sptr_t<UI>& ui()
+    {
+        return _ui;
+    }
+
+    /**
+     * Detect the format of a file to launch and set the
+     * configuration options accordingly.
+     * @param pname File to launch.
+     * @exception IOError
+     */
+    virtual void detect_format(const fs::Path& pname) = 0;
+
+    /**
+     * Initialise the CPU monitor.
+     * @param ifd Input file descriptor;
+     * @param ofd Output file descriptor.
+     * @see monitor::Monitor(inti, int, MonitoredCPU&&)
+     */
+    virtual void init_monitor(int ifd, int ofd) = 0;
+
+    /**
+     * Reset all the devices of this platform.
+     * This method runs in the context of the UI thread.
+     */
+    virtual void reset_devices() = 0;
+
+    /**
+     * Return a human readable string describing the devices that build up this platform.
+     * @return A human readable string representation of the devices of this platform.
+     */
+    virtual std::string to_string_devices() const = 0;
+
+    /**
+     * Instantiate the devices needed to build this platform.
+     */
+    virtual void create_devices() = 0;
+
+    /**
+     * Connect the devices and build this platform.
+     * @see create_devices()
+     */
+    virtual void connect_devices() = 0;
+
+    /**
+     * Create the user interface widgets used by this platform.
+     */
+    virtual void make_widgets() = 0;
+
+    /**
+     * Connect this platform to the user interface.
+     * Connect the hot-keys handler and widgets reset and pause
+     * to the user interface.
+     * The actual platform should derive this method to connect
+     * the emulated keyboard, joystick ports and other widgets.
+     */
+    virtual void connect_ui();
+
+    /**
+     * Process hot-keys.
+     * This method does nothing and it should be derived by the
+     * actual platform that process specific hot-keys.
+     *
+     * It runs in the context of the UI (main) thread.
+     */
+    virtual void hotkeys(keyboard::Key key);
+
+    /**
+     * Get the system clock.
+     * @return The system clock.
+     */
+    virtual Clock& clock() = 0;
+
+    /**
+     * Get the base configuraton.
+     * @return The base configuration.
+     */
+    virtual const Config& config() const = 0;
+
+    /**
+     * Get the UI configuraton.
+     * @return The UI configuration.
+     */
+    virtual ui::Config ui_config() = 0;
+
+private:
+    /**
+     * Start this platform.
+     * - Run the emulator on its own thread;
+     * - Run the UI on the calling thread.
+     * This method returns on error or when the emualtion is terminated using the UI.
+     */
+    void start();
+
+    /**
+     * Reset this platform.
+     * This method is connected to the UI's reset widget.
+     * @see connect_ui()
+     * @see reset_device();
+     */
+    void reset();
+
+    /**
+     * Create the user interface.
+     * @see ui_config()
+     */
+    void create_ui();
+
+    sptr_t<UI> _ui{};
+};
+
+}
