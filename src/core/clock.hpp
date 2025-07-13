@@ -243,7 +243,7 @@ public:
      */
     void toggle_pause()
     {
-        _suspend = (_suspend ? false : true);
+        _suspend = _suspend ^ true;
     }
 
     /**
