@@ -550,7 +550,7 @@ inline fp_t Filter::Q() const
 
 inline fp_t Filter::operator()(fp_t v)
 {
-    return _flt(v) * _gain_comp;
+    return _flt(v); //XXX FIXME * _gain_comp;
 }
 
 void Filter::generate()
