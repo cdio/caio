@@ -414,7 +414,7 @@ void UI::create_panel()
      */
     _wid_photocamera = std::make_shared<widget::PhotoCamera>(_renderer);
     _wid_photocamera->action([this]() {
-        screenshot();
+        _screenshot = true;
     });
 
     /*
@@ -581,6 +581,11 @@ void UI::event_loop()
         }
 
         render_screen();
+
+        if (_screenshot) {
+            screenshot();
+            _screenshot = false;
+        }
     }
 }
 
@@ -1188,17 +1193,11 @@ void UI::attach_controllers()
 
 void UI::screenshot()
 {
-    /*
-     * Native size and no rendering effects.
-     */
-    const int w = _conf.video.width;
-    const int h = _conf.video.height;
+    int w{}, h{};
+    ::SDL_GetWindowSize(_window.get(), &w, &h);     /* To make it work udner fullscreen mode */
 
-    const auto& raw = _screen_raw[raw_index()];
-    void* pixels = const_cast<Rgba*>(raw.data());
-
-    const uptrd_t<::SDL_Surface> image{
-        ::SDL_CreateRGBSurfaceWithFormatFrom(pixels, w, h, 32, w * 4, SDL_PIXELFORMAT_RGBA8888),
+    uptrd_t<::SDL_Surface> image{
+        ::SDL_CreateRGBSurfaceWithFormat(0, w, h, 32, SDL_PIXELFORMAT_RGBA8888),
         ::SDL_FreeSurface
     };
 
@@ -1206,6 +1205,11 @@ void UI::screenshot()
         throw UIError{"Can't create screenshot image: {}", sdl_error()};
     }
 
+    if (::SDL_RenderReadPixels(_renderer.get(), nullptr, image->format->format, image->pixels, image->pitch) != 0) {
+        throw UIError{"Can't read screenshot pixels: {}", sdl_error()};
+    }
+
+#if 1 // FIXME
     struct std::tm tm{};
     const time_t now = std::time(nullptr);
     if (::localtime_r(&now, &tm) == nullptr) {
@@ -1214,8 +1218,12 @@ void UI::screenshot()
 
     char buf[20]{};
     std::strftime(buf, sizeof(buf), "%Y-%m-%d_%H.%M.%S", &tm);
-
     const auto fname = std::format("{}/{}{}.png", _conf.video.screenshotdir, SCREENSHOT_PREFIX, buf);
+#else
+    const auto utc = std::chrono::system_clock::now();
+    const auto now = std::chrono::zoned_time{utc};
+    const auto fname = std::format("{}/{}{:%F_%H.%M.%S}.png", _conf.video.screenshotdir, SCREENSHOT_PREFIX, now);
+#endif
 
     if (::IMG_SavePNG(image.get(), fname.c_str()) < 0) {
         throw UIError{"Can't save screenshot image: {}", sdl_error()};

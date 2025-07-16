@@ -394,6 +394,7 @@ private:
     std::atomic_bool            _running{};                 /* True if the main loop is not running               */
     uint64_t                    _mouse_active_time{};       /* Inactivity time until the cursor becomes invisible */
     bool                        _mouse_visible{true};       /* Whether the mouse cursor is visible or not         */
+    std::atomic_bool            _screenshot{};              /* True if a screenshot must be taken                 */
 
     sptr_t<::SDL_Renderer>      _renderer{};                /* Main window renderer                               */
     uptrd_t<::SDL_Surface>      _icon{nullptr, nullptr};    /* Main window icon                                   */
