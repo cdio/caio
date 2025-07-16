@@ -27,7 +27,7 @@ namespace caio {
 namespace sinclair {
 namespace zxspectrum {
 
-SnapZ80::SnapZ80(std::string_view fname)
+SnapZ80::SnapZ80(const fs::Path& fname)
     : Snapshot{}
 {
     load(fname);
@@ -37,18 +37,18 @@ SnapZ80::~SnapZ80()
 {
 }
 
-bool SnapZ80::seems_like(std::string_view fname)
+bool SnapZ80::seems_like(const fs::Path& fname)
 {
     auto fullpath = fs::fix_home(fname);
-    auto lowcase = utils::tolow(fname);
+    auto lowcase = utils::tolow(fname.string());
     return (fs::exists(fullpath) && lowcase.ends_with(FILE_EXTENSION));
 }
 
-void SnapZ80::load(std::string_view fname)
+void SnapZ80::load(const fs::Path& fname)
 {
     _fname = fs::fix_home(fname);
 
-    log.debug("SnapZ80: Loading snapshot file: {}\n", _fname);
+    log.debug("SnapZ80: Loading snapshot file: {}\n", _fname.string());
 
     const auto raw = fs::load(_fname);
 
@@ -76,7 +76,7 @@ void SnapZ80::load(std::string_view fname)
 
 void SnapZ80::load_v1(const buffer_t& raw)
 {
-    log.debug("SnapZ80: {}: Detected version: 1\n", _fname);
+    log.debug("SnapZ80: {}: Detected version: 1\n", _fname.string());
     uncompress_v1(raw);
 }
 
@@ -108,7 +108,7 @@ void SnapZ80::load_v2(const buffer_t& raw)
         throw_ioerror("Invalid version 23b. Size: " + std::to_string(ext_size));
     }
 
-    log.debug("SnapZ80: {}: Detected version: {}\n", _fname, ver);
+    log.debug("SnapZ80: {}: Detected version: {}\n", _fname.string(), ver);
 
     /*
      * Only plain 48K is supported (no extra hardware).
@@ -190,7 +190,7 @@ void SnapZ80::uncompress_v1(const buffer_t& raw)
 
     bool compressed = (hdr->flags & SnapZ80Header::FLAGS_DATA_COMPRESSED);
 
-    log.debug("SnapZ80: {}: compressed: {}\n", _fname, compressed);
+    log.debug("SnapZ80: {}: compressed: {}\n", _fname.string(), compressed);
 
     if (compressed) {
         _data = uncompress(enc, true);
@@ -206,8 +206,8 @@ void SnapZ80::uncompress_v2(const buffer_t& raw, size_t rawoff)
         uint16_t enc_size = (block->sizeh << 8) | block->sizel;
         bool compressed = (enc_size != SnapZ80Block::UNCOMPRESSED_16K_BLOCK);
 
-        log.debug("SnapZ80: {}: Block: page: {}, encsiz: {}, compressed: {}\n", _fname, block->page, enc_size,
-            compressed);
+        log.debug("SnapZ80: {}: Block: page: {}, encsiz: {}, compressed: {}\n",
+            _fname.string(), block->page, enc_size, compressed);
 
         size_t dstoff{};
 

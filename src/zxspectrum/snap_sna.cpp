@@ -28,7 +28,7 @@ namespace caio {
 namespace sinclair {
 namespace zxspectrum {
 
-SnapSNA::SnapSNA(std::string_view fname)
+SnapSNA::SnapSNA(const fs::Path& fname)
     : Snapshot{}
 {
     load(fname);
@@ -38,18 +38,18 @@ SnapSNA::~SnapSNA()
 {
 }
 
-bool SnapSNA::seems_like(std::string_view fname)
+bool SnapSNA::seems_like(const fs::Path& fname)
 {
     auto fullpath = fs::fix_home(fname);
-    auto lowcase = utils::tolow(fname);
+    auto lowcase = utils::tolow(fname.string());
     return (fs::file_size(fullpath) == FILE_SIZE && lowcase.ends_with(FILE_EXTENSION));
 }
 
-void SnapSNA::load(std::string_view fname)
+void SnapSNA::load(const fs::Path& fname)
 {
     _fname = fs::fix_home(fname);
 
-    log.debug("SnapSNA: Loading snapshot file: {}\n", _fname);
+    log.debug("SnapSNA: Loading snapshot file: {}\n", _fname.string());
 
     auto raw = fs::load(_fname);
 
@@ -89,7 +89,7 @@ void SnapSNA::load(std::string_view fname)
     uint8_t im = (hdr->im & 0x03);
     if (im > 2) {
         im = 2;
-        log.warn("SnapSNA: {}: Invalid IM flag: ${:02x}. Set to ${:02X}\n", _fname, hdr->im, im);
+        log.warn("SnapSNA: {}: Invalid IM flag: ${:02x}. Set to ${:02X}\n", _fname.string(), hdr->im, im);
     }
 
     bool iff2 = (hdr->IFF2 & SnapSNAHeader::IFF2_BIT);

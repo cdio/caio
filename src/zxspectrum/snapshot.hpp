@@ -86,7 +86,7 @@ public:
 protected:
     void throw_ioerror(std::string_view caller, std::string_view reason = {}) const;
 
-    std::string     _fname{};
+    fs::Path        _fname{};
     buffer_t        _data{};
     Z80::Registers  _regs{};
     intflags_t      _intflags{};

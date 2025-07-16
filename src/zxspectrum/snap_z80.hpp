@@ -251,7 +251,7 @@ public:
      * @exception IOError
      * @see load(std::string_view)
      */
-    SnapZ80(std::string_view fname);
+    SnapZ80(const fs::Path& fname);
 
     virtual ~SnapZ80();
 
@@ -263,7 +263,7 @@ public:
      * @return true if the specified file seems to be a Z80 formatted snapshot; false otherwise.
      * @see FILE_EXTENSION
      */
-    static bool seems_like(std::string_view fname);
+    static bool seems_like(const fs::Path& fname);
 
 private:
     enum class Version {
@@ -273,7 +273,7 @@ private:
         v3b
     };
 
-    void load(std::string_view fname);
+    void load(const fs::Path& fname);
     void load_v1(const buffer_t& raw);
     void load_v2(const buffer_t& raw);
     void uncompress_v1(const buffer_t& raw);

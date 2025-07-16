@@ -96,7 +96,7 @@ public:
      * @exception IOError
      * @see load(std::string_view)
      */
-    SnapSNA(std::string_view fname);
+    SnapSNA(const fs::Path& fname);
 
     virtual ~SnapSNA();
 
@@ -109,10 +109,10 @@ public:
      * @see FILE_EXTENSION
      * @see FILE_SIZE
      */
-    static bool seems_like(std::string_view fname);
+    static bool seems_like(const fs::Path& fname);
 
 private:
-    void load(std::string_view fname);
+    void load(const fs::Path& fname);
 };
 
 }

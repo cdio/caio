@@ -24,7 +24,7 @@ namespace zxspectrum {
 
 void Snapshot::throw_ioerror(std::string_view caller, std::string_view reason) const
 {
-    std::string msg{std::string{caller} + ": Invalid snapshot file: " + _fname};
+    std::string msg{std::string{caller} + ": Invalid snapshot file: " + _fname.string()};
     if (!reason.empty()) {
         msg += ": " + std::string{reason};
     }
