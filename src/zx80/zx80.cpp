@@ -18,16 +18,8 @@
  */
 #include "zx80.hpp"
 
-#include <unistd.h>
-#include <cstdlib>
-#include <iostream>
-#include <sstream>
-#include <thread>
-
-#include "fs.hpp"
 #include "logger.hpp"
 #include "types.hpp"
-#include "version.hpp"
 
 #include "ofile.hpp"
 #include "zx80_params.hpp"
@@ -36,92 +28,192 @@ namespace caio {
 namespace sinclair {
 namespace zx80 {
 
-void ZX80::run(std::string_view pname)
+ZX80::ZX80(config::Section& sec)
+    : Platform{},
+      _conf{sec}
 {
-    autorun(pname);
-
-    create_ui();
-    make_widgets();
-
-    create_devices();
-    connect_devices();
-    attach_prg();
-    connect_ui();
-
-    if (_conf.monitor) {
-        _cpu->init_monitor(STDIN_FILENO, STDOUT_FILENO, {}, {});
-    }
-
-    start();
 }
 
-void ZX80::autorun(std::string_view pname)
+ZX80::~ZX80()
+{
+}
+
+std::string_view ZX80::name() const
+{
+    return "Sinclair ZX80";
+}
+
+void ZX80::detect_format(const fs::Path& pname)
 {
     if (!pname.empty()) {
         if (!_conf.prgfile.empty()) {
-            log.warn("Program file overrided. From {} to {}\n", _conf.prgfile, pname);
+            log.warn("Program file overrided. From {} to {}\n", _conf.prgfile, pname.string());
         }
         _conf.prgfile = pname;
     }
 }
 
-void ZX80::start()
+void ZX80::init_monitor(int ifd, int ofd)
 {
-    log.info("Starting {} - {}\n{}\n", full_version(), _conf.title, to_string());
-
-    /*
-     * The emulator runs on its own thread.
-     */
-    std::thread th{[this]() {
-        /*
-         * System clock loop.
-         */
-        _clk->run();
-
-        /*
-         * The clock was self-terminated: Stop the user interface and exit this thread.
-         */
-        _ui->stop();
-    }};
-
-    if (!th.joinable()) {
-        log.error("Can't start the clock thread: {}\n", Error::to_string());
-        return;
-    }
-
-    /*
-     * The UI main loop runs in the main thread.
-     */
-    _ui->run();
-
-    _clk->stop();
-
-    th.join();
-
-    log.info("Terminating {}\n", _conf.title);
+    _cpu->init_monitor(ifd, ofd, {}, {});
 }
 
-void ZX80::reset()
+void ZX80::reset_devices()
 {
-    if (!_clk->paused()) {
-        /*
-         * Pause the clock and wait until it is actually paused
-         * (this method runs in the context of the UI thread; see connect_ui()).
-         */
-        _clk->pause_wait(true);
+    _ram->reset();
+    _rom->reset();
+    _cpu->reset();
+    _kbd->reset();
+    _mmap->reset();
+    _cpu->reset();
 
-        _ram->reset();
-        _rom->reset();
-        _cpu->reset();
-        _kbd->reset();
-        _mmap->reset();
-        _cpu->reset();
+    attach_prg();
+}
 
-        attach_prg();
+std::string ZX80::to_string_devices() const
+{
+    return std::format(
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}\n"
+        "  {}",
+        _clk->to_string(),
+        _cpu->to_string(),
+        _ram->to_string(),
+        _rom->to_string(),
+        _kbd->to_string(),
+        _video->to_string());
+}
 
-        _clk->reset();
-        _clk->pause(false);
+void ZX80::create_devices()
+{
+    _ram = (_conf.ram16 ?
+        std::make_shared<RAM>("ram16", EXTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES) :
+        std::make_shared<RAM>("ram1", INTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES));
+
+    _rom = (_conf.rom8 ?
+        std::make_shared<ROM>("rom8", rompath(ROM8_FNAME), ROM8_DIGEST) :
+        std::make_shared<ROM>("rom4", rompath(ROM_FNAME), ROM_DIGEST));
+
+    _clk   = std::make_shared<Clock>("clk", CLOCK_FREQ, _conf.delay);
+    _cpu   = std::make_shared<Z80>();
+    _video = std::make_shared<ZX80Video>("vid", _clk, _conf.rvideo);
+    _kbd   = std::make_shared<ZX80Keyboard>(_conf.keyboard);
+
+    _cass = (_conf.rom8 ?
+        std::make_shared<ZX80CassetteP>(_clk, _conf.cassdir) :
+        std::make_shared<ZX80CassetteO>(_clk, _conf.cassdir));
+
+    _mmap  = std::make_shared<ZX80ASpace>(_cpu, _ram, _rom, _video, _kbd, _cass);
+
+    _cpu->init(_mmap);
+}
+
+void ZX80::connect_devices()
+{
+    if (!_conf.palette.empty()) {
+        _video->palette(_conf.palette);
     }
+
+    if (!_conf.keymaps.empty()) {
+        _kbd->load(_conf.keymaps);
+    }
+
+    _clk->add(_cpu);
+
+    attach_prg();
+}
+
+void ZX80::make_widgets()
+{
+    const auto cassette = ui::make_widget<ui::widget::Cassette>(ui(), [this]() {
+        using Status = ui::widget::Cassette::Status;
+        return Status{
+            .is_enabled = true,
+            .is_idle    = _cass->is_idle()
+        };
+    });
+
+    auto panel = ui()->panel();
+    panel->add(cassette);
+}
+
+void ZX80::connect_ui()
+{
+    Platform::connect_ui();
+
+    /*
+     * Connect the video output.
+     */
+    _video->render_line([this](unsigned line, const ui::Scanline& scanline) {
+        ui()->render_line(line, scanline);
+    });
+
+    _video->clear_screen([this](const Rgba& color) {
+        ui()->clear_screen(color);
+    });
+
+    /*
+     * Connect the keyboard.
+     */
+    const auto hotkeys = [this](keyboard::Key key) {
+        this->hotkeys(key);
+    };
+
+    ui()->hotkeys(hotkeys);
+    ui()->keyboard(_kbd);
+}
+
+void ZX80::hotkeys(keyboard::Key key)
+{
+    /*
+     * This methods is called within the context of the UI thread.
+     */
+    switch (key) {
+    case keyboard::KEY_ALT_J:
+        break;
+
+    case keyboard::KEY_CTRL_C:
+        /*
+         * Enter monitor on the next clock tick.
+         * CTRL-C forces resume from pause.
+         */
+        _cpu->ebreak();
+        if (ui()->paused()) {
+            ui()->pause(false);
+        }
+        break;
+
+    default:;
+    }
+}
+
+ui::Config ZX80::ui_config()
+{
+    const ui::Config uiconf {
+        .audio = {
+            .enabled        = false,
+            .srate          = 0,
+            .channels       = 0,
+            .samples        = 0
+        },
+        .video = {
+            .title          = _conf.title,
+            .width          = ZX80Video::WIDTH,
+            .height         = ZX80Video::HEIGHT,
+            .fps            = _conf.fps,
+            .scale          = _conf.scale,
+            .sleffect       = ui::to_sleffect(_conf.scanlines),
+            .fullscreen     = _conf.fullscreen,
+            .sresize        = _conf.sresize,
+            .screenshotdir  = _conf.screenshotdir,
+            .statusbar      = _conf.statusbar
+        }
+    };
+
+    return uiconf;
 }
 
 std::string ZX80::rompath(std::string_view fname) const
@@ -187,173 +279,6 @@ void ZX80::attach_prg()
         cpu.bpdel(bpaddr);
 
     }, prog);
-}
-
-void ZX80::create_devices()
-{
-    _ram = (_conf.ram16 ?
-        std::make_shared<RAM>("ram16", EXTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES) :
-        std::make_shared<RAM>("ram1", INTERNAL_RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES));
-
-    _rom = (_conf.rom8 ?
-        std::make_shared<ROM>("rom8", rompath(ROM8_FNAME), ROM8_DIGEST) :
-        std::make_shared<ROM>("rom4", rompath(ROM_FNAME), ROM_DIGEST));
-
-    _clk   = std::make_shared<Clock>("clk", CLOCK_FREQ, _conf.delay);
-    _cpu   = std::make_shared<Z80>();
-    _video = std::make_shared<ZX80Video>("vid", _clk, _conf.rvideo);
-    _kbd   = std::make_shared<ZX80Keyboard>(_conf.keyboard);
-
-    _cass = (_conf.rom8 ?
-        std::make_shared<ZX80CassetteP>(_clk, _conf.cassdir) :
-        std::make_shared<ZX80CassetteO>(_clk, _conf.cassdir));
-
-    _mmap  = std::make_shared<ZX80ASpace>(_cpu, _ram, _rom, _video, _kbd, _cass);
-
-    _cpu->init(_mmap);
-}
-
-void ZX80::connect_devices()
-{
-    if (!_conf.palette.empty()) {
-        _video->palette(_conf.palette);
-    }
-
-    if (!_conf.keymaps.empty()) {
-        _kbd->load(_conf.keymaps);
-    }
-
-    _clk->add(_cpu);
-}
-
-void ZX80::create_ui()
-{
-    ui::Config uiconf {
-        .audio = {
-            .enabled        = false,
-            .srate          = 0,
-            .channels       = 0,
-            .samples        = 0
-        },
-        .video = {
-            .title          = _conf.title,
-            .width          = ZX80Video::WIDTH,
-            .height         = ZX80Video::HEIGHT,
-            .fps            = _conf.fps,
-            .scale          = _conf.scale,
-            .sleffect       = ui::to_sleffect(_conf.scanlines),
-            .fullscreen     = _conf.fullscreen,
-            .sresize        = _conf.sresize,
-            .screenshotdir  = _conf.screenshotdir,
-            .statusbar      = _conf.statusbar
-        }
-    };
-
-    _ui = ui::UI::instance(uiconf);
-}
-
-void ZX80::make_widgets()
-{
-    auto cassette = ui::make_widget<ui::widget::Cassette>(_ui, [this]() {
-        using Status = ui::widget::Cassette::Status;
-        return Status{ .is_enabled = true, .is_idle = _cass->is_idle() };
-    });
-
-    auto panel = _ui->panel();
-    panel->add(cassette);
-}
-
-void ZX80::connect_ui()
-{
-    /*
-     * Connect Pause and Reset widgets.
-     */
-    auto do_pause = [this](bool suspend) {
-        hotkeys(keyboard::KEY_PAUSE);
-    };
-
-    auto is_paused = [this]() {
-        return _clk->paused();
-    };
-
-    auto do_reset = [this]() {
-        reset();
-    };
-
-    _ui->pause(do_pause, is_paused);
-    _ui->reset(do_reset);
-
-    /*
-     * Connect the video output.
-     */
-    _video->render_line([this](unsigned line, const ui::Scanline& scanline) {
-        _ui->render_line(line, scanline);
-    });
-
-    _video->clear_screen([this](const Rgba& color) {
-        _ui->clear_screen(color);
-    });
-
-    /*
-     * Connect the keyboard.
-     */
-    auto hotkeys = [this](keyboard::Key key) {
-        this->hotkeys(key);
-    };
-
-    _ui->hotkeys(hotkeys);
-    _ui->keyboard(_kbd);
-}
-
-void ZX80::hotkeys(keyboard::Key key)
-{
-    /*
-     * This methods is called within the context of the UI thread
-     * (see connect_ui()).
-     */
-    switch (key) {
-    case keyboard::KEY_ALT_J:
-        break;
-
-    case keyboard::KEY_CTRL_C:
-        /*
-         * Enter monitor on the next clock tick.
-         * CTRL-C forces resume from pause.
-         */
-        _cpu->ebreak();
-        if (!_clk->paused()) {
-            break;
-        }
-
-        /* PASSTHROUGH */
-
-    case keyboard::KEY_PAUSE:
-        log.debug("System {}paused\n", (_ui->paused() ? "un" : ""));
-        _clk->pause(_clk->paused() ^ true);
-        break;
-
-    default:;
-    }
-}
-
-std::string ZX80::to_string() const
-{
-    return std::format("{}\n\nConnected devices:\n"
-        "  {}\n"
-        "  {}\n"
-        "  {}\n"
-        "  {}\n"
-        "  {}\n"
-        "  {}\n\n"
-        "UI backend: {}\n",
-        _conf.to_string(),
-        _clk->to_string(),
-        _cpu->to_string(),
-        _ram->to_string(),
-        _rom->to_string(),
-        _kbd->to_string(),
-        _video->to_string(),
-        _ui->to_string());
 }
 
 }

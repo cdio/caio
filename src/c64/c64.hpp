@@ -18,12 +18,11 @@
  */
 #pragma once
 
-#include "clock.hpp"
-#include "device.hpp"
+#include "platform.hpp"
+
 #include "nibble_ram.hpp"
 #include "ram.hpp"
 #include "rom.hpp"
-#include "ui.hpp"
 
 #include "mos_6510.hpp"
 #include "mos_6526.hpp"
@@ -50,7 +49,7 @@ using C1541 = commodore::c1541::C1541;
 /**
  * Commodore 64 emulator.
  */
-class C64 {
+class C64 : public Platform {
 public:
     /**
      * Instantiate this C64.
@@ -60,85 +59,81 @@ public:
      * @see C64Config
      * @see run()
      */
-    C64(config::Section& sec)
-        : _conf{sec} {
-    }
+    C64(config::Section& sec);
+
+    virtual ~C64();
 
     /**
-     * Build this C64 emulator and start it.
-     * This method returns on error or when the user terminates the emulator through the UI.
-     * @param pname If not empty, name of the program to launch (its format is auto-detected).
-     * @see start()
+     * @see Platform::name()
      */
-    void run(std::string_view pname);
-
-    /**
-     * Get a string describing the components that build this C64.
-     * @return A string representation of this C64.
-     */
-    std::string to_string() const;
-
-    /**
-     * Get the name of this platform.
-     * @return The name of this platform.
-     */
-    constexpr static std::string_view name() {
-        return "C64";
-    }
+    std::string_view name() const override;
 
 private:
     /**
-     * Auto-detect the format of a file to launch and
-     * set the configuration options accordingly.
-     * @param pname File to launch.
-     * @exception IOError
+     * @see Platform::detect_format(const fs::Path&)
      */
-    void autorun(std::string_view pname);
+    void detect_format(const fs::Path& pname) override;
 
     /**
-     * Start this C64.
-     * - Instantiate the UI and run it in the context of the calling thread.
-     * - Build a C64 and run it on its own thread.
-     * This method returns on error or when the user terminates the emulator through the UI.
+     * @see Platform::init_monitor(int, int)
      */
-    void start();
+    void init_monitor(int ifd, int ofd) override;
 
     /**
-     * Restart this C64.
-     * This method is called by the UI when the user clicks on the reset widget
-     * (it runs in the context of the UI thread).
-     * If the emulator is paused this method does nothing.
+     * @see Platform::connect_ui()
      */
-    void reset();
+    void connect_ui() override;
 
     /**
-     * Instantiate the devices needed by a C64.
+     * @see Platform::create_devices()
      */
-    void create_devices();
+    void create_devices() override;
 
     /**
-     * Connect the devices and build a C64.
-     * @see create_devices()
+     * @see Platform::connect_devices()
      */
-    void connect_devices();
+    void connect_devices() override;
 
     /**
-     * Create the user interface.
+     * @see Platform::reset_devices()
      */
-    void create_ui();
+    void reset_devices() override;
 
     /**
-     * Create the user interface widgets used by the C64.
+     * @see Platform::to_string_devices()
      */
-    void make_widgets();
+    std::string to_string_devices() const override;
 
     /**
-     * Connect the user interface to the C64.
-     * @see create_ui()
-     * @see create_devices()
-     * @see make_widgets()
+     * @see Platform::make_widgets()
      */
-    void connect_ui();
+    void make_widgets() override;
+
+    /**
+     * @see Platform::hostkeys(keyboard::Key)
+     */
+    void hotkeys(keyboard::Key key) override;
+
+    /**
+     * @see Platform::clock()
+     */
+    Clock& clock() override
+    {
+        return (*_clk);
+    }
+
+    /**
+     * @see Platform::config()
+     */
+    const Config& config() const override
+    {
+        return _conf;
+    }
+
+    /**
+     * @see Platform::ui_config()
+     */
+    ui::Config ui_config() override;
 
     /**
      * Get the full pathname for a ROM file.
@@ -146,7 +141,7 @@ private:
      * @return The full path.
      * @exception IOError if the ROM file is not found.
      */
-    std::string rompath(std::string_view fname);
+    fs::Path rompath(const fs::Path& fname);
 
     /**
      * Attach a cartridge image file.
@@ -168,13 +163,8 @@ private:
      */
     void attach_prg();
 
-    /**
-     * Process hot-keys.
-     * This method is called by the user interface.
-     */
-    void hotkeys(keyboard::Key key);
-
     C64Config                   _conf;
+    sptr_t<Clock>               _clk{};
     sptr_t<RAM>                 _ram{};
     sptr_t<ROM>                 _basic{};
     sptr_t<ROM>                 _kernal{};
@@ -192,11 +182,9 @@ private:
     sptr_t<C64BusController>    _busdev{};
     sptr_t<C1541>               _unit8{};
     sptr_t<C1541>               _unit9{};
-    sptr_t<Clock>               _clk{};
     sptr_t<C64Keyboard>         _kbd{};
     sptr_t<Joystick>            _joy1{};
     sptr_t<Joystick>            _joy2{};
-    sptr_t<ui::UI>              _ui{};
     sptr_t<ui::widget::Floppy>  _floppy8{};
     sptr_t<ui::widget::Floppy>  _floppy9{};
     sptr_t<ui::widget::Gamepad> _gamepad1{};

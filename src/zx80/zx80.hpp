@@ -18,12 +18,10 @@
  */
 #pragma once
 
-#include "clock.hpp"
-#include "device.hpp"
+#include "platform.hpp"
+
 #include "ram.hpp"
 #include "rom.hpp"
-#include "ui.hpp"
-
 #include "zilog_z80.hpp"
 
 #include "zx80_aspace.hpp"
@@ -40,7 +38,7 @@ namespace zx80 {
 /**
  * Sinclair ZX-80 emulator.
  */
-class ZX80 {
+class ZX80 : public Platform {
 public:
     /**
      * Instantiate this ZX80.
@@ -50,85 +48,81 @@ public:
      * @see ZX80Config
      * @see run()
      */
-    ZX80(config::Section& sec)
-        : _conf{sec} {
-    }
+    ZX80(config::Section& sec);
+
+    virtual ~ZX80();
 
     /**
-     * Build this ZX80 emulator and start it.
-     * This method returns on error or when the user terminates the emulator through the UI.
-     * @param pname If not empty, name of the program to launch (its format is auto-detected).
-     * @see start()
+     * @see Platform::name()
      */
-    void run(std::string_view pname);
-
-    /**
-     * Return a human-readable string representation of this ZX80.
-     * @return A string representation of this ZX80.
-     */
-    std::string to_string() const;
-
-    /**
-     * Return the name of this platform.
-     * @return The name of this platform.
-     */
-    constexpr static std::string_view name() {
-        return "Sinclair ZX80";
-    }
+    std::string_view name() const override;
 
 private:
     /**
-     * Auto-detect the format of a file to launch and
-     * set the configuration options accordingly.
-     * @param pname File to launch.
-     * @exception IOError
+     * @see Platform::detect_format(const fs::Path&)
      */
-    void autorun(std::string_view pname);
+    void detect_format(const fs::Path& pname) override;
 
     /**
-     * Start this ZX80.
-     * - Instantiate the UI and run it in the context of the calling thread.
-     * - Build a ZX80 and run it on its own thread.
-     * This method returns on error or when the user terminates the emulator through the UI.
+     * @see Platform::init_monitor(int, int)
      */
-    void start();
+    void init_monitor(int ifd, int ofd) override;
 
     /**
-     * Restart this ZX80.
-     * This method is called by the UI when the user clicks on the reset widget
-     * (it runs in the context of the UI thread).
-     * If the emulator is paused this method does nothing.
+     * @see Platform::reset_devices()
      */
-    void reset();
+    void reset_devices() override;
 
     /**
-     * Instantiate the devices needed by a ZX80.
+     * @see Platform::to_string_devices()
      */
-    void create_devices();
+    std::string to_string_devices() const override;
 
     /**
-     * Connect the devices and buildup a ZX80.
-     * @see create_devices()
+     * @see Platform::create_devices()
      */
-    void connect_devices();
+    void create_devices() override;
 
     /**
-     * Create the user interface.
+     * @see Platform::connect_devices()
      */
-    void create_ui();
+    void connect_devices() override;
 
     /**
-     * Create the user interface widgets used by the ZX80.
+     * @see Platform::make_widgets()
      */
-    void make_widgets();
+    void make_widgets() override;
 
     /**
-     * Connect the user interface to the ZX80.
-     * @see create_ui()
-     * @see create_devices()
-     * @see make_widgets()
+     * @see Platform::connect_ui()
      */
-    void connect_ui();
+    void connect_ui() override;
+
+    /**
+     * @see Platform::hostkeys(keyboard::Key)
+     */
+    void hotkeys(keyboard::Key key) override;
+
+    /**
+     * @see Platform::clock()
+     */
+    Clock& clock() override
+    {
+        return (*_clk);
+    }
+
+    /**
+     * @see Platform::config()
+     */
+    const Config& config() const override
+    {
+        return _conf;
+    }
+
+    /**
+     * @see Platform::ui_config()
+     */
+    ui::Config ui_config() override;
 
     /**
      * Return the full pathname of a ROM file.
@@ -146,23 +140,15 @@ private:
      */
     void attach_prg();
 
-    /**
-     * Process hot-keys.
-     * This method is indirectly called by the user interface.
-     */
-    void hotkeys(keyboard::Key key);
-
     ZX80Config              _conf;
-
-    devptr_t                _ram{};
-    devptr_t                _rom{};
+    sptr_t<Clock>           _clk{};
+    sptr_t<RAM>             _ram{};
+    sptr_t<ROM>             _rom{};
     sptr_t<ZX80ASpace>      _mmap{};
     sptr_t<Z80>             _cpu{};
     sptr_t<ZX80Video>       _video{};
     sptr_t<ZX80Keyboard>    _kbd{};
     sptr_t<ZX80Cassette>    _cass{};
-    sptr_t<Clock>           _clk{};
-    sptr_t<ui::UI>          _ui{};
 };
 
 }

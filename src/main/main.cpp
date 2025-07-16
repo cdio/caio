@@ -43,6 +43,8 @@ static const char* progname;
 template<class MACHINE, class CMDLINE>
 int machine_main(int argc, const char** argv)
 {
+    uptr_t<MACHINE> machine{};
+
     try {
         CMDLINE cmdline{};
         auto [sec, pname] = config::parse(argc, argv, cmdline);
@@ -50,12 +52,16 @@ int machine_main(int argc, const char** argv)
         caio::log.logfile(sec[config::KEY_LOGFILE]);
         caio::log.loglevel(sec[config::KEY_LOGLEVEL]);
 
-        MACHINE machine{sec};
-        machine.run(pname);
+        machine = std::make_unique<MACHINE>(sec);
+        machine->run(pname);
         return 0;
 
     } catch (const std::exception& err) {
-        std::cerr << MACHINE::name() << ": Error: " << err.what() << "\n";
+        if (machine) {
+            std::cerr << machine->name() << ": Error: " << err.what() << "\n";
+        } else {
+            std::cerr << "Error: " << err.what() << "\n";
+        }
     }
 
     return EXIT_FAILURE;
@@ -140,8 +146,7 @@ int main(int argc, const char** argv)
         return run_gui();
     }
 
-    auto it = machines.find(name);
-    if (it != machines.end()) {
+    if (auto it = machines.find(name); it != machines.end()) {
         return it->second(argc, argv);
     }
 

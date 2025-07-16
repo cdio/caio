@@ -18,12 +18,10 @@
  */
 #pragma once
 
-#include "clock.hpp"
-#include "device.hpp"
-#include "ram.hpp"
+#include "platform.hpp"
+
 #include "ricoh_2a03.hpp"
 #include "ricoh_2c02.hpp"
-#include "ui.hpp"
 
 #include "nes_aspace.hpp"
 #include "nes_cartridge.hpp"
@@ -40,7 +38,7 @@ namespace nes {
 /**
  * NES (Nintendo Entertainment System) emulator.
  */
-class NES {
+class NES : public Platform {
 public:
     /**
      * Instantiate this NES.
@@ -55,87 +53,76 @@ public:
     virtual ~NES();
 
     /**
-     * Build this NES emulator and start it.
-     * This method returns on error or when the user terminates the emulator through the UI.
-     * @param pname If not empty, name of the program to launch (its format is auto-detected).
-     * @see start()
+     * @see Platform::name()
      */
-    void run(std::string_view pname);
-
-    /**
-     * Get a description of this NES.
-     * @return A string representation of this NES.
-     */
-    std::string to_string() const;
-
-    /**
-     * Get the name of this platform.
-     * @return The name of this platform.
-     */
-    constexpr static std::string_view name()
-    {
-        return "NES";
-    }
+    std::string_view name() const override;
 
 private:
     /**
-     * Auto-detect the format of a cartridge to launch
-     * and set the configuration parameters accordingly.
-     * @param pname File to launch.
-     * On error a message is logged and the configuration is not changed.
+     * @see Platform::detect_format(const fs::Path&)
      */
-    void autorun(const fs::Path& pname);
+    void detect_format(const fs::Path& pname) override;
 
     /**
-     * Start this NES.
-     * - Instantiate the UI and run it in the context of the calling thread.
-     * - Build a NES machine and run it on its own thread.
-     * This method returns on error or when the user terminates the emulator through the UI.
+     * @see Platform::init_monitor(int, int)
      */
-    void start();
+    void init_monitor(int ifd, int ofd) override;
 
     /**
-     * Restart this NES.
-     * This method is called by the UI when the user clicks on the reset widget
-     * (it runs in the context of the UI thread).
-     * If the emulator is paused this method does nothing.
+     * @see Platform::reset_devices()
      */
-    void reset();
+    void reset_devices() override;
 
     /**
-     * Instantiate the devices needed by a NES.
+     * @see Platform::to_string_devices()
      */
-    void create_devices();
+    std::string to_string_devices() const override;
 
     /**
-     * Connect the devices and build a NES.
-     * @see create_devices()
+     * @see Platform::create_devices()
      */
-    void connect_devices();
+    void create_devices() override;
 
     /**
-     * Create the user interface.
+     * @see Platform::connect_devices()
      */
-    void create_ui();
+    void connect_devices() override;
 
     /**
-     * Create the user interface widgets used by the NES.
+     * @see Platform::make_widgets()
      */
-    void make_widgets();
+    void make_widgets() override;
 
     /**
-     * Connect the user interface to the NES.
-     * @see create_ui()
-     * @see create_devices()
-     * @see make_widgets()
+     * @see Platform::connect_ui()
      */
-    void connect_ui();
+    void connect_ui() override;
 
     /**
-     * Process hot-keys.
-     * This method is called by the user interface.
+     * @see Platform::hostkeys(keyboard::Key)
      */
-    void hotkeys(keyboard::Key key);
+    void hotkeys(keyboard::Key key) override;
+
+    /**
+     * @see Platform::clock()
+     */
+    Clock& clock() override
+    {
+        return (*_clk);
+    }
+
+    /**
+     * @see Platform::config()
+     */
+    const Config& config() const override
+    {
+        return _conf;
+    }
+
+    /**
+     * @see Platform::ui_config()
+     */
+    ui::Config ui_config() override;
 
     NESConfig                   _conf;
     sptr_t<Clock>               _clk{};
@@ -148,10 +135,8 @@ private:
     sptr_t<NESKeyboard>         _kbd{};
     sptr_t<NESJoystick>         _joy1{};
     sptr_t<NESJoystick>         _joy2{};
-    sptr_t<ui::UI>              _ui{};
     sptr_t<ui::widget::Gamepad> _gamepad1{};
     sptr_t<ui::widget::Gamepad> _gamepad2{};
-    std::atomic_bool            _reset{};
 };
 
 }
