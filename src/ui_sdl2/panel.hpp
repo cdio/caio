@@ -31,8 +31,8 @@ namespace ui {
 namespace sdl2 {
 
 /**
- * SDL2 Panel.
- * A panel is a container of widgets.
+ * Info Panel.
+ * A panel is a container for widgets.
  * @see Widget
  */
 class Panel {
@@ -75,7 +75,8 @@ public:
      * @param renderer  Renderer;
      * @param statusbar Status bar position.
      * @exception UIError
-     * @see reset()
+     * @see reset(const sptr_t<::SDL_Renderer>& renderer, const std::string&)
+     * @see sb_str2pos(const std::string&);
      */
     Panel(const sptr_t<::SDL_Renderer>& renderer = {}, const std::string& statusbar = {});
 
@@ -86,12 +87,13 @@ public:
      * @param renderer  Renderer;
      * @param statusbar Status bar position.
      * @exception UIError
+     * @see sb_str2pos(const std::string&);
      */
     void reset(const sptr_t<::SDL_Renderer>& renderer = {}, const std::string& statsubar = {});
 
     /**
      * Set the panel visibility.
-     * @param is_visible True if visible; false otherwise.
+     * @param is_visible true if visible; false otherwise.
      */
     void visible(bool is_visible);
 
@@ -140,8 +142,21 @@ private:
 
     /**
      * Status bar position string to value.
+     * The following position strings are reconised:
+     *   - "center"
+     *   - "north"
+     *   - "south"
+     *   - "east"
+     *   - "west"
+     *   - "north-east"
+     *   - "north-west"
+     *   - "south-east"
+     *   - "south-west"
+     *   - "none"
      * @param strpos Position string.
-     * @return The postion value.
+     * @return The postion value on success;
+     *         The default position if the specified string is not recognised.
+     * @see SB_DEFAULT_POSITION
      */
     int sb_str2pos(const std::string& strpos);
 
@@ -153,12 +168,12 @@ private:
      */
     std::vector<JustRectWidget>::const_iterator find_widget(int x, int y);
 
-    int                         _sb_position{}; /* Status bar position              */
-    bool                        _visible{};     /* Panel visibility                 */
-    sptr_t<::SDL_Renderer>      _renderer{};    /* Renderer                         */
-    ::SDL_Rect                  _ext_rect{};    /* Panel rectangle                  */
-    sptr_t<Widget>              _cur_widget{};  /* Widget under the mouse cursor    */
-    std::vector<JustRectWidget> _widgets{};     /* Panel widgets                    */
+    int                         _sb_position{};     /* Status bar position              */
+    bool                        _visible{};         /* Panel visibility                 */
+    sptr_t<::SDL_Renderer>      _renderer{};        /* Renderer                         */
+    ::SDL_Rect                  _ext_rect{};        /* Panel rectangle                  */
+    sptr_t<Widget>              _cur_widget{};      /* Widget under the mouse cursor    */
+    std::vector<JustRectWidget> _widgets{};         /* Panel widgets                    */
 };
 
 }

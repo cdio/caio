@@ -38,6 +38,7 @@ namespace ui {
 
 using AudioBuffer = sdl2::AudioBuffer;
 using Scanline    = sdl2::Scanline;
+using Size2       = sdl2::Size2;
 
 using UI          = sdl2::UI;
 using Panel       = sdl2::Panel;

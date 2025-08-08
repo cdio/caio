@@ -33,13 +33,13 @@ namespace sdl2 {
 
 /**
  * Audio Buffer.
- * An audio buffer is a self-dispatchable object.
+ * The Audio Buffer is a self-dispatchable object.
  * @see DispatcherT
  */
 using AudioBuffer = DispatcherT<samples_i16>;
 
 /**
- * Audio driver.
+ * Audio Stream driver.
  */
 class AudioStream {
 public:
@@ -47,42 +47,41 @@ public:
     constexpr static const size_t AUDIO_BUFFERS = 4;
 
     /**
-     * Initialise an audio stream.
-     * The reset() method must be called before using ths instance for the first time.
+     * Initialise this audio stream driver.
+     * The reset() method must be called before using this instance for the first time.
      * @see reset()
      */
-    AudioStream() {
-    }
+    AudioStream() = default;
 
-    virtual ~AudioStream() {
-    }
+    virtual ~AudioStream() = default;
 
     /**
      * Reset this audio stream.
      * @param aconf Audio configuration.
      * @exception UIError
+     * @see ui::AudioConfig
      */
     void reset(const ui::AudioConfig& aconf);
 
     /**
      * Stop the audio stream.
-     * Block until all audio related functions are seased and close the audio device.
+     * Block until all audio related events are seased and close the audio device.
      */
     void stop();
 
     /**
-     * Start audio streaming.
+     * Start the audio stream.
      */
     void play();
 
     /**
-     * Pause audio streaming.
+     * Pause the audio stream.
      */
     void pause();
 
     /**
-     * Get the running status of this audio stream.
-     * @return true if this audio stream is paused; false otherwise.
+     * Get the status of the audio stream.
+     * @return true if the audio stream is paused; false otherwise.
      */
     bool is_paused() const;
 
@@ -93,18 +92,18 @@ public:
     void volume(float vol);
 
     /**
-     * Get the volume of this audio stream.
+     * Get the output volume.
      * @return The current volume.
      */
     float volume() const;
 
     /**
      * Get a free audio buffer.
-     * A free audio buffer is retrieved from the free queue and returned back to the caller.
-     * The caller must fill the buffer with audio samples and then dispatch or destroy it.
-     * The act of dispatching (or destroying) the received buffer makes it to be
-     * automatically enqueued inside the playing queue of this audio stream instance.
-     * @return An AudioBuffer.
+     * A free audio buffer is retrieved from the free queue; the caller
+     * must fill the received buffer with PCM audio samples and dispatch it.
+     * The act of dispatching (or destroying) the audio buffer automatically
+     * enqueues it inside the playing queue of this audio stream driver.
+     * @return An empty audio buffer.
      * @see _free_queue
      * @see _playing_queue
      * @see stream_data()
@@ -116,7 +115,7 @@ private:
     /**
      * Audio samples provider.
      * This method is called by the SDL audio subsystem to get audio samples to play.
-     * @param self   A pointer to this class;
+     * @param self   A pointer to this instance;
      * @param stream Destination buffer to fill with audio samples;
      * @param len    Size of the destination buffer.
      */
@@ -127,9 +126,8 @@ private:
     ::SDL_AudioDeviceID      _devid{};
     LockedQueue<samples_i16> _free_queue{};
     LockedQueue<samples_i16> _playing_queue{};
+    std::vector<int16_t>     _buffers[AUDIO_BUFFERS] = {};
     float                    _volume{DEFAULT_VOLUME};
-
-    std::vector<int16_t> _buffers[AUDIO_BUFFERS] = {};
 };
 
 }

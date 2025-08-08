@@ -467,6 +467,42 @@ void Gui::combo_key(const std::string& msg, const std::string& id, keyboard::Key
     key = keyboard::to_key(knames[dst]);
 }
 
+void Gui::combo_aspect(std::string& dst)
+{
+    static const std::string label = "Aspect Ratio";
+    static const std::string id = "##aspect";
+    static const char* position_names[]{
+        "System",
+        "16:9",
+        "8:7",
+        "6:5",
+        "5:3",
+        "4:3"
+    };
+
+    static const auto name_to_index = [](std::string_view name) -> int {
+        const auto str = utils::tolow(name);
+        const auto it = std::find_if(std::begin(position_names), std::end(position_names),
+            [&str](std::string_view entry) {
+                return (str == utils::tolow(entry));
+        });
+        return (it == std::end(position_names) ? 0 : (it - std::begin(position_names)));
+    };
+
+    const float fwidth = font_width();
+    int index = name_to_index(dst);
+    int prev_index = index;
+
+    print(label);
+    cursor_to_valuecol();
+    ::ImGui::SetNextItemWidth(10 * fwidth);
+    ::ImGui::Combo(id.c_str(), &index, position_names, std::size(position_names), std::size(position_names));
+
+    if (index != prev_index) {
+        dst = position_names[index];
+    }
+}
+
 void Gui::combo_scanlines(std::string& dst)
 {
     static const std::string label = "Scanlines effect";

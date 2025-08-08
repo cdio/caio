@@ -28,6 +28,8 @@
 #include "keyboard.hpp"
 #include "logger.hpp"
 
+#include "ui_config.hpp"
+
 #ifndef D_PREFIX
 #define D_PREFIX            "/opt/caio"
 #endif
@@ -89,6 +91,7 @@ constexpr static const char* KEY_KEYMAPS            = "keymaps";
 constexpr static const char* KEY_CARTRIDGE          = "cart";
 constexpr static const char* KEY_FPS                = "fps";
 constexpr static const char* KEY_SCALE              = "scale";
+constexpr static const char* KEY_ASPECT             = "aspect";
 constexpr static const char* KEY_SCANLINES          = "scanlines";
 constexpr static const char* KEY_FULLSCREEN         = "fullscreen";
 constexpr static const char* KEY_SRESIZE            = "sresize";
@@ -122,6 +125,7 @@ constexpr static const char* DEFAULT_KEYMAPS        = "";
 constexpr static const char* DEFAULT_CARTRIDGE      = "";
 constexpr static const char* DEFAULT_FPS            = "50";
 constexpr static const char* DEFAULT_SCALE          = "1";
+constexpr static const char* DEFAULT_ASPECT         = "system";
 constexpr static const char* DEFAULT_SCANLINES      = "n";
 constexpr static const char* DEFAULT_FULLSCREEN     = "no";
 constexpr static const char* DEFAULT_SRESIZE        = "yes";
@@ -181,8 +185,7 @@ public:
      */
     Confile(const fs::Path& fname = {});
 
-    virtual ~Confile() {
-    }
+    virtual ~Confile() = default;
 
     /**
      * Load a configuration file.
@@ -242,13 +245,13 @@ enum class Arg {
 struct Option {
     using SetCb = std::function<bool(class Confile&, const Option&, std::string_view)>;
 
-    std::string name{};     /* Command line option without the "--" prefix              */
-    std::string sname{};    /* Section name                                             */
-    std::string key{};      /* Key name                                                 */
-    std::string dvalue{};   /* Default value                                            */
-    Arg         type{};     /* Argument requisites                                      */
-    SetCb       fn{};       /* Value setter                                             */
-    std::string optval{};   /* Value to set when an optional argument is not provided   */
+    std::string name{};     /**< Command line option without the "--" prefix.               */
+    std::string sname{};    /**< Section name.                                              */
+    std::string key{};      /**< Key name.                                                  */
+    std::string dvalue{};   /**< Default value.                                             */
+    Arg         type{};     /**< Argument requisites.                                       */
+    SetCb       fn{};       /**< Value setter.                                              */
+    std::string optval{};   /**< Value to set when an optional argument is not provided.    */
 };
 
 bool set_value(Confile&, const Option&, std::string_view);
@@ -272,13 +275,12 @@ bool is_false(std::string_view);
  */
 class Cmdline {
 public:
-    Cmdline() {
-    }
+    Cmdline();
 
-    virtual ~Cmdline() {
-    }
+    virtual ~Cmdline();
 
-    std::string_view progname() const {
+    std::string_view progname() const
+    {
         return _progname;
     }
 
@@ -362,8 +364,7 @@ void save(const fs::Path& fname, std::string_view sname, const Section& sec);
 struct VJoyConfig : VJoyKeys {
     bool enabled{};
 
-    VJoyConfig() {
-    }
+    VJoyConfig() = default;
 
     /**
      * Initialise this virtual joystick configuration structure.
@@ -374,7 +375,8 @@ struct VJoyConfig : VJoyKeys {
 
     bool operator==(const VJoyConfig& other) const;
 
-    bool operator!=(const VJoyConfig& other) const {
+    bool operator!=(const VJoyConfig& other) const
+    {
         return !operator==(other);
     }
 
@@ -389,6 +391,9 @@ struct VJoyConfig : VJoyKeys {
  * Generic configuration.
  */
 struct Config {
+    using SLEffect = ui::SLEffect;
+    using AspectRatio = ui::AspectRatio;
+
     std::string title{};
     std::string romdir{};
     std::string palette{};
@@ -396,7 +401,8 @@ struct Config {
     std::string cartridge{};
     unsigned    fps{};
     unsigned    scale{};
-    std::string scanlines{};
+    AspectRatio aspect{};
+    SLEffect    scanlines{};
     bool        fullscreen{};
     bool        sresize{};
     bool        audio{};
@@ -420,12 +426,12 @@ struct Config {
      */
     Config(Section& sec, std::string_view prefix);
 
-    virtual ~Config() {
-    }
+    virtual ~Config();
 
     bool operator==(const Config& other) const;
 
-    bool operator!=(const Config& other) const {
+    bool operator!=(const Config& other) const
+    {
         return !operator==(other);
     }
 
@@ -456,6 +462,9 @@ private:
 
 /**
  * Persistent data directory.
+ * The persistent data directory is where caio stores information
+ * than can be read/written during emulation by devices, such as
+ * EEPROM data used by various cartridges (high scores, player names, etc.).
  * @return A path to the persistent data directory.
  */
 fs::Path storage_path();

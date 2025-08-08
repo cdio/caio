@@ -76,6 +76,7 @@ static Option generic_options[] = {
     { KEY_CARTRIDGE,        SEC_GENERIC, KEY_CARTRIDGE,     DEFAULT_CARTRIDGE,      Arg::Required, set_value       },
     { KEY_FPS,              SEC_GENERIC, KEY_FPS,           DEFAULT_FPS,            Arg::Required, set_value       },
     { KEY_SCALE,            SEC_GENERIC, KEY_SCALE,         DEFAULT_SCALE,          Arg::Required, set_value       },
+    { KEY_ASPECT,           SEC_GENERIC, KEY_ASPECT,        DEFAULT_ASPECT,         Arg::Required, set_value       },
     { KEY_SCANLINES,        SEC_GENERIC, KEY_SCANLINES,     DEFAULT_SCANLINES,      Arg::Required, set_value       },
     { KEY_FULLSCREEN,       SEC_GENERIC, KEY_FULLSCREEN,    DEFAULT_FULLSCREEN,     Arg::Optional, set_bool, "yes" },
     { KEY_SRESIZE,          SEC_GENERIC, KEY_SRESIZE,       DEFAULT_SRESIZE,        Arg::Optional, set_bool, "yes" },
@@ -119,6 +120,8 @@ std::string Cmdline::usage() const
         " --cart <cfile>          Cartridge filename\n"
         " --fps <rate>            Frame rate (default is {})\n"
         " --scale <scale>         Window scale factor (default is {})\n"
+        " --aspect <ratio>        Aspect ratio: 16:9, 8:7, 6:5, 5:3, 4:3, system\n"
+        "                         (default is {})\n"
         " --scanlines <n|h|v|H|V> Scanlines effect: (n)one, (h)orizontal, (v)ertical,\n"
         "                         advanced (H)orizontal, advanced (V)ertical\n"
         "                         (default is {})\n"
@@ -155,6 +158,7 @@ std::string Cmdline::usage() const
         _progname,
         DEFAULT_FPS,
         DEFAULT_SCALE,
+        DEFAULT_ASPECT,
         DEFAULT_SCANLINES,
         DEFAULT_SRESIZE,
         DEFAULT_AUDIO,
@@ -171,6 +175,14 @@ std::string Cmdline::usage() const
         DEFAULT_VJOY_FIRE,
         DEFAULT_SCREENSHOTDIR,
         DEFAULT_STATUSBAR);
+}
+
+Cmdline::Cmdline()
+{
+}
+
+Cmdline::~Cmdline()
+{
 }
 
 Confile Cmdline::defaults()

@@ -18,13 +18,43 @@
  */
 #include "ui_config.hpp"
 
-#include <sstream>
-
 #include "types.hpp"
 #include "utils.hpp"
 
 namespace caio {
 namespace ui {
+
+static const std::unordered_map<std::string, AspectRatio> aspects{
+    { "16:9",   AspectRatio::_16_9  },
+    { "8:7",    AspectRatio::_8_7   },
+    { "6:5",    AspectRatio::_6_5   },
+    { "5:3",    AspectRatio::_5_3   },
+    { "4:3",    AspectRatio::_4_3   },
+    { "system", AspectRatio::System }
+};
+
+AspectRatio to_aspect_ratio(std::string_view str)
+{
+    if (str.empty()) {
+        return AspectRatio::System;
+    }
+
+    const auto it = aspects.find(utils::tolow(str));
+    if (it == aspects.end()) {
+        throw InvalidArgument{"Invalid aspect ratio: \"{}\"", str};
+    }
+
+    return it->second;
+}
+
+std::string to_string(AspectRatio ratio)
+{
+    const auto it = std::find_if(aspects.begin(), aspects.end(), [ratio](const auto& entry) {
+        return (entry.second == ratio);
+    });
+
+    return (it == aspects.end() ? "" : it->first);
+}
 
 SLEffect to_sleffect(std::string_view str)
 {
@@ -37,6 +67,20 @@ SLEffect to_sleffect(std::string_view str)
     }
 
     throw InvalidArgument{"Invalid scanlines effect: \"{}\"", str};
+}
+
+std::string to_string(SLEffect effect)
+{
+    switch (effect) {
+    case SLEffect::Horizontal:
+    case SLEffect::Vertical:
+    case SLEffect::Adv_Horizontal:
+    case SLEffect::Adv_Vertical:
+        return std::string{static_cast<char>(effect)};
+
+    case SLEffect::None:
+        return "n";
+    }
 }
 
 }

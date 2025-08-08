@@ -166,7 +166,15 @@ void ConfigEditor::render_appearance(config::Config& cfg)
     _gui.checkbox("Fullscreen", "##fullscreen", cfg.fullscreen);
     _gui.checkbox("Smooth window resize", "##sresize", cfg.sresize);
     _gui.input_int("Scale", "##scale", reinterpret_cast<int&>(cfg.scale), SCALE_WIDTH, scale_cond);
-    _gui.combo_scanlines(cfg.scanlines);
+
+    std::string aspect{ui::to_string(cfg.aspect)};
+    _gui.combo_aspect(aspect);
+    cfg.aspect = ui::to_aspect_ratio(aspect);
+
+    std::string scanlines{ui::to_string(cfg.scanlines)};
+    _gui.combo_scanlines(scanlines);
+    cfg.scanlines = ui::to_sleffect(scanlines);
+
     _gui.combo_palette(cfg.palette, _palette, machine_prefix());
     _gui.combo_statusbar(cfg.statusbar);
 }

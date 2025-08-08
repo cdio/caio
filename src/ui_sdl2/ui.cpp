@@ -35,6 +35,9 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
+#define UI_DEBUG(args...)      log.debug(args)
+//#define UI_DEBUG(args...)
+
 namespace caio {
 namespace ui {
 namespace sdl2 {
@@ -77,125 +80,29 @@ sptr_t<UI> UI::instance(const ui::Config& conf)
 UI::UI(const ui::Config& conf)
     : _conf{conf}
 {
-    if (::SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0 ||
-        ::IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG ||
-        ::TTF_Init() != 0) {
-        throw UIError{"Can't initialise SDL library: {}", sdl_error()};
-    }
-
     auto& vconf = _conf.video;
-
-    _screen_ratio = vconf.width / static_cast<float>(vconf.height);
-
-    switch (vconf.sleffect) {
-    case SLEffect::Adv_Horizontal:
-        /*
-         * In the advanced horizontal scanlines effect a new "empty"
-         * scanline is intercalated between two valid scanlines.
-         */
-        _tex_width = vconf.width;
-        _tex_height = 2 * vconf.height - 1;
-        break;
-    case SLEffect::Adv_Vertical:
-        /*
-         * In the advanced vertical scanlines effect a new "empty"
-         * vertical line is intercalated between two valid vertical lines.
-         */
-        _tex_width = 2 * vconf.width - 1;
-        _tex_height = vconf.height;
-        break;
-    default:
-        _tex_width = vconf.width;
-        _tex_height = vconf.height;
-    }
-
-    screen_sizes(vconf.scale);
-
-    _screen_rect = {
-        .x = 0,
-        .y = 0,
-        .w = _screen_width,
-        .h = _screen_height
-    };
-
-    _win_width = _screen_width;
-    _win_height = _screen_height;
 
     switch (vconf.sleffect) {
     case SLEffect::Adv_Horizontal:
     case SLEffect::Adv_Vertical:
         if (vconf.sresize) {
-            log.warn("Smooth resize cannot be used with advanced scanlines effects: Smooth resize disabled\n");
+            log.warn("Smooth resize cannot be used with advanced scanlines effects. Smooth resize disabled\n");
             vconf.sresize = false;
         }
     default:;
     }
 
-    /*
-     * Create the main window.
-     */
-    auto* windowp = ::SDL_CreateWindow(_conf.video.title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        _win_width, _win_height, SDL_WINDOW_RESIZABLE);
-
-    if (windowp == nullptr) {
-        throw UIError{"Can't create main window: {}", sdl_error()};
-    }
-
-    _window = sptr_t<::SDL_Window>{windowp, ::SDL_DestroyWindow};
+    init_sdl();
+    init_window();
+    init_renderer();
+    init_texture();
+    init_fs_mode();
 
     /*
-     * Create the main window icon.
+     * Initialise the audio system and create the info panel.
      */
-    const Image& ico = icon();
-
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    constexpr static const uint32_t pixel_format = SDL_PIXELFORMAT_ABGR8888;
-#else
-    constexpr static const uint32_t pixel_format = SDL_PIXELFORMAT_RGBA8888;
-#endif
-
-    auto* iconp = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
-        ico.width, ico.height, 32, ico.width * 4, pixel_format);
-
-    if (iconp == nullptr) {
-        throw UIError{"Can't create window icon: {}", sdl_error()};
-    }
-
-    _icon = uptrd_t<::SDL_Surface>{iconp, ::SDL_FreeSurface};
-    ::SDL_SetWindowIcon(_window.get(), _icon.get());
-
-    /*
-     * Create the renderer.
-     */
-    auto* rendp = ::SDL_CreateRenderer(_window.get(), -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
-    if (rendp == nullptr) {
-        throw UIError{"Can't create renderer: {}", sdl_error()};
-    }
-
-    _renderer = sptr_t<::SDL_Renderer>{rendp, ::SDL_DestroyRenderer};
-
-    if (::SDL_SetRenderDrawBlendMode(_renderer.get(), SDL_BLENDMODE_BLEND) < 0) {
-        throw UIError{"Can't set renderer blend mode: {}", sdl_error()};
-    }
-
-    /*
-     * Create the raw (rgba) screen buffers.
-     */
-    const size_t screen_size = vconf.width * vconf.height;
-    _screen_raw[0] = RawScreen(screen_size, CRT_COLOR);
-    _screen_raw[1] = RawScreen(screen_size, CRT_COLOR);
-
-    /*
-     * Create the raw screen texture.
-     */
-    auto* screenp = ::SDL_CreateTexture(_renderer.get(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
-        _tex_width, _tex_height);
-
-    if (screenp == nullptr) {
-        throw UIError{"Can't create screen texture: {}", sdl_error()};
-    }
-
-    _screen_tex = sptr_t<::SDL_Texture>{screenp, ::SDL_DestroyTexture};
+    audio_reset();
+    create_panel();
 
     /*
      * Set fullscreen/normal mode.
@@ -204,15 +111,9 @@ UI::UI(const ui::Config& conf)
     if (vconf.fullscreen) {
         toggle_fullscreen();
     }
-
-    /*
-     * Initialise audio system and create the info panel.
-     */
-    audio_reset();
-    create_panel();
 }
 
-UI::~UI()
+UI::~UI() noexcept
 {
     stop();
 
@@ -224,6 +125,340 @@ UI::~UI()
 
     ::IMG_Quit();
     ::SDL_Quit();
+}
+
+void UI::init_sdl()
+{
+    if (::SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) < 0 ||
+        ::IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG ||
+        ::TTF_Init() != 0) {
+        throw UIError{"Can't initialise SDL library: {}", sdl_error()};
+    }
+}
+
+void UI::init_window_size()
+{
+    const auto& vconf = _conf.video;
+
+    const Size2 default_screen_size{
+        .width = static_cast<int>(vconf.width),
+        .height = static_cast<int>(vconf.height)
+    };
+
+    _screen_ratio = aspect_ratio(default_screen_size);
+    _screen_scale = (vconf.scale < 1.0f ? 1.0f : vconf.scale);
+
+    _tex_size = default_screen_size;
+
+    switch (vconf.sleffect) {
+    case SLEffect::Adv_Horizontal:
+        /*
+         * In the advanced horizontal scanlines effect a new "empty"
+         * scanline is intercalated between two valid scanlines.
+         */
+        _tex_size.height = 2 * vconf.height - 1;
+        _screen_size.height = static_cast<int>(std::ceil(_tex_size.height * _screen_scale));
+        _screen_size.width  = static_cast<int>(std::ceil(_screen_size.height * _screen_ratio));
+        break;
+
+    case SLEffect::Adv_Vertical:
+        /*
+         * In the advanced vertical scanlines effect a new "empty"
+         * vertical line is intercalated between two valid vertical lines.
+         */
+        _tex_size.width = 2 * vconf.width - 1;
+        _screen_size.width  = static_cast<int>(std::ceil(_tex_size.width * _screen_scale));
+        _screen_size.height = static_cast<int>(std::ceil(_screen_size.width / _screen_ratio));
+        break;
+
+    default:
+        _screen_size.width = static_cast<int>(std::ceil(_tex_size.width * _screen_scale));
+        _screen_size.height = static_cast<int>(std::ceil(_screen_size.width / _screen_ratio));
+    }
+
+    /*
+     * Main window size (windowed mode).
+     */
+    _win_size = _screen_size;
+
+    /*
+     * Position within the main window where the texture is rendered.
+     */
+    _screen_rect = {
+        .x = 0,
+        .y = 0,
+        .w = _screen_size.width,
+        .h = _screen_size.height
+    };
+
+    log.debug("ui: Aspect ratio: {}, scanlines effect: {}, tex size: {} x {}, screen size: {} x {}, window size: {} x {}\n",
+        ui::to_string(vconf.aspect),
+        ui::to_string(vconf.sleffect),
+        _tex_size.width, _tex_size.height,
+        _screen_size.width, _screen_size.height,
+        _win_size.width, _win_size.height);
+}
+
+void UI::init_window()
+{
+    init_window_size();
+
+    auto* windowp = ::SDL_CreateWindow(_conf.video.title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        _win_size.width, _win_size.height, SDL_WINDOW_RESIZABLE);
+
+    if (windowp == nullptr) {
+        throw UIError{"Can't create main window: {}", sdl_error()};
+    }
+
+    _window = sptr_t<::SDL_Window>{windowp, ::SDL_DestroyWindow};
+
+    const Image& ico = icon();
+
+    auto* iconp = ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
+        ico.width, ico.height, 32, ico.width * 4, SDL_PIXELFORMAT_RGBA32);
+
+    if (iconp == nullptr) {
+        throw UIError{"Can't create window icon: {}", sdl_error()};
+    }
+
+    _icon = uptrd_t<::SDL_Surface>{iconp, ::SDL_FreeSurface};
+
+    ::SDL_SetWindowIcon(_window.get(), _icon.get());
+
+    if (const int rate = current_refresh(); rate < REFRESH_RATE) {
+        log.warn("ui: Current refresh rate is too slow: {} Hz. Resolution changes is recommended\n", rate);
+    }
+}
+
+void UI::init_renderer()
+{
+    auto* rendp = ::SDL_CreateRenderer(_window.get(), -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+    if (rendp == nullptr) {
+        throw UIError{"Can't create renderer: {}", sdl_error()};
+    }
+
+    _renderer = sptr_t<::SDL_Renderer>{rendp, ::SDL_DestroyRenderer};
+
+    if (::SDL_SetRenderDrawBlendMode(_renderer.get(), SDL_BLENDMODE_BLEND) < 0) {
+        throw UIError{"Can't set renderer blend mode: {}", sdl_error()};
+    }
+}
+
+void UI::init_texture()
+{
+    /*
+     * Raw (RGBA) scanline buffers.
+     */
+    const size_t area = _conf.video.width * _conf.video.height;
+    _screen_raw[0] = Scanline(area, CRT_COLOR);
+    _screen_raw[1] = Scanline(area, CRT_COLOR);
+
+    /*
+     * Screen texture.
+     */
+    auto* screenp = ::SDL_CreateTexture(_renderer.get(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+        _tex_size.width, _tex_size.height);
+
+    if (screenp == nullptr) {
+        throw UIError{"Can't create screen texture: {}", sdl_error()};
+    }
+
+    _screen_tex = sptr_t<::SDL_Texture>{screenp, ::SDL_DestroyTexture};
+}
+
+inline float UI::aspect_ratio(const Size2& wsize)
+{
+    return to_value(_conf.video.aspect, static_cast<int>(100.0f * wsize.width / wsize.height) / 100.0f);
+}
+
+Size2 UI::scale(const Size2& csize, const Size2& wsize)
+{
+    static const auto do_scale_x = [](const Size2& wsize, float scale_x, float ratio) -> Size2 {
+        const auto w = static_cast<int>(wsize.width * scale_x);
+        const auto h = static_cast<int>(w / ratio);
+        return {w, h};
+    };
+
+    static const auto do_scale_y = [](const Size2& wsize, float scale_y, float ratio) -> Size2 {
+        const auto h = static_cast<int>(wsize.height * scale_y);
+        const auto w = static_cast<int>(h * ratio);
+        return {w, h};
+    };
+
+    const float ratio = static_cast<float>(wsize.width) / wsize.height;
+
+    float scale_x = static_cast<float>(csize.width) / wsize.width;
+    float scale_y = static_cast<float>(csize.height) / wsize.height;
+
+    if (!_conf.video.sresize) {
+        scale_x = std::floor(scale_x);
+        scale_y = std::floor(scale_y);
+    }
+
+    scale_x = std::max(1.0f, scale_x);
+    scale_y = std::max(1.0f, scale_y);
+
+    const int wx = scale_x * wsize.width;
+    const int hx = wx / ratio;
+
+    return (hx > csize.height ? do_scale_y(wsize, scale_y, ratio) : do_scale_x(wsize, scale_x, ratio));
+}
+
+std::tuple<Size2, ::SDL_DisplayMode> UI::closest_display_mode(const Size2& wsize)
+{
+    const int index = ::SDL_GetWindowDisplayIndex(_window.get());
+    if (index < 0) {
+        throw UIError{"Can't get current display index: {}", sdl_error()};
+    }
+
+    const int modes = ::SDL_GetNumDisplayModes(index);
+    if (modes <= 0) {
+        throw UIError{"Can't get number of display modes: {}", sdl_error()};
+    }
+
+    const ::SDL_DisplayMode desired{
+        .format       = SDL_PIXELFORMAT_RGBA8888,
+        .w            = wsize.width,
+        .h            = wsize.height,
+        .refresh_rate = REFRESH_RATE,
+        .driverdata   = nullptr
+    };
+
+    UI_DEBUG("ui: Desired fullscreen mode for display index {}: {} x {} @ {} Hz\n",
+        index,
+        desired.w,
+        desired.h,
+        desired.refresh_rate);
+
+    /*
+     * Look for the supported display mode closest to the desired one.
+     */
+    ::SDL_DisplayMode candidate{};
+    ::SDL_DisplayMode closest{};
+    int closest_covered_area{};
+    Size2 closest_wsize{};
+
+    for (int m = 0; m < modes; ++m) {
+        /*
+         * Display modes are sorted:
+         *     width                -> largest to smallest
+         *     height               -> largest to smallest
+         *     bits per pixel       -> more colors to fewer colors
+         *     packed pixel layout  -> largest to smallest
+         *     refresh rate         -> highest to lowest
+         *
+         * https://wiki.libsdl.org/SDL2/SDL_GetDisplayMode
+         */
+        if (::SDL_GetDisplayMode(index, m, &candidate) != 0) {
+            throw UIError{"Can't get display mode: Display index {}, mode {}: {}", index, m, sdl_error()};
+        }
+
+        const int max_w = (desired.w > FULLSCREEN_MIN_WIDTH  ? desired.w : FULLSCREEN_MIN_WIDTH);
+        const int max_h = (desired.h > FULLSCREEN_MIN_HEIGHT ? desired.h : FULLSCREEN_MIN_HEIGHT);
+        const bool ignore = (candidate.refresh_rate != REFRESH_RATE || candidate.w < max_w || candidate.h < max_h);
+        if (ignore) {
+            /*
+             * Some modern monitors do not work well with lower resolutions.
+             */
+            continue;
+        }
+
+        const auto candidate_wsize = scale({candidate.w, candidate.h}, wsize);
+
+        const int candidate_area = candidate.w * candidate.h;
+        const int desired_area = candidate_wsize.width * candidate_wsize.height;
+
+        const int covered_area = static_cast<int>(100.0f * desired_area / candidate_area);
+        const bool selected = (closest_covered_area <= covered_area);
+
+        UI_DEBUG("ui: Candidate: {:4d} x {:4d} @ {:2d} Hz, covered area: {:3d}%, selected: {}\n",
+            candidate.w,
+            candidate.h,
+            candidate.refresh_rate,
+            covered_area,
+            selected);
+
+        if (selected) {
+            closest = candidate;
+            closest_covered_area = covered_area;
+            closest_wsize = candidate_wsize;
+        }
+    }
+
+    log.debug("ui: Selected fullscreen mode for display index {}: {} x {} @ {} Hz, covered area: {}%\n",
+        index,
+        closest.w,
+        closest.h,
+        closest.refresh_rate,
+        closest_covered_area);
+
+    return {closest_wsize, closest};
+}
+
+void UI::init_fs_mode()
+{
+    const auto& vconf = _conf.video;
+    const int expand_w = (vconf.sleffect == SLEffect::Adv_Horizontal);
+    const int expand_h = (vconf.sleffect == SLEffect::Adv_Vertical);
+
+    Size2 wsize{
+        .width  = _tex_size.width  << expand_w,
+        .height = _tex_size.height << expand_h
+    };
+
+    const float aratio = aspect_ratio(wsize);
+
+    if (vconf.aspect != AspectRatio::System) {
+        if (expand_h) {
+            wsize.height = std::floor(wsize.width / aratio);
+        } else {
+            wsize.width = std::floor(wsize.height * aratio);
+        }
+    }
+
+    const auto [closest_wsize, closest] = closest_display_mode(wsize);
+    if (closest.w == 0) {
+        /*
+         * No 60Hz modes: Downgrade to desktop fullscreen.
+         */
+        _fs_flags = SDL_WINDOW_FULLSCREEN_DESKTOP;
+
+        const auto rate = current_refresh();
+        log.warn("ui: Current refresh rate is too slow: {} Hz. Monitor change is recommended.\n", rate);
+
+    } else {
+        _fs_flags = SDL_WINDOW_FULLSCREEN;
+
+        if (::SDL_SetWindowDisplayMode(_window.get(), &closest) != 0) {
+            throw UIError{"Can't set fullscreen window display mode: {}", sdl_error()};
+        }
+    }
+
+    const int margin_x = (closest.w - closest_wsize.width) >> 1;
+    const int margin_y = (closest.h - closest_wsize.height) >> 1;
+
+    _screen_fs_rect = {
+        .x = margin_x,
+        .y = margin_y,
+        .w = closest_wsize.width,
+        .h = closest_wsize.height
+    };
+
+    _fs_size = {
+        .width  = closest.w,
+        .height = closest.h
+    };
+}
+
+int UI::current_refresh()
+{
+    ::SDL_DisplayMode mode{};
+
+    if (::SDL_GetCurrentDisplayMode(0, &mode) != 0) {
+        throw UIError{"Can't get current display mode: {}", sdl_error()};
+    }
+
+    return mode.refresh_rate;
 }
 
 void UI::title(const std::string& title)
@@ -358,6 +593,9 @@ bool UI::render_line(unsigned line, const Scanline& sline)
     std::copy(sline.begin(), sline.end(), raw.begin() + line * _conf.video.width);
 
     if (line + 1 == _conf.video.height) {
+        /*
+         * Tell the main loop the video frame is ready to be rendered.
+         */
         _raw_index ^= 1;
         _raw_sem.release();
         return true;
@@ -405,6 +643,7 @@ void UI::create_panel()
     _wid_fullscreen = std::make_shared<widget::Fullscreen>(_renderer, [this]() {
         return _is_fullscreen;
     });
+
     _wid_fullscreen->action([this]() {
         toggle_fullscreen();
     });
@@ -413,6 +652,7 @@ void UI::create_panel()
      * Photo-camera (screenshot) widget.
      */
     _wid_photocamera = std::make_shared<widget::PhotoCamera>(_renderer);
+
     _wid_photocamera->action([this]() {
         _screenshot = true;
     });
@@ -425,6 +665,7 @@ void UI::create_panel()
     };
 
     _wid_reset = std::make_shared<widget::Reset>(_renderer, paused_cb);
+
     _wid_reset->action([this]() {
         if (_reset_cb) {
             _reset_cb();
@@ -435,6 +676,7 @@ void UI::create_panel()
      * Pause widget.
      */
     _wid_pause = std::make_shared<widget::Pause>(_renderer, paused_cb);
+
     _wid_pause->action([this]() {
         pause(paused() ^ true);
     });
@@ -446,10 +688,13 @@ void UI::create_panel()
         const auto getvol = [this]() {
             return audio_volume();
         };
+
         const auto setvol = [this](float vol) {
             audio_volume(vol);
         };
+
         _wid_volume = std::make_shared<widget::Volume>(_renderer, getvol, setvol);
+
     } else {
         _wid_volume = std::make_shared<widget::Volume>(_renderer);
     }
@@ -604,11 +849,68 @@ void UI::win_event(const ::SDL_Event& event)
         break;
 
     case SDL_WINDOWEVENT_RESIZED:
-        resize(wevent.data1, wevent.data2);
+        resize_event(wevent.data1, wevent.data2);
+        break;
+
+    case SDL_WINDOWEVENT_MAXIMIZED:
+        _is_maximized = true;
+        break;
+
+    case SDL_WINDOWEVENT_RESTORED:
+    case SDL_WINDOWEVENT_MINIMIZED:
+        _is_maximized = false;
         break;
 
     default:;
     }
+}
+
+void UI::resize_event(int width, int height)
+{
+    if (_is_fullscreen) {
+        return;
+    }
+
+    _win_size = {
+        .width = width,
+        .height = height
+    };
+
+    if (_conf.video.sresize) {
+        /*
+         * Smooth resize: The emulated screen is gradually scaled.
+         */
+        _screen_size = scale(_win_size, _tex_size);
+        _screen_scale = static_cast<float>(_screen_size.width) / _tex_size.width;
+
+    } else {
+        /*
+         * Step resize: The emulated screen is integer scaled.
+         */
+        const bool expand_h = (_conf.video.sleffect == SLEffect::Adv_Vertical);
+
+        const int width = (expand_h ? _tex_size.width : _tex_size.height * _screen_ratio);
+        const int height = (expand_h ? _tex_size.width / _screen_ratio : _tex_size.height);
+
+        const int scale_xy = (expand_h ? _win_size.width / _tex_size.width :
+                                         _win_size.height / _tex_size.height);
+
+        int scale = std::max(1, scale_xy);
+        for (; scale > 1 && ((width * scale > _win_size.width) || (height * scale > _win_size.height)); --scale);
+
+        _screen_scale = scale;
+        _screen_size = { width * scale, height * scale };
+    }
+
+    const int margin_x = (_win_size.width - _screen_size.width) / 2;
+    const int margin_y = (_win_size.height - _screen_size.height) / 2;
+
+    _screen_rect = {
+        .x = (_screen_size.width <= _win_size.width) * margin_x,
+        .y = (_screen_size.height <= _win_size.height) * margin_y,
+        .w = _screen_size.width,
+        .h = _screen_size.height
+    };
 }
 
 void UI::kbd_event(const SDL_Event& event)
@@ -855,6 +1157,16 @@ void UI::mouse_event(const SDL_Event& event)
 
 void UI::toggle_fullscreen()
 {
+    if (_is_maximized) {
+        /*
+         * FIXME
+         * macos chrashes miserably when the fullscreen mode
+         * is selected while in maximized windowed mode.
+         * Check if this is a SDL2 problem.
+         */
+        return;
+    }
+
     if (_is_fullscreen) {
         /*
          * Leave fullscreen.
@@ -864,13 +1176,18 @@ void UI::toggle_fullscreen()
             return;
         }
 
+        ::SDL_SetWindowPosition(_window.get(), _win_pos.width, _win_pos.height);
+        ::SDL_SetWindowSize(_window.get(), _win_size.width, _win_size.height);
+
         _is_fullscreen = false;
 
     } else {
         /*
          * Enter fullscreen.
          */
-        if (::SDL_SetWindowFullscreen(_window.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) < 0) {
+        ::SDL_GetWindowPosition(_window.get(), &_win_pos.width, &_win_pos.height);
+
+        if (::SDL_SetWindowFullscreen(_window.get(), _fs_flags) < 0) {
             log.error("ui: Can't enter fullscreen mode: {}\n", sdl_error());
             return;
         }
@@ -879,97 +1196,19 @@ void UI::toggle_fullscreen()
     }
 }
 
-void UI::screen_sizes(float scale)
-{
-    _screen_scale = (scale == 0.0f ? 1.0f : scale);
-
-    switch (_conf.video.sleffect) {
-    case SLEffect::Adv_Horizontal:
-        _screen_width  = (2 * _conf.video.width - _screen_ratio) * _screen_scale;
-        _screen_height = _tex_height * _screen_scale;
-        break;
-    case SLEffect::Adv_Vertical:
-        _screen_height = (2 * _conf.video.height - 1.0f / _screen_ratio) * _screen_scale;
-        _screen_width  = _tex_width * _screen_scale;
-        break;
-    default:
-        _screen_width = _tex_width * _screen_scale;
-        _screen_height = _screen_width / _screen_ratio;
-    }
-}
-
-void UI::resize(int width, int height)
-{
-    int x, y;
-
-    _win_width = width;
-    _win_height = height;
-
-    /*
-     * Resize keeping the aspect ratio.
-     */
-    if (_conf.video.sresize) {
-        /*
-         * Smooth resize: The emulated screen is gradually scaled.
-         */
-        _screen_width = _win_width;
-        _screen_height = _screen_width / _screen_ratio;
-        if (_screen_height > _win_height) {
-            _screen_height = _win_height;
-            _screen_width = _screen_height * _screen_ratio;
-        }
-
-        _screen_scale = _screen_width / _screen_height;
-
-    } else {
-        /*
-         * Step resize: The emulated screen is integer scaled.
-         */
-        screen_sizes(std::floor(_win_width / _tex_width));
-        if (_screen_height > _win_height) {
-            screen_sizes(std::floor(_win_height / _tex_height));
-            while (_screen_scale > 1.0f && (_screen_width > _win_width || _screen_height > _win_height)) {
-                screen_sizes(_screen_scale - 1.0f);
-            }
-        }
-    }
-
-    x = (_win_width - _screen_width) / 2;
-    if (x + _screen_width > _win_width) {
-        x = 0;
-    }
-
-    y = (_win_height - _screen_height) / 2;
-    if (y + _screen_height > _win_height) {
-        y = 0;
-    }
-
-    _screen_rect = {
-        .x = x,
-        .y = y,
-        .w = _screen_width,
-        .h = _screen_height
-    };
-}
-
 void UI::postrender_effects()
 {
-    auto sleffect = _conf.video.sleffect;
+    //TODO improve speed (shader?)
+
+    const auto sleffect = _conf.video.sleffect;
     if (sleffect == ui::SLEffect::None) {
         return;
     }
 
-    int width = _win_width;
-    int height = _win_height;
-    uint8_t alpha = SCANLINE_COLOR.a;
+    const Size2& wsize = (_is_fullscreen ? _fs_size : _win_size);
 
-    switch (sleffect) {
-    case ui::SLEffect::Adv_Horizontal:
-    case ui::SLEffect::Adv_Vertical:
-        alpha = 255 * (1.0f - ADV_SCANLINE_BRIGHT);
-        break;
-    default:;
-    }
+    const uint8_t alpha = ((sleffect == ui::SLEffect::Adv_Horizontal || sleffect == ui::SLEffect::Adv_Vertical) ?
+        255 * (1.0f - ADV_SCANLINE_BRIGHT) : SCANLINE_COLOR.a);
 
     if (::SDL_SetRenderDrawColor(_renderer.get(), SCANLINE_COLOR.r, SCANLINE_COLOR.g, SCANLINE_COLOR.b, alpha) < 0) {
         log.error("ui: Can't set render draw color: {}\n", sdl_error());
@@ -979,20 +1218,18 @@ void UI::postrender_effects()
     ::SDL_Rect rect{
         .x = 0,
         .y = 0,
-        .w = width,
-        .h = height
+        .w = wsize.width,
+        .h = wsize.height
     };
 
-    int skip = std::ceil(_screen_scale);
-    if (skip < 2) {
-        skip = 2;
-    }
+    const int scale = (_is_fullscreen ? 2 : std::ceil(_screen_scale));
+    const int skip = (scale < 2 ? 2 : scale);
 
     switch (sleffect) {
     case ui::SLEffect::Horizontal:
     case ui::SLEffect::Adv_Vertical:
         rect.h = skip / 2;
-        for (int y = 1; y < height; y += skip) {
+        for (int y = 1; y < wsize.height; y += skip) {
             rect.y = y;
             ::SDL_RenderFillRect(_renderer.get(), &rect);
         }
@@ -1001,7 +1238,7 @@ void UI::postrender_effects()
     case ui::SLEffect::Vertical:
     case ui::SLEffect::Adv_Horizontal:
         rect.w = skip / 2;
-        for (int x = 0; x < width; x += skip) {
+        for (int x = 0; x < wsize.width; x += skip) {
             rect.x = x;
             ::SDL_RenderFillRect(_renderer.get(), &rect);
         }
@@ -1013,24 +1250,7 @@ void UI::postrender_effects()
 
 void UI::render_screen()
 {
-    uint32_t* dst{nullptr};
-    int pitch{};
-
-    if (::SDL_LockTexture(_screen_tex.get(), nullptr, reinterpret_cast<void**>(&dst), &pitch) < 0) {
-        throw UIError{"Can't lock texture: {}", sdl_error()};
-    }
-
-    auto& raw = _screen_raw[raw_index()];
-
-    switch (_conf.video.sleffect) {
-    case SLEffect::None:
-        std::transform(raw.begin(), raw.end(), dst, [](Rgba px) {
-            return px.u32;
-        });
-        break;
-
-    case SLEffect::Horizontal:
-    case SLEffect::Vertical:
+    const auto sleffect_alpha = [](Rgba* dst, const Scanline& raw) {
         /*
          * The horizontal and vertical scanlines effect generate fake scanlines
          * by changing the alpha value of valid scanlines (see postrender_effects()).
@@ -1040,9 +1260,9 @@ void UI::render_screen()
         std::transform(raw.begin(), raw.end(), dst, [](Rgba px) {
             return (px * SCANLINE_LUMINOSITY).u32;
         });
-        break;
+    };
 
-    case SLEffect::Adv_Horizontal: {
+    const auto sleffect_adv_horizontal = [this](Rgba* dst, const Scanline& raw) {
         /*
          * In the advanced horizontal scanlines effect a new "empty" scanline
          * is intercalated between two valid scanlines.
@@ -1053,23 +1273,23 @@ void UI::render_screen()
         unsigned line = 0;
         for (auto it = raw.begin(); it != raw.end(); it += _conf.video.width) {
             std::for_each(it, it + _conf.video.width, [&dst, &line, this](Rgba px) {
-                Rgba pixel{px * ADV_SCANLINE_LUMINOSITY};
-                Rgba refle{px * ADV_SCANLINE_REFLECTION};
-                *dst = pixel.u32;
+                const Rgba pixel{px * ADV_SCANLINE_LUMINOSITY};
+                const Rgba refle{px * ADV_SCANLINE_REFLECTION};
+                *dst = pixel;
                 if (line + 1 < _conf.video.height) {
-                    dst[_tex_width] = refle.u32;
+                    dst[_tex_size.width] = refle;
                 }
                 if (line > 0) {
-                    dst[-_tex_width] = (Rgba{dst[-_tex_width]} + refle).u32;
+                    dst[-_tex_size.width] = dst[-_tex_size.width] + refle;
                 }
                 ++dst;
             });
             dst += _conf.video.width;
             ++line;
-        }}
-        break;
+        }
+    };
 
-    case SLEffect::Adv_Vertical: {
+    const auto sleffect_adv_vertical = [this](Rgba* dst, const Scanline& raw) {
         /*
          * In the advanced vertical scanlines effect a new "empty" vertical line
          * is intercalated between two valid vertical lines.
@@ -1080,34 +1300,64 @@ void UI::render_screen()
         unsigned x = 0;
         for (auto it = raw.begin(); it != raw.end(); it += _conf.video.width) {
             std::for_each(it, it + _conf.video.width, [&dst, &x, this](Rgba px) {
-                Rgba pixel{px * ADV_SCANLINE_LUMINOSITY};
-                Rgba refle{px * ADV_SCANLINE_REFLECTION};
-                *dst = pixel.u32;
+                const Rgba pixel{px * ADV_SCANLINE_LUMINOSITY};
+                const Rgba refle{px * ADV_SCANLINE_REFLECTION};
+                *dst = pixel;
                 if (x + 1 < _conf.video.width) {
-                    dst[1] = refle.u32;
+                    dst[1] = refle;
                 }
                 if (x > 0) {
-                    dst[-1] = (Rgba{dst[-1]} + refle).u32;
+                    dst[-1] = dst[-1] + refle;
                 }
                 dst += 2;
             });
             ++x;
             --dst;
-        }}
+        }
+    };
+
+    Rgba* dst{nullptr};
+    int pitch{};
+
+    if (::SDL_LockTexture(_screen_tex.get(), nullptr, reinterpret_cast<void**>(&dst), &pitch) < 0) {
+        throw UIError{"Can't lock texture: {}", sdl_error()};
+    }
+
+    const auto& raw = _screen_raw[raw_index()];
+
+    switch (_conf.video.sleffect) {
+    case SLEffect::None:
+        std::copy(raw.begin(), raw.end(), dst);
+        break;
+
+    case SLEffect::Horizontal:
+    case SLEffect::Vertical:
+        sleffect_alpha(dst, raw);
+        break;
+
+    case SLEffect::Adv_Horizontal:
+        sleffect_adv_horizontal(dst, raw);
+        break;
+
+    case SLEffect::Adv_Vertical:
+        sleffect_adv_vertical(dst, raw);
         break;
     }
 
     ::SDL_UnlockTexture(_screen_tex.get());
 
+    const auto& rect = (_is_fullscreen ? _screen_fs_rect : _screen_rect);
+
     if (::SDL_SetRenderDrawColor(_renderer.get(), CRT_COLOR.r, CRT_COLOR.g, CRT_COLOR.b, CRT_COLOR.a) < 0 ||
         ::SDL_RenderClear(_renderer.get()) < 0 ||
-        ::SDL_RenderCopy(_renderer.get(), _screen_tex.get(), nullptr, &_screen_rect) < 0) {
+        ::SDL_RenderCopy(_renderer.get(), _screen_tex.get(), nullptr, &rect) < 0) {
         throw IOError{"Can't copy texture: {}", sdl_error()};
     }
 
     postrender_effects();
 
-    _panel->render(_win_width, _win_height);
+    const auto& wsize = (_is_fullscreen ? _fs_size : _win_size);
+    _panel->render(wsize.width, wsize.height);
 
     ::SDL_RenderPresent(_renderer.get());
 }
@@ -1181,7 +1431,7 @@ void UI::attach_controllers()
         return (ejoy->joyid() == Joystick::JOYID_UNASSIGNED);
     });
 
-    log.debug("ui: Unassigned emulated joysticks: {}\n", count);
+    log.debug("ui: Non attached emulated joysticks: {}\n", count);
 
     for (int devid = 0; devid < ::SDL_NumJoysticks() && count > 0; ++devid) {
         if (::SDL_IsGameController(devid)) {
@@ -1194,10 +1444,10 @@ void UI::attach_controllers()
 void UI::screenshot()
 {
     int w{}, h{};
-    ::SDL_GetWindowSize(_window.get(), &w, &h);     /* To make it work udner fullscreen mode */
+    ::SDL_GetWindowSize(_window.get(), &w, &h);
 
     uptrd_t<::SDL_Surface> image{
-        ::SDL_CreateRGBSurfaceWithFormat(0, w, h, 32, SDL_PIXELFORMAT_RGBA8888),
+        ::SDL_CreateRGBSurfaceWithFormat(0, w, h, 32, SDL_PIXELFORMAT_RGBA32),
         ::SDL_FreeSurface
     };
 
@@ -1209,7 +1459,7 @@ void UI::screenshot()
         throw UIError{"Can't read screenshot pixels: {}", sdl_error()};
     }
 
-#if 1 // FIXME
+#if 1 // FIXME std::format for date/time not yet available
     struct std::tm tm{};
     const time_t now = std::time(nullptr);
     if (::localtime_r(&now, &tm) == nullptr) {

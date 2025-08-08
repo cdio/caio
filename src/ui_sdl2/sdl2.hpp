@@ -32,6 +32,14 @@ namespace ui {
 namespace sdl2 {
 
 /**
+ * 2D Size.
+ */
+struct Size2 {
+    int width{};
+    int height{};
+};
+
+/**
  * Scanline.
  * A Scanline represents a single line of an emulated screen;
  * it is filled by a video controller device with RGBa pixel data.
@@ -52,8 +60,8 @@ constexpr const char* sdl_version()
 }
 
 /**
- * Get the last SDL error.
- * @return Last SDL error.
+ * Get the last SDL error string.
+ * @return The last SDL error string.
  */
 extern std::string sdl_error();
 

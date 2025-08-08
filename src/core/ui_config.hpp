@@ -25,6 +25,45 @@ namespace caio {
 namespace ui {
 
 /**
+ * Aspect ratios.
+ */
+enum class AspectRatio {
+    System  = 0,
+    _16_9   = 178,
+    _8_7    = 114,
+    _6_5    = 120,
+    _5_3    = 167,
+    _4_3    = 133
+};
+
+/**
+ * Convert an aspect ratio string to AspectRatio type.
+ * @param str String to convert.
+ * @return The AspectRatio value type.
+ * @exception InvalidArgument if the specified string is not recognised.
+ * @see AspectRatio
+ */
+AspectRatio to_aspect_ratio(std::string_view str);
+
+/**
+ * Convert an aspect ratio to a floating point value.
+ * @param ratio         The aspect ratio to convert;
+ * @param system_ratio  The system aspect ratio floating point value.
+ * @return The floating point aspect ratio value.
+ */
+static inline float to_value(AspectRatio ratio, float system_ratio)
+{
+    return (ratio == AspectRatio::System ? system_ratio : static_cast<int>(ratio) / 100.0f);
+}
+
+/**
+ * Convert an aspect ratio type to string.
+ * @param ratio Aspect ratio to convert.
+ * @return The aspect ratio converted to string.
+ */
+std::string to_string(AspectRatio ratio);
+
+/**
  * Scanline effects.
  */
 enum class SLEffect {
@@ -45,29 +84,37 @@ enum class SLEffect {
 SLEffect to_sleffect(std::string_view str);
 
 /**
+ * Convert a scanline effect to string.
+ * @param effect Scanline effect to convert.
+ * @return The scanline effect converted to string.
+ */
+std::string to_string(SLEffect effect);
+
+/**
  * Video configuration.
  */
 struct VideoConfig {
-    std::string title{};                    /**< Main window title.         */
-    unsigned    width{};                    /**< Emulated screen width.     */
-    unsigned    height{};                   /**< Emulated screen height.    */
-    unsigned    fps{};                      /**< Frames per second.         */
-    unsigned    scale{1};                   /**< Screen scale factor.       */
-    SLEffect    sleffect{SLEffect::None};   /**< Scanlines effect.          */
-    bool        fullscreen{};               /**< Start in fullscreen mode.  */
-    bool        sresize{};                  /**< Smooth window resize.      */
-    std::string screenshotdir{};            /**< Screenshot directory.      */
-    std::string statusbar{};                /**< Status bar position.       */
+    std::string title{};                        /**< Main window title.         */
+    unsigned    width{};                        /**< Emulated screen width.     */
+    unsigned    height{};                       /**< Emulated screen height.    */
+    unsigned    fps{};                          /**< Frames per second.         */
+    unsigned    scale{1};                       /**< Screen scale factor.       */
+    AspectRatio aspect{AspectRatio::System};    /**< Screen aspect ratio.       */
+    SLEffect    sleffect{SLEffect::None};       /**< Scanlines effect.          */
+    bool        fullscreen{};                   /**< Start in fullscreen mode.  */
+    bool        sresize{};                      /**< Smooth window resize.      */
+    std::string screenshotdir{};                /**< Screenshot directory.      */
+    std::string statusbar{};                    /**< Status bar position.       */
 };
 
 /**
  * Audio configuration.
  */
 struct AudioConfig {
-    bool     enabled{};                     /**< Audio output enabled.      */
-    unsigned srate{};                       /**< Sampling rate.             */
-    unsigned channels{};                    /**< Audio channels.            */
-    unsigned samples{};                     /**< No. of samples x buffer.   */
+    bool        enabled{};                      /**< Audio output enabled.      */
+    unsigned    srate{};                        /**< Sampling rate.             */
+    unsigned    channels{};                     /**< Audio channels.            */
+    unsigned    samples{};                      /**< No. of samples x buffer.   */
 };
 
 /**

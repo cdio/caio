@@ -204,7 +204,8 @@ Config::Config(Section& sec, std::string_view prefix)
       cartridge{sec[KEY_CARTRIDGE]},
       fps{static_cast<unsigned>(std::atoi(sec[KEY_FPS].c_str()))},
       scale{static_cast<unsigned>(std::atoi(sec[KEY_SCALE].c_str()))},
-      scanlines{static_cast<char>(ui::to_sleffect(sec[KEY_SCANLINES]))},
+      aspect{ui::to_aspect_ratio(sec[KEY_ASPECT])},
+      scanlines{ui::to_sleffect(sec[KEY_SCANLINES])},
       fullscreen{is_true(sec[KEY_FULLSCREEN])},
       sresize{is_true(sec[KEY_SRESIZE])},
       audio{is_true(sec[KEY_AUDIO])},
@@ -225,53 +226,60 @@ Config::Config(Section& sec, std::string_view prefix)
         /*
          * Default to $HOME when the screenshot directory is invalid.
          */
-        screenshotdir = fs::fix_home("~");
+        screenshotdir = fs::home();
     }
+}
+
+Config::~Config()
+{
 }
 
 bool Config::operator==(const Config& other) const
 {
     return (title == other.title &&
-       romdir == other.romdir &&
-       palette == other.palette &&
-       keymaps == other.keymaps &&
-       cartridge == other.cartridge &&
-       fps == other.fps &&
-       scale == other.scale &&
-       scanlines == other.scanlines &&
-       fullscreen == other.fullscreen &&
-       sresize == other.sresize &&
-       audio == other.audio &&
-       delay == other.delay &&
-       monitor == other.monitor &&
-       logfile == other.logfile &&
-       loglevel == other.loglevel &&
-       keyboard == other.keyboard &&
-       vjoy == other.vjoy &&
-       screenshotdir == other.screenshotdir &&
-       statusbar == other.statusbar);
+        romdir == other.romdir &&
+        palette == other.palette &&
+        keymaps == other.keymaps &&
+        cartridge == other.cartridge &&
+        fps == other.fps &&
+        scale == other.scale &&
+        aspect == other.aspect &&
+        scanlines == other.scanlines &&
+        fullscreen == other.fullscreen &&
+        sresize == other.sresize &&
+        audio == other.audio &&
+        delay == other.delay &&
+        monitor == other.monitor &&
+        logfile == other.logfile &&
+        loglevel == other.loglevel &&
+        keyboard == other.keyboard &&
+        vjoy == other.vjoy &&
+        screenshotdir == other.screenshotdir &&
+        statusbar == other.statusbar);
 }
 
 void Config::to_section(Section& sec) const
 {
-    sec[KEY_ROMDIR] = romdir;
-    sec[KEY_PALETTE] = palette;
-    sec[KEY_KEYMAPS] = keymaps;
-    sec[KEY_CARTRIDGE] = cartridge;
-    sec[KEY_FPS] = std::format("{}", fps);
-    sec[KEY_SCALE] = std::format("{}", scale);
-    sec[KEY_SCANLINES] = scanlines;
-    sec[KEY_FULLSCREEN] = (fullscreen ? "yes" : "no");
-    sec[KEY_SRESIZE] = (sresize ? "yes" : "no");
-    sec[KEY_AUDIO] = (audio ? "yes" : "no");
-    sec[KEY_DELAY] = std::format("{:.1f}", delay);
-    sec[KEY_MONITOR] = (monitor ? "yes" : "no");
-    sec[KEY_LOGFILE] = logfile;
-    sec[KEY_LOGLEVEL] = loglevel;
-    sec[KEY_KEYBOARD] = (keyboard ? "yes" : "no");
+    sec[KEY_ROMDIR]         = romdir;
+    sec[KEY_PALETTE]        = palette;
+    sec[KEY_KEYMAPS]        = keymaps;
+    sec[KEY_CARTRIDGE]      = cartridge;
+    sec[KEY_FPS]            = std::format("{}", fps);
+    sec[KEY_SCALE]          = std::format("{}", scale);
+    sec[KEY_ASPECT]         = ui::to_string(aspect);
+    sec[KEY_SCANLINES]      = ui::to_string(scanlines);
+    sec[KEY_FULLSCREEN]     = (fullscreen ? "yes" : "no");
+    sec[KEY_SRESIZE]        = (sresize ? "yes" : "no");
+    sec[KEY_AUDIO]          = (audio ? "yes" : "no");
+    sec[KEY_DELAY]          = std::format("{:.1f}", delay);
+    sec[KEY_MONITOR]        = (monitor ? "yes" : "no");
+    sec[KEY_LOGFILE]        = logfile;
+    sec[KEY_LOGLEVEL]       = loglevel;
+    sec[KEY_KEYBOARD]       = (keyboard ? "yes" : "no");
+    sec[KEY_SCREENSHOTDIR]  = screenshotdir;
+    sec[KEY_STATUSBAR]      = statusbar;
+
     vjoy.to_section(sec);
-    sec[KEY_SCREENSHOTDIR] = screenshotdir;
-    sec[KEY_STATUSBAR] = statusbar;
 }
 
 fs::Path Config::resolve(const fs::Path& name, const fs::Path& path, const fs::Path& prefix, const fs::Path& ext)
@@ -306,6 +314,7 @@ std::string Config::to_string() const
         "  Cartridge:          \"{}\"\n"
         "  FPS:                {}\n"
         "  Scale:              {}x\n"
+        "  Aspect Ratio:       {}\n"
         "  Scanlines effect:   {}\n"
         "  Fullscreen:         {}\n"
         "  Smooth resize:      {}\n"
@@ -330,7 +339,9 @@ std::string Config::to_string() const
         "             start:   {}\n"
         "  Screenshots path:   \"{}\"\n"
         "  Status bar:         \"{}\"",
-        title, romdir, palette, keymaps, cartridge, fps, scale, scanlines,
+        title, romdir, palette, keymaps, cartridge, fps, scale,
+        ui::to_string(aspect),
+        ui::to_string(scanlines),
         (fullscreen ? "yes" : "no"),
         (sresize ? "yes" : "no"),
         (audio ? "yes" : "no"),
