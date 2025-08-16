@@ -280,7 +280,7 @@ private:
     struct TX {
         std::string           path{};                       /* Output TAP file or directory     */
         bool                  isdir{};                      /* Output is file or directory      */
-        buffer_t              buffer{};                     /* Transmission buffer              */
+        Buffer                buffer{};                     /* Transmission buffer              */
 
         TXState               state{TXState::Init};         /* FSM state                        */
         TXPulseState          pulse_st{TXPulseState::Init}; /* FSM pulse decoding state         */

@@ -207,8 +207,8 @@ protected:
 
     fs::Path    _cassdir;   /* Cassette directory       */
 
-    buffer_t    _buf{};     /* Data buffer              */
-    buffer_it_t _it{};      /* Input buffer iterator    */
+    Buffer      _buf{};     /* Data buffer              */
+    Buffer_it   _it{};      /* Input buffer iterator    */
 };
 
 /**

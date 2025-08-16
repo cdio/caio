@@ -33,7 +33,7 @@ namespace c1541 {
 void C1541Fs::attach(const fs::Path& path)
 {
     if (!path.empty() && (!fs::exists(path) || !fs::is_directory(path))) {
-        throw IOError{*this, "Can't attach: \"{}\": Not a directory", path.string()};
+        throw IOError{"{}: Can't attach: \"{}\": Not a directory", type(), path.string()};
     }
 
     const auto p = path.string();
@@ -396,7 +396,7 @@ void C1541Fs::channel_push_back(uint8_t ch)
     }
 }
 
-Status C1541Fs::channel_write(uint8_t ch, const buffer_t& buf)
+Status C1541Fs::channel_write(uint8_t ch, const Buffer& buf)
 {
     auto& channel = _channels[ch];
 

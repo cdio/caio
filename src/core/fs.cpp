@@ -213,7 +213,7 @@ Dir directory(const Path& path, const Path& pattern, bool icase, size_t limit)
     return entries;
 }
 
-buffer_t load(const Path& fname, size_t maxsiz)
+Buffer load(const Path& fname, size_t maxsiz)
 {
     if (maxsiz == 0) {
         maxsiz = LOAD_MAXSIZ;
@@ -231,9 +231,9 @@ buffer_t load(const Path& fname, size_t maxsiz)
     }
 }
 
-buffer_t load(std::istream& is, size_t maxsiz)
+Buffer load(std::istream& is, size_t maxsiz)
 {
-    buffer_t buf{};
+    Buffer buf{};
     uint8_t c{};
 
     if (maxsiz == 0) {

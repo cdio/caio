@@ -36,7 +36,7 @@ namespace dearimgui {
 #include "icons/DejaVuSansMNerdFontMono_Regular_stripped.hpp"
 #define FONT_NAME       DejaVuSansMNerdFontMono_Regular_stripped_ttf
 
-static buffer_t                         ttf{};
+static Buffer                           ttf{};
 static std::vector<::ImFont*>           loaded_fonts{};
 static std::vector<::ImFont*>::iterator current_loaded_font{};
 

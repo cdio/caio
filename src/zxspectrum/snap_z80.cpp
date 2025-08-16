@@ -74,13 +74,13 @@ void SnapZ80::load(const fs::Path& fname)
     _border_colour = extract_border_colour(hdr);
 }
 
-void SnapZ80::load_v1(const buffer_t& raw)
+void SnapZ80::load_v1(const Buffer& raw)
 {
     log.debug("SnapZ80: {}: Detected version: 1\n", _fname.string());
     uncompress_v1(raw);
 }
 
-void SnapZ80::load_v2(const buffer_t& raw)
+void SnapZ80::load_v2(const Buffer& raw)
 {
     const auto* hdr = header(raw);
     const char* ver{};
@@ -138,9 +138,9 @@ void SnapZ80::load_v2(const buffer_t& raw)
     uncompress_v2(raw, sizeof(SnapZ80Header) + ext_size);
 }
 
-SnapZ80::buffer_t SnapZ80::uncompress(std::span<const uint8_t> enc, bool endmark)
+Buffer SnapZ80::uncompress(std::span<const uint8_t> enc, bool endmark)
 {
-    buffer_t dst{};
+    Buffer dst{};
     size_t i = 0;
 
     while (i < enc.size() - 4) {
@@ -180,7 +180,7 @@ SnapZ80::buffer_t SnapZ80::uncompress(std::span<const uint8_t> enc, bool endmark
     return dst;
 }
 
-void SnapZ80::uncompress_v1(const buffer_t& raw)
+void SnapZ80::uncompress_v1(const Buffer& raw)
 {
     const auto* hdr = header(raw);
 
@@ -199,7 +199,7 @@ void SnapZ80::uncompress_v1(const buffer_t& raw)
     }
 }
 
-void SnapZ80::uncompress_v2(const buffer_t& raw, size_t rawoff)
+void SnapZ80::uncompress_v2(const Buffer& raw, size_t rawoff)
 {
     while (rawoff < raw.size()) {
         const auto* block = reinterpret_cast<const SnapZ80Block*>(raw.data() + rawoff);
@@ -296,7 +296,7 @@ inline Z80::Registers SnapZ80::extract_registers(const SnapZ80HeaderV23* hdr)
     return r;
 }
 
-inline SnapZ80::intflags_t SnapZ80::extract_intflags(const SnapZ80HeaderV23* hdr)
+inline SnapZ80::IntFlags SnapZ80::extract_intflags(const SnapZ80HeaderV23* hdr)
 {
     return {
         static_cast<Z80::IMode>(hdr->port & SnapZ80Header::PORT_IMODE_MASK),
@@ -310,7 +310,7 @@ inline uint8_t SnapZ80::extract_border_colour(const SnapZ80HeaderV23* hdr)
     return static_cast<uint8_t>((hdr->flags & SnapZ80Header::FLAGS_BORDER_MASK) >> SnapZ80Header::FLAGS_BORDER_SHIFT);
 }
 
-inline const SnapZ80HeaderV23* SnapZ80::header(const buffer_t& raw)
+inline const SnapZ80HeaderV23* SnapZ80::header(const Buffer& raw)
 {
     return reinterpret_cast<const SnapZ80HeaderV23*>(raw.data());
 }

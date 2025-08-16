@@ -36,8 +36,6 @@
 #include <type_traits>
 #include <vector>
 
-#include "name.hpp"
-
 #define CAIO_STR_(x)    #x
 #define CAIO_STR(x)     CAIO_STR_(x)
 
@@ -56,9 +54,9 @@ using uptr_t = std::unique_ptr<T...>;
 template<typename T>
 using uptrd_t = std::unique_ptr<T, void(*)(T*)>;
 
-using buffer_t     = std::vector<uint8_t>;
-using buffer_it_t  = std::vector<uint8_t>::iterator;
-using buffer_cit_t = std::vector<uint8_t>::const_iterator;
+using Buffer     = std::vector<uint8_t>;
+using Buffer_it  = std::vector<uint8_t>::iterator;
+using Buffer_cit = std::vector<uint8_t>::const_iterator;
 
 using samples_fp  = std::span<fp_t>;
 using samples_i16 = std::span<int16_t>;
@@ -138,18 +136,6 @@ public:
     Error(std::format_string<Args...> fmt, Args&&... args)
         : std::exception{},
           _reason{std::vformat(fmt.get(), std::make_format_args(args...))} {
-    }
-
-    /**
-     * Initialise this error.
-     * @param elem Name of the element that generated this error;
-     * @param fmt  Error message format string;
-     * @param args Error message format string arguments.
-     */
-    template<typename... Args>
-    Error(const Name& elem, std::format_string<Args...> fmt, Args&&... args)
-        : std::exception{},
-          _reason{std::format("{}: {}", elem.to_string(), std::vformat(fmt.get(), std::make_format_args(args...)))} {
     }
 
     /**

@@ -335,7 +335,7 @@ protected:
      * @return A status code.
      * @see Status
      */
-    virtual Status channel_write(uint8_t ch, const buffer_t& buf) = 0;
+    virtual Status channel_write(uint8_t ch, const Buffer& buf) = 0;
 
     /**
      * Execute a DOS command.
@@ -417,7 +417,7 @@ private:
     /**
      * @see cbm_bus::Device::write()
      */
-    void write(uint8_t ch, const buffer_t& buf) override;
+    void write(uint8_t ch, const Buffer& buf) override;
 
     /**
      * Execute a command.

@@ -348,9 +348,9 @@ public:
  * @see save(const Path&, std::span<const uint8_t>, std::ios_base::openmode)
  * @see save(std::ostream&, std::span<const uint8_t>)
  * @see LOAD_MAXSIZ
- * @see buffer_t
+ * @see Buffer
  */
-buffer_t load(const Path& fname, size_t maxsiz = 0);
+Buffer load(const Path& fname, size_t maxsiz = 0);
 
 /**
  * Read data from an input stream and create a memory buffer.
@@ -362,7 +362,7 @@ buffer_t load(const Path& fname, size_t maxsiz = 0);
  * @see save(const Path&, std::span<const uint8_t>, std::ios_base::openmode)
  * @see save(std::ostream&, std::span<const uint8_t>&)
  */
-buffer_t load(std::istream& is, size_t maxsiz = 0);
+Buffer load(std::istream& is, size_t maxsiz = 0);
 
 /**
  * Save a buffer to a file.

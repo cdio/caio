@@ -89,7 +89,7 @@ private:
     fs::Path            _path{};
     fs::Dir             _entries{};
     fs::Dir::iterator   _dirit{};
-    buffer_t            _buf{};
+    Buffer              _buf{};
     size_t              _bufpos{};
 };
 

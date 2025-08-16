@@ -52,12 +52,12 @@ public:
      * @see C1541(uint8_t, const sptr_t<cbm_bus::Bus>&)
      */
     C1541Fs(uint8_t unit, const sptr_t<cbm_bus::Bus>& bus)
-        : C1541{unit, bus} {
+        : C1541{unit, bus}
+    {
         type(TYPE);
     }
 
-    virtual ~C1541Fs() {
-    }
+    virtual ~C1541Fs() = default;
 
     /**
      * @see C1541::attach()
@@ -78,10 +78,10 @@ private:
         size_t            size{};
         uint64_t          elapsed{};    /* debug/statistics */
 
-        Channel() {
-        }
+        Channel() = default;
 
-        Channel(Channel&& other) {
+        Channel(Channel&& other)
+        {
             operator=(std::move(other));
         }
 
@@ -97,11 +97,13 @@ private:
             return *this;
         }
 
-        bool is_open() const {
+        bool is_open() const
+        {
             return (mode == OpenMode::DIR || fs.is_open());
         }
 
-        bool is_write() const {
+        bool is_write() const
+        {
             return (mode != OpenMode::READ && mode != OpenMode::DIR);
         }
     };
@@ -131,7 +133,7 @@ private:
     /**
      * @see C1541::channel_write()
      */
-    Status channel_write(uint8_t ch, const buffer_t& buf) override;
+    Status channel_write(uint8_t ch, const Buffer& buf) override;
 
     /**
      * @see C1541::command(DOSCommand, std::string_view)

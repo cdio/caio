@@ -50,10 +50,6 @@ Widget::Widget(const sptr_t<::SDL_Renderer>& renderer)
 {
 }
 
-Widget::~Widget()
-{
-}
-
 void Widget::load(const fs::Path& fname)
 {
     if (_texture) {

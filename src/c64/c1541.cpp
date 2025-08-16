@@ -333,7 +333,7 @@ void C1541::push_back(uint8_t ch)
     }
 }
 
-void C1541::write(uint8_t ch, const buffer_t& buf)
+void C1541::write(uint8_t ch, const Buffer& buf)
 {
     if (!check_attached()) {
         return;

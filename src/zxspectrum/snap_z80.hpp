@@ -274,18 +274,18 @@ private:
     };
 
     void load(const fs::Path& fname);
-    void load_v1(const buffer_t& raw);
-    void load_v2(const buffer_t& raw);
-    void uncompress_v1(const buffer_t& raw);
-    void uncompress_v2(const buffer_t& raw, size_t rawoff);
-    buffer_t uncompress(std::span<const uint8_t> enc, bool v1);
+    void load_v1(const Buffer& raw);
+    void load_v2(const Buffer& raw);
+    void uncompress_v1(const Buffer& raw);
+    void uncompress_v2(const Buffer& raw, size_t rawoff);
+    Buffer uncompress(std::span<const uint8_t> enc, bool v1);
 
     void throw_ioerror(std::string_view reason = {}) const;
 
     static Z80::Registers extract_registers(const SnapZ80HeaderV23* hdr);
-    static intflags_t extract_intflags(const SnapZ80HeaderV23* hdr);
+    static IntFlags extract_intflags(const SnapZ80HeaderV23* hdr);
     static uint8_t extract_border_colour(const SnapZ80HeaderV23* hdr);
-    static const SnapZ80HeaderV23* header(const buffer_t& raw);
+    static const SnapZ80HeaderV23* header(const Buffer& raw);
 };
 
 }

@@ -40,21 +40,19 @@ namespace zxspectrum {
  */
 struct Snapshot {
 public:
-    using intflags_t = std::tuple<Z80::IMode, bool, bool>;
-    using buffer_t = std::vector<uint8_t>;
+    using IntFlags = std::tuple<Z80::IMode, bool, bool>;
 
-    Snapshot() {
-    }
+    Snapshot() = default;
 
-    virtual ~Snapshot() {
-    }
+    virtual ~Snapshot() = default;
 
     /**
      * Get the CPU registers.
      * @return The CPU registers.
      * @see Z80::Registers
      */
-    Z80::Registers regs() const {
+    Z80::Registers regs() const
+    {
         return _regs;
     }
 
@@ -63,7 +61,8 @@ public:
      * @return The CPU interrupt mode and internal flip flop values.
      * @see Z80::IMode
      */
-    intflags_t interrupt_flags() const {
+    IntFlags interrupt_flags() const
+    {
         return _intflags;
     }
 
@@ -71,7 +70,8 @@ public:
      * Get the uncompressed RAM.
      * @return The uncompressed RAM data.
      */
-    std::span<const uint8_t> ram() const {
+    std::span<const uint8_t> ram() const
+    {
         return _data;
     }
 
@@ -79,7 +79,8 @@ public:
      * Retrieve the border colour.
      * @return The border colour.
      */
-    uint8_t border_colour() const {
+    uint8_t border_colour() const
+    {
         return _border_colour;
     }
 
@@ -87,9 +88,9 @@ protected:
     void throw_ioerror(std::string_view caller, std::string_view reason = {}) const;
 
     fs::Path        _fname{};
-    buffer_t        _data{};
+    Buffer          _data{};
     Z80::Registers  _regs{};
-    intflags_t      _intflags{};
+    IntFlags        _intflags{};
     uint8_t         _border_colour{};
 };
 

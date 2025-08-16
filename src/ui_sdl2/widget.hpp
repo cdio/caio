@@ -68,7 +68,7 @@ constexpr static const float RATIO                  = static_cast<float>(WIDTH) 
 
 /**
  * Widget.
- * A widget is a graphical element that interact with the user through events.
+ * A widget is a graphical element that interacts with the user through events.
  *
  * Widget dimensions:
  *
@@ -120,7 +120,7 @@ public:
      */
     Widget(const sptr_t<::SDL_Renderer>& renderer = {});
 
-    virtual ~Widget();
+    virtual ~Widget() = default;
 
     /**
      * Load an image from a file.
@@ -337,7 +337,7 @@ private:
         Font();
         Font& init();
     private:
-        buffer_t _ttf{};
+        Buffer _ttf{};
     };
 
     static Font font;
