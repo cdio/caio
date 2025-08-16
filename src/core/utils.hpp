@@ -435,8 +435,28 @@ std::string sha256(std::span<const uint8_t> buf);
  * Base 64 decoder.
  * @param src Encoded buffer.
  * @return A buffer with the decoded data.
+ * @see Buffer
  */
-buffer_t base64_decode(const std::span<const uint8_t>& src);
+Buffer base64_decode(std::span<const uint8_t> src);
+
+/**
+ * Base 64 decoder.
+ * @param src Encoded string.
+ * @return A buffer with the decoded data.
+ * @see Buffer
+ */
+inline Buffer base64_decode(std::string_view src)
+{
+    return base64_decode({reinterpret_cast<const uint8_t*>(src.data()), src.size()});
+}
+
+/**
+ * Base 64 encoder.
+ * @param src Plain buffer.
+ * @return A buffer with the encoded data.
+ * @see Buffer
+ */
+Buffer base64_encode(std::span<const uint8_t> src);
 
 }
 }

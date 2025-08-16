@@ -26,6 +26,8 @@
 namespace caio {
 namespace utils {
 
+constexpr static const char BASE64_PAD = '=';
+
 std::string tolow(std::string_view str)
 {
     std::string lstr{str};
@@ -142,10 +144,8 @@ std::string sha256(std::span<const uint8_t> buf)
     return os.str();
 }
 
-buffer_t base64_decode(const std::span<const uint8_t>& src)
+Buffer base64_decode(std::span<const uint8_t> src)
 {
-    constexpr static const char PAD = '=';
-
     static const uint8_t decode_table[256] = {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* 0x00 */
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* 0x10 */
@@ -175,33 +175,33 @@ buffer_t base64_decode(const std::span<const uint8_t>& src)
         const int d2 = (ee2 << 4) | ((ee3 >> 2) & 15);
         const int d3 = (ee3 << 6) | ee4;
 
-        if (e1 == PAD || e2 == PAD) {
+        if (e1 == BASE64_PAD || e2 == BASE64_PAD) {
             return {-1, -1, -1};
         }
 
-        if (e3 == PAD) {
+        if (e3 == BASE64_PAD) {
             return {d1, -1, -1};
         }
 
-        if (e4 == PAD) {
+        if (e4 == BASE64_PAD) {
             return {d1, d2, -1};
         }
 
         return {d1, d2, d3};
     };
 
-    buffer_t dst{};
+    Buffer dst{};
     size_t i{};
     do {
-        uint8_t e1{PAD}, e2{PAD}, e3{PAD}, e4{PAD};
+        uint8_t e1{BASE64_PAD}, e2{BASE64_PAD}, e3{BASE64_PAD}, e4{BASE64_PAD};
 
-        while (i < src.size() && (e1 = src[i++]) == '\n') e1 = PAD;
-        while (i < src.size() && (e2 = src[i++]) == '\n') e2 = PAD;
-        while (i < src.size() && (e3 = src[i++]) == '\n') e3 = PAD;
-        while (i < src.size() && (e4 = src[i++]) == '\n') e4 = PAD;
+        while (i < src.size() && (e1 = src[i++]) == '\n') e1 = BASE64_PAD;
+        while (i < src.size() && (e2 = src[i++]) == '\n') e2 = BASE64_PAD;
+        while (i < src.size() && (e3 = src[i++]) == '\n') e3 = BASE64_PAD;
+        while (i < src.size() && (e4 = src[i++]) == '\n') e4 = BASE64_PAD;
 
-        if (e1 == PAD || e2 == PAD) break;
-        if (e3 == PAD) e4 = PAD;
+        if (e1 == BASE64_PAD || e2 == BASE64_PAD) break;
+        if (e3 == BASE64_PAD) e4 = BASE64_PAD;
 
         const auto [d1, d2, d3] = decode_block(e1, e2, e3, e4);
         if (d1 >= 0) dst.push_back(d1);
@@ -209,6 +209,61 @@ buffer_t base64_decode(const std::span<const uint8_t>& src)
         if (d3 >= 0) dst.push_back(d3);
 
     } while (i < src.size());
+
+    return dst;
+}
+
+Buffer base64_encode(std::span<const uint8_t> src)
+{
+    static const std::array<char, 64> encode_table = {
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',  'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',  'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',  'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+        'w', 'x', 'y', 'z', '0', '1', '2', '3',  '4', '5', '6', '7', '8', '9', '+', '/'
+    };
+
+    static const auto encode_block =
+        [](uint8_t b1, uint8_t b2, uint8_t b3) -> std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> {
+            const int e1 = b1 >> 2;
+            const int e2 = ((b1 << 4) & 0x30) | (b2 >> 4);
+            const int e3 = ((b2 << 2) & 0x3C) | (b3 >> 6);
+            const int e4 = b3 & 63;
+            return {encode_table[e1], encode_table[e2], encode_table[e3], encode_table[e4]};
+    };
+
+    std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> enc{};
+    Buffer dst{};
+    size_t i{};
+
+    const auto size = src.size() & ~3;
+
+    for (i = 0; i < size; i += 3) {
+        enc = encode_block(src[i], src[i + 1], src[i + 2]);
+        dst.push_back(std::get<0>(enc));
+        dst.push_back(std::get<1>(enc));
+        dst.push_back(std::get<2>(enc));
+        dst.push_back(std::get<3>(enc));
+    }
+
+    switch (size & 3) {
+    case 0:
+        break;
+    case 1:
+        enc = encode_block(src[i + 1], 0, 0);
+        dst.push_back(std::get<0>(enc));
+        dst.push_back(BASE64_PAD);
+        dst.push_back(BASE64_PAD);
+        dst.push_back(BASE64_PAD);
+        break;
+    case 2:
+        enc = encode_block(src[i + 1], src[i + 2], 0);
+        dst.push_back(std::get<0>(enc));
+        dst.push_back(std::get<1>(enc));
+        dst.push_back(BASE64_PAD);
+        dst.push_back(BASE64_PAD);
+        break;
+    default:;
+    }
 
     return dst;
 }
