@@ -72,7 +72,8 @@ struct MonitoredCPU {
     RegvalueCb  regvalue{};     /* Get a register's value given its name    */
     BpdocCb     bpdoc{};        /* Documentation on how to set breakpoints  */
 
-    operator bool() const {
+    operator bool() const
+    {
         return (regs && getpc && setpc && peek && write && disass && mmap &&
             ebreak && load && save && loglevel && regvalue && bpdoc);
     }
@@ -91,7 +92,7 @@ struct MonitoredCPU {
  * @return A monitored cpu structure with default callbacks.
  * @see MonitoredCPU
  */
-template<typename CPU>
+template <typename CPU>
 MonitoredCPU monitored_cpu_defaults(CPU* cpu)
 {
     return MonitoredCPU{
@@ -269,7 +270,8 @@ public:
      * @param addr Breakpoint address;
      * @param cond Condition that triggers the breakpoint (empty for unconditional breakpoints).
      */
-    void add_breakpoint(addr_t addr, const cond_t& cond = {}) {
+    void add_breakpoint(addr_t addr, const cond_t& cond = {})
+    {
         _breakpoints[addr] = cond;
     }
 
@@ -277,7 +279,8 @@ public:
      * Remove a breakpoint.
      * @param addr Address to remove from the breakpoint list.
      */
-    void del_breakpoint(addr_t addr) {
+    void del_breakpoint(addr_t addr)
+    {
         _breakpoints.erase(addr);
     }
 

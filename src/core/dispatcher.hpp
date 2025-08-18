@@ -27,7 +27,7 @@ namespace caio {
  * Encapsulator for an instance of type T that can be
  * moved around and then returned back where it came from.
  */
-template<typename T>
+template <typename T>
 class DispatcherT : public T {
 public:
     DispatcherT() = delete;
@@ -43,10 +43,12 @@ public:
      */
     DispatcherT(const std::function<void(T&&)>& dispatch, T&& instance)
         : T{std::move(instance)},
-          _dispatch{dispatch} {
+          _dispatch{dispatch}
+    {
     }
 
-    DispatcherT(DispatcherT&& other) {
+    DispatcherT(DispatcherT&& other)
+    {
         operator=(std::move(other));
     }
 
@@ -55,7 +57,8 @@ public:
      * Dispatch this instance if it was not previouly dispatched.
      * @see dispatch()
      */
-    virtual ~DispatcherT() {
+    virtual ~DispatcherT()
+    {
         dispatch();
     }
 
@@ -63,7 +66,8 @@ public:
      * Move operator.
      * @param other Dispatcher to move into this dispatcher.
      */
-    DispatcherT& operator=(DispatcherT&& other) {
+    DispatcherT& operator=(DispatcherT&& other)
+    {
         static_cast<T&>(*this) = static_cast<T&&>(other);
         _dispatch = std::move(other._dispatch);
         return *this;
@@ -74,7 +78,8 @@ public:
      * The dispatch callback is executed and the instance in this dispatcher is moved out.
      * This method must be called only once.
      */
-    void dispatch() {
+    void dispatch()
+    {
         if (_dispatch) {
             _dispatch(std::move(*this));
             static_cast<T&>(*this) = {};
@@ -86,7 +91,8 @@ public:
      * Return the status of this dispatcher.
      * @return true if this dispatcher is valid; false otherwise.
      */
-    operator bool() const {
+    operator bool() const
+    {
         return (_dispatch ? true : false);
     }
 
@@ -94,7 +100,8 @@ public:
      * Return the status of this dispatcher.
      * @return true if this dispatcher is invalid; false otherwise.
      */
-    bool operator!() const {
+    bool operator!() const
+    {
         return (!_dispatch);
     }
 

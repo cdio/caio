@@ -93,7 +93,8 @@ constexpr fp_t pulse(fp_t t, fp_t dc)
  * @param m Second value.
  * @return The modulo.
  */
-template<typename T, typename = std::enable_if_t<std::is_integral<T>::value>>
+template <typename T>
+requires std::is_integral_v<T>
 constexpr T mod(T a, T m)
 {
     T b = a % m;
@@ -113,7 +114,7 @@ fp_t mean(samples_fp samples);
 /**
  * Transfer function coefficients.
  */
-template<size_t M, size_t N>
+template <size_t M, size_t N>
 struct PCoeffs {
     std::array<fp_t, M> num;
     std::array<fp_t, N> den;
@@ -155,7 +156,7 @@ struct PCoeffs {
 /**
  * Filter.
  */
-template<size_t M, size_t N>
+template <size_t M, size_t N>
 class Filter : public PCoeffs<M, N> {
 public:
     Filter()
@@ -234,7 +235,7 @@ private:
  * @param a2 Second polynomial coefficients.
  * @return The resulting polynomial coefficients.
  */
-template<size_t R, size_t C>
+template <size_t R, size_t C>
 std::array<fp_t, std::max(R, C)> poly_add(const std::array<fp_t, R>& a1, const std::array<fp_t, C>& a2)
 {
     static_assert((R != 0) && (C != 0), "Invalid input array size");
@@ -260,7 +261,7 @@ std::array<fp_t, std::max(R, C)> poly_add(const std::array<fp_t, R>& a1, const s
  * @param c2 Second pair of coefficeints.
  * @return The resulting coefficient pair.
  */
-template<size_t M1, size_t N1, size_t M2, size_t N2>
+template <size_t M1, size_t N1, size_t M2, size_t N2>
 constexpr PCoeffs<std::max(M1, M2), std::max(N1, N2)> add(const PCoeffs<M1, N1>& c1, const PCoeffs<M2, N2>& c2)
 {
     PCoeffs<std::max(M1, M2), std::max(N1, N2)> result{
@@ -437,7 +438,7 @@ std::ostream& dump(std::ostream& os, samples_fp samples, std::string_view name, 
 
 }
 
-template<size_t M1, size_t N1, size_t M2, size_t N2>
+template <size_t M1, size_t N1, size_t M2, size_t N2>
 constexpr signal::PCoeffs<std::max(M1, M2), std::max(N1, N2)> operator+(const signal::PCoeffs<M1, N1>& c1,
     const signal::PCoeffs<M2, N2>& c2)
 {

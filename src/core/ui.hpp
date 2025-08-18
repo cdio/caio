@@ -46,13 +46,15 @@ using Widget      = sdl2::widget::Widget;
 
 namespace widget  = sdl2::widget;
 
-template<typename W, class... A>
+template <typename W, class... A>
+requires std::derived_from<W, Widget>
 sptr_t<W> make_widget(UI& ui, const A&... args)
 {
     return std::make_shared<W>(ui.renderer(), args...);
 }
 
-template<typename W, class... A>
+template <typename W, class... A>
+requires std::derived_from<W, Widget>
 sptr_t<W> make_widget(const sptr_t<UI>& ui, const A&... args)
 {
     return make_widget<W>(*ui, args...);

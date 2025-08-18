@@ -37,7 +37,7 @@ ROM::ROM(std::string_view label, const fs::Path& fname, std::string_view digest)
     type(TYPE);
     auto sign = signature();
     if (digest != sign) {
-        throw IOError{*this, "{}: Invalid signature: Expected: {}, calculated: {}", fname.string(), digest, sign};
+        throw IOError{"{}: {}: Invalid signature: Expected: {}, calculated: {}", type(), fname.string(), digest, sign};
     }
 }
 
@@ -46,7 +46,7 @@ ROM::ROM(std::string_view label, const fs::Path& fname, size_t size)
 {
     type(TYPE);
     if (size > 0 && _data.size() != size) {
-        throw IOError{*this, "{}: Invalid file size: It must be {}", fname.string(), std::to_string(size)};
+        throw IOError{"{}: {}: Invalid file size: It must be {}", type(), fname.string(), std::to_string(size)};
     }
 }
 

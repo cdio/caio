@@ -58,7 +58,8 @@ public:
      * The current string is the string being edited by the user.
      * @return A reference to the current string.
      */
-    std::string& current() {
+    std::string& current()
+    {
         return _history[_current];
     }
 
@@ -136,7 +137,8 @@ public:
     //TODO: replace with iostream and native_handle() (C++26)
     Readline(int ifd = -1, int ofd = -1, const fs::Path& histfname = {});
 
-    virtual ~Readline() {
+    virtual ~Readline()
+    {
         close();
     }
 
@@ -153,7 +155,8 @@ public:
      * @return The entire history as a string.
      * @see History::to_string()
      */
-    std::string history() const {
+    std::string history() const
+    {
         return _history.to_string();
     }
 
@@ -162,7 +165,8 @@ public:
      * @param ch Character to send.
      * @exception IOError
      */
-    void write(char ch) const {
+    void write(char ch) const
+    {
         write(std::span{&ch, 1});
     }
 
@@ -171,7 +175,8 @@ public:
      * @param msg Message to send.
      * @exception IOError
      */
-    void write(const std::string& msg) const {
+    void write(const std::string& msg) const
+    {
         write(std::span{msg.c_str(), msg.size()});
     }
 
@@ -180,7 +185,8 @@ public:
      * @param msg Message to send.
      * @exception IOError
      */
-    void write(const char* msg) const {
+    void write(const char* msg) const
+    {
         write(std::string{msg});
     }
 
@@ -190,8 +196,9 @@ public:
      * @param args Arguments.
      * @exception IOError
      */
-    template<typename... Args>
-    void write(std::format_string<Args...> fmt, Args&&... args) const {
+    template <typename... Args>
+    void write(std::format_string<Args...> fmt, Args&&... args) const
+    {
         write(std::vformat(fmt.get(), std::make_format_args(args...)));
     }
 
@@ -206,7 +213,8 @@ public:
      * Get input and output file descriptors.
      * @return The input and output file descriptors respectively.
      */
-    std::pair<int, int> fds() const {
+    std::pair<int, int> fds() const
+    {
         return {_ifd, _ofd};
     }
 

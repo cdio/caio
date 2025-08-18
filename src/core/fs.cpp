@@ -167,12 +167,13 @@ bool match(const Path& path, const Path& pattern, bool icase)
     return (!::fnmatch(cpattern, cpath, FNM_NOESCAPE | (icase == MATCH_CASE_INSENSITIVE ? FNM_CASEFOLD : 0)));
 }
 
-template<typename ITERATOR_TYPE>
+template <typename IT>
+requires std::input_iterator<IT>
 bool _directory(const Path& path, const Path& pattern, bool icase,
     const std::function<bool(const Path&, uint64_t)>& callback)
 {
-    const auto& end = std::filesystem::end(ITERATOR_TYPE{});
-    ITERATOR_TYPE it{path, std::filesystem::directory_options::skip_permission_denied};
+    const auto& end = std::filesystem::end(IT{});
+    IT it{path, std::filesystem::directory_options::skip_permission_denied};
 
     for (; it != end; ++it) {
         const auto& entry = it->path();

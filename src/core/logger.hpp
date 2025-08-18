@@ -70,33 +70,40 @@ public:
 
     virtual ~Logger();
 
-    bool is_level(Level lv) const {
+    bool is_level(Level lv) const
+    {
         return (_lv & lv);
     }
 
-    bool is_error() const {
+    bool is_error() const
+    {
         return is_level(Level::Error);
     }
 
-    bool is_warn() const {
+    bool is_warn() const
+    {
         return is_level(Level::Warn);
     }
 
-    bool is_info() const {
+    bool is_info() const
+    {
         return is_level(Level::Info);
     }
 
-    bool is_debug() const {
+    bool is_debug() const
+    {
         return is_level(Level::Debug);
     }
 
-    void loglevel(Level lv) {
+    void loglevel(Level lv)
+    {
         _lv = lv;
     }
 
     void loglevel(std::string_view lvs);
 
-    Level loglevel() const {
+    Level loglevel() const
+    {
         return _lv;
     }
 
@@ -104,47 +111,53 @@ public:
 
     void logfile(int fd);
 
-    std::string logfile() const {
+    std::string logfile() const
+    {
         return _logfile;
     }
 
     Logger& log(std::string_view color, std::string_view fmt, std::format_args args);
 
-    template<typename... Args>
+    template <typename... Args>
     [[noreturn]]
-    Logger& fatal(std::format_string<Args...> fmt, Args&&... args) {
+    Logger& fatal(std::format_string<Args...> fmt, Args&&... args)
+    {
         if (is_error()) {
             log(ERROR_COLOR, fmt.get(), std::make_format_args(args...));
         }
         std::exit(EXIT_FAILURE);
     }
 
-    template<typename... Args>
-    Logger& error(std::format_string<Args...> fmt, Args&&... args) {
+    template <typename... Args>
+    Logger& error(std::format_string<Args...> fmt, Args&&... args)
+    {
         if (is_error()) {
             log(ERROR_COLOR, fmt.get(), std::make_format_args(args...));
         }
         return *this;
     }
 
-    template<typename... Args>
-    Logger& warn(std::format_string<Args...> fmt, Args&&... args) {
+    template <typename... Args>
+    Logger& warn(std::format_string<Args...> fmt, Args&&... args)
+    {
         if (is_warn()) {
             log(WARN_COLOR, fmt.get(), std::make_format_args(args...));
         }
         return *this;
     }
 
-    template<typename... Args>
-    Logger& info(std::format_string<Args...> fmt, Args&&... args) {
+    template <typename... Args>
+    Logger& info(std::format_string<Args...> fmt, Args&&... args)
+    {
         if (is_info()) {
             log(INFO_COLOR, fmt.get(), std::make_format_args(args...));
         }
         return *this;
     }
 
-    template<typename... Args>
-    Logger& debug(std::format_string<Args...> fmt, Args&&... args) {
+    template <typename... Args>
+    Logger& debug(std::format_string<Args...> fmt, Args&&... args)
+    {
         if (is_debug()) {
             log(DEBUG_COLOR, fmt.get(), std::make_format_args(args...));
         }

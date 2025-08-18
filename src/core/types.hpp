@@ -41,17 +41,17 @@
 
 namespace caio {
 
-using fp_t    = double;
+using fp_t    = float;
 using addr_t  = uint16_t;
 using saddr_t = int16_t;
 
-template<typename T>
+template <typename T>
 using sptr_t = std::shared_ptr<T>;
 
-template<typename... T>
+template <typename... T>
 using uptr_t = std::unique_ptr<T...>;
 
-template<typename T>
+template <typename T>
 using uptrd_t = std::unique_ptr<T, void(*)(T*)>;
 
 using Buffer     = std::vector<uint8_t>;
@@ -91,15 +91,18 @@ constexpr static const addr_t A13 = (1 << 13);
 constexpr static const addr_t A14 = (1 << 14);
 constexpr static const addr_t A15 = (1 << 15);
 
-/*
- * Stack overflow tricks.
- */
-template <typename Container>
-struct is_container : std::false_type{};
+template <typename>
+struct Array;
 
-template <typename... Ts> struct is_container<std::vector<Ts...>> : std::true_type{};
-template <typename... Ts> struct is_container<std::array<Ts...>> : std::true_type{};
-template <typename... Ts> struct is_container<std::span<Ts...>> : std::true_type{};
+template <size_t N>
+struct Array<std::array<uint8_t, N>> {
+    constexpr static const size_t size = N;
+};
+
+template <typename C>
+concept is_container_v = std::is_same_v<C, Buffer> ||
+                         std::is_same_v<C, std::span<uint8_t>> ||
+                         std::is_same_v<C, std::array<uint8_t, Array<C>::size>>;
 
 /**
  * Retrieve the stack trace.
@@ -124,7 +127,8 @@ public:
      */
     Error(std::string_view errmsg = {})
         : std::exception{},
-          _reason{errmsg} {
+          _reason{errmsg}
+    {
     }
 
     /**
@@ -132,10 +136,11 @@ public:
      * @param fmt  Error message format string;
      * @param args Error message format string arguments.
      */
-    template<typename... Args>
+    template <typename... Args>
     Error(std::format_string<Args...> fmt, Args&&... args)
         : std::exception{},
-          _reason{std::vformat(fmt.get(), std::make_format_args(args...))} {
+          _reason{std::vformat(fmt.get(), std::make_format_args(args...))}
+    {
     }
 
     /**
@@ -144,14 +149,16 @@ public:
      */
     Error(const std::exception& ex)
         : std::exception{},
-          _reason{ex.what()} {
+          _reason{ex.what()}
+    {
     }
 
     /**
      * Return a null terminated string with the error message.
      * @return The null terminated string with the error message.
      */
-    const char* what() const noexcept override {
+    const char* what() const noexcept override
+    {
         return _reason.c_str();
     }
 
@@ -160,7 +167,8 @@ public:
      * @param reason Error message.
      * @return A reference to this error.
      */
-    Error& operator=(std::string_view reason) {
+    Error& operator=(std::string_view reason)
+    {
         _reason = reason;
         return *this;
     }
@@ -176,7 +184,8 @@ public:
      * Return an error message that corresponds to the current errno value.
      * @return The error message.
      */
-    static std::string to_string() {
+    static std::string to_string()
+    {
         return to_string(errno);
     }
 
@@ -203,10 +212,11 @@ ERROR_CLASS(UIError);
  * @param args  Format string arguments.
  * @execption InvalidArgument if the specified condition is not met.
  */
-template<typename... Args>
+template <typename... Args>
 void expects(bool cond, std::format_string<Args...> fmt, Args&&... args)
 {
-    if (!cond) {
+    if (!cond)
+    {
         throw InvalidArgument{std::vformat(fmt.get(), std::make_format_args(args...))};
     }
 }

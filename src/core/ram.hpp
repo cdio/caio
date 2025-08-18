@@ -19,7 +19,6 @@
 #pragma once
 
 #include <functional>
-#include <iostream>
 #include <span>
 #include <vector>
 
@@ -55,14 +54,14 @@ public:
      * @param random  If true contaminate this RAM with some random values.
      * @see NO_RANDOM_VALUES
      * @see PUT_RANDOM_VALUES
-     * @see utils::fill()
      */
-    template<typename T>
+    template <typename T>
+    requires std::is_integral_v<T>
     RAM(std::string_view label, size_t size, T pattern, bool random)
         : Device{TYPE, label},
-          _data(size) {
-        std::span<uint8_t> dst{_data.data(), _data.size()};
-        utils::fill(dst, pattern, random);
+          _data(size)
+    {
+        utils::fill({_data.data(), _data.size()}, pattern, random);
     }
 
     /**
@@ -71,10 +70,12 @@ public:
      * @param first Input iterator first element;
      * @param last  Input iterator last element + 1.
      */
-    template<typename Iterator>
-    RAM(std::string_view label, Iterator first, Iterator last)
+    template <typename IT>
+    requires std::input_iterator<IT>
+    RAM(std::string_view label, IT first, IT last)
         : Device{TYPE, label},
-          _data{first, last} {
+          _data{first, last}
+    {
     }
 
     /**
@@ -110,13 +111,13 @@ public:
      */
     RAM& operator=(RAM&& other);
 
-    virtual ~RAM();
+    virtual ~RAM() = default;
 
     /**
      * Get an iterator to the first element of this RAM.
      * @return An iterator to the first element.
      */
-    buffer_it_t begin()
+    Buffer_it begin()
     {
         return _data.begin();
     }
@@ -125,7 +126,7 @@ public:
      * Get an iterator to the last element of this RAM +1.
      * @return An iterator to the last element +1.
      */
-    buffer_it_t end()
+    Buffer_it end()
     {
         return _data.end();
     }
@@ -146,17 +147,17 @@ public:
     }
 
     /**
-     * @see Device::dev_read()
+     * @see Device::dev_read(size_t, ReadMode)
      */
     uint8_t dev_read(size_t addr, ReadMode mode = ReadMode::Read) override;
 
     /**
-     * @see Device::dev_write()
+     * @see Device::dev_write(size_t, uint8_t)
      */
     void dev_write(size_t addr, uint8_t data) override;
 
     /**
-     * @see Device::dump()
+     * @see Device::dump(std::ostream&, size_t) const
      */
     std::ostream& dump(std::ostream& os, size_t base = 0) const override;
 
@@ -164,13 +165,16 @@ public:
      * Direct access to the RAM data.
      * @return A reference to the internal data buffer.
      */
-    const buffer_t& buffer() const
+    const Buffer& buffer() const
     {
         return _data;
     }
 
 protected:
-    buffer_t _data{};
+    std::ostream& serialize(std::ostream& os) const override;
+    std::istream& deserialize(std::istream& is) override;
+
+    Buffer _data{};
 };
 
 }

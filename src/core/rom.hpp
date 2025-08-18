@@ -37,8 +37,9 @@ public:
      * @param first Input iterator first element;
      * @param last  Input iterator last element + 1.
      */
-    template<typename Iterator>
-    ROM(std::string_view label, Iterator first, Iterator last)
+    template <typename IT>
+    requires std::input_iterator<IT>
+    ROM(std::string_view label, IT first, IT last)
         : RAM{label, first, last}
     {
         type(TYPE);
@@ -102,7 +103,7 @@ public:
      * Get an iterator to the first element of this ROM.
      * @return An iterator to the first element.
      */
-    buffer_cit_t begin() const
+    Buffer_cit begin() const
     {
         return _data.cbegin();
     }
@@ -111,7 +112,7 @@ public:
      * Get an iterator to the last element of this ROM + 1.
      * @return An iterator to the last element +1.
      */
-    buffer_cit_t end() const
+    Buffer_cit end() const
     {
         return _data.cend();
     }

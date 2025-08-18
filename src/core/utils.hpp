@@ -45,7 +45,8 @@ namespace utils {
  * @param value Value to convert;
  * @return The floating point value.
  */
-template <typename T, typename = std::enable_if<std::is_integral<T>::value>>
+template <typename T>
+requires std::is_integral_v<T>
 fp_t to_fp(T value)
 {
     return static_cast<fp_t>(value) / static_cast<fp_t>(std::numeric_limits<T>::max());
@@ -56,7 +57,8 @@ fp_t to_fp(T value)
  * @param value Floating point value to convert ([0.0, 1.0] if T is unsigned or [-1.0, 1.0] if T is signed).
  * @return The integer value.
  */
-template <typename T, typename = std::enable_if<std::is_integral<T>::value>>
+template <typename T>
+requires std::is_integral_v<T>
 T to_integer(fp_t value)
 {
     return static_cast<T>(value * std::numeric_limits<T>::max());
@@ -79,7 +81,8 @@ inline int16_t to_i16(fp_t value)
  * @param val Value to align.
  * @return The aligned value.
  */
-template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
+template <typename T>
+requires std::is_integral_v<T> && std::is_unsigned_v<T>
 constexpr inline int align(T val)
 {
     return ((val + (sizeof(T) - 1)) & ~(sizeof(T) - 1));
@@ -89,7 +92,8 @@ constexpr inline int align(T val)
  * Ceil method as constant expression.
  * @see std::ceil()
  */
-template<typename T, std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
+template <typename T>
+requires std::is_floating_point_v<T>
 constexpr inline int ceil(T fval)
 {
     int val = static_cast<int>(fval);
@@ -143,7 +147,8 @@ std::string to_string(std::span<const uint8_t> buf);
  * @param v Value to convert.
  * @return The generated string.
  */
-template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
+template <typename T>
+requires std::is_integral_v<T>
 std::string to_string(T v)
 {
     std::stringstream ss{};
@@ -165,8 +170,9 @@ std::string to_string(T v)
  * @param base  Base address.
  * @return The output stream.
  */
-template <typename Iterator>
-std::ostream& dump(std::ostream& os, const Iterator begin, const Iterator end, addr_t base = 0)
+template <typename IT>
+requires std::input_iterator<IT>
+std::ostream& dump(std::ostream& os, const IT begin, const IT end, addr_t base = 0)
 {
     constexpr static size_t WIDTH = 6 + 11 * 4 + 8;
     constexpr static size_t ELEMS_PER_LINE = 16;
@@ -176,7 +182,7 @@ std::ostream& dump(std::ostream& os, const Iterator begin, const Iterator end, a
 
     size_t count = 0;
 
-    for (Iterator it = begin; it != end; ++it, ++count) {
+    for (IT it = begin; it != end; ++it, ++count) {
         if (count % ELEMS_PER_LINE == 0) {
             hex << to_string(static_cast<addr_t>(base + count)) << ": ";
         }
@@ -205,7 +211,8 @@ std::ostream& dump(std::ostream& os, const Iterator begin, const Iterator end, a
  * @param base Base address.
  * @return The output stream.
  */
-template<typename C, typename = std::enable_if<is_container<C>::value>>
+template <typename C>
+requires is_container_v<C>
 std::ostream& dump(std::ostream& os, const C& cont, addr_t base = 0)
 {
     return dump(os, std::begin(cont), std::end(cont), base);
@@ -217,7 +224,8 @@ std::ostream& dump(std::ostream& os, const C& cont, addr_t base = 0)
  * @param base Base address.
  * @return The string.
  */
-template<typename C, typename = std::enable_if<is_container<C>::value>>
+template <typename C>
+requires is_container_v<C>
 std::string dump(const C& cont, addr_t base = 0)
 {
     std::ostringstream os{};
@@ -245,7 +253,8 @@ unsigned long long to_ulonglong(std::string_view str, size_t max);
  * @return The converted number.
  * @exception InvalidNumber
  */
-template<typename T, std::enable_if_t<std::is_integral<T>::value, bool> = true>
+template <typename T>
+requires std::is_integral_v<T>
 T to_number(std::string_view str)
 {
     return static_cast<T>(to_ulonglong(str, std::numeric_limits<T>::max()));
@@ -334,7 +343,8 @@ constexpr inline uint8_t convert_01_10(uint8_t byte)
  * @param bytes Bytes to convert.
  * @see convert_01_10(uint8_t)
  */
-template<typename C, typename = std::enable_if<is_container<C>::value>>
+template <typename C>
+requires is_container_v<C>
 void convert_01_10(C& bytes)
 {
     std::for_each(bytes.begin(), bytes.end(), [](uint8_t& byte) {
@@ -361,7 +371,8 @@ constexpr inline uint8_t convert_01_10_to_11(uint8_t byte)
  * 01011000 becomes 11111100.
  * @param bytes Bytes to convert.
  */
-template<typename C, typename = std::enable_if<is_container<C>::value>>
+template <typename C>
+requires is_container_v<C>
 void convert_01_10_to_11(C& bytes)
 {
     std::for_each(bytes.begin(), bytes.end(), [](uint8_t& byte) {
@@ -393,7 +404,8 @@ constexpr inline uint8_t reverse(uint8_t byte)
  * @param pattern Pattern;
  * @param random  True to contaminate the destination buffer with some random values.
  */
-template<typename T>
+template <typename T>
+requires std::is_integral_v<T> && std::is_unsigned_v<T>
 void fill(std::span<uint8_t> dst, T pattern, bool random = false)
 {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
