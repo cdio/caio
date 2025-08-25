@@ -18,10 +18,10 @@
  */
 #include "mos_6502.hpp"
 
+#include "monitor.hpp"
+
 #include <chrono>
 #include <iomanip>
-
-#include "monitor.hpp"
 
 namespace caio {
 namespace mos {
@@ -335,10 +335,6 @@ Mos6502::Mos6502(std::string_view type, std::string_view label, const sptr_t<ASp
     if (_mmap) {
         Mos6502::reset();
     }
-}
-
-Mos6502::~Mos6502()
-{
 }
 
 void Mos6502::init(const sptr_t<ASpace>& mmap)
@@ -857,6 +853,26 @@ uint8_t Mos6502::read(addr_t addr, Device::ReadMode mode)
 void Mos6502::write(addr_t addr, uint8_t data)
 {
     _mmap->write(addr, data);
+}
+
+Serializer& operator&(Serializer& ser, Mos6502& cpu)
+{
+    ser & static_cast<Name&>(cpu)
+        & cpu._regs.A
+        & cpu._regs.X
+        & cpu._regs.Y
+        & cpu._regs.PC
+        & cpu._regs.S
+        & cpu._regs.P
+        & cpu._irq_pin
+        & cpu._nmi_pin
+        & cpu._rdy_pin
+        & cpu._halted
+        & cpu._decimal_en
+        & cpu._delayed_I
+        & cpu._delayed_irq;
+
+    return ser;
 }
 
 }

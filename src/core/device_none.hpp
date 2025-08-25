@@ -39,23 +39,23 @@ public:
      */
     DeviceNone(uint8_t dvalue = 0)
         : Device{TYPE, TYPE},
-          _dvalue{dvalue} {
-    }
-
-    virtual ~DeviceNone() {
+          _dvalue{dvalue}
+    {
     }
 
     /**
      * @see Device::reset()
      */
-    void reset() override {
+    void reset() override
+    {
     }
 
     /**
      * Return 0.
      * @return 0.
      */
-    size_t size() const override {
+    size_t size() const override
+    {
         return 0;
     }
 
@@ -64,7 +64,8 @@ public:
      * @return The default value.
      * @see Device::dev_read(size_t, ReadMode)
      */
-    uint8_t dev_read(size_t, ReadMode) override {
+    uint8_t dev_read(size_t, ReadMode) override
+    {
         return _dvalue;
     }
 
@@ -72,7 +73,8 @@ public:
      * This method does nothing.
      * @see Device::dev_write(size_t, uint8_t)
      */
-    void dev_write(size_t, uint8_t) override {
+    void dev_write(size_t, uint8_t) override
+    {
     }
 
     /**
@@ -80,12 +82,15 @@ public:
      * @param os Output stream.
      * @return The output stream.
      */
-    std::ostream& dump(std::ostream& os, size_t = 0) const override {
+    std::ostream& dump(std::ostream& os, size_t = 0) const override
+    {
         return os;
     }
 
 private:
     uint8_t _dvalue;
+
+    friend Serializer& operator&(Serializer& ser, DeviceNone& none);
 };
 
 }

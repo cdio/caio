@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "serializer.hpp"
+
 namespace caio {
 
 /**
@@ -66,6 +68,11 @@ public:
     void reset()
     {
         _count = 0;
+    }
+
+    friend Serializer& operator&(Serializer& ser, PullUp &pullup)
+    {
+        return (ser & pullup._count);
     }
 
 private:

@@ -16,17 +16,26 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "device_none.hpp"
-
-#include <memory>
+#include "ram_bank.hpp"
 
 namespace caio {
 
-devptr_t device_none = std::make_shared<DeviceNone>();
-
-Serializer& operator&(Serializer& ser, DeviceNone& none)
+std::ostream& RAMBank::dump(std::ostream& os, size_t base) const
 {
-    return (ser & static_cast<Device&>(none) & none._dvalue);
+    const auto start = _ram->begin() + _boffset;
+    const auto end = start + _bsize;
+    return utils::dump(os, start, end, base);
+}
+
+Serializer& operator&(Serializer& ser, RAMBank& rb)
+{
+    ser & static_cast<Device&>(rb)
+        & rb._bsize
+        & rb._banks
+        & rb._bank
+        & rb._boffset;
+
+    return ser;
 }
 
 }

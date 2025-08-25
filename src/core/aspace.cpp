@@ -23,6 +23,44 @@
 
 namespace caio {
 
+ASpace::ASpace(std::string_view type, std::string_view label)
+    : Name{type, label}
+{
+}
+
+ASpace::ASpace(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask)
+    : ASpace{}
+{
+    reset(rmaps, wmaps, amask);
+}
+
+void ASpace::reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask)
+{
+    auto banks = wmaps.size();
+    CAIO_ASSERT(banks != 0 && banks == rmaps.size());
+
+    auto bsize = (static_cast<size_t>(amask) + 1) / banks;
+    auto bmask = bsize - 1;
+    CAIO_ASSERT((bsize & bmask) == 0);
+
+    _amask = amask;
+    _rmaps = rmaps;
+    _wmaps = wmaps;
+    _bsize = bsize;
+    _bmask = bmask;
+    for (_bshift = 0; bmask != 0; bmask >>= 1, ++_bshift);
+    _data_bus = 0;
+    _address_bus = 0;
+}
+
+inline std::pair<addr_t, addr_t> ASpace::decode(addr_t addr) const
+{
+    addr &= _amask;
+    addr_t bank = addr >> _bshift;
+    addr_t offset = addr & _bmask;
+    return {bank, offset};
+}
+
 uint8_t ASpace::read(addr_t addr, ReadMode mode)
 {
     const auto [bank, offset] = decode(addr);
@@ -55,33 +93,6 @@ void ASpace::write(addr_t addr, uint8_t value)
     }
 }
 
-void ASpace::reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask)
-{
-    auto banks = wmaps.size();
-    CAIO_ASSERT(banks != 0 && banks == rmaps.size());
-
-    auto bsize = (static_cast<size_t>(amask) + 1) / banks;
-    auto bmask = bsize - 1;
-    CAIO_ASSERT((bsize & bmask) == 0);
-
-    _amask = amask;
-    _rmaps = rmaps;
-    _wmaps = wmaps;
-    _bsize = bsize;
-    _bmask = bmask;
-    for (_bshift = 0; bmask != 0; bmask >>= 1, ++_bshift);
-    _data_bus = 0;
-    _address_bus = 0;
-}
-
-inline std::pair<addr_t, addr_t> ASpace::decode(addr_t addr) const
-{
-    addr &= _amask;
-    addr_t bank = addr >> _bshift;
-    addr_t offset = addr & _bmask;
-    return {bank, offset};
-}
-
 std::ostream& ASpace::dump(std::ostream& os) const
 {
     os.setf(std::ios::left, std::ios::adjustfield);
@@ -111,6 +122,19 @@ std::ostream& ASpace::dump(std::ostream& os) const
     }
 
     return os;
+}
+
+Serializer& operator&(Serializer& ser, ASpace &mmap)
+{
+    ser & static_cast<Name&>(mmap)
+        & mmap._amask
+        & mmap._bsize
+        & mmap._bmask
+        & mmap._bshift
+        & mmap._data_bus
+        & mmap._address_bus;
+
+    return ser;
 }
 
 }

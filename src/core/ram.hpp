@@ -18,12 +18,10 @@
  */
 #pragma once
 
-#include <functional>
-#include <span>
-#include <vector>
-
 #include "device.hpp"
 #include "fs.hpp"
+#include "serializer.hpp"
+#include "types.hpp"
 #include "utils.hpp"
 
 namespace caio {
@@ -171,10 +169,9 @@ public:
     }
 
 protected:
-    std::ostream& serialize(std::ostream& os) const override;
-    std::istream& deserialize(std::istream& is) override;
-
     Buffer _data{};
+
+    friend Serializer& operator&(Serializer&, RAM&);
 };
 
 }

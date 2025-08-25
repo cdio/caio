@@ -18,11 +18,14 @@
  */
 #pragma once
 
+#include "device.hpp"
+#include "name.hpp"
+#include "serializer.hpp"
+#include "types.hpp"
+
 #include <array>
 #include <span>
-
-#include "device.hpp"
-#include "types.hpp"
+#include <string_view>
 
 namespace caio {
 
@@ -42,8 +45,11 @@ namespace caio {
  * @see ASpace::addrmap_t
  * @see Device
  */
-class ASpace {
+class ASpace : public Name {
 public:
+    constexpr static const char* TYPE = "ASPACE";
+    constexpr static const char* LABEL = "aspace";
+
     using ReadMode = Device::ReadMode;
 
     /**
@@ -91,13 +97,15 @@ public:
     /**
      * Reset this address space.
      */
-    virtual void reset() {
+    virtual void reset()
+    {
     }
 
     /**
      * @see Device::peek(size_t)
      */
-    uint8_t peek(addr_t addr) const {
+    uint8_t peek(addr_t addr) const
+    {
         return const_cast<ASpace*>(this)->read(addr, ReadMode::Peek);
     }
 
@@ -106,7 +114,8 @@ public:
      * This is usually the last value written to or read from the address space.
      * @return The value present on the data bus.
      */
-    uint8_t data_bus() const {
+    uint8_t data_bus() const
+    {
         return _data_bus;
     }
 
@@ -117,7 +126,8 @@ public:
      * this method.
      * @param data Data to set.
      */
-    uint8_t data_bus(uint8_t data) {
+    uint8_t data_bus(uint8_t data)
+    {
         _data_bus = data;
         return _data_bus;
     }
@@ -127,7 +137,8 @@ public:
      * This is usually the last address written to or read from the address space.
      * @return The value present on the address bus.
      */
-    addr_t address_bus() const {
+    addr_t address_bus() const
+    {
         return _address_bus;
     }
 
@@ -138,7 +149,8 @@ public:
      * this method.
      * @param addr Address to set.
      */
-    virtual void address_bus(addr_t addr) {
+    virtual void address_bus(addr_t addr)
+    {
         _address_bus = addr;
     }
 
@@ -150,8 +162,7 @@ public:
     virtual std::ostream& dump(std::ostream& os) const;
 
 protected:
-    ASpace() {
-    }
+    ASpace(std::string_view type = TYPE, std::string_view label = LABEL);
 
     /**
      * Initialise this address space.
@@ -160,9 +171,7 @@ protected:
      * @param amask Address space mask (addresses are ANDed with this mask).
      * @see reset()
      */
-    ASpace(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask) {
-        reset(rmaps, wmaps, amask);
-    }
+    ASpace(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask);
 
     /**
      * Reset this address space with a new set of mappings.
@@ -187,6 +196,8 @@ private:
     addrmap_t _wmaps{};
     uint8_t   _data_bus{};
     addr_t    _address_bus{};
+
+    friend Serializer& operator&(Serializer&, ASpace&);
 };
 
 }

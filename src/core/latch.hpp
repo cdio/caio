@@ -18,13 +18,16 @@
  */
 #pragma once
 
+#include "serializer.hpp"
+
 namespace caio {
 
 /**
  * Latch register template.
  * The type T determines the size of the register.
  */
-template <typename T, std::enable_if_t<std::is_unsigned<T>::value, bool> = true>
+template <typename T>
+requires std::is_unsigned_v<T>
 class Latch_ {
 public:
     /**
@@ -32,18 +35,19 @@ public:
      * @param value Initial value (default is 0).
      */
     Latch_(T value = {})
-        : _reg{value} {
+        : _reg{value}
+    {
     }
 
-    virtual ~Latch_() {
-    }
+    virtual ~Latch_() = default;
 
     /**
      * Set this latch register value.
      * @param value Value to set.
      * @return this.
      */
-    Latch_& operator=(T value) {
+    Latch_& operator=(T value)
+    {
         _reg = value;
         return *this;
     }
@@ -52,7 +56,8 @@ public:
      * Return the status of this latch.
      * @return true if at least one of the bits of this latch register is active; false otherwise.
      */
-    operator bool() const {
+    operator bool() const
+    {
         return (_reg != 0);
     }
 
@@ -61,7 +66,8 @@ public:
      * @param value Value to AND to this latch register.
      * @return A new latch register with the result of the operation.
      */
-    Latch_ operator&(T value) {
+    Latch_ operator&(T value)
+    {
         return {_reg & value};
     }
 
@@ -70,7 +76,8 @@ public:
      * @param value Value to OR to this latch register.
      * @return A new latch register with the result of the operation.
      */
-    Latch_ operator|(T value) {
+    Latch_ operator|(T value)
+    {
         return {_reg | value};
     }
 
@@ -78,7 +85,8 @@ public:
      * Bitwise NEG operator.
      * @return A new latch register with the result of the operation.
      */
-    Latch_ operator~() const {
+    Latch_ operator~() const
+    {
         return {~_reg};
     }
 
@@ -87,7 +95,8 @@ public:
      * @param value Value to AND to this latch register.
      * @return A reference to this latch.
      */
-    Latch_& operator&=(T value) {
+    Latch_& operator&=(T value)
+    {
         _reg &= value;
         return *this;
     }
@@ -97,9 +106,15 @@ public:
      * @param value Value to OR to this latch register.
      * @return A reference to this latch.
      */
-    Latch_& operator|=(T value) {
+    Latch_& operator|=(T value)
+    {
         _reg |= value;
         return *this;
+    }
+
+    friend Serializer& operator&(Serializer& ser, Latch_<T>& latch)
+    {
+        return (ser & latch._reg);
     }
 
 private:

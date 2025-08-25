@@ -18,14 +18,15 @@
  */
 #pragma once
 
+#include "endian.hpp"
+#include "fs.hpp"
+#include "serializer.hpp"
+#include "types.hpp"
+
 #include <array>
 #include <initializer_list>
 #include <string>
 #include <vector>
-
-#include "endian.hpp"
-#include "fs.hpp"
-#include "types.hpp"
 
 namespace caio {
 
@@ -58,7 +59,8 @@ struct Rgba {
      * @param alpha Alpha component (default is 255, no transparency).
      */
     constexpr Rgba(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255)
-        : Rgba{static_cast<uint32_t>((red << 24) | (green << 16) | (blue << 8) | alpha)} {
+        : Rgba{static_cast<uint32_t>((red << 24) | (green << 16) | (blue << 8) | alpha)}
+    {
     }
 
     /**
@@ -66,11 +68,12 @@ struct Rgba {
      * @param rgba A 32 bits colour value in host endian order (default is black, no transparency).
      */
     constexpr Rgba(uint32_t rgba = 0x000000FF)
-        : u32{rgba} {
+        : u32{rgba}
+    {
     }
 
     /**
-     * Get a string with this colour formatted as "rrbbggaa".
+     * Generate a string with this colour formatted as "rrbbggaa".
      * @return A string with this colour.
      */
     std::string to_string() const;
@@ -79,7 +82,8 @@ struct Rgba {
      * Get the transparency status of this colour.
      * @return true if this colour is transparent; false otherwise.
      */
-    bool is_transparent() const {
+    bool is_transparent() const
+    {
         return (a == 0);
     }
 
@@ -89,7 +93,8 @@ struct Rgba {
      * @param color Colour to copy from.
      * @return This colour.
      */
-    Rgba& set(Rgba color) {
+    Rgba& set(Rgba color)
+    {
         if (!color.is_transparent()) {
             u32 = color.u32;
         }
@@ -140,18 +145,14 @@ public:
      * Initialise this RGBA table with colour values from memory.
      * @param il RGBA values.
      */
-    RgbaTable(const std::initializer_list<Rgba>& il)
-        : std::vector<Rgba>(il) {
-    }
+    RgbaTable(const std::initializer_list<Rgba>& il);
 
     /**
      * Initialise this RGBA table with colour values from a file.
      * @param fname Name of the file containing the colour table.
      * @exception IOError
      */
-    RgbaTable(const fs::Path& fname) {
-        load(fname);
-    }
+    RgbaTable(const fs::Path& fname);
 
     /**
      * (Re-)Initialise this RGBA table with colour values from a file.
@@ -166,20 +167,24 @@ public:
      * @exception IOError
      */
     void save(const fs::Path& fname);
+
+    friend Serializer& operator&(Serializer&, RgbaTable&);
 };
 
 /**
  * Container for a fixed number of colours.
  */
-template<size_t N>
+template <size_t N>
 class RgbaN_ {
 public:
-    template<typename... Ts>
+    template <typename... Ts>
     RgbaN_(const Ts... colors)
-        : _colors{{colors...}} {
+        : _colors{{colors...}}
+    {
     }
 
-    const Rgba& operator[](size_t index) const {
+    const Rgba& operator[](size_t index) const
+    {
         CAIO_ASSERT(index < N);
         return _colors[index];
     }

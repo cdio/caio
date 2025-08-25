@@ -22,6 +22,11 @@
 
 namespace caio {
 
+Device::Device(std::string_view type, std::string_view label)
+    : Name{type, label}
+{
+}
+
 uint8_t Device::read(size_t addr, ReadMode mode)
 {
     if (_read_cb) {
@@ -58,9 +63,14 @@ std::string Device::to_string() const
 std::ostream& Device::dump(std::ostream& os, size_t base) const
 {
     size_t r{};
-    buffer_t regs(size());
+    Buffer regs(size());
     std::generate(std::begin(regs), std::end(regs), [this, &r]() { return peek(r++); });
     return utils::dump(os, regs, base);
+}
+
+Serializer& operator&(Serializer& ser, Device& dev)
+{
+    return (ser & static_cast<Name&>(dev));
 }
 
 }

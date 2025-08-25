@@ -100,7 +100,8 @@ static Option generic_options[] = {
     { KEY_VJOY_GUIDE,       SEC_GENERIC, KEY_VJOY_GUIDE,    DEFAULT_VJOY_GUIDE,     Arg::Required, set_value       },
     { KEY_VJOY_START,       SEC_GENERIC, KEY_VJOY_START,    DEFAULT_VJOY_START,     Arg::Required, set_value       },
     { KEY_SCREENSHOTDIR,    SEC_GENERIC, KEY_SCREENSHOTDIR, DEFAULT_SCREENSHOTDIR,  Arg::Required, set_value       },
-    { KEY_STATUSBAR,        SEC_GENERIC, KEY_STATUSBAR,     DEFAULT_STATUSBAR,      Arg::Required, set_value       }
+    { KEY_STATUSBAR,        SEC_GENERIC, KEY_STATUSBAR,     DEFAULT_STATUSBAR,      Arg::Required, set_value       },
+    { KEY_SNAPSHOT,         SEC_GENERIC, KEY_SNAPSHOT,      DEFAULT_SNAPSHOT,       Arg::Optional, set_value       }
 };
 
 std::string Cmdline::usage() const
@@ -109,7 +110,7 @@ std::string Cmdline::usage() const
       // 01234567890123456789012345678901234567890123456789012345678901234567890123456789
     return std::format("usage: {} <options> [<file>]\n"
         "where <file> is the name of a program, cartridge or\n"
-        "snapshot to launch (the file format is auto-detected)\n"
+        "snapshot file to launch (the file format is auto-detected)\n"
         "and <options> are:\n"
         " --conf <cfile>          Configuration file\n"
         " --romdir <romdir>       ROMs directory\n"
@@ -117,7 +118,8 @@ std::string Cmdline::usage() const
         " --palette <palette>     Colour palette name or filename\n"
         " --keymapsdir <kdir>     Key mappings directory\n"
         " --keymaps <keymaps>     Key mappings name or filename\n"
-        " --cart <cfile>          Cartridge filename\n"
+        " --cart <fname>          Cartridge filename\n"
+        " --snap <fname>          Load a snapshot file\n"
         " --fps <rate>            Frame rate (default is {})\n"
         " --scale <scale>         Window scale factor (default is {})\n"
         " --aspect <ratio>        Aspect ratio: 16:9, 8:7, 6:5, 5:3, 4:3, system\n"

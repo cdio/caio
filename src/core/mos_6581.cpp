@@ -18,11 +18,11 @@
  */
 #include "mos_6581.hpp"
 
-#include <algorithm>
-#include <cmath>
-
 #include "logger.hpp"
 #include "ui.hpp"
+
+#include <algorithm>
+#include <cmath>
 
 namespace caio {
 namespace mos {
@@ -851,7 +851,7 @@ void Mos6581::play()
     if (v16) {
         for (size_t i = 0; i < SAMPLES; ++i) {
             fp_t value = _v[i] * _volume + _v4[i] * 0.3;
-            value = std::clamp(value, -0.8, 0.8);
+            value = std::clamp(value, -0.8f, 0.8f);
             v16[i] = utils::to_i16(value);
         }
     }
@@ -875,6 +875,88 @@ inline bool Mos6581::is_v3_filtered() const
 inline bool Mos6581::is_v3_active() const
 {
     return !(_voice_3_filtered && _voice_3_off);
+}
+
+Serializer& operator&(Serializer& ser, Oscillator& osc)
+{
+    ser & osc._clkf
+        & osc._type
+        & osc._ring
+        & osc._test
+        & osc._sync
+        & osc._ufreq
+        & osc._freq
+        & osc._T
+        & osc._uwidth
+        & osc._width
+        & osc._rreg
+        & osc._ndelay
+        & osc._nvalue
+        & osc._A
+        & osc._t;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Envelope& env)
+{
+    ser & env._tadj
+        & env._attack_time
+        & env._decay_time
+        & env._sustain
+        & env._release_time
+        & env._release_A
+        & env._t
+        & env._A
+        & env._gate
+        & env._cycle;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Voice& voice)
+{
+    ser & voice._osc
+        & voice._env;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Filter& flt)
+{
+    ser & flt._ufc
+        & flt._pufc
+        & flt._res
+        & flt._pres
+        & flt._type
+        & flt._ptype
+        & flt._flt
+        & flt._gain_comp;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Mos6581& sid)
+{
+    ser & static_cast<Device&>(sid)
+        & sid._samples_cycles
+        & sid._voice_1
+        & sid._voice_2
+        & sid._voice_3
+        & sid._v
+        & sid._v4
+        & sid._voice_1_filtered
+        & sid._voice_2_filtered
+        & sid._voice_3_filtered
+        & sid._voice_3_off
+        & sid._filter
+        & sid._volume
+        & sid._prev_volume
+        & sid._sample_index
+        & sid._prev_index
+        & sid._last_value;
+
+    return ser;
 }
 
 }

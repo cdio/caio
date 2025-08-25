@@ -18,8 +18,6 @@
  */
 #include "mos_6526.hpp"
 
-#include <array>
-
 #include "logger.hpp"
 #include "utils.hpp"
 
@@ -113,7 +111,7 @@ void Mos6526::Timer::cr(uint8_t data)
 
     if (!is_started() && (data & (CRx_START | CRx_PBON | CRx_PBTOGGLE)) == (CRx_START | CRx_PBON | CRx_PBTOGGLE)) {
         /* Toggle mode, port-B bit is set when it starts */
-        _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) | _pbit);
+        _dev._ioports.iow(Mos6526::PRB, _dev._ioports.ior(Mos6526::PRB) | _pbit);
     }
 
     _cr = data;
@@ -134,10 +132,10 @@ void Mos6526::Timer::setpb()
     if (is_pbon()) {
         if (is_pbtoggle()) {
             /* Toggle port-B bit */
-            _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) ^ _pbit);
+            _dev._ioports.iow(Mos6526::PRB, _dev._ioports.ior(Mos6526::PRB) ^ _pbit);
         } else {
             /* Set port-B bit active for one clock cycle. See unsetpb() */
-            _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) | _pbit);
+            _dev._ioports.iow(Mos6526::PRB, _dev._ioports.ior(Mos6526::PRB) | _pbit);
         }
     }
 }
@@ -146,7 +144,7 @@ void Mos6526::Timer::unsetpb()
 {
     /* This must be called one clock cycle after setpb() */
     if (is_pbon() && !is_pbtoggle()) {
-        _dev.iow(Mos6526::PRB, _dev.ior(Mos6526::PRB) & ~_pbit);
+        _dev._ioports.iow(Mos6526::PRB, _dev._ioports.ior(Mos6526::PRB) & ~_pbit);
     }
 }
 
@@ -199,10 +197,6 @@ Mos6526::Tod::TodData& Mos6526::Tod::TodData::operator++()
     }
 
     return *this;
-}
-
-Mos6526::Tod::Tod()
-{
 }
 
 inline void Mos6526::Tod::tod_hour(uint8_t hour)
@@ -300,10 +294,6 @@ Mos6526::Mos6526(std::string_view label)
 {
 }
 
-Mos6526::~Mos6526()
-{
-}
-
 void Mos6526::reset()
 {
     if (_icr_data & ICR_IR) {
@@ -327,10 +317,10 @@ uint8_t Mos6526::dev_read(size_t addr, ReadMode mode)
 {
     switch (addr) {
     case PRA:
-        return ior(PRA);
+        return _ioports.ior(PRA);
 
     case PRB:
-        return ior(PRB);
+        return _ioports.ior(PRB);
 
     case DDRA:
         return _port_A_dir;
@@ -395,11 +385,11 @@ void Mos6526::dev_write(size_t addr, uint8_t data)
 {
     switch (addr) {
     case PRA:
-        iow(PRA, (ior(addr) & ~_port_A_dir) | (data & _port_A_dir));
+        _ioports.iow(PRA, (_ioports.ior(addr) & ~_port_A_dir) | (data & _port_A_dir));
         break;
 
     case PRB:
-        iow(PRB, (ior(addr) & ~_port_B_dir) | (data & _port_B_dir));
+        _ioports.iow(PRB, (_ioports.ior(addr) & ~_port_B_dir) | (data & _port_B_dir));
         break;
 
     case DDRA:
@@ -577,6 +567,52 @@ inline void Mos6526::irq_out(bool active)
     if (_irq_out) {
         _irq_out(active);
     }
+}
+
+Serializer& operator&(Serializer& ser, Mos6526::Timer& timer)
+{
+    ser & timer._pbit
+        & timer._cr
+        & timer._counter
+        & timer._prescaler
+        & timer._is_underflow;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Mos6526::Tod::TodData& td)
+{
+    ser & td.hour
+        & td.min
+        & td.sec
+        & td.tth;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Mos6526::Tod& tod)
+{
+    ser & tod._is_running
+        & tod._tod
+        & tod._alarm
+        & tod._latch
+        & tod._cycles;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Mos6526& cia)
+{
+    ser & static_cast<Device&>(cia)
+        & cia._timer_A
+        & cia._timer_B
+        & cia._tod
+        & cia._port_A_dir
+        & cia._port_B_dir
+        & cia._icr_data
+        & cia._icr_mask;
+
+    return ser;
 }
 
 }

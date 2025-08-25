@@ -37,9 +37,12 @@ CXXSRCS=	aspace.cpp \
 		keyboard.cpp \
 		logger.cpp \
 		monitor.cpp \
+		name.cpp \
 		platform.cpp \
+		ram_bank.cpp \
 		readline.cpp \
 		rgb.cpp \
+		serializer.cpp \
 		signal.cpp \
 		types.cpp \
 		ui_config.cpp \
@@ -51,9 +54,6 @@ INCS=		aspace.hpp \
 		config.hpp \
 		device.hpp \
 		device_none.hpp \
-		ram.hpp \
-		ram_bank.hpp \
-		rom.hpp \
 		dispatcher.hpp \
 		endian.hpp \
 		fs.hpp \
@@ -71,8 +71,12 @@ INCS=		aspace.hpp \
 		pin.hpp \
 		platform.hpp \
 		pullup.hpp \
+		ram.hpp \
+		ram_bank.hpp \
+		rom.hpp \
 		readline.hpp \
 		rgb.hpp \
+		serializer.hpp \
 		signal.hpp \
 		types.hpp \
 		ui.hpp \

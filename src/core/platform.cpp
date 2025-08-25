@@ -22,20 +22,22 @@
 
 #include "version.hpp"
 
-
 namespace caio {
 
-Platform::Platform()
+Platform::Platform(std::string_view label)
+    : Name{TYPE, label}
 {
 }
 
-Platform::~Platform()
+void Platform::run(const fs::Path& fname)
 {
+    create(fname);
+    start();
 }
 
-void Platform::run(const fs::Path& pname)
+void Platform::create(const fs::Path& fname)
 {
-    detect_format(pname);
+    detect_format(fname);
 
     create_devices();
     connect_devices();
@@ -44,21 +46,29 @@ void Platform::run(const fs::Path& pname)
     make_widgets();
     connect_ui();
 
-    if (config().monitor) {
-        init_monitor(STDIN_FILENO, STDOUT_FILENO);
+    const auto& snapshot = config().snapshot;
+    if (!snapshot.empty()) {
+        /*
+         * Load a snapshot file.
+         */
+        try {
+            auto ser = Serializer::create_deserializer(snapshot);
+            serdes(ser);
+        } catch (const std::exception& err) {
+            throw IOError{"Can't load snapshot file: {}: {}", snapshot, err.what()};
+        }
     }
-
-    start();
 }
 
 void Platform::start()
 {
-    log.info("Starting {} - {}\n{}\n", full_version(), name(), to_string());
+    log.info("Starting {} - {}\n{}\n", full_version(), label(), to_string());
 
     /*
      * The emulator runs on its own thread.
      */
     std::exception_ptr error{};
+
     std::thread th{[&error, this]() {
         try {
             /*
@@ -87,22 +97,23 @@ void Platform::start()
     _ui->run();
 
     clock().stop();
+
     th.join();
 
     if (error) {
         std::rethrow_exception(error);
     }
 
-    log.info("Terminating {}\n", name());
+    log.info("Terminating {}\n", label());
 }
 
 std::string Platform::to_string() const
 {
     return std::format("{}\n\n"
         "Connected devices:\n"
-        "  {}\n\n"
+        "{}\n\n"
         "UI backend: {}\n",
-        config().to_string(),
+        const_cast<Platform*>(this)->config().to_string(),
         to_string_devices(),
         _ui->to_string());
 }
@@ -160,6 +171,44 @@ void Platform::connect_ui()
 
 void Platform::hotkeys(keyboard::Key key)
 {
+}
+
+bool Platform::is_snapshot(const fs::Path& fname) const
+{
+    if (!fname.empty()) {
+        try {
+            auto ser = Serializer::create_deserializer(fname);
+            Name name{type()};
+
+            ser & name;     /* Throws if different platform */
+
+            return true;
+
+        } catch (...) {
+        }
+    }
+
+    return false;
+}
+
+bool Platform::detect_format(const fs::Path& fname)
+{
+    if (!is_snapshot(fname)) {
+        return false;
+    }
+
+    auto& conf = config();
+    if (!conf.snapshot.empty()) {
+        log.warn("Snapshot file overrided. From {} to {}\n", conf.snapshot, fname.string());
+    }
+
+    conf.snapshot = fname;
+    return true;
+}
+
+Serializer& operator&(Serializer& ser, Platform& platform)
+{
+    return (ser & static_cast<Name&>(platform));
 }
 
 }

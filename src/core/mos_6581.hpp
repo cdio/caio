@@ -94,6 +94,8 @@ private:
 
     fp_t        _A;
     fp_t        _t;
+
+    friend Serializer& operator&(Serializer&, Oscillator&);
 };
 
 class Envelope {
@@ -134,6 +136,8 @@ private:
 
     static const std::array<fp_t, 16> attack_times;
     static const std::array<fp_t, 16> decay_times;
+
+    friend Serializer& operator&(Serializer&, Envelope&);
 };
 
 class Voice {
@@ -158,6 +162,8 @@ public:
 private:
     Oscillator _osc;
     Envelope   _env;
+
+    friend Serializer& operator&(Serializer&, Voice&);
 };
 
 class Filter {
@@ -198,6 +204,8 @@ private:
     FilterType              _ptype{};
     signal::Filter<3, 3>    _flt{};
     fp_t                    _gain_comp{};
+
+    friend Serializer& operator&(Serializer&, Filter&);
 };
 
 /**
@@ -401,14 +409,14 @@ public:
      */
     Mos6581(std::string_view label, unsigned clkf);
 
-    virtual ~Mos6581() {
-    }
+    virtual ~Mos6581() = default;
 
     /**
      * Set the audio buffer provider.
      * @param abuf Audio buffer provider.
      */
-    void audio_buffer(const AudioBufferCb& abuf) {
+    void audio_buffer(const AudioBufferCb& abuf)
+    {
         _audio_buffer = abuf;
     }
 
@@ -420,7 +428,8 @@ public:
     /**
      * @see Device::size()
      */
-    size_t size() const override {
+    size_t size() const override
+    {
         return REGMAX;
     }
 
@@ -452,11 +461,8 @@ private:
     void play();
 
     bool is_v1_filtered() const;
-
     bool is_v2_filtered() const;
-
     bool is_v3_filtered() const;
-
     bool is_v3_active() const;
 
     size_t                      _samples_cycles;
@@ -477,6 +483,8 @@ private:
     size_t                      _prev_index{};
     uint8_t                     _last_value{};
     AudioBufferCb               _audio_buffer{};
+
+    friend Serializer& operator&(Serializer&, Mos6581&);
 };
 
 }

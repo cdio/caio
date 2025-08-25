@@ -63,10 +63,6 @@ Mos6569::Mos6569(std::string_view label, const sptr_t<ASpace>& mmap, const devpt
     std::fill(std::begin(_cdata), std::end(_cdata), idle_cdata);
 }
 
-Mos6569::~Mos6569()
-{
-}
-
 void Mos6569::render_line(const Renderer& rl)
 {
     _render_line = rl;
@@ -1469,5 +1465,64 @@ inline void Mos6569::update_collision_data_mcm(unsigned start, uint8_t bitmap)
      */
     update_collision_data(start, utils::convert_01_10(bitmap));
 }
+
+Serializer& operator&(Serializer& ser, Mos6569& vic2)
+{
+    ser & static_cast<Device&>(vic2)
+        & vic2._aec_pin
+        & vic2._palette
+        & vic2._mob_enable
+        & vic2._mob_coord_x
+        & vic2._mob_coord_y
+        & vic2._mob_expand_x
+        & vic2._mob_expand_y
+        & vic2._mob_data_priority
+        & vic2._mob_mcm_sel
+        & vic2._mob_mob_collision
+        & vic2._mob_data_collision
+        & vic2._mob_color
+        & vic2._mob_mcm
+        & vic2._raster_counter
+        & vic2._stored_raster
+        & vic2._den
+        & vic2._mcm_mode
+        & vic2._ecm_mode
+        & vic2._bmm_mode
+        & vic2._25_rows
+        & vic2._40_columns
+        & vic2._scroll_x
+        & vic2._scroll_y
+        & vic2._lp_x
+        & vic2._lp_y
+        & vic2._lp_latched
+        & vic2._char_base
+        & vic2._video_matrix
+        & vic2._bitmap_base
+        & vic2._border_color
+        & vic2._background_color
+        & vic2._irq_status
+        & vic2._irq_enable
+        & vic2._bl_den
+        & vic2._bad_line
+        & vic2._idle_mode
+        & vic2._mode
+        & vic2._vc_base
+        & vic2._vc
+        & vic2._rc
+        & vic2._col
+        & vic2._main_border
+        & vic2._vertical_border
+        & vic2._uborder_end
+        & vic2._bborder_start
+        & vic2._lborder_end
+        & vic2._rborder_start
+        & vic2._cycle
+        & vic2._vblank
+        & vic2._collision_data
+        & vic2._mob_bitmaps;
+
+    return ser;
+}
+
 }
 }

@@ -50,10 +50,6 @@ RP2C02::RP2C02(std::string_view label, const sptr_t<ASpace>& mmap, bool ntsc)
 {
 }
 
-RP2C02::~RP2C02()
-{
-}
-
 void RP2C02::render_line(const RendererCb& rl)
 {
     _render_line = rl;
@@ -1093,6 +1089,84 @@ void RP2C02::scroll_y_inc()
 
         _regs.v = (_regs.v & ~(FINE_Y_MASK | COARSE_Y_MASK)) | (coarse_y << 5);
     }
+}
+
+Serializer& operator&(Serializer& ser, RP2C02::TileData& tile)
+{
+    ser & tile.tilech
+        & tile.pindex
+        & tile.plane[0]
+        & tile.plane[1];
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, RP2C02::OamSec& oamsec)
+{
+    auto soam = std::span<uint8_t>{reinterpret_cast<uint8_t*>(&oamsec.sprite), sizeof(oamsec.sprite)};
+
+    ser & oamsec.spindex
+        & soam;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, RP2C02& ppu)
+{
+    ser & static_cast<Device&>(ppu)
+        & ppu._palette
+        & ppu._visible_y_start
+        & ppu._visible_y_end
+        & ppu._regs.v
+        & ppu._regs.t
+        & ppu._regs.x
+        & ppu._regs.w
+        & ppu._irq_status
+        & ppu._sync_pin
+        & ppu._bg_palette
+        & ppu._sp_palette
+        & ppu._vram_inc
+        & ppu._sp_base
+        & ppu._bg_base
+        & ppu._sp_8x16
+        & ppu._irq_enabled
+        & ppu._ext_in
+        & ppu._rindex_mask
+        & ppu._bg_lborder
+        & ppu._sp_lborder
+        & ppu._bg_enabled
+        & ppu._sp_enabled
+        & ppu._tint
+        & ppu._red_tint
+        & ppu._green_tint
+        & ppu._blue_tint
+        & ppu._sp_0_hit
+        & ppu._sp_overflow
+        & ppu._sp_0_hit_cycle
+        & ppu._vblank
+        & ppu._vblank_flag
+        & ppu._oam_addr
+        & ppu._oam
+        & ppu._oam_sec[0]
+        & ppu._oam_sec[1]
+        & ppu._oam_sec[2]
+        & ppu._oam_sec[3]
+        & ppu._oam_sec[4]
+        & ppu._oam_sec[5]
+        & ppu._oam_sec[6]
+        & ppu._oam_sec[7]
+        & ppu._oam_sec_count
+        & ppu._delayed_data
+        & ppu._last_mmio_write
+        & ppu._rasterline
+        & ppu._cycle
+        & ppu._tiles[0]
+        & ppu._tiles[1]
+        & ppu._tiles[2]
+        & ppu._fetch_tile
+        & ppu._paint_tile;
+
+    return ser;
 }
 
 }

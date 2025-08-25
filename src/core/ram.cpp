@@ -18,8 +18,6 @@
  */
 #include "ram.hpp"
 
-#include "types.hpp"
-
 namespace caio {
 
 RAM::RAM()
@@ -55,10 +53,6 @@ RAM::RAM(RAM&& other)
 {
 }
 
-RAM::~RAM()
-{
-}
-
 RAM& RAM::operator=(RAM&& other)
 {
     type(other.type());
@@ -80,6 +74,11 @@ void RAM::dev_write(size_t addr, uint8_t data)
 std::ostream& RAM::dump(std::ostream& os, size_t base) const
 {
     return utils::dump(os, _data, base);
+}
+
+Serializer& operator&(Serializer& ser, RAM& ram)
+{
+    return (ser & static_cast<Device&>(ram) & ram._data);
 }
 
 }

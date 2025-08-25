@@ -18,12 +18,13 @@
  */
 #pragma once
 
+#include "serializer.hpp"
+#include "types.hpp"
+
 #include <array>
 #include <cmath>
 #include <functional>
-#include <ostream>
-
-#include "types.hpp"
+#include <iostream>
 
 namespace caio {
 namespace signal {
@@ -223,10 +224,17 @@ public:
     }
 
 private:
+    Serializer& serdes(Serializer& ser)
+    {
+        return (ser & _x & _y & _xpos & _ypos);
+    }
+
     std::array<fp_t, M> _x{};
     std::array<fp_t, N> _y{};
     ssize_t             _xpos{};
     ssize_t             _ypos{};
+
+    friend Serializer& caio::operator&(caio::Serializer&, Filter<M, N>&);
 };
 
 /**
@@ -436,13 +444,19 @@ std::string to_string(samples_fp samples);
  */
 std::ostream& dump(std::ostream& os, samples_fp samples, std::string_view name, fp_t fc1, fp_t fc2, fp_t Q, fp_t fs);
 
-}
+}   /* namesspace signal */
 
 template <size_t M1, size_t N1, size_t M2, size_t N2>
 constexpr signal::PCoeffs<std::max(M1, M2), std::max(N1, N2)> operator+(const signal::PCoeffs<M1, N1>& c1,
     const signal::PCoeffs<M2, N2>& c2)
 {
     return signal::add(c1, c2);
+}
+
+template <size_t M, size_t N>
+Serializer& operator&(Serializer& ser, signal::Filter<M, N>& flt)
+{
+    return flt.serdes(ser);
 }
 
 }

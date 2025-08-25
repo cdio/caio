@@ -216,7 +216,8 @@ Config::Config(Section& sec, std::string_view prefix)
       keyboard{is_true(sec[KEY_KEYBOARD])},
       vjoy{sec},
       screenshotdir{fs::fix_home(sec[KEY_SCREENSHOTDIR])},
-      statusbar{sec[KEY_STATUSBAR]}
+      statusbar{sec[KEY_STATUSBAR]},
+      snapshot{sec[KEY_SNAPSHOT]}
 {
     if (scale < 1) {
         scale = 1;
@@ -255,7 +256,8 @@ bool Config::operator==(const Config& other) const
         keyboard == other.keyboard &&
         vjoy == other.vjoy &&
         screenshotdir == other.screenshotdir &&
-        statusbar == other.statusbar);
+        statusbar == other.statusbar &&
+        snapshot == other.snapshot);
 }
 
 void Config::to_section(Section& sec) const
@@ -278,6 +280,7 @@ void Config::to_section(Section& sec) const
     sec[KEY_KEYBOARD]       = (keyboard ? "yes" : "no");
     sec[KEY_SCREENSHOTDIR]  = screenshotdir;
     sec[KEY_STATUSBAR]      = statusbar;
+    sec[KEY_SNAPSHOT]       = snapshot;
 
     vjoy.to_section(sec);
 }
@@ -312,6 +315,7 @@ std::string Config::to_string() const
         "  Palette:            \"{}\"\n"
         "  Keymaps:            \"{}\"\n"
         "  Cartridge:          \"{}\"\n"
+        "  Snapshot:           \"{}\"\n"
         "  FPS:                {}\n"
         "  Scale:              {}x\n"
         "  Aspect Ratio:       {}\n"
@@ -339,7 +343,14 @@ std::string Config::to_string() const
         "             start:   {}\n"
         "  Screenshots path:   \"{}\"\n"
         "  Status bar:         \"{}\"",
-        title, romdir, palette, keymaps, cartridge, fps, scale,
+        title,
+        romdir,
+        palette,
+        keymaps,
+        cartridge,
+        snapshot,
+        fps,
+        scale,
         ui::to_string(aspect),
         ui::to_string(scanlines),
         (fullscreen ? "yes" : "no"),

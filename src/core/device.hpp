@@ -18,13 +18,14 @@
  */
 #pragma once
 
+#include "name.hpp"
+#include "types.hpp"
+
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <ostream>
 #include <string_view>
-
-#include "name.hpp"
-#include "types.hpp"
 
 namespace caio {
 
@@ -83,7 +84,8 @@ public:
      * @param addr Address to read from;
      * @return The data stored at the specified address.
      */
-    uint8_t peek(size_t addr) const {
+    uint8_t peek(size_t addr) const
+    {
         return const_cast<Device*>(this)->read(addr, ReadMode::Peek);
     }
 
@@ -117,12 +119,9 @@ public:
     virtual std::ostream& dump(std::ostream& os, size_t base = 0) const;
 
 protected:
-    Device(std::string_view type, std::string_view label)
-        : Name{type, label} {
-    }
+    Device(std::string_view type, std::string_view label);
 
-    virtual ~Device() {
-    }
+    virtual ~Device() = default;
 
     /**
      * Read from a device address or register.
@@ -142,6 +141,8 @@ protected:
 
     ReadObserverCb  _read_cb{};
     WriteObserverCb _write_cb{};
+
+    friend Serializer& operator&(Serializer&, Device&);
 };
 
 }

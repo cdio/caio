@@ -466,6 +466,145 @@ void Apu::play()
     }
 }
 
+Serializer& operator&(Serializer& ser, Divider& div)
+{
+    ser & div._period
+        & div._counter;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, LengthCounter& lc)
+{
+    ser & lc._enabled
+        & lc._halt
+        & lc._counter;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Envelope& env)
+{
+    ser & env._reload
+        & env._constvol
+        & env._divider
+        & env._loop
+        & env._level;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Sweep& sweep)
+{
+    ser & sweep._onec
+        & sweep._enabled
+        & sweep._negate
+        & sweep._shift
+        & sweep._divider
+        & sweep._reload
+        & sweep._muted
+        & sweep._target;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Waveform& wave)
+{
+    ser & wave._timer
+        & wave._lc
+        & wave._env;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Pulse& pulse)
+{
+    ser & static_cast<Waveform&>(pulse)
+        & pulse._sweep
+        & pulse._D
+        & pulse._seq
+        & pulse._out;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Triangle& tri)
+{
+    ser & static_cast<Waveform&>(tri)
+        & tri._linear_reload
+        & tri._linear_cnt
+        & tri._seq
+        & tri._out;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Noise& noise)
+{
+    ser & static_cast<Waveform&>(noise)
+        & noise._mode
+        & noise._shreg
+        & noise._out;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, DmcReader& dr)
+{
+    ser & dr._loop
+        & dr._start
+        & dr._len
+        & dr._addr
+        & dr._remaining
+        & dr._data
+        & dr._consumed;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, DmcShifter& ds)
+{
+    ser & ds._sample
+        & ds._bit;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Dmc& dmc)
+{
+    ser & dmc._enabled
+        & dmc._irq_en
+        & dmc._irq_flag
+        & dmc._reader
+        & dmc._shifter
+        & dmc._timer
+        & dmc._silence
+        & dmc._out;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Apu& apu)
+{
+    ser & apu._even_tick
+        & apu._framecnt.irq_en
+        & apu._framecnt.irq_flag
+        & apu._framecnt.mode
+        & apu._framecnt.cycle
+        & apu._framecnt.step
+        & apu._pulse1
+        & apu._pulse2
+        & apu._triangle
+        & apu._noise
+        & apu._dmc
+        & apu._apos
+        & apu._srate_cycles
+        & apu._sample_cycle
+        & apu._filter;
+
+    return ser;
+}
+
 }
 }
 }

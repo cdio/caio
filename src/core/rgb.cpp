@@ -18,10 +18,10 @@
  */
 #include "rgb.hpp"
 
+#include "utils.hpp"
+
 #include <cstring>
 #include <fstream>
-
-#include "utils.hpp"
 
 namespace caio {
 
@@ -67,6 +67,16 @@ Rgba operator+(Rgba color1, Rgba color2)
     };
 }
 
+RgbaTable::RgbaTable(const std::initializer_list<Rgba>& il)
+    : std::vector<Rgba>(il)
+{
+}
+
+RgbaTable::RgbaTable(const fs::Path& fname)
+{
+    load(fname);
+}
+
 void RgbaTable::load(const fs::Path& fname)
 {
     std::ifstream is{fname, std::ios::binary | std::ios::in};
@@ -97,8 +107,6 @@ void RgbaTable::load(const fs::Path& fname)
             throw IOError{"Invalid line: {}", line};
         }
     }
-
-    is.close();
 }
 
 void RgbaTable::save(const fs::Path& fname)
@@ -114,8 +122,12 @@ void RgbaTable::save(const fs::Path& fname)
             throw IOError{"Can't write: {}: {}", fname.string(), Error::to_string()};
         }
     }
+}
 
-    os.close();
+Serializer& operator&(Serializer& ser, RgbaTable &table)
+{
+    auto buf = std::span<uint32_t>{reinterpret_cast<uint32_t*>(table.data()), table.size()};
+    return (ser & buf);
 }
 
 }

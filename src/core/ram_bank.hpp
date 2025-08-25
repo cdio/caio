@@ -20,6 +20,7 @@
 
 #include "ram.hpp"
 #include "rom.hpp"
+#include "serializer.hpp"
 
 namespace caio {
 
@@ -66,12 +67,7 @@ public:
         return _bsize;
     }
 
-    std::ostream& dump(std::ostream& os, size_t base = 0) const override
-    {
-        const auto start = _ram->begin() + _boffset;
-        const auto end = start + _bsize;
-        return utils::dump(os, start, end, base);
-    }
+    std::ostream& dump(std::ostream& os, size_t base = 0) const override;
 
     void bank(size_t bnk)
     {
@@ -105,6 +101,8 @@ protected:
     size_t  _banks{};
     size_t  _bank{};
     size_t  _boffset{};
+
+    friend Serializer& operator&(Serializer&, RAMBank&);
 };
 
 using ROMBank = RAMBank;

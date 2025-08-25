@@ -36,10 +36,6 @@ Mos6510::Mos6510(std::string_view type, std::string_view label, const sptr_t<ASp
 {
 }
 
-Mos6510::~Mos6510()
-{
-}
-
 void Mos6510::reset()
 {
     Mos6502::reset();
@@ -53,7 +49,7 @@ uint8_t Mos6510::read(addr_t addr, Device::ReadMode mode)
         return _iodir;
 
     case PORT_1:
-        return (Mos6502::read(addr, mode) & (~PALL | _iodir)) | (_ioport.ior(0) & ~_iodir);
+        return (Mos6502::read(addr, mode) & (~PALL | _iodir)) | (_ioports.ior(0) & ~_iodir);
 
     default:;
     }
@@ -71,12 +67,17 @@ void Mos6510::write(addr_t addr, uint8_t value)
         break;
 
     case PORT_1:
-        value = (value & _iodir) | (_ioport.ior(0) & ~_iodir);
-        _ioport.iow(0, value);
+        value = (value & _iodir) | (_ioports.ior(0) & ~_iodir);
+        _ioports.iow(0, value);
         break;
 
     default:;
     }
+}
+
+Serializer& operator&(Serializer& ser, Mos6510& cpu)
+{
+    return (ser & static_cast<Mos6502&>(cpu) & cpu._iodir);
 }
 
 }

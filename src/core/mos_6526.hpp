@@ -18,10 +18,6 @@
  */
 #pragma once
 
-#include <cstdint>
-#include <functional>
-#include <string_view>
-
 #include "clock.hpp"
 #include "device.hpp"
 #include "gpio.hpp"
@@ -34,7 +30,7 @@ namespace mos {
  * MOS6526 (CIA) emulator.
  * @see mos_6526_cia_preliminary_mar_1981.pdf
  */
-class Mos6526 : public Device, public Gpio, public Clockable {
+class Mos6526 : public Device, public Clockable {
 public:
     constexpr static const char* TYPE = "MOS6526";
 
@@ -99,6 +95,9 @@ public:
     constexpr static uint8_t PB6           = P6;            /* Port B bit for timer A                       */
     constexpr static uint8_t PB7           = P7;            /* Port B bit for timer B                       */
 
+    using IorCb = Gpio::IorCb;
+    using IowCb = Gpio::IowCb;
+
     class Timer {
     public:
         Timer(Mos6526& dev, uint8_t pbit);
@@ -130,6 +129,8 @@ public:
         uint16_t _counter;
         uint16_t _prescaler;
         bool     _is_underflow;
+
+        friend Serializer& operator&(Serializer&, Timer&);
     };
 
     class Tod {
@@ -151,9 +152,11 @@ public:
             bool     operator==(const TodData& tod) const;
             TodData& operator=(const TodData& tod);
             TodData& operator++();
+
+            friend Serializer& operator&(Serializer&, TodData&);
         };
 
-        Tod();
+        Tod() = default;
 
         void    tod_hour(uint8_t hour);
         void    tod_min(uint8_t min);
@@ -177,6 +180,8 @@ public:
         TodData          _alarm{};
         mutable TodData  _latch{};
         size_t           _cycles{};
+
+        friend Serializer& operator&(Serializer&, Tod&);
     };
 
     /**
@@ -185,7 +190,23 @@ public:
      */
     explicit Mos6526(std::string_view label = {});
 
-    virtual ~Mos6526();
+    virtual ~Mos6526() = default;
+
+    /**
+     * @see Gpio_::add_ior(const iorCb&, DATA)
+     */
+    void add_ior(const IorCb& ior, uint8_t mask)
+    {
+        _ioports.add_ior(ior, mask);
+    }
+
+    /**
+     * @see Gpio_::add_iow(const IowCb&, DATA)
+     */
+    void add_iow(const IowCb& iow, uint8_t mask)
+    {
+        _ioports.add_iow(iow, mask);
+    }
 
     /**
      * @see Device::reset()
@@ -228,18 +249,17 @@ private:
 
     void irq_out(bool active);
 
-    OutputPinCb _irq_out{};
-
     Timer       _timer_A;
     Timer       _timer_B;
-
     Tod         _tod{};
-
     uint8_t     _port_A_dir{};  /* 0: Input, 1: Output  */
     uint8_t     _port_B_dir{};  /* 0: Input, 1: Output  */
-
+    Gpio        _ioports{};
     uint8_t     _icr_data{};
     uint8_t     _icr_mask{};
+    OutputPinCb _irq_out{};
+
+    friend Serializer& operator&(Serializer&, Mos6526&);
 };
 
 }

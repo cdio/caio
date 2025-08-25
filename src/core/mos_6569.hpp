@@ -18,15 +18,6 @@
  */
 #pragma once
 
-#include <algorithm>
-#include <array>
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <string_view>
-#include <tuple>
-#include <utility>
-
 #include "aspace.hpp"
 #include "clock.hpp"
 #include "device.hpp"
@@ -207,7 +198,7 @@ public:
     constexpr static const uint8_t SCROLL_Y_MASK             = 0x07;
     constexpr static const uint8_t SCROLL_X_MASK             = 0x07;
 
-    constexpr static const uint8_t MOBS                      = 8;
+    constexpr static const size_t MOBS                       = 8;
     constexpr static const uint16_t MOB_X_COORD_OFFSET       = 18;
     constexpr static const uint16_t MOB_Y_COORD_OFFSET       = 1;
     constexpr static const unsigned MOB_WIDTH                = 3;       /* MOB width in bytes   */
@@ -353,7 +344,7 @@ public:
      */
     Mos6569(std::string_view label, const sptr_t<ASpace>& mmap, const devptr_t& vcolor);
 
-    ~Mos6569();
+    virtual ~Mos6569() = default;
 
     /**
      * Set the render line callback.
@@ -723,6 +714,8 @@ private:
 
     static const CData idle_cdata;
     static RgbaTable builtin_palette;
+
+    friend Serializer& operator&(Serializer&, Mos6569&);
 };
 
 }

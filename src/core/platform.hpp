@@ -24,43 +24,40 @@
 #include "clock.hpp"
 #include "config.hpp"
 #include "fs.hpp"
+#include "name.hpp"
 #include "types.hpp"
 #include "ui.hpp"
 
 namespace caio {
 
 /**
- * Commodore 64 emulator.
+ * Generic platform emulator.
  */
-class Platform {
+class Platform : public Name {
 public:
+    constexpr static const char* TYPE = "PLATFORM";
+
     using UI = ui::UI;
     using Config = config::Config;
 
-    Platform();
-
-    virtual ~Platform();
+    Platform(std::string_view label = "");
 
     /**
      * Build this platform and start it.
-     * This method returns on error or when the user terminates the emulator through the UI.
-     * @param pname If not empty, name of a program or cartridge to launch (its format is auto-detected).
-     * @see detect_format(fs::Path&)
+     * This method returns on error or when the
+     * user terminates the emulator through the UI.
+     * @param fname If not empty, name of a program, cartridge or
+     * snapshot file to launch (its format is auto-detected).
+     * @see create(const fs::Path&)
      * @see start()
      */
-    virtual void run(const fs::Path& pname);
+    virtual void run(const fs::Path& fname);
 
     /**
      * Return a human readable string describing the components that build this platform.
      * @return A human readable string representation of this platform.
      */
-    virtual std::string to_string() const;
-
-    /**
-     * Get the name of this platform.
-     * @return The name of this platform.
-     */
-    virtual std::string_view name() const = 0;
+    std::string to_string() const override;
 
 protected:
     /**
@@ -73,12 +70,24 @@ protected:
     }
 
     /**
-     * Detect the format of a file to launch and set the
-     * configuration options accordingly.
-     * @param pname File to launch.
-     * @exception IOError
+     * Detect whether a file contains a snapshot image.
+     * This method detects whether a file contains a snapshot
+     * but it does not guarantee the validity of all its
+     * components (for example cartridge or rom signatures).
+     * That would be known during actual deserialization.
+     * @param fname File name.
+     * @return true if the specified file contains a snapshot; false otherwise.
      */
-    virtual void detect_format(const fs::Path& pname) = 0;
+    bool is_snapshot(const fs::Path& fname) const;
+
+    /**
+     * Detect the format of a file.
+     * If the specified file contains a snapshot image
+     * set the proper configuration option accordingly.
+     * @param fname File to detect.
+     * @return true if the specified file is a snapshot image; false otherwise.
+     */
+    virtual bool detect_format(const fs::Path& fname);
 
     /**
      * Initialise the CPU monitor.
@@ -144,7 +153,7 @@ protected:
      * Get the base configuraton.
      * @return The base configuration.
      */
-    virtual const Config& config() const = 0;
+    virtual Config& config() = 0;
 
     /**
      * Get the UI configuraton.
@@ -152,7 +161,34 @@ protected:
      */
     virtual ui::Config ui_config() = 0;
 
+    /**
+     * Serialize/Deserialize this platform.
+     * @param ser Serializer/Deserializer.
+     * @exception InvalidArgument
+     * @exception IOError
+     */
+    virtual void serdes(Serializer& ser) = 0;
+
 private:
+    /**
+     * Create this platform.
+     * Instantiate and interconnect the platform devices,
+     * instantiate the user interface and connect it to those devices.
+     * If a snapshot file is configured, the devices are deserialized.
+     * @param fname If not empty, name of a program, cartridge or
+     * snapshot file to launch (its format is auto-detected).
+     * @exception IOError
+     * @exception InvalidArgument
+     * @see detect_format(const fs::Path&)
+     * @see create_devices()
+     * @see connect_devices()
+     * @see create_ui()
+     * @see make_widgets()
+     * @see connect_ui()
+     * @see deserialize(const fs::Path&)
+     */
+    void create(const fs::Path& fname);
+
     /**
      * Start this platform.
      * - Run the emulator on its own thread;
@@ -176,6 +212,8 @@ private:
     void create_ui();
 
     sptr_t<UI> _ui{};
+
+    friend Serializer& operator&(Serializer&, Platform&);
 };
 
 }

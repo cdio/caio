@@ -116,6 +116,7 @@ constexpr static const char* KEY_VJOY_GUIDE         = "vjoy-guide";
 constexpr static const char* KEY_VJOY_START         = "vjoy-start";
 constexpr static const char* KEY_SCREENSHOTDIR      = "screenshotdir";
 constexpr static const char* KEY_STATUSBAR          = "statusbar";
+constexpr static const char* KEY_SNAPSHOT           = "snap";
 
 constexpr static const char* DEFAULT_ROMDIR         = ROMDIR;
 constexpr static const char* DEFAULT_PALETTEDIR     = PALETTEDIR;
@@ -150,6 +151,7 @@ constexpr static const char* DEFAULT_VJOY_GUIDE     = "";
 constexpr static const char* DEFAULT_VJOY_START     = "";
 constexpr static const char* DEFAULT_SCREENSHOTDIR  = SCREENSHOTDIR;
 constexpr static const char* DEFAULT_STATUSBAR      = "south";
+constexpr static const char* DEFAULT_SNAPSHOT       = "";
 
 /**
  * Configuration file section.
@@ -414,6 +416,7 @@ struct Config {
     VJoyConfig  vjoy{};
     std::string screenshotdir{};
     std::string statusbar{};
+    std::string snapshot{};
 
     /**
      * Initialise this configuration structure.
@@ -463,8 +466,8 @@ private:
 /**
  * Persistent data directory.
  * The persistent data directory is where caio stores information
- * than can be read/written during emulation by devices, such as
- * EEPROM data used by various cartridges (high scores, player names, etc.).
+ * than can be read/written during runtime (for example EEPROM data
+ * from cartridges or other devices).
  * @return A path to the persistent data directory.
  */
 fs::Path storage_path();

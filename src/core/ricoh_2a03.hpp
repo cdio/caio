@@ -18,14 +18,15 @@
  */
 #pragma once
 
-#include <functional>
-#include <optional>
-
 #include "gpio.hpp"
 #include "mos_6502.hpp"
+#include "serializer.hpp"
 #include "signal.hpp"
 #include "ui.hpp"
 #include "utils.hpp"
+
+#include <functional>
+#include <optional>
 
 namespace caio {
 namespace ricoh {
@@ -85,6 +86,8 @@ public:
 protected:
     uint16_t _period{};
     uint16_t _counter{};
+
+    friend Serializer& operator&(Serializer&, Divider&);
 };
 
 /**
@@ -128,6 +131,8 @@ private:
     uint8_t _counter{};
 
     static const uint8_t lc_table[LC_TABLE_SIZE];
+
+    friend Serializer& operator&(Serializer&, LengthCounter&);
 };
 
 /**
@@ -160,6 +165,8 @@ private:
     Divider _divider{};
     bool    _loop{};
     uint8_t _level{};
+
+    friend Serializer& operator&(Serializer&, Envelope&);
 };
 
 /**
@@ -187,6 +194,8 @@ protected:
     Divider         _timer{};
     LengthCounter   _lc{};
     Envelope        _env{};
+
+    friend Serializer& operator&(Serializer&, Waveform&);
 };
 
 /**
@@ -222,6 +231,8 @@ private:
     bool            _reload{};
     bool            _muted{};
     uint16_t        _target{};
+
+    friend Serializer& operator&(Serializer&, Sweep&);
 };
 
 /**
@@ -270,6 +281,8 @@ private:
     int16_t _out{};
 
     static const uint8_t duty_table[DUTY_TABLE_SIZE][DUTY_SEQUENCE_SIZE];
+
+    friend Serializer& operator&(Serializer&, Pulse&);
 };
 
 /**
@@ -307,6 +320,8 @@ private:
     int16_t _out{};
 
     static const int16_t tri_table[TRIANGLE_TABLE_SIZE];
+
+    friend Serializer& operator&(Serializer&, Triangle&);
 };
 
 /**
@@ -333,6 +348,8 @@ private:
     int16_t     _out{};
 
     static const uint16_t noise_table[NOISE_TABLE_SIZE];
+
+    friend Serializer& operator&(Serializer&, Noise&);
 };
 
 /**
@@ -393,6 +410,8 @@ private:
     addr_t  _remaining{};
     uint8_t _data{};
     bool    _consumed{};
+
+    friend Serializer& operator&(Serializer&, DmcReader&);
 };
 
 /**
@@ -413,6 +432,8 @@ public:
 private:
     uint8_t _sample{};
     uint8_t _bit{};
+
+    friend Serializer& operator&(Serializer&, DmcShifter&);
 };
 
 /*
@@ -514,6 +535,8 @@ private:
     int16_t     _out{};
 
     static const uint16_t rate_table[RATE_TABLE_SIZE];
+
+    friend Serializer& operator&(Serializer&, Dmc&);
 };
 
 /**
@@ -658,6 +681,8 @@ private:
         signal::iir_hipass20(HIPASS_HI_FC, AUDIO_SAMPLING_RATE) +
         signal::iir_lopass20(LOPASS_FC, AUDIO_SAMPLING_RATE)
     };
+
+    friend Serializer& operator&(Serializer&, Apu&);
 };
 
 /**
@@ -797,7 +822,7 @@ public:
      */
     RP2A03(std::string_view label, size_t clkf, const sptr_t<ASpace>& mmap);
 
-    virtual ~RP2A03();
+    virtual ~RP2A03() = default;
 
     /**
      * @see Apu::audio_buffer(const AudioBufferCb&)
@@ -899,6 +924,8 @@ private:
     std::optional<uint8_t>  _oamdma_data{};     /* OAM DMA data being transferred   */
     Gpio                    _ioport{};          /* OUT0-OUT1, /OE1, /OE2            */
     size_t                  _cpu_cycles{};      /* 6502 cycles count-down           */
+
+    friend Serializer& operator&(Serializer&, RP2A03&);
 };
 
 }

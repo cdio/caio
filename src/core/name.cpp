@@ -16,17 +16,42 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include "device_none.hpp"
+#include "name.hpp"
 
-#include <memory>
+#include "types.hpp"
+
+#include <format>
 
 namespace caio {
 
-devptr_t device_none = std::make_shared<DeviceNone>();
-
-Serializer& operator&(Serializer& ser, DeviceNone& none)
+Name::Name(std::string_view type, std::string_view label)
+    : _type{type},
+      _label{label}
 {
-    return (ser & static_cast<Device&>(none) & none._dvalue);
+}
+
+std::string Name::to_string() const
+{
+    return std::format("{}({})", _type, _label);
+}
+
+Serializer& operator&(Serializer& ser, Name& name)
+{
+    if (ser.is_serializer()) {
+        ser & name._type & name._label;
+
+    } else {
+        std::string type{};
+        ser & type;
+
+        if (type != name._type) {
+            throw InvalidArgument{"Invalid type: required: {}, read: {}", name._type, type};
+        }
+
+        ser & name._label;
+    }
+
+    return ser;
 }
 
 }

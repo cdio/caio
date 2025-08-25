@@ -72,7 +72,7 @@ public:
      */
     Mos6510(std::string_view type, std::string_view label, const sptr_t<ASpace>& mmap);
 
-    virtual ~Mos6510();
+    virtual ~Mos6510() = default;
 
     /**
      * Add an input callback.
@@ -82,7 +82,7 @@ public:
      */
     void add_ior(const IorCb& ior, uint8_t mask)
     {
-        _ioport.add_ior(ior, mask);
+        _ioports.add_ior(ior, mask);
     }
 
     /**
@@ -93,7 +93,7 @@ public:
      */
     void add_iow(const IowCb& iow, uint8_t mask)
     {
-        _ioport.add_iow(iow, mask);
+        _ioports.add_iow(iow, mask);
     }
 
     /**
@@ -122,7 +122,9 @@ public:
 
 private:
     uint8_t _iodir{};
-    Gpio    _ioport{};
+    Gpio    _ioports{};
+
+    friend Serializer& operator&(Serializer&, Mos6510&);
 };
 
 }

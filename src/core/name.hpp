@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include <format>
+#include "serializer.hpp"
+
 #include <string>
 #include <string_view>
 
@@ -29,21 +30,16 @@ namespace caio {
  */
 class Name {
 public:
-    constexpr static const char* TYPE_UNKNOWN = "UNK";
+    Name(std::string_view type = "", std::string_view label = "");
 
-    Name(std::string_view type = {}, std::string_view label = {})
-        : _type{(type.empty() ? TYPE_UNKNOWN : type)},
-          _label{(label.empty() ? "" : label)} {
-    }
-
-    virtual ~Name() {
-    }
+    virtual ~Name() = default;
 
     /**
      * Get the type of this instance.
      * @return The type of this instance.
      */
-    std::string type() const {
+    std::string type() const
+    {
         return _type;
     }
 
@@ -51,7 +47,8 @@ public:
      * Change the type of this instance.
      * @param type New type to set.
      */
-    void type(std::string_view type) {
+    void type(std::string_view type)
+    {
         _type = type;
     }
 
@@ -59,7 +56,8 @@ public:
      * Get the label assigned to this instance.
      * @return The label of this instance.
      */
-    std::string label() const {
+    std::string label() const
+    {
         return _label;
     }
 
@@ -67,7 +65,8 @@ public:
      * Change the label of this instance.
      * @param label New label to set.
      */
-    void label(std::string_view label) {
+    void label(std::string_view label)
+    {
         _label = label;
     }
 
@@ -75,17 +74,13 @@ public:
      * Get a string with the representation of this instance.
      * @return A string with the representation of this instance.
      */
-    virtual std::string to_string() const {
-        return to_string(_type, _label);
-    }
-
-    static std::string to_string(std::string_view type, std::string_view label) {
-        return std::format("{}({})", type, label);
-    }
+    virtual std::string to_string() const;
 
 private:
-    std::string _type{};
-    std::string _label{};
+    std::string _type;
+    std::string _label;
+
+    friend Serializer& operator&(Serializer&, Name&);
 };
 
 }

@@ -18,6 +18,16 @@
  */
 #pragma once
 
+#include "aspace.hpp"
+#include "clock.hpp"
+#include "logger.hpp"
+#include "monitor.hpp"
+#include "name.hpp"
+#include "pin.hpp"
+#include "serializer.hpp"
+#include "types.hpp"
+#include "utils.hpp"
+
 #include <atomic>
 #include <functional>
 #include <memory>
@@ -27,15 +37,6 @@
 #include <string_view>
 #include <unordered_map>
 #include <utility>
-
-#include "aspace.hpp"
-#include "clock.hpp"
-#include "logger.hpp"
-#include "monitor.hpp"
-#include "name.hpp"
-#include "pin.hpp"
-#include "types.hpp"
-#include "utils.hpp"
 
 namespace caio {
 namespace mos {
@@ -137,7 +138,7 @@ public:
      */
     Mos6502(std::string_view type, std::string_view label, const sptr_t<ASpace>& mmap);
 
-    virtual ~Mos6502();
+    virtual ~Mos6502() = default;
 
     /**
      * Initialise this CPU.
@@ -331,7 +332,8 @@ protected:
      * @param addr2 Second address.
      * @return true if the specified addresses belong to different pages; false otherwise.
      */
-    bool page_crossed(addr_t addr1, addr_t addr2) const {
+    bool page_crossed(addr_t addr1, addr_t addr2) const
+    {
         return ((addr1 & 0xFF00) != (addr2 & 0xFF00));
     }
 
@@ -351,7 +353,8 @@ protected:
      * If decimal mode is disabled the D flag is ignored on arithmetic operatons.
      * @param act Enable/disable flag.
      */
-    void decimal_enable(int act) {
+    void decimal_enable(int act)
+    {
         _decimal_en = act;
     }
 
@@ -359,102 +362,126 @@ protected:
      * Get the decimal mode.
      * @return true if the decimal mode is enabled and the decimal flag is set; false otherwise.
      */
-    bool decimal_mode() const {
+    bool decimal_mode() const
+    {
         return (_decimal_en && test_D());
     }
 
-    void flag(uint8_t bits, bool act = true) {
+    void flag(uint8_t bits, bool act = true)
+    {
         _regs.P = (act ? (_regs.P | bits) : (_regs.P & (~bits))) | Flags::_;
     }
 
-    void flag_N(bool act) {
+    void flag_N(bool act)
+    {
         flag(Flags::N, act);
     }
 
-    void flag_V(bool act) {
+    void flag_V(bool act)
+    {
         flag(Flags::V, act);
     }
 
-    void flag_Z(bool act) {
+    void flag_Z(bool act)
+    {
         flag(Flags::Z, act);
     }
 
-    void flag_B(bool act) {
+    void flag_B(bool act)
+    {
         flag(Flags::B, act);
     }
 
-    void flag_D(bool act) {
+    void flag_D(bool act)
+    {
         flag(Flags::D, act);
     }
 
-    void flag_I(bool act) {
+    void flag_I(bool act)
+    {
         flag(Flags::I, act);
     }
 
-    void flag_C(bool act) {
+    void flag_C(bool act)
+    {
         flag(Flags::C, act);
     }
 
-    void set_N(uint8_t value) {
+    void set_N(uint8_t value)
+    {
         flag_N(value & 0x80);
     }
 
-    void set_Z(uint8_t value) {
+    void set_Z(uint8_t value)
+    {
         flag_Z(value == 0);
     }
 
-    bool test_flags(uint8_t bits) const {
+    bool test_flags(uint8_t bits) const
+    {
         return (_regs.P & bits);
     }
 
-    bool test_N() const {
+    bool test_N() const
+    {
         return test_flags(Flags::N);
     }
 
-    bool test_V() const {
+    bool test_V() const
+    {
         return test_flags(Flags::V);
     }
 
-    bool test_Z() const {
+    bool test_Z() const
+    {
         return test_flags(Flags::Z);
     }
 
-    bool test_D() const {
+    bool test_D() const
+    {
         return test_flags(Flags::D);
     }
 
-    bool test_B() const {
+    bool test_B() const
+    {
         return test_flags(Flags::B);
     }
 
-    bool test_I() const {
+    bool test_I() const
+    {
         return test_flags(Flags::I);
     }
 
-    bool test_C() const {
+    bool test_C() const
+    {
         return test_flags(Flags::C);
     }
 
-    bool is_irq_enabled() const {
+    bool is_irq_enabled() const
+    {
         return (!test_I());
     }
 
-    void push(uint8_t value) {
+    void push(uint8_t value)
+    {
         write(S_base | _regs.S--, value);
     }
 
-    uint8_t pop() {
+    uint8_t pop()
+    {
         return read(S_base | (++_regs.S));
     }
 
-    void push_addr(addr_t value) {
+    void push_addr(addr_t value)
+    {
         const uint8_t hi = (value >> 8) & 0xff;
         const uint8_t lo = value & 0xff;
         push(hi);
         push(lo);
     }
 
-    addr_t pop_addr() {
+    addr_t pop_addr()
+    {
         const uint8_t lo = pop();
         const addr_t hi = pop();
         const addr_t addr = (hi << 8) | lo;
@@ -782,6 +809,8 @@ protected:
     static int i_LAS       (Mos6502&, addr_t);
 
     static int i_KIL       (Mos6502&, addr_t);
+
+    friend Serializer& operator&(Serializer&, Mos6502&);
 };
 
 }

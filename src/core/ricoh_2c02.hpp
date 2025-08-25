@@ -18,9 +18,6 @@
  */
 #pragma once
 
-#include <functional>
-#include <string_view>
-
 #include "aspace.hpp"
 #include "clock.hpp"
 #include "device.hpp"
@@ -28,6 +25,9 @@
 #include "rgb.hpp"
 #include "ui.hpp"
 #include "utils.hpp"
+
+#include <functional>
+#include <string_view>
 
 namespace caio {
 namespace ricoh {
@@ -211,8 +211,6 @@ public:
 
     constexpr static const size_t TILES                     = 3;            /* Tile data buffer size                */
 
-    using RendererCb = std::function<bool(unsigned, const ui::Scanline&)>;
-
     /*
      * Memory mapped registers (CPU Bus).
      */
@@ -293,6 +291,10 @@ public:
         bool    bgpri{};            /* Background priority over sprites     */
     };
 
+    using RendererCb   = std::function<bool(unsigned, const ui::Scanline&)>;
+    using PaletteArray = std::array<uint8_t, PALETTES * PALETTE_SIZE>;
+    using OamArray     = std::array<uint8_t, SPRITES * sizeof(struct Oam)>;
+
     /**
      * Initialise this PPU.
      * @param label PPU label;
@@ -301,7 +303,7 @@ public:
      */
     RP2C02(std::string_view label, const sptr_t<ASpace>& mmap, bool ntsc);
 
-    virtual ~RP2C02();
+    virtual ~RP2C02() = default;
 
     /**
      * Set the renderline callback.
@@ -546,8 +548,9 @@ private:
     OutputPinCb     _irq_out{};                             /* /IRQ output pin                          */
     bool            _irq_status{};                          /* /IRQ pin status                          */
     InputPin        _sync_pin{};                            /* /SYNC input pin                          */
-    uint8_t         _bg_palette[PALETTES * PALETTE_SIZE];   /* Background image palettes (x4)           */
-    uint8_t         _sp_palette[PALETTES * PALETTE_SIZE];   /* Sprite palettes (x4)                     */
+
+    PaletteArray    _bg_palette{};                          /* Background image palettes (x4)           */
+    PaletteArray    _sp_palette{};                          /* Sprite palettes (x4)                     */
 
     addr_t          _vram_inc{};                            /* VRAM address increment                   */
     addr_t          _sp_base{};                             /* Sprite pattern table (8x8 sprites)       */
@@ -573,7 +576,7 @@ private:
     bool            _vblank_flag{};                         /* VBlank status flags (PPUSTATUS)          */
 
     uint8_t         _oam_addr{};                            /* OAM address                              */
-    uint8_t         _oam[SPRITES * sizeof(Oam)]{};          /* OAM data                                 */
+    OamArray        _oam{};                                 /* OAM data                                 */
     OamSec          _oam_sec[SEC_SPRITES]{};                /* Secondary OAM data                       */
     size_t          _oam_sec_count{};                       /* Visible sprites in scanline (maximum 8)  */
     SpritePixel     _sp_scanline[WIDTH]{};                  /* Scanline made of sprites                 */
@@ -590,6 +593,10 @@ private:
     size_t          _paint_tile{0};                         /* Tile index being painted                 */
 
     static RgbaTable builtin_palette;
+
+    friend Serializer& operator&(Serializer&, OamSec&);
+    friend Serializer& operator&(Serializer&, TileData&);
+    friend Serializer& operator&(Serializer&, RP2C02&);
 };
 
 }

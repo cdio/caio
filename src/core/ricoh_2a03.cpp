@@ -36,10 +36,6 @@ RP2A03::RP2A03(std::string_view label, size_t clkf, const sptr_t<ASpace>& mmap)
     decimal_enable(false);
 }
 
-RP2A03::~RP2A03()
-{
-}
-
 void RP2A03::audio_buffer(const AudioBufferCb& abuf)
 {
     _apu.audio_buffer(abuf);
@@ -563,6 +559,19 @@ void RP2A03::write(addr_t addr, uint8_t value)
     } else {
         Mos6502::write(addr, value);
     }
+}
+
+Serializer& operator&(Serializer& ser, RP2A03& cpu)
+{
+    ser & static_cast<Mos6502&>(cpu)
+        & cpu._apu
+        & cpu._even_tick
+        & cpu._oamdma_addr
+        & cpu._oamdma_size
+        & cpu._oamdma_data
+        & cpu._cpu_cycles;
+
+    return ser;
 }
 
 }
