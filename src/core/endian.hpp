@@ -2,11 +2,11 @@
  * Apple macros borrowed from
  * https://gist.github.com/dendisuhubdy/19482135d26da86cdcf442b3724e0728
  */
-/** compatibility header for endian.h
+/*  compatibility header for endian.h
  * This is a simple compatibility shim to convert
  * BSD/Linux endian macros to the Mac OS X equivalents.
  * It is public domain.
- * */
+ */
 #pragma once
 
 #ifdef __linux__

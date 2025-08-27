@@ -39,10 +39,6 @@ ZX80Cassette::ZX80Cassette(const sptr_t<Clock>& clk)
     CAIO_ASSERT(_clk.get() != nullptr);
 }
 
-ZX80Cassette::~ZX80Cassette()
-{
-}
-
 bool ZX80Cassette::read()
 {
     uint64_t now = _clk->time();
@@ -271,10 +267,6 @@ ZX80CassetteO::ZX80CassetteO(const sptr_t<Clock>& clk, const fs::Path& cassdir)
     }
 }
 
-ZX80CassetteO::~ZX80CassetteO()
-{
-}
-
 void ZX80CassetteO::restart()
 {
     ZX80Cassette::restart();
@@ -368,10 +360,6 @@ uint8_t ZX80CassetteP::ascii_to_zx81(char ch)
     };
 
     return zx81[ch & MASK];
-}
-
-ZX80CassetteP::~ZX80CassetteP()
-{
 }
 
 inline fs::Path ZX80CassetteP::fname(const fs::Path& basename) const

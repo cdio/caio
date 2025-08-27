@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include <string_view>
-
 #include "joystick.hpp"
 #include "types.hpp"
+
+#include <string_view>
 
 namespace caio {
 namespace nintendo {
@@ -111,9 +111,7 @@ public:
     {
     }
 
-    virtual ~NESJoystick()
-    {
-    }
+    virtual ~NESJoystick() = default;
 
     /**
      * Load the shift register with the joystick status.

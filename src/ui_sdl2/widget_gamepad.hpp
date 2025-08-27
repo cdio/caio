@@ -38,8 +38,7 @@ public:
 
     Gamepad(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd);
 
-    virtual ~Gamepad() {
-    }
+    virtual ~Gamepad() = default;
 
     void render(const ::SDL_Rect& dstrect) override;
 

@@ -18,16 +18,11 @@
  */
 #pragma once
 
-#include <array>
-#include <cctype>
-#include <memory>
-#include <string>
-#include <string_view>
-#include <tuple>
-
 #include "fs.hpp"
 #include "types.hpp"
 #include "cbm_bus.hpp"
+
+#include <array>
 
 namespace caio {
 namespace commodore {
@@ -217,7 +212,7 @@ enum class FileType {
  */
 class C1541 : public cbm_bus::Device {
 public:
-    constexpr static const char* TYPE        = "C1541";
+    constexpr static const char* TYPE = "C1541";
 
     /**
      * Initialise this C1541 drive.
@@ -228,13 +223,9 @@ public:
      * @see cbm_bus::Device
      * @see attach()
      */
-    C1541(uint8_t unit, const sptr_t<cbm_bus::Bus>& bus)
-        : cbm_bus::Device{unit, bus} {
-        type(TYPE);
-    }
+    C1541(uint8_t unit, const sptr_t<cbm_bus::Bus>& bus);
 
-    virtual ~C1541() {
-    }
+    virtual ~C1541() = default;
 
     /**
      * Attach this disk drive to a specified path.
@@ -255,7 +246,8 @@ public:
      * Get the attached path.
      * @return A reference to the attached path.
      */
-    std::string_view attached_path() const {
+    std::string_view attached_path() const
+    {
         return _attached_path;
     }
 
@@ -263,7 +255,8 @@ public:
      * Get the status of this disk drive.
      * @return True if this disk drive is attached; false otherwise.
      */
-    bool is_attached() const {
+    bool is_attached() const
+    {
         return (!_attached_path.empty());
     }
 
@@ -277,7 +270,8 @@ public:
      * @return A value indicating the current progress for an
      * ongoing load operation (-1 = no progress, 0..1 = current progress).
      */
-    float progress() const {
+    float progress() const
+    {
         return _progress;
     }
 
@@ -287,7 +281,8 @@ protected:
      * @param ch Channel.
      * @return The name of a channel.
      */
-    std::string name(uint8_t ch) const {
+    std::string name(uint8_t ch) const
+    {
         return Name::to_string() + "-ch-" + std::to_string(ch);
     }
 
@@ -351,7 +346,8 @@ protected:
      * Set attached native path name.
      * @param path Path to attach to.
      */
-    void attached_path(std::string_view path) {
+    void attached_path(std::string_view path)
+    {
         _attached_path = path;
     }
 
@@ -364,16 +360,19 @@ private:
 
     class StatusChannel {
     public:
-        explicit StatusChannel(Status st, uint8_t track = 0, uint8_t sector = 0) {
+        explicit StatusChannel(Status st, uint8_t track = 0, uint8_t sector = 0)
+        {
             reset(st, track, sector);
         }
 
-        StatusChannel& operator=(Status st) {
+        StatusChannel& operator=(Status st)
+        {
             reset(st, 0, 0);
             return *this;
         }
 
-        bool operator==(Status st) const {
+        bool operator==(Status st) const
+        {
             return _status == st;
         }
 

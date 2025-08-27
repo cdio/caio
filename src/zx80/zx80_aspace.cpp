@@ -66,10 +66,6 @@ ZX80ASpace::ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr
     });
 }
 
-ZX80ASpace::~ZX80ASpace()
-{
-}
-
 void ZX80ASpace::reset()
 {
     _counter = 0;

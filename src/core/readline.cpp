@@ -18,6 +18,8 @@
  */
 #include "readline.hpp"
 
+#include "logger.hpp"
+
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <termios.h>
@@ -26,8 +28,6 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
-
-#include "logger.hpp"
 
 namespace caio {
 namespace readline {

@@ -18,16 +18,12 @@
  */
 #pragma once
 
-#include <string>
-#include <string_view>
-#include <vector>
+#include "guiapp.hpp"
 
 #include "config.hpp"
 #include "fs.hpp"
 #include "keyboard.hpp"
 #include "types.hpp"
-
-#include "guiapp.hpp"
 
 namespace caio {
 namespace ui {

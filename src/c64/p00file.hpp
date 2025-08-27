@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include <cstdint>
-
 #include "prgfile.hpp"
 #include "types.hpp"
 
@@ -48,18 +46,16 @@ public:
      * @exception IOError
      * @see load(const fs::Path&)
      */
-    P00File(const fs::Path& fname = {}) {
-        P00File::load(fname);
-    }
+    P00File(const fs::Path& fname = {});
 
-    virtual ~P00File() {
-    }
+    virtual ~P00File() = default;
 
     /**
      * The the header of this P00 file.
      * @return The raw header of this P00 file.
      */
-    const P00Header& header() const {
+    const P00Header& header() const
+    {
         return _hdr;
     }
 

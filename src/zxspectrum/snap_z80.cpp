@@ -18,10 +18,10 @@
  */
 #include "snap_z80.hpp"
 
+#include "zxsp_params.hpp"
+
 #include "fs.hpp"
 #include "utils.hpp"
-
-#include "zxsp_params.hpp"
 
 namespace caio {
 namespace sinclair {
@@ -31,10 +31,6 @@ SnapZ80::SnapZ80(const fs::Path& fname)
     : Snapshot{}
 {
     load(fname);
-}
-
-SnapZ80::~SnapZ80()
-{
 }
 
 bool SnapZ80::seems_like(const fs::Path& fname)

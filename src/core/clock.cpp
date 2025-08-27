@@ -18,13 +18,12 @@
  */
 #include "clock.hpp"
 
+#include "logger.hpp"
+
 #include <algorithm>
 #include <chrono>
 #include <cinttypes>
 #include <thread>
-
-#include "logger.hpp"
-#include "utils.hpp"
 
 namespace caio {
 

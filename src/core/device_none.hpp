@@ -22,7 +22,7 @@
 
 namespace caio {
 
-extern devptr_t device_none;
+extern sptr_t<class DeviceNone> device_none;
 
 /**
  * The device none does nothing.

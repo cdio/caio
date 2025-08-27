@@ -18,10 +18,10 @@
  */
 #pragma once
 
+#include "rgb.hpp"
+
 #include <cstdint>
 #include <span>
-
-#include "rgb.hpp"
 
 namespace caio {
 

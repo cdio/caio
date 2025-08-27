@@ -18,13 +18,9 @@
  */
 #include "dearimgui.hpp"
 
-#include <cstdio>
-#include <vector>
-
 #include "3rdparty/imgui/libimgui/imgui_internal.h"
 
-#include "fs.hpp"
-#include "utils.hpp"
+#include <cstdio>
 
 using namespace std::string_literals;
 

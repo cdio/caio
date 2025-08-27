@@ -18,6 +18,9 @@
  */
 #pragma once
 
+#include "types.hpp"
+#include "endian.hpp"
+
 #include <algorithm>
 #include <cctype>
 #include <chrono>
@@ -33,9 +36,6 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-
-#include "types.hpp"
-#include "endian.hpp"
 
 namespace caio {
 namespace utils {

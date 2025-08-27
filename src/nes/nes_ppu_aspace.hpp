@@ -31,17 +31,17 @@ namespace nes {
  *
  * ### Address space:
  *
- *   PPU Address Range  Size    Description             Provider
- *   ------------------------------------------------------------------------
- *   0000-0FFF          1000    Pattern table 0 (CHR)   Cartridge (*1)
- *   1000-1FFF          1000    Pattern table 1 (CHR)   Cartridge (*1)
- *   2000-23BF          0400    Nametable 0             VRAM / Cartridge (*2)
- *   2400-27FF          0400    Nametable 1             VRAM / Cartridge (*2)
- *   2800-2BFF          0400    Nametable 2             VRAM / Cartridge (*2)
- *   2C00-2FFF          0400    Nametable 3             VRAM / Cartridge (*2)
- *   3000-3EFF          0F00    Unused                  Cartridge
- *   3F00-3F1F          0020    Palette RAM indexes     Internal to PPU
- *   3F20-3FFF          00E0    Mirror of 3F00-3F1F     Internal to PPU
+ *     PPU Address Range  Size    Description             Provider
+ *     ------------------------------------------------------------------------
+ *     0000-0FFF          1000    Pattern table 0 (CHR)   Cartridge (*1)
+ *     1000-1FFF          1000    Pattern table 1 (CHR)   Cartridge (*1)
+ *     2000-23BF          0400    Nametable 0             VRAM / Cartridge (*2)
+ *     2400-27FF          0400    Nametable 1             VRAM / Cartridge (*2)
+ *     2800-2BFF          0400    Nametable 2             VRAM / Cartridge (*2)
+ *     2C00-2FFF          0400    Nametable 3             VRAM / Cartridge (*2)
+ *     3000-3EFF          0F00    Unused                  Cartridge
+ *     3F00-3F1F          0020    Palette RAM indexes     Internal to PPU
+ *     3F20-3FFF          00E0    Mirror of 3F00-3F1F     Internal to PPU
  *
  * (*1) CHR 8K RAM or ROM
  * (*2) 2K VRAM on NES board is mapped on these addresses but the cartridge
@@ -51,6 +51,7 @@ namespace nes {
  */
 class NESPPUASpace : public ASpace {
 public:
+    constexpr static const char* TYPE       = "PPU-ASPACE";
     constexpr static const addr_t ADDR_MASK = 0x3FFF;
     constexpr static const size_t BLOCKS    = 8;
 
@@ -58,9 +59,9 @@ public:
      * Initialise this address space.
      * @param cart Cartridge.
      */
-    NESPPUASpace(const sptr_t<Cartridge>& cart);
+    NESPPUASpace(std::string_view label, const sptr_t<Cartridge>& cart);
 
-    virtual ~NESPPUASpace();
+    virtual ~NESPPUASpace() = default;
 
 private:
     bank_t<BLOCKS> _mmap;

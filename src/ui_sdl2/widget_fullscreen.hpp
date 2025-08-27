@@ -29,8 +29,7 @@ class Fullscreen : public Widget {
 public:
     Fullscreen(const sptr_t<::SDL_Renderer>& _renderer, const std::function<bool()>& upd);
 
-    virtual ~Fullscreen() {
-    }
+    virtual ~Fullscreen() = default;
 
     void action(const std::function<void()>& act)
     {

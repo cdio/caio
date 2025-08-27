@@ -18,6 +18,8 @@
  */
 #include "logger.hpp"
 
+#include "utils.hpp"
+
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -26,8 +28,6 @@
 #include <cstring>
 #include <iterator>
 #include <regex>
-
-#include "utils.hpp"
 
 namespace caio {
 

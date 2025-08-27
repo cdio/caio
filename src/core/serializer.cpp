@@ -65,26 +65,26 @@ Serializer Serializer::create_serializer(const fs::Path& fname)
 {
     auto os = std::make_unique<std::ofstream>(fname);
     if (os->fail()) {
-        throw IOError{"Can't open snapshot image: {}: {}", fname.string(), Error::to_string()};
+        throw IOError{"Can't open snapshot file: {}: {}", fname.string(), Error::to_string()};
     }
 
     return Serializer{std::move(os)};
-}
-
-Serializer& operator&(Serializer& ser, Serializer::ObjSep&)
-{
-    ser._objsep = true;
-    return ser;
 }
 
 Serializer Serializer::create_deserializer(const fs::Path& fname)
 {
     auto is = std::make_unique<std::ifstream>(fname);
     if (is->fail()) {
-        throw IOError{"Can't open snapshot image: {}: {}", fname.string(), Error::to_string()};
+        throw IOError{"Can't open snapshot file: {}: {}", fname.string(), Error::to_string()};
     }
 
     return Serializer{std::move(is)};
+}
+
+Serializer& operator&(Serializer& ser, Serializer::ObjSep&)
+{
+    ser._objsep = true;
+    return ser;
 }
 
 Serializer& operator&(Serializer& ser, std::string& value)

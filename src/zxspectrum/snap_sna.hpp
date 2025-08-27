@@ -98,7 +98,7 @@ public:
      */
     SnapSNA(const fs::Path& fname);
 
-    virtual ~SnapSNA();
+    virtual ~SnapSNA() = default;
 
     /**
      * Detect if a specified file uses the SNA format.

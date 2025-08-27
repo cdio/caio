@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "types.hpp"
+
 #include <unistd.h>
 
 #include <cstdint>
@@ -29,8 +31,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-
-#include "types.hpp"
 
 namespace caio {
 namespace fs {

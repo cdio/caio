@@ -18,23 +18,6 @@
  */
 #pragma once
 
-#include <atomic>
-#include <functional>
-#include <memory>
-#include <semaphore>
-#include <string>
-#include <tuple>
-#include <vector>
-#include <unordered_map>
-#include <utility>
-
-#include "keyboard.hpp"
-#include "joystick.hpp"
-#include "rgb.hpp"
-#include "types.hpp"
-
-#include "ui_config.hpp"
-
 #include "ui_sdl2/sdl2.hpp"
 #include "ui_sdl2/audio.hpp"
 #include "ui_sdl2/panel.hpp"
@@ -45,6 +28,20 @@
 #include "ui_sdl2/widget_photocamera.hpp"
 #include "ui_sdl2/widget_reset.hpp"
 #include "ui_sdl2/widget_volume.hpp"
+
+#include "ui_config.hpp"
+
+#include "keyboard.hpp"
+#include "joystick.hpp"
+#include "rgb.hpp"
+#include "types.hpp"
+
+#include <atomic>
+#include <functional>
+#include <semaphore>
+#include <tuple>
+#include <unordered_map>
+#include <utility>
 
 namespace caio {
 namespace ui {

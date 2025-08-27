@@ -18,22 +18,21 @@
  */
 #include "ui_sdl2/ui.hpp"
 
+#include "endian.hpp"
+#include "icon.hpp"
+#include "logger.hpp"
+#include "utils.hpp"
+
+#include <SDL_image.h>
+#include <SDL_ttf.h>
+
 #include <algorithm>
 #include <cmath>
 #include <csignal>
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
-#include <memory>
 #include <thread>
-
-#include <SDL_image.h>
-#include <SDL_ttf.h>
-
-#include "endian.hpp"
-#include "icon.hpp"
-#include "logger.hpp"
-#include "utils.hpp"
 
 #define UI_DEBUG(args...)      log.debug(args)
 //#define UI_DEBUG(args...)
@@ -264,6 +263,11 @@ void UI::init_texture()
     }
 
     _screen_tex = sptr_t<::SDL_Texture>{screenp, ::SDL_DestroyTexture};
+
+    //XXX command line option?
+    //::SDL_SetTextureScaleMode(screenp, ::SDL_ScaleMode::SDL_ScaleModeBest);
+    //::SDL_SetTextureScaleMode(screenp, ::SDL_ScaleMode::SDL_ScaleModeLinear);
+    ::SDL_SetTextureScaleMode(screenp, ::SDL_ScaleMode::SDL_ScaleModeNearest);
 }
 
 inline float UI::aspect_ratio(const Size2& wsize)
@@ -1431,7 +1435,7 @@ void UI::attach_controllers()
         return (ejoy->joyid() == Joystick::JOYID_UNASSIGNED);
     });
 
-    log.debug("ui: Non attached emulated joysticks: {}\n", count);
+    log.debug("ui: Unattached emulated joysticks: {}\n", count);
 
     for (int devid = 0; devid < ::SDL_NumJoysticks() && count > 0; ++devid) {
         if (::SDL_IsGameController(devid)) {

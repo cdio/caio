@@ -289,7 +289,7 @@ public:
      */
     ULAVideo(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, std::string_view label);
 
-    virtual ~ULAVideo();
+    virtual ~ULAVideo() = default;
 
     /**
      * Set the render line callback.

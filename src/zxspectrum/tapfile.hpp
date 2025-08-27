@@ -19,7 +19,6 @@
 #pragma once
 
 #include "fs.hpp"
-#include "types.hpp"
 
 namespace caio {
 namespace sinclair {
@@ -46,7 +45,7 @@ public:
      */
     TAPFile(const fs::Path& path = {});
 
-    virtual ~TAPFile();
+    virtual ~TAPFile() = default;
 
     /**
      * Load a TAP file.

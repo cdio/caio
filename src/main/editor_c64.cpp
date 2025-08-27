@@ -29,10 +29,6 @@ ConfigEditorC64::ConfigEditorC64(Gui& gui, const fs::Path& cfile, config::Sectio
 {
 }
 
-ConfigEditorC64::~ConfigEditorC64()
-{
-}
-
 void ConfigEditorC64::save()
 {
     _conf.to_section(_sec);

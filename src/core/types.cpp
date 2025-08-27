@@ -18,14 +18,14 @@
  */
 #include "types.hpp"
 
+#include "utils.hpp"
+
 #include <execinfo.h>
 
 #include <climits>
 #include <array>
 #include <cstdlib>
 #include <sstream>
-
-#include "utils.hpp"
 
 namespace caio {
 

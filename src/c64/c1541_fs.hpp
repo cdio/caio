@@ -18,18 +18,11 @@
  */
 #pragma once
 
+#include "c1541.hpp"
+
 #include <algorithm>
-#include <array>
 #include <atomic>
 #include <fstream>
-#include <functional>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
-
-#include "fs.hpp"
-#include "c1541.hpp"
 
 namespace caio {
 namespace commodore {
@@ -51,11 +44,7 @@ public:
      * @exception InvalidArgument
      * @see C1541(uint8_t, const sptr_t<cbm_bus::Bus>&)
      */
-    C1541Fs(uint8_t unit, const sptr_t<cbm_bus::Bus>& bus)
-        : C1541{unit, bus}
-    {
-        type(TYPE);
-    }
+    C1541Fs(uint8_t unit, const sptr_t<cbm_bus::Bus>& bus);
 
     virtual ~C1541Fs() = default;
 

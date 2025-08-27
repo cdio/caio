@@ -40,8 +40,7 @@ public:
     Volume(const sptr_t<::SDL_Renderer>& renderer, const std::function<float()>& getvol = {},
         const std::function<void(float)>& setvol = {});
 
-    virtual ~Volume() {
-    }
+    virtual ~Volume() = default;
 
     bool enabled() const override;
 

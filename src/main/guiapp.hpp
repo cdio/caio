@@ -18,15 +18,13 @@
  */
 #pragma once
 
-#include <atomic>
-#include <string>
-#include <string_view>
+#include "gui.hpp"
 
 #include "config.hpp"
 #include "types.hpp"
 #include "ui_sdl2/sdl2.hpp"
 
-#include "gui.hpp"
+#include <atomic>
 
 namespace caio {
 namespace ui {
@@ -60,7 +58,8 @@ public:
      * Send the stop signal to the application.
      * This method returns immediatly (it does not wait for the application to terminate).
      */
-    void stop() {
+    void stop()
+    {
         _stop = true;
     }
 
@@ -68,7 +67,8 @@ public:
      * Return the status of this GUI application
      * @return true if this GUI application is running; otherwise false.
      */
-    bool is_running() const {
+    bool is_running() const
+    {
         return !_stop;
     }
 
@@ -76,7 +76,8 @@ public:
      * Return the size of the main window.
      * @return A pair with the width and height values of the main window.
      */
-    Size window_size() const {
+    Size window_size() const
+    {
         return {static_cast<float>(_width), static_cast<float>(_height)};
     }
 

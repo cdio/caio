@@ -18,16 +18,12 @@
  */
 #pragma once
 
-#include <atomic>
-#include <functional>
-#include <string_view>
-#include <tuple>
-#include <vector>
+#include "tapfile.hpp"
 
 #include "clock.hpp"
-#include "fs.hpp"
-#include "tapfile.hpp"
-#include "types.hpp"
+
+#include <atomic>
+#include <tuple>
 
 namespace caio {
 namespace sinclair {
@@ -59,23 +55,24 @@ constexpr static const size_t PILOT_PULSE_COUNT_DATA    = 1612;
  * - Boolean value indicating the pulse state (0 or 1).
  * - Time value indicating how much time (in microseconds) the state must be maintained.
  */
-using pulse_t = std::tuple<bool, uint64_t>;
+using Pulse = std::tuple<bool, uint64_t>;
 
 /**
  * Pulse buffer.
  * Pulse buffer is a vector of pulses and provides
  * methods to convert from bytes to pulses.
  */
-class PulseBuffer : public std::vector<pulse_t> {
+class PulseBuffer : public std::vector<Pulse> {
 public:
     PulseBuffer(uint64_t start = 0)
-        : _start{start} {
+        : _start{start}
+    {
     }
 
-    virtual ~PulseBuffer() {
-    }
+    virtual ~PulseBuffer() = default;
 
-    void start_time(uint64_t start) {
+    void start_time(uint64_t start)
+    {
         _start = start;
     }
 
@@ -154,7 +151,7 @@ public:
      */
     Tape(const sptr_t<Clock>& clk, std::string_view itape, std::string_view otape, bool fastload);
 
-    virtual ~Tape();
+    virtual ~Tape() = default;
 
     /**
      * Set the output tape.
@@ -300,7 +297,7 @@ private:
         TAPFile               tap{};                        /* Input TAP file                   */
 
         RXState               state{RXState::Init};         /* FSM state                        */
-        pulse_t               pulse{};                      /* FSM current pulse being received */
+        Pulse                 pulse{};                      /* FSM current pulse being received */
         PulseBuffer           pulsebuf{};                   /* TAP block converted to pulses    */
         PulseBuffer::iterator pulseit{};                    /* Pulse buffer interator           */
     };

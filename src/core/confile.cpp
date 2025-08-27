@@ -18,11 +18,11 @@
  */
 #include "config.hpp"
 
+#include "utils.hpp"
+
 #include <format>
 #include <fstream>
 #include <regex>
-
-#include "utils.hpp"
 
 namespace caio {
 namespace config {

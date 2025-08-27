@@ -18,12 +18,11 @@
  */
 #include "c1541.hpp"
 
+#include "logger.hpp"
+#include "utils.hpp"
+
 #include <iomanip>
 #include <regex>
-
-#include "logger.hpp"
-#include "types.hpp"
-#include "utils.hpp"
 
 namespace caio {
 namespace commodore {
@@ -154,6 +153,12 @@ std::string to_string(Status st)
     }
 
     return "";
+}
+
+C1541::C1541(uint8_t unit, const sptr_t<cbm_bus::Bus>& bus)
+    : cbm_bus::Device{unit, bus}
+{
+    type(TYPE);
 }
 
 void C1541::reset()

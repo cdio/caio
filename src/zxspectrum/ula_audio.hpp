@@ -18,9 +18,6 @@
  */
 #pragma once
 
-#include <functional>
-#include <string_view>
-
 #include "clock.hpp"
 #include "signal.hpp"
 #include "types.hpp"
@@ -50,15 +47,15 @@ public:
      */
     ULAAudio(unsigned clkf, std::string_view label);
 
-    virtual ~ULAAudio() {
-    }
+    virtual ~ULAAudio() = default;
 
     /**
      * Set the audio buffer provider.
      * @param abuf Audio buffer provider.
      * @see ui::AudioBuffer
      */
-    void audio_buffer(const std::function<ui::AudioBuffer()>& abuf) {
+    void audio_buffer(const std::function<ui::AudioBuffer()>& abuf)
+    {
         _audio_buffer = abuf;
     }
 
@@ -66,7 +63,8 @@ public:
      * Beep.
      * @param vol Beep volume (between 0 and 1).
      */
-    void beep(float vol) {
+    void beep(float vol)
+    {
         _beep = std::clamp(vol, 0.0f, 1.0f);
     }
 
@@ -92,7 +90,6 @@ private:
 
     size_t                           _samples_cycles;
     int16_t                          _samples_buffer[SAMPLES];
-
     samples_i16                      _samples{ _samples_buffer, std::size(_samples_buffer) };
     size_t                           _pos{};
     float                            _beep{};

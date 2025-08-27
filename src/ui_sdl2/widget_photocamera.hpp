@@ -31,9 +31,7 @@ public:
 
     PhotoCamera(sptr_t<::SDL_Renderer>& renderer);
 
-    virtual ~PhotoCamera()
-    {
-    }
+    virtual ~PhotoCamera() = default;
 
     void action(const std::function<void()>& act)
     {

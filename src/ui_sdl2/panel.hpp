@@ -18,13 +18,14 @@
  */
 #pragma once
 
-#include <tuple>
-#include <vector>
+#include "ui_sdl2/widget.hpp"
+
+#include "rgb.hpp"
 
 #include <SDL.h>
 
-#include "rgb.hpp"
-#include "ui_sdl2/widget.hpp"
+#include <tuple>
+#include <vector>
 
 namespace caio {
 namespace ui {
@@ -80,7 +81,7 @@ public:
      */
     Panel(const sptr_t<::SDL_Renderer>& renderer = {}, const std::string& statusbar = {});
 
-    virtual ~Panel();
+    virtual ~Panel() = default;
 
     /**
      * Reset this panel,

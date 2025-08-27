@@ -28,10 +28,6 @@ Empty::Empty(const sptr_t<::SDL_Renderer>& renderer)
 {
 }
 
-Empty::~Empty()
-{
-}
-
 bool Empty::enabled() const
 {
     return false;

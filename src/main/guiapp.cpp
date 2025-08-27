@@ -18,14 +18,13 @@
  */
 #include "guiapp.hpp"
 
-#include <sys/wait.h>
-#include <csignal>
-#include <filesystem>
-
 #include "endian.hpp"
 #include "fs.hpp"
 #include "icon.hpp"
 #include "utils.hpp"
+
+#include <sys/wait.h>
+#include <csignal>
 
 namespace caio {
 namespace ui {
@@ -147,8 +146,23 @@ int GuiApp::run()
     auto prev_chld = std::signal(SIGCHLD, signal_handler);
     auto prev_pipe = std::signal(SIGPIPE, SIG_IGN);
     if (prev_term == SIG_ERR || prev_quit == SIG_ERR || prev_chld == SIG_ERR || prev_pipe == SIG_ERR) {
-        throw Error{"Can't set signal handler: {}\n", Error::to_string()};
+        throw Error{"Can't set signal handler: {}", Error::to_string()};
     }
+
+#if 1 // XXX
+    float ddpi{}, hdpi{}, vdpi{};
+    if (::SDL_GetDisplayDPI(0, &ddpi, &hdpi, &vdpi) != 0) {
+        throw Error{"Can't getdiplay dpi"};
+    }
+
+    std::cout << std::format(
+        "  diagonal dpi: {}\n"
+        "horizontal dpi: {}\n"
+        "  vertical dpi: {}\n",
+        ddpi,
+        hdpi,
+        vdpi);
+#endif
 
     event_loop();
 

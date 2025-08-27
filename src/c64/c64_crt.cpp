@@ -27,8 +27,17 @@ namespace caio {
 namespace commodore {
 namespace c64 {
 
+Crt::Crt(const fs::Path& fname)
+{
+    open(fname);
+}
+
 void Crt::open(const fs::Path& fname)
 {
+    if (fname.empty()) {
+        return;
+    }
+
     std::ifstream is{fname, std::ios_base::binary | std::ios_base::in};
     if (!is) {
         throw InvalidCartridge{"Can't open: {}: {}", fname.string(), Error::to_string()};

@@ -18,18 +18,14 @@
  */
 #pragma once
 
-#include <functional>
-#include <memory>
-#include <span>
-#include <string>
-#include <tuple>
+#include "fs.hpp"
+#include "rgb.hpp"
 
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 
-#include "fs.hpp"
-#include "rgb.hpp"
+#include <tuple>
 
 namespace caio {
 namespace ui {
@@ -70,7 +66,7 @@ constexpr static const float RATIO                  = static_cast<float>(WIDTH) 
  * Widget.
  * A widget is a graphical element that interacts with the user through events.
  *
- * Widget dimensions:
+ * ### Widget dimensions:
  *
  *      |<-------------------------- WIDTH ------------------------->|
  *                                    128

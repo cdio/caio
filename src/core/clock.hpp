@@ -18,14 +18,14 @@
  */
 #pragma once
 
+#include "name.hpp"
+#include "types.hpp"
+#include "utils.hpp"
+
 #include <atomic>
 #include <memory>
 #include <utility>
 #include <vector>
-
-#include "name.hpp"
-#include "types.hpp"
-#include "utils.hpp"
 
 namespace caio {
 
@@ -62,7 +62,7 @@ private:
 class Clock : public Name {
 public:
     constexpr static const char* TYPE = "CLK";
-    constexpr static const float SYNC_TIME = 1.0f / 60.0f;  /* Default sync time to 60Hz */
+    constexpr static const float SYNC_TIME = 1.0f / 60.0f;  /* Default sync time */
 
     using ClockablePair = std::pair<sptr_t<Clockable>, size_t>;
 

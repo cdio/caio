@@ -35,8 +35,7 @@ public:
 
     Floppy(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd);
 
-    virtual ~Floppy() {
-    }
+    virtual ~Floppy() = default;
 
     bool is_idle() override;
 

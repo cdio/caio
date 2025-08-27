@@ -18,15 +18,12 @@
  */
 #pragma once
 
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <vector>
-#include <tuple>
-#include <utility>
-
 #include "editor.hpp"
 #include "guiapp.hpp"
+
+#include <unordered_map>
+#include <tuple>
+#include <utility>
 
 namespace caio {
 namespace ui {

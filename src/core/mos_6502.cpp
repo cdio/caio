@@ -18,8 +18,6 @@
  */
 #include "mos_6502.hpp"
 
-#include "monitor.hpp"
-
 #include <chrono>
 #include <iomanip>
 

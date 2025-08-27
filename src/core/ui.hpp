@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include <memory>
-
 #include "ui_sdl2/ui.hpp"
 #include "ui_sdl2/widget.hpp"
 #include "ui_sdl2/widget_cassette.hpp"
@@ -32,6 +30,8 @@
 #include "ui_sdl2/widget_photocamera.hpp"
 #include "ui_sdl2/widget_reset.hpp"
 #include "ui_sdl2/widget_volume.hpp"
+
+#include <memory>
 
 namespace caio {
 namespace ui {

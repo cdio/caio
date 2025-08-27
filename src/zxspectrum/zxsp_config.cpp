@@ -25,8 +25,7 @@ namespace zxspectrum {
 static const config::Option zxspectrum_options[] = {
     { KEY_OTAPE,    SEC_ZXSPECTRUM, KEY_OTAPE,    DEFAULT_OTAPE,    config::Arg::Required, config::set_value        },
     { KEY_ITAPE,    SEC_ZXSPECTRUM, KEY_ITAPE,    DEFAULT_ITAPE,    config::Arg::Required, config::set_value        },
-    { KEY_FASTLOAD, SEC_ZXSPECTRUM, KEY_FASTLOAD, DEFAULT_FASTLOAD, config::Arg::Optional, config::set_bool, "yes"  },
-    { KEY_SNAPSHOT, SEC_ZXSPECTRUM, KEY_SNAPSHOT, DEFAULT_SNAPSHOT, config::Arg::Required, config::set_value        }
+    { KEY_FASTLOAD, SEC_ZXSPECTRUM, KEY_FASTLOAD, DEFAULT_FASTLOAD, config::Arg::Optional, config::set_bool, "yes"  }
 };
 
 std::string ZXSpectrumCmdline::usage() const
@@ -36,8 +35,7 @@ std::string ZXSpectrumCmdline::usage() const
         " --tape <fname|dir>      Set the input tape file (TAP) or directory\n"
         " --otape <fname|dir>     Set the output tape file (TAP) or directory\n"
         "                         (default is {})\n"
-        " --fastload [yes|no]     Fast tape loading (default is {})\n"
-        " --snap <fname>          Load a snapshot image (Z80 or SNA formats)\n",
+        " --fastload [yes|no]     Fast tape loading (default is {})\n",
         config::Cmdline::usage(),
         DEFAULT_OTAPE,
         DEFAULT_FASTLOAD);
@@ -59,8 +57,7 @@ ZXSpectrumConfig::ZXSpectrumConfig(config::Section& sec)
     : Config{sec, "zxspectrum_"},
       otape{sec[KEY_OTAPE]},
       itape{sec[KEY_ITAPE]},
-      fastload{config::is_true(sec[KEY_FASTLOAD])},
-      snap{sec[KEY_SNAPSHOT]}
+      fastload{config::is_true(sec[KEY_FASTLOAD])}
 {
     title += " - Sinclair ZX-Spectrum 48K";
 }
@@ -70,8 +67,7 @@ bool ZXSpectrumConfig::operator==(const ZXSpectrumConfig& other) const
     return (static_cast<const Config&>(*this) == static_cast<const Config&>(other) &&
        otape == other.otape &&
        itape == other.itape &&
-       fastload == other.fastload &&
-       snap == other.snap);
+       fastload == other.fastload);
 }
 
 void ZXSpectrumConfig::to_section(config::Section& sec) const
@@ -80,7 +76,6 @@ void ZXSpectrumConfig::to_section(config::Section& sec) const
     sec[KEY_OTAPE] = otape;
     sec[KEY_ITAPE] = itape;
     sec[KEY_FASTLOAD] = (fastload ? "yes" : "no");
-    sec[KEY_SNAPSHOT] = snap;
 }
 
 std::string ZXSpectrumConfig::to_string() const
@@ -88,13 +83,11 @@ std::string ZXSpectrumConfig::to_string() const
     return std::format("{}\n"
         "  Output tape:        \"{}\"\n"
         "  Input tape:         \"{}\"\n"
-        "  Tape fastload:      {}\n"
-        "  Snapshot:           \"{}\"",
+        "  Tape fastload:      {}\n",
         Config::to_string(),
         otape,
         itape,
-        (fastload ? "yes" : "no"),
-        snap);
+        (fastload ? "yes" : "no"));
 }
 
 }

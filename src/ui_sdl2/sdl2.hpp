@@ -18,14 +18,11 @@
  */
 #pragma once
 
-#include <string>
-#include <vector>
+#include "keyboard.hpp"
+#include "rgb.hpp"
 
 #include <SDL.h>
 #include <SDL_image.h>
-
-#include "keyboard.hpp"
-#include "rgb.hpp"
 
 namespace caio {
 namespace ui {

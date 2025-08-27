@@ -18,17 +18,7 @@
  */
 #pragma once
 
-#include <cstdint>
-#include <format>
-#include <functional>
-#include <optional>
-#include <span>
-#include <string>
-
-#define IMGUI_USE_WCHAR32
-#include "3rdparty/imgui/libimgui/imgui.h"
-#include "3rdparty/imgui/libimgui/imgui_impl_sdl2.h"
-#include "3rdparty/imgui/libimgui/imgui_impl_sdlrenderer2.h"
+#include "ui_sdl2/sdl2.hpp"
 
 #include "endian.hpp"
 #include "fs.hpp"
@@ -36,7 +26,12 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-#include "ui_sdl2/sdl2.hpp"
+#define IMGUI_USE_WCHAR32
+#include "3rdparty/imgui/libimgui/imgui.h"
+#include "3rdparty/imgui/libimgui/imgui_impl_sdl2.h"
+#include "3rdparty/imgui/libimgui/imgui_impl_sdlrenderer2.h"
+
+#include <optional>
 
 namespace caio {
 namespace ui {

@@ -18,8 +18,6 @@
  */
 #include "ui_sdl2/widget_gamepad.hpp"
 
-#include <format>
-
 #include "sdl2.hpp"
 #include "utils.hpp"
 

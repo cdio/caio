@@ -189,10 +189,6 @@ ZXSpectrumKeyboard::ZXSpectrumKeyboard(std::string_view label, bool enabled)
     _matrix.fill(0);
 }
 
-ZXSpectrumKeyboard::~ZXSpectrumKeyboard()
-{
-}
-
 void ZXSpectrumKeyboard::reset()
 {
     std::lock_guard<std::mutex> lock{_matrix_mutex};

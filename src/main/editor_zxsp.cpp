@@ -29,10 +29,6 @@ ConfigEditorZXSpectrum::ConfigEditorZXSpectrum(Gui& gui, const fs::Path& cfile, 
 {
 }
 
-ConfigEditorZXSpectrum::~ConfigEditorZXSpectrum()
-{
-}
-
 void ConfigEditorZXSpectrum::save()
 {
     _conf.to_section(_sec);
@@ -46,7 +42,7 @@ void ConfigEditorZXSpectrum::render_specific()
     _gui.checkbox("Input tape fastload", "##fastload", _conf.fastload);
     _gui.combo_file("Input tape", "##itape", _conf.itape, _itape);
     _gui.combo_directory("Output tape", "##otape", _conf.otape, _otape);
-    _gui.combo_file("Load snapshot", "##snapshot", _conf.snap, _snapshot);
+    _gui.combo_file("Load snapshot", "##snapshot", _conf.snapshot, _snapshot); //XXX
     _gui.end_subsection();
 }
 

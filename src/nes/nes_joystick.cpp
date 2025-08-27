@@ -18,9 +18,9 @@
  */
 #include "nes_joystick.hpp"
 
-#include <map>
-
 #include "utils.hpp"
+
+#include <map>
 
 namespace caio {
 namespace nintendo {

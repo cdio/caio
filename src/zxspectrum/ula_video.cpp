@@ -20,7 +20,6 @@
 
 #include "logger.hpp"
 #include "signal.hpp"
-#include "types.hpp"
 #include "utils.hpp"
 
 namespace caio {
@@ -55,10 +54,6 @@ ULAVideo::ULAVideo(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, std::string_v
       _scanline(WIDTH)
 {
     CAIO_ASSERT(_cpu && _ram && _ram->size() > VRAM_MIN_SIZE);
-}
-
-ULAVideo::~ULAVideo()
-{
 }
 
 void ULAVideo::palette(std::string_view fname)

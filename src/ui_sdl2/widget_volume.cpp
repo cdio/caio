@@ -18,9 +18,9 @@
  */
 #include "ui_sdl2/widget_volume.hpp"
 
-#include <format>
-
 #include "sdl2.hpp"
+
+#include <format>
 
 namespace caio {
 namespace ui {

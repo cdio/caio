@@ -29,10 +29,6 @@ ConfigEditorZX80::ConfigEditorZX80(Gui& gui, const fs::Path& cfile, config::Sect
 {
 }
 
-ConfigEditorZX80::~ConfigEditorZX80()
-{
-}
-
 void ConfigEditorZX80::save()
 {
     _conf.to_section(_sec);

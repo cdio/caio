@@ -18,10 +18,10 @@
  */
 #pragma once
 
+#include "editor.hpp"
+
 #include "config.hpp"
 #include "zx80/zx80_config.hpp"
-
-#include "editor.hpp"
 
 namespace caio {
 namespace ui {
@@ -31,7 +31,7 @@ class ConfigEditorZX80 : public ConfigEditor {
 public:
     ConfigEditorZX80(Gui& gui, const fs::Path& cfile, config::Section&& sec);
 
-    virtual ~ConfigEditorZX80();
+    virtual ~ConfigEditorZX80() = default;
 
     void save() override;
 

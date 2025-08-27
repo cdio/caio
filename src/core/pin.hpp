@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include <functional>
-
 #include "latch.hpp"
 #include "pullup.hpp"
+
+#include <functional>
 
 namespace caio {
 

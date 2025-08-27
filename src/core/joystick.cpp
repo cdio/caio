@@ -18,10 +18,10 @@
  */
 #include "joystick.hpp"
 
+#include "utils.hpp"
+
 #include <cstddef>
 #include <unordered_map>
-
-#include "utils.hpp"
 
 namespace caio {
 namespace joystick {
@@ -55,6 +55,19 @@ std::string port_offset_to_string(ssize_t offset)
     });
 
     return (it == std::end(gamepad_name_to_port) ? "" : it->first);
+}
+
+Joystick::Joystick(std::string_view label, const Port& port)
+    : Name{TYPE, label},
+      _port{port}
+{
+}
+
+void Joystick::reset(unsigned jid, std::string_view name)
+{
+    _joyid = jid;
+    _position = 0;
+    _name = name;
 }
 
 }

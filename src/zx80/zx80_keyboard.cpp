@@ -233,10 +233,6 @@ ZX80Keyboard::ZX80Keyboard(std::string_view label, bool enabled)
     _matrix.fill(0);
 }
 
-ZX80Keyboard::~ZX80Keyboard()
-{
-}
-
 void ZX80Keyboard::reset()
 {
     std::lock_guard<std::mutex> lock{_matrix_mutex};

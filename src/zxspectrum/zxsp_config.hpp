@@ -29,19 +29,16 @@ constexpr static const char* SEC_ZXSPECTRUM     = "zxspectrum";
 constexpr static const char* KEY_OTAPE          = "otape";
 constexpr static const char* KEY_ITAPE          = "tape";
 constexpr static const char* KEY_FASTLOAD       = "fastload";
-constexpr static const char* KEY_SNAPSHOT       = "snap";
 
 constexpr static const char* DEFAULT_OTAPE      = "./";
 constexpr static const char* DEFAULT_ITAPE      = "";
 constexpr static const char* DEFAULT_FASTLOAD   = "no";
-constexpr static const char* DEFAULT_SNAPSHOT   = "";
 
 class ZXSpectrumCmdline : public config::Cmdline {
 public:
     using Cmdline::Cmdline;
 
-    virtual ~ZXSpectrumCmdline() {
-    }
+    virtual ~ZXSpectrumCmdline() = default;
 
     std::vector<config::Option> options() const override;
     std::string usage() const override;
@@ -52,16 +49,15 @@ struct ZXSpectrumConfig : public config::Config {
     std::string otape{};
     std::string itape{};
     bool        fastload{};
-    std::string snap{};
 
     ZXSpectrumConfig(config::Section& sec);
 
-    virtual ~ZXSpectrumConfig() {
-    }
+    virtual ~ZXSpectrumConfig() = default;
 
     bool operator==(const ZXSpectrumConfig& other) const;
 
-    bool operator!=(const ZXSpectrumConfig& other) const {
+    bool operator!=(const ZXSpectrumConfig& other) const
+    {
         return !operator==(other);
     }
 

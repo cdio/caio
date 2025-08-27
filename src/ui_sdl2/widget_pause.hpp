@@ -29,8 +29,7 @@ class Pause : public Widget {
 public:
     Pause(const sptr_t<::SDL_Renderer>& _renderer, const std::function<bool()>& upd = {});
 
-    virtual ~Pause() {
-    }
+    virtual ~Pause() = default;
 
     void action(const std::function<void()>& act)
     {

@@ -18,8 +18,9 @@
  */
 #include "ula_aspace.hpp"
 
-#include "logger.hpp"
 #include "zxsp_params.hpp"
+
+#include "logger.hpp"
 
 namespace caio {
 namespace sinclair {
@@ -48,10 +49,6 @@ ULAASpace::ULAASpace(const sptr_t<Z80>& cpu, const sptr_t<RAM>& ram, const sptr_
         _audio && _video && _kbd && _joy && _tape);
 
     ASpace::reset(_mmap, _mmap, ADDR_MASK);
-}
-
-ULAASpace::~ULAASpace()
-{
 }
 
 uint8_t ULAASpace::read(addr_t addr, ReadMode mode)

@@ -18,18 +18,16 @@
  */
 #pragma once
 
+#include "types.hpp"
+#include "keyboard.hpp"
+
 #include <array>
 #include <functional>
 #include <list>
 #include <map>
 #include <mutex>
-#include <string>
-#include <string_view>
 #include <tuple>
 #include <utility>
-
-#include "types.hpp"
-#include "keyboard.hpp"
 
 namespace caio {
 namespace commodore {
@@ -37,24 +35,26 @@ namespace c64 {
 
 /**
  * C64 Keyboard.
- * <pre>
- * +------------------------------------------------------------------------------+-------+
- * |                             CIA 1 Port B ($DC01)                             | Joy 2 |
- * +-------------+----------------------------------------------------------------+-------+
- * |             | PB7     PB6     PB5     PB4     PB3     PB2     PB1     PB0    |       |
- * +-------------+----------------------------------------------------------------+-------+
- * | CIA1    PA7 | STOP    Q       C=      SPACE   2       CTRL    <-      1      |       |
- * | Port A  PA6 | /       ^       =       RSHIFT  HOME    ;       *       £      |       |
- * | ($DC00) PA5 | ,       @       :       .       -       L       P       +      |       |
- * |         PA4 | N       O       K       M       0       J       I       9      | Fire  |
- * |         PA3 | V       U       H       B       8       G       Y       7      | Right |
- * |         PA2 | X       T       F       C       6       D       R       5      | Left  |
- * |         PA1 | LSHIFT  E       S       Z       4       A       W       3      | Down  |
- * |         PA0 | CRSR DN F5      F3      F1      F7      CRSR RT RETURN  DELETE | Up    |
- * +-------------+----------------------------------------------------------------+-------+
- * | Joy 1       |                         Fire    Right   Left    Down    Up     |       |
- * +-------------+----------------------------------------------------------------+-------+
- * </pre>
+ *
+ * ### Keyboard Matrix:
+ *
+ *     +------------------------------------------------------------------------------+-------+
+ *     |                             CIA 1 Port B ($DC01)                             | Joy 2 |
+ *     +-------------+----------------------------------------------------------------+-------+
+ *     |             | PB7     PB6     PB5     PB4     PB3     PB2     PB1     PB0    |       |
+ *     +-------------+----------------------------------------------------------------+-------+
+ *     | CIA1    PA7 | STOP    Q       C=      SPACE   2       CTRL    <-      1      |       |
+ *     | Port A  PA6 | /       ^       =       RSHIFT  HOME    ;       *       £      |       |
+ *     | ($DC00) PA5 | ,       @       :       .       -       L       P       +      |       |
+ *     |         PA4 | N       O       K       M       0       J       I       9      | Fire  |
+ *     |         PA3 | V       U       H       B       8       G       Y       7      | Right |
+ *     |         PA2 | X       T       F       C       6       D       R       5      | Left  |
+ *     |         PA1 | LSHIFT  E       S       Z       4       A       W       3      | Down  |
+ *     |         PA0 | CRSR DN F5      F3      F1      F7      CRSR RT RETURN  DELETE | Up    |
+ *     +-------------+----------------------------------------------------------------+-------+
+ *     | Joy 1       |                         Fire    Right   Left    Down    Up     |       |
+ *     +-------------+----------------------------------------------------------------+-------+
+ *
  * @see <https://www.c64-wiki.com/wiki/Keyboard>
  */
 class C64Keyboard : public keyboard::Keyboard {
@@ -154,7 +154,7 @@ public:
      */
     C64Keyboard(std::string_view label, bool enabled = true, const std::function<void()>& restore_cb = {});
 
-    virtual ~C64Keyboard();
+    virtual ~C64Keyboard() = default;
 
     /**
      * Set the RESTORE key callback.

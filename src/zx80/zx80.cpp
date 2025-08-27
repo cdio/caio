@@ -18,39 +18,37 @@
  */
 #include "zx80.hpp"
 
-#include "logger.hpp"
-#include "types.hpp"
-
-#include "ofile.hpp"
 #include "zx80_params.hpp"
+#include "ofile.hpp"
+
+#include "logger.hpp"
 
 namespace caio {
 namespace sinclair {
 namespace zx80 {
 
 ZX80::ZX80(config::Section& sec)
-    : Platform{},
+    : Platform{LABEL},
       _conf{sec}
 {
 }
 
-ZX80::~ZX80()
+bool ZX80::detect_format(const fs::Path& fname)
 {
-}
-
-std::string_view ZX80::name() const
-{
-    return "Sinclair ZX80";
-}
-
-void ZX80::detect_format(const fs::Path& pname)
-{
-    if (!pname.empty()) {
-        if (!_conf.prgfile.empty()) {
-            log.warn("Program file overrided. From {} to {}\n", _conf.prgfile, pname.string());
-        }
-        _conf.prgfile = pname;
+    if (fname.empty()) {
+        return false;
     }
+
+    if (Platform::detect_format(fname)) {
+        return true;
+    }
+
+    if (!_conf.prgfile.empty()) {
+        log.warn("Program file overrided. From {} to {}\n", _conf.prgfile, fname.string());
+    }
+
+    _conf.prgfile = fname;
+    return true;
 }
 
 void ZX80::init_monitor(int ifd, int ofd)

@@ -18,10 +18,10 @@
  */
 #include "monitor.hpp"
 
+#include "utils.hpp"
+
 #include <algorithm>
 #include <sstream>
-
-#include "utils.hpp"
 
 namespace caio {
 namespace monitor {

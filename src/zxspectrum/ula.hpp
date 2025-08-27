@@ -18,17 +18,14 @@
  */
 #pragma once
 
-#include <memory>
-#include <string>
+#include "ula_aspace.hpp"
+#include "ula_audio.hpp"
+#include "ula_video.hpp"
 
 #include "joystick.hpp"
 #include "ram.hpp"
 #include "rom.hpp"
 #include "zilog_z80.hpp"
-
-#include "ula_aspace.hpp"
-#include "ula_audio.hpp"
-#include "ula_video.hpp"
 
 namespace caio {
 namespace sinclair {
@@ -59,20 +56,22 @@ public:
         const sptr_t<ZXSpectrumKeyboard>& kbd, const sptr_t<Joystick>& joy,
         const sptr_t<ZXSpectrumTape>& tape);
 
-    virtual ~ULA() {
-    }
+    virtual ~ULA() = default;
 
     void reset();
 
-    sptr_t<class ULAAudio> audio() {
+    sptr_t<class ULAAudio>& audio()
+    {
         return _audio;
     }
 
-    sptr_t<class ULAVideo> video() {
+    sptr_t<class ULAVideo>& video()
+    {
         return _video;
     }
 
-    sptr_t<class ULAASpace> mmap() {
+    sptr_t<class ULAASpace>& mmap()
+    {
         return _aspace;
     }
 

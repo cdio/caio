@@ -36,8 +36,7 @@ public:
 
     Cassette(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd);
 
-    virtual ~Cassette() {
-    }
+    virtual ~Cassette() = default;
 
     bool is_idle() override;
 

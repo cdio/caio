@@ -18,11 +18,11 @@
  */
 #include "snap_sna.hpp"
 
-#include <iterator>
+#include "zxsp_params.hpp"
 
 #include "fs.hpp"
 
-#include "zxsp_params.hpp"
+#include <iterator>
 
 namespace caio {
 namespace sinclair {
@@ -32,10 +32,6 @@ SnapSNA::SnapSNA(const fs::Path& fname)
     : Snapshot{}
 {
     load(fname);
-}
-
-SnapSNA::~SnapSNA()
-{
 }
 
 bool SnapSNA::seems_like(const fs::Path& fname)

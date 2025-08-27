@@ -18,16 +18,15 @@
  */
 #include "keyboard.hpp"
 
+#include "utils.hpp"
+#include "logger.hpp"
+
 #include <algorithm>
 #include <iomanip>
 #include <fstream>
 #include <regex>
 #include <sstream>
 #include <unordered_map>
-
-#include "types.hpp"
-#include "utils.hpp"
-#include "logger.hpp"
 
 #define KEY_ENTRY(key)  { CAIO_STR(key), key }
 

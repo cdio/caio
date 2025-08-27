@@ -18,39 +18,20 @@
  */
 #include "zxsp.hpp"
 
-#include "kempston.hpp"
-
 #include "zxsp_params.hpp"
 #include "snap_sna.hpp"
 #include "snap_z80.hpp"
+
+#include "kempston.hpp"
 
 namespace caio {
 namespace sinclair {
 namespace zxspectrum {
 
 ZXSpectrum::ZXSpectrum(config::Section& sec)
-    : Platform{},
+    : Platform{LABEL},
       _conf{sec}
 {
-}
-
-ZXSpectrum::~ZXSpectrum()
-{
-}
-
-std::string_view ZXSpectrum::name() const
-{
-    return "Sinclair ZX-Spectrum";
-}
-
-void ZXSpectrum::detect_format(const fs::Path& pname)
-{
-    if (!pname.empty()) {
-        if (!_conf.snap.empty()) {
-            log.warn("Snapshot file overrided. From {} to {}\n", _conf.snap, pname.string());
-        }
-        _conf.snap = pname;
-    }
 }
 
 void ZXSpectrum::init_monitor(int ifd, int ofd)
@@ -250,10 +231,10 @@ fs::Path ZXSpectrum::rompath(const fs::Path& fname) const
 
 void ZXSpectrum::attach_prg()
 {
-    if (!_conf.snap.empty()) {
-        const auto fname{fs::search(_conf.snap, {"./"})};
+    if (!_conf.snapshot.empty()) {
+        const auto fname{fs::search(_conf.snapshot, {"./"})};
         if (fname.empty()) {
-            throw IOError{"Can't load snapshot: {}: {}", _conf.snap, Error::to_string()};
+            throw IOError{"Can't load snapshot: {}: {}", _conf.snapshot, Error::to_string()};
         }
 
         uptr_t<Snapshot> snap{};
@@ -263,7 +244,7 @@ void ZXSpectrum::attach_prg()
         } else if (SnapZ80::seems_like(fname)) {
             snap = std::make_unique<SnapZ80>(fname);
         } else {
-            throw IOError{"Unrecognised snapshot format: {}", _conf.snap};
+            throw IOError{"Unrecognised snapshot format: {}", _conf.snapshot};
         }
 
         reset(*snap);

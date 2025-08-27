@@ -25,8 +25,9 @@ namespace caio {
 namespace nintendo {
 namespace nes {
 
-NESASpace::NESASpace(const sptr_t<RAM>& ram, const sptr_t<RP2C02>& ppu, const sptr_t<Cartridge>& cart)
-    : ASpace{},
+NESASpace::NESASpace(std::string_view label, const sptr_t<RAM>& ram, const sptr_t<RP2C02>& ppu,
+    const sptr_t<Cartridge>& cart)
+    : ASpace{TYPE, label},
       _mmap{{
           { ram,  0x0000 },     /* 0000 - 07FF - 2K RAM                                             */
           { ram,  0x0000 },     /* 0800 - 0FFF - 2K RAM (mirror)                                    */
@@ -64,10 +65,6 @@ NESASpace::NESASpace(const sptr_t<RAM>& ram, const sptr_t<RP2C02>& ppu, const sp
 {
     CAIO_ASSERT(ram && ppu && cart && ram->size() >= RAM_SIZE);
     ASpace::reset(_mmap, _mmap, ADDR_MASK);
-}
-
-NESASpace::~NESASpace()
-{
 }
 
 }

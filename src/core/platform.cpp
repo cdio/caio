@@ -18,9 +18,9 @@
  */
 #include "platform.hpp"
 
-#include <thread>
-
 #include "version.hpp"
+
+#include <thread>
 
 namespace caio {
 

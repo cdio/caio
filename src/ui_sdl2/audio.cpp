@@ -18,11 +18,11 @@
  */
 #include "ui_sdl2/audio.hpp"
 
+#include "ui_sdl2/sdl2.hpp"
+#include "logger.hpp"
+
 #include <algorithm>
 #include <sstream>
-
-#include "logger.hpp"
-#include "ui_sdl2/sdl2.hpp"
 
 namespace caio {
 namespace ui {

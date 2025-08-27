@@ -18,13 +18,12 @@
  */
 #include "editor.hpp"
 
-#include "fs.hpp"
-#include "utils.hpp"
-
 #include "editor_c64.hpp"
 #include "editor_nes.hpp"
 #include "editor_zx80.hpp"
 #include "editor_zxsp.hpp"
+
+#include "utils.hpp"
 
 using namespace std::string_literals;
 

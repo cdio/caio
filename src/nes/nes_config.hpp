@@ -19,6 +19,7 @@
 #pragma once
 
 #include "config.hpp"
+
 #include "nes_joystick.hpp"
 
 namespace caio {
@@ -56,8 +57,7 @@ class NESCmdline : public config::Cmdline {
 public:
     using Cmdline::Cmdline;
 
-    virtual ~NESCmdline() {
-    }
+    virtual ~NESCmdline() = default;
 
     std::vector<config::Option> options() const override;
     std::string usage() const override;
@@ -71,9 +71,7 @@ struct NESConfig : public config::Config {
 
     NESConfig(config::Section& sec);
 
-    virtual ~NESConfig()
-    {
-    }
+    virtual ~NESConfig() = default;
 
     bool operator==(const NESConfig& other) const;
 

@@ -103,8 +103,7 @@ public:
      */
     ZX80Video(std::string_view label, const sptr_t<Clock>& clk, bool rvideo);
 
-    virtual ~ZX80Video() {
-    }
+    virtual ~ZX80Video() = default;
 
     /**
      * Set the render line callback.

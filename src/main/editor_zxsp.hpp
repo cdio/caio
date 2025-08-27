@@ -18,10 +18,10 @@
  */
 #pragma once
 
+#include "editor.hpp"
+
 #include "config.hpp"
 #include "zxspectrum/zxsp_config.hpp"
-
-#include "editor.hpp"
 
 namespace caio {
 namespace ui {
@@ -31,7 +31,7 @@ class ConfigEditorZXSpectrum : public ConfigEditor {
 public:
     ConfigEditorZXSpectrum(Gui& gui, const fs::Path& cfile, config::Section&& sec);
 
-    virtual ~ConfigEditorZXSpectrum();
+    virtual ~ConfigEditorZXSpectrum() = default;
 
     void save() override;
 

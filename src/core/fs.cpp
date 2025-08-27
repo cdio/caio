@@ -18,6 +18,11 @@
  */
 #include "fs.hpp"
 
+#include "logger.hpp"
+#include "utils.hpp"
+
+#include "sha2.h"
+
 #ifdef __APPLE__
 #include <mach-o/dyld.h>    /* _NSGetExecutablePath */
 #endif
@@ -31,12 +36,6 @@
 #include <fstream>
 #include <iterator>
 #include <sstream>
-
-#include "sha2.h"
-
-#include "logger.hpp"
-#include "types.hpp"
-#include "utils.hpp"
 
 namespace caio {
 namespace fs {

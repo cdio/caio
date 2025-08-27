@@ -18,9 +18,6 @@
  */
 #pragma once
 
-#include <cstdint>
-#include <memory>
-
 #include "fs.hpp"
 
 #include "cbm_bus.hpp"

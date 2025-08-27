@@ -18,9 +18,10 @@
  */
 #include "ui_sdl2/widget.hpp"
 
+#include "ui_sdl2/sdl2.hpp"
+
 #include "logger.hpp"
 #include "utils.hpp"
-#include "ui_sdl2/sdl2.hpp"
 
 namespace caio {
 namespace ui {

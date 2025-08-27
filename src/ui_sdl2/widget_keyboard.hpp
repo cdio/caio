@@ -33,8 +33,7 @@ public:
 
     Keyboard(const sptr_t<::SDL_Renderer>& renderer, const std::function<Status()>& upd);
 
-    virtual ~Keyboard() {
-    }
+    virtual ~Keyboard() = default;
 
     void render(const ::SDL_Rect& dstrect) override;
 

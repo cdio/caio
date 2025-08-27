@@ -18,13 +18,10 @@
  */
 #pragma once
 
-#include <cstdint>
-#include <iostream>
-#include <span>
-#include <vector>
-
 #include "fs.hpp"
 #include "types.hpp"
+
+#include <iostream>
 
 namespace caio {
 namespace commodore {
@@ -32,11 +29,13 @@ namespace c64 {
 
 /**
  * PRG file.
+ * A PRG file is the C64 program file, it starts with a
+ * 16-bit LE loading address followed by the actual data.
  */
 class PrgFile : public std::vector<uint8_t> {
 public:
     struct PrgHeader {
-        uint16_t addr;      /* Loading address (little endian on file, host order on memory) */
+        uint16_t addr;      /* Loading address (little endian on file) */
         /* data follows */
     } __attribute__((packed));
 
@@ -46,18 +45,16 @@ public:
      * @exception IOError
      * @see load(const fs::Path&)
      */
-    PrgFile(const fs::Path& fname = {}) {
-        PrgFile::load(fname);
-    }
+    PrgFile(const fs::Path& fname = {});
 
-    virtual ~PrgFile() {
-    }
+    virtual ~PrgFile() = default;
 
     /**
      * Get the start address of this PRG file.
      * @return The start address.
      */
-    addr_t address() const {
+    addr_t address() const
+    {
         return _hdr.addr;
     }
 
@@ -65,7 +62,8 @@ public:
      * Set a new start address for this PRG file.
      * @param addr New start address.
      */
-    void address(addr_t addr) {
+    void address(addr_t addr)
+    {
         _hdr.addr = addr;
     }
 

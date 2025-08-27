@@ -18,10 +18,10 @@
  */
 #include "utils.hpp"
 
+#include "sha2.h"
+
 #include <thread>
 #include <tuple>
-
-#include "sha2.h"
 
 namespace caio {
 namespace utils {

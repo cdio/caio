@@ -18,9 +18,6 @@
  */
 #pragma once
 
-#include <string_view>
-#include <vector>
-
 #include "fs.hpp"
 #include "types.hpp"
 
@@ -37,25 +34,25 @@ public:
     constexpr static const addr_t LOAD_ADDR   = 0x4000;
     constexpr static const addr_t MAX_SIZE    = 16384;
 
-    OFile() {
-    }
+    OFile() = default;
 
     /**
      * Create a cassette file from a data buffer.
      * @param buf Data buffer.
      */
     OFile(std::vector<uint8_t>&& buf)
-        : std::vector<uint8_t>{std::move(buf)} {
+        : std::vector<uint8_t>{std::move(buf)}
+    {
     }
 
-    virtual ~OFile() {
-    }
+    virtual ~OFile() = default;
 
     /**
      * Get the load address of this .o file.
      * @return The load address.
      */
-    virtual addr_t load_address() const {
+    virtual addr_t load_address() const
+    {
         return LOAD_ADDR;
     }
 
@@ -63,7 +60,8 @@ public:
      * Get the position containing the size of this file (little-endian).
      * @return The offset to the size of this .o file.
      */
-    virtual addr_t size_offset() const {
+    virtual addr_t size_offset() const
+    {
         return SIZE_OFFSET;
     }
 
@@ -91,25 +89,25 @@ public:
     constexpr static const addr_t SIZE_OFFSET = 11;
     constexpr static const addr_t LOAD_ADDR   = 0x4009;
 
-    PFile() {
-    }
+    PFile() = default;
 
     /**
      * Create a cassette file from a data buffer.
      * @param buf Data buffer.
      */
     PFile(std::vector<uint8_t>&& buf)
-        : OFile{std::move(buf)} {
+        : OFile{std::move(buf)}
+    {
     }
 
-    virtual ~PFile() {
-    }
+    virtual ~PFile() = default;
 
     /**
      * Get the load address of this .p file.
      * @return The load address.
      */
-    addr_t load_address() const override {
+    addr_t load_address() const override
+    {
         return PFile::LOAD_ADDR;
     }
 
@@ -117,7 +115,8 @@ public:
      * Get the position containing the size of this file (little-endian).
      * @return The offset to the size of this .p file.
      */
-    addr_t size_offset() const override {
+    addr_t size_offset() const override
+    {
         return PFile::SIZE_OFFSET;
     }
 };

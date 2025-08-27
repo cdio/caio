@@ -28,15 +28,15 @@ namespace caio {
  */
 class NibbleRAM : public RAM {
 public:
-    constexpr static const char* TYPE = "4-BIT RAM";
+    constexpr static const char* TYPE = "NIBBLE-RAM";
 
-    NibbleRAM(std::string_view label, size_t size)
-        : RAM{label, size} {
+    NibbleRAM(std::string_view label = {}, size_t size = 0)
+        : RAM{label, size}
+    {
         type(TYPE);
     }
 
-    virtual ~NibbleRAM() {
-    }
+    virtual ~NibbleRAM() = default;
 
     /**
      * @see RAM::dev_write()

@@ -39,8 +39,7 @@ class C64Cmdline : public config::Cmdline {
 public:
     using Cmdline::Cmdline;
 
-    virtual ~C64Cmdline() {
-    }
+    virtual ~C64Cmdline() = default;
 
     std::vector<config::Option> options() const override;
     std::string usage() const override;
@@ -55,12 +54,12 @@ struct C64Config : public config::Config {
 
     C64Config(config::Section& sec);
 
-    virtual ~C64Config() {
-    }
+    virtual ~C64Config() = default;
 
     bool operator==(const C64Config& other) const;
 
-    bool operator!=(const C64Config& other) const {
+    bool operator!=(const C64Config& other) const
+    {
         return !operator==(other);
     }
 

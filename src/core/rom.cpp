@@ -18,10 +18,10 @@
  */
 #include "rom.hpp"
 
-#include <fstream>
-
 #include "logger.hpp"
 #include "utils.hpp"
+
+#include <fstream>
 
 namespace caio {
 

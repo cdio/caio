@@ -18,10 +18,10 @@
  */
 #pragma once
 
+#include "editor.hpp"
+
 #include "config.hpp"
 #include "nes/nes_config.hpp"
-
-#include "editor.hpp"
 
 namespace caio {
 namespace ui {
@@ -31,7 +31,7 @@ class ConfigEditorNES : public ConfigEditor {
 public:
     ConfigEditorNES(Gui& gui, const fs::Path& cfile, config::Section&& sec);
 
-    virtual ~ConfigEditorNES();
+    virtual ~ConfigEditorNES() = default;
 
     void save() override;
 

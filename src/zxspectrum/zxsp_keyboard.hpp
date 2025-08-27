@@ -18,17 +18,15 @@
  */
 #pragma once
 
+#include "keyboard.hpp"
+#include "types.hpp"
+
 #include <array>
 #include <list>
 #include <map>
 #include <mutex>
-#include <string>
-#include <string_view>
 #include <tuple>
 #include <utility>
-
-#include "keyboard.hpp"
-#include "types.hpp"
 
 namespace caio {
 namespace sinclair {
@@ -37,7 +35,7 @@ namespace zxspectrum {
 /**
  * ZX-Spectrum Keyboard.
  *
- * Keyboard layout:
+ * ### Keyboard layout:
  *
  *     +---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+
  *     | blue    | red     |magenta  | green   | cyan    | yellow  | white   |unbright | bright  | black   |
@@ -64,7 +62,7 @@ namespace zxspectrum {
  *     |         | beep    | ink     | paper   | flash   | bright  | over    | inverse |         |         |
  *     +---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+
  *
- * Keyboard matrix:
+ * ### Keyboard matrix:
  *
  *     +----+-----------------------------------------------------------+
  *     |    |   D7     D6     D5     D4     D3     D2     D1     D0     |
@@ -155,7 +153,7 @@ public:
      */
     ZXSpectrumKeyboard(std::string_view label, bool enabled = true);
 
-    virtual ~ZXSpectrumKeyboard();
+    virtual ~ZXSpectrumKeyboard() = default;
 
     /**
      * @see Keyboard::reset()

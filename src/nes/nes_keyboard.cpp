@@ -336,10 +336,6 @@ NESKeyboard::NESKeyboard(std::string_view label, bool enabled)
     _matrix.fill(0);
 }
 
-NESKeyboard::~NESKeyboard()
-{
-}
-
 void NESKeyboard::reset()
 {
     _matrix.fill(0);

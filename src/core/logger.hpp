@@ -18,6 +18,9 @@
  */
 #pragma once
 
+#include "fs.hpp"
+#include "types.hpp"
+
 #include <cstdarg>
 #include <cstdio>
 #include <cstdint>
@@ -25,9 +28,6 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
-
-#include "fs.hpp"
-#include "types.hpp"
 
 namespace caio {
 

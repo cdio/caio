@@ -18,17 +18,23 @@
  */
 #include "c1541_fs.hpp"
 
-#include <format>
-#include <iomanip>
-#include <regex>
-
 #include "logger.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 
+#include <format>
+#include <iomanip>
+#include <regex>
+
 namespace caio {
 namespace commodore {
 namespace c1541 {
+
+C1541Fs::C1541Fs(uint8_t unit, const sptr_t<cbm_bus::Bus>& bus)
+    : C1541{unit, bus}
+{
+    type(TYPE);
+}
 
 void C1541Fs::attach(const fs::Path& path)
 {

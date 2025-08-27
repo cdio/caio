@@ -22,8 +22,8 @@ namespace caio {
 namespace nintendo {
 namespace nes {
 
-NESPPUASpace::NESPPUASpace(const sptr_t<Cartridge>& cart)
-    : ASpace{},
+NESPPUASpace::NESPPUASpace(std::string_view label, const sptr_t<Cartridge>& cart)
+    : ASpace{TYPE, label},
       _mmap{{
           { cart, 0x0000 + Cartridge::PPU_OFFSET },     /* 0000 - 07FF - Cartridge 8K CHR RAM                   */
           { cart, 0x0800 + Cartridge::PPU_OFFSET },     /* 0800 - 0FFF - Cartridge 8K CHR RAM                   */
@@ -37,10 +37,6 @@ NESPPUASpace::NESPPUASpace(const sptr_t<Cartridge>& cart)
 {
     CAIO_ASSERT(cart.get() != nullptr);
     ASpace::reset(_mmap, _mmap, ADDR_MASK);
-}
-
-NESPPUASpace::~NESPPUASpace()
-{
 }
 
 }

@@ -169,7 +169,7 @@ Serializer& operator&(Serializer& ser, float& value);
  * @see Serializer
  */
 template <typename T>
-requires (std::is_integral_v<T> || std::is_enum_v<T>) && (not (std::is_same_v<uint64_t, T>))
+requires (std::is_integral_v<T> || std::is_enum_v<T>) && (not std::is_same_v<uint64_t, T>)
 Serializer& operator&(Serializer& ser, T& value)
 {
     if (ser.is_serializer()) {

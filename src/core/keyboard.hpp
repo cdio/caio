@@ -18,15 +18,15 @@
  */
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include "fs.hpp"
 #include "joystick.hpp"
 #include "name.hpp"
 #include "types.hpp"
+
+#include <cstdint>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace caio {
 namespace keyboard {

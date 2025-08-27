@@ -19,7 +19,6 @@
 #include "mos_6581.hpp"
 
 #include "logger.hpp"
-#include "ui.hpp"
 
 #include <algorithm>
 #include <cmath>

@@ -18,11 +18,11 @@
  */
 #pragma once
 
+#include "name.hpp"
+
 #include <cstdint>
 #include <string>
 #include <string_view>
-
-#include "name.hpp"
 
 namespace caio {
 namespace joystick {
@@ -81,15 +81,9 @@ public:
      * @param jport Joystick port.
      * @see Port
      */
-    Joystick(std::string_view label, const Port& port)
-        : Name{TYPE, label},
-          _port{port}
-    {
-    }
+    Joystick(std::string_view label, const Port& port);
 
-    virtual ~Joystick()
-    {
-    }
+    virtual ~Joystick() = default;
 
     /**
      * Reset this joystick.
@@ -97,12 +91,7 @@ public:
      * this joystick to a real game controller.
      * @param jid Identifier assigned to this joystick.
      */
-    void reset(unsigned jid = JOYID_INVALID, std::string_view name = "")
-    {
-        _joyid = jid;
-        _position = 0;
-        _name = name;
-    }
+    void reset(unsigned jid = JOYID_INVALID, std::string_view name = "");
 
     /**
      * Set the current joystick position.

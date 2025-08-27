@@ -18,9 +18,6 @@
  */
 #include "c1541_factory.hpp"
 
-#include "types.hpp"
-#include "fs.hpp"
-
 #include "c1541_fs.hpp"
 
 namespace caio {

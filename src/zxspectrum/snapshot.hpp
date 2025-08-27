@@ -18,13 +18,11 @@
  */
 #pragma once
 
-#include <span>
-#include <string_view>
-#include <tuple>
-#include <vector>
-
 #include "types.hpp"
 #include "zilog_z80.hpp"
+
+#include <span>
+#include <tuple>
 
 namespace caio {
 namespace sinclair {

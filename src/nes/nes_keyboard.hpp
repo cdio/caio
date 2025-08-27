@@ -18,6 +18,9 @@
  */
 #pragma once
 
+#include "keyboard.hpp"
+#include "types.hpp"
+
 #include <array>
 #include <functional>
 #include <list>
@@ -28,17 +31,14 @@
 #include <tuple>
 #include <utility>
 
-#include "types.hpp"
-#include "keyboard.hpp"
-
 namespace caio {
 namespace nintendo {
 namespace nes {
 
 /**
- * Family BASIC Keyboard
+ * Family BASIC Keyboard.
  *
- * ## Keyboard Layout:
+ * ### Keyboard Layout:
  *
  *    +--------+ +--------+ +--------+ +--------+ +--------+ +--------+ +--------+ +--------+
  *    |        | |        | |        | |        | |        | |        | |        | |        |
@@ -88,7 +88,7 @@ namespace nes {
  *   LEFT-CONTROL       -> GRPH
  *   GRAVE ACCENT `     -> YEN
  *
- * ## Keyboard Matrix:
+ * ### Keyboard Matrix:
  *
  *    +-----+---------+---------+---------+---------+---------+---------+---------+---------+
  *    |     |               COLUMN 0                |               COLUMN 1                |
@@ -234,7 +234,7 @@ public:
      */
     NESKeyboard(std::string_view label, bool enabled = true);
 
-    virtual ~NESKeyboard();
+    virtual ~NESKeyboard() = default;
 
     /**
      * @see Keyboard::reset()

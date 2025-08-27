@@ -18,14 +18,14 @@
  */
 #pragma once
 
-#include <atomic>
-
-#include <SDL_audio.h>
-
 #include "dispatcher.hpp"
 #include "locked_queue.hpp"     //TODO XXX use lock-free queues
 #include "signal.hpp"
 #include "ui_config.hpp"
+
+#include <SDL_audio.h>
+
+#include <atomic>
 
 namespace caio {
 namespace ui {

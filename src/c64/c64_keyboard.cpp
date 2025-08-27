@@ -286,10 +286,6 @@ C64Keyboard::C64Keyboard(std::string_view label, bool enabled, const std::functi
     _matrix.fill(0);
 }
 
-C64Keyboard::~C64Keyboard()
-{
-}
-
 void C64Keyboard::restore_key(const std::function<void()>& restore_cb)
 {
     _restore_cb = restore_cb;

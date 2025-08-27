@@ -29,7 +29,7 @@ class Empty : public Widget {
 public:
     Empty(const sptr_t<::SDL_Renderer>& _renderer);
 
-    virtual ~Empty();
+    virtual ~Empty() = default;
 
     bool enabled() const override;
 

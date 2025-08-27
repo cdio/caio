@@ -24,6 +24,8 @@
 
 #include "nes_cartridge.hpp"
 
+#include <string_view>
+
 namespace caio {
 namespace nintendo {
 namespace nes {
@@ -53,18 +55,20 @@ namespace nes {
  */
 class NESASpace : public ASpace {
 public:
+    constexpr static const char* TYPE       = "NES-ASPACE";
     constexpr static const addr_t ADDR_MASK = 0xFFFF;
     constexpr static const size_t BLOCKS    = 32;       /* 2K sized blocks */
 
     /**
      * Initialise this address space.
-     * @param ram  Board's RAM (2K);
-     * @param ppu  PPU;
-     * @param cart Cartridge.
+     * @param label Label assigned to this address space.
+     * @param ram   Board's RAM (2K);
+     * @param ppu   PPU;
+     * @param cart  Cartridge.
      */
-    NESASpace(const sptr_t<RAM>& ram, const sptr_t<RP2C02>& ppu, const sptr_t<Cartridge>& cart);
+    NESASpace(std::string_view label, const sptr_t<RAM>& ram, const sptr_t<RP2C02>& ppu, const sptr_t<Cartridge>& cart);
 
-    virtual ~NESASpace();
+    virtual ~NESASpace() = default;
 
 private:
     bank_t<BLOCKS> _mmap;

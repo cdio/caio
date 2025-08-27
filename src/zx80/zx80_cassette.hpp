@@ -18,14 +18,11 @@
  */
 #pragma once
 
-#include <functional>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include "clock.hpp"
 #include "fs.hpp"
 #include "types.hpp"
+
+#include <functional>
 
 namespace caio {
 namespace sinclair {
@@ -54,7 +51,7 @@ public:
     constexpr static const int END_OF_FILE              = -1;
     constexpr static const int END_OF_TAPE              = -2;
 
-    virtual ~ZX80Cassette();
+    virtual ~ZX80Cassette() = default;
 
     /**
      * Read a pulse from this cassette.
@@ -160,7 +157,7 @@ public:
      */
     ZX80CassetteO(const sptr_t<Clock>& clk, const fs::Path& cassdir);
 
-    virtual ~ZX80CassetteO();
+    virtual ~ZX80CassetteO() = default;
 
     /**
      * Restart this cassette interface.
@@ -234,7 +231,7 @@ public:
      */
     ZX80CassetteP(const sptr_t<Clock>& clk, const fs::Path& cassdir);
 
-    virtual ~ZX80CassetteP();
+    virtual ~ZX80CassetteP() = default;
 
     /**
      * Convert a 8K ROM character to ascii.

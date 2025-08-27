@@ -18,18 +18,12 @@
  */
 #pragma once
 
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <ostream>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include "clock.hpp"
 #include "name.hpp"
 #include "types.hpp"
 #include "utils.hpp"
+
+#include <functional>
 
 namespace caio {
 namespace commodore {
@@ -42,73 +36,71 @@ class BusData {
 public:
     constexpr static const bool RELEASED = true;
 
-    BusData() {
-    }
+    BusData() = default;
 
-    BusData(const BusData& bd)
-        : _srq{bd._srq},
-          _atn{bd._atn},
-          _clk{bd._clk},
-          _dat{bd._dat},
-          _rst{bd._rst} {
-    }
+    BusData(const BusData& bd);
 
-    bool is_released() const {
+    bool is_released() const
+    {
         return (_srq == RELEASED && _atn == RELEASED && _clk == RELEASED && _dat == RELEASED && _rst == RELEASED);
     }
 
-    bool srq() const {
+    bool srq() const
+    {
         return _srq;
     }
 
-    bool atn() const {
+    bool atn() const
+    {
         return _atn;
     }
 
-    bool clk() const {
+    bool clk() const
+    {
         return _clk;
     }
 
-    bool dat() const {
+    bool dat() const
+    {
         return _dat;
     }
 
-    bool rst() const {
+    bool rst() const
+    {
         return _rst;
     }
 
-    void srq(bool release) {
+    void srq(bool release)
+    {
         _srq = release;
     }
 
-    void atn(bool release) {
+    void atn(bool release)
+    {
         _atn = release;
     }
 
-    void clk(bool release) {
+    void clk(bool release)
+    {
         _clk = release;
     }
 
-    void dat(bool release) {
+    void dat(bool release)
+    {
         _dat = release;
     }
 
-    void rst(bool release) {
+    void rst(bool release)
+    {
         _rst = release;
     }
 
-    void release() {
+    void release()
+    {
         _srq = _atn = _clk = _dat = _rst = RELEASED;
     }
 
-    BusData& operator&=(const BusData& bd) {
-        _srq &= bd._srq;
-        _atn &= bd._atn;
-        _clk &= bd._clk;
-        _dat &= bd._dat;
-        _rst &= bd._rst;
-        return *this;
-    }
+    BusData& operator&=(const BusData& bd);
 
     std::string to_string() const;
 
@@ -129,12 +121,9 @@ class Bus : public Name {
 public:
     constexpr static const char* TYPE = "CBM-BUS";
 
-    explicit Bus(std::string_view label = "")
-        : Name{TYPE, label} {
-    }
+    explicit Bus(std::string_view label = "");
 
-    virtual ~Bus() {
-    }
+    virtual ~Bus() = default;
 
     /**
      * Attach a new device to this bus.
@@ -154,7 +143,8 @@ public:
      * Get the cbm data bus.
      * @return A reference to this bus' data lines.
      */
-    const BusData& data() const {
+    const BusData& data() const
+    {
         return _data;
     }
 
@@ -191,71 +181,82 @@ public:
      * @param bus   Bus to connect to;
      * @param label Label asssigned to this controller.
      */
-    Controller(const sptr_t<Bus>& bus)
-        : Controller{CONTROLLER_UNIT, bus, LABEL} {
-    }
+    Controller(const sptr_t<Bus>& bus);
 
-    virtual ~Controller() {
-    }
+    virtual ~Controller() = default;
 
-    uint8_t unit() const {
+    uint8_t unit() const
+    {
         return _unit;
     }
 
-    const BusData& bus_data() const {
+    const BusData& bus_data() const
+    {
         return _bus->data();
     }
 
-    const BusData& data() const {
+    const BusData& data() const
+    {
         return _data;
     }
 
-    bool srq() const {
+    bool srq() const
+    {
         return bus_data().srq();
     }
 
-    bool atn() const {
+    bool atn() const
+    {
         return bus_data().atn();
     }
 
-    bool clk() const {
+    bool clk() const
+    {
         return bus_data().clk();
     }
 
-    bool dat() const {
+    bool dat() const
+    {
         return bus_data().dat();
     }
 
-    bool rst() const {
+    bool rst() const
+    {
         return bus_data().rst();
     }
 
-    void srq(bool release) {
+    void srq(bool release)
+    {
         _data.srq(release);
         _bus->propagate();
     }
 
-    void atn(bool release) {
+    void atn(bool release)
+    {
         _data.atn(release);
         _bus->propagate();
     }
 
-    void clk(bool release) {
+    void clk(bool release)
+    {
         _data.clk(release);
         _bus->propagate();
     }
 
-    void dat(bool release) {
+    void dat(bool release)
+    {
         _data.dat(release);
         _bus->propagate();
     }
 
-    void rst(bool release) {
+    void rst(bool release)
+    {
         _data.rst(release);
         _bus->propagate();
     }
 
-    void release() {
+    void release()
+    {
         _data.release();
         _bus->propagate();
     }
@@ -280,14 +281,12 @@ protected:
  */
 class ByteTR {
 public:
-    ByteTR() {
-    }
-
     /**
      * Get the byte being transmetted or received.
      * @return The byte being transmitted or received.
      */
-    uint8_t byte() const {
+    uint8_t byte() const
+    {
         return _byte;
     }
 
@@ -295,7 +294,8 @@ public:
      * Get the transmission status.
      * @return True if this is the last byte to be transmitted or received; false otherwise.
      */
-    bool last() const {
+    bool last() const
+    {
         return _last;
     }
 
@@ -304,7 +304,8 @@ public:
      * @return True if this byte is ready to be transmitted or it is fully received
      * and the state machine is ready for another byte; false otherwise.
      */
-    bool ready() const {
+    bool ready() const
+    {
         return _ready;
     }
 
@@ -313,7 +314,8 @@ public:
      * @return True if the transmission or reception of this byte is completed
      * but the state machine is not ready for another byte; false otherwise.
      */
-    bool complete() const {
+    bool complete() const
+    {
         return (_curbit == 0);
     }
 
@@ -322,7 +324,8 @@ public:
      * @param byte Byte to transmit;
      * @param last True if this is the last byte to transmit.
      */
-    void byte(uint8_t byte, bool last = false) {
+    void byte(uint8_t byte, bool last = false)
+    {
         _byte   = byte;
         _last   = last;
         _ready  = false;
@@ -333,7 +336,8 @@ public:
      * Set the last state of this byte.
      * @param last True if this is the last byte to be transmitted or received; false otherwise.
      */
-    void last(bool last) {
+    void last(bool last)
+    {
         _last = last;
     }
 
@@ -343,7 +347,8 @@ public:
      * @param ready True if this is byte is ready; false otherwise.
      * @see ready()
      */
-    void ready(bool ready) {
+    void ready(bool ready)
+    {
         _ready = ready;
     }
 
@@ -351,7 +356,8 @@ public:
      * Set a new received bit.
      * @param bit Received bit (true is 1, false is 0).
      */
-    void bit(bool bit) {
+    void bit(bool bit)
+    {
         if (bit) {
             _byte |= _curbit;
         }
@@ -362,7 +368,8 @@ public:
      * Get the next bit to transmit.
      * @return The next bit to transmit.
      */
-    bool bit() {
+    bool bit()
+    {
         bool b = _byte & _curbit;
         _curbit <<= 1;
         return b;
@@ -380,49 +387,53 @@ private:
  */
 class Command {
 public:
-    Command() {
-    }
-
-    ~Command() {
-    }
-
-    bool operator!() const {
+    bool operator!() const
+    {
         return (_cmd == 0);
     }
 
-    operator bool() const {
+    operator bool() const
+    {
         return (_cmd != 0);
     }
 
-    uint8_t command() const {
+    uint8_t command() const
+    {
         return _cmd;
     }
 
-    uint8_t chunit() const {
+    uint8_t chunit() const
+    {
         return _chunit;
     }
 
-    buffer_t& param() {
+    Buffer& param()
+    {
         return _param;
     }
 
-    std::string param_str() const {
+    std::string param_str() const
+    {
         return utils::to_string({_param.data(), _param.size()});
     }
 
-    void command(uint8_t cmd) {
+    void command(uint8_t cmd)
+    {
         _cmd = cmd;
     }
 
-    void chunit(uint8_t chunit) {
+    void chunit(uint8_t chunit)
+    {
         _chunit = chunit;
     }
 
-    void param(uint8_t byte) {
+    void param(uint8_t byte)
+    {
         _param.push_back(byte);
     }
 
-    void clear() {
+    void clear()
+    {
         _cmd = 0;
         _chunit = 0;
         _param.clear();
@@ -431,7 +442,7 @@ public:
 private:
     uint8_t     _cmd{};
     uint8_t     _chunit{};
-    buffer_t    _param{};
+    Buffer      _param{};
 };
 
 /**
@@ -440,22 +451,27 @@ private:
 class ReadByte {
 public:
     ReadByte()
-        : _value{-1} {
+        : _value{-1}
+    {
     }
 
     ReadByte(uint8_t byte, bool is_last)
-        : _value{byte | (is_last ? ~255 : 0)} {
+        : _value{byte | (is_last ? ~255 : 0)}
+    {
     }
 
-    uint8_t value() const {
+    uint8_t value() const
+    {
         return (_value & 255);
     }
 
-    bool is_last() const {
+    bool is_last() const
+    {
         return (_value < 0);
     }
 
-    bool is_eof() const {
+    bool is_eof() const
+    {
         return (_value == -1);
     }
 
@@ -466,7 +482,7 @@ private:
 /**
  * CBM-BUS Device.
  * Device attached to a CBM-BUS.
- * This class must be derived by the actual device implementation.
+ * This class must be derived by the actual bus device implementation.
  */
 class Device : public Controller, public Clockable {
 public:
@@ -595,13 +611,14 @@ public:
      * @param ch    Channel to write to:
      * @param value Buffer to write.
      */
-    virtual void write(uint8_t ch, const buffer_t& buf) = 0;
+    virtual void write(uint8_t ch, const Buffer& buf) = 0;
 
     /**
      * Get the device activity status.
      * @return true if the device is idle; false if the device is receiving or transmitting data.
      */
-    bool is_idle() const {
+    bool is_idle() const
+    {
         return (_role == Role::PASSIVE);
     }
 
@@ -621,20 +638,24 @@ protected:
 
     bool process_secondary(bool with_param);
 
-    void state(State state) {
+    void state(State state)
+    {
         _state = state;
         _time = 0;
     }
 
-    bool is_timeout(uint64_t timeout) const {
+    bool is_timeout(uint64_t timeout) const
+    {
         return (_time >= timeout);
     }
 
-    std::string bus_name() const {
+    std::string bus_name() const
+    {
         return _bus->type();
     }
 
-    std::string dev_name() const {
+    std::string dev_name() const
+    {
         return label();
     }
 

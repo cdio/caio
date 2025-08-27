@@ -18,12 +18,11 @@
  */
 #pragma once
 
-#include <fstream>
-#include <vector>
-
 #include "fs.hpp"
 #include "types.hpp"
 #include "device.hpp"
+
+#include <fstream>
 
 namespace caio {
 namespace commodore {
@@ -174,21 +173,15 @@ public:
         HW_TYPE_FREEZE_FRAME_MK2        = 77
     };
 
-    Crt() {
-    }
-
     /**
      * Create a CRT instance.
      * @param fname Name of the cartridge file to open.
      * @exceptions InvalidCartridge
-     * @see open(std::string_view)
+     * @see open(const fs::Path&)
      */
-    Crt(const fs::Path& fname) {
-        open(fname);
-    }
+    Crt(const fs::Path& fname = {});
 
-    virtual ~Crt() {
-    }
+    virtual ~Crt() = default;
 
     /**
      * Open and read a CRT cartridge file.
@@ -202,7 +195,8 @@ public:
      * Get the hardware type of this CRT file.
      * @return The hardware type of this CRT file.
      */
-    const HardwareType type() const {
+    const HardwareType type() const
+    {
         return static_cast<HardwareType>(_hdr.hwtype);
     }
 
@@ -210,7 +204,8 @@ public:
      * Get the status of the EXROM pin of this CRT.
      * @return The status of the EXROM pin.
      */
-    bool exrom() const {
+    bool exrom() const
+    {
         return _hdr.exrom;
     }
 
@@ -218,7 +213,8 @@ public:
      * Get the status of the GAME pin of this CRT.
      * @return The status of the GAME pin.
      */
-    bool game() const {
+    bool game() const
+    {
         return _hdr.game;
     }
 
@@ -226,7 +222,8 @@ public:
      * Get the number of chips embedded in this CRT.
      * @return The number of chip sections in this CRT.
      */
-    size_t chips() const {
+    size_t chips() const
+    {
         return _chips.size();
     }
 

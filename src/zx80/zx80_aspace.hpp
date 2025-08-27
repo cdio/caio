@@ -18,15 +18,15 @@
  */
 #pragma once
 
-#include "aspace.hpp"
-#include "device.hpp"
-#include "zilog_z80.hpp"
-
 #include "zx80_cassette.hpp"
 #include "zx80_config.hpp"
 #include "zx80_keyboard.hpp"
 #include "zx80_params.hpp"
 #include "zx80_video.hpp"
+
+#include "aspace.hpp"
+#include "device.hpp"
+#include "zilog_z80.hpp"
 
 namespace caio {
 namespace sinclair {
@@ -68,7 +68,7 @@ public:
     ZX80ASpace(const sptr_t<Z80>& cpu, const devptr_t& ram, const devptr_t& rom, const sptr_t<ZX80Video>& video,
         const sptr_t<ZX80Keyboard>& kbd, const sptr_t<ZX80Cassette>& cass);
 
-    virtual ~ZX80ASpace();
+    virtual ~ZX80ASpace() = default;
 
     /**
      * @see ASpace::read()

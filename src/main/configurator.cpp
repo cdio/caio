@@ -18,6 +18,11 @@
  */
 #include "configurator.hpp"
 
+#include "config.hpp"
+#include "fs.hpp"
+#include "logger.hpp"
+#include "utils.hpp"
+
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <fcntl.h>
@@ -26,11 +31,6 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
-
-#include "config.hpp"
-#include "fs.hpp"
-#include "logger.hpp"
-#include "utils.hpp"
 
 namespace caio {
 namespace ui {

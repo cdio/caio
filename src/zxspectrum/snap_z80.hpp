@@ -28,7 +28,7 @@ namespace zxspectrum {
  * Z80 snapshot file format header (version 1).
  *
  *     Offset  Length  Description
- *     ---------------------------------------------------------------------
+ *     -----------------------------------------------------------------
  *     0       1       A register
  *     1       1       F register
  *     2       2       BC register pair (LSB, i.e. C, first)
@@ -253,7 +253,7 @@ public:
      */
     SnapZ80(const fs::Path& fname);
 
-    virtual ~SnapZ80();
+    virtual ~SnapZ80() = default;
 
     /**
      * Detect if a specified file uses the Z80 format.

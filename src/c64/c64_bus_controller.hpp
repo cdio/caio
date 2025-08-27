@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include <memory>
-
 #include "cbm_bus.hpp"
 #include "mos_6526.hpp"
 
@@ -39,8 +37,7 @@ public:
 
     C64BusController(const sptr_t<cbm_bus::Bus>& bus, const sptr_t<Mos6526>& cia2);
 
-    virtual ~C64BusController() {
-    }
+    virtual ~C64BusController() = default;
 
 private:
     /**

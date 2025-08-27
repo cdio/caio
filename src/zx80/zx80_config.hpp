@@ -41,8 +41,7 @@ class ZX80Cmdline : public config::Cmdline {
 public:
     using Cmdline::Cmdline;
 
-    virtual ~ZX80Cmdline() {
-    }
+    virtual ~ZX80Cmdline() = default;
 
     std::vector<config::Option> options() const override;
     std::string usage() const override;
@@ -58,12 +57,12 @@ struct ZX80Config : public config::Config {
 
     ZX80Config(config::Section& sec);
 
-    virtual ~ZX80Config() {
-    }
+    virtual ~ZX80Config() = default;
 
     bool operator==(const ZX80Config& other) const;
 
-    bool operator!=(const ZX80Config& other) const {
+    bool operator!=(const ZX80Config& other) const
+    {
         return !operator==(other);
     }
 

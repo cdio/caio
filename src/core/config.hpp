@@ -18,17 +18,17 @@
  */
 #pragma once
 
-#include <functional>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <utility>
-
 #include "fs.hpp"
 #include "keyboard.hpp"
 #include "logger.hpp"
 
 #include "ui_config.hpp"
+
+#include <functional>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
 
 #ifndef D_PREFIX
 #define D_PREFIX            "/opt/caio"
@@ -277,9 +277,9 @@ bool is_false(std::string_view);
  */
 class Cmdline {
 public:
-    Cmdline();
+    Cmdline() = default;
 
-    virtual ~Cmdline();
+    virtual ~Cmdline() = default;
 
     std::string_view progname() const
     {
@@ -429,7 +429,7 @@ struct Config {
      */
     Config(Section& sec, std::string_view prefix);
 
-    virtual ~Config();
+    virtual ~Config() = default;
 
     bool operator==(const Config& other) const;
 

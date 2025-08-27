@@ -18,13 +18,18 @@
  */
 #include "prgfile.hpp"
 
-#include <fstream>
-
 #include "endian.hpp"
+
+#include <fstream>
 
 namespace caio {
 namespace commodore {
 namespace c64 {
+
+PrgFile::PrgFile(const fs::Path& fname)
+{
+    PrgFile::load(fname);
+}
 
 void PrgFile::load(const fs::Path& fname)
 {

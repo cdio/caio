@@ -18,13 +18,13 @@
  */
 #pragma once
 
+#include "fs.hpp"
+#include "types.hpp"
+
 #include <array>
 #include <format>
 #include <span>
 #include <string>
-
-#include "fs.hpp"
-#include "types.hpp"
 
 namespace caio {
 namespace readline {

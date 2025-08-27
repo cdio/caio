@@ -20,9 +20,8 @@
 
 #include <cstdint>
 #include <functional>
-#include <limits>
+#include <tuple>
 #include <type_traits>
-#include <utility>
 #include <vector>
 
 namespace caio {
@@ -36,9 +35,8 @@ namespace caio {
  * Each port can be associated to several input and output callbacks so the port
  * pins are implemented as pull-ups.
  */
-template<typename ADDR, typename DATA,
-    std::enable_if_t<std::is_unsigned<ADDR>::value, bool> = true,
-    std::enable_if_t<std::is_unsigned<DATA>::value, bool> = true>
+template <typename ADDR, typename DATA>
+requires std::is_unsigned_v<ADDR> && std::is_unsigned_v<DATA>
 class Gpio_ {
 public:
     using addr_type = ADDR;
@@ -47,18 +45,20 @@ public:
     using IorCb = std::function<DATA(ADDR)>;
     using IowCb = std::function<void(ADDR, DATA, bool)>;
 
-    using IorMask = std::pair<IorCb, DATA>;
-    using IowMask = std::pair<IowCb, DATA>;
+    using IorMask = std::tuple<IorCb, DATA>;
+    using IowMask = std::tuple<IowCb, DATA>;
 
-    explicit Gpio_() {
-    }
+    Gpio_() = default;
+
+    virtual ~Gpio_() = default;
 
     /**
      * Add an input callback.
      * @param ior  Input callback;
      * @param mask Data bits used by the callback.
      */
-    void add_ior(const IorCb& ior, DATA mask) {
+    void add_ior(const IorCb& ior, DATA mask)
+    {
         _iors.push_back({ior, mask});
     }
 
@@ -67,7 +67,8 @@ public:
      * @param iow  Output callback;
      * @param mask Data bits used by the callback.
      */
-    void add_iow(const IowCb& iow, DATA mask) {
+    void add_iow(const IowCb& iow, DATA mask)
+    {
         _iows.push_back({iow, mask});
     }
 
@@ -78,8 +79,9 @@ public:
      * @param addr Port to read from.
      * @return The port value.
      */
-    DATA ior(ADDR addr) const {
-        DATA value{std::numeric_limits<DATA>::max()};   /* pull-up */
+    DATA ior(ADDR addr) const
+    {
+        DATA value{static_cast<DATA>(-1)};   /* pull-up */
         for (const auto& [ior, mask] : _iors) {
             value &= (ior(addr) & mask) | ~mask;
         }
@@ -95,7 +97,8 @@ public:
      * @param value Value to write;
      * @param force Force write.
      */
-    void iow(ADDR addr, DATA value, bool force = false) {
+    void iow(ADDR addr, DATA value, bool force = false)
+    {
         for (auto& [iow, mask] : _iows) {
             iow(addr, value & mask, force);
         }

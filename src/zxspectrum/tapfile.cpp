@@ -18,10 +18,10 @@
  */
 #include "tapfile.hpp"
 
-#include <fstream>
-
 #include "endian.hpp"
 #include "logger.hpp"
+
+#include <fstream>
 
 namespace caio {
 namespace sinclair {
@@ -30,10 +30,6 @@ namespace zxspectrum {
 TAPFile::TAPFile(const fs::Path& path)
 {
     load(path);
-}
-
-TAPFile::~TAPFile()
-{
 }
 
 void TAPFile::reset()

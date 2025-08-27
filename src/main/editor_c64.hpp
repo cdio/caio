@@ -18,10 +18,10 @@
  */
 #pragma once
 
+#include "editor.hpp"
+
 #include "config.hpp"
 #include "c64/c64_config.hpp"
-
-#include "editor.hpp"
 
 namespace caio {
 namespace ui {
@@ -31,7 +31,7 @@ class ConfigEditorC64 : public ConfigEditor {
 public:
     ConfigEditorC64(Gui& gui, const fs::Path& cfile, config::Section&& sec);
 
-    virtual ~ConfigEditorC64();
+    virtual ~ConfigEditorC64() = default;
 
     void save() override;
 

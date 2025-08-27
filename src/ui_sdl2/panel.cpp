@@ -18,10 +18,11 @@
  */
 #include "ui_sdl2/panel.hpp"
 
-#include <algorithm>
+#include "ui_sdl2/sdl2.hpp"
 
 #include "utils.hpp"
-#include "ui_sdl2/sdl2.hpp"
+
+#include <algorithm>
 
 namespace caio {
 namespace ui {
@@ -30,10 +31,6 @@ namespace sdl2 {
 Panel::Panel(const sptr_t<::SDL_Renderer>& renderer, const std::string& statusbar)
 {
     reset(renderer, statusbar);
-}
-
-Panel::~Panel()
-{
 }
 
 void Panel::reset(const sptr_t<::SDL_Renderer>& renderer, const std::string& statusbar)

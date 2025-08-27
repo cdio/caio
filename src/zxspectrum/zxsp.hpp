@@ -18,16 +18,17 @@
  */
 #pragma once
 
-#include "platform.hpp"
-#include "ram.hpp"
-#include "rom.hpp"
-#include "zilog_z80.hpp"
-
 #include "snapshot.hpp"
 #include "ula.hpp"
 #include "zxsp_config.hpp"
 #include "zxsp_keyboard.hpp"
 #include "zxsp_tape.hpp"
+
+#include "platform.hpp"
+
+#include "ram.hpp"
+#include "rom.hpp"
+#include "zilog_z80.hpp"
 
 namespace caio {
 namespace sinclair {
@@ -38,6 +39,8 @@ namespace zxspectrum {
  */
 class ZXSpectrum : public Platform {
 public:
+    constexpr static const char* LABEL = "Sinclair ZX-Spectrum";
+
     /**
      * Initialise this ZX-Spectrum.
      * This method only sets the configuration parameters.
@@ -48,19 +51,7 @@ public:
      */
     ZXSpectrum(config::Section& sec);
 
-    virtual ~ZXSpectrum();
-
-    /**
-     * @see Platform::name()
-     */
-    std::string_view name() const override;
-
 private:
-    /**
-     * @see Platform::detect_format(const fs::Path&)
-     */
-    void detect_format(const fs::Path& pname) override;
-
     /**
      * @see Platform::init_monitor(int, int)
      */
@@ -112,7 +103,7 @@ private:
     /**
      * @see Platform::config()
      */
-    const Config& config() const override
+    Config& config() override
     {
         return _conf;
     }
@@ -145,6 +136,11 @@ private:
      * @exception IOError if the specified file cannot be loaded.
      */
     void attach_prg();
+
+    /**
+     * @see Platform::serdes(Serializer&)
+     */
+    void serdes(Serializer& ser) override { /* TODO XXX */ };
 
     ZXSpectrumConfig            _conf;
     std::string                 _title{};

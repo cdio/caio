@@ -18,13 +18,12 @@
  */
 #include "config.hpp"
 
-#include <cstdlib>
-#include <iostream>
-
-#include "fs.hpp"
 #include "types.hpp"
 #include "utils.hpp"
 #include "version.hpp"
+
+#include <cstdlib>
+#include <iostream>
 
 namespace caio {
 namespace config {
@@ -177,14 +176,6 @@ std::string Cmdline::usage() const
         DEFAULT_VJOY_FIRE,
         DEFAULT_SCREENSHOTDIR,
         DEFAULT_STATUSBAR);
-}
-
-Cmdline::Cmdline()
-{
-}
-
-Cmdline::~Cmdline()
-{
 }
 
 Confile Cmdline::defaults()

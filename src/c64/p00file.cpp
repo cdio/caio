@@ -18,13 +18,18 @@
  */
 #include "p00file.hpp"
 
-#include <fstream>
-
 #include "endian.hpp"
+
+#include <fstream>
 
 namespace caio {
 namespace commodore {
 namespace c64 {
+
+P00File::P00File(const fs::Path& fname)
+{
+    P00File::load(fname);
+}
 
 void P00File::load(const fs::Path& fname)
 {

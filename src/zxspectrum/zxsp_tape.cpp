@@ -102,10 +102,6 @@ Tape::Tape(const sptr_t<Clock>& clk, std::string_view itape, std::string_view ot
     save(otape);
 }
 
-Tape::~Tape()
-{
-}
-
 void Tape::save(std::string_view path)
 {
     TX tx{};

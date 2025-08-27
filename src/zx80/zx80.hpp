@@ -20,16 +20,16 @@
 
 #include "platform.hpp"
 
-#include "ram.hpp"
-#include "rom.hpp"
-#include "zilog_z80.hpp"
-
 #include "zx80_aspace.hpp"
 #include "zx80_cassette.hpp"
 #include "zx80_config.hpp"
 #include "zx80_keyboard.hpp"
 #include "zx80_params.hpp"
 #include "zx80_video.hpp"
+
+#include "ram.hpp"
+#include "rom.hpp"
+#include "zilog_z80.hpp"
 
 namespace caio {
 namespace sinclair {
@@ -40,6 +40,8 @@ namespace zx80 {
  */
 class ZX80 : public Platform {
 public:
+    constexpr static const char* LABEL = "Sinclair ZX80";
+
     /**
      * Instantiate this ZX80.
      * This method only sets the configuration parameters.
@@ -50,18 +52,16 @@ public:
      */
     ZX80(config::Section& sec);
 
-    virtual ~ZX80();
-
-    /**
-     * @see Platform::name()
-     */
-    std::string_view name() const override;
-
 private:
     /**
+     * Detect the format of a file.
+     * If the specified file is a snapshot image or a program
+     * file, set the proper configuration option accordingly.
+     * @param fname File to detect.
+     * @return true if the specified file is valid; false otherwise.
      * @see Platform::detect_format(const fs::Path&)
      */
-    void detect_format(const fs::Path& pname) override;
+    bool detect_format(const fs::Path& pname) override;
 
     /**
      * @see Platform::init_monitor(int, int)
@@ -114,7 +114,7 @@ private:
     /**
      * @see Platform::config()
      */
-    const Config& config() const override
+    Config& config() override
     {
         return _conf;
     }
@@ -139,6 +139,11 @@ private:
      * @exception IOError if the specified file cannot be loaded.
      */
     void attach_prg();
+
+    /**
+     * @see Platform::serdes(Serializer&)
+     */
+    void serdes(Serializer& ser) override { /* TODO XXX */ };
 
     ZX80Config              _conf;
     sptr_t<Clock>           _clk{};

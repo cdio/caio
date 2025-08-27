@@ -18,13 +18,10 @@
  */
 #include "config.hpp"
 
+#include "utils.hpp"
+
 #include <cstdlib>
 #include <fstream>
-
-#include "fs.hpp"
-#include "logger.hpp"
-#include "utils.hpp"
-#include "ui_config.hpp"
 
 namespace caio {
 namespace config {
@@ -229,10 +226,6 @@ Config::Config(Section& sec, std::string_view prefix)
          */
         screenshotdir = fs::home();
     }
-}
-
-Config::~Config()
-{
 }
 
 bool Config::operator==(const Config& other) const

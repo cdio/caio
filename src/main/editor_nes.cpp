@@ -29,10 +29,6 @@ ConfigEditorNES::ConfigEditorNES(Gui& gui, const fs::Path& cfile, config::Sectio
 {
 }
 
-ConfigEditorNES::~ConfigEditorNES()
-{
-}
-
 void ConfigEditorNES::save()
 {
     _conf.to_section(_sec);

@@ -16,25 +16,19 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
-#include <cstdlib>
-#include <exception>
-#include <filesystem>
-#include <functional>
-#include <iostream>
-#include <unordered_map>
-
-#include "types.hpp"
-#include "config.hpp"
-#include "logger.hpp"
-#include "utils.hpp"
-#include "version.hpp"
+#include "configurator.hpp"
 
 #include "c64.hpp"
 #include "nes.hpp"
 #include "zx80.hpp"
 #include "zxsp.hpp"
 
-#include "configurator.hpp"
+#include "types.hpp"
+#include "config.hpp"
+#include "fs.hpp"
+#include "logger.hpp"
+#include "utils.hpp"
+#include "version.hpp"
 
 using namespace caio;
 
@@ -58,7 +52,7 @@ int machine_main(int argc, const char** argv)
 
     } catch (const std::exception& err) {
         if (machine) {
-            std::cerr << machine->name() << ": Error: " << err.what() << "\n";
+            std::cerr << machine->label() << ": Error: " << err.what() << "\n";
         } else {
             std::cerr << "Error: " << err.what() << "\n";
         }
@@ -88,9 +82,9 @@ static void usage()
     std::cerr << "usage: " << progname << " <arch> [--help]\n"
                  "where arch is one of:\n";
 
-    std::for_each(machines.begin(), machines.end(), [](const auto& entry) {
+    for (const auto& entry : machines) {
         std::cerr << entry.first << "\n";
-    });
+    }
 
     std::cerr << "\n";
 }
@@ -100,15 +94,16 @@ int main(int argc, const char** argv)
     static const auto run_gui = []() -> int {
 #ifdef GUI_COMBO_PATH_RELATIVE
         /*
-         * chdir to the binary's directory so the GUI
+         * chdir to the binary's directory so the gui
          * looks for everything relative to that position.
-         * This is used to run self-contained bundles.
+         * This is used to run self-contained bundles
+         * (such as macos dmg packages).
          */
         std::error_code ec{};
         const auto bindir = fs::exec_directory();
         std::filesystem::current_path(bindir, ec);
         if (ec) {
-            caio::log.fatal("Can't change current working directory: {}: {}\n", bindir.string(), ec.message());
+            caio::log.fatal("Can't change working directory: {}: {}\n", bindir.string(), ec.message());
         }
 #endif
         auto& gui = ui::sdl2::ConfiguratorApp::instance();
@@ -120,7 +115,7 @@ int main(int argc, const char** argv)
 
     if (argc == 1) {
         /*
-         * No machine is specified: Run the selector GUI.
+         * No machine is specified: Run the machine configurator.
          */
         return run_gui();
     }
@@ -132,7 +127,7 @@ int main(int argc, const char** argv)
         ++argv;
     }
 
-    if (name == "" || name == "--help" || name == "-h" || name == "-?") {
+    if (name.empty() || name == "--help" || name == "-h" || name == "-?" || name == "?") {
         usage();
         std::exit(EXIT_FAILURE);
     }

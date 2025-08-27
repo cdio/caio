@@ -18,9 +18,9 @@
  */
 #include "cbm_bus.hpp"
 
-#include <sstream>
-
 #include "logger.hpp"
+
+#include <sstream>
 
 //#define CAIO_CBMBUS_DEBUG
 //#define CAIO_CBMBUS_DEBUG_STATE
@@ -45,11 +45,34 @@ namespace caio {
 namespace commodore {
 namespace cbm_bus {
 
+BusData::BusData(const BusData& bd)
+    : _srq{bd._srq},
+      _atn{bd._atn},
+      _clk{bd._clk},
+      _dat{bd._dat},
+      _rst{bd._rst}
+{
+}
+
+BusData& BusData::operator&=(const BusData& bd)
+{
+    _srq &= bd._srq;
+    _atn &= bd._atn;
+    _clk &= bd._clk;
+    _dat &= bd._dat;
+    _rst &= bd._rst;
+    return *this;
+}
+
 std::string BusData::to_string() const
 {
     return std::format("SRQ {}, ATN {}, CLK {}, DAT {}, RST {}", srq(), atn(), clk(), dat(), rst());
 }
 
+Bus::Bus(std::string_view label)
+    : Name{TYPE, label}
+{
+}
 
 bool Bus::add(Controller* dev)
 {
@@ -99,6 +122,10 @@ std::string Bus::to_string() const
     return os.str();
 }
 
+Controller::Controller(const sptr_t<Bus>& bus)
+    : Controller{CONTROLLER_UNIT, bus, LABEL}
+{
+}
 
 Controller::Controller(uint8_t unit, const sptr_t<Bus>& bus, std::string_view label)
     : Name{TYPE, label},
