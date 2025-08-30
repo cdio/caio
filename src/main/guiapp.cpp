@@ -149,7 +149,7 @@ int GuiApp::run()
         throw Error{"Can't set signal handler: {}", Error::to_string()};
     }
 
-#if 1 // XXX
+#if 0 // XXX
     float ddpi{}, hdpi{}, vdpi{};
     if (::SDL_GetDisplayDPI(0, &ddpi, &hdpi, &vdpi) != 0) {
         throw Error{"Can't getdiplay dpi"};
