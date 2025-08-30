@@ -18,10 +18,10 @@
  */
 #include "c64_cart_ocean_type_1.hpp"
 
-#include <sstream>
-
 #include "logger.hpp"
 #include "utils.hpp"
+
+#include <sstream>
 
 //#define CART_OCEAN_TYPE_1_DEBUG
 
@@ -229,6 +229,15 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartOceanType1::getdev(addr_t addr
 size_t CartOceanType1::cartsize() const
 {
     return (_banks * ROM_SIZE);
+}
+
+Serializer& operator&(Serializer& ser, CartOceanType1& cart)
+{
+    ser & static_cast<Cartridge&>(cart)
+        & cart._bank
+        & cart._banks;
+
+    return ser;
 }
 
 }

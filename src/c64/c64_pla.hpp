@@ -18,12 +18,12 @@
  */
 #pragma once
 
+#include "aspace.hpp"
+#include "types.hpp"
+
 #include <array>
 #include <functional>
 #include <utility>
-
-#include "aspace.hpp"
-#include "types.hpp"
 
 namespace caio {
 namespace commodore {
@@ -37,6 +37,8 @@ namespace c64 {
  */
 class PLA : public ASpace {
 public:
+    constexpr static const char* TYPE       = "PLA";
+    constexpr static const char* LABEL      = "pla";
     constexpr static const uint8_t LORAM    = 0x01;
     constexpr static const uint8_t HIRAM    = 0x02;
     constexpr static const uint8_t CHAREN   = 0x04;
@@ -65,8 +67,7 @@ public:
     PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, const devptr_t& chargen,
         const devptr_t& io);
 
-    virtual ~PLA() {
-    }
+    virtual ~PLA() = default;
 
     /**
      * Reset this PLA.
@@ -117,6 +118,8 @@ private:
     std::array<bank_t, BANKS> _wmodes{};        /* Default write mapping modes                                  */
     bank_t                    _rmaps{};         /* Current read mappings                                        */
     bank_t                    _wmaps{};         /* Current write mappings                                       */
+
+    friend Serializer& operator&(Serializer&, PLA&);
 };
 
 }

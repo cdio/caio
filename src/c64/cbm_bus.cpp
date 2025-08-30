@@ -784,6 +784,67 @@ bool Device::process_secondary(bool with_param)
     return false;
 }
 
+Serializer& operator&(Serializer& ser, BusData& busdata)
+{
+    ser & busdata._srq
+        & busdata._atn
+        & busdata._clk
+        & busdata._dat
+        & busdata._rst;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Bus& bus)
+{
+    return (ser & bus._data);
+}
+
+Serializer& operator&(Serializer& ser, Controller& controller)
+{
+    ser & controller._unit
+        & controller._data;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, ByteTR& tr)
+{
+    ser & tr._byte
+        & tr._ready
+        & tr._curbit
+        & tr._last;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, Command& cmd)
+{
+    ser & cmd._cmd
+        & cmd._chunit
+        & cmd._param;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, ReadByte& rb)
+{
+    return (ser & rb._value);
+}
+
+Serializer& operator&(Serializer& ser, Device& busdev)
+{
+    ser & busdev._mode
+        & busdev._role
+        & busdev._state
+        & busdev._data
+        & busdev._time
+        & busdev._cmd
+        & busdev._bytetr;
+
+    return ser;
+}
+
 }
 }
 }

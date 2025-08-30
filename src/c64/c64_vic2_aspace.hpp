@@ -18,11 +18,11 @@
  */
 #pragma once
 
-#include <array>
-
 #include "aspace.hpp"
 #include "device.hpp"
 #include "mos_6526.hpp"
+
+#include <array>
 
 namespace caio {
 namespace commodore {
@@ -38,6 +38,7 @@ namespace c64 {
  */
 class Vic2ASpace : public ASpace {
 public:
+    constexpr static const char* TYPE       = "VICII-ASPACE";
     constexpr static const size_t BANKS     = 4;
     constexpr static const size_t BLOCKS    = 4;
     constexpr static const addr_t ADDR_MASK = 0x3FFF;
@@ -52,8 +53,7 @@ public:
      */
     Vic2ASpace(const sptr_t<Mos6526>& cia2, const devptr_t& ram, const devptr_t& chargen);
 
-    virtual ~Vic2ASpace() {
-    }
+    virtual ~Vic2ASpace() = default;
 
 private:
     /**
@@ -65,6 +65,8 @@ private:
     size_t                    _bank{};
     std::array<bank_t, BANKS> _rbanks{};
     std::array<bank_t, BANKS> _wbanks{};
+
+    friend Serializer& operator&(Serializer&, Vic2ASpace&);
 };
 
 }

@@ -51,6 +51,8 @@ using C1541 = commodore::c1541::C1541;
  */
 class C64 : public Platform {
 public:
+    constexpr static const char* LABEL = "C64";
+
     /**
      * Instantiate this C64.
      * This method only sets the configuration parameters.
@@ -61,18 +63,16 @@ public:
      */
     C64(config::Section& sec);
 
-    virtual ~C64();
-
-    /**
-     * @see Platform::name()
-     */
-    std::string_view name() const override;
-
 private:
     /**
+     * Detect the format of a file.
+     * If the specified file is a snapshot image, a CRT file, or
+     * a PRG file, set the proper configuration option accordingly.
+     * @param fname File to detect.
+     * @return true if the specified file is valid; false otherwise.
      * @see Platform::detect_format(const fs::Path&)
      */
-    void detect_format(const fs::Path& pname) override;
+    bool detect_format(const fs::Path& fname) override;
 
     /**
      * @see Platform::init_monitor(int, int)
@@ -125,7 +125,7 @@ private:
     /**
      * @see Platform::config()
      */
-    const Config& config() const override
+    Config& config() override
     {
         return _conf;
     }
@@ -163,6 +163,11 @@ private:
      */
     void attach_prg();
 
+    /**
+     * @see Platform::serdes(Serializer&)
+     */
+    void serdes(Serializer& ser) override;
+
     C64Config                   _conf;
     sptr_t<Clock>               _clk{};
     sptr_t<RAM>                 _ram{};
@@ -173,6 +178,7 @@ private:
     sptr_t<C64IO>               _io{};
     sptr_t<PLA>                 _pla{};
     sptr_t<Mos6510>             _cpu{};
+    sptr_t<Vic2ASpace>          _vic2_mmap{};
     sptr_t<Mos6569>             _vic2{};
     sptr_t<Mos6581>             _sid{};
     sptr_t<Mos6526>             _cia1{};
@@ -189,6 +195,8 @@ private:
     sptr_t<ui::widget::Floppy>  _floppy9{};
     sptr_t<ui::widget::Gamepad> _gamepad1{};
     sptr_t<ui::widget::Gamepad> _gamepad2{};
+
+    friend Serializer& operator&(Serializer&, C64&);
 };
 
 }

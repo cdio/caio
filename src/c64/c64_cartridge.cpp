@@ -18,8 +18,6 @@
  */
 #include "c64_cartridge.hpp"
 
-#include <array>
-
 #include "logger.hpp"
 #include "types.hpp"
 #include "utils.hpp"
@@ -100,6 +98,14 @@ void Cartridge::throw_invalid_cartridge(ssize_t entry, std::string_view errmsg)
     } else {
         throw InvalidCartridge{"{}: {}: Chip entry {}: {}. {}", type(), name(), entry, errmsg, _crt->to_string()};
     }
+}
+
+Serializer& operator&(Serializer& ser, Cartridge& cart)
+{
+    ser & static_cast<Device&>(cart)
+        & cart._mode;
+
+    return ser;
 }
 
 sptr_t<Cartridge> Cartridge::instance(const fs::Path& fname)

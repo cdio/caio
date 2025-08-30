@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <array>
-
 #include "c64_cartridge.hpp"
+
+#include <array>
 
 namespace caio {
 namespace commodore {
@@ -29,9 +29,11 @@ namespace c64 {
 /**
  * C64 Game System, System 3 Cartridge.
  *
- * Type     Size    Game    EXROM   ROML        ROMH    LOAD ADDRESS
- * ----------------------------------------------------------------------------
- *          512K    1       0                           $8000-$9FFF (Banks 0-3)
+ * ### Memory mappings:
+ *
+ *     Type     Size    Game    EXROM   ROML    ROMH    LOAD ADDRESS
+ *     -------------------------------------------------------------------------
+ *              512K    1       0                       $8000-$9FFF (Banks 0-63)
  *
  * 64 banks of 8K each.
  *
@@ -60,11 +62,11 @@ public:
     constexpr static const addr_t ROM_LOAD_ADDR = 0x8000;
 
     CartC64GameSystem3(const sptr_t<Crt>& crt)
-        : Cartridge{TYPE, crt} {
+        : Cartridge{TYPE, crt}
+    {
     }
 
-    virtual ~CartC64GameSystem3() {
-    }
+    virtual ~CartC64GameSystem3() = default;
 
     /**
      * @see Device::dev_read()
@@ -100,6 +102,8 @@ private:
     uint8_t                         _bank{};
     size_t                          _banks{};
     std::array<devptr_t, MAX_BANKS> _roms{};
+
+    friend Serializer& operator&(Serializer&, CartC64GameSystem3&);
 };
 
 }

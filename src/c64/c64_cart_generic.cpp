@@ -212,6 +212,15 @@ size_t CartGeneric::cartsize() const
     return (_roml->size() + ((_romh && _romh != _roml) ? _romh->size() : 0));
 }
 
+Serializer& operator&(Serializer& ser, CartGeneric& cart)
+{
+    ser & static_cast<Cartridge&>(cart)
+        & cart._generic_mode
+        & cart._romh_offset;
+
+    return ser;
+}
+
 }
 }
 }

@@ -38,10 +38,10 @@ void CartSimonsBasic::reset()
     /*
      * Simons' Basic Cartridge.
      *
-     * Type     Size    Game    EXROM   ROML        ROMH    LOAD ADDRESS
-     * ----------------------------------------------------------------------------
-     *          16K     1       0                           $8000-$9FFF (Module 1)
-     *                                                      $A000-$BFFF (Module 2)
+     * Type     Size    Game    EXROM   ROML    ROMH    LOAD ADDRESS
+     * ------------------------------------------------------------------------
+     *          16K     1       0                       $8000-$9FFF (Module 1)
+     *                                                  $A000-$BFFF (Module 2)
      *
      * Simons' BASIC permanently uses 16K ($4000) bytes of cartridge memory from $8000-$BFFF.
      * However, through some custom bank-switching logic the upper area ($A000-$BFFF) may be disabled so
@@ -166,6 +166,14 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartSimonsBasic::getdev(addr_t add
 size_t CartSimonsBasic::cartsize() const
 {
     return ((_roml ? _roml->size() : 0) + (_romh ? _romh->size() : 0));
+}
+
+Serializer& operator&(Serializer& ser, CartSimonsBasic& cart)
+{
+    ser & static_cast<Cartridge&>(cart)
+        & cart._reg;
+
+    return ser;
 }
 
 }

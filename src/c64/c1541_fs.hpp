@@ -97,7 +97,7 @@ private:
         }
     };
 
-    using channel_array_t = std::array<Channel, MAX_CHANNELS - 1>;
+    using ChannelArray = std::array<Channel, MAX_CHANNELS - 1>;
 
     /**
      * @see C1541::channel_open()
@@ -143,8 +143,10 @@ private:
 
     Status initialize();
 
-    channel_array_t _channels{};
-    std::string     _last_file{};
+    ChannelArray _channels{};
+    std::string  _last_file{};
+
+    friend Serializer& operator&(Serializer&, C1541Fs&);
 };
 
 }

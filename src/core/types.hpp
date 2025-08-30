@@ -202,6 +202,7 @@ ERROR_CLASS(InvalidNumber);
 ERROR_CLASS(InvalidPalette);
 ERROR_CLASS(IOError);
 ERROR_CLASS(LoggerError);
+ERROR_CLASS(NotSupported);
 ERROR_CLASS(SignalError);
 ERROR_CLASS(UIError);
 

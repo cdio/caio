@@ -18,10 +18,10 @@
  */
 #include "c64_cart_magic_desk.hpp"
 
-#include <sstream>
-
 #include "logger.hpp"
 #include "utils.hpp"
+
+#include <sstream>
 
 //#define CART_MAGIC_DESK
 
@@ -223,6 +223,15 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartMagicDesk::getdev(addr_t addr,
 size_t CartMagicDesk::cartsize() const
 {
     return (_banks * ROM_SIZE);
+}
+
+Serializer& operator&(Serializer& ser, CartMagicDesk& cart)
+{
+    ser & static_cast<Cartridge&>(cart)
+        & cart._bank
+        & cart._banks;
+
+    return ser;
 }
 
 }

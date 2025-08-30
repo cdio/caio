@@ -20,6 +20,7 @@
 
 #include "logger.hpp"
 #include "device_none.hpp"
+#include "serializer.hpp"
 
 namespace caio {
 namespace commodore {
@@ -27,6 +28,7 @@ namespace c64 {
 
 PLA::PLA(const devptr_t& ram, const devptr_t& basic, const devptr_t& kernal, const devptr_t& chargen,
     const devptr_t& io)
+    : ASpace{TYPE, LABEL}
 {
     /*
      * Fixed mappings to accelerate bank switching.
@@ -505,6 +507,18 @@ inline void PLA::remap()
 #endif
 
     ASpace::reset(_rmaps, _wmaps, ADDR_MASK);
+}
+
+Serializer& operator&(Serializer& ser, PLA& pla)
+{
+    ser & static_cast<ASpace&>(pla)
+        & pla._mode;
+
+    if (ser.is_deserializer()) {
+        pla.remap();
+    }
+
+    return ser;
 }
 
 }

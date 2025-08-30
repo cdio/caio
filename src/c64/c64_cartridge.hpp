@@ -18,13 +18,10 @@
  */
 #pragma once
 
-#include <string>
-#include <string_view>
-#include <memory>
-
 #include "aspace.hpp"
 #include "fs.hpp"
 #include "gpio.hpp"
+
 #include "c64_crt.hpp"
 
 namespace caio {
@@ -71,8 +68,7 @@ public:
      */
     static sptr_t<Cartridge> instance(const fs::Path& fname);
 
-    virtual ~Cartridge() {
-    }
+    virtual ~Cartridge() = default;
 
     /**
      * @return The name of this cartridge.
@@ -160,13 +156,15 @@ protected:
 
     void throw_invalid_cartridge(ssize_t entry, std::string_view errmsg);
 
-    template<typename... Args>
-    void throw_invalid_cartridge(std::format_string<Args...> fmt, Args&&... args) {
+    template <typename... Args>
+    void throw_invalid_cartridge(std::format_string<Args...> fmt, Args&&... args)
+    {
         throw_invalid_cartridge(-1, std::vformat(fmt.get(), std::make_format_args(args...)));
     }
 
-    template<typename... Args>
-    void throw_invalid_cartridge(ssize_t entry, std::format_string<Args...> fmt, Args&&... args) {
+    template <typename... Args>
+    void throw_invalid_cartridge(ssize_t entry, std::format_string<Args...> fmt, Args&&... args)
+    {
         throw_invalid_cartridge(entry, std::vformat(fmt.get(), std::make_format_args(args...)));
     }
 
@@ -174,6 +172,8 @@ private:
     sptr_t<Crt>     _crt;
     Gpio            _ioport{};
     GameExromMode   _mode{};
+
+    friend Serializer& operator&(Serializer&, Cartridge&);
 };
 
 }

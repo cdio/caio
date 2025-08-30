@@ -18,12 +18,15 @@
  */
 #include "c64_vic2_aspace.hpp"
 
+#include "serializer.hpp"
+
 namespace caio {
 namespace commodore {
 namespace c64 {
 
 Vic2ASpace::Vic2ASpace(const sptr_t<Mos6526>& cia2, const devptr_t& ram, const devptr_t& chargen)
-    : _cia2{cia2}
+    : ASpace{TYPE},
+      _cia2{cia2}
 {
     /*
      * The 16K address space of a memory bank is subdivided into four 4K blocks.
@@ -86,6 +89,18 @@ inline void Vic2ASpace::bank(size_t bank)
 {
     _bank = bank;
     ASpace::reset(_rbanks[_bank], _wbanks[_bank], ADDR_MASK);
+}
+
+Serializer& operator&(Serializer& ser, Vic2ASpace& mmap)
+{
+    ser & static_cast<ASpace&>(mmap)
+        & mmap._bank;
+
+    if (ser.is_deserializer()) {
+        mmap.bank(mmap._bank);
+    }
+
+    return ser;
 }
 
 }

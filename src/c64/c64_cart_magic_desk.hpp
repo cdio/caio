@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <array>
-
 #include "c64_cartridge.hpp"
+
+#include <array>
 
 namespace caio {
 namespace commodore {
@@ -29,11 +29,12 @@ namespace c64 {
 /**
  * Magic Desk Cartridge.
  *
- * Type     Size    Game    EXROM   ROML        ROMH    LOAD ADDRESS
- * ----------------------------------------------------------------------------
- *          32K     1       0                           $8000-$9FFF (Banks 0-3)
- *          64K     1       0                           $8000-$9FFF (Banks 0-7)
- *          128K    1       0                           $8000-$9FFF (Banks 0-15)
+ * ### Memory mappings:
+ *     Type     Size    Game    EXROM   ROML    ROMH    LOAD ADDRESS
+ *     ----------------------------------------------------------------------------
+ *              32K     1       0                       $8000-$9FFF (Banks 0-3)
+ *              64K     1       0                       $8000-$9FFF (Banks 0-7)
+ *              128K    1       0                       $8000-$9FFF (Banks 0-15)
  *
  * Startup mode 8K
  *
@@ -76,11 +77,11 @@ public:
     constexpr static const addr_t ROML_LOAD_ADDR = 0x8000;
 
     CartMagicDesk(const sptr_t<Crt>& crt)
-        : Cartridge{TYPE, crt} {
+        : Cartridge{TYPE, crt}
+    {
     }
 
-    virtual ~CartMagicDesk() {
-    }
+    virtual ~CartMagicDesk() = default;
 
     /**
      * @see Device::dev_read()
@@ -116,6 +117,8 @@ private:
     uint8_t                         _bank{};
     size_t                          _banks{};
     std::array<devptr_t, MAX_BANKS> _roms{};
+
+    friend Serializer& operator&(Serializer&, CartMagicDesk&);
 };
 
 }

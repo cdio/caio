@@ -18,10 +18,10 @@
  */
 #include "c64_cart_c64_game_system_3.hpp"
 
-#include <sstream>
-
 #include "logger.hpp"
 #include "utils.hpp"
+
+#include <sstream>
 
 //#define CART_C64_GAME_SYSTEM_3
 
@@ -40,9 +40,9 @@ void CartC64GameSystem3::reset()
     /**
      * C64 Game System, System 3 Cartridge.
      *
-     * Type     Size    Game    EXROM   ROML        ROMH    LOAD ADDRESS
-     * ----------------------------------------------------------------------------
-     *          512K    1       0                           $8000-$9FFF (Banks 0-3)
+     * Type     Size    Game    EXROM   ROML    ROMH    LOAD ADDRESS
+     * -------------------------------------------------------------------------
+     *          512K    1       0                       $8000-$9FFF (Banks 0-63)
      *
      * 64 banks of 8K each.
      *
@@ -164,9 +164,9 @@ std::string CartC64GameSystem3::to_string() const
 std::pair<ASpace::devmap_t, ASpace::devmap_t> CartC64GameSystem3::getdev(addr_t addr, bool romh, bool roml)
 {
     /*
-     * Type     Size    Game    EXROM   ROML        ROMH    LOAD ADDRESS
-     * ----------------------------------------------------------------------------
-     *          512K    0       0                           $8000-$9FFF (Banks 0-63)
+     * Type     Size    Game    EXROM   ROML    ROMH    LOAD ADDRESS
+     * -------------------------------------------------------------------------
+     *          512K    0       0                       $8000-$9FFF (Banks 0-63)
      * 64 banks of 8K each.
      */
     if (roml) {
@@ -179,6 +179,15 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartC64GameSystem3::getdev(addr_t 
 size_t CartC64GameSystem3::cartsize() const
 {
     return (_banks * ROM_SIZE);
+}
+
+Serializer& operator&(Serializer& ser, CartC64GameSystem3& cart)
+{
+    ser & static_cast<Cartridge&>(cart)
+        & cart._bank
+        & cart._banks;
+
+    return ser;
 }
 
 }

@@ -443,6 +443,28 @@ std::string C1541::StatusChannel::to_string() const
     return std::format("{:02X} - \"{}\"", static_cast<uint8_t>(_status), c1541::to_string(_status));
 }
 
+Serializer& operator&(Serializer& ser, C1541::StatusChannel& sch)
+{
+    ser & sch._status
+        & sch._track
+        & sch._sector
+        & sch._buf
+        & sch._size
+        & sch._pos;
+
+    return ser;
+}
+
+Serializer& operator&(Serializer& ser, C1541& c1541)
+{
+    ser & static_cast<caio::commodore::cbm_bus::Device&>(c1541)
+        & c1541._attached_path
+        & c1541._statusch
+        & c1541._progress;
+
+    return ser;
+}
+
 }
 }
 }

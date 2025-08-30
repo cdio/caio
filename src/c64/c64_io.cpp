@@ -176,6 +176,11 @@ std::ostream& C64IO::dump(std::ostream& os, size_t base) const
     return os;
 }
 
+Serializer& operator&(Serializer& ser, C64IO& io)
+{
+    return (ser & static_cast<Device&>(io));
+}
+
 }
 }
 }

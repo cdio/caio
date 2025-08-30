@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <array>
-
 #include "c64_cartridge.hpp"
+
+#include <array>
 
 namespace caio {
 namespace commodore {
@@ -29,10 +29,11 @@ namespace c64 {
 /**
  * Simons' Basic Cartridge.
  *
- * Type     Size    Game    EXROM   ROML        ROMH    LOAD ADDRESS
- * ----------------------------------------------------------------------------
- *          16K     1       0                           $8000-$9FFF (Module 1)
- *                                                      $A000-$BFFF (Module 2)
+ * ### Memory mappings:
+ *     Type     Size    Game    EXROM   ROML        ROMH    LOAD ADDRESS
+ *     ----------------------------------------------------------------------------
+ *              16K     1       0                           $8000-$9FFF (Module 1)
+ *                                                          $A000-$BFFF (Module 2)
  *
  * Simons' BASIC permanently uses 16K ($4000) bytes of cartridge memory from $8000-$BFFF.
  * However, through some custom bank-switching logic the upper area ($A000-$BFFF) may be disabled so
@@ -58,11 +59,11 @@ public:
     constexpr static const addr_t ROMH_LOAD_ADDR   = 0xA000;
 
     CartSimonsBasic(const sptr_t<Crt>& crt)
-        : Cartridge{TYPE, crt} {
+        : Cartridge{TYPE, crt}
+    {
     }
 
-    virtual ~CartSimonsBasic() {
-    }
+    virtual ~CartSimonsBasic() = default;
 
     /**
      * @see Device::dev_read()
@@ -98,6 +99,8 @@ private:
     devptr_t _roml{};
     devptr_t _romh{};
     uint8_t  _reg{};
+
+    friend Serializer& operator&(Serializer&, CartSimonsBasic&);
 };
 
 }

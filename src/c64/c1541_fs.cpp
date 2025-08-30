@@ -666,6 +666,12 @@ Status C1541Fs::initialize()
     return Status::OK;
 }
 
+Serializer& operator&(Serializer& ser, C1541Fs& c1541fs)
+{
+    //TODO
+    throw NotSupported{"C1541Fs: Serialization not supported"};
+}
+
 }
 }
 }

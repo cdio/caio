@@ -21,6 +21,7 @@
 #include "p00file.hpp"
 #include "prgfile.hpp"
 #include "mos_6581.hpp"
+#include "serializer.hpp"
 
 #include "c64_crt.hpp"
 #include "c1541_factory.hpp"
@@ -30,35 +31,40 @@ namespace commodore {
 namespace c64 {
 
 C64::C64(config::Section& sec)
-    : Platform{},
+    : Platform{LABEL},
       _conf{sec}
 {
 }
 
-C64::~C64()
+bool C64::detect_format(const fs::Path& fname)
 {
-}
-
-std::string_view C64::name() const
-{
-    return "C64";
-}
-
-void C64::detect_format(const fs::Path& pname)
-{
-    if (!pname.empty()) {
-        if (Crt::is_crt(pname)) {
-            if (!_conf.cartridge.empty()) {
-                log.warn("Cartridge file overrided. From {} to {}\n", _conf.cartridge, pname.string());
-            }
-            _conf.cartridge = pname;
-        } else {
-            if (!_conf.prgfile.empty()) {
-                log.warn("Program file overrided. From {} to {}\n", _conf.prgfile, pname.string());
-            }
-            _conf.prgfile = pname;
-        }
+    if (fname.empty()) {
+        return false;
     }
+
+    if (Platform::detect_format(fname)) {
+        return true;
+    }
+
+    if (Crt::is_crt(fname)) {
+        if (!_conf.cartridge.empty()) {
+            log.warn("Cartridge file overrided. From {} to {}\n", _conf.cartridge, fname.string());
+        }
+
+        _conf.cartridge = fname;
+        return true;
+    }
+
+    /*
+     * PRG files do not have any signature.
+     * Assume it is a PRG file.
+     */
+    if (!_conf.prgfile.empty()) {
+        log.warn("Program file overrided. From {} to {}\n", _conf.prgfile, fname.string());
+    }
+
+    _conf.prgfile = fname;
+    return true;
 }
 
 void C64::init_monitor(int ifd, int ofd)
@@ -153,31 +159,6 @@ std::string C64::to_string_devices() const
         _bus->to_string());
 }
 
-void C64::connect_ui()
-{
-    Platform::connect_ui();
-
-    /*
-     * Connect the audio output.
-     */
-    _sid->audio_buffer([this]() {
-        return ui()->audio_buffer();
-    });
-
-    /*
-     * Connect the video output.
-     */
-    _vic2->render_line([this](unsigned line, const ui::Scanline& scanline) {
-        ui()->render_line(line, scanline);
-    });
-
-    /*
-     * Connect keyboard and joysticks.
-     */
-    ui()->keyboard(_kbd);
-    ui()->joystick({_joy1, _joy2});
-}
-
 void C64::create_devices()
 {
     _clk = std::make_shared<Clock>("clk", CLOCK_FREQ, _conf.delay);
@@ -193,8 +174,8 @@ void C64::create_devices()
     _bus = std::make_shared<cbm_bus::Bus>("bus");
     _busdev = std::make_shared<C64BusController>(_bus, _cia2);
 
-    const auto vic2_mmap = std::make_shared<Vic2ASpace>(_cia2, _ram, _chargen);
-    _vic2 = std::make_shared<Mos6569>("vic2", vic2_mmap, _vram);
+    _vic2_mmap = std::make_shared<Vic2ASpace>(_cia2, _ram, _chargen);
+    _vic2 = std::make_shared<Mos6569>("vic2", _vic2_mmap, _vram);
 
     _ioexp = attach_cartridge();
     _io = std::make_shared<C64IO>(_vic2, _sid, _vram, _cia1, _cia2, _ioexp);
@@ -270,6 +251,7 @@ void C64::connect_devices()
         };
 
         _ioexp->add_iow(cart_port_write, Cartridge::GAME | Cartridge::EXROM);
+
         _ioexp->reset();
         _cpu->reset();
     }
@@ -430,6 +412,31 @@ void C64::make_widgets()
     panel->add(_gamepad2);
 }
 
+void C64::connect_ui()
+{
+    Platform::connect_ui();
+
+    /*
+     * Connect the audio output.
+     */
+    _sid->audio_buffer([this]() {
+        return ui()->audio_buffer();
+    });
+
+    /*
+     * Connect the video output.
+     */
+    _vic2->render_line([this](unsigned line, const ui::Scanline& scanline) {
+        ui()->render_line(line, scanline);
+    });
+
+    /*
+     * Connect keyboard and joysticks.
+     */
+    ui()->keyboard(_kbd);
+    ui()->joystick({_joy1, _joy2});
+}
+
 void C64::hotkeys(keyboard::Key key)
 {
     /*
@@ -581,6 +588,31 @@ ui::Config C64::ui_config()
     };
 
     return uiconf;
+}
+
+void C64::serdes(Serializer& ser)
+{
+    ser & *this;
+}
+
+Serializer& operator&(Serializer& ser, C64& c64)
+{
+    ser & static_cast<Platform&>(c64)
+        & c64._ram
+        & c64._vram
+        & c64._sid
+        & c64._cia1
+        & c64._cia2
+        & c64._bus
+        & c64._busdev
+        & c64._vic2_mmap
+        & c64._vic2
+        & c64._ioexp
+        & c64._io
+        & c64._pla
+        & c64._cpu;
+
+    return ser;
 }
 
 }

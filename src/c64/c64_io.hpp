@@ -27,8 +27,10 @@ namespace c64 {
 
 /**
  * C64 I/O device.
- * This class is a container for all the devices connected
- * to the C64 I/O space mapped from address $D000 to $DFFF.
+ * This class is a container for devices connected to
+ * the C64 I/O space mapped from addresses $D000 to $DFFF.
+ *
+ * ### Memory mappings:
  *
  *     $D000 - $D02E -- $0000 - $002E   VIC2 registers
  *     $D02F - $D03F -- $002F - $003F   Fixed #$FF
@@ -71,11 +73,11 @@ public:
           _vram{vram},
           _cia1{cia1},
           _cia2{cia2},
-          _ioexp{ioexp} {
+          _ioexp{ioexp}
+    {
     }
 
-    virtual ~C64IO() {
-    }
+    virtual ~C64IO() = default;
 
     /**
      * Reset this device.
@@ -87,7 +89,8 @@ public:
     /**
      * @see Device::size()
      */
-    size_t size() const override {
+    size_t size() const override
+    {
         return SIZE;
     }
 
@@ -113,6 +116,8 @@ private:
     devptr_t _cia1{};
     devptr_t _cia2{};
     devptr_t _ioexp{};
+
+    friend Serializer& operator&(Serializer&, C64IO&);
 };
 
 }

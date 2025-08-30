@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <array>
-
 #include "c64_cartridge.hpp"
+
+#include <array>
 
 namespace caio {
 namespace commodore {
@@ -29,16 +29,18 @@ namespace c64 {
 /**
  * Ocean type 1 Cartridge.
  *
- * Type     Size    Game    EXROM   ROML        ROMH    LOAD ADDRESS
- * ----------------------------------------------------------------------------
- *          32K     0       0                           $8000-$9FFF (Banks 0-3)
+ * ### Memory mappings:
  *
- *          128K    0       0                           $8000-$9FFF (Banks 0-15)
+ *     Type     Size    Game    EXROM   ROML        ROMH    LOAD ADDRESS
+ *     ----------------------------------------------------------------------------
+ *              32K     0       0                           $8000-$9FFF (Banks 0-3)
  *
- *          256K    0       0                           $8000-$9FFF (Banks 0-15)
- *                                                      $A000-$BFFF (Banks 16-31)
+ *              128K    0       0                           $8000-$9FFF (Banks 0-15)
  *
- *          512K    0       0                           $8000-$9FFF (Banks 0-63)    TERMINATOR 2
+ *              256K    0       0                           $8000-$9FFF (Banks 0-15)
+ *                                                          $A000-$BFFF (Banks 16-31)
+ *
+ *              512K    0       0                           $8000-$9FFF (Banks 0-63)    TERMINATOR 2
  *
  * 32K, 128K, 256K or 512K sizes (4, 16, 32 or 64 banks of 8K each)
  *
@@ -77,11 +79,11 @@ public:
     constexpr static const addr_t ROMH_LOAD_ADDR   = 0xA000;
 
     CartOceanType1(const sptr_t<Crt>& crt)
-        : Cartridge{TYPE, crt} {
+        : Cartridge{TYPE, crt}
+    {
     }
 
-    virtual ~CartOceanType1() {
-    }
+    virtual ~CartOceanType1() = default;
 
     /**
      * @see Device::dev_read()
@@ -117,6 +119,8 @@ private:
     uint8_t                         _bank{};
     size_t                          _banks{};
     std::array<devptr_t, MAX_BANKS> _roms{};
+
+    friend Serializer& operator&(Serializer&, CartOceanType1&);
 };
 
 }

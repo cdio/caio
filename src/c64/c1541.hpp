@@ -214,6 +214,43 @@ class C1541 : public cbm_bus::Device {
 public:
     constexpr static const char* TYPE = "C1541";
 
+    class StatusChannel {
+    public:
+        explicit StatusChannel(Status st, uint8_t track = 0, uint8_t sector = 0)
+        {
+            reset(st, track, sector);
+        }
+
+        StatusChannel& operator=(Status st)
+        {
+            reset(st, 0, 0);
+            return *this;
+        }
+
+        bool operator==(Status st) const
+        {
+            return _status == st;
+        }
+
+        void reset(Status st, uint8_t track, uint8_t sector);
+
+        ReadByte read();
+
+        void push_back();
+
+        std::string to_string() const;
+
+    private:
+        Status                _status{};
+        uint8_t               _track{};
+        uint8_t               _sector{};
+        std::array<char, 128> _buf{};
+        size_t                _size{};
+        size_t                _pos{};
+
+        friend Serializer& operator&(Serializer&, StatusChannel&);
+    };
+
     /**
      * Initialise this C1541 drive.
      * In order to work this disk drive must be attached (see attach()).
@@ -358,41 +395,6 @@ private:
         DOSCommand        code;     /* Command code                 */
     };
 
-    class StatusChannel {
-    public:
-        explicit StatusChannel(Status st, uint8_t track = 0, uint8_t sector = 0)
-        {
-            reset(st, track, sector);
-        }
-
-        StatusChannel& operator=(Status st)
-        {
-            reset(st, 0, 0);
-            return *this;
-        }
-
-        bool operator==(Status st) const
-        {
-            return _status == st;
-        }
-
-        void reset(Status st, uint8_t track, uint8_t sector);
-
-        ReadByte read();
-
-        void push_back();
-
-        std::string to_string() const;
-
-    private:
-        Status                _status{};
-        uint8_t               _track{};
-        uint8_t               _sector{};
-        std::array<char, 128> _buf{};
-        size_t                _size{};
-        size_t                _pos{};
-    };
-
     /**
      * @see cbm_bus::Device::open()
      */
@@ -441,6 +443,8 @@ private:
 
     constexpr static const size_t COMMANDS = 35;
     static std::array<DiskCommand, COMMANDS> commands;
+
+    friend Serializer& operator&(Serializer&, C1541&);
 };
 
 }

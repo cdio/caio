@@ -18,12 +18,12 @@
  */
 #include "c64_cart_easy_flash.hpp"
 
-#include <algorithm>
-#include <sstream>
-
 #include "device_none.hpp"
 #include "logger.hpp"
 #include "utils.hpp"
+
+#include <algorithm>
+#include <sstream>
 
 //#define CART_EASY_FLASH
 
@@ -59,6 +59,11 @@ namespace c64 {
  *
  * @see https://skoe.de/easyflash/files/devdocs/EasyFlash-ProgRef.pdf
  */
+CartEasyFlash::CartEasyFlash(const sptr_t<Crt>& crt)
+    : Cartridge{TYPE, crt}
+{
+}
+
 void CartEasyFlash::reset()
 {
     Cartridge::reset();
@@ -68,8 +73,8 @@ void CartEasyFlash::reset()
     _romls = 0;
     _reg2 = 0;
     _ram = {};
-    _roms_lo.fill(devptr_t{});
-    _roms_hi.fill(devptr_t{});
+    _roms_lo.fill(sptr_t<ROM>{});
+    _roms_hi.fill(sptr_t<ROM>{});
 
     /*
      * Load ROMs and RAM.
@@ -83,11 +88,11 @@ void CartEasyFlash::reset()
         switch (chip.type) {
         case Crt::CHIP_TYPE_ROM:
         case Crt::CHIP_TYPE_FLASH:
-            add_rom(entry, chip, dev);
+            add_rom(entry, chip, static_pointer_cast<ROM>(dev));
             break;
 
         case Crt::CHIP_TYPE_RAM:
-            add_ram(entry, chip, dev);
+            add_ram(entry, chip, static_pointer_cast<RAM>(dev));
             break;
 
         case Crt::CHIP_TYPE_EEPROM:     /* TODO: File on user's config directory */
@@ -104,7 +109,7 @@ void CartEasyFlash::reset()
     propagate();
 }
 
-void CartEasyFlash::add_rom(size_t entry, const Crt::Chip& chip, const devptr_t& rom)
+void CartEasyFlash::add_rom(size_t entry, const Crt::Chip& chip, const sptr_t<ROM>& rom)
 {
     if (chip.rsiz != ROM_SIZE) {
         throw_invalid_cartridge(entry, "Invalid ROM size {}", chip.rsiz);
@@ -131,13 +136,13 @@ void CartEasyFlash::add_rom(size_t entry, const Crt::Chip& chip, const devptr_t&
 
     }
 
-    DEBUG("{}({}): Chip {}: ROM device: {}\n", type(), name(), entry, Crt::to_string(chip));
+    DEBUG("{}: Chip {}: ROM device: {}\n", Name::to_string(), entry, Crt::to_string(chip));
 }
 
-void CartEasyFlash::add_ram(size_t entry, const Crt::Chip& chip, const devptr_t& ram)
+void CartEasyFlash::add_ram(size_t entry, const Crt::Chip& chip, const sptr_t<RAM>& ram)
 {
     _ram = ram;
-    DEBUG("{}({}): Chip {}: RAM device: {}\n", type(), name(), entry, Crt::to_string(chip));
+    DEBUG("{}: Chip {}: RAM device: {}\n", Name::to_string(), entry, Crt::to_string(chip));
 }
 
 uint8_t CartEasyFlash::dev_read(size_t addr, ReadMode mode)
@@ -268,8 +273,8 @@ void CartEasyFlash::dev_write(size_t addr, uint8_t data)
 std::string CartEasyFlash::to_string() const
 {
     std::ostringstream os{};
-    size_t total = _romls + _romhs;
-    size_t size = total * ROM_SIZE;
+    const size_t total = _romls + _romhs;
+    const size_t size = total * ROM_SIZE;
 
     os << Name::to_string() << ", " << total << " roms, total rom size " << size << " (" << (size >> 10) << "K)";
 
@@ -306,7 +311,7 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartEasyFlash::getdev(addr_t addr,
              * ROML mapped at $8000-$9FFF.
              */
 #if 1
-            DEBUG("{}:({}): 8K ROML: {}\n", type(), name(), _roms_hi[_bank]->to_string());
+            DEBUG("{}: 8K ROML: {}\n", Name::to_string(), _roms_hi[_bank]->to_string());
 #endif
             return {{_roms_lo[_bank], addr - ROML_LOAD_ADDR}, {}};
         }
@@ -318,7 +323,7 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartEasyFlash::getdev(addr_t addr,
              * ROML mapped at $8000-$9FFF.
              */
 #if 1
-            DEBUG("{}({}): 16K ROML: {}\n", type(), name(), _roms_hi[_bank]->to_string());
+            DEBUG("{}: 16K ROML: {}\n", Name::to_string(), _roms_hi[_bank]->to_string());
 #endif
             return {{_roms_lo[_bank], addr - ROML_LOAD_ADDR}, {}};
         }
@@ -327,7 +332,7 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartEasyFlash::getdev(addr_t addr,
              * ROMH mapped at $A000-$BFFF.
              */
 #if 1
-            DEBUG("{}({}): 16K ROMH: {}\n", type(), name(), _roms_hi[_bank]->to_string());
+            DEBUG("{}: 16K ROMH: {}\n", Name::to_string(), _roms_hi[_bank]->to_string());
 #endif
             return {{_roms_hi[_bank], addr - ROMH_LOAD_ADDR_1}, {}};
         }
@@ -357,6 +362,16 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartEasyFlash::getdev(addr_t addr,
 size_t CartEasyFlash::cartsize() const
 {
     return ((_romls + _romhs) * ROM_SIZE + (_ram ? _ram->size() : 0));
+}
+
+Serializer& operator&(Serializer& ser, CartEasyFlash& cart)
+{
+    ser & static_cast<Cartridge&>(cart)
+        & cart._bank
+        & cart._reg2
+        & cart._ram;
+
+    return ser;
 }
 
 }

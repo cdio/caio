@@ -105,6 +105,8 @@ private:
     devptr_t    _roml{};
     devptr_t    _romh{};
     addr_t      _romh_offset{};
+
+    friend Serializer& operator&(Serializer&, CartGeneric&);
 };
 
 }

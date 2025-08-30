@@ -18,9 +18,12 @@
  */
 #pragma once
 
-#include <array>
+#include "ram.hpp"
+#include "rom.hpp"
 
 #include "c64_cartridge.hpp"
+
+#include <array>
 
 namespace caio {
 namespace commodore {
@@ -28,24 +31,30 @@ namespace c64 {
 
 /**
  * EasyFlash Cartridge.
+ *
+ * ### Memory mappings:
+ *
  * 1M divided in 64 banks of 2 * 8K each.
  *
- * Type     Size    Game    EXROM   ROML    ROMH    LOAD ADDRESS
- * ----------------------------------------------------------------------------
- *          1024K   0       1       $8000   $A000   $8000-$9FFF and $A000-$BFFF
- *                                  $8000   $E000   $8000-$9FFF and $E000-$FFFF
+ *     Type     Size    Game    EXROM   ROML    ROMH    LOAD ADDRESS
+ *     ----------------------------------------------------------------------------
+ *              1024K   0       1       $8000   $A000   $8000-$9FFF and $A000-$BFFF
+ *                                      $8000   $E000   $8000-$9FFF and $E000-$FFFF
  *
  * EasyFlash is a 1M or 2x512K flash memory (one called ROML and the other ROMH)
  * plus 256 bytes of RAM (mapped into the I/O-2 range).
- * Control register 1 ($DE00): Bank switching.
- * Control register 2 ($DE02): EasyFlash control:
- *      Bit     Name    Content
- *      -------------------------------------------------------------------------
- *      7       L       LED (1: LED on, 0: LED off)
- *      6..3    0       Reserved (must be 0)
- *      2       M       GAME mode (1: Controlled by bit G, 0: From jumper "boot")
- *      1       X       EXROM state (0: /EXROM high)
- *      0       G       GAME state (if M = 1, 0 = /GAME high)
+ *
+ * - Control register 1 ($DE00): Bank switching.
+ *
+ * - Control register 2 ($DE02): EasyFlash control:
+ *
+ *     Bit     Name    Content
+ *     -------------------------------------------------------------------------
+ *     7       L       LED (1: LED on, 0: LED off)
+ *     6..3    0       Reserved (must be 0)
+ *     2       M       GAME mode (1: Controlled by bit G, 0: From jumper "boot")
+ *     1       X       EXROM state (0: /EXROM high)
+ *     0       G       GAME state (if M = 1, 0 = /GAME high)
  *
  * @see https://skoe.de/easyflash/files/devdocs/EasyFlash-ProgRef.pdf
  */
@@ -62,12 +71,9 @@ public:
     constexpr static const uint8_t REG2_EXROM      = 0x02;
     constexpr static const uint8_t REG2_GAME       = 0x01;
 
-    CartEasyFlash(const sptr_t<Crt>& crt)
-        : Cartridge{TYPE, crt} {
-    }
+    CartEasyFlash(const sptr_t<Crt>& crt);
 
-    virtual ~CartEasyFlash() {
-    }
+    virtual ~CartEasyFlash() = default;
 
     /**
      * @see Device::dev_read()
@@ -100,17 +106,20 @@ public:
     void reset() override;
 
 private:
-    void add_rom(size_t entry, const Crt::Chip& chip, const devptr_t& rom);
+    using ROM_Array = std::array<sptr_t<ROM>, MAX_BANKS>;
 
-    void add_ram(size_t entry, const Crt::Chip& chip, const devptr_t& ram);
+    void add_rom(size_t entry, const Crt::Chip& chip, const sptr_t<ROM>& rom);
+    void add_ram(size_t entry, const Crt::Chip& chip, const sptr_t<RAM>& ram);
 
-    devptr_t                        _ram{};     /* 256 bytes RAM (if present)   */
-    size_t                          _bank{};    /* Current ROM bank             */
-    uint8_t                         _reg2{};    /* Control register at $DE02    */
-    size_t                          _romls{};   /* Number of ROMLs              */
-    size_t                          _romhs{};   /* Number of ROMHs              */
-    std::array<devptr_t, MAX_BANKS> _roms_lo{}; /* ROMLs                        */
-    std::array<devptr_t, MAX_BANKS> _roms_hi{}; /* ROMHs                        */
+    size_t      _bank{};        /* Current ROM bank             */
+    uint8_t     _reg2{};        /* Control register at $DE02    */
+    size_t      _romls{};       /* Number of ROMLs              */
+    size_t      _romhs{};       /* Number of ROMHs              */
+    sptr_t<RAM> _ram{};         /* 256 bytes RAM (if present)   */
+    ROM_Array   _roms_lo{};     /* ROMLs                        */
+    ROM_Array   _roms_hi{};     /* ROMHs                        */
+
+    friend Serializer& operator&(Serializer&, CartEasyFlash&);
 };
 
 }

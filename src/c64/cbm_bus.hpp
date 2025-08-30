@@ -23,8 +23,6 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-#include <functional>
-
 namespace caio {
 namespace commodore {
 namespace cbm_bus {
@@ -110,6 +108,8 @@ private:
     bool _clk{RELEASED};
     bool _dat{RELEASED};
     bool _rst{RELEASED};
+
+    friend Serializer& operator&(Serializer&, BusData&);
 };
 
 /**
@@ -164,6 +164,8 @@ public:
 private:
     BusData                        _data{};     /* Bus lines                        */
     std::vector<class Controller*> _devs{};     /* Devices connected to this bus    */
+
+    friend Serializer& operator&(Serializer&, Bus&);
 };
 
 /**
@@ -273,6 +275,8 @@ protected:
     uint8_t     _unit;
     sptr_t<Bus> _bus;
     BusData     _data{};
+
+    friend Serializer& operator&(Serializer&, Controller&);
 };
 
 
@@ -380,6 +384,8 @@ private:
     bool    _ready{};
     uint8_t _curbit{1};
     bool    _last{};
+
+    friend Serializer& operator&(Serializer&, ByteTR&);
 };
 
 /**
@@ -443,6 +449,8 @@ private:
     uint8_t     _cmd{};
     uint8_t     _chunit{};
     Buffer      _param{};
+
+    friend Serializer& operator&(Serializer&, Command&);
 };
 
 /**
@@ -477,6 +485,8 @@ public:
 
 private:
     int _value;
+
+    friend Serializer& operator&(Serializer&, ReadByte&);
 };
 
 /**
@@ -667,6 +677,8 @@ private:
     uint64_t _time{};
     Command  _cmd{};
     ByteTR   _bytetr{};
+
+    friend Serializer& operator&(Serializer&, Device&);
 };
 
 }

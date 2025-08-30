@@ -43,10 +43,10 @@ void CartZaxxon::reset()
      *                                  $A000-BFFF
      *
      * The (Super) Zaxxon carts use a 4Kb ($1000) ROM at $8000-$8FFF (mirrored
-     * in $9000-$9FFF) along with two 8Kb ($2000) cartridge banks  located  at
+     * in $9000-$9FFF) along with two 8Kb ($2000) cartridge banks located at
      * $A000-$BFFF. One of the two banks is selected by doing a read access to
      * either the $8000-$8FFF area (bank 0 is selected) or to $9000-$9FFF area
-     * (bank 1 is selected). EXROM ($18 = $00) and GAME ($19 = $00) lines  are
+     * (bank 1 is selected). EXROM ($18 = $00) and GAME ($19 = $00) lines are
      * always pulled to GND to select the 16 kB ROM configuration.
      *
      * The CRT file includes three CHIP blocks:
@@ -159,6 +159,14 @@ std::pair<ASpace::devmap_t, ASpace::devmap_t> CartZaxxon::getdev(addr_t addr, bo
 size_t CartZaxxon::cartsize() const
 {
     return (ROML_SIZE + ROMH_BANKS * ROMH_SIZE);
+}
+
+Serializer& operator&(Serializer& ser, CartZaxxon& cart)
+{
+    ser & static_cast<Cartridge&>(cart)
+        & cart._bank;
+
+    return ser;
 }
 
 }
