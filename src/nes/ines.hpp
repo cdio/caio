@@ -18,13 +18,12 @@
  */
 #pragma once
 
-#include <cstring>
+#include "fs.hpp"
+#include "types.hpp"
+
 #include <fstream>
 #include <string>
 #include <utility>
-
-#include "fs.hpp"
-#include "types.hpp"
 
 namespace caio {
 namespace nintendo {
@@ -147,6 +146,12 @@ std::pair<Header, std::ifstream> load_header(const fs::Path& fname);
  * @return A string representation of the specified header.
  */
 std::string to_string(const Header& hdr);
+
+/**
+ * Get the signature of an iNES header.
+ * @return The signature as a string.
+ */
+std::string signature(const Header& hdr);
 
 }
 }

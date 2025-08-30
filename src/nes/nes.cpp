@@ -23,35 +23,35 @@ namespace nintendo {
 namespace nes {
 
 NES::NES(config::Section& sec)
-    : Platform{},
+    : Platform{LABEL},
       _conf{sec}
 {
 }
 
-NES::~NES()
+bool NES::detect_format(const fs::Path& fname)
 {
-}
-
-std::string_view NES::name() const
-{
-    return "NES";
-}
-
-void NES::detect_format(const fs::Path& pname)
-{
-    if (!pname.empty()) {
-        try {
-            auto [hdr, is] = iNES::load_header(pname);
-            if (!_conf.cartridge.empty()) {
-                log.warn("Cartridge file overrided. From {} to {}\n", _conf.cartridge, pname.string());
-            }
-
-            _conf.cartridge = pname;
-
-        } catch (const InvalidCartridge& err) {
-            log.error("{}\n", err.what());
-        }
+    if (fname.empty()) {
+        return false;
     }
+
+    if (Platform::detect_format(fname)) {
+        return true;
+    }
+
+    try {
+        auto [hdr, is] = iNES::load_header(fname);
+        if (!_conf.cartridge.empty()) {
+            log.warn("Cartridge file overrided. From {} to {}\n", _conf.cartridge, fname.string());
+        }
+
+        _conf.cartridge = fname;
+        return true;
+
+    } catch (const InvalidCartridge& err) {
+        log.error("{}\n", err.what());
+    }
+
+    return false;
 }
 
 void NES::init_monitor(int ifd, int ofd)
@@ -98,11 +98,11 @@ void NES::create_devices()
     _ram  = std::make_shared<RAM>("ram", RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES);
     _cart = Cartridge::instance(_conf.cartridge);
 
-    _ppu_mmap = std::make_shared<NESPPUASpace>(_cart);
+    _ppu_mmap = std::make_shared<NESPPUASpace>("ppu-mmap", _cart);
     _ppu = std::make_shared<RP2C02>("ppu", _ppu_mmap, _conf.ntsc);
 
-    _cpu_mmap = std::make_shared<NESASpace>(_ram, _ppu, _cart);
-    _cpu = std::make_shared<RP2A03>(PPU_FREQ, _cpu_mmap);
+    _cpu_mmap = std::make_shared<NESASpace>("cpu-mmap", _ram, _ppu, _cart);
+    _cpu = std::make_shared<RP2A03>("cpu", PPU_FREQ, _cpu_mmap);
 
     _kbd  = std::make_shared<NESKeyboard>(_conf.keyboard);
     _joy1 = std::make_shared<NESJoystick>("joy1", _conf.buttons);
@@ -286,7 +286,7 @@ void NES::hotkeys(keyboard::Key key)
          */
         _gamepad1->action();    /* Swap action, gamepad1 visible on status bar */
         _gamepad2->action();    /* Swap action, gamepad2 visible on status bar */
-        _gamepad1->action();    /* Swap action, swap value as excepted         */
+        _gamepad1->action();    /* Swap action, swap value as expected         */
         break;
 
     case keyboard::KEY_CTRL_C:
@@ -334,6 +334,24 @@ ui::Config NES::ui_config()
     };
 
     return uiconf;
+}
+
+void NES::serdes(Serializer& ser)
+{
+    ser & *this;
+}
+
+Serializer& operator&(Serializer& ser, NES& nes)
+{
+    ser & static_cast<Platform&>(nes)
+        & nes._ram
+        & nes._cart
+        & nes._ppu_mmap
+        & nes._ppu
+        & nes._cpu_mmap
+        & nes._cpu;
+
+    return ser;
 }
 
 }

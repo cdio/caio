@@ -19,7 +19,6 @@
 #pragma once
 
 #include "platform.hpp"
-
 #include "ricoh_2a03.hpp"
 #include "ricoh_2c02.hpp"
 
@@ -40,6 +39,8 @@ namespace nes {
  */
 class NES : public Platform {
 public:
+    constexpr static const char* LABEL = "NES";
+
     /**
      * Instantiate this NES.
      * This method only sets the configuration parameters.
@@ -50,18 +51,16 @@ public:
      */
     NES(config::Section& sec);
 
-    virtual ~NES();
-
-    /**
-     * @see Platform::name()
-     */
-    std::string_view name() const override;
-
 private:
     /**
+     * Detect the format of a file.
+     * If the specified file is a snapshot image or a supported
+     * cartridge file, set the proper configuration option accordingly.
+     * @param fname File to detect.
+     * @return true if the specified file is valid; false otherwise.
      * @see Platform::detect_format(const fs::Path&)
      */
-    void detect_format(const fs::Path& pname) override;
+    bool detect_format(const fs::Path& fname) override;
 
     /**
      * @see Platform::init_monitor(int, int)
@@ -114,7 +113,7 @@ private:
     /**
      * @see Platform::config()
      */
-    const Config& config() const override
+    Config& config() override
     {
         return _conf;
     }
@@ -123,6 +122,11 @@ private:
      * @see Platform::ui_config()
      */
     ui::Config ui_config() override;
+
+    /**
+     * @see Platform::serdes(Serializer&)
+     */
+    void serdes(Serializer& ser) override;
 
     NESConfig                   _conf;
     sptr_t<Clock>               _clk{};
@@ -137,6 +141,8 @@ private:
     sptr_t<NESJoystick>         _joy2{};
     sptr_t<ui::widget::Gamepad> _gamepad1{};
     sptr_t<ui::widget::Gamepad> _gamepad2{};
+
+    friend Serializer& operator&(Serializer&, NES&);
 };
 
 }

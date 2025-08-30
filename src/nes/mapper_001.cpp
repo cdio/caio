@@ -19,6 +19,7 @@
 #include "mapper_001.hpp"
 
 #include "logger.hpp"
+#include "serializer.hpp"
 
 namespace caio {
 namespace nintendo {
@@ -54,10 +55,6 @@ Mapper_001::Mapper_001(const fs::Path& fname, const iNES::Header& hdr, std::ifst
     };
 
     write_observer(shreg_loader);
-}
-
-Mapper_001::~Mapper_001()
-{
 }
 
 void Mapper_001::reset()
@@ -241,6 +238,16 @@ void Mapper_001::reg_chr(bool hi, uint8_t value)
             _prg_A18 = a18;
         }
     }
+}
+
+Serializer& operator&(Serializer& ser, Mapper_001& cart)
+{
+    ser & static_cast<Cartridge&>(cart)
+        & cart._shreg
+        & cart._shbit
+        & cart._prg_A18;
+
+    return ser;
 }
 
 }

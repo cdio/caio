@@ -23,6 +23,7 @@
 #include "mapper_000.hpp"
 #include "mapper_001.hpp"
 #include "mapper_002.hpp"
+#include "mapper_003.hpp"
 
 namespace caio {
 namespace nintendo {
@@ -75,16 +76,9 @@ Cartridge::Cartridge(std::string_view type, const fs::Path& fname, const iNES::H
         _chr = ROM{"chr", is, chr_size};
     }
 
-    _prg_mode = PrgMode::Fixed_C000;
-    _prg_lb = ROMBank{_prg, PRG_BANK_SIZE};
-    _prg_hb = ROMBank{_prg, PRG_BANK_SIZE};
-    _prg_hb.bank(_prg_hb.banks() - 1);
+    signature();
 
-    _chr_mode = ChrMode::Mode_8K;
-    _chr_lb = ROMBank{_chr, CHR_BANK_SIZE, 0};
-    _chr_hb = ROMBank{_chr, CHR_BANK_SIZE, 1};
-
-    _ram_b = RAMBank{_ram, _ram.size()};
+    Cartridge::reset();
 }
 
 Cartridge::~Cartridge()
@@ -96,6 +90,9 @@ Cartridge::~Cartridge()
 
 void Cartridge::reset()
 {
+#if 1 //XXX
+    _mirror = _hdr.vertical_mirror() ? MirrorType::Vertical : MirrorType::Horizontal;
+#endif
     _prg_mode = PrgMode::Fixed_C000;
     _prg_lb = ROMBank{_prg, PRG_BANK_SIZE};
     _prg_hb = ROMBank{_prg, PRG_BANK_SIZE};
@@ -116,6 +113,19 @@ size_t Cartridge::size() const
 std::string Cartridge::to_string() const
 {
     return std::format("{}: {}", Name::to_string(), iNES::to_string(_hdr));
+}
+
+std::string Cartridge::signature() const
+{
+    if (_signature.empty()) {
+        const auto concat = iNES::signature(_hdr) + _prg.signature() +
+            (_hdr.chr_size() == 0 ? "" : static_cast<const ROM&>(_chr).signature());
+
+        const auto buf = std::span<const uint8_t>{reinterpret_cast<const uint8_t*>(concat.data()), concat.size()};
+        const_cast<std::string&>(_signature) = utils::sha256(buf);
+    }
+
+    return _signature;
 }
 
 uint8_t Cartridge::dev_read(size_t addr, ReadMode mode)
@@ -294,6 +304,31 @@ inline addr_t Cartridge::vram_mirror(size_t addr, MirrorType type) const
     return addr;
 }
 
+Serializer& operator&(Serializer& ser, Cartridge& cart)
+{
+    std::string sign{cart.signature()};
+
+    ser & static_cast<Device&>(cart)
+        & sign
+        & cart._mirror
+        & cart._vram
+        & cart._ram
+        & cart._chr
+        & cart._ram_b
+        & cart._prg_lb
+        & cart._prg_hb
+        & cart._chr_lb
+        & cart._chr_hb
+        & cart._chr_mode
+        & cart._prg_mode;
+
+    if (ser.is_deserializer() && sign != cart.signature()) {
+        throw IOError{"Invalid cartridge signature"};
+    }
+
+    return ser;
+}
+
 sptr_t<Cartridge> Cartridge::instance(const fs::Path& fname)
 {
     const auto fullpath = fs::search(fname);
@@ -301,7 +336,7 @@ sptr_t<Cartridge> Cartridge::instance(const fs::Path& fname)
         if (fname.empty()) {
             throw InvalidCartridge{"Cartridge file not specified"};
         }
-        throw InvalidCartridge{"Invalid cartridge file: {}\n", fname.c_str()};
+        throw InvalidCartridge{"Invalid cartridge file: {}\n", fname.string()};
     }
 
     auto [hdr, is] = iNES::load_header(fullpath);
@@ -314,6 +349,8 @@ sptr_t<Cartridge> Cartridge::instance(const fs::Path& fname)
         return std::make_shared<Mapper_001>(fullpath, hdr, is);
     case 2:   /* UxROM */
         return std::make_shared<Mapper_002>(fullpath, hdr, is);
+    case 3:   /* CNROM */
+        return std::make_shared<Mapper_003>(fullpath, hdr, is);
     default:;
     }
 

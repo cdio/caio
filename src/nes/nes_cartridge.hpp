@@ -18,10 +18,6 @@
  */
 #pragma once
 
-#include <fstream>
-#include <string>
-#include <string_view>
-
 #include "device.hpp"
 #include "fs.hpp"
 #include "ram.hpp"
@@ -30,6 +26,10 @@
 
 #include "ines.hpp"
 #include "nes_params.hpp"
+
+#include <fstream>
+#include <string>
+#include <string_view>
 
 namespace caio {
 namespace nintendo {
@@ -45,10 +45,10 @@ namespace nes {
  * The set of addresses exposed by the cartridge is divided
  * into two separated sections as follows:
  *
- *   Cartridge Address  Accessed by     Mapped at CPU/PPU Address
- *   -------------------------------------------------------------
- *   0000-BFFF          CPU             4000-FFFF
- *   C000-EFFF          PPU             0000-2FFF
+ *     Cartridge Address  Accessed by     Mapped at CPU/PPU Address
+ *     -------------------------------------------------------------
+ *     0000-BFFF          CPU             4000-FFFF
+ *     C000-EFFF          PPU             0000-2FFF
  *
  * @see https://www.nesdev.org/wiki/Mapper
  */
@@ -109,6 +109,14 @@ public:
     virtual ~Cartridge();
 
     /**
+     * Get the signature of this cartridge.
+     * If the signature of this cartridge is empty, compute it.
+     * @return The signature of this cartridge as a string.
+     * @see _signature
+     */
+    virtual std::string signature() const;
+
+    /**
      * @see Device::reset()
      */
     void reset() override;
@@ -155,6 +163,7 @@ protected:
 
     fs::Path        _fname;         /* Cartridge file name              */
     iNES::Header    _hdr;           /* Cartridge header                 */
+    std::string     _signature{};   /* Cartridge signature              */
     MirrorType      _mirror;        /* Nametable mirroring type         */
     fs::Path        _ram_fname{};   /* Persistent PRG RAM full path     */
     RAM             _vram{};        /* Board's 2K VRAM                  */
@@ -162,12 +171,14 @@ protected:
     ROM             _prg{};         /* PRG ROM                          */
     RAM             _chr{};         /* CHR ROM/RAM                      */
     RAMBank         _ram_b{};       /* Current PRG RAM bank             */
-    ROMBank         _prg_hb{};      /* Current PRG LO ROM bank          */
-    ROMBank         _prg_lb{};      /* Current PRG HI ROM bank          */
-    ROMBank         _chr_hb{};      /* Current CHR LO RAM/ROM bank      */
-    ROMBank         _chr_lb{};      /* Current CHR HI RAM/ROM bank      */
+    ROMBank         _prg_lb{};      /* Current PRG LO ROM bank          */
+    ROMBank         _prg_hb{};      /* Current PRG HI ROM bank          */
+    ROMBank         _chr_lb{};      /* Current CHR LO RAM/ROM bank      */
+    ROMBank         _chr_hb{};      /* Current CHR HI RAM/ROM bank      */
     ChrMode         _chr_mode{};    /* CHR RAM/ROM mode (default 8K)    */
     PrgMode         _prg_mode{};    /* PRG ROM mode (default 16K, C000 fixed to last bank)  */
+
+    friend Serializer& operator&(Serializer&, Cartridge&);
 };
 
 }

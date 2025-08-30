@@ -18,6 +18,8 @@
  */
 #include "ines.hpp"
 
+#include "utils.hpp"
+
 #include <format>
 
 namespace caio {
@@ -91,6 +93,12 @@ std::string to_string(const Header& hdr)
         (hdr.playchoice() ? "Yes" : "No"),
         (hdr.tv_pal() ? "PAL" : "NTSC"),
         (hdr.is_v20() ? "Yes" : "No"));
+}
+
+std::string signature(const Header& hdr)
+{
+    const auto buf = std::span<const uint8_t>{reinterpret_cast<const uint8_t*>(&hdr), sizeof(hdr)};
+    return utils::sha256(buf);
 }
 
 }

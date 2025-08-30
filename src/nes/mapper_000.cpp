@@ -39,10 +39,6 @@ Mapper_000::Mapper_000(const fs::Path& fname, const iNES::Header& hdr, std::ifst
     }
 }
 
-Mapper_000::~Mapper_000()
-{
-}
-
 void Mapper_000::reset()
 {
     Cartridge::reset();

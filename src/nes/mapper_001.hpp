@@ -27,26 +27,27 @@ namespace nes {
 /**
  * Cartridge Mapper 001 (MMC1).
  *
- * Address range accessed by the CPU:
+ * ### Address range accessed by the CPU:
  *
- *   Mapper Address     CPU Address     Descripton
- *   --------------------------------------------------------------------------------------------------
- *   2000-3FFF          6000-7FFF       8K PRG RAM (optional)
- *   4000-7FFF          8000-BFFF       16K PRG ROM (fixed to the first bank or switchable)
- *   8000-BFFF          C000-FFFF       16K PRG ROM (fixed to the last bank or switchable)
+ *     Mapper Address     CPU Address     Descripton
+ *     ---------------------------------------------------------------------------------------
+ *     2000-3FFF          6000-7FFF       8K PRG RAM (optional)
+ *     4000-7FFF          8000-BFFF       16K PRG ROM (fixed to the first bank or switchable)
+ *     8000-BFFF          C000-FFFF       16K PRG ROM (fixed to the last bank or switchable)
  *
- * Address range accessed by the PPU:
+ * ### Address range accessed by the PPU:
  *
- *   Mapper Address     PPU Address     Descripton
- *   --------------------------------------------------------------------------------------------------
- *   C000-CFFF          0000-0FFF       4K CHR ROM (switchable)
- *   D000-DFFF          1000-1FFF       4K CHR ROM (switchable)
- *   E000-E7FF          2000-27FF       2K VRAM
- *   E800-FFFF          2800-2FFF       2K VRAM (Nametable mirroring)
- *   F000-F7FF          3000-37FF       Mirror of 2000-27FF
- *   F800-FFFF          3800-3FFF       Mirror of 2800-2FFF
+ *     Mapper Address     PPU Address     Descripton
+ *     ---------------------------------------------------------------------------------------
+ *     C000-CFFF          0000-0FFF       4K CHR ROM (switchable)
+ *     D000-DFFF          1000-1FFF       4K CHR ROM (switchable)
+ *     E000-E7FF          2000-27FF       2K VRAM
+ *     E800-FFFF          2800-2FFF       2K VRAM (Nametable mirroring)
+ *     F000-F7FF          3000-37FF       Mirror of 2000-27FF
+ *     F800-FFFF          3800-3FFF       Mirror of 2800-2FFF
  *
- * Bank Switching and Registers:
+ * ### Bank Switching and Registers:
+ *
  * The bank switching is done through a 5-bit shift register accessed by
  * writing to 8000-FFFF, the written address selects the internal register.
  *
@@ -124,7 +125,7 @@ public:
      */
     Mapper_001(const fs::Path& fname, const iNES::Header& hdr, std::ifstream& is);
 
-    virtual ~Mapper_001();
+    virtual ~Mapper_001() = default;
 
     void reset() override;
 
@@ -137,6 +138,8 @@ private:
     uint8_t _shreg{};       /* 5-bit shift register         */
     uint8_t _shbit{};       /* 5-bit shift register counter */
     bool    _prg_A18{};     /* PRG A18 line status          */
+
+    friend Serializer& operator&(Serializer&, Mapper_001&);
 };
 
 }
