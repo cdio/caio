@@ -27,7 +27,7 @@ namespace signal {
 
 fp_t mean(samples_fp samples)
 {
-    fp_t sum = std::accumulate(samples.begin(), samples.end(), 0.0);
+    const fp_t sum = std::accumulate(samples.begin(), samples.end(), 0.0);
     return (sum / samples.size());
 }
 

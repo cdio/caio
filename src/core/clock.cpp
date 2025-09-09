@@ -142,10 +142,9 @@ void Clock::run()
 
 size_t Clock::tick()
 {
-    for (auto& pair : _clockables) {
-        auto& cycles = pair.second;
+    for (auto& [device, cycles] : _clockables) {
         if (cycles == 0) {
-            cycles = pair.first->tick(*this);
+            cycles = device->tick(*this);
             if (cycles == Clockable::HALT) {
                 /*
                  * System Halt is requested.
@@ -163,8 +162,7 @@ size_t Clock::tick()
 void Clock::reset()
 {
     if (paused()) {
-        for (auto& pair : _clockables) {
-            auto& cycles = pair.second;
+        for (auto& [device, cycles] : _clockables) {
             cycles = 0;
         }
     }

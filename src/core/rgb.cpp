@@ -101,7 +101,7 @@ void RgbaTable::load(const fs::Path& fname)
         }
 
         try {
-            auto value = utils::to_number<uint32_t>(line.c_str());
+            const auto value = utils::to_number<uint32_t>(line.c_str());
             push_back(Rgba{value});
         } catch (const InvalidNumber&) {
             throw IOError{"Invalid line: {}", line};

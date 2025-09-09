@@ -36,10 +36,10 @@ ASpace::ASpace(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask)
 
 void ASpace::reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask)
 {
-    auto banks = wmaps.size();
+    const auto banks = wmaps.size();
     CAIO_ASSERT(banks != 0 && banks == rmaps.size());
 
-    auto bsize = (static_cast<size_t>(amask) + 1) / banks;
+    const auto bsize = (static_cast<size_t>(amask) + 1) / banks;
     auto bmask = bsize - 1;
     CAIO_ASSERT((bsize & bmask) == 0);
 
@@ -97,10 +97,10 @@ std::ostream& ASpace::dump(std::ostream& os) const
 {
     os.setf(std::ios::left, std::ios::adjustfield);
 
-    unsigned amax = _amask + 1;
+    const unsigned amax = _amask + 1;
 
     for (unsigned addr = 0; addr < amax; addr += _bsize) {
-        auto [bank, _] = decode(addr);
+        const auto [bank, _] = decode(addr);
         const auto& rdev = _rmaps[bank];
         const auto& wdev = _wmaps[bank];
         const addr_t astart = static_cast<addr_t>(addr);

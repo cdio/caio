@@ -140,8 +140,8 @@ void UI::init_window_size()
     const auto& vconf = _conf.video;
 
     const Size2 default_screen_size{
-        .width = static_cast<int>(vconf.width),
-        .height = static_cast<int>(vconf.height)
+        .w = static_cast<int>(vconf.width),
+        .h = static_cast<int>(vconf.height)
     };
 
     _screen_ratio = aspect_ratio(default_screen_size);
@@ -155,9 +155,9 @@ void UI::init_window_size()
          * In the advanced horizontal scanlines effect a new "empty"
          * scanline is intercalated between two valid scanlines.
          */
-        _tex_size.height = 2 * vconf.height - 1;
-        _screen_size.height = static_cast<int>(std::ceil(_tex_size.height * _screen_scale));
-        _screen_size.width  = static_cast<int>(std::ceil(_screen_size.height * _screen_ratio));
+        _tex_size.h = 2 * vconf.height - 1;
+        _screen_size.h = static_cast<int>(std::ceil(_tex_size.h * _screen_scale));
+        _screen_size.w = static_cast<int>(std::ceil(_screen_size.h * _screen_ratio));
         break;
 
     case SLEffect::Adv_Vertical:
@@ -165,14 +165,14 @@ void UI::init_window_size()
          * In the advanced vertical scanlines effect a new "empty"
          * vertical line is intercalated between two valid vertical lines.
          */
-        _tex_size.width = 2 * vconf.width - 1;
-        _screen_size.width  = static_cast<int>(std::ceil(_tex_size.width * _screen_scale));
-        _screen_size.height = static_cast<int>(std::ceil(_screen_size.width / _screen_ratio));
+        _tex_size.w = 2 * vconf.width - 1;
+        _screen_size.w  = static_cast<int>(std::ceil(_tex_size.w * _screen_scale));
+        _screen_size.h = static_cast<int>(std::ceil(_screen_size.w / _screen_ratio));
         break;
 
     default:
-        _screen_size.width = static_cast<int>(std::ceil(_tex_size.width * _screen_scale));
-        _screen_size.height = static_cast<int>(std::ceil(_screen_size.width / _screen_ratio));
+        _screen_size.w = static_cast<int>(std::ceil(_tex_size.w * _screen_scale));
+        _screen_size.h = static_cast<int>(std::ceil(_screen_size.w / _screen_ratio));
     }
 
     /*
@@ -186,16 +186,16 @@ void UI::init_window_size()
     _screen_rect = {
         .x = 0,
         .y = 0,
-        .w = _screen_size.width,
-        .h = _screen_size.height
+        .w = _screen_size.w,
+        .h = _screen_size.h
     };
 
     log.debug("ui: Aspect ratio: {}, scanlines effect: {}, tex size: {} x {}, screen size: {} x {}, window size: {} x {}\n",
         ui::to_string(vconf.aspect),
         ui::to_string(vconf.sleffect),
-        _tex_size.width, _tex_size.height,
-        _screen_size.width, _screen_size.height,
-        _win_size.width, _win_size.height);
+        _tex_size.w, _tex_size.h,
+        _screen_size.w, _screen_size.h,
+        _win_size.w, _win_size.h);
 }
 
 void UI::init_window()
@@ -203,7 +203,7 @@ void UI::init_window()
     init_window_size();
 
     auto* windowp = ::SDL_CreateWindow(_conf.video.title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        _win_size.width, _win_size.height, SDL_WINDOW_RESIZABLE);
+        _win_size.w, _win_size.h, SDL_WINDOW_RESIZABLE);
 
     if (windowp == nullptr) {
         throw UIError{"Can't create main window: {}", sdl_error()};
@@ -256,7 +256,7 @@ void UI::init_texture()
      * Screen texture.
      */
     auto* screenp = ::SDL_CreateTexture(_renderer.get(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
-        _tex_size.width, _tex_size.height);
+        _tex_size.w, _tex_size.h);
 
     if (screenp == nullptr) {
         throw UIError{"Can't create screen texture: {}", sdl_error()};
@@ -272,27 +272,27 @@ void UI::init_texture()
 
 inline float UI::aspect_ratio(const Size2& wsize)
 {
-    return to_value(_conf.video.aspect, static_cast<int>(100.0f * wsize.width / wsize.height) / 100.0f);
+    return to_value(_conf.video.aspect, static_cast<int>(100.0f * wsize.w / wsize.h) / 100.0f);
 }
 
 Size2 UI::scale(const Size2& csize, const Size2& wsize)
 {
     static const auto do_scale_x = [](const Size2& wsize, float scale_x, float ratio) -> Size2 {
-        const auto w = static_cast<int>(wsize.width * scale_x);
+        const auto w = static_cast<int>(wsize.w * scale_x);
         const auto h = static_cast<int>(w / ratio);
         return {w, h};
     };
 
     static const auto do_scale_y = [](const Size2& wsize, float scale_y, float ratio) -> Size2 {
-        const auto h = static_cast<int>(wsize.height * scale_y);
+        const auto h = static_cast<int>(wsize.h * scale_y);
         const auto w = static_cast<int>(h * ratio);
         return {w, h};
     };
 
-    const float ratio = static_cast<float>(wsize.width) / wsize.height;
+    const float ratio = static_cast<float>(wsize.w) / wsize.h;
 
-    float scale_x = static_cast<float>(csize.width) / wsize.width;
-    float scale_y = static_cast<float>(csize.height) / wsize.height;
+    float scale_x = static_cast<float>(csize.w) / wsize.w;
+    float scale_y = static_cast<float>(csize.h) / wsize.h;
 
     if (!_conf.video.sresize) {
         scale_x = std::floor(scale_x);
@@ -302,10 +302,10 @@ Size2 UI::scale(const Size2& csize, const Size2& wsize)
     scale_x = std::max(1.0f, scale_x);
     scale_y = std::max(1.0f, scale_y);
 
-    const int wx = scale_x * wsize.width;
+    const int wx = scale_x * wsize.w;
     const int hx = wx / ratio;
 
-    return (hx > csize.height ? do_scale_y(wsize, scale_y, ratio) : do_scale_x(wsize, scale_x, ratio));
+    return (hx > csize.h ? do_scale_y(wsize, scale_y, ratio) : do_scale_x(wsize, scale_x, ratio));
 }
 
 std::tuple<Size2, ::SDL_DisplayMode> UI::closest_display_mode(const Size2& wsize)
@@ -322,8 +322,8 @@ std::tuple<Size2, ::SDL_DisplayMode> UI::closest_display_mode(const Size2& wsize
 
     const ::SDL_DisplayMode desired{
         .format       = SDL_PIXELFORMAT_RGBA8888,
-        .w            = wsize.width,
-        .h            = wsize.height,
+        .w            = wsize.w,
+        .h            = wsize.h,
         .refresh_rate = REFRESH_RATE,
         .driverdata   = nullptr
     };
@@ -370,7 +370,7 @@ std::tuple<Size2, ::SDL_DisplayMode> UI::closest_display_mode(const Size2& wsize
         const auto candidate_wsize = scale({candidate.w, candidate.h}, wsize);
 
         const int candidate_area = candidate.w * candidate.h;
-        const int desired_area = candidate_wsize.width * candidate_wsize.height;
+        const int desired_area = candidate_wsize.w * candidate_wsize.h;
 
         const int covered_area = static_cast<int>(100.0f * desired_area / candidate_area);
         const bool selected = (closest_covered_area <= covered_area);
@@ -406,17 +406,17 @@ void UI::init_fs_mode()
     const int expand_h = (vconf.sleffect == SLEffect::Adv_Vertical);
 
     Size2 wsize{
-        .width  = _tex_size.width  << expand_w,
-        .height = _tex_size.height << expand_h
+        .w = _tex_size.w  << expand_w,
+        .h = _tex_size.h << expand_h
     };
 
     const float aratio = aspect_ratio(wsize);
 
     if (vconf.aspect != AspectRatio::System) {
         if (expand_h) {
-            wsize.height = std::floor(wsize.width / aratio);
+            wsize.h = std::floor(wsize.w / aratio);
         } else {
-            wsize.width = std::floor(wsize.height * aratio);
+            wsize.w = std::floor(wsize.h * aratio);
         }
     }
 
@@ -438,19 +438,19 @@ void UI::init_fs_mode()
         }
     }
 
-    const int margin_x = (closest.w - closest_wsize.width) >> 1;
-    const int margin_y = (closest.h - closest_wsize.height) >> 1;
+    const int margin_x = (closest.w - closest_wsize.w) >> 1;
+    const int margin_y = (closest.h - closest_wsize.h) >> 1;
 
     _screen_fs_rect = {
         .x = margin_x,
         .y = margin_y,
-        .w = closest_wsize.width,
-        .h = closest_wsize.height
+        .w = closest_wsize.w,
+        .h = closest_wsize.h
     };
 
     _fs_size = {
-        .width  = closest.w,
-        .height = closest.h
+        .w = closest.w,
+        .h = closest.h
     };
 }
 
@@ -876,8 +876,8 @@ void UI::resize_event(int width, int height)
     }
 
     _win_size = {
-        .width = width,
-        .height = height
+        .w = width,
+        .h = height
     };
 
     if (_conf.video.sresize) {
@@ -885,7 +885,7 @@ void UI::resize_event(int width, int height)
          * Smooth resize: The emulated screen is gradually scaled.
          */
         _screen_size = scale(_win_size, _tex_size);
-        _screen_scale = static_cast<float>(_screen_size.width) / _tex_size.width;
+        _screen_scale = static_cast<float>(_screen_size.w) / _tex_size.w;
 
     } else {
         /*
@@ -893,27 +893,26 @@ void UI::resize_event(int width, int height)
          */
         const bool expand_h = (_conf.video.sleffect == SLEffect::Adv_Vertical);
 
-        const int width = (expand_h ? _tex_size.width : _tex_size.height * _screen_ratio);
-        const int height = (expand_h ? _tex_size.width / _screen_ratio : _tex_size.height);
+        const int width = (expand_h ? _tex_size.w : _tex_size.h * _screen_ratio);
+        const int height = (expand_h ? _tex_size.w / _screen_ratio : _tex_size.h);
 
-        const int scale_xy = (expand_h ? _win_size.width / _tex_size.width :
-                                         _win_size.height / _tex_size.height);
+        const int scale_xy = (expand_h ? _win_size.w / _tex_size.w : _win_size.h / _tex_size.h);
 
         int scale = std::max(1, scale_xy);
-        for (; scale > 1 && ((width * scale > _win_size.width) || (height * scale > _win_size.height)); --scale);
+        for (; scale > 1 && ((width * scale > _win_size.w) || (height * scale > _win_size.h)); --scale);
 
         _screen_scale = scale;
         _screen_size = { width * scale, height * scale };
     }
 
-    const int margin_x = (_win_size.width - _screen_size.width) / 2;
-    const int margin_y = (_win_size.height - _screen_size.height) / 2;
+    const int margin_x = (_win_size.w - _screen_size.w) / 2;
+    const int margin_y = (_win_size.h - _screen_size.h) / 2;
 
     _screen_rect = {
-        .x = (_screen_size.width <= _win_size.width) * margin_x,
-        .y = (_screen_size.height <= _win_size.height) * margin_y,
-        .w = _screen_size.width,
-        .h = _screen_size.height
+        .x = (_screen_size.w <= _win_size.w) * margin_x,
+        .y = (_screen_size.h <= _win_size.h) * margin_y,
+        .w = _screen_size.w,
+        .h = _screen_size.h
     };
 }
 
@@ -1180,8 +1179,8 @@ void UI::toggle_fullscreen()
             return;
         }
 
-        ::SDL_SetWindowPosition(_window.get(), _win_pos.width, _win_pos.height);
-        ::SDL_SetWindowSize(_window.get(), _win_size.width, _win_size.height);
+        ::SDL_SetWindowPosition(_window.get(), _win_pos.w, _win_pos.h);
+        ::SDL_SetWindowSize(_window.get(), _win_size.w, _win_size.h);
 
         _is_fullscreen = false;
 
@@ -1189,7 +1188,7 @@ void UI::toggle_fullscreen()
         /*
          * Enter fullscreen.
          */
-        ::SDL_GetWindowPosition(_window.get(), &_win_pos.width, &_win_pos.height);
+        ::SDL_GetWindowPosition(_window.get(), &_win_pos.w, &_win_pos.h);
 
         if (::SDL_SetWindowFullscreen(_window.get(), _fs_flags) < 0) {
             log.error("ui: Can't enter fullscreen mode: {}\n", sdl_error());
@@ -1222,8 +1221,8 @@ void UI::postrender_effects()
     ::SDL_Rect rect{
         .x = 0,
         .y = 0,
-        .w = wsize.width,
-        .h = wsize.height
+        .w = wsize.w,
+        .h = wsize.h
     };
 
     const int scale = (_is_fullscreen ? 2 : std::ceil(_screen_scale));
@@ -1233,7 +1232,7 @@ void UI::postrender_effects()
     case ui::SLEffect::Horizontal:
     case ui::SLEffect::Adv_Vertical:
         rect.h = skip / 2;
-        for (int y = 1; y < wsize.height; y += skip) {
+        for (int y = 1; y < wsize.h; y += skip) {
             rect.y = y;
             ::SDL_RenderFillRect(_renderer.get(), &rect);
         }
@@ -1242,7 +1241,7 @@ void UI::postrender_effects()
     case ui::SLEffect::Vertical:
     case ui::SLEffect::Adv_Horizontal:
         rect.w = skip / 2;
-        for (int x = 0; x < wsize.width; x += skip) {
+        for (int x = 0; x < wsize.w; x += skip) {
             rect.x = x;
             ::SDL_RenderFillRect(_renderer.get(), &rect);
         }
@@ -1281,10 +1280,10 @@ void UI::render_screen()
                 const Rgba refle{px * ADV_SCANLINE_REFLECTION};
                 *dst = pixel;
                 if (line + 1 < _conf.video.height) {
-                    dst[_tex_size.width] = refle;
+                    dst[_tex_size.w] = refle;
                 }
                 if (line > 0) {
-                    dst[-_tex_size.width] = dst[-_tex_size.width] + refle;
+                    dst[-_tex_size.w] = dst[-_tex_size.w] + refle;
                 }
                 ++dst;
             });
@@ -1355,13 +1354,13 @@ void UI::render_screen()
     if (::SDL_SetRenderDrawColor(_renderer.get(), CRT_COLOR.r, CRT_COLOR.g, CRT_COLOR.b, CRT_COLOR.a) < 0 ||
         ::SDL_RenderClear(_renderer.get()) < 0 ||
         ::SDL_RenderCopy(_renderer.get(), _screen_tex.get(), nullptr, &rect) < 0) {
-        throw IOError{"Can't copy texture: {}", sdl_error()};
+        throw UIError{"Can't copy texture: {}", sdl_error()};
     }
 
     postrender_effects();
 
     const auto& wsize = (_is_fullscreen ? _fs_size : _win_size);
-    _panel->render(wsize.width, wsize.height);
+    _panel->render(wsize.w, wsize.h);
 
     ::SDL_RenderPresent(_renderer.get());
 }
@@ -1406,7 +1405,7 @@ void UI::joy_add(int devid)
     }
 
     /*
-     * Associate the new game controller to the emulated joystick.
+     * Attach the new game controller to the emulated joystick.
      */
     auto gcptr = uptr_t<::SDL_GameController, void(*)(::SDL_GameController*)>{gc, ::SDL_GameControllerClose};
     _sdl_joys.emplace(jid, std::move(gcptr));
@@ -1472,12 +1471,13 @@ void UI::screenshot()
 
     char buf[20]{};
     std::strftime(buf, sizeof(buf), "%Y-%m-%d_%H.%M.%S", &tm);
-    const auto fname = std::format("{}/{}{}.png", _conf.video.screenshotdir, SCREENSHOT_PREFIX, buf);
+    const auto fname = std::format("{}{}.png", SCREENSHOT_PREFIX, buf);
 #else
     const auto utc = std::chrono::system_clock::now();
     const auto now = std::chrono::zoned_time{utc};
     const auto fname = std::format("{}/{}{:%F_%H.%M.%S}.png", _conf.video.screenshotdir, SCREENSHOT_PREFIX, now);
 #endif
+    log.debug("Saving screenshot to: '{}'\n", fname);
 
     if (::IMG_SavePNG(image.get(), fname.c_str()) < 0) {
         throw UIError{"Can't save screenshot image: {}", sdl_error()};

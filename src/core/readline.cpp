@@ -62,7 +62,7 @@ History& History::operator=(History&& other)
 
 std::string History::add_current()
 {
-    auto curr = _history[_current];
+    const auto curr = _history[_current];
     if (!curr.empty()) {
         if (_current == 0 || curr != _history[_current - 1]) {
             if (_current == HISTSIZ) {
@@ -181,7 +181,7 @@ Readline& Readline::operator=(Readline&& other)
 
 void Readline::fds(const std::pair<int, int>& fd)
 {
-    auto setfd = [](int& dstfd, int fd, std::string_view iostr) {
+    const auto setfd = [](int& dstfd, int fd, std::string_view iostr) {
         if (fd >= 0) {
             auto nfd = ::dup(fd);
             if (nfd < 0) {
@@ -253,7 +253,7 @@ void Readline::write(std::span<const char> data) const
 
 bool Readline::process_escape()
 {
-    char ch = getc();
+    const char ch = getc();
 
     switch (ch) {
     case CURSOR_CONTROL:
@@ -267,7 +267,7 @@ bool Readline::process_escape()
 
 bool Readline::process_cursor()
 {
-    char ch = getc();
+    const char ch = getc();
 
     switch (ch) {
     case CURSOR_UP:
@@ -299,7 +299,7 @@ std::string Readline::getline()
 {
     for (;;) {
         std::string& line = _history.current();
-        char ch = getc();
+        const char ch = getc();
         switch (ch) {
         case NEWLINE:
             write(ch);

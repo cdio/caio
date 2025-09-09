@@ -48,47 +48,49 @@ Expr::fn_t Expr::compile_argument(MonitoredCPU& cpu, std::string_view line)
      */
     auto pos = line.find_first_not_of(" \n\r\v\t");
     if (pos != std::string_view::npos) {
-        auto last = line.find_last_not_of(" \n\r\v\t");
-        if (last == std::string_view::npos) {
-            last = line.size();
-        }
+        const auto last = [&line](){
+            const auto l = line.find_last_not_of(" \n\r\v\t");
+            return (l == std::string_view::npos ? line.size() : l);
+        }();
 
         /*
          * Detect if it is a value or a reference to a value stored in memory.
          */
-        bool isref{};
-        if (line[pos] == '*') {
-            isref = true;
+        const bool isref = [&line, &pos](){
+            if (line[pos] != '*') {
+                return false;
+            }
             ++pos;
-        }
+            return true;
+        }();
 
         /*
          * Detect numeric base (default is hexadecimal).
          */
-        int base = 16;
-        if (line[pos] == '#') {
-            /*
-             * #xx means decimal.
-             */
-            base = 10;
-            ++pos;
-        }
+        const int base = [&line, &pos](){
+            if (line[pos] == '#') {
+                /*
+                 * #xx means decimal.
+                 */
+                ++pos;
+                return 10;
+            }
+            if (line[pos] == '$') {
+                /*
+                 * $#xx and $xx mean hexadecimal.
+                 */
+                ++pos;
+            }
+            return 16;
+        }();
 
-        if (line[pos] == '$') {
-            /*
-             * $#xx and $xx mean hexadecimal.
-             */
-            base = 16;
-            ++pos;
-        }
-
-        std::string svalue = utils::tolow(line.substr(pos, last - pos + 1));
+        const std::string svalue = utils::tolow(line.substr(pos, last - pos + 1));
 
         /*
          * Try to compile a literal value.
          */
         char* e{};
-        uint64_t lit = std::strtoull(svalue.c_str(), &e, base);
+        const uint64_t lit = std::strtoull(svalue.c_str(), &e, base);
         if (*e == '\0') {
             /*
              * It is a literal value.
@@ -98,6 +100,7 @@ Expr::fn_t Expr::compile_argument(MonitoredCPU& cpu, std::string_view line)
                 return (isref ? cpu.peek(val) : val);
             };
         }
+
 
         /*
          * Try to compile a register name.
@@ -129,7 +132,7 @@ std::function<int()> Expr::compile(MonitoredCPU& cpu, std::string_view line)
      */
     for (const auto& op : operators) {
         const auto& name = op.first;
-        auto pos = line.find(name);
+        const auto pos = line.find(name);
         if (pos != std::string_view::npos) {
             const auto arg1 = line.substr(0, pos);
             const auto arg2 = line.substr(pos + name.size());
@@ -222,10 +225,10 @@ bool Monitor::run()
 
 bool Monitor::is_breakpoint(addr_t addr) const
 {
-    auto it = _breakpoints.find(addr);
+    const auto it = _breakpoints.find(addr);
     if (it != _breakpoints.end()) {
-        auto& cond = it->second;
-        auto& fn = cond.first;
+        const auto& cond = it->second;
+        const auto& fn = cond.first;
         if (!fn) {
             /*
              * Unconditional breakpoint.
@@ -298,14 +301,12 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
 
     mon._rd.write("Entering edit mode. To finish write '.' or an empty line\n");
 
-    auto [ifd, ofd] = mon._rd.fds();
+    const auto [ifd, ofd] = mon._rd.fds();
     Readline editor{ifd, ofd};
     while (true) {
         editor.write("${}: ", utils::to_string(addr));
 
-        std::string line = editor.getline();
-        line = utils::trim(line);
-
+        const std::string line = utils::trim(editor.getline());
         if (line.empty() || line == ".") {
             /*
              * Leave the edit mode.
@@ -321,7 +322,7 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
         std::string str{};
         while (iss >> str) {
             try {
-                auto u8 = utils::to_number<uint8_t>(str);
+                const auto u8 = utils::to_number<uint8_t>(str);
                 program.push_back(u8);
             } catch (const InvalidNumber&) {
                 /*
@@ -337,7 +338,7 @@ bool Monitor::assemble(Monitor& mon, const Command::args_t& args)
          * Write the user edited program line into memory.
          */
         try {
-            for (uint8_t u8 : program) {
+            for (const uint8_t u8 : program) {
                 mon._cpu.write(addr++, u8);
             }
         } catch (const std::exception& err) {
@@ -612,12 +613,7 @@ bool Monitor::load(Monitor& mon, const Command::args_t& args)
      */
     try {
         if (args.size() > 1) {
-            addr_t addr{};
-
-            if (args.size() > 2) {
-                addr = utils::to_number<addr_t>(args[2]);
-            }
-
+            const addr_t addr = (args.size() > 2 ? utils::to_number<addr_t>(args[2]) : 0);
             auto [start, size] = mon._cpu.load(args[1], addr);
             mon._rd.write("load: {} loaded at ${}, size {} (${})\n",
                 args[1], utils::to_string(addr), size, utils::to_string(size));
@@ -640,8 +636,8 @@ bool Monitor::save(Monitor& mon, const Command::args_t& args)
         }
 
         const auto& fname = args[1];
-        addr_t start = utils::to_number<addr_t>(args[2]);
-        addr_t end = utils::to_number<addr_t>(args[3]);
+        const addr_t start = utils::to_number<addr_t>(args[2]);
+        const addr_t end = utils::to_number<addr_t>(args[3]);
 
         if (end < start) {
             throw InvalidArgument{"End address smaller than start address"};
@@ -664,7 +660,7 @@ bool Monitor::loglevel(Monitor& mon, const Command::args_t& args)
      */
     try {
         if (args.size() != 2) {
-            unsigned lv = mon._cpu.loglevel({});
+            const unsigned lv = mon._cpu.loglevel({});
             mon._rd.write("{}\n", std::to_string(lv));
         } else {
             mon._cpu.loglevel(args[1]);
@@ -692,7 +688,7 @@ bool Monitor::quit(Monitor& mon, const Command::args_t& args)
      * quit, q
      */
     if (args.size() > 1) {
-        int eval = std::atoi(args[1].c_str());
+        const int eval = std::atoi(args[1].c_str());
         mon._rd.write("Emulator terminated with exit code: {}\n", eval);
         std::exit(eval);
     }

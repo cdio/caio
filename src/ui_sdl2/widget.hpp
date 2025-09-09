@@ -282,7 +282,7 @@ protected:
     void update_action_period();
 
     sptr_t<::SDL_Renderer>  _renderer{};
-    uptrd_t<::SDL_Texture>  _texture{nullptr, nullptr};
+    uptrd_t<::SDL_Texture>  _texture{{}, {}};
     std::function<void()>   _action{};
     bool                    _is_action_period{};
     uint64_t                _action_time{};
@@ -322,7 +322,7 @@ private:
 
     sptr_t<::SDL_Renderer>  _renderer{};
     std::string             _label{};
-    uptrd_t<::SDL_Texture>  _texture{nullptr, nullptr};
+    uptrd_t<::SDL_Texture>  _texture{{}, {}};
     float                   _ratio{};
 
     /*

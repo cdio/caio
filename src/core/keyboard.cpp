@@ -148,13 +148,13 @@ static std::unordered_map<std::string, Key> name_to_key{
 
 Key to_key(const std::string& name)
 {
-    auto it = name_to_key.find(name);
+    const auto it = name_to_key.find(name);
     return (it == name_to_key.end() ? Key::KEY_NONE : it->second);
 }
 
 std::string to_string(Key key)
 {
-    auto it = std::find_if(name_to_key.begin(), name_to_key.end(),
+    const auto it = std::find_if(name_to_key.begin(), name_to_key.end(),
         [key](const std::pair<std::string, Key>& pair) {
             return (pair.second == key);
     });
@@ -184,10 +184,6 @@ Keyboard::Keyboard(bool enabled)
 Keyboard::Keyboard(std::string_view label, bool enabled)
     : Name{TYPE, label},
       _kbd_enabled{enabled}
-{
-}
-
-Keyboard::~Keyboard()
 {
 }
 
@@ -226,10 +222,10 @@ void Keyboard::load(const fs::Path& fname)
             }
 
             const auto& key_name  = result.str(1);
-            bool key_shift        = (result.str(2) == "SHIFT");
-            bool key_altgr        = (result.str(3) == "ALTGR");
+            const bool key_shift  = (result.str(2) == "SHIFT");
+            const bool key_altgr  = (result.str(3) == "ALTGR");
             const auto& impl_name = result.str(4);
-            bool impl_shift       = (result.str(5) == "SHIFT");
+            const bool impl_shift = (result.str(5) == "SHIFT");
 
             add_key_map(key_name, key_shift, key_altgr, impl_name, impl_shift);
 
@@ -263,20 +259,19 @@ void Keyboard::key_pressed(Key key)
 
     if (_vjoy) {
         const auto& jport = _vjoy->port();
-        uint16_t pos = _vjoy->position();
-
-        pos |= (key == _vjoykeys.up     ? jport.up :
-               (key == _vjoykeys.down   ? jport.down :
-               (key == _vjoykeys.left   ? jport.left :
-               (key == _vjoykeys.right  ? jport.right :
-               (key == _vjoykeys.fire   ? jport.fire :
-               (key == _vjoykeys.a      ? jport.a :
-               (key == _vjoykeys.b      ? jport.b :
-               (key == _vjoykeys.x      ? jport.x :
-               (key == _vjoykeys.y      ? jport.y :
-               (key == _vjoykeys.back   ? jport.back :
-               (key == _vjoykeys.guide  ? jport.guide :
-               (key == _vjoykeys.start  ? jport.start : 0))))))))))));
+        const uint16_t pos = _vjoy->position() |
+            ((key == _vjoykeys.up) * jport.up) |
+            ((key == _vjoykeys.down) * jport.down) |
+            ((key == _vjoykeys.left) * jport.left) |
+            ((key == _vjoykeys.right) * jport.right) |
+            ((key == _vjoykeys.fire) * jport.fire) |
+            ((key == _vjoykeys.a) * jport.a) |
+            ((key == _vjoykeys.b) * jport.b) |
+            ((key == _vjoykeys.x) * jport.x) |
+            ((key == _vjoykeys.y) * jport.y) |
+            ((key == _vjoykeys.back) * jport.back) |
+            ((key == _vjoykeys.guide) * jport.guide) |
+            ((key == _vjoykeys.start) * jport.start);
 
         _vjoy->position(pos);
     }
@@ -286,20 +281,19 @@ void Keyboard::key_released(Key key)
 {
     if (_vjoy) {
         const auto& jport = _vjoy->port();
-        uint16_t pos = _vjoy->position();
-
-        pos &= ~(key == _vjoykeys.up     ? jport.up :
-                (key == _vjoykeys.down   ? jport.down :
-                (key == _vjoykeys.left   ? jport.left :
-                (key == _vjoykeys.right  ? jport.right :
-                (key == _vjoykeys.fire   ? jport.fire :
-                (key == _vjoykeys.a      ? jport.a :
-                (key == _vjoykeys.b      ? jport.b :
-                (key == _vjoykeys.x      ? jport.x :
-                (key == _vjoykeys.y      ? jport.y :
-                (key == _vjoykeys.back   ? jport.back :
-                (key == _vjoykeys.guide  ? jport.guide :
-                (key == _vjoykeys.start  ? jport.start : 0))))))))))));
+        const uint16_t pos = _vjoy->position() &
+            ~(((key == _vjoykeys.up) * jport.up) |
+              ((key == _vjoykeys.down) * jport.down) |
+              ((key == _vjoykeys.left) * jport.left) |
+              ((key == _vjoykeys.right) * jport.right) |
+              ((key == _vjoykeys.fire) * jport.fire) |
+              ((key == _vjoykeys.a) * jport.a) |
+              ((key == _vjoykeys.b) * jport.b) |
+              ((key == _vjoykeys.x) * jport.x) |
+              ((key == _vjoykeys.y) * jport.y) |
+              ((key == _vjoykeys.back) * jport.back) |
+              ((key == _vjoykeys.guide) * jport.guide) |
+              ((key == _vjoykeys.start) * jport.start));
 
         _vjoy->position(pos);
     }

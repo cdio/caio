@@ -32,8 +32,8 @@ namespace sdl2 {
  * 2D Size.
  */
 struct Size2 {
-    int width{};
-    int height{};
+    int w{};
+    int h{};
 };
 
 /**

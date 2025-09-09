@@ -30,13 +30,13 @@ namespace config {
 
 bool is_true(std::string_view value)
 {
-    auto val = utils::tolow(value);
+    const auto val = utils::tolow(value);
     return (val == "yes" || val == "ye" || val == "y");
 }
 
 bool is_false(std::string_view value)
 {
-    auto val = utils::tolow(value);
+    const auto val = utils::tolow(value);
     return (val == "no" || val == "n");
 }
 

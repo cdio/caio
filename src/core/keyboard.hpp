@@ -219,7 +219,7 @@ public:
      */
     Keyboard(std::string_view label, bool enabled = true);
 
-    virtual ~Keyboard();
+    virtual ~Keyboard() = default;
 
     /**
      * Load a key mappings table from a file.
@@ -248,7 +248,8 @@ public:
      * @return The status of this keyboard (true if enabled, false if disabled).
      * @see enable(bool)
      */
-    bool is_enabled() const {
+    bool is_enabled() const
+    {
         return _kbd_enabled;
     }
 
@@ -257,7 +258,8 @@ public:
      * Note that the status of the keyboard does not affect the virtual joystick.
      * @param en true to enable; false to disable.
      */
-    void enable(bool en) {
+    void enable(bool en)
+    {
         _kbd_enabled = en;
     }
 

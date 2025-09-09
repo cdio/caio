@@ -66,19 +66,17 @@ std::vector<std::string> split(std::string_view str, char sep)
 
 std::string trim(std::string_view str)
 {
-    size_t len = str.length();
-    size_t begin = str.find_first_not_of(" \t");
-    size_t end = str.find_last_not_of(" \t");
+    const size_t len = str.length();
 
-    if (begin == std::string::npos) {
-        begin = 0;
-    }
+    const size_t begin = [&str]() {
+        const size_t pos = str.find_first_not_of(" \t");
+        return (pos == std::string::npos ? 0 : pos);
+    }();
 
-    if (end == std::string::npos) {
-        end = len - 1;
-    } else {
-        ++end;
-    }
+    const size_t end = [&str, &len]() {
+        const size_t pos = str.find_last_not_of(" \t");
+        return (pos == std::string::npos ? len - 1 : pos + 1);
+    }();
 
     return std::string{str.substr(begin, end)};
 }
@@ -94,7 +92,7 @@ unsigned long long to_ulonglong(std::string_view str, size_t max)
     switch (str[0]) {
     case '#':
         base = 10;
-        /* FALLTHROUGH */
+        [[fallthrough]];
     case '$':
         ++pos;
         break;
@@ -102,7 +100,7 @@ unsigned long long to_ulonglong(std::string_view str, size_t max)
     }
 
     char* err{};
-    unsigned long long val = std::strtoull(str.data() + pos, &err, base);
+    const unsigned long long val = std::strtoull(str.data() + pos, &err, base);
     if (*err != '\0' || val > max) {
         throw InvalidNumber{str};
     }
@@ -114,7 +112,7 @@ std::string to_string(std::span<const uint8_t> buf)
 {
     std::string str{};
 
-    for (uint8_t value : buf) {
+    for (const uint8_t value : buf) {
         str.push_back(static_cast<char>(value));
     }
 
@@ -123,7 +121,7 @@ std::string to_string(std::span<const uint8_t> buf)
 
 uint64_t sleep(uint64_t delay)
 {
-    uint64_t start = now();
+    const uint64_t start = now();
     std::this_thread::sleep_for(std::chrono::microseconds{delay});
     return (now() - start);
 }
@@ -137,7 +135,7 @@ std::string sha256(std::span<const uint8_t> buf)
     SHA256Final(md, &ctx);
 
     std::ostringstream os{};
-    for (uint8_t value : md) {
+    for (const uint8_t value : md) {
         os << to_string(value);
     }
 

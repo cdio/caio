@@ -46,7 +46,8 @@ void Platform::create(const fs::Path& fname)
     make_widgets();
     connect_ui();
 
-    const auto& snapshot = config().snapshot;
+    const auto& conf = config();
+    const auto& snapshot = conf.snapshot;
     if (!snapshot.empty()) {
         /*
          * Load a snapshot file.
@@ -57,6 +58,11 @@ void Platform::create(const fs::Path& fname)
         } catch (const std::exception& err) {
             throw IOError{"Can't load snapshot file: {}: {}", snapshot, err.what()};
         }
+    }
+
+    if (conf.monitor) {
+        // XXX FIXME input/output streams
+        init_monitor(STDIN_FILENO, STDOUT_FILENO);
     }
 }
 

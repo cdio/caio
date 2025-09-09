@@ -103,7 +103,7 @@ Path search(const Path& fname, const std::initializer_list<const Path>& spath)
 
     log.debug("Looking for file: {}: ", fname.string());
 
-    auto name = basename(fname);
+    const auto name = basename(fname);
     if (name != fname) {
         /*
          * A directory is specified in fname.
@@ -196,7 +196,7 @@ bool directory(const Path& path, const Path& pattern, bool icase,
 Dir directory(const Path& path, const Path& pattern, bool icase, size_t limit)
 {
     Dir entries{};
-    bool limited = (limit != 0);
+    const bool limited = (limit != 0);
 
     const auto filter = [&entries, &limit, limited](const Path& entry, uint64_t size) -> bool {
         if (limited) {
@@ -281,12 +281,10 @@ std::string sha256(const fs::Path& fname)
 
 std::string sha256(std::ifstream& is)
 {
-    uint8_t buf[BUFSIZ];
-
     SHA2_CTX ctx{};
-    uint8_t md[SHA256_DIGEST_LENGTH];
     SHA256Init(&ctx);
 
+    uint8_t buf[BUFSIZ];
     while (is) {
         is.read(reinterpret_cast<char*>(buf), sizeof(buf));
         const auto size = is.gcount();
@@ -295,10 +293,11 @@ std::string sha256(std::ifstream& is)
         }
     }
 
+    uint8_t md[SHA256_DIGEST_LENGTH];
     SHA256Final(md, &ctx);
 
     std::ostringstream os{};
-    for (uint8_t value : md) {
+    for (const uint8_t value : md) {
         os << utils::to_string(value);
     }
 
@@ -309,10 +308,6 @@ IDir::IDir(EntryType etype, const std::string& eempty, size_t elimit)
     : _etype{etype},
       _eempty{eempty},
       _elimit{elimit}
-{
-}
-
-IDir::~IDir()
 {
 }
 
@@ -439,10 +434,6 @@ inline bool IDir::time_to_refresh() const
 
 IDirNav::IDirNav(EntryType etype, const std::string& eempty, size_t elimit)
     : IDir{etype, eempty, elimit}
-{
-}
-
-IDirNav::~IDirNav()
 {
 }
 

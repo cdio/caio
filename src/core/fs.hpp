@@ -227,7 +227,7 @@ public:
      */
     IDir(EntryType etype, const std::string& eempty, size_t limit = MAX_DIRS);
 
-    virtual ~IDir();
+    virtual ~IDir() = default;
 
     /**
      * Set the entry filter callback.
@@ -333,7 +333,7 @@ public:
      */
     IDirNav(EntryType etype, const std::string& eempty, size_t elimit = MAX_DIRS);
 
-    virtual ~IDirNav();
+    virtual ~IDirNav() = default;
 
     bool refresh() override;
 };
