@@ -26,8 +26,8 @@
 namespace caio {
 
 struct Image {
-    int                   width{};
-    int                   height{};
+    unsigned              width{};
+    unsigned              height{};
     std::span<const Rgba> data{};
 
     operator bool() const {

@@ -143,7 +143,8 @@ Serializer& operator&(Serializer& ser, double& value)
         uint64_t data{};
         ser & data;
         data = be64toh(data);
-        value = *reinterpret_cast<double*>(&data);
+//        value = *reinterpret_cast<double*>(&data);
+        std::copy_n(&data, sizeof(data), &value);
     }
 
     return ser;
@@ -159,7 +160,8 @@ Serializer& operator&(Serializer& ser, float& value)
         uint32_t data{};
         ser & data;
         data = be32toh(data);
-        value = *reinterpret_cast<float*>(&data);
+//        value = *reinterpret_cast<float*>(&data);
+        std::copy_n(&data, sizeof(data), &value);
     }
 
     return ser;

@@ -22,7 +22,7 @@
 
 namespace caio {
 
-auto device_none = std::make_shared<DeviceNone>();
+sptr_t<class DeviceNone> device_none = std::make_shared<DeviceNone>();
 
 Serializer& operator&(Serializer& ser, DeviceNone& none)
 {

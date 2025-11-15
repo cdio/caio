@@ -21,6 +21,8 @@
 #include "types.hpp"
 #include "utils.hpp"
 
+#include <unordered_map>
+
 namespace caio {
 namespace ui {
 
@@ -78,9 +80,9 @@ std::string to_string(SLEffect effect)
     case SLEffect::Adv_Vertical:
         return std::string{static_cast<char>(effect)};
 
-    case SLEffect::None:
-        return "n";
+    case SLEffect::None:;
     }
+    return "n";
 }
 
 }
