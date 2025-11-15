@@ -69,12 +69,12 @@ std::string trim(std::string_view str)
     const size_t len = str.length();
 
     const size_t begin = [&str]() {
-        const size_t pos = str.find_first_not_of(" \t");
+        const size_t pos = str.find_first_not_of(" \t\r\n\v");
         return (pos == std::string::npos ? 0 : pos);
     }();
 
     const size_t end = [&str, &len]() {
-        const size_t pos = str.find_last_not_of(" \t");
+        const size_t pos = str.find_last_not_of(" \t\r\n\v");
         return (pos == std::string::npos ? len - 1 : pos + 1);
     }();
 
