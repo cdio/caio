@@ -403,5 +403,13 @@ std::string sha256(const fs::Path& fname);
  */
 std::string sha256(std::ifstream& is);
 
+/**
+ * Launch a shell command.
+ * @param cmd Shell command.
+ * @return The command output as a string stream.
+ * @exception IOError
+ */
+std::stringstream shell(const std::string& cmd);
+
 }
 }

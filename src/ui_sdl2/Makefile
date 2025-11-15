@@ -25,6 +25,7 @@ LIB=		libcaio_ui_sdl2.a
 CXXSRCS+=	sdl2.cpp \
 		ui.cpp \
 		audio.cpp \
+		dialog.cpp \
 		panel.cpp \
 		widget.cpp \
 		widget_cassette.cpp \
@@ -41,6 +42,7 @@ CXXSRCS+=	sdl2.cpp \
 INCS+=		sdl2.hpp \
 		ui.hpp \
 		audio.hpp \
+		dialog.hpp \
 		panel.hpp \
 		widget.hpp \
 		widget_cassette.hpp \

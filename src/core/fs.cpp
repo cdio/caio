@@ -32,6 +32,7 @@
 #include <fnmatch.h>
 #include <unistd.h>
 
+#include <cstdio>
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
@@ -302,6 +303,32 @@ std::string sha256(std::ifstream& is)
     }
 
     return os.str();
+}
+
+std::stringstream shell(const std::string& cmd)
+{
+    uptrd_t<FILE> f{::popen(cmd.c_str(), "r"), reinterpret_cast<void(*)(FILE*)>(::pclose)};
+    if (!f) {
+        throw IOError{"Can't launch shell command: {}", Error::to_string()};
+    }
+
+    std::stringstream ss{};
+    char buf[LINE_MAX]{};
+
+    while (true) {
+        const size_t size = std::fread(buf, 1, sizeof(buf), f.get());
+        if (size == 0) {
+            break;
+        }
+
+        try {
+            ss.write(buf, size);
+        } catch (const std::exception& err) {
+            throw IOError{"Can't read shell command output: {}", err.what()};
+        }
+    }
+
+    return ss;
 }
 
 IDir::IDir(EntryType etype, const std::string& eempty, size_t elimit)

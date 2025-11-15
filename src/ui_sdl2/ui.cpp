@@ -18,6 +18,8 @@
  */
 #include "ui_sdl2/ui.hpp"
 
+#include "ui_sdl2/dialog.hpp"
+
 #include "endian.hpp"
 #include "icon.hpp"
 #include "logger.hpp"
@@ -1477,10 +1479,15 @@ void UI::screenshot()
     const auto now = std::chrono::zoned_time{utc};
     const auto fname = std::format("{}/{}{:%F_%H.%M.%S}.png", _conf.video.screenshotdir, SCREENSHOT_PREFIX, now);
 #endif
-    log.debug("Saving screenshot to: '{}'\n", fname);
+    const auto path = saveas_dialog("Select Screenshot File Name", _conf.video.screenshotdir, fname);
 
-    if (::IMG_SavePNG(image.get(), fname.c_str()) < 0) {
-        throw UIError{"Can't save screenshot image: {}", sdl_error()};
+    if (!path.empty()) {
+        log.debug("Saving screenshot to: '{}'\n", path);
+        if (::IMG_SavePNG(image.get(), path.c_str()) < 0) {
+            throw UIError{"Can't save screenshot image: {}", sdl_error()};
+        }
+    } else {
+        log.debug("Screenshot canelled.\n");
     }
 }
 
