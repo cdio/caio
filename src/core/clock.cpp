@@ -29,7 +29,7 @@ namespace caio {
 
 using namespace std::chrono_literals;
 
-Clock::Clock(std::string_view label, size_t freq, float delay)
+Clock::Clock(const std::string& label, size_t freq, float delay)
     : Name{TYPE, label},
       _freq{freq},
       _delay{delay}
@@ -42,8 +42,10 @@ Clock::Clock(size_t freq, float delay)
 {
 }
 
-Clock::~Clock()
+void Clock::sync(float stime)
 {
+    _sync_time = static_cast<int64_t>(stime * 1'000'000.0f);
+    _sync_cycles = cycles(stime);
 }
 
 void Clock::add(const sptr_t<Clockable>& clkb)
@@ -78,9 +80,15 @@ void Clock::run()
     int64_t start = utils::now();
 
     _stop = false;
+    _is_running = true;
 
-    while (!_stop)  {
-        while (_suspend && !_stop) {
+    while (!_stop) {
+        if (_suspend) {
+            _suspend = false;
+            _paused = true;
+        }
+
+        while (_paused && !_stop) {
             /*
              * The emulated system is paused, wait for 200ms and check again.
              */
@@ -138,6 +146,8 @@ void Clock::run()
 
         sched_cycle = -extra_cycles;
     }
+
+    _is_running = false;
 }
 
 size_t Clock::tick()
@@ -168,11 +178,31 @@ void Clock::reset()
     }
 }
 
-void Clock::pause_wait(bool susp)
+void Clock::pause(bool suspend)
 {
-    if (susp != paused()) {
-        pause(susp);
-        while (paused() != susp) {
+    if (is_running()) {
+        _paused = suspend;
+    } else {
+        _suspend = suspend;
+    }
+}
+
+void Clock::toggle_pause()
+{
+    if (is_running()) {
+        _suspend = _suspend ^ true;
+    } else {
+        _paused = _paused ^ true;
+    }
+}
+
+void Clock::pause_wait(bool suspend)
+{
+    if (is_running()) {
+        _paused = suspend;
+    } else if (suspend != _suspend) {
+        _suspend = suspend;
+        while (_paused != suspend) {
             std::this_thread::yield();
         }
     }

@@ -24,6 +24,7 @@
 
 #include <atomic>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -37,18 +38,14 @@ class Clockable {
 public:
     constexpr static const size_t HALT = 0;
 
-    Clockable() {
-    }
-
-    virtual ~Clockable() {
-    }
+    virtual ~Clockable() = default;
 
 private:
     /**
      * Clockable tick method.
      * This method is called by Clock::tick() at specific clock intervals.
      * @param clk The caller clock.
-     * @return The number of clock cycles before calling this instance again; HALT to terminate the clock emulation.
+     * @return The next call interval in cycles; HALT to terminate the clock emulation.
      * @see Clock::tick()
      */
     virtual size_t tick(const class Clock& clk) = 0;
@@ -72,7 +69,7 @@ public:
      * @param freq  Frequency (in Hz);
      * @param delay The speed delay (1.0f is normal speed).
      */
-    Clock(std::string_view label = {}, size_t freq = {}, float delay = 1.0f);
+    Clock(const std::string& label = {}, size_t freq = {}, float delay = 1.0f);
 
     /**
      * Initialise this clock.
@@ -81,7 +78,7 @@ public:
      */
     Clock(size_t freq, float delay = 1.0f);
 
-    virtual ~Clock();
+    virtual ~Clock() = default;
 
     /**
      * Synchronise the emulated system with the real time.
@@ -89,20 +86,19 @@ public:
      * devices can call this method to change this value.
      * @param stime Time since the last sync (seconds).
      */
-    void sync(float stime)
-    {
-        _sync_time = static_cast<int64_t>(stime * 1'000'000.0f);
-        _sync_cycles = cycles(stime);
-    }
+    void sync(float stime);
 
+    /**
+     * @see sync(float)
+     */
     void sync(float stime) const
     {
         const_cast<Clock*>(this)->sync(stime);
     }
 
     /**
-     * Return the frequency of this clock in Hz.
-     * @return The frequency of this clock in Hz.
+     * Return the frequency of this clock (Hz).
+     * @return The frequency of this clock (Hz).
      * @see freq(size_t)
      */
     size_t freq() const
@@ -112,7 +108,7 @@ public:
 
     /**
      * Set the frequency of this clock.
-     * @param freq Frequency (in Hz).
+     * @param freq Frequency (Hz).
      * @see freq()
      */
     void freq(size_t freq)
@@ -121,8 +117,8 @@ public:
     }
 
     /**
-     * Return the speed delay for this clock.
-     * @return The speed delay for this clock (1.0 is normal speed, 2.0 is half the speed. etc.).
+     * Get the speed delay factor.
+     * @return The speed delay factor (1.0 is normal speed, 2.0 is half the speed, etc.).
      * @see delay(float)
      */
     float delay() const
@@ -131,10 +127,10 @@ public:
     }
 
     /**
-     * Set the speed delay for this clock.
+     * Set the speed delay factor.
      * The speed delay is a factor applied to the emulated clock frequecy,
      * The actual emulated frequency is "freq() / delay".
-     * @param speed Speed delay (1.0 is normal speed).
+     * @param speed Speed delay (1.0 is normal speed, 2.0 is half the speed, etc.).
      * @see delay()
      * @see freq(size_t)
      */
@@ -145,8 +141,8 @@ public:
 
     /**
      * Enable/disable full-speed mode.
-     * When the full-speed mode is enabled the clock runs at host speed
-     * (does not emulate the actual time expected from the emulated system).
+     * When the full-speed mode is enabled the clock runs at host speed.
+     * (it does not emulate the actual time expected from the emulated system).
      * @param on true to activate; false to deactivate.
      */
     void fullspeed(bool on)
@@ -155,7 +151,7 @@ public:
     }
 
     /**
-     * Return the status of the full-speed mode.
+     * Get the full-speed mode.
      * @return true if full-speed mode is active; false otherwise.
      */
     bool fullspeed() const
@@ -164,23 +160,24 @@ public:
     }
 
     /**
-     * Add a clockable to this clock.
+     * Add a clockable.
      * @param clkb Clockable to register.
-     * @see del()
+     * @see del(const sptr_t<Clockable>&)
+     * @see Clockable
      */
     void add(const sptr_t<Clockable>& clkb);
 
     /**
-     * Remove a clockable from this clock.
+     * Remove a clockable.
      * @param clkb Clockable to de-register.
-     * @see add()
+     * @see add(const sptr_t<Clockable>&)
      */
     void del(const sptr_t<Clockable>& clkb);
 
     /**
-     * Execute a clock tick loop.
-     * This method returns when the clock is stopped or
-     * one of the registered clockables returns clockable::HALT.
+     * Start this clock.
+     * This method returns when the clock is stopped or when
+     * at least one of the registered clockables returns clockable::HALT.
      * @see stop()
      * @see tick()
      */
@@ -195,15 +192,25 @@ public:
 
     /**
      * Reset this clock.
-     * Before calling this method the clock must be paused otherwise it does nothing.
+     * This method must be called with this clock paused
+     * otherwise it does nothing.
      * @see pause()
      */
     void reset();
 
     /**
+     * Get the running state.
+     * @return true if this clock is running (the run() method was called); false otherwise.
+     */
+    bool is_running() const
+    {
+        return _is_running;
+    }
+
+    /**
      * Stop this clock.
-     * Instruct the clock to stop and return immediably.
-     * This method does not wait for a running clock thread
+     * Set the stop flag and return immediably.
+     * This method does not wait for the clock thread
      * to return back from the run() method.
      * @see run()
      */
@@ -214,47 +221,41 @@ public:
 
     /**
      * Pause/Unpause this clock.
-     * Instruct the clock to pause/unpause and return immediately.
-     * This method does not wait for the clock thread to actually pause/resume.
+     * Set the pause/unpause flag and return immediately.
+     * This method does not wait for the clock thread to actually pause/unpause.
      * @param susp true to pause; false to unpause.
      * @see paused()
      * @see toggle_pause()
      */
-    void pause(bool susp = true)
-    {
-        _suspend = susp;
-    }
+    void pause(bool susp = true);
 
     /**
-     * Pause/Unpause this clock and wait until it takes effect.
-     * Instruct the clock to pause/unpause and wait for it to actually do the change.
-     * This method must be called by another thread that is not running this clock.
-     * @param susp true to pause; false to unpause.
-     * @see paused()
-     */
-    void pause_wait(bool susp = true);
-
-    /**
-     * Toggle the pause/unpause status of this clock.
-     * Instruct the clock to toggle its running status and return immediately.
-     * This method does not wait for the clock thread to actually pause/resume.
+     * Toggle the pause/unpause flag.
+     * Toggle the pause flag and return immediately.
+     * This method does not wait for the clock thread to actually pause/unpause.
      * @see pause()
      * @see paused()
      */
-    void toggle_pause()
-    {
-        _suspend = _suspend ^ true;
-    }
+    void toggle_pause();
 
     /**
-     * Get the running status of this clock.
-     * @return true if this clock is suspended; false otherwise.
+     * Pause/Unpause this clock.
+     * Set the pause/unpause flag and wait for this commadn to take effect.
+     * This method must be called from a thread that is not running this clock.
+     * @param suspend true to pause; false to unpause.
+     * @see paused()
+     */
+    void pause_wait(bool suspend = true);
+
+    /**
+     * Get the pause status of this clock.
+     * @return true if this clock is paused; false otherwise.
      * @see pause()
      * @see toggle_pause()
      */
     bool paused() const
     {
-        return _suspend;
+        return _paused;
     }
 
     /**
@@ -267,6 +268,8 @@ public:
      * Get the number of clock cycles corresponding to a given time interval.
      * @param secs Time interval (seconds).
      * @return The clock cycles corresponding to the specified time interval.
+     * @see cycles(float, size_t)
+     * @see time(size_t) const
      */
     size_t cycles(float secs) const
     {
@@ -277,6 +280,8 @@ public:
      * Get the time interval corresponding to a given number of clock cycles.
      * @param cycles Cycles.
      * @return The time interval corresponding to the specified clock cycles.
+     * @see cycles(float) const
+     * @see time(size_t, size_t)
      */
     float time(size_t cycles) const
     {
@@ -284,17 +289,18 @@ public:
     }
 
     /**
-     * Return the elapsed emulated time since the clock was started (in microseconds).
+     * Get the elapsed emulated time since this clock was started.
      * @return The elapsed time in microseconds.
      * @see run()
      */
     uint64_t time() const;
 
     /**
-     * Get the number of clock cycles correspoinding to a given time interval.
+     * Get the number of clock cycles that corresponds to a given time interval.
      * @param secs Time interval (seconds);
      * @param freq Clock frequency (Hz).
-     * @return The clock cycles corresponding to the specified time interval.
+     * @return The clock cycles that corresponds to the specified time interval.
+     * @see time(size_t, size_t)
      */
     constexpr static size_t cycles(float secs, size_t freq)
     {
@@ -302,10 +308,11 @@ public:
     }
 
     /**
-     * Get the time corresponding to a given number of cycles.
+     * Get the time that corresponds to a given number of cycles.
      * @param cycles Cycles;
      * @param freq   Clock frequency (Hz).
-     * @return The time interval corresponding to the specified cycles.
+     * @return The time interval that corresponds to the specified cycles.
+     * @see cycles(float, size_t)
      */
     constexpr static float time(size_t cycles, size_t freq)
     {
@@ -320,7 +327,9 @@ private:
     bool                        _fullspeed{};
     uint64_t                    _ticks{};
     std::atomic_bool            _stop{};
-    std::atomic_bool            _suspend{};
+    std::atomic_bool            _suspend{};         /* Pause/Unpause command */
+    std::atomic_bool            _paused{};          /* Pause/Unpause state   */
+    std::atomic_bool            _is_running{};
     std::vector<ClockablePair>  _clockables{};
 };
 
