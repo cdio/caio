@@ -35,8 +35,8 @@ SnapZ80::SnapZ80(const fs::Path& fname)
 
 bool SnapZ80::seems_like(const fs::Path& fname)
 {
-    auto fullpath = fs::fix_home(fname);
-    auto lowcase = utils::tolow(fname.string());
+    const auto& fullpath = fs::fix_home(fname);
+    const auto& lowcase = utils::tolow(fname.string());
     return (fs::exists(fullpath) && lowcase.ends_with(FILE_EXTENSION));
 }
 
@@ -184,7 +184,7 @@ void SnapZ80::uncompress_v1(const Buffer& raw)
     size_t size = raw.size() - offset;
     const std::span<const uint8_t> enc = { raw.data() + offset, size };
 
-    bool compressed = (hdr->flags & SnapZ80Header::FLAGS_DATA_COMPRESSED);
+    static bool compressed = (hdr->flags & SnapZ80Header::FLAGS_DATA_COMPRESSED);
 
     log.debug("SnapZ80: {}: compressed: {}\n", _fname.string(), compressed);
 

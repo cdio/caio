@@ -20,6 +20,7 @@
 
 #include "ui_sdl2/dialog.hpp"
 
+#include "config.hpp"
 #include "endian.hpp"
 #include "icon.hpp"
 #include "logger.hpp"
@@ -226,8 +227,9 @@ void UI::init_window()
 
     ::SDL_SetWindowIcon(_window.get(), _icon.get());
 
-    if (const int rate = current_refresh(); rate < REFRESH_RATE) {
-        log.warn("ui: Current refresh rate is too slow: {} Hz. Resolution changes is recommended\n", rate);
+    _win_rate = current_refresh();
+    if (_win_rate < REFRESH_RATE) {
+        log.warn("ui: Current refresh rate is too slow: {} Hz. Resolution changes is recommended\n", _win_rate);
     }
 }
 
@@ -266,7 +268,7 @@ void UI::init_texture()
 
     _screen_tex = sptr_t<::SDL_Texture>{screenp, ::SDL_DestroyTexture};
 
-    //XXX command line option?
+    //XXX TODO command line option?
     //::SDL_SetTextureScaleMode(screenp, ::SDL_ScaleMode::SDL_ScaleModeBest);
     //::SDL_SetTextureScaleMode(screenp, ::SDL_ScaleMode::SDL_ScaleModeLinear);
     ::SDL_SetTextureScaleMode(screenp, ::SDL_ScaleMode::SDL_ScaleModeNearest);
@@ -660,7 +662,25 @@ void UI::create_panel()
     _wid_photocamera = std::make_shared<widget::PhotoCamera>(_renderer);
 
     _wid_photocamera->action([this]() {
-        _screenshot = true;
+        _dialog = std::bind(&UI::screenshot, this);
+    });
+
+    /*
+     * Load snapshot (emulator state) widget.
+     */
+    _wid_snapshot_load = std::make_shared<widget::Snapshot>(_renderer, widget::Snapshot::Type::Load);
+
+    _wid_snapshot_load->action([this]() {
+        _dialog = [this](){snapshot_load();};
+    });
+
+    /*
+     * Save snapshot (emulator state) widget.
+     */
+    _wid_snapshot_save = std::make_shared<widget::Snapshot>(_renderer, widget::Snapshot::Type::Save);
+
+    _wid_snapshot_save->action([this]() {
+        _dialog = [this](){snapshot_save();};
     });
 
     /*
@@ -714,7 +734,7 @@ void UI::create_panel()
 
     const auto kbd_toggle = [this]() {
         _kbd->enable(!_kbd->is_enabled());
-        log.debug("Keyboard {}\n", (_kbd->is_enabled() ? "enabled" : "disabled"));
+        log.debug("ui: Keyboard {}\n", (_kbd->is_enabled() ? "enabled" : "disabled"));
     };
 
     _wid_keyboard = std::make_shared<widget::Keyboard>(_renderer, kbd_status);
@@ -728,6 +748,8 @@ void UI::create_panel()
     _panel->add(_wid_fullscreen, Panel::Just::Right);
     _panel->add(_wid_photocamera, Panel::Just::Right);
     _panel->add(empty, Panel::Just::Right);
+    _panel->add(_wid_snapshot_save, Panel::Just::Right);
+    _panel->add(_wid_snapshot_load, Panel::Just::Right);
     _panel->add(_wid_reset, Panel::Just::Right);
     _panel->add(_wid_pause, Panel::Just::Right);
     _panel->add(_wid_volume, Panel::Just::Right);
@@ -774,6 +796,7 @@ void UI::run()
 
 void UI::event_loop()
 {
+    bool restore_fullscreen{};
     ::SDL_Event event{};
 
     while (!_stop) {
@@ -828,14 +851,65 @@ void UI::event_loop()
         }
 
         if (!paused()) {
+            /*
+             * Synchronise the SDL event loop
+             * with the emulated screen rate.
+             */
             _raw_sem.acquire();
         }
 
-        render_screen();
+        /*
+         * render_screen() is synchronised with the monitor refresh rate.
+         * When using a slow monitor (30Hz) the rendering method waits too
+         * much time so SDL events are handled with a visible and very
+         * annoying delay.
+         * To avoid this situation, when using slow monitors the screen rendering
+         * done every two SDL event handling cycles, thus the screen is still
+         * refreshed at 30Hz but the event handling is done at a speed that
+         * depends on the emulated screen rate (usually 50Hz or 60Hz).
+         */
+        if (_render_cycle == 0) {
+            render_screen();
+            _render_cycle = (_win_rate < REFRESH_RATE);
+        } else {
+            std::this_thread::yield();
+            --_render_cycle;
+        }
 
-        if (_screenshot) {
-            screenshot();
-            _screenshot = false;
+        if (_dialog) {
+            if (_is_fullscreen) {
+                /*
+                 * A dialog must be spawn but that requires an exit from fullscreen:
+                 * Enqueue the proper events and run for another event cycle.
+                 */
+                toggle_fullscreen();
+                restore_fullscreen = true;
+
+            } else {
+                /*
+                 * Fullscreen mode not in effect, the dialog can be spawned.
+                 * The emulator clock is suspended so the user can concentrate on the dialog.
+                 */
+                const bool restore_clock = !paused();
+                if (restore_clock) {
+                    pause(true);
+                    std::this_thread::yield();
+                }
+
+                _dialog();
+                _dialog = {};
+
+                _panel->visible(false);
+
+                if (restore_fullscreen) {
+                    toggle_fullscreen();
+                    restore_fullscreen = false;
+                }
+
+                if (restore_clock) {
+                    pause(false);
+                }
+            }
         }
     }
 }
@@ -850,6 +924,12 @@ void UI::win_event(const ::SDL_Event& event)
 
     case SDL_WINDOWEVENT_FOCUS_GAINED:
         if (_kbd) {
+            /*
+             * For some reason, the state of the emulated keyboard
+             * is lost when the main window focus is lost/re-gained.
+             * A workaround is to reset the state of the emulated
+             * keyboard when the focus is re-gained.
+             */
             _kbd->reset();
         }
         break;
@@ -900,6 +980,7 @@ void UI::resize_event(int width, int height)
 
         const int scale_xy = (expand_h ? _win_size.w / _tex_size.w : _win_size.h / _tex_size.h);
 
+        //XXX improve
         int scale = std::max(1, scale_xy);
         for (; scale > 1 && ((width * scale > _win_size.w) || (height * scale > _win_size.h)); --scale);
 
@@ -920,12 +1001,6 @@ void UI::resize_event(int width, int height)
 
 void UI::kbd_event(const SDL_Event& event)
 {
-#ifdef __APPLE__
-    constexpr static const auto ALT = KMOD_GUI;
-#else
-    constexpr static const auto ALT = KMOD_ALT;
-#endif
-
     const auto& kevent = event.key;
     const auto& key = kevent.keysym;
 
@@ -936,7 +1011,7 @@ void UI::kbd_event(const SDL_Event& event)
             break;
         }
 
-        if (key.mod & ALT) {
+        if (key.mod & GUI_KEY) {
             /*
              * Handle ALT-xx hotkeys.
              */
@@ -962,6 +1037,13 @@ void UI::kbd_event(const SDL_Event& event)
                 _wid_keyboard->action();
                 break;
 
+            case SDLK_l:
+                /*
+                 * Load snapshot (ALT-L).
+                 */
+                _wid_snapshot_load->action();
+                break;
+
             case SDLK_p:
                 /*
                  * Toggle Pause mode (ALT-P).
@@ -970,11 +1052,16 @@ void UI::kbd_event(const SDL_Event& event)
                 break;
 
             case SDLK_s:
-                /*
-                 * Screenshot (ALT+SHIFT+S).
-                 */
                 if (key.mod & KMOD_SHIFT) {
+                    /*
+                     * Screenshot (ALT-SHIFT-S).
+                     */
                     _wid_photocamera->action();
+                } else {
+                    /*
+                     * Save snapshot (ALT-S).
+                     */
+                    _wid_snapshot_save->action();
                 }
                 break;
 
@@ -1191,6 +1278,7 @@ void UI::toggle_fullscreen()
          * Enter fullscreen.
          */
         ::SDL_GetWindowPosition(_window.get(), &_win_pos.w, &_win_pos.h);
+        ::SDL_GetWindowSize(_window.get(), &_win_size.w, &_win_size.h);
 
         if (::SDL_SetWindowFullscreen(_window.get(), _fs_flags) < 0) {
             log.error("ui: Can't enter fullscreen mode: {}\n", sdl_error());
@@ -1391,8 +1479,8 @@ void UI::joy_add(int devid)
     }
 
     ::SDL_Joystick* js = ::SDL_GameControllerGetJoystick(gc);
-    ::SDL_JoystickID jid = ::SDL_JoystickInstanceID(js);
-    auto eid = find_joystick(jid);
+    const ::SDL_JoystickID jid = ::SDL_JoystickInstanceID(js);
+    const auto eid = find_joystick(jid);
     if (eid) {
         log.debug("ui: Game controller already handled: devid {} \"{}\", jid {}\n", devid, name, jid);
         ::SDL_GameControllerClose(gc);
@@ -1409,7 +1497,7 @@ void UI::joy_add(int devid)
     /*
      * Attach the new game controller to the emulated joystick.
      */
-    auto gcptr = uptr_t<::SDL_GameController, void(*)(::SDL_GameController*)>{gc, ::SDL_GameControllerClose};
+    auto gcptr = uptrd_t<::SDL_GameController>{gc, ::SDL_GameControllerClose};
     _sdl_joys.emplace(jid, std::move(gcptr));
 
     ejoy->reset(jid, name);
@@ -1473,21 +1561,64 @@ void UI::screenshot()
 
     char buf[20]{};
     std::strftime(buf, sizeof(buf), "%Y-%m-%d_%H.%M.%S", &tm);
-    const auto fname = std::format("{}{}.png", SCREENSHOT_PREFIX, buf);
+    const auto fname = std::format("{}/{}{}{}", _conf.video.screenshotdir, SCREENSHOT_PREFIX, buf, SCREENSHOT_EXT);
 #else
     const auto utc = std::chrono::system_clock::now();
     const auto now = std::chrono::zoned_time{utc};
-    const auto fname = std::format("{}/{}{:%F_%H.%M.%S}.png", _conf.video.screenshotdir, SCREENSHOT_PREFIX, now);
+    const auto fname = std::format("{}/{}{:%F_%H.%M.%S}{}",
+        _conf.video.screenshotdir, SCREENSHOT_PREFIX, now, SCREENSHOT_EXT);
 #endif
-    const auto path = saveas_dialog("Select Screenshot File Name", _conf.video.screenshotdir, fname);
+    const auto path = dialog_saveas("Select the destination screenshot file name",
+        _conf.video.screenshotdir, fname, SCREENSHOT_EXT);
 
     if (!path.empty()) {
-        log.debug("Saving screenshot to: '{}'\n", path);
+        log.debug("ui: Saving screenshot to: '{}'\n", path);
         if (::IMG_SavePNG(image.get(), path.c_str()) < 0) {
             throw UIError{"Can't save screenshot image: {}", sdl_error()};
         }
     } else {
-        log.debug("Screenshot canelled.\n");
+        log.debug("ui: Screenshot cancelled.\n");
+    }
+}
+
+void UI::snapshot_load(const SnapshotCb& cb)
+{
+    _snapshot_load_cb = cb;
+}
+
+void UI::snapshot_save(const SnapshotCb& cb)
+{
+    _snapshot_save_cb = cb;
+}
+
+void UI::snapshot_load()
+{
+    if (_snapshot_load_cb) {
+        const auto& default_fname = std::format("{}/{}{}", _conf.snapshotdir, _conf.name, config::SNAPSHOTFILE_EXT);
+
+        const auto& fname = dialog_pick_file("Select the snapshot file to load", _conf.snapshotdir, default_fname,
+            config::SNAPSHOTFILE_EXT);
+
+        if (!fname.empty()) {
+            log.debug("ui: Loading snapshot file: {}\n", fname);
+            if (const auto errmsg = _snapshot_load_cb(fname); !errmsg.empty()) {
+                dialog_error("Can't load snapshot", errmsg);
+            }
+        }
+    }
+}
+
+void UI::snapshot_save()
+{
+    if (_snapshot_save_cb) {
+        const auto& default_fname = std::format("{}/{}{}", _conf.snapshotdir, _conf.name, config::SNAPSHOTFILE_EXT);
+        const auto& fname = dialog_saveas("Select the snapshot file name to save", _conf.snapshotdir, default_fname);
+        if (!fname.empty()) {
+            log.debug("ui: Saving snapshot file: {}\n", fname);
+            if (const auto& errmsg = _snapshot_save_cb(fname); !errmsg.empty()) {
+                dialog_error("Can't create snapshot", errmsg);
+            }
+        }
     }
 }
 

@@ -557,15 +557,22 @@ void C64::attach_prg()
 ui::Config C64::ui_config()
 {
     std::string title = _conf.title;
-    if (_ioexp) {
-        title = std::format("{} - {}", title, fs::basename(_ioexp->name()).string());
-    }
+    std::string session = LABEL;
 
     if (!_conf.prgfile.empty()) {
-        title = std::format("{} - {}", title, fs::basename(_conf.prgfile).string());
+        const auto& basename = fs::basename(_conf.prgfile);
+        title = std::format("{} - {}", title, basename.string());
+        session = (basename.extension().empty() ? basename : basename.stem());
+
+    } else if (_ioexp) {
+        const auto& basename = fs::basename(_ioexp->name());
+        title = std::format("{} - {}", title, basename.string());
+        session = (basename.extension().empty() ? basename : basename.stem());
     }
 
     const ui::Config uiconf {
+        .name               = session,
+        .snapshotdir        = _conf.snapshotdir,
         .audio = {
             .enabled        = _conf.audio,
             .srate          = mos::mos_6581::SAMPLING_RATE,
@@ -576,14 +583,13 @@ ui::Config C64::ui_config()
             .title          = title,
             .width          = Mos6569::WIDTH,
             .height         = Mos6569::HEIGHT,
-            .fps            = _conf.fps,
             .scale          = _conf.scale,
             .aspect         = _conf.aspect,
             .sleffect       = _conf.scanlines,
             .fullscreen     = _conf.fullscreen,
             .sresize        = _conf.sresize,
-            .screenshotdir  = _conf.screenshotdir,
-            .statusbar      = _conf.statusbar
+            .statusbar      = _conf.statusbar,
+            .screenshotdir  = _conf.screenshotdir
         }
     };
 

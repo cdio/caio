@@ -175,7 +175,8 @@ size_t Device::tick(const Clock& clock)
         _role = Role::PASSIVE;
         state(State::IDLE);
         CBMBUS_DEBUG("ATN line ON: Mode IDLE -> Mode COMMAND\n");
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case Mode::COMMAND:
         if (_role == Role::PASSIVE && atn() == INACTIVE) {
@@ -228,7 +229,8 @@ size_t Device::tick(const Clock& clock)
 
         _mode = Mode::SECONDARY;
         CBMBUS_DEBUG("Selected device: Mode COMMAND -> Mode SECONDARY\n");
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case Mode::SECONDARY:
         if (!tick_rx()) {
@@ -274,7 +276,8 @@ size_t Device::tick(const Clock& clock)
          */
         _mode = Mode::DATA;
         CBMBUS_DEBUG("Selected device: Mode SECONDARY -> Mode DATA\n");
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case Mode::DATA:
         if (tick_rx()) {
@@ -320,7 +323,8 @@ size_t Device::tick(const Clock& clock)
         _mode = Mode::TURN_HOLD;
         _time = 0;
         CBMBUS_DEBUG("Selected device: Mode TURNAROUND -> Mode TURN_HOLD\n");
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case Mode::TURN_HOLD:
         if (_time < TURN_HOLD_TIME) {
@@ -331,7 +335,8 @@ size_t Device::tick(const Clock& clock)
         _bytetr.ready(true);
         _mode = Mode::TALKER;
         CBMBUS_DEBUG("Selected device: Mode TURN_HOLD -> Mode TALKER\n");
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case Mode::TALKER:
         if (atn() == ACTIVE) {
@@ -527,7 +532,8 @@ void Device::tick_tx()
         clk(INACTIVE);
         CBMBUS_DEBUG_STATE("TX: IDLE -> INIT, time {}, bus {}\n", _time, bus_data().to_string());
         state(State::INIT);
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case State::INIT:
         if (dat() == ACTIVE) {
@@ -539,7 +545,8 @@ void Device::tick_tx()
          */
         CBMBUS_DEBUG_STATE("TX: INIT -> READY, time {}, bus {}\n", _time, bus_data().to_string());
         state(State::READY);
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case State::READY:
         if (_time < NON_EOI_TIME) {
@@ -569,7 +576,8 @@ void Device::tick_tx()
 
         CBMBUS_DEBUG_STATE("TX: READY -> EOI, time {}\n", _time);
         state(State::EOI);
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case State::EOI:
         if (dat() == ACTIVE) {
@@ -583,7 +591,8 @@ void Device::tick_tx()
         clk(ACTIVE);
         dat(INACTIVE);
         state(State::BIT_WAIT);
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case State::BIT_WAIT:
         if (_time < BIT_SETUP_TIME) {
@@ -597,7 +606,8 @@ void Device::tick_tx()
         clk(INACTIVE);
         CBMBUS_DEBUG_STATE("TX: BIT_WAIT -> BIT_DONE, bit {} time {}\n", _data.dat(), _time);
         state(State::BIT_DONE);
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case State::BIT_DONE:
         if (_time < BIT_VALID_TIME) {
@@ -620,7 +630,8 @@ void Device::tick_tx()
          */
         CBMBUS_DEBUG_STATE("TX: BIT_DONE -> FRAME, time {}\n", _time);
         state(State::FRAME);
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case State::FRAME:
         if (_time > FRAME_TIMEOUT) {
@@ -642,7 +653,8 @@ void Device::tick_tx()
          */
         CBMBUS_DEBUG_STATE("TX: FRAME -> FRAME_WAIT, time {}\n", _time);
         state(State::FRAME_WAIT);
-        /* PASSTHROUGH */
+
+        [[fallthrough]];
 
     case State::FRAME_WAIT:
         if (_time < BETWEEN_BYTES_TIME) {

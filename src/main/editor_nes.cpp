@@ -83,8 +83,8 @@ void ConfigEditorNES::render_specific()
     _gui.end_subsection();
     _gui.newline();
 
-    _gui.begin_subsection("Attachments:");
-    _gui.combo_file("Cartridge", "##cartridge", _conf.cartridge, _cartridge);
+    _gui.begin_subsection("Attached devices:");
+    _gui.combo_path("Cartridge", "##cartridge", _conf.cartridge, _cartridge);
     _gui.end_subsection();
 
     _gui.newline();

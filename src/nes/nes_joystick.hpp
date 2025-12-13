@@ -29,7 +29,7 @@ namespace nes {
 
 /**
  * NES controller button configuration.
- * Members point to an offset within a Port.
+ * Members point to an offset within a joystick Port.
  * @see joystick::Port
  */
 struct NESButtonConfig {

@@ -45,7 +45,17 @@ static void signal_handler(int signo)
     }
 }
 
-GuiApp::GuiApp(const std::string& title)
+GuiApp::GuiApp(const std::string& title, const Size& wsize, const std::string& inifile)
+    : GuiApp{title, inifile}
+{
+    _width = static_cast<int>(wsize.x);
+    _height = static_cast<int>(wsize.y);
+    ::SDL_SetWindowSize(_window.get(), _width, _height);
+}
+
+GuiApp::GuiApp(const std::string& title, const std::string& inifile)
+    : Gui{},
+      _inifile{std::format("{}/{}", confdir(), inifile.empty() ? DEFAULT_INIFILE : inifile)}
 {
     /*
      * Configuration directory.
@@ -54,7 +64,7 @@ GuiApp::GuiApp(const std::string& title)
     std::error_code ec{};
     std::filesystem::create_directories(cdir, ec);
     if (ec) {
-        throw IOError{"Can't create configuration directory: {}: {}. Error Ignored\n", cdir, ec.message()};
+        throw IOError{"Can't create configuration directory: {}: {}", cdir, ec.message()};
     }
 
     /*
@@ -69,14 +79,21 @@ GuiApp::GuiApp(const std::string& title)
     _width = Gui::FONT_SIZE * 130;
     _height = _width / _ratio;
 
-    _window = Window_uptr{::SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        _width, _height, SDL_WINDOW_RESIZABLE), ::SDL_DestroyWindow};
+    _window = sptr_t<::SDL_Window>{
+        ::SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _width, _height,
+            SDL_WINDOW_RESIZABLE),
+        ::SDL_DestroyWindow
+    };
 
     if (!_window) {
         throw UIError{"Can't create main window: {}", sdl_error()};
     }
 
-    _renderer = Renderer_uptr{::SDL_CreateRenderer(_window.get(), -1, 0), ::SDL_DestroyRenderer};
+    _renderer = sptr_t<::SDL_Renderer>{
+        ::SDL_CreateRenderer(_window.get(), -1, 0),
+        ::SDL_DestroyRenderer
+    };
+
     if (!_renderer) {
         throw UIError{"Can't create renderer: {}", sdl_error()};
     }
@@ -88,12 +105,15 @@ GuiApp::GuiApp(const std::string& title)
     const Image& ico = icon();
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-    _icon = Surface_uptr{::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
-        ico.width, ico.height, 32, ico.width * 4, SDL_PIXELFORMAT_ABGR8888), ::SDL_FreeSurface};
+    constexpr static const auto PIXEL_FORMAT = SDL_PIXELFORMAT_ABGR8888;
 #else
-    _icon = Surface_uptr{::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
-        ico.width, ico.height, 32, ico.width * 4, SDL_PIXELFORMAT_RGBA8888), ::SDL_FreeSurface};
+    constexpr static const auto PIXEL_FORMAT = SDL_PIXELFORMAT_RGBA8888;
 #endif
+    _icon = sptr_t<::SDL_Surface>{
+        ::SDL_CreateRGBSurfaceWithFormatFrom(const_cast<Rgba*>(ico.data.data()),
+            ico.width, ico.height, 32, ico.width * 4, PIXEL_FORMAT),
+        ::SDL_FreeSurface
+    };
 
     if (!_icon) {
         throw UIError{"Can't create main window icon: {}", sdl_error()};
@@ -126,7 +146,7 @@ GuiApp::GuiApp(const std::string& title)
         .ranges = font_ranges
     };
 
-    Gui::init(inifile(), _window.get(), _renderer.get(), font_params);
+    Gui::init(_inifile, _window, _renderer, font_params);
 }
 
 GuiApp::~GuiApp()
@@ -139,45 +159,42 @@ GuiApp::~GuiApp()
     ::SDL_Quit();
 }
 
+void GuiApp::title(const std::string& title)
+{
+    ::SDL_SetWindowTitle(_window.get(), title.c_str());
+}
+
 int GuiApp::run()
 {
-    auto prev_term = std::signal(SIGTERM, signal_handler);
-    auto prev_quit = std::signal(SIGQUIT, signal_handler);
-    auto prev_chld = std::signal(SIGCHLD, signal_handler);
-    auto prev_pipe = std::signal(SIGPIPE, SIG_IGN);
+    const auto prev_term = std::signal(SIGTERM, signal_handler);
+    const auto prev_quit = std::signal(SIGQUIT, signal_handler);
+    const auto prev_chld = std::signal(SIGCHLD, signal_handler);
+    const auto prev_pipe = std::signal(SIGPIPE, SIG_IGN);
     if (prev_term == SIG_ERR || prev_quit == SIG_ERR || prev_chld == SIG_ERR || prev_pipe == SIG_ERR) {
         throw Error{"Can't set signal handler: {}", Error::to_string()};
     }
 
-#if 0 // XXX
-    float ddpi{}, hdpi{}, vdpi{};
-    if (::SDL_GetDisplayDPI(0, &ddpi, &hdpi, &vdpi) != 0) {
-        throw Error{"Can't getdiplay dpi"};
-    }
-
-    std::cout << std::format(
-        "  diagonal dpi: {}\n"
-        "horizontal dpi: {}\n"
-        "  vertical dpi: {}\n",
-        ddpi,
-        hdpi,
-        vdpi);
-#endif
-
-    event_loop();
+    const int eval = event_loop();
 
     std::signal(SIGPIPE, prev_pipe);
     std::signal(SIGCHLD, prev_chld);
     std::signal(SIGQUIT, prev_quit);
     std::signal(SIGTERM, prev_term);
-    return 0;
+
+    return eval;
 }
 
-void GuiApp::event_loop()
+void GuiApp::stop(int eval)
+{
+    _eval = eval;
+    _stop = true;
+}
+
+int GuiApp::event_loop()
 {
     ::SDL_Event event{};
-    int64_t start{};
     int64_t activity_counter{};
+    int64_t start{};
 
     while (is_running()) {
         start = utils::now() - start;
@@ -188,7 +205,7 @@ void GuiApp::event_loop()
             switch (event.type) {
             case SDL_QUIT:
                 stop();
-                return;
+                break;
 
             case SDL_WINDOWEVENT:
                 switch (event.window.event) {
@@ -205,21 +222,26 @@ void GuiApp::event_loop()
                 break;
 
             case SDL_KEYDOWN:
-#ifdef __APPLE__
-                _guikey = (event.key.keysym.mod & KMOD_GUI);
-#else
-                _guikey = (event.key.keysym.mod & KMOD_CTRL);
-#endif
+                _guikey = (event.key.keysym.mod & GUI_KEY);
                 if (_guikey) {
-                    /*
-                     * Handle CTRL-'+' and CTRL-'-'
-                     */
                     switch (event.key.keysym.sym) {
                     case SDLK_EQUALS:
+                        /*
+                         * ALT-'+': Increase font size.
+                         */
                         process_font_incdec(true);
                         break;
                     case SDLK_MINUS:
+                        /*
+                         * ALT-'-': Decrease font size.
+                         */
                         process_font_incdec(false);
+                        break;
+                    case SDLK_t:
+                        /*
+                         * ALT-'T': Toggle dark/light theme.
+                         */
+                        toggle_style();
                         break;
                     default:;
                     }
@@ -257,9 +279,11 @@ void GuiApp::event_loop()
             activity_counter -= FRAME_TIME_FAST;
         }
 
-        int64_t delay = (activity_counter > 0 ? FRAME_TIME_FAST : FRAME_TIME_SLOW) - utils::now() + start;
+        const int64_t delay = (activity_counter > 0 ? FRAME_TIME_FAST : FRAME_TIME_SLOW) - utils::now() + start;
         start = (delay > 0 ? utils::sleep(delay) - delay : 0);
     }
+
+    return _eval;
 }
 
 void GuiApp::render_screen()
@@ -275,10 +299,16 @@ const std::string& GuiApp::confdir()
     return cdir;
 }
 
-const std::string& GuiApp::inifile()
+void GuiApp::theme_banner()
 {
-    static std::string ini = std::format("{}/{}", confdir(), INIFILE);
-    return ini;
+    to_column(-6.5);
+    button((style() == Style::Dark ? "Light Mode" : "Dark Mode"), std::bind(&Gui::toggle_style, this));
+
+    sameline();
+    button("+", [](){ process_font_incdec(true); });
+
+    sameline();
+    button("-", [](){ process_font_incdec(false); });
 }
 
 }

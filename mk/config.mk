@@ -69,8 +69,7 @@ CPPFLAGS+=		-DD_VERSION='"${VERSION}"' \
 CPPFLAGS+=		-I${CWD} \
 			-I${ROOT} \
 			-I${ROOT}/src \
-			-I${ROOT}/src/core \
-			-I${ROOT}/3rdparty/sha2
+			-I${ROOT}/src/core
 
 CXXFLAGS+=		${UI_CXXFLAGS} \
 			${SYSDEP_CXXFLAGS} \

@@ -173,14 +173,14 @@ struct VJoyKeys {
 };
 
 /**
- * Convert a key name to a key code.
+ * Get a key code from its name.
  * @param name Key name.
  * @return The key code (Key::KEY_NONE if the key name is invalid).
  */
 Key to_key(const std::string& name);
 
 /**
- * Convert a key code to a key name.
+ * Get the name of a key code.
  * @param key Key code.
  * @return The key name (an empty string if the key code is invalid).
  */
@@ -193,7 +193,7 @@ std::string to_string(Key key);
 std::vector<std::string> key_names();
 
 /**
- * Emulated keyboard.
+ * Keyboard interface.
  * This class must be derived by an actual emulated keyboard.
  */
 class Keyboard : public Name {
@@ -206,7 +206,7 @@ public:
 
     /**
      * Initialise this keyboard.
-     * @param enabled True to enable; false otherwise.
+     * @param enabled true to enable the keyboard; false to disable it.
      * @see enable(bool)
      */
     Keyboard(bool enabled = true);
@@ -214,7 +214,7 @@ public:
     /**
      * Initialise this keyboard.
      * @param label   label;
-     * @param enabled True to enable; false otherwise.
+     * @param enabled true to enable the keyboard; false to disable it.
      * @see enable(bool)
      */
     Keyboard(std::string_view label, bool enabled = true);
@@ -222,30 +222,30 @@ public:
     virtual ~Keyboard() = default;
 
     /**
-     * Load a key mappings table from a file.
-     * Previous key mappings within this instance are removed.
-     * @param fname Name of the file containing the key mappings.
+     * Load the key mappings table from a file.
+     * Previously loaded key mappings are removed.
+     * The mappings table is a text file with entry lines
+     * formatted as follow:
+     * "<key_name> [SHIFT] [ALTGR] <impl_key_name> [SHIFT]".
+     * @param fname Name of the file containing the key mappings table.
      * @exception IOError
-     * @see add_key_map()
+     * @see add_key_map(const std::string&, bool, bool, const std::string&, bool)
      * @see clear_key_map()
      */
     void load(const fs::Path& fname);
 
     /**
-     * Assign a virtual joystick to an emulated joystick.
-     * An emulated joystick is connected to the platform under emulation.
-     * What this method does is to make the emulated platform detect the
-     * virtual joystick implemented by this keyboard.
-     * @param vjoykeys Virtual joystick keys;
-     * @param vjoy     Emulated joystick.
+     * Connect a virtual joystick to a joystick interface.
+     * @param vjoykeys Virtual joystic;
+     * @param vjoy     Joystick interface.
      * @see Joystick
      * @see VJoyKeys
      */
     void vjoystick(const VJoyKeys& vjoykeys, const sptr_t<Joystick>& vjoy);
 
     /**
-     * Return the status of this keyboard.
-     * @return The status of this keyboard (true if enabled, false if disabled).
+     * Get the status of this keyboard.
+     * @return true if this keyboard is enabled; false otherwise.
      * @see enable(bool)
      */
     bool is_enabled() const
@@ -265,17 +265,21 @@ public:
 
     /**
      * Key pressed event.
-     * This method must be called by the UI each time
-     * a key press event is received from the user.
+     * This method must be called by the UI each time a key press event
+     * is received from the user.
+     * It processes the virtual joystick and the actual emulated keyboard.
      * @param key Key code.
+     * @see pressed(Key)
      */
     void key_pressed(Key key);
 
     /**
      * Key released event.
-     * This method must be called by the UI each time
-     * a key release event es received from the user.
+     * This method must be called by the UI each time a key release event
+     * is received from the user.
+     * It processes the virtual joystick and the actual emulated keyboard.
      * @param key Key code.
+     * @see released(Key)
      */
     void key_released(Key key);
 
@@ -284,14 +288,19 @@ public:
      */
     virtual void reset() = 0;
 
+private:
     /**
      * Key pressed event.
+     * This method must be implemented by the specific emulated keyboard.
+     * It is called when the keyboard is enabled and a key press event is received.
      * @param key Key code.
      */
     virtual void pressed(Key key) = 0;
 
     /**
      * Key released event.
+     * This method must be implemented by the specific emulated keyboard.
+     * It is called when the keyboard is enabled and a key release event is received.
      * @param key Key code.
      */
     virtual void released(Key key) = 0;
@@ -311,18 +320,18 @@ public:
 
     /**
      * Add a new translation code.
-     * A translation code is used to translate between key combinations
-     * to the specific emulated keyboard key combinations.
-     * @param key_name   Name of the key code;
-     * @param key_shift  true if the key code must be shifted, false otherwise;
-     * @param key_altgr  true if key code is an ALT-GR combination; false otherwise:
-     * @param impl_name  Name of the specific keyboard implementation code;
-     * @param impl_shift true the specific keyboard implementation code must be shifted, false otherwise.
-     * @exception InvalidArgument if the key_name or the impl_name is not valid.
+     * A translation code is used to translate between host key combinations
+     * and their respective emulated keyboard key combinations.
+     * @param key_name   Name of the host key code;
+     * @param key_shift  true if the host SHIFT key is pressed, false otherwise;
+     * @param key_altgr  true if key host ALT-GR key is pressed, false otherwise:
+     * @param impl_name  Name of the emulated keyboard key code;
+     * @param impl_shift true if the emulated keyboard SHIFT key is pressed; false otherwise.
+     * @exception InvalidArgument if key_name or impl_name is not valid.
      * @see clear_key_map()
      */
-    virtual void add_key_map(const std::string& key_name, bool key_shift, bool key_altgr, const std::string& impl_name,
-        bool impl_shift) = 0;
+    virtual void add_key_map(const std::string& key_name, bool key_shift, bool key_altgr,
+        const std::string& impl_name, bool impl_shift) = 0;
 
     /**
      * Clear (remove) the key mappings.

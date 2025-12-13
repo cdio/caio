@@ -42,7 +42,7 @@ namespace caio {
 namespace mos {
 
 /**
- * MOS 6502 NMOS microprocessor.
+ * MOS-6502 NMOS microprocessor.
  * @see https://www.nesdev.org/6502_cpu.txt
  * @see https://www.nesdev.org/extra_instructions.txt
  * @see https://www.nesdev.org/undocumented_opcodes.txt
@@ -152,8 +152,8 @@ public:
      * the monitor takes control as soon as this CPU is started.
      * @param ifd  Input file descriptor used to communicate with the user;
      * @param ofd  Output file descriptor used to communicate with the user.
-     * @param load Load callback (empty for default);
-     * @param save Save calblack (empty for default).
+     * @param load Load callback (empty to use the default load);
+     * @param save Save calblack (empty to use the default save).
      * @see monitor::LoadCb
      * @see monitor::SaveCb
      */

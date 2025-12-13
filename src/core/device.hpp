@@ -33,56 +33,64 @@ using devptr_t = sptr_t<class Device>;
 
 /**
  * Generic device.
- * This class implements a hardware device that exposes an address
+ * The Device class implements a hardware device that exposes an address
  * (or register) range where data can be written to or read from.
  * This class must be derived by an actual emulated device.
  */
 class Device : public Name {
 public:
+    /**
+     * Device read mode.
+     * - Peek: A read operation never changes the internal state of the device.
+     * - Read: A read operation could change the internal state of the device.
+     */
     enum class ReadMode {
-        Peek,       /**< A read operation never changes the internal state of the device.   */
-        Read        /**< A read operation could change the internal state of the device.    */
+        Peek,
+        Read
     };
 
     using ReadObserverCb  = std::function<void(size_t, ReadMode)>;
     using WriteObserverCb = std::function<void(size_t, uint8_t)>;
 
     /**
-     * Set a device read observer.
+     * Set a read observer.
      * @param cb Observer callback.
      * @see read(size_t, ReadMode)
+     * @see ReadObserverCb
      */
     void read_observer(const ReadObserverCb& cb);
 
     /**
-     * Set a device write observer.
+     * Set a write observer.
      * @param cb Observer callback.
      * @see write(size_t, uint8_t)
+     * @see WriteObserverCb
      */
     void write_observer(const WriteObserverCb& cb);
 
     /**
-     * Return a human readable string representing this device.
-     * @return A string representing this device.
+     * Get a human readable representation of this device.
+     * @return A human readable representation of this device.
      */
     std::string to_string() const override;
 
     /**
-     * Read from an address or device register.
+     * Read from an address or register.
      * If there is a read observer it is called before
-     * the actual device read operation through dev_read().
+     * the actual read operation (through dev_read()).
      * @param addr Address to read from;
      * @param mode Read mode (default is ReadMode::Read).
-     * @return The data stored at the specified address.
+     * @return The data read from the specified address.
      * @see dev_read(size_t, ReadMode mode)
      * @see ReadMode
      */
     uint8_t read(size_t addr, ReadMode mode = ReadMode::Read);
 
     /**
-     * Read from an address or register without changing the device's internal state.
-     * @param addr Address to read from;
-     * @return The data stored at the specified address.
+     * Read from an address or register without changing the device internal state.
+     * @param addr Address to read from.
+     * @return The data read from the specified address.
+     * @see read(size_t, ReadMode)
      */
     uint8_t peek(size_t addr) const
     {
@@ -92,7 +100,7 @@ public:
     /**
      * Write a value to an address or register.
      * If there is a write observer it is called before
-     * the actual device write operation through dev_write().
+     * the actual write operation (through dev_write()).
      * @param addr Address to write to;
      * @param data Data to write.
      * @see dev_write(size_t, uint8_t)
@@ -135,7 +143,7 @@ protected:
     /**
      * Write a device address or register.
      * @param addr Address to write to;
-     * @param data Data to write.
+     * @param data Value to write.
      */
     virtual void dev_write(size_t addr, uint8_t data) = 0;
 

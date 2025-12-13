@@ -215,6 +215,8 @@ private:
     float         _t{};                     /* Out-of-sync time                 */
 
     static RgbaTable builtin_palette;       /* Default colour palette           */
+
+    friend Serializer& operator&(Serializer&, ZX80Video&);
 };
 
 }

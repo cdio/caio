@@ -377,6 +377,8 @@ private:
     Rgba          _border_colour{};         /* Border colour                            */
 
     static RgbaTable builtin_palette;       /* Default colour palette                   */
+
+    friend Serializer& operator&(Serializer&, ULAVideo&);
 };
 
 }

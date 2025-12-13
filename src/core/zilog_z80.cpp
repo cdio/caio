@@ -18,10 +18,21 @@
  */
 #include "zilog_z80.hpp"
 
+#include "logger.hpp"
+
 namespace caio {
 namespace zilog {
 
 using namespace std::literals::string_literals;
+
+const Z80::Instruction* Z80::instr_tables[6] = {
+    main_instr_set,
+    bit_instr_set,
+    ed_instr_set,
+    ix_instr_set,
+    iy_instr_set,
+    ix_bit_instr_set
+};
 
 const Z80::Instruction Z80::main_instr_set[256] = {
     { "NOP",            Z80::i_NOP,         ArgType::None,  4,  1   },  /* 00 */
@@ -1356,6 +1367,85 @@ std::string Z80::status() const
 {
     return std::format("{}\n  IFF1={} IFF2={} MI={} HALT={}",
         _regs.to_string(), _IFF1, _IFF2, static_cast<unsigned>(_imode), _halt_pin);
+}
+
+Serializer& operator&(Serializer& ser, Z80& cpu)
+{
+    ser & static_cast<Name&>(cpu)
+        & cpu._IFF1
+        & cpu._IFF2
+        & cpu._imode
+        & cpu._regs.A
+        & cpu._regs.F
+        & cpu._regs.B
+        & cpu._regs.C
+        & cpu._regs.D
+        & cpu._regs.E
+        & cpu._regs.H
+        & cpu._regs.L
+        & cpu._regs.aA
+        & cpu._regs.aF
+        & cpu._regs.aB
+        & cpu._regs.aC
+        & cpu._regs.aD
+        & cpu._regs.aE
+        & cpu._regs.aH
+        & cpu._regs.aL
+        & cpu._regs.IXh
+        & cpu._regs.IXl
+        & cpu._regs.IYh
+        & cpu._regs.IYl
+        & cpu._regs.I
+        & cpu._regs.R
+        & cpu._regs.SP
+        & cpu._regs.PC
+        & cpu._regs.memptr
+        & cpu._int_pin
+        & cpu._nmi_pin
+        & cpu._reset_pin
+        & cpu._wait_pin
+        & cpu._halt_pin
+        & cpu._iorq_pin
+        & cpu._m1_pin
+        & cpu._rfsh_pin
+        & cpu._int
+        & cpu._nmi
+        & cpu._tx
+        & cpu._opcode
+        & cpu._iprefix
+        & cpu._iaddr
+        & cpu._bit_displ
+        & cpu._fstate;
+
+    if (ser.is_serializer()) {
+        size_t index = [&cpu]() {
+            const auto it = std::find_if(std::begin(cpu.instr_tables), std::end(cpu.instr_tables),
+                [&cpu](const Z80::Instruction* table) {
+                return (table == cpu._instr_set);
+            });
+
+            if (it == std::end(cpu.instr_tables)) {
+                log.fatal("Z80 ser: Invalid instruction set: {:p}\n",
+                    reinterpret_cast<const void*>(cpu._instr_set));
+            }
+
+            return (it - std::begin(cpu.instr_tables));
+        }();
+
+        ser & index;
+
+    } else {
+        size_t index{};
+        ser & index;
+
+        if (index >= std::size(cpu.instr_tables)) {
+            log.fatal("Z80 des: Invalid instruction set index: {}", index);
+        }
+
+        cpu._instr_set = cpu.instr_tables[index];
+    }
+
+    return ser;
 }
 
 }

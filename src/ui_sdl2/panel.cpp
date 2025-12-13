@@ -124,7 +124,7 @@ void Panel::render(int width, int height)
     /*
      * Width and height of widgets.
      */
-    const int ww = wc_width / N;
+    const int ww = std::max(wc_width / N, WIDGET_MINSIZE);
     const int wh = ww / widget::RATIO;
 
     /*

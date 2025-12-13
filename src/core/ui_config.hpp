@@ -97,21 +97,20 @@ struct VideoConfig {
     std::string title{};                        /**< Main window title.         */
     unsigned    width{};                        /**< Emulated screen width.     */
     unsigned    height{};                       /**< Emulated screen height.    */
-    unsigned    fps{};                          /**< Frames per second.         */
     unsigned    scale{1};                       /**< Screen scale factor.       */
     AspectRatio aspect{AspectRatio::System};    /**< Screen aspect ratio.       */
     SLEffect    sleffect{SLEffect::None};       /**< Scanlines effect.          */
     bool        fullscreen{};                   /**< Start in fullscreen mode.  */
     bool        sresize{};                      /**< Smooth window resize.      */
-    std::string screenshotdir{};                /**< Screenshot directory.      */
     std::string statusbar{};                    /**< Status bar position.       */
+    std::string screenshotdir{};                /**< Screenshot directory.      */
 };
 
 /**
  * Audio configuration.
  */
 struct AudioConfig {
-    bool        enabled{};                      /**< Audio output enabled.      */
+    bool        enabled{};                      /**< Enable audio flag.         */
     unsigned    srate{};                        /**< Sampling rate.             */
     unsigned    channels{};                     /**< Audio channels.            */
     unsigned    samples{};                      /**< No. of samples x buffer.   */
@@ -123,8 +122,10 @@ struct AudioConfig {
  * @see VideoConfig
  */
 struct Config {
-    struct AudioConfig audio{};
-    struct VideoConfig video{};
+    std::string name{};                         /**< Session name.              */
+    std::string snapshotdir{};                  /**< Snapshot directory.        */
+    struct AudioConfig audio{};                 /**< Audio configuration.       */
+    struct VideoConfig video{};                 /**< Video configuration.       */
 };
 
 }

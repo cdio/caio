@@ -45,7 +45,7 @@ Serializer& operator&(Serializer& ser, Name& name)
         ser & type;
 
         if (type != name._type) {
-            throw InvalidArgument{"Invalid type: required: {}, read: {}", name._type, type};
+            throw InvalidArgument{"Invalid type: required: '{}', read: '{}'", name._type, type};
         }
 
         ser & name._label;

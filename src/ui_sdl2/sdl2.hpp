@@ -28,6 +28,12 @@ namespace caio {
 namespace ui {
 namespace sdl2 {
 
+#ifdef __APPLE__
+constexpr static const auto GUI_KEY = KMOD_GUI;
+#else
+constexpr static const auto GUI_KEY = KMOD_ALT;
+#endif
+
 /**
  * 2D Size.
  */

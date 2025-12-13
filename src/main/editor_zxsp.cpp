@@ -38,11 +38,11 @@ void ConfigEditorZXSpectrum::save()
 
 void ConfigEditorZXSpectrum::render_specific()
 {
-    _gui.begin_subsection("Attachments:");
+    _gui.begin_subsection("Attached devices:");
     _gui.checkbox("Input tape fastload", "##fastload", _conf.fastload);
-    _gui.combo_file("Input tape", "##itape", _conf.itape, _itape);
-    _gui.combo_directory("Output tape", "##otape", _conf.otape, _otape);
-    _gui.combo_file("Load snapshot", "##snapshot", _conf.snapshot, _snapshot); //XXX
+    _gui.combo_path("Input tape", "##itape", _conf.itape, _itape);
+    _gui.combo_path("Output tape", "##otape", _conf.otape, _otape);
+    _gui.combo_path("Load snapshot", "##snapshot", _conf.snapshot, _snapshot);
     _gui.end_subsection();
 }
 

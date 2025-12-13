@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -25,14 +25,44 @@ namespace ui {
 namespace sdl2 {
 
 /**
+ * Spawn a new process and launch the dialog command.
+ * @param args Dialog arguments.
+ * @return The dialog output on success; an empty string if there is no output or on error.
+ * @exception IOError
+ * @see fs::shell(const std::string&)
+ */
+std::string dialog_exec(const std::string& args);
+
+/**
  * SaveAs dialog.
- * @param title Dialog title;
- * @param dir   Default selection directory;
- * @param fname Default selected file name.
+ * @param msg   Dialog message;
+ * @param dir   Initial browsing directory;
+ * @param fname Current selected file name.
+ * @param ext   File extension.
  * @return The chosen fullpath on success; an empty string if the
  * operation was cancelled by the user or some error occurred.
  */
-std::string saveas_dialog(const std::string& title, const std::string& dir, const std::string& fname);
+std::string dialog_saveas(const std::string& msg, const std::string& dir, const std::string& fname,
+    const std::string& ext = "");
+
+/**
+ * Pick File dialog.
+ * @param msg   Dialog message;
+ * @param dir   Initial browsing directory;
+ * @param fname Default selected file name;
+ * @param ext   File extension.
+ * @return The chosen fullpath on success; an empty string if the
+ * operation was cancelled by the user or some error occurred.
+ */
+std::string dialog_pick_file(const std::string& msg, const std::string& dir, const std::string& fname,
+    const std::string& ext);
+
+/**
+ * Error Message dialog.
+ * @param title  Dialog title;
+ * @param errmsg Error message (can be multiline);
+ */
+void dialog_error(const std::string& reason, const std::string& errmsg);
 
 }
 }

@@ -72,7 +72,7 @@ uint8_t ULAASpace::read(addr_t addr, ReadMode mode)
                     break;
                 }
 
-                /* PASSTHROUGH */
+                [[fallthrough]];
 
             case REPORT_Da_ADDR:    /* Break from user */
                 /* Force tape stop after a break from user */

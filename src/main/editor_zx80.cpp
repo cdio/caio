@@ -64,9 +64,9 @@ void ConfigEditorZX80::render_specific()
 
     _gui.newline();
 
-    _gui.begin_subsection("Attachments:");
-    _gui.combo_directory("Tape directory", "##cassdir", _conf.cassdir, _cassdir);
-    _gui.combo_file("Preload program", "##prgfile", _conf.prgfile, _prgfile);
+    _gui.begin_subsection("Attached devices:");
+    _gui.combo_path("Tape directory", "##cassdir", _conf.cassdir, _cassdir);
+    _gui.combo_path("Preload program", "##prgfile", _conf.prgfile, _prgfile);
     _gui.end_subsection();
 }
 

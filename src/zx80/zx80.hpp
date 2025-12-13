@@ -143,7 +143,7 @@ private:
     /**
      * @see Platform::serdes(Serializer&)
      */
-    void serdes(Serializer& ser) override { /* TODO XXX */ };
+    void serdes(Serializer& ser) override;
 
     ZX80Config              _conf;
     sptr_t<Clock>           _clk{};
@@ -154,6 +154,8 @@ private:
     sptr_t<ZX80Video>       _video{};
     sptr_t<ZX80Keyboard>    _kbd{};
     sptr_t<ZX80Cassette>    _cass{};
+
+    friend Serializer& operator&(Serializer&, ZX80&);
 };
 
 }

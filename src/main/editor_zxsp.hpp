@@ -45,9 +45,9 @@ private:
     sinclair::zxspectrum::ZXSpectrumConfig _conf;
     sinclair::zxspectrum::ZXSpectrumConfig _conf_orig;
 
-    fs::IDirNav _otape{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
-    fs::IDirNav _itape{fs::IDir::EntryType::All, Gui::ENTRY_EMPTY};
-    fs::IDirNav _snapshot{fs::IDir::EntryType::All, Gui::ENTRY_EMPTY};
+    Gui::IDirNavGui _otape{Gui::IDirNavGui::EntryType::Dir};
+    Gui::IDirNavGui _itape{Gui::IDirNavGui::EntryType::All};
+    Gui::IDirNavGui _snapshot{Gui::IDirNavGui::EntryType::All};
 };
 
 }

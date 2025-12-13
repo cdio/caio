@@ -81,6 +81,8 @@ private:
     sptr_t<ULAAudio>  _audio;
     sptr_t<ULAVideo>  _video;
     sptr_t<ULAASpace> _aspace;
+
+    friend Serializer& operator&(Serializer&, ULA&);
 };
 
 }

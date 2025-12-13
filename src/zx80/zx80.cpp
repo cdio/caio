@@ -190,7 +190,12 @@ void ZX80::hotkeys(keyboard::Key key)
 
 ui::Config ZX80::ui_config()
 {
+    const auto& basename = fs::Path{_conf.prgfile};
+    const auto& session = (basename.extension().empty() ? basename : basename.stem());
+
     const ui::Config uiconf {
+        .name               = session,
+        .snapshotdir        = _conf.snapshotdir,
         .audio = {
             .enabled        = false,
             .srate          = 0,
@@ -201,14 +206,13 @@ ui::Config ZX80::ui_config()
             .title          = _conf.title,
             .width          = ZX80Video::WIDTH,
             .height         = ZX80Video::HEIGHT,
-            .fps            = _conf.fps,
             .scale          = _conf.scale,
             .aspect         = _conf.aspect,
             .sleffect       = _conf.scanlines,
             .fullscreen     = _conf.fullscreen,
             .sresize        = _conf.sresize,
-            .screenshotdir  = _conf.screenshotdir,
-            .statusbar      = _conf.statusbar
+            .statusbar      = _conf.statusbar,
+            .screenshotdir  = _conf.screenshotdir
         }
     };
 
@@ -278,6 +282,22 @@ void ZX80::attach_prg()
         cpu.bpdel(bpaddr);
 
     }, prog);
+}
+
+void ZX80::serdes(Serializer& ser)
+{
+    ser & *this;
+}
+
+Serializer& operator&(Serializer& ser, ZX80& zx80)
+{
+    ser & static_cast<Platform&>(zx80)
+        & zx80._ram
+        & zx80._mmap
+        & zx80._cpu
+        & zx80._video;
+
+    return ser;
 }
 
 }

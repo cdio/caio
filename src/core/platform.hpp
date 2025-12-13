@@ -70,7 +70,7 @@ protected:
     }
 
     /**
-     * Detect whether a file contains a snapshot image.
+     * Detect whether a file contains a snapshot file.
      * This method detects whether a file contains a snapshot
      * but it does not guarantee the validity of all its
      * components (for example cartridge or rom signatures).
@@ -160,6 +160,15 @@ protected:
      * @return The UI configuration.
      */
     virtual ui::Config ui_config() = 0;
+
+    /**
+     * Load an external snapshot.
+     * An external snapshot is a snapshot whose format
+     * is not internal to caio (not a caio .snp file).
+     * @return true on success; false if the format is
+     * not recognised or there is no snapshot to laod.
+     */
+    virtual bool load_external_snapshot();
 
     /**
      * Serialize/Deserialize this platform.

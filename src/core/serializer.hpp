@@ -168,7 +168,7 @@ Serializer& operator&(Serializer& ser, float& value);
  * @exception IOError
  * @see Serializer
  */
-template <typename T>
+template<typename T>
 requires (std::is_integral_v<T> || std::is_enum_v<T>) && (not std::is_same_v<uint64_t, T>)
 Serializer& operator&(Serializer& ser, T& value)
 {
@@ -192,7 +192,7 @@ Serializer& operator&(Serializer& ser, T& value)
  * @exception IOError
  * @see Serializer
  */
-template <typename T>
+template<typename T>
 Serializer& operator&(Serializer& ser, std::optional<T>& opt)
 {
     if (ser.is_serializer()) {
@@ -222,7 +222,7 @@ Serializer& operator&(Serializer& ser, std::optional<T>& opt)
  * @exception IOError
  * @see Serializer
  */
-template <typename T, size_t N>
+template<typename T, size_t N>
 requires std::is_arithmetic_v<T> || std::is_enum_v<T>
 Serializer& operator&(Serializer& ser, std::array<T, N>& arr)
 {
@@ -258,7 +258,7 @@ Serializer& operator&(Serializer& ser, Buffer& buf);
  * @exception IOError
  * @see Serializer
  */
-template <typename T>
+template<typename T>
 requires std::is_integral_v<T> && (not std::is_same_v<uint8_t, T>)
 Serializer& operator&(Serializer& ser, std::span<T>& buf)
 {
@@ -274,7 +274,7 @@ Serializer& operator&(Serializer& ser, std::span<T>& buf)
  * @exception IOError
  * @note The object must implement: Serializer& operator&(Serializer&, OBJECT&)
  */
-template <typename T>
+template<typename T>
 requires std::is_class_v<T>
 Serializer& operator&(Serializer& ser, const sptr_t<T>& pinst)
 {

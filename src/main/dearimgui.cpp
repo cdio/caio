@@ -36,7 +36,8 @@ static Buffer                           ttf{};
 static std::vector<::ImFont*>           loaded_fonts{};
 static std::vector<::ImFont*>::iterator current_loaded_font{};
 
-void Gui::init(const std::string& inifile, ::SDL_Window* sdlwin, ::SDL_Renderer* sdlrend, const FontParams& fontp)
+void Gui::init(const std::string& inifile, const sptr_t<::SDL_Window>& sdlwin,
+    const sptr_t<::SDL_Renderer>& sdlrend, const FontParams& fontp)
 {
     if (ttf.size() == 0) {
         ttf = utils::base64_decode({FONT_NAME, std::size(FONT_NAME)});
@@ -50,8 +51,8 @@ void Gui::init(const std::string& inifile, ::SDL_Window* sdlwin, ::SDL_Renderer*
      * Initialise Dear ImGui.
      */
     ::ImGui::CreateContext();
-    ::ImGui_ImplSDL2_InitForSDLRenderer(_sdlwin, _sdlrend);
-    ::ImGui_ImplSDLRenderer2_Init(_sdlrend);
+    ::ImGui_ImplSDL2_InitForSDLRenderer(_sdlwin.get(), _sdlrend.get());
+    ::ImGui_ImplSDLRenderer2_Init(_sdlrend.get());
 
     auto& io = ::ImGui::GetIO();
     io.ConfigFlags |= ::ImGuiConfigFlags_NavEnableKeyboard | ::ImGuiConfigFlags_NavEnableGamepad;
@@ -88,8 +89,8 @@ void Gui::init(const std::string& inifile, ::SDL_Window* sdlwin, ::SDL_Renderer*
         const auto* self = reinterpret_cast<Gui*>(handler->UserData);
         const int font_index = current_loaded_font - loaded_fonts.begin();
         int x{}, y{}, w{}, h{};
-        ::SDL_GetWindowPosition(self->_sdlwin, &x, &y);
-        ::SDL_GetWindowSize(self->_sdlwin, &w, &h);
+        ::SDL_GetWindowPosition(self->_sdlwin.get(), &x, &y);
+        ::SDL_GetWindowSize(self->_sdlwin.get(), &w, &h);
         buf->appendf(
             "[%s][gui]\n"
             "win=%d,%d,%d,%d\n"
@@ -113,15 +114,15 @@ void Gui::init(const std::string& inifile, ::SDL_Window* sdlwin, ::SDL_Renderer*
         auto* self = reinterpret_cast<Gui*>(handler->UserData);
         int x{}, y{}, w{}, h{};
         if (::sscanf(line, "win=%d,%d,%d,%d\n", &x, &y, &w, &h) == 4) {
-            ::SDL_SetWindowPosition(self->_sdlwin, x, y);
-            ::SDL_SetWindowSize(self->_sdlwin, w, h);
+            ::SDL_SetWindowPosition(self->_sdlwin.get(), x, y);
+            ::SDL_SetWindowSize(self->_sdlwin.get(), w, h);
 
             /* Force a SDL window event so imgui gets updated */
             ::SDL_Event event{
                 .window = {
                     .type       = ::SDL_WINDOWEVENT,
                     .timestamp  = ::SDL_GetTicks(),
-                    .windowID   = ::SDL_GetWindowID(self->_sdlwin),
+                    .windowID   = ::SDL_GetWindowID(self->_sdlwin.get()),
                     .event      = ::SDL_WINDOWEVENT_RESIZED,
                     .data1      = static_cast<::Sint32>(w),
                     .data2      = static_cast<::Sint32>(h)
@@ -171,11 +172,13 @@ void Gui::post_render()
 {
     ::ImGui::PopFont();
     ::ImGui::Render();
+
     const uint8_t color = 255 * (_style == Style::Dark);
-    ::SDL_SetRenderDrawColor(_sdlrend, color, color, color, 255);
-    ::SDL_RenderClear(_sdlrend);
-    ::ImGui_ImplSDLRenderer2_RenderDrawData(::ImGui::GetDrawData(), _sdlrend);
-    ::SDL_RenderPresent(_sdlrend);
+    ::SDL_SetRenderDrawColor(_sdlrend.get(), color, color, color, 255);
+
+    ::SDL_RenderClear(_sdlrend.get());
+    ::ImGui_ImplSDLRenderer2_RenderDrawData(::ImGui::GetDrawData(), _sdlrend.get());
+    ::SDL_RenderPresent(_sdlrend.get());
 }
 
 ::ImFont* Gui::current_font()
@@ -213,6 +216,13 @@ float Gui::font_width()
     return fwidth;
 }
 
+float Gui::font_height()
+{
+    const ::ImGuiContext& g = *::ImGui::GetCurrentContext();
+    const float fheight = g.FontSize + g.Style.ItemSpacing.y;
+    return fheight;
+}
+
 void Gui::cursor_to_column(unsigned col)
 {
     const float pos = font_width() * col;
@@ -224,12 +234,20 @@ void Gui::cursor_to_valuecol()
     cursor_to_column(VALUE_COLUMN);
 }
 
-void Gui::begin_window(const std::string& id, const Size& container_size)
+bool Gui::begin_window(const std::string& id, const Size& pos, const Size& size, int wflags, bool* popen)
 {
-    const auto [width, height] = container_size;
-    ::ImGui::SetNextWindowSize(::ImVec2{width, height}, 0);
-    ::ImGui::SetNextWindowPos(::ImVec2{}, ::ImGuiCond_Always, ::ImVec2{});
-    ::ImGui::Begin(id.c_str(), nullptr,
+    const auto [x, y] = pos;
+    const auto [w, h] = size;
+    ::ImGui::SetNextWindowSize(::ImVec2{w, h}, 0);
+    ::ImGui::SetNextWindowPos(::ImVec2{x, y}, ::ImGuiCond_Always, ::ImVec2{});
+
+    wflags |= ::ImGuiWindowFlags_NoCollapse;
+    return ::ImGui::Begin(id.c_str(), popen, wflags);
+}
+
+bool Gui::begin_window(const std::string& id, const Size& size)
+{
+    return begin_window(id, {}, size,
         ::ImGuiWindowFlags_NoTitleBar |
         ::ImGuiWindowFlags_NoCollapse |
         ::ImGuiWindowFlags_NoDecoration |
@@ -366,6 +384,11 @@ bool Gui::button_cancel(const ActionCb& action)
     return button("Cancel", action, BUTTON_WIDTH_CANCEL);
 }
 
+bool Gui::button_choose(const ActionCb& action)
+{
+    return button("Choose", action, BUTTON_WIDTH_CHOOSE);
+}
+
 std::optional<bool> Gui::buttons_ok_cancel(const ActionCb& ok, const ActionCb& cancel)
 {
     if (button_ok(ok)) {
@@ -379,19 +402,6 @@ std::optional<bool> Gui::buttons_ok_cancel(const ActionCb& ok, const ActionCb& c
     }
 
     return {};
-}
-
-void Gui::input_text(const std::string& msg, const std::string& id, std::string& dst)
-{
-    const float fwidth = font_width();
-    print(msg);
-    cursor_to_valuecol();
-    char dir[80];
-    ::snprintf(dir, sizeof(dir), "%s", dst.c_str());
-    ::ImGui::SetNextItemWidth(20 * fwidth);
-    if (::ImGui::InputText(id.c_str(), dir, sizeof(dir), 0)) {
-        dst = dir;
-    }
 }
 
 void Gui::input_int(const std::string& msg, const std::string& id, int& dst, size_t width, bool(*cond)(int))
@@ -421,6 +431,18 @@ void Gui::checkbox(const std::string& msg, const std::string& id, bool& dst)
     print(msg);
     cursor_to_valuecol();
     ::ImGui::Checkbox(id.c_str(), &dst);
+}
+
+bool Gui::message_box(const std::string& reason, const std::string& msg, const ActionCb& action)
+{
+    print(reason);
+    newline();
+
+    print(msg);
+    newline();
+
+    separator();
+    return button_ok(action);
 }
 
 void Gui::combo_select(const std::string& label, const std::string& id, const char** list, size_t size,
@@ -542,7 +564,7 @@ void Gui::combo_statusbar(std::string& dst)
         "Center",
         "North",
         "South",
-        "Easth",
+        "East",
         "West",
         "North-East",
         "North-West",
@@ -554,7 +576,7 @@ void Gui::combo_statusbar(std::string& dst)
         "center",
         "north",
         "south",
-        "easth",
+        "east",
         "west",
         "north-east",
         "north-west",
@@ -582,71 +604,20 @@ void Gui::combo_statusbar(std::string& dst)
     }
 }
 
-void Gui::combo_path(const std::string& msg, const std::string& id, std::string& dst, fs::IDir& idir,
-    const SetterCb& setter, unsigned width)
+void Gui::combo_path(const std::string& msg, const std::string& id, std::string& dst, IDirNavGui& idir)
 {
-    const float fwidth = font_width();
-
     print(msg);
     cursor_to_valuecol();
-    ::ImGui::SetNextItemWidth(width * fwidth);
 
-    if (idir.empty()) {
-        idir.reset(dst);
-    }
+    const float cols = font_width() * COMBO_FILE_WIDTH;
+    ::ImGui::SetNextItemWidth(cols);
 
-    if (::ImGui::BeginCombo(id.c_str(), dst.c_str())) {
-        std::error_code ec{};
-#ifdef GUI_COMBO_PATH_RELATIVE
-        if (!dst.empty()) {
-            dst = std::filesystem::proximate(dst, ec);
-        }
-#endif
-        idir.refresh();
-        for (size_t i = 0; i < idir.size(); ++i) {
-            const auto& entry = idir[i];
-            const auto dstc = std::filesystem::weakly_canonical(dst, ec);
-            const bool is_selected = ((i == 0) ? dst.empty() : std::filesystem::equivalent(dstc, entry, ec));
-            if (::ImGui::Selectable(entry.c_str(), is_selected, ::ImGuiSelectableFlags_DontClosePopups)) {
-                setter(idir, entry, dst);
-            }
-        }
+    if (::ImGui::BeginCombo(id.c_str(), dst.c_str(), ImGuiComboFlags_HeightLargest)) {
+        idir.show(true);
         ::ImGui::EndCombo();
     }
-}
 
-void Gui::combo_directory(const std::string& msg, const std::string& id, std::string& dst, fs::IDir& idir)
-{
-    static const auto setter = [](fs::IDir& idir, const fs::Path& entry, std::string& dst) {
-        if (entry == fs::IDir::ENTRY_BACK) {
-            dst = idir.path().parent_path();
-        } else if (entry == ENTRY_EMPTY) {
-            dst = {};
-        } else {
-            dst = entry;
-        }
-        idir.reset(dst);
-    };
-
-    combo_path(msg, id, dst, idir, setter, COMBO_FILE_WIDTH);
-}
-
-void Gui::combo_file(const std::string& msg, const std::string& id, std::string& dst, fs::IDir& idir, unsigned width)
-{
-    static const auto setter = [](fs::IDir& idir, const fs::Path& entry, std::string& dst) {
-        if (entry == fs::IDir::ENTRY_BACK) {
-            idir.reset(idir.path().parent_path());
-        } else if (entry == ENTRY_EMPTY) {
-            dst = {};
-        } else if (std::filesystem::status(entry).type() == std::filesystem::file_type::directory) {
-            idir.reset(entry);
-        } else {
-            dst = entry;
-            idir.reset(entry.parent_path());
-        }
-    };
-
-    combo_path(msg, id, dst, idir, setter, width);
+    idir.render("Choose " + msg, id, dst);
 }
 
 void Gui::combo_file(const std::string& msg, const std::string& id, std::string& dst, fs::IDir& idir,
@@ -665,7 +636,48 @@ void Gui::combo_file(const std::string& msg, const std::string& id, std::string&
         dst = filter(dst);
     }
 
-    combo_file(msg, id, dst, idir, width);
+    static const auto setter = [](fs::IDir& idir, const fs::Path& entry, std::string& dst) {
+        if (entry == fs::IDir::ENTRY_BACK) {
+            idir.reset(idir.path().parent_path());
+        } else if (entry == ENTRY_EMPTY) {
+            dst = {};
+        } else if (std::filesystem::status(entry).type() == std::filesystem::file_type::directory) {
+            idir.reset(entry);
+        } else {
+            dst = entry;
+            idir.reset(entry.parent_path());
+        }
+    };
+
+    const float fwidth = font_width();
+
+    print(msg);
+    cursor_to_valuecol();
+    ::ImGui::SetNextItemWidth(width * fwidth);
+
+    if (idir.empty()) {
+        idir.reset(dst);
+    }
+
+    if (::ImGui::BeginCombo(id.c_str(), dst.c_str(), ImGuiComboFlags_HeightLargest)) {
+        std::error_code ec{};
+#ifdef GUI_COMBO_PATH_RELATIVE
+        if (!dst.empty()) {
+            dst = std::filesystem::proximate(dst, ec);
+        }
+#endif
+        idir.refresh();
+        for (size_t i = 0; i < idir.size(); ++i) {
+            const auto& entry = idir[i];
+            const auto dstc = std::filesystem::weakly_canonical(dst, ec);
+            const bool is_selected = ((i == 0) ? dst.empty() : std::filesystem::equivalent(dstc, entry, ec));
+            if (::ImGui::Selectable(entry.c_str(), is_selected, ::ImGuiSelectableFlags_DontClosePopups)) {
+                setter(idir, entry, dst);
+            }
+        }
+
+        ::ImGui::EndCombo();
+    }
 }
 
 void Gui::combo_palette(std::string& dst, fs::IDir& idir, const std::string& mprefix)
@@ -681,6 +693,11 @@ void Gui::combo_keymaps(std::string& dst, fs::IDir& idir, const std::string& mpr
 void Gui::keyboard_focus()
 {
     ::ImGui::SetKeyboardFocusHere();
+}
+
+Gui::Style Gui::style() const
+{
+    return _style;
 }
 
 void Gui::style(Style style)
@@ -757,6 +774,158 @@ void Gui::style(Style style)
     colors[ImGuiCol_NavWindowingDimBg]      = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
     colors[ImGuiCol_ModalWindowDimBg]       = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 #endif
+}
+
+void Gui::toggle_style()
+{
+    style((style() == Style::Dark) ? Style::Light : Style::Dark);
+}
+
+Gui::IDirNavGui::IDirNavGui(EntryType etype, size_t elimit)
+    : IDirNavGui{ONLY_EXISTENT, etype, elimit}
+{
+}
+
+Gui::IDirNavGui::IDirNavGui(bool existent, EntryType etype, size_t elimit)
+    : IDirNavGui{POPUP, existent, etype, elimit}
+{
+}
+
+Gui::IDirNavGui::IDirNavGui(bool isapp, bool existent, EntryType etype, size_t elimit)
+    : IDirNav{etype, ENTRY_EMPTY, elimit},
+      _is_app{isapp},
+      _existent{existent},
+      _wsize{COMBO_FILE_WIDTH * font_width(), font_height() * 22},
+      _wpos{(::ImGui::GetIO().DisplaySize.x - _wsize.x) / 2.0f,
+            (::ImGui::GetIO().DisplaySize.y - _wsize.y) / 2.0f},
+      _visible{_is_app},
+      _cancelled{},
+      _selected{}
+{
+}
+
+void Gui::IDirNavGui::show(bool visible)
+{
+    if (visible && !_visible) {
+        _selected = fs::Path{};     // Hideous (see render())
+    }
+
+    _visible = visible;
+}
+
+void Gui::IDirNavGui::render(const std::string& msg, const std::string& id, std::string& dst,
+    const Size& wpos, const Size& wsize, int wflags)
+{
+    if (!_visible) {
+        return;
+    }
+
+    if (empty()) {
+        reset(dst);
+    }
+
+    std::error_code ec{};
+
+#ifdef GUI_COMBO_PATH_RELATIVE
+    if (!dst.empty()) {
+        const auto& pdst = std::filesystem::proximate(dst, ec);
+        if (!ec) {
+            dst = pdst;
+        }
+    }
+#endif
+
+    refresh();
+
+    begin_window(msg, wpos, wsize, wflags);
+
+    /* Selected entry */
+    if (_selected.empty()) {
+        _selected = dst;
+    }
+
+    if (_existent) {
+        print(_selected);
+    } else {
+        ::ImGui::SetNextItemWidth(::ImGui::GetWindowWidth());
+        input("##nav-input", _selected, 0);
+    }
+    separator();
+
+    /* Currently traversed directory */
+    print(path());
+    separator();
+
+    /* List of directory entries */
+    const auto ssize = Size{
+        _wsize.x * font_width(),
+        _wsize.y - 6 * font_height()
+    };
+
+    begin_section(id + "nav", ssize);
+
+    const auto& setter = [this](const fs::Path& entry) {
+        std::error_code err{};
+        const auto& newpath = (entry == ENTRY_BACK ? path().parent_path() : entry);
+        const bool isdir = std::filesystem::is_directory(newpath, err);
+        if (!err) {
+            if (isdir) {
+                reset(newpath);
+            } else {
+                _selected = newpath;
+            }
+        }
+    };
+
+    const auto dstc = std::filesystem::weakly_canonical(dst, ec);
+    if (!ec) {
+        for (size_t i = 0; i < size(); ++i) {
+            const auto& entry = (*this)[i];
+            const auto& show_entry = " " + entry.string();
+            const bool is_selected = ((i == 0) ? dst.empty() : std::filesystem::equivalent(dstc, entry, ec));
+            if (::ImGui::Selectable(show_entry.c_str(), is_selected, ::ImGuiSelectableFlags_DontClosePopups)) {
+                setter(entry);
+            }
+        }
+    }
+
+    end_section();
+
+    separator();
+
+    const auto choose = [&dst, this]() {
+        if (type() == EntryType::Dir) {
+            dst = path();
+        } else if (!_selected.empty()) {
+            dst = _selected;
+        }
+        show(false);
+        _cancelled = false;
+    };
+
+    const auto cancel = [this]() {
+        show(false);
+        _cancelled = true;
+    };
+
+    button_choose(choose);
+    sameline();
+    button_cancel(cancel);
+
+    const bool is_popup = !_is_app;
+    const bool focus_lost = !::ImGui::IsWindowFocused(ImGuiFocusedFlags_ChildWindows);
+    const bool esc_pressed = ::ImGui::IsKeyPressed(ImGuiKey_Escape);
+
+    if (is_popup && (focus_lost || esc_pressed)) {
+        cancel();
+    }
+
+    end_window();
+}
+
+void Gui::IDirNavGui::render(const std::string& msg, const std::string& id, std::string& dst)
+{
+    render(msg, id, dst, _wpos, _wsize, ::ImGuiWindowFlags_AlwaysAutoResize);
 }
 
 }

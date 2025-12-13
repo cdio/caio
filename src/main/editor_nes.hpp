@@ -46,7 +46,7 @@ private:
     nintendo::nes::NESConfig _conf;
     nintendo::nes::NESConfig _conf_orig;
 
-    fs::IDirNav _cartridge{fs::IDir::EntryType::All, Gui::ENTRY_EMPTY};
+    Gui::IDirNavGui _cartridge{Gui::IDirNavGui::EntryType::All};
 };
 
 }

@@ -18,7 +18,7 @@
  */
 #include "utils.hpp"
 
-#include "sha2.h"
+#include "3rdparty/sha2/sha2.h"
 
 #include <thread>
 #include <tuple>

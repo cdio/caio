@@ -48,26 +48,15 @@ public:
     constexpr static const char* ID_DELETE_CONFIG   = "Delete configuration";
 
     /**
-     * Get the instance to the configurator.
-     * @return A reference to the configurator.
-     */
-    static ConfiguratorApp& instance();
-
-    virtual ~ConfiguratorApp();
-
-private:
-    /* ConfigEntry = std::tuple<read-only, name, path> */
-    using ConfigEntry = std::tuple<bool, std::string, fs::Path>;
-    using ConfigVector = std::vector<ConfigEntry>;
-    using LoadedConfigMap = std::unordered_map<fs::Path, uptr_t<ConfigEditor>>;
-
-    /**
      * Initialise this configurator.
      * @exception IOError
      * @see ConfigEditor::create_default_configurations()
      */
     ConfiguratorApp();
 
+    virtual ~ConfiguratorApp();
+
+private:
     /**
      * Render the main window.
      */
@@ -137,6 +126,11 @@ private:
      * @return The configuration editor.
      */
     uptr_t<ConfigEditor>& editor_instance(const fs::Path& cfile);
+
+    /* ConfigEntry = std::tuple<read-only, name, path> */
+    using ConfigEntry = std::tuple<bool, std::string, fs::Path>;
+    using ConfigVector = std::vector<ConfigEntry>;
+    using LoadedConfigMap = std::unordered_map<fs::Path, uptr_t<ConfigEditor>>;
 
     ConfigVector        _configs{};             /* List of configurations                   */
     ssize_t             _centry{};              /* Selected configuration                   */

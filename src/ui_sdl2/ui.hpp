@@ -27,12 +27,14 @@
 #include "ui_sdl2/widget_pause.hpp"
 #include "ui_sdl2/widget_photocamera.hpp"
 #include "ui_sdl2/widget_reset.hpp"
+#include "ui_sdl2/widget_snapshot.hpp"
 #include "ui_sdl2/widget_volume.hpp"
 
 #include "ui_config.hpp"
 
-#include "keyboard.hpp"
+#include "fs.hpp"
 #include "joystick.hpp"
+#include "keyboard.hpp"
 #include "rgb.hpp"
 #include "types.hpp"
 
@@ -66,10 +68,12 @@ public:
     constexpr static const uint64_t MOUSE_INACTIVE_TIME     = 2'000'000;    /* us */
     constexpr static const uint8_t PANEL_BUTTON             = SDL_BUTTON_RIGHT;
     constexpr static const char* SCREENSHOT_PREFIX          = "caio_screenshot_";
+    constexpr static const char* SCREENSHOT_EXT             = ".png";
 
     using KeyboardPtr   = sptr_t<Keyboard>;
     using JoystickPtr   = sptr_t<Joystick>;
     using HotkeysCb     = std::function<void(keyboard::Key)>;
+    using SnapshotCb    = std::function<std::string(const fs::Path&)>;
 
     /**
      * Get the instance to the user interface.
@@ -268,6 +272,32 @@ public:
      * @see SCREENSHOT_PREFIX
      */
     void screenshot();
+
+    /**
+     * Set the load snapshot callback.
+     * @param cb Callback (called when the user wants to laod a new snapshot file).
+     */
+    void snapshot_load(const SnapshotCb& cb);
+
+    /**
+     * Set the save snapshot callback.
+     * @param cb Callback (called when the user wants to create a new snapshot file).
+     */
+    void snapshot_save(const SnapshotCb& cb);
+
+    /**
+     * Load a snapshot file.
+     * If defined, this method calls the _snapshot_load_cb() callback.
+     * @see _snapshot_load_cb(const fs::Path&)
+     */
+    void snapshot_load();
+
+    /**
+     * Save a snapshot file.
+     * If defined, this method calls the _snapshot_save_cb() callback.
+     * @see _snapshot_save_cb(const fs::Path&)
+     */
+    void snapshot_save();
 
 private:
     /**
@@ -471,13 +501,17 @@ private:
     std::atomic_bool            _running{};                 /* True if the main loop is running                 */
     uint64_t                    _mouse_active_time{};       /* Mouse inactive time until it becomes invisible   */
     bool                        _mouse_visible{true};       /* True if the mouse cursor is currently visible    */
-    std::atomic_bool            _screenshot{};              /* True if a screenshot must be taken               */
+    SnapshotCb                  _snapshot_load_cb{};        /* Load snapshot callback                           */
+    SnapshotCb                  _snapshot_save_cb{};        /* Save snapshot callback                           */
+    std::function<void()>       _dialog{};                  /* Dialog to launch (requires exit from fullscreen) */
 
     sptr_t<::SDL_Window>        _window{};                  /* Main window                                      */
     uptrd_t<::SDL_Surface>      _icon{nullptr, nullptr};    /* Main window icon                                 */
     sptr_t<::SDL_Renderer>      _renderer{};                /* Main window renderer                             */
     sptr_t<::SDL_Texture>       _screen_tex{};              /* Screen texture to render                         */
 
+    int                         _win_rate{};                /* Refresh rate in windowed mode                    */
+    int                         _render_cycle{};            /* Improve event handling with slow monitors        */
     Size2                       _win_size{};                /* Size of the main window                          */
     Size2                       _win_pos{};                 /* Position of the main window on desktop           */
     Size2                       _fs_size{};                 /* Size of the fullscreen window                    */
@@ -498,10 +532,12 @@ private:
     sptr_t<Panel>               _panel{};                   /* Info Panel                                       */
     sptr_t<widget::Fullscreen>  _wid_fullscreen{};          /* Fullscreen button panel widget                   */
     sptr_t<widget::Reset>       _wid_reset{};               /* Reset button panel widget                        */
-    sptr_t<widget::Pause>       _wid_pause{};               /* Puase button panel widget                        */
+    sptr_t<widget::Pause>       _wid_pause{};               /* Pause button panel widget                        */
     sptr_t<widget::Volume>      _wid_volume{};              /* Volume control panel widget                      */
     sptr_t<widget::Keyboard>    _wid_keyboard{};            /* Keyboard button panel widget                     */
     sptr_t<widget::PhotoCamera> _wid_photocamera{};         /* Screenshot button panel widget                   */
+    sptr_t<widget::Snapshot>    _wid_snapshot_load{};       /* Load snapshot button panel widget                */
+    sptr_t<widget::Snapshot>    _wid_snapshot_save{};       /* Save snapshot button panel widget                */
 
     AudioStream                 _audio_stream{};            /* Audio driver                                     */
 

@@ -18,6 +18,8 @@
  */
 #include "config.hpp"
 
+#include "fs.hpp"
+#include "logger.hpp"
 #include "utils.hpp"
 
 #include <cstdlib>
@@ -26,7 +28,7 @@
 namespace caio {
 namespace config {
 
-std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdline, bool search_conf)
+std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdline, bool search)
 {
     Confile def{cmdline.defaults()};
     auto [cline, pname] = cmdline.parse(argc, argv);
@@ -42,7 +44,7 @@ std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdl
         fname = it->second;
         log.debug("Configuration file: {}\n", fname);
         cfile.load(fname);
-    } else if (search_conf) {
+    } else if (search) {
         /*
          * Searh for the configuration file in standard directories.
          */
@@ -196,10 +198,10 @@ void VJoyConfig::to_section(Section& sec) const
 Config::Config(Section& sec, std::string_view prefix)
     : title{"caio"},
       romdir{sec[KEY_ROMDIR]},
+      screenshotdir{fs::fix_home(sec[KEY_SCREENSHOTDIR])},
       palette{(sec[KEY_PALETTE].empty() ? "" : resolve(sec[KEY_PALETTE], sec[KEY_PALETTEDIR], prefix, PALETTEFILE_EXT))},
       keymaps{(sec[KEY_KEYMAPS].empty() ? "" : resolve(sec[KEY_KEYMAPS], sec[KEY_KEYMAPSDIR], prefix, KEYMAPSFILE_EXT))},
       cartridge{sec[KEY_CARTRIDGE]},
-      fps{static_cast<unsigned>(std::atoi(sec[KEY_FPS].c_str()))},
       scale{static_cast<unsigned>(std::atoi(sec[KEY_SCALE].c_str()))},
       aspect{ui::to_aspect_ratio(sec[KEY_ASPECT])},
       scanlines{ui::to_sleffect(sec[KEY_SCANLINES])},
@@ -212,19 +214,25 @@ Config::Config(Section& sec, std::string_view prefix)
       loglevel{sec[KEY_LOGLEVEL]},
       keyboard{is_true(sec[KEY_KEYBOARD])},
       vjoy{sec},
-      screenshotdir{fs::fix_home(sec[KEY_SCREENSHOTDIR])},
       statusbar{sec[KEY_STATUSBAR]},
-      snapshot{sec[KEY_SNAPSHOT]}
+      snapshotdir{fs::fix_home(sec[KEY_SNAPSHOTDIR])},
+      snapshot{(sec[KEY_SNAPSHOT].empty() ?
+          "" : resolve(sec[KEY_SNAPSHOT], sec[KEY_SNAPSHOTDIR], prefix, SNAPSHOTFILE_EXT))}
 {
+    static const auto fix_dir = [](std::string& dir) {
+        if (!fs::exists(dir) || !fs::is_directory(dir)) {
+            /*
+             * Default to $HOME when the directory is invalid.
+             */
+            dir = fs::home();
+        }
+    };
+
+    fix_dir(screenshotdir);
+    fix_dir(snapshotdir);
+
     if (scale < 1) {
         scale = 1;
-    }
-
-    if (!fs::exists(screenshotdir)) {
-        /*
-         * Default to $HOME when the screenshot directory is invalid.
-         */
-        screenshotdir = fs::home();
     }
 }
 
@@ -235,7 +243,6 @@ bool Config::operator==(const Config& other) const
         palette == other.palette &&
         keymaps == other.keymaps &&
         cartridge == other.cartridge &&
-        fps == other.fps &&
         scale == other.scale &&
         aspect == other.aspect &&
         scanlines == other.scanlines &&
@@ -250,16 +257,18 @@ bool Config::operator==(const Config& other) const
         vjoy == other.vjoy &&
         screenshotdir == other.screenshotdir &&
         statusbar == other.statusbar &&
+        snapshotdir == other.snapshotdir &&
         snapshot == other.snapshot);
 }
 
 void Config::to_section(Section& sec) const
 {
     sec[KEY_ROMDIR]         = romdir;
+    sec[KEY_SCREENSHOTDIR]  = screenshotdir;
+    sec[KEY_SNAPSHOTDIR]    = snapshotdir;
     sec[KEY_PALETTE]        = palette;
     sec[KEY_KEYMAPS]        = keymaps;
     sec[KEY_CARTRIDGE]      = cartridge;
-    sec[KEY_FPS]            = std::format("{}", fps);
     sec[KEY_SCALE]          = std::format("{}", scale);
     sec[KEY_ASPECT]         = ui::to_string(aspect);
     sec[KEY_SCANLINES]      = ui::to_string(scanlines);
@@ -271,7 +280,6 @@ void Config::to_section(Section& sec) const
     sec[KEY_LOGFILE]        = logfile;
     sec[KEY_LOGLEVEL]       = loglevel;
     sec[KEY_KEYBOARD]       = (keyboard ? "yes" : "no");
-    sec[KEY_SCREENSHOTDIR]  = screenshotdir;
     sec[KEY_STATUSBAR]      = statusbar;
     sec[KEY_SNAPSHOT]       = snapshot;
 
@@ -305,11 +313,12 @@ std::string Config::to_string() const
     return std::format(
         "  Title:              \"{}\"\n"
         "  ROMs path:          \"{}\"\n"
+        "  Screenshot path:    \"{}\"\n"
+        "  Snapshot path:      \"{}\"\n"
         "  Palette:            \"{}\"\n"
         "  Keymaps:            \"{}\"\n"
         "  Cartridge:          \"{}\"\n"
         "  Snapshot:           \"{}\"\n"
-        "  FPS:                {}\n"
         "  Scale:              {}x\n"
         "  Aspect Ratio:       {}\n"
         "  Scanlines effect:   {}\n"
@@ -322,27 +331,27 @@ std::string Config::to_string() const
         "  Log level:          {}\n"
         "  Keyboard enabled:   {}\n"
         "  Virtual Joystick:   {}\n"
-        "                up:   {}\n"
-        "              down:   {}\n"
-        "              left:   {}\n"
-        "             right:   {}\n"
-        "              fire:   {}\n"
-        "                 A:   {}\n"
-        "                 B:   {}\n"
-        "                 X:   {}\n"
-        "                 Y:   {}\n"
-        "              back:   {}\n"
-        "             guide:   {}\n"
-        "             start:   {}\n"
-        "  Screenshots path:   \"{}\"\n"
+        "    up:               {}\n"
+        "    down:             {}\n"
+        "    left:             {}\n"
+        "    right:            {}\n"
+        "    fire:             {}\n"
+        "    A:                {}\n"
+        "    B:                {}\n"
+        "    X:                {}\n"
+        "    Y:                {}\n"
+        "    back:             {}\n"
+        "    guide:            {}\n"
+        "    start:            {}\n"
         "  Status bar:         \"{}\"",
         title,
         romdir,
+        screenshotdir,
+        snapshotdir,
         palette,
         keymaps,
         cartridge,
         snapshot,
-        fps,
         scale,
         ui::to_string(aspect),
         ui::to_string(scanlines),
@@ -367,7 +376,6 @@ std::string Config::to_string() const
         keyboard::to_string(vjoy.back),
         keyboard::to_string(vjoy.guide),
         keyboard::to_string(vjoy.start),
-        screenshotdir,
         statusbar);
 }
 
@@ -377,6 +385,7 @@ fs::Path storage_path()
     if (dir.empty()) {
         dir = fs::fix_home(D_HOMECONFDIR);
     }
+
     return dir;
 }
 

@@ -27,7 +27,8 @@ namespace caio {
 template<typename T>
 class LockedQueue {
 public:
-    LockedQueue() {
+    LockedQueue()
+    {
     }
 
     LockedQueue(LockedQueue&& lq)
@@ -35,9 +36,7 @@ public:
     {
     }
 
-    virtual ~LockedQueue()
-    {
-    }
+    virtual ~LockedQueue() = default;
 
     void clear()
     {

@@ -175,6 +175,20 @@ void ULAVideo::paint_display()
     }
 }
 
+Serializer& operator&(Serializer& ser, ULAVideo& video)
+{
+    ser & static_cast<Name&>(video)
+        & video._palette
+        & video._line
+        & video._cycle
+        & video._flash_counter
+        & video._flash_swap
+        & video._intreq
+        & video._border_colour.u32;
+
+    return ser;
+}
+
 }
 }
 }

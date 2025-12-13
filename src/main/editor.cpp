@@ -136,10 +136,11 @@ void ConfigEditor::render_directories(config::Config& cfg)
     auto& keymapsdir = _sec[config::KEY_KEYMAPSDIR];
     auto& palettedir = _sec[config::KEY_PALETTEDIR];
 
-    _gui.combo_directory("ROMs directory", "##romdir", cfg.romdir, _romdir);
-    _gui.combo_directory("Key Mappings directory", "##keymapsdir", keymapsdir, _keymapsdir);
-    _gui.combo_directory("Palette directory", "##palettedir", palettedir, _palettedir);
-    _gui.combo_directory("Screenshot directory", "##screenshotdir", cfg.screenshotdir, _screenshotdir);
+    _gui.combo_path("ROMs directory", "##romdir", cfg.romdir, _romdir);
+    _gui.combo_path("Key Mappings directory", "##keymapsdir", keymapsdir, _keymapsdir);
+    _gui.combo_path("Palette directory", "##palettedir", palettedir, _palettedir);
+    _gui.combo_path("Screenshot directory", "##screenshotdir", cfg.screenshotdir, _screenshotdir);
+    _gui.combo_path("Snapshot directory", "##snapshotdir", cfg.snapshotdir, _snapshotdir);
 
     if (palettedir != _palette.path()) {
         _palette.reset(palettedir);
@@ -152,16 +153,11 @@ void ConfigEditor::render_directories(config::Config& cfg)
 
 void ConfigEditor::render_appearance(config::Config& cfg)
 {
-    constexpr static const size_t FPS_WIDTH = 4;
-    constexpr static const int FPS_MAX = 100;
-    constexpr static const int FPS_MIN = 1;
     constexpr static const size_t SCALE_WIDTH = 4;
     constexpr static const int SCALE_MAX = 10;
     constexpr static const int SCALE_MIN = 1;
-    static const auto fps_cond = [](int fps) { return (fps >= FPS_MIN && fps <= FPS_MAX); };
     static const auto scale_cond = [](int scale) { return (scale >= SCALE_MIN && scale <= SCALE_MAX); };
 
-    _gui.input_int("Frames per second", "##fps", reinterpret_cast<int&>(cfg.fps), FPS_WIDTH, fps_cond);
     _gui.checkbox("Fullscreen", "##fullscreen", cfg.fullscreen);
     _gui.checkbox("Smooth window resize", "##sresize", cfg.sresize);
     _gui.input_int("Scale", "##scale", reinterpret_cast<int&>(cfg.scale), SCALE_WIDTH, scale_cond);
@@ -188,8 +184,12 @@ void ConfigEditor::render_keyboard(config::Config& cfg)
     config::VJoyConfig& vjoy = cfg.vjoy;
 
     _gui.checkbox("Enable keyboard", "##kbd-enabled", cfg.keyboard);
+    _gui.begin_disabled(!cfg.keyboard);
     _gui.combo_keymaps(cfg.keymaps, _keymaps, machine_prefix());
+    _gui.end_disabled();
+
     _gui.newline();
+
     _gui.checkbox("Enable virtual joystick", "##vjoy-enabled", vjoy.enabled);
     _gui.begin_disabled(!vjoy.enabled);
     _gui.combo_key("UP key", "##key-up", vjoy.up);
@@ -211,18 +211,23 @@ void ConfigEditor::render_specific()
 {
 }
 
+using EditorInstantiator = std::function<uptr_t<ConfigEditor>(Gui&, const fs::Path&, config::Section&&)>;
+
+template<typename EDITOR_TYPE>
+static EditorInstantiator make_editor_instantiator()
+{
+    return [](Gui& gui, const fs::Path& cfile, config::Section&& sec) -> uptr_t<ConfigEditor> {
+        return std::make_unique<EDITOR_TYPE>(gui, cfile, std::move(sec));
+    };
+}
+
 uptr_t<ConfigEditor> ConfigEditor::make_editor(Gui& gui, const fs::Path& cfile)
 {
-#define INSTANTIATOR(editor_type)                                                               \
-        [](Gui& gui, const fs::Path& cfile, config::Section&& sec) -> uptr_t<ConfigEditor> {    \
-            return std::make_unique<editor_type>(gui, cfile, std::move(sec));                   \
-    }
-
-    static const std::unordered_map<std::string, uptr_t<ConfigEditor>(*)(Gui&, const fs::Path&, config::Section&&)> editors{
-        { "c64",        INSTANTIATOR(ConfigEditorC64)          },
-        { "nes",        INSTANTIATOR(ConfigEditorNES)          },
-        { "zx80",       INSTANTIATOR(ConfigEditorZX80)         },
-        { "zxspectrum", INSTANTIATOR(ConfigEditorZXSpectrum)   }
+    static const std::unordered_map<std::string, EditorInstantiator> editors{
+        { "c64",        make_editor_instantiator<ConfigEditorC64>()         },
+        { "nes",        make_editor_instantiator<ConfigEditorNES>()         },
+        { "zx80",       make_editor_instantiator<ConfigEditorZX80>()        },
+        { "zxspectrum", make_editor_instantiator<ConfigEditorZXSpectrum>()  }
     };
 
     /*
@@ -246,7 +251,7 @@ uptr_t<ConfigEditor> ConfigEditor::make_editor(Gui& gui, const fs::Path& cfile)
 }
 
 template<typename CMDLINE_TYPE>
-void default_config(std::string_view description, std::string_view secname)
+static void default_config(std::string_view description, std::string_view secname)
 {
     auto cfname = ConfigEditor::config_path(description);
     if (!fs::exists(cfname)) {

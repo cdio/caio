@@ -32,12 +32,12 @@ namespace caio {
 /**
  * Address Space.
  * Address space is the interface used to access the memory mappings of a system,
- * that is, anything that involves the address bus and/or the data bus should
- * be handled by an object derived from this class.
+ * anything that involves the address bus and/or the data bus should be handled
+ * by an object derived from this class.
  * <br>
  * The entire range of addresses (2^(8*sizeof(addr_t))) must be divided into a
- * number of fixed size banks, each bank contains a range of addresses that must
- * be associated to (handled by) a single device.
+ * number of fixed size banks, the address range within a bank must be handled
+ * by a device.
  * <br>
  * There are two sets of address space mappings, one for reading and another for writing.
  * @see addr_t
@@ -56,7 +56,7 @@ public:
      * Device mappings type.
      * The device mappings type binds a device to a memory bank.
      * The first element is a pointer to the device and the second element
-     * is the starting address of the associated bank.
+     * is the start address of the bank within the global address space.
      *
      * The device must handle the entire set of addresses of the specified bank:
      * offset + bank_size <= device.size().
@@ -70,7 +70,7 @@ public:
 
     /**
      * Address mappings type.
-     * The address mappings type defines the device mappings for an entire address space.
+     * The address mappings type defines the device mappings for the entire address space.
      * It must not contain holes (unmapped addresses): The entire range of addresses
      * supported by the addr_t type must be mapped (2^(8*sizeof(addr_t))).
      * @see addr_t
@@ -145,8 +145,8 @@ public:
     /**
      * Set a value on the address bus.
      * The value on the address bus is the last address written to
-     * or read from the address space; this value can be overrided by calling
-     * this method.
+     * or read from the address space; this value can be overrided by
+     * calling this method.
      * @param addr Address to set.
      */
     virtual void address_bus(addr_t addr)
@@ -168,7 +168,7 @@ protected:
      * Initialise this address space.
      * @param rmaps Address mappings for read operations (it must have the same size as the write map);
      * @param wmaps Address mappings for write operations (it must have the same size as the read map);
-     * @param amask Address space mask (addresses are ANDed with this mask).
+     * @param amask Address space mask (addresses are bitwise ANDed with this mask).
      * @see reset()
      */
     ASpace(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask);
@@ -176,12 +176,12 @@ protected:
     /**
      * Reset this address space with a new set of mappings.
      * - The size of the address space is 2^(sizeof addr_t);
-     * - Both the read an write mappings must be the same size which equals the number of banks;
+     * - Both the read an write mappings must have the same size which equals the number of banks;
      * - All banks must have the same size (2^(sizeof addr_t) / banks);
      * - The size of a bank must be a power of 2.
      * @param rmaps Address mappings for read operations;
      * @param wmaps Address mappings for write operations;
-     * @param amask Address space mask (addresses are ANDed with this mask).
+     * @param amask Address space mask (addresses are bitwise ANDed with this mask).
      */
     void reset(const addrmap_t& rmaps, const addrmap_t& wmaps, addr_t amask);
 

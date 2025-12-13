@@ -38,17 +38,21 @@ namespace ui {
 namespace sdl2 {
 namespace dearimgui {
 
+/**
+ * Extremely horrible wrapper for an even more horrible gui.
+ */
 class Gui {
 public:
-    constexpr static const char* INI_SNAME              = "caio";
-    constexpr static const float FONT_SCALE             = 1.0f;
-    constexpr static const float FONT_SIZE              = 10.0f;
-    constexpr static const float BUTTON_WIDTH_OK        = 100.0f;
-    constexpr static const float BUTTON_WIDTH_CANCEL    = 100.0f;
-    constexpr static const unsigned VALUE_COLUMN        = 11;
-    constexpr static const char* ENTRY_EMPTY            = "## ";
-    constexpr static const unsigned COMBO_WIDTH         = 10;
-    constexpr static const unsigned COMBO_FILE_WIDTH    = 20;
+    constexpr static const char* INI_SNAME            = "caio";
+    constexpr static const float FONT_SCALE           = 1.0f;
+    constexpr static const float FONT_SIZE            = 10.0f;
+    constexpr static const float BUTTON_WIDTH_OK      = 100.0f;
+    constexpr static const float BUTTON_WIDTH_CANCEL  = 100.0f;
+    constexpr static const float BUTTON_WIDTH_CHOOSE  = 100.0f;
+    constexpr static const unsigned VALUE_COLUMN      = 11;
+    constexpr static const char* ENTRY_EMPTY          = "";
+    constexpr static const unsigned COMBO_WIDTH       = 10;
+    constexpr static const unsigned COMBO_FILE_WIDTH  = 30;
 
     enum class Style : int {
         Light,
@@ -76,7 +80,91 @@ public:
     using ActionCb = std::function<void()>;
     using FilterCb = fs::IDir::FilterCb;
 
-    void init(const std::string& inifile, ::SDL_Window* sdlwin, ::SDL_Renderer* sdlrend, const FontParams& fontp);
+    /**
+     * Directory/File navigator.
+     */
+    class IDirNavGui : public fs::IDirNav {
+    public:
+        constexpr static const bool APP               = true;
+        constexpr static const bool POPUP             = !APP;
+        constexpr static const bool ONLY_EXISTENT     = true;
+        constexpr static const bool ALLOW_NONEXISTENT = !ONLY_EXISTENT;
+
+        /**
+         * Instantiate this Directory Navigator GUI as a popup.
+         * Allow only selection of existent entries.
+         * @param etype  Type of entry;
+         * @param elimit Maximum number of entries to consider.
+         * @see IDir::EntryType
+         * @see IDirNav
+         */
+        IDirNavGui(EntryType etype, size_t elimit = MAX_DIRS);
+
+        /**
+         * Instantiate this Directory Navigator GUI as a popup.
+         * @param existent If true allow only selection of existent entries;
+         * @param etype    Type of entry;
+         * @param elimit   Maximum number of entries to consider.
+         * @see IDir::EntryType
+         * @see IDirNav
+         */
+        IDirNavGui(bool existent, EntryType etype, size_t elimit = MAX_DIRS);
+
+        /**
+         * Instantiate this Directory Navigator GUI.
+         * @param isapp    Application flag (true: Application; false: Popup);
+         * @param existent If true allow only selection of existent entries;
+         * @param etype    Type of entry to consider;
+         * @param elimit   Maximum number of entries to consider.
+         * @see IDir::EntryType
+         * @see IDirNav
+         */
+        IDirNavGui(bool isapp, bool existent, EntryType etype, size_t elimit = MAX_DIRS);
+
+        void position(const Size& pos)
+        {
+            _wpos = pos;
+        }
+
+        size_t size() const
+        {
+            return fs::IDirNav::size();
+        }
+
+        void size(const Size& wsize)
+        {
+            _wsize = wsize;
+        }
+
+        void render(const std::string& msg, const std::string& id, std::string& dst);
+
+        void render(const std::string& msg, const std::string& id, std::string& dst,
+            const Size& wpos, const Size& wsize, int wflags);
+
+        void show(bool visible);
+
+        bool is_visible() const
+        {
+            return _visible;
+        }
+
+        bool is_cancelled() const
+        {
+            return _cancelled;
+        }
+
+    private:
+        bool        _is_app;        /* Application vs. popup            */
+        bool        _existent;      /* Allow only existent entries      */
+        Size        _wsize;         /* Window size                      */
+        Size        _wpos;          /* Window position                  */
+        bool        _visible;       /* Window visibility flag           */
+        bool        _cancelled;     /* Operation cancelled by the user  */
+        std::string _selected;      /* Selected fullpath                */
+    };
+
+    void init(const std::string& inifile, const sptr_t<::SDL_Window>& sdlwin, const sptr_t<::SDL_Renderer>& sdlrend,
+        const FontParams& fontp);
 
     void release();
 
@@ -92,7 +180,10 @@ public:
     static void cursor_to_column(unsigned col);
     static void cursor_to_valuecol();
 
-    static void begin_window(const std::string& id, const Size& container_size);
+    static bool begin_window(const std::string& id, const Size& pos, const Size& size,
+        int wflags /* ImGuiWindowFlags_ */, bool* popen = nullptr);
+
+    static bool begin_window(const std::string& id, const Size& size);
     static void end_window();
 
     static void begin_section(const std::string& id, const Size& size = {}, int flags = 0);
@@ -117,7 +208,7 @@ public:
     static void print(const std::string& msg);
 
     template<typename... Args>
-    void print(std::format_string<Args...> fmt, Args&&... args)
+    static void print(std::format_string<Args...> fmt, Args&&... args)
     {
         print(std::vformat(fmt.get(), std::make_format_args(args...)));
     }
@@ -127,13 +218,15 @@ public:
     static bool button(const std::string& label, const ActionCb& action = {}, float width = 0.0f);
     static bool button_ok(const ActionCb& action = {});
     static bool button_cancel(const ActionCb& action = {});
+    static bool button_choose(const ActionCb& action = {});
     static std::optional<bool> buttons_ok_cancel(const ActionCb& ok = {}, const ActionCb& cancel = {});
 
     static int input(const std::string& id, std::string& dst, int flags = 0);
-    static void input_text(const std::string& msg, const std::string& id, std::string& dst);
     static void input_int(const std::string& msg, const std::string& id, int& dst, size_t width, bool(*cond)(int));
 
     static void checkbox(const std::string& msg, const std::string& id, bool& dst);
+
+    static bool message_box(const std::string& reason, const std::string& msg, const ActionCb& action = {});
 
     static void combo_select(const std::string& label, const std::string& id, const char** list, size_t size,
         std::string& dst);
@@ -143,13 +236,10 @@ public:
     static void combo_statusbar(std::string& dst);
     static void combo_key(const std::string& msg, const std::string& id, keyboard::Key& key);
 
-    static void combo_directory(const std::string& msg, const std::string& id, std::string& dst, fs::IDir& dir);
+    static void combo_path(const std::string& msg, const std::string& id, std::string& dst, IDirNavGui& idir);
 
     static void combo_file(const std::string& msg, const std::string& id, std::string& dst, fs::IDir& dir,
-        unsigned width = COMBO_FILE_WIDTH);
-
-    static void combo_file(const std::string& msg, const std::string& id, std::string& dst, fs::IDir& dir,
-        const std::string& mprefix, const std::string& ext, unsigned width = COMBO_FILE_WIDTH);
+        const std::string& mprefix, const std::string& ext, unsigned width);
 
     static void combo_palette(std::string& dst, fs::IDir& idir, const std::string& mprefix);
     static void combo_keymaps(std::string& dst, fs::IDir& idir, const std::string& mprefix);
@@ -157,26 +247,20 @@ public:
     static void keyboard_focus();
 
     void style(Style style);
+    Style style() const;
+    void toggle_style();
 
-    Style style()
-    {
-        return _style;
-    }
+    static float font_width();
+    static float font_height();
 
 private:
-    using SetterCb = std::function<void(fs::IDir&, const fs::Path&, std::string&)>;
-
-    static void combo_path(const std::string& msg, const std::string& id, std::string& dst, fs::IDir& dir,
-        const SetterCb& setter, unsigned width = COMBO_FILE_WIDTH);
-
     static void  next_font_size();
     static void  prev_font_size();
-    static float font_width();
 
-    std::string     _inifile{""};
-    ::SDL_Window*   _sdlwin{};
-    ::SDL_Renderer* _sdlrend{};
-    Style           _style{};
+    std::string             _inifile{""};
+    sptr_t<::SDL_Window>    _sdlwin{};
+    sptr_t<::SDL_Renderer>  _sdlrend{};
+    Style                   _style{};
 };
 
 }

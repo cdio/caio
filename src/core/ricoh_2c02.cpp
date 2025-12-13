@@ -427,7 +427,7 @@ size_t RP2C02::tick(const Clock& clk)
                 irq_out(true);
             }
 
-            /* PASSTHROUGH */
+            [[fallthrough]];
 
         case 0:
             /*
@@ -611,7 +611,7 @@ size_t RP2C02::tick(const Clock& clk)
                 std::copy_n(&_oam[addr], 8, &_oam[0]);
             }
 
-            /* PASSTHROUGH */
+            [[fallthrough]];
 
         case 66 ... 256:
             /*
@@ -1077,7 +1077,7 @@ void RP2C02::scroll_y_inc()
              */
             _regs.v ^= VERT_NAMETABLE;
 
-            /* FALLTROUGH */
+            [[fallthrough]];
 
         case COARSE_SCROLL_MASK:
             coarse_y = 0;

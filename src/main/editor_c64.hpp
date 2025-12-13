@@ -45,10 +45,10 @@ private:
     commodore::c64::C64Config _conf;
     commodore::c64::C64Config _conf_orig;
 
-    fs::IDirNav _unit8{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
-    fs::IDirNav _unit9{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
-    fs::IDirNav _cartridge{fs::IDir::EntryType::All, Gui::ENTRY_EMPTY};
-    fs::IDirNav _program{fs::IDir::EntryType::All, Gui::ENTRY_EMPTY};
+    Gui::IDirNavGui _unit8{Gui::IDirNavGui::EntryType::Dir};
+    Gui::IDirNavGui _unit9{Gui::IDirNavGui::EntryType::Dir};
+    Gui::IDirNavGui _cartridge{Gui::IDirNavGui::EntryType::All};
+    Gui::IDirNavGui _program{Gui::IDirNavGui::EntryType::All};
 };
 
 }

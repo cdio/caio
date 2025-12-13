@@ -42,6 +42,15 @@ std::string ULA::to_string() const
     return _audio->to_string() + "\n  " + _video->to_string();
 }
 
+Serializer& operator&(Serializer& ser, ULA& ula)
+{
+    ser & ula._audio
+        & ula._video
+        & ula._aspace;
+
+    return ser;
+}
+
 }
 }
 }

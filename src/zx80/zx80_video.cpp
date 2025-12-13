@@ -160,6 +160,21 @@ inline int ZX80Video::disturbance(float A, float& t)
     return value;
 }
 
+Serializer& operator&(Serializer& ser, ZX80Video& video)
+{
+    ser & static_cast<Name&>(video)
+        & video._rvideo
+        & video._palette
+        & video._line
+        & video._column
+        & video._vsync_count
+        & video._lineoff
+        & video._A
+        & video._t;
+
+    return ser;
+}
+
 }
 }
 }

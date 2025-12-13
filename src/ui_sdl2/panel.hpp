@@ -47,6 +47,7 @@ public:
     constexpr static float HEIGHT_RATIO             = WIDTH_RATIO / 4.0f;
     constexpr static const float THICKNESS_RATIO    = WIDTH_RATIO / 30.0f;
     constexpr static const int WIDGET_MAGNIFICATION = 5;
+    constexpr static const int WIDGET_MINSIZE       = 64;
 
     /*
      * Status bar.

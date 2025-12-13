@@ -67,7 +67,7 @@ bool ZX80Cassette::read()
         _rx_time = now;
         ZX80_CASS_DEBUG("ZX80 Cassette: read: Sync -> Data\n");
 
-        /* PASSTHROUGH */
+        [[fallthrough]];
 
     case State::Data:
         if (_rx_count == 0) {

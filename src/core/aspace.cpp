@@ -124,7 +124,7 @@ std::ostream& ASpace::dump(std::ostream& os) const
     return os;
 }
 
-Serializer& operator&(Serializer& ser, ASpace &mmap)
+Serializer& operator&(Serializer& ser, ASpace& mmap)
 {
     ser & static_cast<Name&>(mmap)
         & mmap._amask

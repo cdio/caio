@@ -46,6 +46,10 @@ CMAKE_FLAGS+=	-DBUILD_SHARED_LIBS=NO \
 		-DSDL2IMAGE_XPM=NO \
 		-DSDL2IMAGE_XV=NO
 
+# XXX Move to SDL3
+CMAKE_C_FLAGS=	-Wno-deprecated-declarations
+CMAKE_FLAGS+=	-DCMAKE_C_FLAGS="${CMAKE_C_FLAGS}"
+
 DISTCLEANFILES=	${BUILDIR}
 
 .PHONY: all debug clean distclean install

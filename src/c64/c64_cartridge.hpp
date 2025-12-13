@@ -156,13 +156,13 @@ protected:
 
     void throw_invalid_cartridge(ssize_t entry, std::string_view errmsg);
 
-    template <typename... Args>
+    template<typename... Args>
     void throw_invalid_cartridge(std::format_string<Args...> fmt, Args&&... args)
     {
         throw_invalid_cartridge(-1, std::vformat(fmt.get(), std::make_format_args(args...)));
     }
 
-    template <typename... Args>
+    template<typename... Args>
     void throw_invalid_cartridge(ssize_t entry, std::format_string<Args...> fmt, Args&&... args)
     {
         throw_invalid_cartridge(entry, std::vformat(fmt.get(), std::make_format_args(args...)));

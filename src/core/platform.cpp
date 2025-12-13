@@ -48,15 +48,18 @@ void Platform::create(const fs::Path& fname)
 
     const auto& conf = config();
     const auto& snapshot = conf.snapshot;
+
     if (!snapshot.empty()) {
-        /*
-         * Load a snapshot file.
-         */
-        try {
-            auto ser = Serializer::create_deserializer(snapshot);
-            serdes(ser);
-        } catch (const std::exception& err) {
-            throw IOError{"Can't load snapshot file: {}: {}", snapshot, err.what()};
+        if (!load_external_snapshot()) {
+            /*
+             * Load a snapshot file.
+             */
+            try {
+                auto ser = Serializer::create_deserializer(snapshot);
+                serdes(ser);
+            } catch (const std::exception& err) {
+                throw IOError{"Can't load snapshot file: {}: {}", snapshot, err.what()};
+            }
         }
     }
 
@@ -150,7 +153,7 @@ void Platform::connect_ui()
      * Connect Pause and Reset widgets.
      */
     const auto do_pause = [this](bool suspend) {
-        clock().toggle_pause();
+        clock().pause(suspend);
         log.debug("System {}paused\n", (clock().paused() ? "" : "un"));
     };
 
@@ -173,6 +176,48 @@ void Platform::connect_ui()
     };
 
     _ui->hotkeys(hotkeys);
+
+    /*
+     * Connect the "save snapshot" and "load snapshot" callbacks.
+     */
+    static const auto do_serdes = [](Platform* self, Serializer& ser) -> std::string {
+        try {
+            auto& clk = self->clock();
+            const auto is_paused = clk.paused();
+            clk.pause_wait();
+            self->serdes(ser);
+            clk.pause(is_paused);
+        } catch (const std::exception& err) {
+            return err.what();
+        }
+
+        return "";
+    };
+
+    const auto do_serialize = [this](const fs::Path& fname) -> std::string {
+        try {
+            auto ser = Serializer::create_serializer(fname);
+            do_serdes(this, ser);
+        } catch (const std::exception& err) {
+            return err.what();
+        }
+
+        return "";
+    };
+
+    const auto do_deserialize = [this](const fs::Path& fname) -> std::string {
+        try {
+            auto ser = Serializer::create_deserializer(fname);
+            do_serdes(this, ser);
+        } catch (const std::exception& err) {
+            return err.what();
+        }
+
+        return "";
+    };
+
+    _ui->snapshot_save(do_serialize);
+    _ui->snapshot_load(do_deserialize);
 }
 
 void Platform::hotkeys(keyboard::Key key)
@@ -194,6 +239,11 @@ bool Platform::is_snapshot(const fs::Path& fname) const
         }
     }
 
+    return false;
+}
+
+bool Platform::load_external_snapshot()
+{
     return false;
 }
 

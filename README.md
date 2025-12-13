@@ -1,10 +1,8 @@
 # caio - 8-bit home computers emulator
 
-caio is an emulator of hardware platforms with a strong focus on old 8-bit
-home computers.
-
-At the moment the following platforms are emulated:
-
+caio is an emulator of hardware platforms with a strong focus on 8-bit
+home computers and consoles.<br>
+The following platforms are emulated:
 - Commodore 64
 - NES (Nintendo Entertainment System)
 - Sinclair ZX-80
@@ -13,12 +11,14 @@ At the moment the following platforms are emulated:
 
 ### Commodore 64
 
-The emulation of the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
-reached beta status. Most of the tested programs work (there are still some
-issues with few advanced games that use specific video/timing tricks).<br>
-It supports audio, joystick interfaces, the cartridge CRT format, and the
-C1541 disk drive unit (read and write), the D64 file format is not supported
-yet.
+The emulator of the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
+supports audio, video, joystick interfaces, the cartridge CRT format, and the
+C1541 disk drive unit (read and write); the D64 file format is not supported
+(yet).
+
+This emulator concentrates in pre-1994 games and applications and it might
+not work as expected with advanced games that exploit specific video/timing
+"tricks" discovered/developed after 1994.
 
 ![c64-basic](images/c64-basic.gif "C64 - Basic")
 ![c64-q-bert](images/c64-q-bert.gif "C64 - Q*Bert")
@@ -28,13 +28,17 @@ yet.
 
 ### NES (Nintendo Entertainment System)
 
-The emulation of the [NES](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
-platform is completed but not all the cartridge
-[mappers](https://www.nesdev.org/wiki/Mapper) are implemented, yet.
-The [Family BASIC keyboard](https://en.wikipedia.org/wiki/Family_BASIC)
-is supported.<br>
-Only the NTSC version of this machine is supported so games for the USA and
+The emulator of the [NES](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
+platform supports the NTSC version of this machine so games for the USA and
 Japan markets should run without any problems.
+The [Family BASIC keyboard](https://en.wikipedia.org/wiki/Family_BASIC)
+is also supported.<br>
+Implemented [mappers](https://www.nesdev.org/wiki/Mapper) (Cartridge types):
+- [Mapper 000 / NROM](https://www.nesdev.org/wiki/NROM)
+- [Mapper 001 / MMC1](https://www.nesdev.org/wiki/MMC1)
+- [Mapper 002 / UxROM](https://www.nesdev.org/wiki/UxROM)
+
+Other mappers are on the way.
 
 ![nes-mario](images/nes-mario.gif "NES - Super Mario Bros.")
 ![nes-contra](images/nes-contra.gif "NES - Contra")
@@ -51,29 +55,25 @@ caio supports the original configuration, the 16K RAM extension and
 the 8K ROM.<br>
 Tape files .O and .P are supported (read and write).
 
-![zx80-4K-space-invaders](images/zx80-4K-space-invaders.gif "ZX80 - Space Invaders")
 ![zx80-4K-breakout](images/zx80-4K-breakout.gif "ZX80 - Breakout")
-![zx80-8K-pacman](images/zx80-8K-pacman.gif "ZX80 - Pacman")
 ![zx80-8K-kong](images/zx80-8K-kong.gif "ZX80 - Kong")
 
 
 ### Sinclair ZX-Spectrum 48K
 
-The emulation of the
-[Sinclair ZX-Spectrum 48K](https://en.wikipedia.org/wiki/ZX_Spectrum)
-reached beta status. Only the 48K version of this machine is emulated.<br>
-caio supports the integrated 1 bit audio, the Kempston joystick interface,
-the cassette TAP file format (read and write) and snapshot files Z80 and SNA.
+The emulator of the [Sinclair ZX-Spectrum](https://en.wikipedia.org/wiki/ZX_Spectrum)
+supports the 48K version of this machine including the integrated 1 bit audio,
+the Kempston joystick interface, the cassette TAP file format (read and write)
+and snapshot files Z80 and SNA.
 
 ![zxspectrum-48K-extreme](images/zxspectrum-48k-extreme.gif "ZX-Spectrum 48K - Extreme")
-![zxspectrum-48K-jetset-willy](images/zxspectrum-48k-jetset-willy.gif "ZX-Spectrum 48K - JetSet Willy")
-![zxspectrum-48K-olli-n-lissa](images/zxspectrum-48k-olli_n_lissa.gif "ZX-Spectrum 48K - Olli & Lissa - The Ghost of Shilmoore Castle")
 ![zxspectrum-48K-starquake](images/zxspectrum-48k-starquake.gif "ZX-Spectrum 48K - Starquake")
 
 
 ## Host platforms
 
-At the moment the supported host platforms are Linux and macOS.<br>
+The supported host platforms are Linux and macOS.<br>
+Porting caio to any of the BSD Operating Systems should be smooth.
 
 
 ## Compile & Install

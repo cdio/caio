@@ -156,17 +156,18 @@ protected:
      */
     virtual std::string machine_prefix() = 0;
 
-    Gui             _gui;           /* Widgets tookit                   */
+    Gui             _gui;           /* Widget tookit                    */
     fs::Path        _cfile;         /* Configuration file name          */
     config::Section _sec;           /* Configuration section            */
     config::Section _sec_orig;      /* Original configuration section   */
 
-    fs::IDirNav     _romdir{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
-    fs::IDirNav     _keymapsdir{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
-    fs::IDirNav     _palettedir{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
-    fs::IDirNav     _screenshotdir{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
-    fs::IDir        _palette{fs::IDir::EntryType::File, Gui::ENTRY_EMPTY};
-    fs::IDir        _keymaps{fs::IDir::EntryType::File, Gui::ENTRY_EMPTY};
+    Gui::IDirNavGui _romdir{Gui::IDirNavGui::EntryType::Dir};
+    Gui::IDirNavGui _keymapsdir{Gui::IDirNavGui::EntryType::Dir};
+    Gui::IDirNavGui _palettedir{Gui::IDirNavGui::EntryType::Dir};
+    Gui::IDirNavGui _screenshotdir{Gui::IDirNavGui::EntryType::Dir};
+    Gui::IDirNavGui _snapshotdir{Gui::IDirNavGui::EntryType::Dir};
+    Gui::IDirNavGui _palette{Gui::IDirNavGui::EntryType::File};
+    Gui::IDirNavGui _keymaps{Gui::IDirNavGui::EntryType::File};
 };
 
 }

@@ -830,6 +830,7 @@ private:
     static const Instruction ix_instr_set[256];
     static const Instruction iy_instr_set[256];
     static const Instruction ix_bit_instr_set[256];
+    static const Instruction* instr_tables[6];
 
     const Instruction*  _instr_set{main_instr_set};     /* Current instruction set lookup table */
     Prefix              _iprefix{Prefix::None};         /* Instruction prefix                   */
@@ -1262,6 +1263,8 @@ private:
     static int i_mi_cmp     (Z80& self, uint8_t op, addr_t arg);
     static int i_mi_in      (Z80& self, uint8_t op, addr_t arg);
     static int i_mi_out     (Z80& self, uint8_t op, addr_t arg);
+
+    friend Serializer& operator&(Serializer&, Z80&);
 };
 
 }

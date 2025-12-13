@@ -38,8 +38,13 @@ CXXSRCS=	configurator.cpp \
 		editor_nes.cpp \
 		editor_zx80.cpp \
 		editor_zxsp.cpp \
+		file_dialog.cpp \
+		message_dialog.cpp \
 		guiapp.cpp \
-		main.cpp
+		main.cpp \
+		main_dialog.cpp \
+		main_emulator.cpp \
+		main_gui.cpp \
 
 INCS=		configurator.hpp \
 		editor.hpp \
@@ -47,6 +52,8 @@ INCS=		configurator.hpp \
 		editor_nes.hpp \
 		editor_zx80.hpp \
 		editor_zxsp.hpp \
+		file_dialog.hpp \
+		message_dialog.hpp \
 		guiapp.hpp \
 		gui.hpp
 
@@ -66,7 +73,6 @@ EXTRA_LIBS+=	${ROOT}/src/c64/libcaio_c64.a \
 # Widget Toolkit
 CXXSRCS+=	dearimgui.cpp
 INCS+=		dearimgui.hpp
-CPPFLAGS+=	-I${ROOT}/3rdparty/imgui
 EXTRA_LIBS+=	${ROOT}/3rdparty/imgui/libimgui/libimgui.a
 
 LDADD+=		${EXTRA_LIBS}

@@ -47,6 +47,9 @@ public:
     {
     }
 
+    /**
+     * Move constructor.
+     */
     DispatcherT(DispatcherT&& other)
     {
         operator=(std::move(other));

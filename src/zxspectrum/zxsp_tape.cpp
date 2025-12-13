@@ -178,7 +178,7 @@ bool Tape::read()
         _rx.state = RXState::Pulse;
         ZXSPECTRUM_TAPE_DEBUG("Tape: read: Init -> Pulse\n");
 
-        /* PASSTHROUGH */
+        [[fallthrough]];
 
     case RXState::Pulse:
         /*
@@ -194,7 +194,7 @@ bool Tape::read()
         _rx.pulse = *_rx.pulseit++;
         ZXSPECTRUM_TAPE_DEBUG("Tape: read: New block: Pulse -> Pulsing\n");
 
-        /* PASSTHROUGH */
+        [[fallthrough]];
 
     case RXState::Pulsing:
         while (now >= std::get<uint64_t>(_rx.pulse)) {
@@ -234,7 +234,7 @@ void Tape::write(bool pulse)
         case TXState::Bit_1:
             _tx.byte |= _tx.bit;
 
-            /* PASSTHROUGH */
+            [[fallthrough]];
 
         case TXState::Bit_0:
             _tx.bit >>= 1;

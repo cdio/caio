@@ -53,6 +53,11 @@ public:
 
 private:
     /**
+     * @see Platform::detect_format(const fs::Path&)
+     */
+    bool detect_format(const fs::Path& fname) override;
+
+    /**
      * @see Platform::init_monitor(int, int)
      */
     void init_monitor(int ifd, int ofd) override;
@@ -131,16 +136,18 @@ private:
     fs::Path rompath(const fs::Path& fname) const;
 
     /**
-     * Load a snapshot file.
+     * Load a SNA or Z80 snapshot file.
      * If a snapshot is specified in the configuration, load it.
-     * @exception IOError if the specified file cannot be loaded.
+     * @return true on success; false if the snapshot file is
+     * not SNA or Z80.
+     * @see Platform::load_external_snapshot()
      */
-    void attach_prg();
+    bool load_external_snapshot() override;
 
     /**
      * @see Platform::serdes(Serializer&)
      */
-    void serdes(Serializer& ser) override { /* TODO XXX */ };
+    void serdes(Serializer& ser) override;
 
     ZXSpectrumConfig            _conf;
     std::string                 _title{};
@@ -152,6 +159,8 @@ private:
     sptr_t<ZXSpectrumKeyboard>  _kbd{};
     sptr_t<ZXSpectrumTape>      _tape{};
     sptr_t<Joystick>            _joy{};
+
+    friend Serializer& operator&(Serializer&, ZXSpectrum&);
 };
 
 }

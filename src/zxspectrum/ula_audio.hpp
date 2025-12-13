@@ -89,11 +89,12 @@ private:
     void clear();
 
     size_t                           _samples_cycles;
-    int16_t                          _samples_buffer[SAMPLES];
-    samples_i16                      _samples{ _samples_buffer, std::size(_samples_buffer) };
+    std::array<int16_t, SAMPLES>     _samples{};
     size_t                           _pos{};
     float                            _beep{};
     std::function<ui::AudioBuffer()> _audio_buffer{};
+
+    friend Serializer& operator&(Serializer&, ULAAudio&);
 };
 
 }

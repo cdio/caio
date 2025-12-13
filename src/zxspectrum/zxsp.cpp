@@ -34,6 +34,22 @@ ZXSpectrum::ZXSpectrum(config::Section& sec)
 {
 }
 
+bool ZXSpectrum::detect_format(const fs::Path& fname)
+{
+    if (!fname.empty()) {
+        if (Platform::detect_format(fname)) {
+            return true;
+        }
+
+        if (SnapSNA::seems_like(fname) || SnapZ80::seems_like(fname)) {
+            _conf.snapshot = fname;
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void ZXSpectrum::init_monitor(int ifd, int ofd)
 {
     _cpu->init_monitor(ifd, ofd, {}, {});
@@ -48,7 +64,7 @@ void ZXSpectrum::reset_devices()
     _tape->rewind();
 
     _cpu->reset();
-    attach_prg();
+    load_external_snapshot();
 }
 
 std::string ZXSpectrum::to_string_devices() const
@@ -182,7 +198,24 @@ void ZXSpectrum::hotkeys(keyboard::Key key)
 
 ui::Config ZXSpectrum::ui_config()
 {
+    std::string session = LABEL;
+
+    if (!_conf.snapshot.empty()) {
+        const auto& basename = fs::basename(_conf.snapshot);
+        session = (basename.extension().empty() ? basename : basename.stem());
+
+    } else if (!_conf.itape.empty()) {
+        const auto& basename = fs::basename(_conf.itape);
+        session = (basename.extension().empty() ? basename : basename.stem());
+
+    } else if (!_conf.otape.empty()) {
+        const auto& basename = fs::basename(_conf.otape);
+        session = (basename.extension().empty() ? basename : basename.stem());
+    }
+
     const ui::Config uiconf {
+        .name               = session,
+        .snapshotdir        = _conf.snapshotdir,
         .audio = {
             .enabled        = _conf.audio,
             .srate          = ULAAudio::SAMPLING_RATE,
@@ -193,14 +226,13 @@ ui::Config ZXSpectrum::ui_config()
             .title          = _title,
             .width          = ULAVideo::WIDTH,
             .height         = ULAVideo::HEIGHT,
-            .fps            = _conf.fps,
             .scale          = _conf.scale,
             .aspect         = _conf.aspect,
             .sleffect       = _conf.scanlines,
             .fullscreen     = _conf.fullscreen,
             .sresize        = _conf.sresize,
-            .screenshotdir  = _conf.screenshotdir,
-            .statusbar      = _conf.statusbar
+            .statusbar      = _conf.statusbar,
+            .screenshotdir  = _conf.screenshotdir
         }
     };
 
@@ -229,29 +261,49 @@ fs::Path ZXSpectrum::rompath(const fs::Path& fname) const
     return path;
 }
 
-void ZXSpectrum::attach_prg()
+bool ZXSpectrum::load_external_snapshot()
 {
-    if (!_conf.snapshot.empty()) {
-        const auto fname{fs::search(_conf.snapshot, {"./"})};
-        if (fname.empty()) {
-            throw IOError{"Can't load snapshot: {}: {}", _conf.snapshot, Error::to_string()};
-        }
-
-        uptr_t<Snapshot> snap{};
-
-        if (SnapSNA::seems_like(fname)) {
-            snap = std::make_unique<SnapSNA>(fname);
-        } else if (SnapZ80::seems_like(fname)) {
-            snap = std::make_unique<SnapZ80>(fname);
-        } else {
-            throw IOError{"Unrecognised snapshot format: {}", _conf.snapshot};
-        }
-
-        reset(*snap);
-
-        _title = std::format("{} - {}", _conf.title, fs::basename(fname).string());
+    if (_conf.snapshot.empty()) {
+        return false;
     }
+
+    const auto fname{fs::search(_conf.snapshot, {"./"})};
+    if (fname.empty()) {
+        return false;
+    }
+
+    uptr_t<Snapshot> snap{};
+
+    if (SnapSNA::seems_like(fname)) {
+        snap = std::make_unique<SnapSNA>(fname);
+    } else if (SnapZ80::seems_like(fname)) {
+        snap = std::make_unique<SnapZ80>(fname);
+    } else {
+        log.debug("Unrecognised snapshot format: {}", _conf.snapshot);
+        return false;
+    }
+
+    reset(*snap);
+    _title = std::format("{} - {}", _conf.title, fs::basename(fname).string());
+    return true;
 }
+
+void ZXSpectrum::serdes(Serializer& ser)
+{
+    ser & *this;
+}
+
+Serializer& operator&(Serializer& ser, ZXSpectrum& zxsp)
+{
+    ser & static_cast<Platform&>(zxsp)
+        & zxsp._ram
+        & zxsp._rom
+        & zxsp._ula
+        & zxsp._cpu;
+
+    return ser;
+}
+
 
 }
 }

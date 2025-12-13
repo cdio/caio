@@ -127,6 +127,8 @@ private:
     bool                    _intpin{};      /* Status of /INT pin               */
     bool                    _intreq{};      /* Interrupt request flag           */
     bool                    _vsync{};       /* VSync flag                       */
+
+    friend Serializer& operator&(Serializer&, ZX80ASpace&);
 };
 
 }

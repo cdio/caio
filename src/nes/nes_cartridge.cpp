@@ -23,7 +23,6 @@
 #include "mapper_000.hpp"
 #include "mapper_001.hpp"
 #include "mapper_002.hpp"
-#include "mapper_003.hpp"
 
 namespace caio {
 namespace nintendo {
@@ -349,8 +348,6 @@ sptr_t<Cartridge> Cartridge::instance(const fs::Path& fname)
         return std::make_shared<Mapper_001>(fullpath, hdr, is);
     case 2:   /* UxROM */
         return std::make_shared<Mapper_002>(fullpath, hdr, is);
-    case 3:   /* CNROM */
-        return std::make_shared<Mapper_003>(fullpath, hdr, is);
     default:;
     }
 

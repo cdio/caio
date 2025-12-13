@@ -25,6 +25,7 @@
 #include "ui_config.hpp"
 
 #include <functional>
+#include <map>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -62,6 +63,10 @@
 #define D_SCREENSHOTDIR     "~/Desktop"
 #endif
 
+#ifndef D_SNAPSHOTDIR
+#define D_SNAPSHOTDIR       D_HOMECONFDIR "/snapshots"
+#endif
+
 namespace caio {
 namespace config {
 
@@ -71,9 +76,11 @@ constexpr static const char* ROMDIR                 = D_ROMDIR;
 constexpr static const char* PALETTEDIR             = D_PALETTEDIR;
 constexpr static const char* KEYMAPSDIR             = D_KEYMAPSDIR;
 constexpr static const char* SCREENSHOTDIR          = D_SCREENSHOTDIR;
+constexpr static const char* SNAPSHOTDIR            = D_SNAPSHOTDIR;
 
 constexpr static const char* PALETTEFILE_EXT        = ".plt";
 constexpr static const char* KEYMAPSFILE_EXT        = ".kbd";
+constexpr static const char* SNAPSHOTFILE_EXT       = ".snp";
 
 constexpr static const char* CONFIG_FILE            = "caio.conf";
 constexpr static const char* KEY_CONFIG_FILE        = "conf";
@@ -86,10 +93,11 @@ constexpr static const char* SEC_GENERIC            = "generic";
 constexpr static const char* KEY_ROMDIR             = "romdir";
 constexpr static const char* KEY_PALETTEDIR         = "palettedir";
 constexpr static const char* KEY_KEYMAPSDIR         = "keymapsdir";
+constexpr static const char* KEY_SCREENSHOTDIR      = "screenshotdir";
+constexpr static const char* KEY_SNAPSHOTDIR        = "snapshotdir";
 constexpr static const char* KEY_PALETTE            = "palette";
 constexpr static const char* KEY_KEYMAPS            = "keymaps";
 constexpr static const char* KEY_CARTRIDGE          = "cart";
-constexpr static const char* KEY_FPS                = "fps";
 constexpr static const char* KEY_SCALE              = "scale";
 constexpr static const char* KEY_ASPECT             = "aspect";
 constexpr static const char* KEY_SCANLINES          = "scanlines";
@@ -114,17 +122,17 @@ constexpr static const char* KEY_VJOY_Y             = "vjoy-y";
 constexpr static const char* KEY_VJOY_BACK          = "vjoy-back";
 constexpr static const char* KEY_VJOY_GUIDE         = "vjoy-guide";
 constexpr static const char* KEY_VJOY_START         = "vjoy-start";
-constexpr static const char* KEY_SCREENSHOTDIR      = "screenshotdir";
 constexpr static const char* KEY_STATUSBAR          = "statusbar";
 constexpr static const char* KEY_SNAPSHOT           = "snap";
 
 constexpr static const char* DEFAULT_ROMDIR         = ROMDIR;
 constexpr static const char* DEFAULT_PALETTEDIR     = PALETTEDIR;
 constexpr static const char* DEFAULT_KEYMAPSDIR     = KEYMAPSDIR;
+constexpr static const char* DEFAULT_SCREENSHOTDIR  = SCREENSHOTDIR;
+constexpr static const char* DEFAULT_SNAPSHOTDIR    = SNAPSHOTDIR;
 constexpr static const char* DEFAULT_PALETTE        = "";
 constexpr static const char* DEFAULT_KEYMAPS        = "";
 constexpr static const char* DEFAULT_CARTRIDGE      = "";
-constexpr static const char* DEFAULT_FPS            = "50";
 constexpr static const char* DEFAULT_SCALE          = "1";
 constexpr static const char* DEFAULT_ASPECT         = "system";
 constexpr static const char* DEFAULT_SCANLINES      = "n";
@@ -149,20 +157,19 @@ constexpr static const char* DEFAULT_VJOY_Y         = "";
 constexpr static const char* DEFAULT_VJOY_BACK      = "";
 constexpr static const char* DEFAULT_VJOY_GUIDE     = "";
 constexpr static const char* DEFAULT_VJOY_START     = "";
-constexpr static const char* DEFAULT_SCREENSHOTDIR  = SCREENSHOTDIR;
-constexpr static const char* DEFAULT_STATUSBAR      = "south";
 constexpr static const char* DEFAULT_SNAPSHOT       = "";
+constexpr static const char* DEFAULT_STATUSBAR      = "south";
 
 /**
- * Configuration file section.
- * A section contains key-value pairs.
+ * Configuration section.
+ * A section contains configutation key-value pairs.
  */
-using Section = std::unordered_map<std::string, std::string>;
+using Section = std::map<std::string, std::string>;
 
 /**
  * Configuration file.
- * A Configuration file is conformed by one or more sections.
- * Section names are case insensitive. Key names are case sensitive.
+ * A Configuration file consists of one or more sections.
+ * Section names are case insensitive; key names are case sensitive.
  * File format:
  * <pre>
  *      [section_name_1]
@@ -180,7 +187,7 @@ class Confile {
 public:
     /**
      * Initialise this configuration file.
-     * @param fname Name of the configuration file to read or an empty string.
+     * @param fname Name of the configuration file.
      * @exception ConfigError
      * @exception IOError
      * @see load(const fs::Path&)
@@ -191,24 +198,24 @@ public:
 
     /**
      * Load a configuration file.
-     * This configuration is merged with the new data (existing sections are extended
-     * with new values and existing values are replaced with new ones).
-     * @param fname Name of the configuration file to load or an empty string.
+     * This configuration is merged with the new data (existing sections are
+     * extended with new values and existing values are replaced with new ones).
+     * @param fname Name of the configuration file.
      * @exception ConfigError
      * @exception IOError
      */
     void load(const fs::Path& fname);
 
     /**
-     * Return a configuration section.
+     * Get a configuration section.
      * If the specified section does not exit an empty one is created.
      * @param sname Name of the section (case insensitive).
-     * @return The requested section.
+     * @return A reference to the specified section.
      */
     Section& operator[](std::string_view sname);
 
     /**
-     * Extract a section.
+     * Extract a section from this configuration file.
      * @param sname Name of the section to extract (case insensitive).
      * @return The extracted section or an empty one if it does not exist.
      */
@@ -223,7 +230,7 @@ public:
     std::unordered_map<std::string, Section>::const_iterator find(std::string_view sname) const;
 
     /**
-     * Return an iterator following the last section of this configuration file.
+     * Get an iterator following the last section of this configuration file.
      * @return An iterator following the last section.
      */
     std::unordered_map<std::string, Section>::const_iterator end() const;
@@ -233,12 +240,13 @@ private:
 };
 
 /**
- * Command line option argument specification.
+ * Command line option argument requirements.
+ * @see Option
  */
 enum class Arg {
-    None,
-    Required,
-    Optional
+    None,           /**< No argument.           */
+    Required,       /**< Argument is mandatory. */
+    Optional        /**< Argument is optional.  */
 };
 
 /**
@@ -247,12 +255,12 @@ enum class Arg {
 struct Option {
     using SetCb = std::function<bool(class Confile&, const Option&, std::string_view)>;
 
-    std::string name{};     /**< Command line option without the "--" prefix.               */
+    std::string name{};     /**< Command line option (without the "--" prefix).             */
     std::string sname{};    /**< Section name.                                              */
     std::string key{};      /**< Key name.                                                  */
     std::string dvalue{};   /**< Default value.                                             */
-    Arg         type{};     /**< Argument requisites.                                       */
-    SetCb       fn{};       /**< Value setter.                                              */
+    Arg         type{};     /**< Argument requirements.                                     */
+    SetCb       fn{};       /**< Argument value setter.                                     */
     std::string optval{};   /**< Value to set when an optional argument is not provided.    */
 };
 
@@ -341,14 +349,14 @@ private:
  *   1. Command line options
  *   2. Configuration file values
  *   3. Default values
- * @param argc        argc as received by main();
- * @param argv        argv as received by main();
- * @param cmdline     Command line parser;
- * @param search_conf If the configuration file is not defined search it in standard directories (default is true)
+ * @param argc      argc as received by main();
+ * @param argv      argv as received by main();
+ * @param cmdline   Command line parser;
+ * @param search    If the configuration file is not defined search it in standard directories (default is true)
  * @return A pair containing: A section with all the configuration values,
  * and a string containing the name of a program to launch (can be empty).
  */
-std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdline, bool search_conf = true);
+std::pair<Section, std::string> parse(int argc, const char** argv, Cmdline& cmdline, bool search = true);
 
 /**
  * Save a configuration section to file.
@@ -398,10 +406,10 @@ struct Config {
 
     std::string title{};
     std::string romdir{};
+    std::string screenshotdir{};
     std::string palette{};
     std::string keymaps{};
     std::string cartridge{};
-    unsigned    fps{};
     unsigned    scale{};
     AspectRatio aspect{};
     SLEffect    scanlines{};
@@ -414,8 +422,8 @@ struct Config {
     std::string loglevel{};
     bool        keyboard{};
     VJoyConfig  vjoy{};
-    std::string screenshotdir{};
     std::string statusbar{};
+    std::string snapshotdir{};
     std::string snapshot{};
 
     /**

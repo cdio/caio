@@ -82,6 +82,7 @@ std::string to_string(SLEffect effect)
 
     case SLEffect::None:;
     }
+
     return "n";
 }
 

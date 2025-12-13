@@ -27,6 +27,7 @@ extern sptr_t<class DeviceNone> device_none;
 /**
  * The device none does nothing.
  * A read operation returns a user defined default value.
+ * FIXME rename this class to DeviceConstant
  */
 class DeviceNone : public Device {
 public:
@@ -60,8 +61,8 @@ public:
     }
 
     /**
-     * This method does nothing.
-     * @return The default value.
+     * Read the stored value.
+     * @return The stored value.
      * @see Device::dev_read(size_t, ReadMode)
      */
     uint8_t dev_read(size_t, ReadMode) override
@@ -81,6 +82,7 @@ public:
      * This method does nothing.
      * @param os Output stream.
      * @return The output stream.
+     * FIXME this method should dump a constant buffer of size
      */
     std::ostream& dump(std::ostream& os, size_t = 0) const override
     {

@@ -315,7 +315,8 @@ fp_t Envelope::tick()
             _t = 0.0;
             _A = 1.0;
             _cycle = CYCLE_DECAY;
-            /* PASSTHROUGH */
+
+            [[fallthrough]];
 
         case CYCLE_DECAY:
             if (_t < _decay_time) {
@@ -328,7 +329,8 @@ fp_t Envelope::tick()
             _t = 0.0;
             _A = _sustain;
             _cycle = CYCLE_SUSTAIN;
-            /* PASSTHROUGH */
+
+            [[fallthrough]];
 
         case CYCLE_SUSTAIN:
             break;
@@ -346,7 +348,8 @@ fp_t Envelope::tick()
             _t = 0.0;
             _release_A = _A;
             _cycle = CYCLE_RELEASE;
-            /* PASSTHROUGH */
+
+            [[fallthrough]];
 
         case CYCLE_RELEASE:
             if (_t < _release_time) {
@@ -357,7 +360,8 @@ fp_t Envelope::tick()
             _t = 0.0;
             _A = 0.0;
             _cycle = CYCLE_NONE;
-            /* PASSTHROUGH */
+
+            [[fallthrough]];
 
         case CYCLE_NONE:
             break;

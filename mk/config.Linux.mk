@@ -40,3 +40,4 @@ UI_LDADD+=		${ROOT}/3rdparty/sdl2/sdl_image/SDL_image/libSDL2_image.a \
 
 UI_LDADD+=		${shell ${SDL2_CONFIG} --libs}
 
+override AWK=		gawk

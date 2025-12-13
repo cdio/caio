@@ -71,8 +71,8 @@ public:
     }
 
     /**
-     * Get a string with the representation of this instance.
-     * @return A string with the representation of this instance.
+     * Get a string representation of this instance.
+     * @return A string representation of this instance.
      */
     virtual std::string to_string() const;
 

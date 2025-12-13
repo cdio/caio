@@ -124,9 +124,12 @@ void Logger::loglevel(std::string_view lvs)
 Logger& Logger::log(std::string_view color, std::string_view fmt, std::format_args args)
 {
     ::write(_fd, color.data(), color.size());
+
     const auto msg = std::vformat(fmt, args);
     ::write(_fd, msg.data(), msg.size());
+
     ::write(_fd, ANSI_RESET, std::strlen(ANSI_RESET));
+
     return *this;
 }
 

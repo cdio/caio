@@ -307,11 +307,16 @@ void NES::hotkeys(keyboard::Key key)
 ui::Config NES::ui_config()
 {
     std::string title = _conf.title;
+    std::string session = LABEL;
+
     if (_cart) {
-        title = std::format("{} - {}", title, _cart->label());
+        session = _cart->label();
+        title = std::format("{} - {}", title, session);
     }
 
     const ui::Config uiconf {
+        .name               = session,
+        .snapshotdir        = _conf.snapshotdir,
         .audio = {
             .enabled        = _conf.audio,
             .srate          = ricoh::rp2a03::AUDIO_SAMPLING_RATE,
@@ -322,14 +327,13 @@ ui::Config NES::ui_config()
             .title          = title,
             .width          = RP2C02::WIDTH,
             .height         = (_conf.ntsc ? RP2C02::NTSC_HEIGHT : RP2C02::HEIGHT),
-            .fps            = _conf.fps,
             .scale          = _conf.scale,
             .aspect         = _conf.aspect,
             .sleffect       = _conf.scanlines,
             .fullscreen     = _conf.fullscreen,
             .sresize        = _conf.sresize,
-            .screenshotdir  = _conf.screenshotdir,
-            .statusbar      = _conf.statusbar
+            .statusbar      = _conf.statusbar,
+            .screenshotdir  = _conf.screenshotdir
         }
     };
 

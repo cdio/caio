@@ -63,7 +63,7 @@ std::ostream& Serializer::output()
 
 Serializer Serializer::create_serializer(const fs::Path& fname)
 {
-    auto os = std::make_unique<std::ofstream>(fname);
+    auto os = std::make_unique<std::ofstream>(fname, std::ios_base::out | std::ios_base::trunc);
     if (os->fail()) {
         throw IOError{"Can't open snapshot file: {}: {}", fname.string(), Error::to_string()};
     }
@@ -144,7 +144,7 @@ Serializer& operator&(Serializer& ser, double& value)
         ser & data;
         data = be64toh(data);
 //        value = *reinterpret_cast<double*>(&data);
-        std::copy_n(&data, sizeof(data), &value);
+        std::copy_n(&data, 1, &value);
     }
 
     return ser;
@@ -161,7 +161,7 @@ Serializer& operator&(Serializer& ser, float& value)
         ser & data;
         data = be32toh(data);
 //        value = *reinterpret_cast<float*>(&data);
-        std::copy_n(&data, sizeof(data), &value);
+        std::copy_n(&data, 1, &value);
     }
 
     return ser;

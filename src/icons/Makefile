@@ -30,6 +30,7 @@ ICONS_SRC=	cassette_128x23.png \
 		pause_128x2.png \
 		photocamera_128x1.png \
 		reset_128.png \
+		snapshot_128x2.png \
 		volume_128x21.png
 
 FONT_HPP=	${FONT_SRC:%.ttf=%.hpp}

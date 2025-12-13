@@ -21,7 +21,7 @@
 #include "logger.hpp"
 #include "utils.hpp"
 
-#include "sha2.h"
+#include "3rdparty/sha2/sha2.h"
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>    /* _NSGetExecutablePath */
@@ -71,6 +71,8 @@ Path exec_path()
         [[maybe_unused]] auto _ = ::readlink("/proc/self/exe", buf, sizeof(buf));
 #else
 #error "Implement exec_path() under this OS"
+//      extern const char* _progname;
+//      path = _progname;
 #endif
         path = buf;
     }
@@ -167,7 +169,7 @@ bool match(const Path& path, const Path& pattern, bool icase)
     return (!::fnmatch(cpattern, cpath, FNM_NOESCAPE | (icase == MATCH_CASE_INSENSITIVE ? FNM_CASEFOLD : 0)));
 }
 
-template <typename IT>
+template<typename IT>
 requires std::input_iterator<IT>
 bool _directory(const Path& path, const Path& pattern, bool icase,
     const std::function<bool(const Path&, uint64_t)>& callback)
@@ -282,20 +284,20 @@ std::string sha256(const fs::Path& fname)
 
 std::string sha256(std::ifstream& is)
 {
-    SHA2_CTX ctx{};
-    SHA256Init(&ctx);
+    ::SHA2_CTX ctx{};
+    ::SHA256Init(&ctx);
 
     uint8_t buf[BUFSIZ];
     while (is) {
         is.read(reinterpret_cast<char*>(buf), sizeof(buf));
         const auto size = is.gcount();
         if (size > 0) {
-            SHA256Update(&ctx, buf, size);
+            ::SHA256Update(&ctx, buf, size);
         }
     }
 
     uint8_t md[SHA256_DIGEST_LENGTH];
-    SHA256Final(md, &ctx);
+    ::SHA256Final(md, &ctx);
 
     std::ostringstream os{};
     for (const uint8_t value : md) {
@@ -305,18 +307,18 @@ std::string sha256(std::ifstream& is)
     return os.str();
 }
 
-std::stringstream shell(const std::string& cmd)
+std::pair<int, std::stringstream> shell(const std::string& cmd)
 {
-    uptrd_t<FILE> f{::popen(cmd.c_str(), "r"), reinterpret_cast<void(*)(FILE*)>(::pclose)};
-    if (!f) {
-        throw IOError{"Can't launch shell command: {}", Error::to_string()};
+    FILE* f = ::popen(cmd.c_str(), "r");
+    if (f == nullptr) {
+        throw IOError{"Can't launch shell command: '{}'", Error::to_string()};
     }
 
     std::stringstream ss{};
     char buf[LINE_MAX]{};
 
     while (true) {
-        const size_t size = std::fread(buf, 1, sizeof(buf), f.get());
+        const size_t size = std::fread(buf, 1, sizeof(buf), f);
         if (size == 0) {
             break;
         }
@@ -324,11 +326,13 @@ std::stringstream shell(const std::string& cmd)
         try {
             ss.write(buf, size);
         } catch (const std::exception& err) {
+            ::pclose(f);
             throw IOError{"Can't read shell command output: {}", err.what()};
         }
     }
 
-    return ss;
+    const int eval = ::pclose(f);
+    return {eval, std::move(ss)};
 }
 
 IDir::IDir(EntryType etype, const std::string& eempty, size_t elimit)
@@ -347,6 +351,12 @@ void IDir::filter(const FilterCb& efilter)
 inline Path IDir::filter(const Path& entry) const
 {
     return (_efilter ? _efilter(entry) : entry);
+}
+
+void IDir::reset(const fs::Path& path, EntryType etype)
+{
+    reset(etype);
+    reset(path);
 }
 
 void IDir::reset(const Path& path)
@@ -402,14 +412,19 @@ void IDir::reset(const Path& path)
     refresh();
 }
 
+void IDir::reset(EntryType etype)
+{
+    _etype = etype;
+}
+
 bool IDir::refresh()
 {
     if (!time_to_refresh()) {
         return false;
     }
 
-    const bool want_dirs = (_etype & EntryType::Dir);
-    const bool want_files = (_etype & EntryType::File);
+    const bool want_dirs = (static_cast<unsigned>(_etype) & static_cast<unsigned>(EntryType::Dir));
+    const bool want_files = (static_cast<unsigned>(_etype) & static_cast<unsigned>(EntryType::File));
     std::vector<Path> files{};
 
     const auto flt = [this, &files, want_dirs, want_files](const Path& entry) {
@@ -449,7 +464,11 @@ bool IDir::refresh()
 
     std::sort(files.begin(), files.end());
     std::move(files.begin(), files.end(), std::back_inserter(_entries));
-    _entries.insert(_entries.begin(), _eempty);
+
+    if (!_eempty.empty()) {
+        _entries.insert(_entries.begin(), _eempty);
+    }
+
     _nrefresh = utils::now() + REFRESH_TIME;
     return true;
 }
@@ -459,17 +478,13 @@ inline bool IDir::time_to_refresh() const
     return (utils::now() >= _nrefresh);
 }
 
-IDirNav::IDirNav(EntryType etype, const std::string& eempty, size_t elimit)
-    : IDir{etype, eempty, elimit}
-{
-}
-
 bool IDirNav::refresh()
 {
     if (!IDir::refresh()) {
         return false;
     }
-    _entries.insert(_entries.begin() + 1, ENTRY_BACK);
+
+    _entries.insert(_entries.begin(), ENTRY_BACK);
     return true;
 }
 

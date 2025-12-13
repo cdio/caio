@@ -103,6 +103,9 @@ void Clock::run()
         }
 
         if (_fullspeed) {
+            /*
+             * Free run.
+             */
             continue;
         }
 
@@ -113,6 +116,7 @@ void Clock::run()
         }
 
         /*
+         * Synchronise with the actual expected elapsed time:
          * Calculate the time required for the host system
          * to execute _sync_cycles emulated clock cycles.
          */

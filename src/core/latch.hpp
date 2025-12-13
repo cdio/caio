@@ -42,8 +42,8 @@ public:
     virtual ~Latch_() = default;
 
     /**
-     * Set this latch register value.
-     * @param value Value to set.
+     * Set the value of this latch register.
+     * @param value Value.
      * @return this.
      */
     Latch_& operator=(T value)
@@ -53,7 +53,7 @@ public:
     }
 
     /**
-     * Return the status of this latch.
+     * Get the status of this latch.
      * @return true if at least one of the bits of this latch register is active; false otherwise.
      */
     operator bool() const

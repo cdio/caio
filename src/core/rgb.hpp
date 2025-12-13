@@ -35,7 +35,7 @@ namespace caio {
  */
 struct Rgba {
     union {
-        uint32_t u32 __attribute__((packed));
+        uint32_t u32;
         struct {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
             uint8_t a;

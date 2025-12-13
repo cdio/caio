@@ -36,7 +36,7 @@ system.
 ### Launching caio from a command line terminal
 
 ```
-$ caio --help
+$ caio help
 usage: caio <arch> [--help]
 where arch is one of:
 c64
@@ -74,14 +74,18 @@ Generic options as command line parameters:
 
 ```
  --conf <cfile>          Configuration file
- --romdir <romdir>       ROMs directory
- --palettedir <pdir>     Colour palette directory
+ --romdir <romdir>       ROMs directory (default is /opt/caio/share/caio/roms)
+ --screenshotdir <sdir>  Screenshot directory (default is ~/Desktop)
+ --snapshotdir <sdir>    Snapshot directory (default is ~/.config/caio/snapshots)
+ --palettedir <pdir>     Colour palette directory (default is /opt/caio/share/caio/palette)
  --palette <palette>     Colour palette name or filename
- --keymapsdir <kdir>     Key mappings directory
+ --keymapsdir <kdir>     Key mappings directory (default is /opt/caio/share/caio/keymaps)
  --keymaps <keymaps>     Key mappings name or filename
- --cart <cfile>          Cartridge filename
- --fps <rate>            Frame rate (default is 50)
+ --cart <fname>          Cartridge filename
+ --snap <fname>          Snapshot file
  --scale <scale>         Window scale factor (default is 1)
+ --aspect <ratio>        Aspect ratio: 16:9, 8:7, 6:5, 5:3, 4:3, system
+                         (default is system)
  --scanlines <n|h|v|H|V> Scanlines effect: (n)one, (h)orizontal, (v)ertical,
                          advanced (H)orizontal, advanced (V)ertical
                          (default is n)
@@ -108,7 +112,6 @@ Generic options as command line parameters:
  --vjoy-back <keyname>   Virtual joystick BACK key
  --vjoy-guide <keyname>  Virtual joystick GUIDE key
  --vjoy-start <keyname>  Virtual joystick START key
- --screenshotdir <sdir>  Screenshot directory (default is ~/Desktop)
  --statusbar <pos>       Status bar position, one of:
                          none, center, north, south, east, west,
                          north-east, north-west, south-east, south-west
@@ -202,7 +205,7 @@ $ caio c64 --keymaps vice
 #### Joysticks
 
 The Commodore 64 has two joystick ports. If a gamepad is detected it is
-connected to the first avaiable emulated joystick port.
+connected to one of the available emulated joystick ports.
 
 That is, if the virtual joystick is not enabled, the gamepad is connected
 to the first C64 joystick port.
@@ -219,8 +222,8 @@ or disbled at runtime using the `ALT-K` key combination.
 <br>
 Games or other applications that use the keyboard in conjunction with the
 virtual joystick should never share the same keys. If the default virtual
-joystick keys are not available or just difficult to use, the user is always
-free to redefine both the keyboard keys and the virtual joystick as desired.
+joystick keys are not available or they are difficult to use, the user can
+redefine both, the keyboard keys and the virtual joystick keys as desired.
 
 For more information refer to the Generic Configuration section.
 
@@ -228,13 +231,13 @@ For more information refer to the Generic Configuration section.
 
 There is an implementation of the
 [C1541](https://en.wikipedia.org/wiki/Commodore_1541) disk drive unit that
-access the host filesystem. Host directories are recursively traversed so it
-must be used with care.
+access the host filesystem. Host directories are recursively traversed so
+it must be used with care.
 <br>
-Configuration options `unit8` and `unit9` are be used to associate a host
+Configuration options `unit8` and `unit9` can be used to associate a host
 directory to a floppy disk.
 
-`D64` disk drive images are not supported yet.
+`D64` disk drive images are not supported (yet).
 
 #### Examples
 
@@ -248,8 +251,8 @@ $ caio c64 --scanlines h --scale 3 --cart /games/c64/ghostsngoblins.crt
 
 The next command activates the advanced horizontal scanlines visual effect
 (note the captial H), in this mode the specified scale factor is doubled
-(that is, a 320x200 screen is scaled up to 1280x800), loads and launches the
-cartridge named *Simon's Basic*:
+(that is, a 320x200 screen is scaled up to 1280x800), it loads and launches
+the cartridge named *Simon's Basic*:
 
 ```
 $ caio c64 --scanlines H --scale 2 --cart /apps/c64/simons_basic.crt
@@ -261,10 +264,10 @@ The next command loads and run a `PRG` program:
 $ caio c64 --scale 3 --prg /games/c64/rambo.prg
 ```
 
-The program is injected directly into RAM while the emulator is suspended,
-this means that the previous command won't work with advanced or big files
-that are expected to overwrite memory areas not configured as RAM. In that
-case configuration options `unit8` and `unit9` must be used as follows:
+A `PRG` program is directly injected into RAM while the emulator is suspended,
+this means that the previous command won't work with an advanced or big file
+that is expected to overwrite memory areas not configured as RAM. In that
+case configuration options `unit8` or `unit9` must be used as follows:
 
 ```
 $ caio c64 --scale 3 --unit8 /games/c64
@@ -333,22 +336,22 @@ NES Family BASIC keyboard layout:
 
 The default key mappings is positional, with the exception of the following
 keys:
-```
- NES Keyboard    PC Keyboard
------------------------------------
- STOP            BACKSLASH \
- CTR             TAB
- ]               ALTGR ;
- KANA            ALTGR '
- _               ALTGR+SHIFT /
- GRPH            Left CTRL
- YEN             ` (GRAVE ACCENT)
-```
+
+| NES Keyboard | PC Keyboard      |
+| ------------ | ---------------- |
+| STOP         | BACKSLASH \      |
+| CTR          | TAB              |
+| ]            | ALTGR ;          |
+| KANA         | ALTGR '          |
+| _            | ALTGR+SHIFT /    |
+| GRPH         | Left CTRL        |
+| YEN          | ` (GRAVE ACCENT) |
+
 
 #### Joysticks
 
 Both standard NES controller ports are supported. If the virtual joystick
-is enabled, the first port is connected to it and the second port is connected
+is enabled it is connected to the first port. The second port is conencted
 to an eventual gamepad. This default can be changed using the `swapj`
 option or the `ALT-J` key combination.
 
@@ -479,7 +482,6 @@ Sinclair ZX-Spectrum 48K specific:
  --otape <fname|dir>     Set the output tape file (TAP) or directory
                          (default is ./)
  --fastload [yes|no]     Fast tape loading (default is no)
- --snap <fname>          Load a snapshot image (Z80 or SNA formats)
 ```
 
 #### Keyboard layout
@@ -547,7 +549,7 @@ shown below must be entered from *BASIC*:
 LOAD ""
 ```
 
-#### Snapshots
+#### ZX-Spectrum specific Snapshots
 
 The `snap` option can be used to load a snapshot file.
 Supported formats are [SNA](https://sinclair.wiki.zxnet.co.uk/wiki/SNA_format)
@@ -580,14 +582,16 @@ platform.
 
 The following key combinations are accepted:
 
-* `ALT-F` toggles between *windowed* and *fullscreen* modes.
-* `PAUSE` or `ALT-P` toggles between *pause* and *running* modes.
-* `ALT-J` swaps joysticks #1 and #2.
-* `ALT-K` toggles the status of the emulated keyboard (active/inactive).
-* `ALT-V` toggles the visibility of the info panel.
-* `ALT-SHIFT-S` takes a screenshot.
-* `CTRL-C` on the terminal enters the CPU monitor (if the monitor is not
-  active the emulation is terminated).
+* `ALT-F` Toggle between *windowed* and *fullscreen* modes.
+* `PAUSE` or `ALT-P` Toggle between *pause* and *running* modes.
+* `ALT-J` Swap joysticks #1 and #2.
+* `ALT-K` Toggle the status of the emulated keyboard (active/inactive).
+* `ALT-V` Toggle the visibility of the info panel.
+* `ALT-L` Load a snapshot file (emulator previously saved state).
+* `ALT-S` Save a snapshot file (emulator current state).
+* `ALT-SHIFT-S` Take a screenshot.
+* `CTRL-C` on the terminal to enter the CPU monitor (if the monitor
+is not active the emulation is terminated).
 
 Under macOS the **command &#8984;** key must be used instead of the
 **ALT** key.
@@ -605,6 +609,8 @@ The default panel widgets that appear on the screen are (from right to left):
 
 * Toggle Fullscreen mode
 * Take screenshot
+* Save a snapshot (save the emulator's current state)
+* Load a snapshot (load a previously saved emulator state)
 * Platform reset
 * Suspend/Resume emulation
 * Audio Volume control
@@ -639,10 +645,6 @@ on the screen can be configured by the user.
 
 ### Joysticks
 
-As explained in the Configuration section, when a gamepad is detected and
-the emulated platform supports one or more joystick ports, the gamepad is
-connected to the first avaiable joystick port.
-<br>
 When the virtual joystick is enabled and the emulated platform supports one
 or more joystick ports, the virtual joystick is connected to the first port.
 
@@ -653,6 +655,6 @@ is connected to the first port and the gamepad to the second.
 Some platforms (such as the Commodore 64) share the internal keyboard matrix
 with joystick ports, this means that a virtual joystick sharing keys with the
 emulated keyboard can negatively interfere with it.
-Please refer to the specific platform configuration section to learn more
+Refer to the specific platform configuration section to learn more
 about the virutal joystick and possible issues with the keyboard.
 

@@ -47,9 +47,8 @@ private:
 
     sinclair::zx80::ZX80Config _conf;
     sinclair::zx80::ZX80Config _conf_orig;
-
-    fs::IDirNav _cassdir{fs::IDir::EntryType::Dir, Gui::ENTRY_EMPTY};
-    fs::IDirNav _prgfile{fs::IDir::EntryType::All, Gui::ENTRY_EMPTY};
+    Gui::IDirNavGui _cassdir{Gui::IDirNavGui::EntryType::Dir};
+    Gui::IDirNavGui _prgfile{Gui::IDirNavGui::EntryType::All};
 };
 
 }

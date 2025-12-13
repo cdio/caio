@@ -37,6 +37,7 @@ CXXSRCS+=	sdl2.cpp \
 		widget_pause.cpp \
 		widget_photocamera.cpp \
 		widget_reset.cpp \
+		widget_snapshot.cpp \
 		widget_volume.cpp
 
 INCS+=		sdl2.hpp \
@@ -54,6 +55,7 @@ INCS+=		sdl2.hpp \
 		widget_pause.hpp \
 		widget_photocamera.hpp \
 		widget_reset.hpp \
+		widget_snapshot.hpp \
 		widget_volume.hpp
 
 include ${ROOT}/mk/lib.mk

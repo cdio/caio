@@ -325,6 +325,19 @@ std::ostream& ZX80ASpace::dump(std::ostream& os) const
     return os;
 }
 
+Serializer& operator&(Serializer& ser, ZX80ASpace& mmap)
+{
+    ser & static_cast<ASpace&>(mmap)
+        & mmap._chcode
+        & mmap._counter
+        & mmap._blank
+        & mmap._intpin
+        & mmap._intreq
+        & mmap._vsync;
+
+    return ser;
+}
+
 }
 }
 }

@@ -165,14 +165,15 @@ public:
     }
 
     /**
-     * Convert a string to a level type.
+     * Convert a log level string to a log level type.
      * @param level Log level string to convert.
-     * @return The log level.
+     * @return The log level type.
+     * @see Level
      */
     static Level to_loglevel(std::string_view level);
 
     /**
-     * Convert a string with several log level strings to a bitwise combination of levels.
+     * Convert a string with several log level strings to a bitwise combination of log levels.
      * @param levels Log level string formatted as "level1|level2|..."
      * @return The bitwise combination of log levels.
      * @exception LoggerError If the specified string is malformed.

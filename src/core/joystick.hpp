@@ -77,7 +77,7 @@ public:
 
     /**
      * Initialise this joystick.
-     * @param label Label assigned to this joystick;
+     * @param label Joystick Label;
      * @param jport Joystick port.
      * @see Port
      */
@@ -87,14 +87,15 @@ public:
 
     /**
      * Reset this joystick.
-     * This method must be called by the UI to associate
+     * This method must be called by the UI to assign
      * this joystick to a real game controller.
-     * @param jid Identifier assigned to this joystick.
+     * @param jid  Unique identifier that defines the connection to a gamepad;
+     * @param name Name of the gamepad connected to this joystick.
      */
     void reset(unsigned jid = JOYID_INVALID, std::string_view name = "");
 
     /**
-     * Set the current joystick position.
+     * Set the joystick position.
      * @param pos A bitwise combination of the joystick port values.
      * @see Port
      */
@@ -104,7 +105,7 @@ public:
     }
 
     /**
-     * Get the joystick positions.
+     * Get the joystick position.
      * @return A bitwise combination of the current joystick port values.
      * @see Port
      */
@@ -115,7 +116,7 @@ public:
 
     /**
      * Get the connection status of this joystick.
-     * @return True if there is a real game controller behind this joystick; false otherwise.
+     * @return true if there is a game controller connected to this joystick; false otherwise.
      */
     bool is_connected() const
     {
@@ -123,7 +124,7 @@ public:
     }
 
     /**
-     * Return the identifier of this joystick.
+     * Get the identifier of this joystick.
      * @return The joystick id.
      */
     unsigned joyid() const
@@ -141,8 +142,8 @@ public:
     }
 
     /*
-     * Get the name of the associated gamepad.
-     * @return The name of the associated gamepad if this joystick is connected to one; otherwise an empty string.
+     * Get the name of the connected gamepad.
+     * @return The name of the associated gamepad; otherwise an empty string.
      */
     const std::string& name() const
     {

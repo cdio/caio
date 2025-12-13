@@ -53,6 +53,17 @@ size_t ULAAudio::tick(const Clock& clk)
     return _samples_cycles;
 }
 
+Serializer& operator&(Serializer& ser, ULAAudio& audio)
+{
+    ser & static_cast<Name&>(audio)
+        & audio._samples_cycles
+        & audio._samples
+        & audio._pos
+        & audio._beep;
+
+    return ser;
+}
+
 }
 }
 }

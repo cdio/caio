@@ -45,15 +45,15 @@ void ConfigEditorC64::render_specific()
     _gui.newline();
 
     _gui.begin_subsection("Disk Drives:");
-    _gui.combo_directory("Disk drive unit 8", "##unit-8", _conf.unit8, _unit8);
-    _gui.combo_directory("Disk drive unit 9", "##unit-9", _conf.unit9, _unit9);
+    _gui.combo_path("Disk drive unit 8", "##unit-8", _conf.unit8, _unit8);
+    _gui.combo_path("Disk drive unit 9", "##unit-9", _conf.unit9, _unit9);
     _gui.end_subsection();
 
     _gui.newline();
 
-    _gui.begin_subsection("Attachments:");
-    _gui.combo_file("Cartridge", "##cartridge", _conf.cartridge, _cartridge);
-    _gui.combo_file("Preload program", "##prg", _conf.prgfile, _program);
+    _gui.begin_subsection("Attached devices:");
+    _gui.combo_path("Cartridge", "##cartridge", _conf.cartridge, _cartridge);
+    _gui.combo_path("Preload program", "##prg", _conf.prgfile, _program);
     _gui.end_subsection();
 
     _gui.newline();

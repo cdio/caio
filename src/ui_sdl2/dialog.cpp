@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Claudio Castiglia
+ * Copyright (C) 2020 Claudio Castiglia
  *
  * This file is part of caio.
  *
@@ -19,31 +19,43 @@
 #include "dialog.hpp"
 
 #include "fs.hpp"
+#include "logger.hpp"
 #include "utils.hpp"
+
+#include <sys/wait.h>
+#include <unistd.h>
 
 namespace caio {
 namespace ui {
 namespace sdl2 {
 
-std::string saveas_dialog(const std::string& title, const std::string& dir, const std::string& fname)
+std::string dialog_exec(const std::string& args)
 {
-#ifdef __APPLE__
-    const auto script = std::format(
-        "(/usr/bin/osascript 2>/dev/null <<EOF\n"
-        "set fname to (choose file name with prompt \"{}\" default name \"{}\" default location \"{}\") as text\n"
-        "EOF\n"
-        ") | /usr/bin/sed -e 's,^Macintosh HD,,' -e 's,:,/,g'",
-        title, fname, dir);
-#else
-    constexpr static const char* ZENITY = "zenity";
-    const auto zenity_path = fs::search(ZENITY, {"/usr/bin", "/bin", "/usr/local/bin"});
-    const auto script = std::format(
-        "cd {}; {} --title '{}' --file-selection --save --filename='{}' 2>/dev/null",
-        dir, (zenity_path.empty() ? ZENITY : zenity_path.string()), title, fname);
-#endif
+    const auto cmd = std::format("{} dialog {}", fs::exec_path().string(), args);
+    const auto [err, ss] = fs::shell(cmd);
+    return (err ? "" : utils::trim(ss.str()));
+}
 
-    const auto ss = fs::shell(script);
-    return utils::trim(ss.str());
+std::string dialog_saveas(const std::string& msg, const std::string& dir, const std::string& fname,
+    const std::string& ext)
+{
+    const auto extopt = (ext.empty() ? "" : "-e " + ext);
+    const auto args = std::format("-s -t 'Select file to save' -m '{}' -p '{}' -c '{}' {}", msg, dir, fname, extopt);
+    return dialog_exec(args);
+}
+
+std::string dialog_pick_file(const std::string& msg, const std::string& dir, const std::string& fname,
+    const std::string& ext)
+{
+    const auto extopt = (ext.empty() ? "" : "-e " + ext);
+    const auto args = std::format("-t 'Select file to load' -m '{}' -p '{}' -c '{}' {}", msg, dir, fname, extopt);
+    return dialog_exec(args);
+}
+
+void dialog_error(const std::string& reason, const std::string& errmsg)
+{
+    const auto& args = std::format("-E -t '{}' -m '{}'", reason, errmsg);
+    dialog_exec(args);
 }
 
 }

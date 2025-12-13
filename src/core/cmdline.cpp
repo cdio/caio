@@ -30,13 +30,13 @@ namespace config {
 
 bool is_true(std::string_view value)
 {
-    const auto val = utils::tolow(value);
+    const auto& val = utils::tolow(value);
     return (val == "yes" || val == "ye" || val == "y");
 }
 
 bool is_false(std::string_view value)
 {
-    const auto val = utils::tolow(value);
+    const auto& val = utils::tolow(value);
     return (val == "no" || val == "n");
 }
 
@@ -70,10 +70,11 @@ static Option generic_options[] = {
     { KEY_ROMDIR,           SEC_GENERIC, KEY_ROMDIR,        DEFAULT_ROMDIR,         Arg::Required, set_value       },
     { KEY_PALETTEDIR,       SEC_GENERIC, KEY_PALETTEDIR,    DEFAULT_PALETTEDIR,     Arg::Required, set_value       },
     { KEY_KEYMAPSDIR,       SEC_GENERIC, KEY_KEYMAPSDIR,    DEFAULT_KEYMAPSDIR,     Arg::Required, set_value       },
+    { KEY_SCREENSHOTDIR,    SEC_GENERIC, KEY_SCREENSHOTDIR, DEFAULT_SCREENSHOTDIR,  Arg::Required, set_value       },
+    { KEY_SNAPSHOTDIR,      SEC_GENERIC, KEY_SNAPSHOTDIR,   DEFAULT_SNAPSHOTDIR,    Arg::Required, set_value       },
     { KEY_PALETTE,          SEC_GENERIC, KEY_PALETTE,       DEFAULT_PALETTE,        Arg::Required, set_value       },
     { KEY_KEYMAPS,          SEC_GENERIC, KEY_KEYMAPS,       DEFAULT_KEYMAPS,        Arg::Required, set_value       },
     { KEY_CARTRIDGE,        SEC_GENERIC, KEY_CARTRIDGE,     DEFAULT_CARTRIDGE,      Arg::Required, set_value       },
-    { KEY_FPS,              SEC_GENERIC, KEY_FPS,           DEFAULT_FPS,            Arg::Required, set_value       },
     { KEY_SCALE,            SEC_GENERIC, KEY_SCALE,         DEFAULT_SCALE,          Arg::Required, set_value       },
     { KEY_ASPECT,           SEC_GENERIC, KEY_ASPECT,        DEFAULT_ASPECT,         Arg::Required, set_value       },
     { KEY_SCANLINES,        SEC_GENERIC, KEY_SCANLINES,     DEFAULT_SCANLINES,      Arg::Required, set_value       },
@@ -98,7 +99,6 @@ static Option generic_options[] = {
     { KEY_VJOY_BACK,        SEC_GENERIC, KEY_VJOY_BACK,     DEFAULT_VJOY_BACK,      Arg::Required, set_value       },
     { KEY_VJOY_GUIDE,       SEC_GENERIC, KEY_VJOY_GUIDE,    DEFAULT_VJOY_GUIDE,     Arg::Required, set_value       },
     { KEY_VJOY_START,       SEC_GENERIC, KEY_VJOY_START,    DEFAULT_VJOY_START,     Arg::Required, set_value       },
-    { KEY_SCREENSHOTDIR,    SEC_GENERIC, KEY_SCREENSHOTDIR, DEFAULT_SCREENSHOTDIR,  Arg::Required, set_value       },
     { KEY_STATUSBAR,        SEC_GENERIC, KEY_STATUSBAR,     DEFAULT_STATUSBAR,      Arg::Required, set_value       },
     { KEY_SNAPSHOT,         SEC_GENERIC, KEY_SNAPSHOT,      DEFAULT_SNAPSHOT,       Arg::Optional, set_value       }
 };
@@ -112,14 +112,15 @@ std::string Cmdline::usage() const
         "snapshot file to launch (the file format is auto-detected)\n"
         "and <options> are:\n"
         " --conf <cfile>          Configuration file\n"
-        " --romdir <romdir>       ROMs directory\n"
-        " --palettedir <pdir>     Colour palette directory\n"
+        " --romdir <romdir>       ROMs directory (default is {})\n"
+        " --screenshotdir <sdir>  Screenshot directory (default is {})\n"
+        " --snapshotdir <sdir>    Snapshot directory (default is {})\n"
+        " --palettedir <pdir>     Colour palette directory (default is {})\n"
         " --palette <palette>     Colour palette name or filename\n"
-        " --keymapsdir <kdir>     Key mappings directory\n"
+        " --keymapsdir <kdir>     Key mappings directory (default is {})\n"
         " --keymaps <keymaps>     Key mappings name or filename\n"
         " --cart <fname>          Cartridge filename\n"
-        " --snap <fname>          Load a snapshot file\n"
-        " --fps <rate>            Frame rate (default is {})\n"
+        " --snap <fname>          Snapshot file\n"
         " --scale <scale>         Window scale factor (default is {})\n"
         " --aspect <ratio>        Aspect ratio: 16:9, 8:7, 6:5, 5:3, 4:3, system\n"
         "                         (default is {})\n"
@@ -149,7 +150,6 @@ std::string Cmdline::usage() const
         " --vjoy-back <keyname>   Virtual joystick BACK key\n"
         " --vjoy-guide <keyname>  Virtual joystick GUIDE key\n"
         " --vjoy-start <keyname>  Virtual joystick START key\n"
-        " --screenshotdir <sdir>  Screenshot directory (default is {})\n"
         " --statusbar <pos>       Status bar position, one of:\n"
         "                         none, center, north, south, east, west,\n"
         "                         north-east, north-west, south-east, south-west\n"
@@ -157,7 +157,11 @@ std::string Cmdline::usage() const
         " -v|--version            Show version information and exit\n"
         " -h|--help               Print this message and exit",
         _progname,
-        DEFAULT_FPS,
+        DEFAULT_ROMDIR,
+        DEFAULT_SCREENSHOTDIR,
+        DEFAULT_SNAPSHOTDIR,
+        DEFAULT_PALETTEDIR,
+        DEFAULT_KEYMAPSDIR,
         DEFAULT_SCALE,
         DEFAULT_ASPECT,
         DEFAULT_SCANLINES,
@@ -174,7 +178,6 @@ std::string Cmdline::usage() const
         DEFAULT_VJOY_LEFT,
         DEFAULT_VJOY_RIGHT,
         DEFAULT_VJOY_FIRE,
-        DEFAULT_SCREENSHOTDIR,
         DEFAULT_STATUSBAR);
 }
 

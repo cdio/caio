@@ -45,13 +45,13 @@ using DirEntry = std::pair<Path, uint64_t>;
 using Dir = std::vector<DirEntry>;
 
 /**
- * Return the value of the HOME environment variable.
- * @return A string with the value of the HOME environment variable.
+ * Get the value of the HOME environment variable.
+ * @return The path assigned to the HOME environment variable.
  */
 Path home();
 
 /**
- * Set a the proper home path.
+ * Fix a path.
  * If the specified path starts with '~' it is replaced
  * with the value of the HOME environment variable.
  * @param path Path to fix.
@@ -60,8 +60,8 @@ Path home();
 Path fix_home(const Path& path);
 
 /**
- * Get the executable file full path.
- * @return The executable file full path.
+ * Get the executable file full-path.
+ * @return The executable file full-path.
  */
 Path exec_path();
 
@@ -211,21 +211,21 @@ public:
 
     using FilterCb = std::function<Path(const Path&)>;
 
-    enum EntryType {
-        Dir     = 0x01,     /**< Take directory entries     */
-        File    = 0x02,     /**< Take regular file entries  */
-        All     = 0x03      /**< Take all entries           */
+    enum class EntryType {
+        Dir     = 0x01,     /**< Take directory entries.    */
+        File    = 0x02,     /**< Take regular file entries. */
+        All     = 0x03      /**< Take all entries.          */
     };
 
     /**
-     * Initialise this interactive directory traverser.
+     * Interactive directory traverser.
      * @param etype  Entry type to consider;
      * @param eempty Empty entry;
-     * @param elimit Directory entries limit (0 means not limit).
+     * @param elimit Maximum allowed directory entries (0 means no maximum).
      * @see EntryType
      * @see MAX_DIRS
      */
-    IDir(EntryType etype, const std::string& eempty, size_t limit = MAX_DIRS);
+    IDir(EntryType etype, const std::string& eempty, size_t elimit = MAX_DIRS);
 
     virtual ~IDir() = default;
 
@@ -250,8 +250,27 @@ public:
     /**
      * Reset this interactive directory traverser.
      * @param path New path to traverse.
+     * @param etype Entry type to consider;
+     * @see reset(const fs::Path&)
+     * @see reset(EntryType)
+     */
+    void reset(const fs::Path& path, EntryType etype);
+
+    /**
+     * Reset this interactive directory traverser.
+     * @param path New path to traverse.
+     * @see reset(const fs::Path&, EntryType)
+     * @see reset(EntryType)
      */
     void reset(const fs::Path& path);
+
+    /**
+     * Reset this interactive directory traverser.
+     * @param etype Entry type to consider.
+     * @see reset(const fs::Path&, EntryType)
+     * @see reset(const fs::Path&)
+     */
+    void reset(EntryType etype);
 
     /**
      * Refresh the internal state of this interactive directory traverser.
@@ -299,9 +318,23 @@ public:
         return _entries[index];
     }
 
+    /**
+     * Get the empty entry.
+     * @return The empty entry.
+     */
     std::string_view empty_entry() const
     {
         return _eempty;
+    }
+
+    /**
+     * Get the type of entries to consider.
+     * @return The entry tupe.
+     * @see EntryType
+     */
+    EntryType type() const
+    {
+        return _etype;
     }
 
 protected:
@@ -323,17 +356,7 @@ protected:
  */
 class IDirNav : public IDir {
 public:
-    /**
-     * Initialise this interactive directory traverser.
-     * @param etype  Entry type to consider;
-     * @param eempty Empty entry;
-     * @param elimit Directory entries limit (0 means not limit).
-     * @see IDir
-     * @see MAX_DIRS
-     */
-    IDirNav(EntryType etype, const std::string& eempty, size_t elimit = MAX_DIRS);
-
-    virtual ~IDirNav() = default;
+    using IDir::IDir;
 
     bool refresh() override;
 };
@@ -406,10 +429,10 @@ std::string sha256(std::ifstream& is);
 /**
  * Launch a shell command.
  * @param cmd Shell command.
- * @return The command output as a string stream.
+ * @return A pair containing the command exit value and the command output as a string stream.
  * @exception IOError
  */
-std::stringstream shell(const std::string& cmd);
+std::pair<int, std::stringstream> shell(const std::string& cmd);
 
 }
 }

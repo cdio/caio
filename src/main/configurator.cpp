@@ -87,18 +87,10 @@ bool ConfiguratorApp::buttons_pane()
     print(" ");
 
     sameline();
-    bool run = button("Run");
-
-    to_column(-6.5);
-    button((style() == Style::Dark ? "Light Mode" : "Dark Mode"), [this](){
-        style((style() == Style::Dark) ? Style::Light : Style::Dark);
-    });
+    const bool run = button("Run");
 
     sameline();
-    button("+", [](){ process_font_incdec(true); });
-
-    sameline();
-    button("-", [](){ process_font_incdec(false); });
+    theme_banner();
 
     return run;
 }
@@ -114,10 +106,11 @@ void ConfiguratorApp::selector_pane()
     for (ssize_t i = 0; i < static_cast<ssize_t>(_configs.size()); ++i) {
         /*
          * The entry shown in the selector pane is encoded as prefix + name.
-         * prefix is used to mark whether the configuration file is read-only or read/write.
+         * On read-only configurations the prefix is the unicode for the closed lock symbol;
+         * on read/write configurations the prefix is a white space.
          */
         const auto& [read_only, name, _] = _configs[i];
-        const auto descr = std::string{(read_only ? UNI_LOCK_CLOSED : " ")} + " " + name;
+        const auto& descr = std::string{(read_only ? UNI_LOCK_CLOSED : " ")} + " " + name;
         select_table(descr, _centry == i, [this, &i]() { _centry = i; });
     }
 
@@ -164,7 +157,7 @@ void ConfiguratorApp::add_config_popup()
 
             for (ssize_t i = 0; i < static_cast<ssize_t>(_configs.size()); ++i) {
                 const auto& [read_only, name, path] = _configs[i];
-                select_table(name, _add_centry == i, [this, &i]() { _add_centry = i; });
+                select_table(name, _add_centry == i, [this, i]() { _add_centry = i; });
             }
 
             separator();
@@ -235,10 +228,17 @@ void ConfiguratorApp::rename_config_popup()
                 if (newcfile != cfile) {
                     try {
                         std::filesystem::rename(cfile, newcfile);
-                        _loaded_configs.erase(cfile);
+
                         _configs.erase(it);
+
+                        auto lcit = _loaded_configs.find(cfile);
+                        if (lcit != _loaded_configs.end()) {
+                            _loaded_configs.erase(cfile);
+                        }
+
                         ConfigEditor::create_default_configs();     /* Re-create default configurations */
                         close_popup();
+
                     } catch (const std::exception& err) {
                         const auto title = std::format("Can't rename: {}", cname);
                         const auto errmsg = err.what();
@@ -256,30 +256,50 @@ void ConfiguratorApp::rename_config_popup()
 void ConfiguratorApp::delete_config_popup()
 {
     define_popup(ID_DELETE_CONFIG, [this]() {
-        auto it = _configs.begin() + _centry;
-        const auto& [read_only, cname, cfile] = *it;
-
-        print("Confirm delete configuration: {} ", cname);
+        const auto it = _configs.cbegin() + _centry;
+        const auto& name = std::get<std::string>(*it);
+        print("Confirm delete configuration: {} ", name);
         separator();
 
-        const auto do_delete = [this, &cname, &cfile, &it]() {
+        const auto delete_current_entry = [this]() {
+            auto it = _configs.begin() + _centry;
+            const auto& [read_only, cname, cfile] = *it;
             try {
+                /*
+                 * 1. Remove the configuration data from memory
+                 * 2. Remove the configuration file
+                 * 3. Remove the configuration name from the list of configurations
+                 * In that order (the destructor of the configuration data might re-create the configuration file).
+                 */
+                auto lcit = _loaded_configs.find(cfile);
+                if (lcit != _loaded_configs.end()) {
+                    _loaded_configs.erase(cfile);
+                }
+
                 fs::unlink(cfile);
-                _loaded_configs.erase(cfile);
                 _configs.erase(it);
-                ConfigEditor::create_default_configs();     /* Re-create default configurations */
+
+                /*
+                 * Recreate an eventually erased default configuration
+                 * (a default configuration can be modified. To restore
+                 * its original values it must be erased).
+                 */
+                ConfigEditor::create_default_configs();
+
                 if (_centry > 0) {
                     --_centry;
                 }
+
             } catch (const std::exception& err) {
-                const auto title = std::format("Can't delete configuration: {}", cname);
-                const auto errmsg = err.what();
+                const auto& title = std::format("Can't delete configuration: {}", cname);
+                const auto& errmsg = err.what();
                 error_message(title, errmsg);
             }
+
             close_popup();
         };
 
-        buttons_ok_cancel(do_delete, close_popup);
+        buttons_ok_cancel(delete_current_entry, close_popup);
     });
 }
 
@@ -366,11 +386,10 @@ void ConfiguratorApp::run_machine()
             nullptr
         };
 
-        const char* home = std::getenv("HOME");
-        if (home == nullptr || *home == '\0') {
-            home = "/";
-        }
-        const auto env_home = std::format("HOME={}", home);
+        const auto& env_home = []() {
+            const char* home = std::getenv("HOME");
+            return std::format("HOME={}", ((home == nullptr || *home == '\0') ? "/" : home));
+        }();
 
 #ifdef __APPLE__
         const char* envp[] = {
@@ -380,11 +399,11 @@ void ConfiguratorApp::run_machine()
 
         ::execve(argv[0], const_cast<char**>(argv), const_cast<char**>(envp));
 #else
-        const char* display = std::getenv("DISPLAY");
-        if (display == nullptr || *display == '\0') {
-            display = ":0";
-        }
-        const auto env_display = std::format("DISPLAY={}", display);
+        const auto& env_display = []() {
+            const char* display = std::getenv("DISPLAY");
+            return std::format("DISPLAY={}", ((display == nullptr || *display == '\0') ? ":0" : display));
+        }();
+
         const char* envp[] = {
             env_home.c_str(),
             env_display.c_str(),
@@ -468,15 +487,6 @@ uptr_t<ConfigEditor>& ConfiguratorApp::editor_instance(const fs::Path& cfile)
     auto editor = ConfigEditor::make_editor(*this, cfile);
     auto [it, _] = _loaded_configs.emplace(cfile, std::move(editor));
     return it->second;
-}
-
-ConfiguratorApp& ConfiguratorApp::instance()
-{
-    static uptr_t<ConfiguratorApp> inst{};
-    if (!inst) {
-        inst = uptr_t<ConfiguratorApp>{new ConfiguratorApp{}};
-    }
-    return *inst;
 }
 
 }
