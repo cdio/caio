@@ -251,18 +251,11 @@ std::array<fp_t, std::max(R, C)> poly_add(const std::array<fp_t, R>& a1, const s
 {
     static_assert((R != 0) && (C != 0), "Invalid input array size");
     constexpr size_t N = std::max(R, C);
+    constexpr size_t MINSIZ = std::min(R, C);
     std::array<fp_t, N>arr{};
-    if (R > C) {
-        std::copy(a1.begin(), a1.end(), arr.begin());
-        for (size_t i = 0; i < C; ++i) {
-            arr[i] += a2[i];
-        }
-    } else {
-        std::copy(a2.begin(), a2.end(), arr.begin());
-        for (size_t i = 0; i < R; ++i) {
-            arr[i] += a1[i];
-        }
-    }
+    std::transform(a1.begin(), a1.begin() + MINSIZ, a2.begin(), arr.begin(), [](fp_t v1, fp_t v2) {
+        return (v1 + v2);
+    });
     return arr;
 }
 
