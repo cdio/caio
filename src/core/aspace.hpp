@@ -81,7 +81,7 @@ public:
     /**
      * Array of memory banks.
      */
-    template <size_t BLOCKS>
+    template<size_t BLOCKS>
     using bank_t = std::array<devmap_t, BLOCKS>;
 
     /**

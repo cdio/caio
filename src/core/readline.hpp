@@ -196,7 +196,7 @@ public:
      * @param args Arguments.
      * @exception IOError
      */
-    template <typename... Args>
+    template<typename... Args>
     void write(std::format_string<Args...> fmt, Args&&... args) const
     {
         write(std::vformat(fmt.get(), std::make_format_args(args...)));

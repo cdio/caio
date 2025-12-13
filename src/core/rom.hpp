@@ -37,7 +37,7 @@ public:
      * @param first Input iterator first element;
      * @param last  Input iterator last element + 1.
      */
-    template <typename IT>
+    template<typename IT>
     requires std::input_iterator<IT>
     ROM(std::string_view label, IT first, IT last)
         : RAM{label, first, last}

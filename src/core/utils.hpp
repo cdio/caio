@@ -45,7 +45,7 @@ namespace utils {
  * @param value Value to convert;
  * @return The floating point value.
  */
-template <typename T>
+template<typename T>
 requires std::is_integral_v<T>
 fp_t to_fp(T value)
 {
@@ -57,7 +57,7 @@ fp_t to_fp(T value)
  * @param value Floating point value to convert ([0.0, 1.0] if T is unsigned or [-1.0, 1.0] if T is signed).
  * @return The integer value.
  */
-template <typename T>
+template<typename T>
 requires std::is_integral_v<T>
 T to_integer(fp_t value)
 {
@@ -81,7 +81,7 @@ inline int16_t to_i16(fp_t value)
  * @param val Value to align.
  * @return The aligned value.
  */
-template <typename T>
+template<typename T>
 requires std::is_integral_v<T> && std::is_unsigned_v<T>
 constexpr inline int align(T val)
 {
@@ -92,7 +92,7 @@ constexpr inline int align(T val)
  * Ceil method as constant expression.
  * @see std::ceil()
  */
-template <typename T>
+template<typename T>
 requires std::is_floating_point_v<T>
 constexpr inline int ceil(T fval)
 {
@@ -147,7 +147,7 @@ std::string to_string(std::span<const uint8_t> buf);
  * @param v Value to convert.
  * @return The generated string.
  */
-template <typename T>
+template<typename T>
 requires std::is_integral_v<T>
 std::string to_string(T v)
 {
@@ -170,7 +170,7 @@ std::string to_string(T v)
  * @param base  Base address.
  * @return The output stream.
  */
-template <typename IT>
+template<typename IT>
 requires std::input_iterator<IT>
 std::ostream& dump(std::ostream& os, const IT begin, const IT end, addr_t base = 0)
 {
@@ -211,7 +211,7 @@ std::ostream& dump(std::ostream& os, const IT begin, const IT end, addr_t base =
  * @param base Base address.
  * @return The output stream.
  */
-template <typename C>
+template<typename C>
 requires is_container_v<C>
 std::ostream& dump(std::ostream& os, const C& cont, addr_t base = 0)
 {
@@ -224,7 +224,7 @@ std::ostream& dump(std::ostream& os, const C& cont, addr_t base = 0)
  * @param base Base address.
  * @return The string.
  */
-template <typename C>
+template<typename C>
 requires is_container_v<C>
 std::string dump(const C& cont, addr_t base = 0)
 {
@@ -253,7 +253,7 @@ unsigned long long to_ulonglong(std::string_view str, size_t max);
  * @return The converted number.
  * @exception InvalidNumber
  */
-template <typename T>
+template<typename T>
 requires std::is_integral_v<T>
 T to_number(std::string_view str)
 {
@@ -343,7 +343,7 @@ constexpr inline uint8_t convert_01_10(uint8_t byte)
  * @param bytes Bytes to convert.
  * @see convert_01_10(uint8_t)
  */
-template <typename C>
+template<typename C>
 requires is_container_v<C>
 void convert_01_10(C& bytes)
 {
@@ -371,7 +371,7 @@ constexpr inline uint8_t convert_01_10_to_11(uint8_t byte)
  * 01011000 becomes 11111100.
  * @param bytes Bytes to convert.
  */
-template <typename C>
+template<typename C>
 requires is_container_v<C>
 void convert_01_10_to_11(C& bytes)
 {
@@ -404,7 +404,7 @@ constexpr inline uint8_t reverse(uint8_t byte)
  * @param pattern Pattern;
  * @param random  True to contaminate the destination buffer with some random values.
  */
-template <typename T>
+template<typename T>
 requires std::is_integral_v<T> && std::is_unsigned_v<T>
 void fill(std::span<uint8_t> dst, T pattern, bool random = false)
 {

@@ -92,7 +92,7 @@ struct MonitoredCPU {
  * @return A monitored cpu structure with default callbacks.
  * @see MonitoredCPU
  */
-template <typename CPU>
+template<typename CPU>
 MonitoredCPU monitored_cpu_defaults(CPU* cpu)
 {
     return MonitoredCPU{

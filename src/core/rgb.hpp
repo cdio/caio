@@ -174,10 +174,10 @@ public:
 /**
  * Container for a fixed number of colours.
  */
-template <size_t N>
+template<size_t N>
 class RgbaN_ {
 public:
-    template <typename... Ts>
+    template<typename... Ts>
     RgbaN_(const Ts... colors)
         : _colors{{colors...}}
     {

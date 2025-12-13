@@ -27,7 +27,7 @@ namespace caio {
  * Encapsulator for an instance of type T that can be
  * moved around and then returned back where it came from.
  */
-template <typename T>
+template<typename T>
 class DispatcherT : public T {
 public:
     DispatcherT() = delete;

@@ -53,7 +53,7 @@ public:
      * @see NO_RANDOM_VALUES
      * @see PUT_RANDOM_VALUES
      */
-    template <typename T>
+    template<typename T>
     requires std::is_integral_v<T>
     RAM(std::string_view label, size_t size, T pattern, bool random)
         : Device{TYPE, label},
@@ -68,7 +68,7 @@ public:
      * @param first Input iterator first element;
      * @param last  Input iterator last element + 1.
      */
-    template <typename IT>
+    template<typename IT>
     requires std::input_iterator<IT>
     RAM(std::string_view label, IT first, IT last)
         : Device{TYPE, label},

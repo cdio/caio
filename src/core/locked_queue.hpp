@@ -24,7 +24,7 @@
 
 namespace caio {
 
-template <typename T>
+template<typename T>
 class LockedQueue {
 public:
     LockedQueue() {

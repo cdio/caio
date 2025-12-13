@@ -26,7 +26,7 @@ namespace caio {
  * Latch register template.
  * The type T determines the size of the register.
  */
-template <typename T>
+template<typename T>
 requires std::is_unsigned_v<T>
 class Latch_ {
 public:

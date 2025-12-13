@@ -118,7 +118,7 @@ public:
 
     Logger& log(std::string_view color, std::string_view fmt, std::format_args args);
 
-    template <typename... Args>
+    template<typename... Args>
     [[noreturn]]
     Logger& fatal(std::format_string<Args...> fmt, Args&&... args)
     {
@@ -128,7 +128,7 @@ public:
         std::exit(EXIT_FAILURE);
     }
 
-    template <typename... Args>
+    template<typename... Args>
     Logger& error(std::format_string<Args...> fmt, Args&&... args)
     {
         if (is_error()) {
@@ -137,7 +137,7 @@ public:
         return *this;
     }
 
-    template <typename... Args>
+    template<typename... Args>
     Logger& warn(std::format_string<Args...> fmt, Args&&... args)
     {
         if (is_warn()) {
@@ -146,7 +146,7 @@ public:
         return *this;
     }
 
-    template <typename... Args>
+    template<typename... Args>
     Logger& info(std::format_string<Args...> fmt, Args&&... args)
     {
         if (is_info()) {
@@ -155,7 +155,7 @@ public:
         return *this;
     }
 
-    template <typename... Args>
+    template<typename... Args>
     Logger& debug(std::format_string<Args...> fmt, Args&&... args)
     {
         if (is_debug()) {

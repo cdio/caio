@@ -45,13 +45,13 @@ using fp_t    = float;
 using addr_t  = uint16_t;
 using saddr_t = int16_t;
 
-template <typename T>
+template<typename T>
 using sptr_t = std::shared_ptr<T>;
 
-template <typename... T>
+template<typename... T>
 using uptr_t = std::unique_ptr<T...>;
 
-template <typename T>
+template<typename T>
 using uptrd_t = std::unique_ptr<T, void(*)(T*)>;
 
 using Buffer     = std::vector<uint8_t>;
@@ -91,15 +91,15 @@ constexpr static const addr_t A13 = (1 << 13);
 constexpr static const addr_t A14 = (1 << 14);
 constexpr static const addr_t A15 = (1 << 15);
 
-template <typename>
+template<typename>
 struct Array;
 
-template <size_t N>
+template<size_t N>
 struct Array<std::array<uint8_t, N>> {
     constexpr static const size_t size = N;
 };
 
-template <typename C>
+template<typename C>
 concept is_container_v = std::is_same_v<C, Buffer> ||
                          std::is_same_v<C, std::span<uint8_t>> ||
                          std::is_same_v<C, std::array<uint8_t, Array<C>::size>>;
@@ -136,7 +136,7 @@ public:
      * @param fmt  Error message format string;
      * @param args Error message format string arguments.
      */
-    template <typename... Args>
+    template<typename... Args>
     Error(std::format_string<Args...> fmt, Args&&... args)
         : std::exception{},
           _reason{std::vformat(fmt.get(), std::make_format_args(args...))}
@@ -213,7 +213,7 @@ ERROR_CLASS(UIError);
  * @param args  Format string arguments.
  * @execption InvalidArgument if the specified condition is not met.
  */
-template <typename... Args>
+template<typename... Args>
 void expects(bool cond, std::format_string<Args...> fmt, Args&&... args)
 {
     if (!cond)

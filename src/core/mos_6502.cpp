@@ -740,7 +740,6 @@ size_t Mos6502::single_step()
 
     /*
      * A taken branch w/o page crossed delays IRQ sampling.
-     * XXX test
      */
     if (_delayed_irq) {
         _delayed_irq = false;

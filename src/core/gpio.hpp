@@ -35,7 +35,7 @@ namespace caio {
  * Each port can be associated to several input and output callbacks so the port
  * pins are implemented as pull-ups.
  */
-template <typename ADDR, typename DATA>
+template<typename ADDR, typename DATA>
 requires std::is_unsigned_v<ADDR> && std::is_unsigned_v<DATA>
 class Gpio_ {
 public:
