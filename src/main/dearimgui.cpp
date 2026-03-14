@@ -423,6 +423,7 @@ int Gui::input(const std::string& id, std::string& dst, int flags)
         dst = buf;
         return true;
     }
+
     return false;
 }
 
@@ -464,8 +465,13 @@ void Gui::combo_select(const std::string& label, const std::string& id, const ch
 void Gui::combo_key(const std::string& msg, const std::string& id, keyboard::Key& key)
 {
     constexpr static const int SHOW_ITEMS = 10;
+
     static const auto knames = keyboard::key_names();
-    static const auto getter = [](void*, int idx) -> const char* { return knames[idx].c_str(); };
+
+    static const auto getter = [](void*, int idx) -> const char* {
+        return knames[idx].c_str();
+    };
+
     static const auto kname_index = [](keyboard::Key key) -> int {
         const auto& kname = keyboard::to_string(key);
         if (const auto it = std::find(knames.begin(), knames.end(), kname); it != knames.end()) {
@@ -473,6 +479,7 @@ void Gui::combo_key(const std::string& msg, const std::string& id, keyboard::Key
         }
         return knames.size() - 1;
     };
+
     const float fwidth = font_width();
 
     int dst = kname_index(key);
@@ -532,7 +539,11 @@ void Gui::combo_scanlines(std::string& dst)
         "Vertical",
         "Advanced vertical"
     };
-    static const std::string scanline_codes[]{ "n", "h", "H", "v", "V" };
+
+    static const std::string scanline_codes[]{
+        "n", "h", "H", "v", "V"
+    };
+
     static const auto code_to_index = [](std::string_view slcode) -> int {
         if (const auto it = std::find(std::begin(scanline_codes), std::end(scanline_codes), slcode);
             it != std::end(scanline_codes)) {
@@ -540,6 +551,7 @@ void Gui::combo_scanlines(std::string& dst)
         }
         return 0;
     };
+
     const float fwidth = font_width();
 
     int sl_index = code_to_index(dst);
@@ -571,6 +583,7 @@ void Gui::combo_statusbar(std::string& dst)
         "South-East",
         "South-West"
     };
+
     static const char* position_codes[]{
         "none",
         "center",
@@ -583,6 +596,7 @@ void Gui::combo_statusbar(std::string& dst)
         "south-east",
         "south-west"
     };
+
     static const auto code_to_index = [](std::string_view code) -> int {
         if (const auto it = std::find(std::begin(position_codes), std::end(position_codes), code);
             it != std::end(position_codes)) {
@@ -590,7 +604,9 @@ void Gui::combo_statusbar(std::string& dst)
         }
         return 0;
     };
+
     const float fwidth = font_width();
+
     int index = code_to_index(utils::tolow(dst));
     int prev_index = index;
 
@@ -839,10 +855,15 @@ void Gui::IDirNavGui::render(const std::string& msg, const std::string& id, std:
 
     begin_window(msg, wpos, wsize, wflags);
 
-    /* Selected entry */
+    /*
+     * Selected entry.
+     */
     if (_selected.empty()) {
         _selected = dst;
     }
+
+    print("   Selected entry:");
+    sameline();
 
     if (_existent) {
         print(_selected);
@@ -850,13 +871,20 @@ void Gui::IDirNavGui::render(const std::string& msg, const std::string& id, std:
         ::ImGui::SetNextItemWidth(::ImGui::GetWindowWidth());
         input("##nav-input", _selected, 0);
     }
+
     separator();
 
-    /* Currently traversed directory */
+    /*
+     * Current traversed directory.
+     */
+    print("Current directory:");
+    sameline();
     print(path());
     separator();
 
-    /* List of directory entries */
+    /*
+     * List of directory entries.
+     */
     const auto ssize = Size{
         _wsize.x * font_width(),
         _wsize.y - 6 * font_height()

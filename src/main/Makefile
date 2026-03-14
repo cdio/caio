@@ -44,7 +44,7 @@ CXXSRCS=	configurator.cpp \
 		main.cpp \
 		main_dialog.cpp \
 		main_emulator.cpp \
-		main_gui.cpp \
+		main_gui.cpp
 
 INCS=		configurator.hpp \
 		editor.hpp \
@@ -81,7 +81,7 @@ EXTRA_DEPS+=	${EXTRA_LIBS}
 # UI Libraries
 LDADD+=		${UI_LDADD}
 
-# Xorg desktop
+# Free Desktop
 ifneq (${OS}, Darwin)
 DESKTOP=	caio.desktop
 DESKTOP_SED=	${DESKTOP}.sed

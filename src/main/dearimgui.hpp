@@ -60,7 +60,7 @@ public:
     };
 
     enum SectionFlags : int {
-        Border              = ::ImGuiChildFlags_Border,
+        Border              = ::ImGuiChildFlags_Borders,
         ResizeX             = ::ImGuiChildFlags_ResizeX
     };
 

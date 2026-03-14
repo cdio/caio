@@ -42,18 +42,18 @@ public:
     };
 
     /**
-     * Get the instance to the file dialog.
+     * Instantiate the file dialog.
      * @param title   Window title;
      * @param message Window message;
      * @param dtype   Dialog type;
      * @param etype   File Entry type;
      * @param dir     Initial traversed directory;
      * @param fname   Initial selected path name;
-     * @param ext     File extension (used to filter file names);
+     * @param ext     File extension.
      * @exception IOError
-     * @see Type
+     * @see DialogType
      * @see GuiApp::GuiApp
-     * @see IDir::EntryType
+     * @see fs::IDir::EntryType
      */
     FileDialogApp(const std::string& title, const std::string& message, DialogType dtype, fs::IDir::EntryType etype,
         const std::string& dir, const std::string& fname, const std::string& ext);
@@ -64,7 +64,8 @@ public:
      * Start this File Dialog application.
      * This method returns when the user selects an entry or cancels the dialog.
      * If an entry is selected it sent to standard output.
-     * @return 0 if an entry is selected; -1 if the operation is cancelled.
+     * @return 0 if an entry is selected (the entry is printed to standard output);
+     * -1 if the operation is cancelled.
      * @exception UIError
      * @see GuiApp::run()
      */
@@ -74,7 +75,7 @@ private:
     /**
      * Reset this dialog.
      * @param dir   Directory to traverse;
-     * @param fname selected path name;
+     * @param fname Selected path name.
      */
     void reset(const std::string& dir, const std::string& fname);
 
