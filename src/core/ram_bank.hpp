@@ -21,6 +21,7 @@
 #include "ram.hpp"
 #include "rom.hpp"
 #include "serializer.hpp"
+#include "signal.hpp"
 
 namespace caio {
 
@@ -71,7 +72,7 @@ public:
 
     void bank(size_t bnk)
     {
-        _bank = bnk % _banks;
+        _bank = signal::mod(bnk, _banks);
         _boffset = _bank * _bsize;
     }
 
