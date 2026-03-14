@@ -57,17 +57,6 @@ public:
         MODE_INVISIBLE = GAME_EXROM_11
     };
 
-    /**
-     * Instantiate a cartridge device associated to a CRT file.
-     * The returned cartridge cannot be used until its reset() method is called.
-     * @param fname Name of the CRT file to associate.
-     * @return A pointer to the new cartridge device.
-     * @exception InvalidCartridge
-     * @see c64::Crt
-     * @see reset()
-     */
-    static sptr_t<Cartridge> instance(const fs::Path& fname);
-
     virtual ~Cartridge() = default;
 
     /**
@@ -173,8 +162,20 @@ private:
     Gpio            _ioport{};
     GameExromMode   _mode{};
 
+    friend sptr_t<Cartridge> make_cartridge(const fs::Path& fname);
     friend Serializer& operator&(Serializer&, Cartridge&);
 };
+
+/**
+ * Instantiate a cartridge device from a CRT file.
+ * The returned cartridge cannot be used until its reset() method is called.
+ * @param fname Name of the CRT file.
+ * @return A pointer to the new cartridge device.
+ * @exception InvalidCartridge
+ * @see c64::Crt
+ * @see Cartridge::reset()
+ */
+sptr_t<Cartridge> make_cartridge(const fs::Path& fname);
 
 }
 }

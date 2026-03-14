@@ -488,7 +488,7 @@ sptr_t<Cartridge> C64::attach_cartridge()
         throw IOError{"Can't load Cartridge: {}: {}", _conf.cartridge, Error::to_string(ENOENT)};
     }
 
-    auto cart = Cartridge::instance(fpath);
+    auto cart = make_cartridge(fpath);
     return cart;
 }
 

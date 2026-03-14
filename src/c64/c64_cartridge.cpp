@@ -108,7 +108,7 @@ Serializer& operator&(Serializer& ser, Cartridge& cart)
     return ser;
 }
 
-sptr_t<Cartridge> Cartridge::instance(const fs::Path& fname)
+sptr_t<Cartridge> make_cartridge(const fs::Path& fname)
 {
     auto crt = std::make_shared<Crt>(fname);
 
