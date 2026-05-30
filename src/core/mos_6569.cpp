@@ -917,104 +917,103 @@ void Mos6569::g_access()
      * Display mode.
      */
     const CData& cd = _cdata[_col];
-    addr_t g_addr{};
 
-    switch (_mode) {
-    case VideoMode::TextStandard:
-    case VideoMode::TextMulticolor:
-    case VideoMode::TextExtendedColor:
-    case VideoMode::TextInvalid:
-        /*
-         * All text modes:
-         *  g_addr:
-         *   A13 A12 A11 A10 A9 A8 A7 A6 A5 A4 A3 A2 A1 A0
-         *    |   |   |   |   |  |  |  |  |  |  |  |  |  |
-         *    |   |   |   |   |  |  |  |  |  |  |  +--+--+--> RC
-         *    |   |   |   +---+--+--+--+--+--+--+-----------> CDATA
-         *    +---+---+-------------------------------------> CB13-CB11
-         *
-         * TextStandard:
-         *  g_data:
-         *   D7 D6 D5 D4 D3 D2 D1 D0
-         *    |  |  |  |  |  |  |  |
-         *    +--+--+--+--+--+--+--+--> 8 pixels (1 bit per pixel)
-         *
-         * TextMulticolor:
-         *  g_data:
-         *   D7 D6 D5 D4 D3 D2 D1 D0
-         *    |  |  |  |  |  |  |  |
-         *    +--+--+--+--+--+--+--+--> mcm=false: 8 pixels (1 bit per pixel)
-         *                              mcm=true:  4 pixels (2 bits per pixel)
-         *
-         * TextExtendedColor:
-         *  g_data:
-         *   D7 D6 D5 D4 D3 D2 D1 D0
-         *    |  |  |  |  |  |  |  |
-         *    +--+--+--+--+--+--+--+--> mcm=false: 8 pixels (1 bit per pixel)
-         *                              mcm=true:  4 pixels (2 bits per pixel)
-         *
-         * TextInvalid:
-         *  g_data:
-         *   D7 D6 D5 D4 D3 D2 D1 D0
-         *    |  |  |  |  |  |  |  |
-         *    +--+--+--+--+--+--+--+--> mcm=false: 8 pixels (1 bit per pixel)
-         *                              mcm=true:  4 pixels (2 bits per pixel)
-         */
-        g_addr = _char_base | (cd.ch << 3) | _rc;
-        break;
+    const addr_t g_addr = [this, &cd]() -> addr_t {
+        switch (_mode) {
+        case VideoMode::TextStandard:
+        case VideoMode::TextMulticolor:
+        case VideoMode::TextExtendedColor:
+        case VideoMode::TextInvalid:
+            /*
+             * All text modes:
+             *  g_addr:
+             *   A13 A12 A11 A10 A9 A8 A7 A6 A5 A4 A3 A2 A1 A0
+             *    |   |   |   |   |  |  |  |  |  |  |  |  |  |
+             *    |   |   |   |   |  |  |  |  |  |  |  +--+--+--> RC
+             *    |   |   |   +---+--+--+--+--+--+--+-----------> CDATA
+             *    +---+---+-------------------------------------> CB13-CB11
+             *
+             * TextStandard:
+             *  g_data:
+             *   D7 D6 D5 D4 D3 D2 D1 D0
+             *    |  |  |  |  |  |  |  |
+             *    +--+--+--+--+--+--+--+--> 8 pixels (1 bit per pixel)
+             *
+             * TextMulticolor:
+             *  g_data:
+             *   D7 D6 D5 D4 D3 D2 D1 D0
+             *    |  |  |  |  |  |  |  |
+             *    +--+--+--+--+--+--+--+--> mcm=false: 8 pixels (1 bit per pixel)
+             *                              mcm=true:  4 pixels (2 bits per pixel)
+             *
+             * TextExtendedColor:
+             *  g_data:
+             *   D7 D6 D5 D4 D3 D2 D1 D0
+             *    |  |  |  |  |  |  |  |
+             *    +--+--+--+--+--+--+--+--> mcm=false: 8 pixels (1 bit per pixel)
+             *                              mcm=true:  4 pixels (2 bits per pixel)
+             *
+             * TextInvalid:
+             *  g_data:
+             *   D7 D6 D5 D4 D3 D2 D1 D0
+             *    |  |  |  |  |  |  |  |
+             *    +--+--+--+--+--+--+--+--> mcm=false: 8 pixels (1 bit per pixel)
+             *                              mcm=true:  4 pixels (2 bits per pixel)
+             */
+            return (_char_base | (cd.ch << 3) | _rc);
 
-    case VideoMode::BitmapStandard:
-    case VideoMode::BitmapMulticolor:
-        /*
-         * All valid bitmap modes:
-         *  g_addr:
-         *   A13 A12 A11 A10 A9 A8 A7 A6 A5 A4 A3 A2 A1 A0
-         *    |   |   |   |   |  |  |  |  |  |  |  |  |  |
-         *    |   |   |   |   |  |  |  |  |  |  |  +--+--+--> RC
-         *    |   +---+---+---+--+--+--+--+--+--+-----------> VC9-VC0
-         *    +---------------------------------------------> CB13
-         *
-         * BitmapStandard:
-         *  g_data:
-         *   D7 D6 D5 D4 D3 D2 D1 D0
-         *    |  |  |  |  |  |  |  |
-         *    +--+--+--+--+--+--+--+--> 8 pixels (1 bit per pixel)
-         *
-         * BitmapMulticolor:
-         *  g_data:
-         *   D7 D6 D5 D4 D3 D2 D1 D0
-         *    |  |  |  |  |  |  |  |
-         *    +--+--+--+--+--+--+--+--> 4 pixels (2 bits per pixel)
-         */
-        g_addr = _bitmap_base | (_vc << 3) | _rc;
-        break;
+        case VideoMode::BitmapStandard:
+        case VideoMode::BitmapMulticolor:
+            /*
+             * All valid bitmap modes:
+             *  g_addr:
+             *   A13 A12 A11 A10 A9 A8 A7 A6 A5 A4 A3 A2 A1 A0
+             *    |   |   |   |   |  |  |  |  |  |  |  |  |  |
+             *    |   |   |   |   |  |  |  |  |  |  |  +--+--+--> RC
+             *    |   +---+---+---+--+--+--+--+--+--+-----------> VC9-VC0
+             *    +---------------------------------------------> CB13
+             *
+             * BitmapStandard:
+             *  g_data:
+             *   D7 D6 D5 D4 D3 D2 D1 D0
+             *    |  |  |  |  |  |  |  |
+             *    +--+--+--+--+--+--+--+--> 8 pixels (1 bit per pixel)
+             *
+             * BitmapMulticolor:
+             *  g_data:
+             *   D7 D6 D5 D4 D3 D2 D1 D0
+             *    |  |  |  |  |  |  |  |
+             *    +--+--+--+--+--+--+--+--> 4 pixels (2 bits per pixel)
+             */
+            return (_bitmap_base | (_vc << 3) | _rc);
 
-    case VideoMode::BitmapInvalid:
-    case VideoMode::BitmapMulticolorInvalid:
-        /*
-         * All invalid bitmap modes:
-         *  g_addr:
-         *   A13 A12 A11 A10 A9 A8 A7 A6 A5 A4 A3 A2 A1 A0
-         *    |   |   |   |   |  |  |  |  |  |  |  |  |  |
-         *    |   |   |   0   0  |  |  |  |  |  |  +--+--+--> RC
-         *    |   |   |          +--+--+--+--+--+-----------> VC5-VC0
-         *    |   +---+-------------------------------------> VC9-VC8
-         *    +---------------------------------------------> CB13
-         *
-         * BitmapInvalid:
-         *  g_data:
-         *   D7 D6 D5 D4 D3 D2 D1 D0
-         *    |  |  |  |  |  |  |  |
-         *    +--+--+--+--+--+--+--+--> 8 pixels (1 bit per pixel)
-         *
-         * BitmapMulticolorInvalid:
-         *  g_data:
-         *   D7 D6 D5 D4 D3 D2 D1 D0
-         *    |  |  |  |  |  |  |  |
-         *    +--+--+--+--+--+--+--+--> 4 pixels (2 bits per pixel)
-         */
-        g_addr = _bitmap_base | ((_vc & 0b1100111111) << 3) | _rc;
-    }
+        case VideoMode::BitmapInvalid:
+        case VideoMode::BitmapMulticolorInvalid:
+            /*
+             * All invalid bitmap modes:
+             *  g_addr:
+             *   A13 A12 A11 A10 A9 A8 A7 A6 A5 A4 A3 A2 A1 A0
+             *    |   |   |   |   |  |  |  |  |  |  |  |  |  |
+             *    |   |   |   0   0  |  |  |  |  |  |  +--+--+--> RC
+             *    |   |   |          +--+--+--+--+--+-----------> VC5-VC0
+             *    |   +---+-------------------------------------> VC9-VC8
+             *    +---------------------------------------------> CB13
+             *
+             * BitmapInvalid:
+             *  g_data:
+             *   D7 D6 D5 D4 D3 D2 D1 D0
+             *    |  |  |  |  |  |  |  |
+             *    +--+--+--+--+--+--+--+--> 8 pixels (1 bit per pixel)
+             *
+             * BitmapMulticolorInvalid:
+             *  g_data:
+             *   D7 D6 D5 D4 D3 D2 D1 D0
+             *    |  |  |  |  |  |  |  |
+             *    +--+--+--+--+--+--+--+--> 4 pixels (2 bits per pixel)
+             */
+            return (_bitmap_base | ((_vc & 0b1100111111) << 3) | _rc);
+        }
+    }();
 
     const uint8_t g_data = _mmap->read(g_addr);
     paint_display(g_data, cd.colors(), cd.mcm);
@@ -1346,31 +1345,33 @@ Mos6569::mob_bitmap(unsigned start, uint8_t byte1, uint8_t byte2, uint8_t byte3,
     const auto start_byte = start >> 3;
     const auto start_bit = start - (start_byte << 3);
 
-    uint64_t bitmap;
-    uint64_t mask;
+    const auto [bitmap, mask] = [exp_x, mcm, byte1, byte2, byte3]() -> std::pair<uint64_t, uint64_t> {
+        if (exp_x) {
+            uint64_t w1, w2, w3;
+            if (mcm) {
+                w1 = utils::expand_dibits(byte1);
+                w2 = utils::expand_dibits(byte2);
+                w3 = utils::expand_dibits(byte3);
+            } else {
+                w1 = utils::expand_bits(byte1);
+                w2 = utils::expand_bits(byte2);
+                w3 = utils::expand_bits(byte3);
+            }
 
-    if (exp_x) {
-        uint64_t w1, w2, w3;
-        if (mcm) {
-            w1 = utils::expand_dibits(byte1);
-            w2 = utils::expand_dibits(byte2);
-            w3 = utils::expand_dibits(byte3);
+            const uint64_t bitmap = (w1 << 48) | (w2 << 32) | (w3 << 16);
+            const uint64_t mask = 0xFFFFFFFFFFFF0000ULL;
+            return {bitmap, mask};
+
         } else {
-            w1 = utils::expand_bits(byte1);
-            w2 = utils::expand_bits(byte2);
-            w3 = utils::expand_bits(byte3);
+            const uint64_t bitmap = (static_cast<uint64_t>(byte1) << 56) |
+                                    (static_cast<uint64_t>(byte2) << 48) |
+                                    (static_cast<uint64_t>(byte3) << 40);
+
+            const uint64_t mask = 0xFFFFFF0000000000ULL;
+
+            return {bitmap, mask};
         }
-
-        bitmap = (w1 << 48) | (w2 << 32) | (w3 << 16);
-        mask = 0xFFFFFFFFFFFF0000ULL;
-
-    } else {
-        bitmap = (static_cast<uint64_t>(byte1) << 56) |
-                 (static_cast<uint64_t>(byte2) << 48) |
-                 (static_cast<uint64_t>(byte3) << 40);
-
-        mask = 0xFFFFFF0000000000ULL;
-    }
+    }();
 
     const uint64_t background     = be64toh(*reinterpret_cast<uint64_t*>(&_collision_data[start_byte])) << start_bit;
     const uint64_t collision      = mask & background & bitmap;

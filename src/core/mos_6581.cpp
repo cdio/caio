@@ -159,7 +159,7 @@ uint8_t Oscillator::rand()
     /*
      * See http://www.sidmusic.org/sid/sidtech5.html.
      */
-    uint8_t value =
+    const uint8_t value =
         ((_rreg & (1 << 22)) ? 0x80 : 0x00) |
         ((_rreg & (1 << 20)) ? 0x40 : 0x00) |
         ((_rreg & (1 << 16)) ? 0x20 : 0x00) |
@@ -169,8 +169,8 @@ uint8_t Oscillator::rand()
         ((_rreg & (1 <<  4)) ? 0x02 : 0x00) |
         ((_rreg & (1 <<  2)) ? 0x01 : 0x00);
 
-    bool bit22 = _rreg & (1 << 22);
-    bool bit17 = _rreg & (1 << 17);
+    const bool bit22 = _rreg & (1 << 22);
+    const bool bit17 = _rreg & (1 << 17);
 
     _rreg = (_rreg << 1) | (bit22 ^ bit17);
 
@@ -512,29 +512,20 @@ inline fp_t Filter::frequency() const
      */
     static constexpr fp_t m = 1024.0;
 
-    fp_t s0{};
-    fp_t sm{};
-    fp_t b0{};
-    fp_t b1{};
+    const auto [s0, sm, b0, b1] = [this]() -> std::tuple<fp_t, fp_t, fp_t, fp_t> {
+        /* FIXME:
+         * this function approximates the lookup table
+         * from resid-0.16 but that one seems to be incorrect.
+         * Extract the proper frequency values from a real 6581.
+         */
+        if (_ufc < 1024) {
+            return {215.0, 17000.0, -0.65, 0.0072};
+        } else {
+            return {1024.0, 18200.0, -1.30, 0.0055};
+        }
+    }();
 
-    /* FIXME:
-     * this function approximates the lookup table
-     * from resid-0.16 but that one seems to be incorrect.
-     * Extract the proper frequency values from a real 6581.
-     */
-    if (_ufc < 1024) {
-        s0 = 215.0;
-        sm = 17000.0;
-        b0 = -0.65;
-        b1 = 0.0072;
-    } else {
-        s0 = 1024.0;
-        sm = 18200.0;
-        b0 = -1.30;
-        b1 = 0.0055;
-    }
-
-    fp_t fc = s0 + (sm - s0) / (1.0 + std::exp(-b0 - b1 * (_ufc - m)));
+    const fp_t fc = s0 + (sm - s0) / (1.0 + std::exp(-b0 - b1 * (_ufc - m)));
 
 //XXX    fc = 30.0 + (12000.0 - 30.0) * _ufc / 2048.0;
     return fc;
@@ -817,7 +808,8 @@ std::ostream& Mos6581::dump(std::ostream& os, size_t base) const
 size_t Mos6581::tick(const Clock& clk)
 {
     if (_audio_buffer) {
-        fp_t att = 0.6 - 0.3 * is_v3_active();
+        const fp_t att = 0.6 - 0.3 * is_v3_active();
+
         fp_t s1 = _voice_1.tick() * att;
         fp_t s2 = _voice_2.tick() * att;
         fp_t s3 = _voice_3.tick() * att;

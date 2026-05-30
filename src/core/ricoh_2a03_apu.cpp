@@ -127,13 +127,14 @@ void Sweep::reset(bool enable, uint8_t period, bool negate, uint8_t shift)
 void Sweep::calculate_target()
 {
     const int period = _pulse.timer().period();
-    int change = period >> _shift;
 
-    if (_negate) {
-        change = -change - _onec;
-    }
+    const int change = [this, period]() -> int {
+        const int change = period >> _shift;
+        return (_negate ? -change - _onec : change);
+    }();
 
     const int target = std::max(0, period + change);
+
     _target = static_cast<uint16_t>(target);
     _muted = (period < 8) || (_target > 0x7FF);
 }
@@ -442,11 +443,14 @@ int16_t Apu::mixed_sample() const
     const float noise = _noise.output() / 12241.0f;
     const float dmc = _dmc.output() / 22638.0f;
 
-    float p12 = p1 + p2;
-    float tnd = tri + noise + dmc;
-
-    p12 = (p12 == 0.0f ? 0.0f : 95.88f / ((8128.0f / p12) + 100.0f));
-    tnd = (tnd == 0.0f ? 0.0f : 159.79f / ((1.0f / tnd) + 100.0f));
+    const auto [p12, tnd] = [p1, p2, tri, noise, dmc]() -> std::pair<float, float> {
+        const float p12 = p1 + p2;
+        const float tnd = tri + noise + dmc;
+        return {
+            (p12 == 0.0f ? 0.0f : 95.88f / ((8128.0f / p12) + 100.0f)),
+            (tnd == 0.0f ? 0.0f : 159.79f / ((1.0f / tnd) + 100.0f))
+        };
+    }();
 
     const float fsample = _filter(p12 + tnd);
     const int16_t sample = utils::to_i16(fsample - 0.5f);

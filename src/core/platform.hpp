@@ -46,8 +46,8 @@ public:
      * Build this platform and start it.
      * This method returns on error or when the
      * user terminates the emulator through the UI.
-     * @param fname If not empty, name of a program, cartridge or
-     * snapshot file to launch (its format is auto-detected).
+     * @param fname If not empty, name of a program, cartridge
+     * or snapshot file to launch (its format is auto-detected).
      * @see create(const fs::Path&)
      * @see start()
      */
@@ -82,10 +82,10 @@ protected:
 
     /**
      * Detect the format of a file.
-     * If the specified file contains a snapshot image
-     * set the proper configuration option accordingly.
+     * If the specified file contains a snapshot set
+     * the proper configuration option accordingly.
      * @param fname File to detect.
-     * @return true if the specified file is a snapshot image; false otherwise.
+     * @return true if the specified file is a snapshot; false otherwise.
      */
     virtual bool detect_format(const fs::Path& fname);
 

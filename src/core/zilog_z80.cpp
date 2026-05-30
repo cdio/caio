@@ -364,19 +364,19 @@ void Z80::init_monitor(int ifd, int ofd, const monitor::LoadCb& load, const moni
 {
     CAIO_ASSERT(ifd >= 0 && ofd >= 0);
 
-    auto getpc = [this]() -> addr_t {
+    const auto getpc = [this]() -> addr_t {
         return _regs.PC;
     };
 
-    auto setpc = [this](addr_t addr) {
+    const auto setpc = [this](addr_t addr) {
         _regs.PC = _iaddr = addr;
     };
 
-    auto mmap = [this]() {
+    const auto mmap = [this]() {
         return _mmap;
     };
 
-    auto regvalue = [this](std::string_view rname) -> uint16_t {
+    const auto regvalue = [this](std::string_view rname) -> uint16_t {
         static std::unordered_map<std::string, std::function<int(const Z80&)>> regvals{
             { "ra",    [](const Z80& cpu) { return cpu._regs.A;     }},
             { "rf",    [](const Z80& cpu) { return cpu._regs.F;     }},
@@ -421,14 +421,14 @@ void Z80::init_monitor(int ifd, int ofd, const monitor::LoadCb& load, const moni
             { "rf'.n", [](const Z80& cpu) { return cpu.test_aN();   }},
             { "rf'.c", [](const Z80& cpu) { return cpu.test_aC();   }}
         };
-        auto it = regvals.find(std::string{rname});
+        const auto it = regvals.find(std::string{rname});
         if (it != regvals.end()) {
             return it->second(*this);
         }
         throw InvalidArgument{};
     };
 
-    auto bpdoc = [](std::string_view cmd) -> std::string {
+    const auto bpdoc = [](std::string_view cmd) -> std::string {
         return {
             std::string{cmd} + " help | h | ?\n" +
             std::string{cmd} + " <addr> [<cond>]\n\n"
@@ -743,8 +743,6 @@ void Z80::opcode_fetch(bool read_bus)
 
 size_t Z80::m1_cycle()
 {
-    addr_t rfsh_addr{};
-
     switch (_tx) {
     case Cycle::T1:
         rfsh_pin(false);    /* Finish the previous refresh cycle */
@@ -779,8 +777,7 @@ size_t Z80::m1_cycle()
          * (Bit 8 of the R register remains untouched).
          */
         _regs.R = (_regs.R & 0x80) | (((_regs.R & 0x7F) + 1) & 0x7F);
-        rfsh_addr = (static_cast<addr_t>(_regs.I) << 8) | _regs.R;
-        _mmap->address_bus(rfsh_addr);
+        _mmap->address_bus((static_cast<addr_t>(_regs.I) << 8) | _regs.R);
         rfsh_pin(true);
 
         _tx = Cycle::T4;
@@ -828,8 +825,6 @@ size_t Z80::m1_cycle()
 
 size_t Z80::m1_cycle_interrupt()
 {
-    addr_t rfsh_addr{};
-
     switch (_tx) {
     case Cycle::T1:
         unhalt();
@@ -878,8 +873,7 @@ size_t Z80::m1_cycle_interrupt()
          * (Bit 8 of the R register remains untouched).
          */
         _regs.R = (_regs.R & 0x80) | (((_regs.R & 0x7F) + 1) & 0x7F);
-        rfsh_addr = (static_cast<addr_t>(_regs.I) << 8) | _regs.R;
-        _mmap->address_bus(rfsh_addr);
+        _mmap->address_bus((static_cast<addr_t>(_regs.I) << 8) | _regs.R);
         rfsh_pin(true);
 
         _tx = Cycle::T4;
@@ -947,8 +941,8 @@ size_t Z80::m1_cycle_interrupt()
                     /*
                      * The interrupting device provides an 8-bits vector used to address an ISR table.
                      */
-                    addr_t isr_table = static_cast<addr_t>(_regs.I) << 8;
-                    addr_t isr_addr = isr_table | _opcode;
+                    const addr_t isr_table = static_cast<addr_t>(_regs.I) << 8;
+                    const addr_t isr_addr = isr_table | _opcode;
                     push_addr(_regs.PC);
                     _regs.PC = read_addr(isr_addr);
                     _regs.memptr = _regs.PC;
@@ -996,7 +990,7 @@ size_t Z80::execute(uint8_t opcode, bool forced)
         line = (forced ? "Forced instruction: "s + ins.format : disass(addr));
     }
 
-    size_t cycles = execute(ins, opcode, forced);
+    const size_t cycles = execute(ins, opcode, forced);
 
     if (_log.is_debug()) {
         _log.debug("{:35s}  cycles={}\n{}\n", line, cycles, status());
@@ -1044,8 +1038,7 @@ size_t Z80::execute(const Z80::Instruction& ins, uint8_t opcode, bool forced)
         return NOP_CYCLES;
     }
 
-    auto c = ins.fn(*this, opcode, arg);
-    c &= 0x0000FFFF;
+    const auto c = ins.fn(*this, opcode, arg) & 0x0000FFFF;
 
     _iaddr = _regs.PC;
 
@@ -1061,7 +1054,7 @@ inline size_t Z80::tick()
         return 1;
     }
 
-    auto cycles = ((_int || _nmi) ? m1_cycle_interrupt() : m1_cycle());
+    const auto cycles = ((_int || _nmi) ? m1_cycle_interrupt() : m1_cycle());
     return cycles;
 }
 
@@ -1096,7 +1089,7 @@ size_t Z80::tick(const Clock& clk)
         /*
          * System breakpoints (from some part of the emulator).
          */
-        auto bp = _breakpoints.find(_regs.PC);
+        const auto bp = _breakpoints.find(_regs.PC);
         if (bp != _breakpoints.end()) {
             auto& fn = bp->second.first;
             auto* arg = bp->second.second;
@@ -1104,14 +1097,14 @@ size_t Z80::tick(const Clock& clk)
         }
     }
 
-    size_t cycles = tick();
+    const size_t cycles = tick();
     return (cycles == 0 ? Clockable::HALT : cycles);
 }
 
 void Z80::disass(std::ostream& os, addr_t start, size_t count, bool show_pc)
 {
     for (addr_t addr = start; count; --count) {
-        auto line = disass(addr, show_pc);
+        const auto& line = disass(addr, show_pc);
         os << line << "\n";
     }
 }
@@ -1318,16 +1311,16 @@ std::string Z80::disass(addr_t& addr, bool show_pc)
 
 addr_t Z80::read_addr(size_t addr)
 {
-    uint16_t lo = read(addr);
-    uint16_t hi = read(addr + 1);
+    const uint16_t lo = read(addr);
+    const uint16_t hi = read(addr + 1);
 
     return ((hi << 8) | lo);
 }
 
 void Z80::write_addr(addr_t addr, addr_t data)
 {
-    uint8_t lo = data & 255;
-    uint8_t hi = data >> 8;
+    const uint8_t lo = data & 255;
+    const uint8_t hi = data >> 8;
 
     write(addr, lo);
     write(addr + 1, hi);

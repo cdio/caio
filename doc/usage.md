@@ -7,8 +7,10 @@ terminal.
 
 ### Launching caio from a filesystem navigator
 
-When caio is installed in the system its icon should be visible from any
-filesystem navigator. When launched, a configurator GUI appears:
+After caio is installed its icon should be visible in the desktop window
+manager's main menu (probably in the games section). When it is launched
+(through the menu pane or from a filesystem navigator), the caio configuration
+GUI appears:
 
 <p align="center">
 <img src="../images/caio-gui.jpg" width="640" title="caio configurator">
@@ -18,14 +20,14 @@ The upper left corner contains buttons `Add`, `Rename`, `Delete`, and `Run`,
 these are used to add, rename, delete, and run machine configurations
 respectively.
 
-The left pane below the buttons contains a selectable a list of machines
-and the right pane shows the specific configuration values for the selected
-entry.
+The left pane below the buttons contains a selectable list of machines
+and the right pane shows the configuration values for the selected entry.
 
-The upper right corner of the main window contains buttons to change from
-_Dark mode_ to _Light mode_ and vice versa, and buttons to increase/decrease
-the font size which can also be changed using **CTRL +** and **CTRL -**
-(under macOS it would be **command &#8984; +** and **command &#8984; -**).
+The upper right corner of the main window contains buttons to toggle from
+_Dark mode_ to _Light mode_ and vice versa (**ALT**-**T**), and buttons to
+increase (**ALT**-**+**) and decrease (**ALT**-**-**) the font size.
+
+Under macOS the **command &#8984;** key is used instead of **ALT**.
 
 User defined configurations are stored in the `$HOME/.config/caio/` directory.
 <br>
@@ -585,7 +587,7 @@ The following key combinations are accepted:
 * `ALT-F` Toggle between *windowed* and *fullscreen* modes.
 * `PAUSE` or `ALT-P` Toggle between *pause* and *running* modes.
 * `ALT-J` Swap joysticks #1 and #2.
-* `ALT-K` Toggle the status of the emulated keyboard (active/inactive).
+* `ALT-K` Toggle the status of the emulated keyboard (enable/disable).
 * `ALT-V` Toggle the visibility of the info panel.
 * `ALT-L` Load a snapshot file (emulator previously saved state).
 * `ALT-S` Save a snapshot file (emulator current state).
@@ -600,7 +602,7 @@ Under macOS the **command &#8984;** key must be used instead of the
 
 The Info Panel is an informational panel containing widgets used to show
 status information of emulated devices and to control some aspects of the
-emulator (audio volume setting, pause, reset, etc.).
+emulator (audio volume, pause, reset, etc.).
 <br>
 The Panel can be made visible/invisible clicking the mouse right button
 or using the `ALT-V` key combination.
@@ -630,6 +632,7 @@ There are other widgets that depend on the specifc emulated platform, such as:
 The panel above shows the Commodore 64 disk drive unit 8 active, disk drive
 unit 9 disabled, joystick port #1 enabled and connected to the virtual
 joystick, it is not swapped with joystick port #2 which is disabled.
+The keyboard is enabled and the audio volume is set to 60%.
 
 ### Status Bar
 

@@ -44,7 +44,7 @@ public:
     /**
      * Instantiate this NES.
      * This method only sets the configuration parameters.
-     * Call the run() method to build and start the actual NES emulator.
+     * The run() method must be used to build and start the actual NES emulator.
      * @param sec Configuration section.
      * @see NESConfig
      * @see run()
@@ -54,8 +54,8 @@ public:
 private:
     /**
      * Detect the format of a file.
-     * If the specified file is a snapshot image or a supported
-     * cartridge file, set the proper configuration option accordingly.
+     * If the specified file is supported cartridge file or a
+     * snapshot, set the proper configuration option accordingly.
      * @param fname File to detect.
      * @return true if the specified file is valid; false otherwise.
      * @see Platform::detect_format(const fs::Path&)

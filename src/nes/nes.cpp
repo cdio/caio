@@ -96,7 +96,7 @@ void NES::create_devices()
 {
     _clk  = std::make_shared<Clock>("clk", PPU_FREQ, _conf.delay);
     _ram  = std::make_shared<RAM>("ram", RAM_SIZE, RAM_INIT_PATTERN, RAM::PUT_RANDOM_VALUES);
-    _cart = Cartridge::instance(_conf.cartridge);
+    _cart = make_cartridge(_conf.cartridge);
 
     _ppu_mmap = std::make_shared<NESPPUASpace>("ppu-mmap", _cart);
     _ppu = std::make_shared<RP2C02>("ppu", _ppu_mmap, _conf.ntsc);
@@ -115,14 +115,17 @@ void NES::create_devices()
 
 void NES::connect_devices()
 {
+    using namespace std::placeholders;
+
     /*
      * Connect the PPU /IRQ output to the CPU /NMI input.
      */
-    const auto set_nmi = [this](bool active) {
-        _cpu->nmi_pin(active);
-    };
+    _ppu->irq(std::bind(&RP2A03::nmi_pin, _cpu.get(), _1));
 
-    _ppu->irq(set_nmi);
+    /*
+     * Connect the cartridge /IRQ output to the CPU /IRQ input.
+     */
+    _cart->irq(std::bind(&RP2A03::irq_pin, _cpu.get(), _1));
 
     /*
      * Connect keyboard and controllers to the proper CPU I/O ports.
@@ -254,21 +257,19 @@ void NES::make_widgets()
 
 void NES::connect_ui()
 {
+    using namespace std::placeholders;
+
     Platform::connect_ui();
 
     /*
      * Connect the audio output.
      */
-    _cpu->audio_buffer([this]() {
-        return ui()->audio_buffer();
-    });
+    _cpu->audio_buffer(std::bind(&UI::audio_buffer, ui().get()));
 
     /*
      * Connect the video output.
      */
-    _ppu->render_line([this](unsigned line, const ui::Scanline& scanline) {
-        return ui()->render_line(line, scanline);
-    });
+    _ppu->render_line(std::bind(&UI::render_line, ui().get(), _1, _2));
 
     ui()->keyboard(_kbd);
     ui()->joystick({_joy1, _joy2});

@@ -144,22 +144,22 @@ namespace rp2c02 {
  * to output a pixel on the screen.
  * This implementation of the PPU must be clocked at *NTSC_clock / 4*.
  *
+ * ### Memory Map (NES):
+ *
+ *     Address Range  Size  Description          Provider Device (NES)
+ *     ---------------------------------------------------------------
+ *     0000-0FFF      1000  Pattern table 0      Cartridge (CHR)
+ *     1000-1FFF      1000  Pattern table 1      Cartridge (CHR)
+ *     2000-23FF      0400  Nametable 0          Cartridge (VRAM)
+ *     2400-27FF      0400  Nametable 1          Cartridge (VRAM)
+ *     2800-2BFF      0400  Nametable 2          Cartridge (VRAM)
+ *     2C00-2FFF      0400  Nametable 3          Cartridge (VRAM)
+ *     3000-3EFF      0F00  Unused
+ *     3F00-3F1F      0020  Palette RAM indexes  Internal to PPU
+ *     3F20-3FFF      00E0  Mirror of 3F00-3F1F  Internal to PPU
+ *
  * The CPU Bus is implemented by the device (caio::Device) part of this class.
  * The PPU Bus is implemented by the address space (caio::ASPace) set during initialisation.
- *
- * ### Memory Map:
- *
- *    Address Range     Size    Description         Provider Device (NES)
- *    -------------------------------------------------------------------
- *    0000-0FFF         1000    Pattern table 0     Cartridge (CHR)
- *    1000-1FFF         1000    Pattern table 1     Cartridge (CHR)
- *    2000-23FF         0400    Nametable 0         Cartridge (VRAM)
- *    2400-27FF         0400    Nametable 1         Cartridge (VRAM)
- *    2800-2BFF         0400    Nametable 2         Cartridge (VRAM)
- *    2C00-2FFF         0400    Nametable 3         Cartridge (VRAM)
- *    3000-3EFF         0F00    Unused
- *    3F00-3F1F         0020    Palette RAM indexes Internal to PPU
- *    3F20-3FFF         00E0    Mirror of 3F00-3F1F Internal to PPU
  *
  * @see https://www.nesdev.org/wiki/PPU
  */
@@ -242,38 +242,38 @@ public:
      * Tile data.
      */
     struct TileData {
-        uint8_t     tilech{};       /* Tile code (0-255)                        */
-        uint8_t     pindex{};       /* Palette number (0-3)                     */
-        uint8_t     plane[2]{};     /* Tile pixel data                          */
+        uint8_t     tilech{};       /* Tile code (0-255)    */
+        uint8_t     pindex{};       /* Palette number (0-3) */
+        uint8_t     plane[2]{};     /* Tile pixel data      */
     };
 
     /**
      * OAM (sprite) data as stored in PPU memory.
      */
     struct Oam {
-        uint8_t y;
-        uint8_t tilech;
-        uint8_t pindex:2;
-        uint8_t unused:3;
-        uint8_t bgpri:1;
-        uint8_t hflip:1;
-        uint8_t vflip:1;
-        uint8_t x;
+        uint8_t     y;
+        uint8_t     tilech;
+        uint8_t     pindex:2;
+        uint8_t     unused:3;
+        uint8_t     bgpri:1;
+        uint8_t     hflip:1;
+        uint8_t     vflip:1;
+        uint8_t     x;
     } __attribute__((packed));
 
     /**
      * Seconadry OAM (sprite) data.
      */
     struct OamSec {
-        uint8_t spindex{};          /* Sprite index (0-63)                  */
-        Oam     sprite{};           /* Sprite data                          */
+        uint8_t spindex{};          /* Sprite index (0-63)  */
+        Oam     sprite{};           /* Sprite data          */
 
         OamSec(uint8_t spindex = 0, Oam sprite = {})
             : spindex{spindex},
               sprite{sprite}
         {
         }
-    };
+    } __attribute__((packed));
 
     /*
      * Tile pixel data.
@@ -287,8 +287,8 @@ public:
      * Sprite pixel data.
      */
     struct SpritePixel : TilePixel {
-        uint8_t spindex{};          /* Sprite index (0-63)                  */
-        bool    bgpri{};            /* Background priority over sprites     */
+        uint8_t spindex{};          /* Sprite index (0-63)              */
+        bool    bgpri{};            /* Background priority over sprites */
     };
 
     using RendererCb   = std::function<bool(unsigned, const ui::Scanline&)>;
@@ -388,8 +388,8 @@ private:
 
     /**
      * Fetch a tile code from the name table.
-     * Read the tile code from VRAM, the address is build
-     * based on the contents of the 'v' register.
+     * Read the tile code from VRAM, the tile address
+     * depends on the content of the 'v' register.
      * @param tile Destination tile data.
      * @see Registers
      * @see TileData
@@ -399,8 +399,8 @@ private:
     /**
      * Fetch the palette index from the attribute table.
      * Read an entry from the attribute table stored in VRAM
-     * (soon after the name table), the address is built based
-     * on the contents of the 'v' register.
+     * (soon after the name table), the palette address depends
+     * on the content of the 'v' register.
      * The palette index is deduced from the attribute and the
      * contents of the 'v' register.
      * @param tile Destination tile data.
@@ -411,8 +411,8 @@ private:
 
     /**
      * Fetch a tile pattern (tile bitmap data).
-     * The address of the tile pattern is built based
-     * on the contentes of the 'v' register.
+     * The address of the tile pattern depends
+     * on the contente of the 'v' register.
      * @param tilech Tile code;
      * @param plane  Bitmap plane (0 or 1).
      * @see TileData
@@ -426,13 +426,13 @@ private:
      * scanline copy it into the secondary OAM buffer.
      * @param spindex Sprite index within the OAM data buffer (0-63);
      * @param line    Scanline.
-     * @return True if the secondary OAM buffer is full; false otherwise.
+     * @return true if the secondary OAM buffer is full; false otherwise.
      */
     bool sprite_evaluation(uint8_t spindex, unsigned line);
 
     /**
      * Fetch a sprite pattern data (bitmap).
-     * Feth the sprite pattern and, if necessary, flip it as specified
+     * Feth the sprite pattern and, if required, flip it as specified
      * in the sprite data structure.
      * @param sprite Sprite data;
      * @param spline Sprite pattern line to fetch (0-7 for 8x8 sprites and 0-15 for 8x16 sprites).
@@ -445,9 +445,9 @@ private:
      * Paint a tile line.
      * The tile is painted in a temporary "background scanline" (_bg_scanline).
      * Sprite 0 hits are detected so this method expects the "sprite scanline"
-     * (_sp_scanline) to be properly set within the range [start, start + 7].
+     * (_sp_scanline) to be properly filled within the range [start, start + 7].
      * The paint_scanline() method must be called before the actual rendering.
-     * @param x      Starting horizontal coordinates within the current scanline;
+     * @param x      Starting horizontal coordinate within the current scanline;
      * @param left   Left tile;
      * @param right  Right tile.
      * @return The X coordinate of a sprite 0 hit, otherwise INVALID_X_COORDINATE.
@@ -490,9 +490,9 @@ private:
     /**
      * Detect whether an address belongs to the palette area.
      * @param addr Address.
-     * @return True if the address falls within a color palette; false otherwise.
+     * @return true if the address falls within a color palette; false otherwise.
      */
-    bool is_palette_address(const addr_t addr) const;
+    bool is_palette_address(addr_t addr) const;
 
     /**
      * Get a RGBA color from the palette.
@@ -513,7 +513,7 @@ private:
     /**
      * Detect a forced VBlank condition.
      * Forced VBlank occurs when both sprites and background rendering are disabled.
-     * @return True if forced VBlank is enabled; false otherwise.
+     * @return true if forced VBlank is enabled; false otherwise.
      */
     bool is_forced_vblank() const;
 
@@ -521,7 +521,7 @@ private:
      * Get the rendering status.
      * Rendering is enabled if the current scanline is a visible line
      * and rendering of background, sprites or both is enabled.
-     * @return True if rendering is enabled; false otherwise.
+     * @return true if rendering is enabled; false otherwise.
      */
     bool is_rendering() const;
 

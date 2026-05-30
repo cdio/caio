@@ -192,8 +192,6 @@ size_t RP2A03::tick(const Clock& clk)
 uint8_t RP2A03::read(addr_t addr, Device::ReadMode mode)
 {
     if (addr >= REG_ADDR_START && addr < REG_ADDR_END) {
-        uint8_t data{};
-
         switch (addr) {
         case SND_CHN:
             /*
@@ -212,16 +210,21 @@ uint8_t RP2A03::read(addr_t addr, Device::ReadMode mode)
              * - Frame interrupt flag cleared after read.
              * - If an interrupt flag is set during read, it will be read as 1 but it is not cleared.
              */
-            data = (_apu.pulse1().lc().is_running()   * D0) |
-                   (_apu.pulse2().lc().is_running()   * D1) |
-                   (_apu.triangle().lc().is_running() * D2) |
-                   (_apu.noise().lc().is_running()    * D3) |
-                   (_apu.dmc().is_running()           * D4) |
-                   (_apu.frame_irq_flag()             * D6) |
-                   (_apu.dmc_irq_flag()               * D7) |
-                   (_mmap->data_bus() & D5);
-            _apu.frame_irq_ack();
-            return data;
+            return [this]() -> uint8_t {
+                const uint8_t data =
+                    (_apu.pulse1().lc().is_running()   * D0) |
+                    (_apu.pulse2().lc().is_running()   * D1) |
+                    (_apu.triangle().lc().is_running() * D2) |
+                    (_apu.noise().lc().is_running()    * D3) |
+                    (_apu.dmc().is_running()           * D4) |
+                    (_apu.frame_irq_flag()             * D6) |
+                    (_apu.dmc_irq_flag()               * D7) |
+                    (_mmap->data_bus() & D5);
+
+                _apu.frame_irq_ack();
+
+                return data;
+            }();
 
         case PORT1:
             /*

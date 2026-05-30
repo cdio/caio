@@ -35,18 +35,18 @@ namespace nes {
  *
  * ### Address space:
  *
- *   CPU Address Range  Size    Description             Provider
- *   ------------------------------------------------------------------
- *   0000-07FF          800     2K RAM                  NES board
- *   0800-0FFF          800     Mirror of 0000-07FF
- *   1000-17FF          800     Mirror of 0000-07FF
- *   1800-1FFF          800     Mirror of 0000-07FF
- *   2000-2007          8       PPU registers           PPU
- *   2008-3FFF          1FF8    Mirror of 2000-2007
- *   4000-401F          20      APU/IO registers        Internal to CPU
- *   4020-5FFF          1FE0    Cartridge defined       Cartridge
- *   6000-7FFF          2000    8K RAM (usually)        Cartridge
- *   8000-FFFF          8000    32K ROM (usually)       Cartridge
+ *     CPU Address Range  Size  Description          Provider
+ *     -------------------------------------------------------------
+ *     0000-07FF          800   2K RAM               NES board
+ *     0800-0FFF          800   Mirror of 0000-07FF
+ *     1000-17FF          800   Mirror of 0000-07FF
+ *     1800-1FFF          800   Mirror of 0000-07FF
+ *     2000-2007          8     PPU registers        PPU
+ *     2008-3FFF          1FF8  Mirror of 2000-2007
+ *     4000-401F          20    APU/IO registers     Internal to CPU
+ *     4020-5FFF          1FE0  Cartridge defined    Cartridge
+ *     6000-7FFF          2000  8K RAM (usually)     Cartridge
+ *     8000-FFFF          8000  32K ROM (usually)    Cartridge
  *
  * @see ASpace
  * @see NESCartridge
@@ -57,7 +57,7 @@ class NESASpace : public ASpace {
 public:
     constexpr static const char* TYPE       = "NES-ASPACE";
     constexpr static const addr_t ADDR_MASK = 0xFFFF;
-    constexpr static const size_t BLOCKS    = 32;       /* 2K sized blocks */
+    constexpr static const size_t BLOCKS    = 32;           /* 2K sized blocks */
 
     /**
      * Initialise this address space.
@@ -67,8 +67,6 @@ public:
      * @param cart  Cartridge.
      */
     NESASpace(std::string_view label, const sptr_t<RAM>& ram, const sptr_t<RP2C02>& ppu, const sptr_t<Cartridge>& cart);
-
-    virtual ~NESASpace() = default;
 
 private:
     bank_t<BLOCKS> _mmap;
