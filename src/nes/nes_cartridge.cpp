@@ -20,10 +20,6 @@
 
 #include "config.hpp"
 
-#include "mapper_000.hpp"
-#include "mapper_001.hpp"
-#include "mapper_002.hpp"
-
 namespace caio {
 namespace nintendo {
 namespace nes {
@@ -31,27 +27,28 @@ namespace nes {
 Cartridge::Cartridge(std::string_view type, const fs::Path& fname, const iNES::Header& hdr, std::ifstream& is)
     : Device{type, fname.stem().string()},
       _fname{fname},
-      _hdr{hdr},
-      _mirror{hdr.vertical_mirror() ? MirrorType::Vertical : MirrorType::Horizontal},
-      _vram{"vram", VRAM_SIZE}
+      _hdr{hdr}
 {
-    const size_t chr_size = hdr.chr_size();
-    const size_t prg_size = hdr.prg_size();
     const size_t ram_size = hdr.prg_ram_size();
+    const size_t prg_size = hdr.prg_size();
+    const size_t chr_size = hdr.chr_size();
 
     if (ram_size != 0 && (ram_size & RAM_BANK_MASK) != 0)  {
-        throw InvalidCartridge{"{}: Invalid PRG RAM size: {}", fname.c_str(), ram_size};
+        throw InvalidCartridge{"{}: Invalid PRG RAM size: {}. It must be a multiple of {}",
+            fname.c_str(), ram_size, RAM_BANK_SIZE};
     }
 
     if (prg_size < PRG_BANK_SIZE || (prg_size & PRG_BANK_MASK) != 0) {
-        throw InvalidCartridge{"{}: Invalid PRG ROM size: {}. It must be a multiple of {}K",
-            fname.c_str(), prg_size, PRG_BANK_SIZE / 1024};
+        throw InvalidCartridge{"{}: Invalid PRG ROM size: {}. It must be a multiple of {}",
+            fname.c_str(), prg_size, PRG_BANK_SIZE};
     }
 
-    if (chr_size != 0 && (chr_size & CHR_BANK_MASK) != 0) {
-        throw InvalidCartridge{"{}: Invalid CHR ROM size: {}. It must be a multiple of {}K",
-            fname.string(), chr_size, CHR_BANK_SIZE / 1024};
+    if (chr_size != 0 && ((chr_size < CHR_BANK_SIZE) || (chr_size & CHR_BANK_MASK) != 0)) {
+        throw InvalidCartridge{"{}: Invalid CHR ROM size: {}. Minimum size: {}. It must be a multiple of {}",
+            fname.c_str(), chr_size, CHR_RAM_SIZE, CHR_BANK_SIZE};
     }
+
+    const size_t rsize = (ram_size == 0 ? DEFAULT_RAM_SIZE : ram_size);
 
     if (_hdr.persistent_ram()) {
         /*
@@ -59,19 +56,27 @@ Cartridge::Cartridge(std::string_view type, const fs::Path& fname, const iNES::H
          */
         _ram_fname = std::format("{}/{}.ram", config::storage_path().c_str(), fs::sha256(fname));
         if (fs::exists(_ram_fname)) {
-            _ram = RAM{_ram_fname.string(), _ram_fname, (ram_size == 0 ? RAM_SIZE : ram_size)};
+            log.debug("{}: Loading PRG RAM data: {}, size: {}\n", Name::to_string(), _ram_fname.c_str(), rsize);
+            _ram = RAM{_ram_fname.string(), _ram_fname, rsize};
         }
     }
 
     if (_ram.size() == 0) {
-        _ram = RAM{"ram", (ram_size == 0 ? RAM_SIZE : ram_size)};
+        log.debug("{}: Initializing PRG RAM, size: {}\n", Name::to_string(), rsize);
+        _ram = RAM{"ram", rsize};
     }
 
+    log.debug("{}: Loading PRG ROM, size: {}\n", Name::to_string(), prg_size);
     _prg = ROM{"prg", is, prg_size};
 
+    log.debug("{}: Initializing VRAM, size: {}\n", Name::to_string(), VRAM_SIZE);
+    _vram = RAM{"vram", VRAM_SIZE};
+
     if (chr_size == 0) {
+        log.debug("{}: Initializing CHR RAM, size: {}\n", Name::to_string(), CHR_RAM_SIZE);
         _chr = RAM{"chr", CHR_RAM_SIZE};
     } else {
+        log.debug("{}: Loading CHR ROM, size: {}\n", Name::to_string(), chr_size);
         _chr = ROM{"chr", is, chr_size};
     }
 
@@ -83,25 +88,52 @@ Cartridge::Cartridge(std::string_view type, const fs::Path& fname, const iNES::H
 Cartridge::~Cartridge()
 {
     if (!_ram_fname.empty()) {
-        fs::save(_ram_fname, _ram.buffer());
+        try {
+            fs::save(_ram_fname, _ram.buffer());
+        } catch (const std::exception& err) {
+            log.error("{}: Can't save RAM content: {}: {}\n", Name::to_string(), _ram_fname.string(), err.what());
+        }
     }
 }
 
 void Cartridge::reset()
 {
-#if 1 //XXX
-    _mirror = _hdr.vertical_mirror() ? MirrorType::Vertical : MirrorType::Horizontal;
-#endif
+    _ram_banks[0] = RAMBank{_ram, RAM_BANK_SIZE, 0};
+    _ram_banks[1] = RAMBank{_ram, RAM_BANK_SIZE, 1};
+    _ram_banks[2] = RAMBank{_ram, RAM_BANK_SIZE, 2};
+    _ram_banks[3] = RAMBank{_ram, RAM_BANK_SIZE, 3};
+    _ram_banks[4] = RAMBank{_ram, RAM_BANK_SIZE, 4};
+    _ram_banks[5] = RAMBank{_ram, RAM_BANK_SIZE, 5};
+    _ram_banks[6] = RAMBank{_ram, RAM_BANK_SIZE, 6};
+    _ram_banks[7] = RAMBank{_ram, RAM_BANK_SIZE, 7};
+
     _prg_mode = PrgMode::Fixed_C000;
-    _prg_lb = ROMBank{_prg, PRG_BANK_SIZE};
-    _prg_hb = ROMBank{_prg, PRG_BANK_SIZE};
-    _prg_hb.bank(_prg_hb.banks() - 1);
+    const size_t banks = _prg.size() / PRG_BANK_SIZE;
+    _prg_banks[0] = ROMBank{_prg, PRG_BANK_SIZE, 0};
+    _prg_banks[1] = ROMBank{_prg, PRG_BANK_SIZE, 1};
+    _prg_banks[2] = ROMBank{_prg, PRG_BANK_SIZE, banks - 2};
+    _prg_banks[3] = ROMBank{_prg, PRG_BANK_SIZE, banks - 1};
+
+    _vram_banks[0] = RAMBank{_vram, VRAM_BANK_SIZE, 0};
+    _vram_banks[1] = RAMBank{_vram, VRAM_BANK_SIZE, 1};
+    _vram_banks[2] = RAMBank{_vram, VRAM_BANK_SIZE, 2};
+    _vram_banks[3] = RAMBank{_vram, VRAM_BANK_SIZE, 3};
+
+    const MirrorType mirror = (_hdr.alternative_nametable() ? MirrorType::FourScreen :
+        (_hdr.vertical_mirror() ? MirrorType::Vertical : MirrorType::Horizontal));
+
+    log.debug("{}: Applying VRAM mirror type: {}\n", Name::to_string(), static_cast<int>(mirror));
+    vram_mirror(mirror);
 
     _chr_mode = ChrMode::Mode_8K;
-    _chr_lb = ROMBank{_chr, CHR_BANK_SIZE, 0};
-    _chr_hb = ROMBank{_chr, CHR_BANK_SIZE, 1};
-
-    _ram_b = RAMBank{_ram, _ram.size()};
+    _chr_banks[0] = RAMBank{_chr, CHR_BANK_SIZE, 0};
+    _chr_banks[1] = RAMBank{_chr, CHR_BANK_SIZE, 1};
+    _chr_banks[2] = RAMBank{_chr, CHR_BANK_SIZE, 2};
+    _chr_banks[3] = RAMBank{_chr, CHR_BANK_SIZE, 3};
+    _chr_banks[4] = RAMBank{_chr, CHR_BANK_SIZE, 4};
+    _chr_banks[5] = RAMBank{_chr, CHR_BANK_SIZE, 5};
+    _chr_banks[6] = RAMBank{_chr, CHR_BANK_SIZE, 6};
+    _chr_banks[7] = RAMBank{_chr, CHR_BANK_SIZE, 7};
 }
 
 size_t Cartridge::size() const
@@ -141,166 +173,200 @@ void Cartridge::dev_write(size_t addr, uint8_t value)
     }
 }
 
-inline uint8_t Cartridge::cpu_read(size_t addr, ReadMode mode)
+uint8_t Cartridge::cpu_read(size_t addr, ReadMode mode)
 {
-    if (addr < RAM_BASE) {
+    if (addr < RAM_BASE_ADDR) {
         /*
          * Unmapped area: 0000-1FFF (CPU 4000-5FFF).
          */
         return 0;
     }
 
-    if (addr < PRG_LO_BASE) {
+    if (addr < PRG_BASE_ADDR) {
         /*
          * RAM access: 2000-3FFF (CPU 6000-7FFF).
          */
-        return _ram_b.read(addr - RAM_BASE, mode);
-    }
-
-    if (addr < PRG_HI_BASE) {
-        /*
-         * PRG LO access: 4000-7FFF (CPU 8000-BFFF)
-         */
-        return _prg_lb.read(addr - PRG_LO_BASE, mode);
+        const size_t raddr = addr - RAM_BASE_ADDR;
+        const size_t rbank = raddr >> RAM_BANK_SHIFT;
+        const size_t rbase = raddr & RAM_BANK_MASK;
+        return _ram_banks[rbank].read(rbase, mode);
     }
 
     /*
-     * PRG HI access: 8000-BFFF (CPU C000-FFFF)
+     * PRG access: 4000-BFFF (CPU 8000-FFFF)
      */
-    return _prg_hb.read(addr - PRG_HI_BASE, mode);
+    const size_t raddr = addr - PRG_BASE_ADDR;
+    const size_t rbank = raddr >> PRG_BANK_SHIFT;
+    const size_t rbase = raddr & PRG_BANK_MASK;
+    return _prg_banks[rbank].read(rbase, mode);
 }
 
-void Cartridge::cpu_write(size_t addr, uint8_t data)
+void Cartridge::cpu_write(size_t addr, uint8_t value)
 {
-    if (addr < RAM_BASE) {
+    if (addr < RAM_BASE_ADDR) {
         /*
          * Unmapped area: 0000-1FFF (CPU 4000-5FFF).
          */
         return;
     }
 
-    if (addr < PRG_LO_BASE) {
+    if (addr < PRG_BASE_ADDR) {
         /*
          * RAM access: 2000-3FFF (CPU 6000-7FFF).
          */
-        _ram_b.write(addr - RAM_BASE, data);
+        const size_t raddr = addr - RAM_BASE_ADDR;
+        const size_t rbank = raddr >> RAM_BANK_SHIFT;
+        const size_t rbase = raddr & RAM_BANK_MASK;
+        _ram_banks[rbank].write(rbase, value);
     }
 }
 
-inline uint8_t Cartridge::ppu_read(size_t addr, ReadMode mode)
+uint8_t Cartridge::ppu_read(size_t addr, ReadMode mode)
 {
-    if (addr < CHR_HI_BASE) {
+    if (addr < VRAM_BASE_ADDR) {
         /*
-         * CHR LO ROM access: 0000-0FFF (PPU 0000-0FFF).
+         * CHR access: PPU 0000-1FFF.
          */
-        return _chr_lb.read(addr - CHR_LO_BASE, mode);
-    }
-
-    if (addr < VRAM_BASE) {
-        /*
-         * CHR HI ROM access: 1000-1FFF (PPU 1000-1FFF).
-         */
-        return _chr_hb.read(addr - CHR_HI_BASE, mode);
+        const size_t raddr = addr - CHR_BASE_ADDR;
+        const size_t rbank = raddr >> CHR_BANK_SHIFT;
+        const size_t rbase = raddr & CHR_BANK_MASK;
+        return _chr_banks[rbank].read(rbase, mode);
     }
 
     /*
-     * VRAM access: 2000-2C00 (PPU 2000-2C00).
+     * VRAM access: PPU 2000-3FFF.
      */
-    addr = vram_mirror(addr - VRAM_BASE) & VRAM_MASK;
-    return _vram.read(addr, mode);
+    const size_t raddr = (addr - VRAM_BASE_ADDR) & VRAM_MASK;
+    const size_t rbank = raddr >> VRAM_BANK_SHIFT;
+    const size_t rbase = raddr & VRAM_BANK_MASK;
+    return _vram_banks[rbank].read(rbase, mode);
 }
 
-inline void Cartridge::ppu_write(size_t addr, uint8_t value)
+void Cartridge::ppu_write(size_t addr, uint8_t value)
 {
-    if (addr < CHR_HI_BASE) {
+    if (addr < VRAM_BASE_ADDR) {
         /*
-         * CHR LO ROM access: 0000-0FFF (PPU 0000-0FFF).
+         * CHR access: PPU 0000-1FFF.
          */
-        _chr_lb.write(addr - CHR_LO_BASE, value);
-        return;
-    }
+        const size_t raddr = addr - CHR_BASE_ADDR;
+        const size_t rbank = raddr >> CHR_BANK_SHIFT;
+        const size_t rbase = raddr & CHR_BANK_MASK;
+        _chr_banks[rbank].write(rbase, value);
 
-    if (addr < VRAM_BASE) {
+    } else {
         /*
-         * CHR HI ROM access: 1000-1FFF (PPU 1000-1FFF).
+         * VRAM access: PPU 2000-3FFF.
          */
-        _chr_hb.write(addr - CHR_HI_BASE, value);
-        return;
+        const size_t raddr = (addr - VRAM_BASE_ADDR) & VRAM_MASK;
+        const size_t rbank = raddr >> VRAM_BANK_SHIFT;
+        const size_t rbase = raddr & VRAM_BANK_MASK;
+        return _vram_banks[rbank].write(rbase, value);
     }
-
-    /*
-     * VRAM access: 2000-2C00 (PPU 2000-2C00).
-     */
-    addr = vram_mirror(addr - VRAM_BASE) & VRAM_MASK;
-    _vram.write(addr, value);
 }
 
-inline addr_t Cartridge::vram_mirror(size_t addr) const
+void Cartridge::vram_mirror(MirrorType type)
 {
-    return vram_mirror(addr, _mirror);
-}
+    _mirror = type;
 
-inline addr_t Cartridge::vram_mirror(size_t addr, MirrorType type) const
-{
-    /*
-     * Horizontal mirroring:
-     *   2000 -> 2400
-     *   2800 -> 2C00
-     *
-     * 20xx = 24xx
-     * 28xx = 2Cxx
-     *
-     * Physical 2400 must be moved to logical 2800:
-     * Access to logical 2000 => Nothing to do
-     * Access to logical 2400 => Clear A10 becoming physical 2000
-     * Access to logical 2800 => Clear A11 and set A10 becoming physical 2400
-     * Access to logical 2C00 => Clear A11 (A10 already set) becoming physical 2400
-     *
-     * Vertical mirroring:
-     *   2000 2400
-     *     |   |
-     *     v   v
-     *   2800 2C00
-     *
-     * 20xx = 28xx
-     * 24xx = 2Cxx
-     *
-     * Physical 2000 mirrored to logical 2800
-     * Physical 2400 mirrored to logical 2C00
-     */
-    if (addr >= VRAM_END) {
-        addr &= ~A12;
-    }
-
-    switch (type) {
+    switch (_mirror) {
     case MirrorType::OneScreenLower:
         /*
          * One-screen, lower bank.
-         * All mirror 2000.
+         * All mirror 2000-23FF.
          */
-        return (addr & ~0x0C00);
+        _vram_banks[0].bank(0);
+        _vram_banks[1].bank(0);
+        _vram_banks[2].bank(0);
+        _vram_banks[3].bank(0);
+        break;
+
     case MirrorType::OneScreenUpper:
         /*
-         * One-screen, upper bank/
-         * All mirror 2400.
+         * One-screen, upper bank.
+         * All mirror 2400-27FF.
          */
-        return (addr & ~0x0C00) | 0x0400;
+        _vram_banks[0].bank(1);
+        _vram_banks[1].bank(1);
+        _vram_banks[2].bank(1);
+        _vram_banks[3].bank(1);
+        break;
+
     case MirrorType::Vertical:
         /*
-         * Horizontal arrangement (Vertical mirroring)
+         * Horizontal arrangement (Vertical mirroring).
+         * 2000 2400
+         *   |   |
+         *   v   v
+         * 2800 2C00
+         *
+         * 20xx = 28xx
+         * 24xx = 2Cxx
+         *
+         * Physical 2000 mirrored to logical 2800
+         * Physical 2400 mirrored to logical 2C00
          */
+        _vram_banks[0].bank(0);
+        _vram_banks[1].bank(1);
+        _vram_banks[2].bank(0);
+        _vram_banks[3].bank(1);
         break;
-    case MirrorType::Horizontal: {
-            /*
-             * Vertical arrangement (Horizontal mirroring)
-             */
-            const addr_t bit10 = (addr & A11) >> 1;
-            addr = ((addr & ~(A11 | A10)) | bit10);
-        }
+
+    case MirrorType::Horizontal:
+        /*
+         * Vertical arrangement (Horizontal mirroring).
+         * 2000 -> 2400
+         * 2800 -> 2C00
+         *
+         * 20xx = 24xx
+         * 28xx = 2Cxx
+         *
+         * Physical 2400 must be moved to logical 2800:
+         * Access to logical 2000 => Nothing to do
+         * Access to logical 2400 => Clear A10 becoming physical 2000
+         * Access to logical 2800 => Clear A11 and set A10 becoming physical 2400
+         * Access to logical 2C00 => Clear A11 (A10 already set) becoming physical 2400
+         */
+        _vram_banks[0].bank(0);
+        _vram_banks[1].bank(0);
+        _vram_banks[2].bank(1);
+        _vram_banks[3].bank(1);
+        break;
+
+    case MirrorType::FourScreen:
+        /*
+         * Four-Screen mirroring:
+         * Each page has its own data.
+         */
+        _vram_banks[0].bank(0);
+        _vram_banks[1].bank(1);
+        _vram_banks[2].bank(2);
+        _vram_banks[3].bank(3);
         break;
     }
+}
 
-    return addr;
+void Cartridge::irq(const OutputPinCb& cb)
+{
+    _irq_out_cb = cb;
+}
+
+void Cartridge::irq_enable(bool enable)
+{
+    if (!enable) {
+        irq_out(false);
+    }
+
+    _irq_enabled = enable;
+}
+
+void Cartridge::irq_out(bool active)
+{
+    if (_irq_enabled && _irq_pin != active) {
+        _irq_pin = active;
+        if (_irq_out_cb) {
+            _irq_out_cb(_irq_pin);
+        }
+    }
 }
 
 Serializer& operator&(Serializer& ser, Cartridge& cart)
@@ -310,49 +376,40 @@ Serializer& operator&(Serializer& ser, Cartridge& cart)
     ser & static_cast<Device&>(cart)
         & sign
         & cart._mirror
-        & cart._vram
-        & cart._ram
-        & cart._chr
-        & cart._ram_b
-        & cart._prg_lb
-        & cart._prg_hb
-        & cart._chr_lb
-        & cart._chr_hb
         & cart._chr_mode
-        & cart._prg_mode;
+        & cart._prg_mode
+        & cart._ram
+        & cart._prg
+        & cart._vram
+        & cart._chr
+        & cart._ram_banks[0]
+        & cart._ram_banks[1]
+        & cart._ram_banks[2]
+        & cart._ram_banks[3]
+        & cart._ram_banks[4]
+        & cart._ram_banks[5]
+        & cart._ram_banks[6]
+        & cart._ram_banks[7]
+        & cart._prg_banks[0]
+        & cart._prg_banks[1]
+        & cart._prg_banks[2]
+        & cart._prg_banks[3]
+        & cart._chr_banks[0]
+        & cart._chr_banks[1]
+        & cart._chr_banks[2]
+        & cart._chr_banks[3]
+        & cart._chr_banks[4]
+        & cart._chr_banks[5]
+        & cart._chr_banks[6]
+        & cart._chr_banks[7]
+        & cart._irq_enabled
+        & cart._irq_pin;
 
     if (ser.is_deserializer() && sign != cart.signature()) {
         throw IOError{"Invalid cartridge signature"};
     }
 
     return ser;
-}
-
-sptr_t<Cartridge> Cartridge::instance(const fs::Path& fname)
-{
-    const auto fullpath = fs::search(fname);
-    if (fullpath.empty()) {
-        if (fname.empty()) {
-            throw InvalidCartridge{"Cartridge file not specified"};
-        }
-        throw InvalidCartridge{"Invalid cartridge file: {}\n", fname.string()};
-    }
-
-    auto [hdr, is] = iNES::load_header(fullpath);
-    const size_t mapper = hdr.mapper();
-
-    switch (mapper) {
-    case 0:   /* NROM */
-        return std::make_shared<Mapper_000>(fullpath, hdr, is);
-    case 1:   /* SxROM */
-        return std::make_shared<Mapper_001>(fullpath, hdr, is);
-    case 2:   /* UxROM */
-        return std::make_shared<Mapper_002>(fullpath, hdr, is);
-    default:;
-    }
-
-    throw InvalidCartridge{"Can't instantiate cartridge: {}: Mapper not supported: {}\n",
-        fullpath.c_str(), iNES::to_string(hdr)};
 }
 
 }

@@ -27,31 +27,30 @@ namespace nes {
 /**
  * Cartridge Mapper 001 (MMC1).
  *
- * ### Address range accessed by the CPU:
+ * ### Charactersitics:
  *
- *     Mapper Address     CPU Address     Descripton
- *     ---------------------------------------------------------------------------------------
- *     2000-3FFF          6000-7FFF       8K PRG RAM (optional)
- *     4000-7FFF          8000-BFFF       16K PRG ROM (fixed to the first bank or switchable)
- *     8000-BFFF          C000-FFFF       16K PRG ROM (fixed to the last bank or switchable)
+ * - PRG ROM capacity:  256 KB / 512 KB
+ * - PRG ROM window:    16 KB + 16 KB fixed or 32 KB
+ * - PRG RAM capacity:  32 KB
+ * - PRG RAM window:    8 KB
+ * - CHR capacity:      128 KB
+ * - CHR window:        4 KB + 4 KB or 8 KB
  *
- * ### Address range accessed by the PPU:
+ * ### Banks:
  *
- *     Mapper Address     PPU Address     Descripton
- *     ---------------------------------------------------------------------------------------
- *     C000-CFFF          0000-0FFF       4K CHR ROM (switchable)
- *     D000-DFFF          1000-1FFF       4K CHR ROM (switchable)
- *     E000-E7FF          2000-27FF       2K VRAM
- *     E800-FFFF          2800-2FFF       2K VRAM (Nametable mirroring)
- *     F000-F7FF          3000-37FF       Mirror of 2000-27FF
- *     F800-FFFF          3800-3FFF       Mirror of 2800-2FFF
+ * - CPU 6000-7FFF: 8 KB PRG-RAM bank, (optional)
+ * - CPU 8000-BFFF: 16 KB PRG-ROM bank, either switchable or fixed to the first bank
+ * - CPU C000-FFFF: 16 KB PRG-ROM bank, either fixed to the last bank or switchable
+ * - PPU 0000-0FFF: 4 KB switchable CHR bank
+ * - PPU 1000-1FFF: 4 KB switchable CHR bank
  *
  * ### Bank Switching and Registers:
  *
  * The bank switching is done through a 5-bit shift register accessed by
  * writing to 8000-FFFF, the written address selects the internal register.
  *
- * - Load Register (8000-FFFF):
+ * #### Load Register (8000-FFFF):
+ *
  *   D7 D6 D5 D4 D3 D2 D1 D0
  *    |  |  |  |  |  |  |  |
  *    |  x  x  x  x  x  x  +-> Data bit loaded into the shift register (LSB first)
@@ -59,7 +58,8 @@ namespace nes {
  *                             1: Reset the shift register and write:
  *                                control = control OR $0C
  *
- * - Control Register (internal, 8000-9FFF):
+ * #### Control Register (internal, 8000-9FFF):
+ *
  *   D4 D3 D2 D1 D0
  *    |  |  |  |  |
  *    |  |  |  +--+-> Nametable arragement:
@@ -106,13 +106,13 @@ namespace nes {
  *                    MMC1A: Bit 3 bypasses fixed bank logic in 16K mode
  *                           0: Fixed bank affects A17-A14
  *                           1: Fixed bank affects A16-A14 and bit-3 directly controls A17
- *
+ * @see Cartridge
  * @see https://www.nesdev.org/wiki/MMC1
  */
 class Mapper_001 : public Cartridge {
 public:
-    constexpr static const char* TYPE                   = "CART_SxROM";
-    constexpr static const uint8_t SHIFT_RESET          = 0x80;
+    constexpr static const char* TYPE                   = "CART_MMC1";
+    constexpr static const uint8_t SHIFT_RESET          = D7;
     constexpr static const uint8_t CTRL_PRG_FIXED_C000  = 0x0C;
     constexpr static const size_t LOAD_REGISTER         = 0x8000 - 0x4000;
     constexpr static const size_t CONTROL_REGISTER      = 0x8000 - 0x4000;
@@ -125,12 +125,11 @@ public:
      */
     Mapper_001(const fs::Path& fname, const iNES::Header& hdr, std::ifstream& is);
 
-    virtual ~Mapper_001() = default;
-
     void reset() override;
 
 private:
-    void load_bit(size_t addr, uint8_t data);
+    void shreg_loader(size_t addr, uint8_t value);
+    void load_bit(size_t addr, uint8_t value);
     void reg_control(uint8_t value);
     void reg_prg(uint8_t value);
     void reg_chr(bool hi, uint8_t value);

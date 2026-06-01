@@ -27,31 +27,27 @@ namespace nes {
 /**
  * Cartridge Mapper 002 (UxROM).
  *
- * ### Address range accessed by the CPU:
+ * ### Characteristics:
  *
- *     Mapper Address     CPU Address     Descripton
- *     -----------------------------------------------------------------------------
- *     2000-3FFF          6000-7FFF       PRG RAM (size depends on specified value)
- *     4000-7FFF          8000-BFFF       Switchable 16K PRG ROM
- *     8000-BFFF          C000-FFFF       16K PRG ROM, fixed to the last bank
+ *   - PRG ROM capacity 256K/4096K
+ *   - PRG ROM window 16K + 16K fixed
+ *   - PRG RAM capacity None
+ *   - CHR capacity 8K
  *
- * ### Address range accessed by the PPU:
- *
- *     Mapper Address     PPU Address     Descripton
- *     -----------------------------------------------------------------------------
- *     C000-DFFF          0000-1FFF       8K CHR RAM
- *     E000-E7Ff          2000-27FF       2K VRAM
- *     E800-FFFF          2800-2FFF       2K VRAM (Nametable mirroring)
- *     F000-F7FF          3000-37FF       Mirror of 2000-27FF
- *     F800-FFFF          3800-3FFF       Mirror of 2800-2FFF
+ *   - CPU 8000-BFFF: 16 KB switchable PRG ROM bank
+ *   - CPU C000-FFFF: 16 KB PRG ROM bank, fixed to the last bank
  *
  * ### Bank select register (8000-FFFF):
  *
- *     D7 D6 D5 D4 D3 D2 D1 D0
- *      |  |  |  |  |  |  |  |
- *      x  x  x  x  +--+--+--+-> Select 16K PRG ROM bank for CPU (8000-BFFF)
- *                               (UNROM uses bits 2-0, UOROM uses bits 3-0)
+ *   D7 D6 D5 D4 D3 D2 D1 D0
+ *    |  |  |  |  |  |  |  |
+ *    x  x  x  x  +--+--+--+-> Select 16K PRG ROM bank for CPU (8000-BFFF)
+ *                             (UNROM uses bits 2-0, UOROM uses bits 3-0)
  *
+ * Emulator implementations of iNES mapper 2 treat this as a
+ * full 8-bit bank select register, without bus conflicts.
+ *
+ * @see Cartridge
  * @see https://www.nesdev.org/wiki/UxROM
  */
 class Mapper_002 : public Cartridge {
@@ -63,7 +59,10 @@ public:
      */
     Mapper_002(const fs::Path& fname, const iNES::Header& hdr, std::ifstream& is);
 
-    virtual ~Mapper_002() = default;
+private:
+    void bank_select(size_t addr, uint8_t value);
+
+    size_t _bmask;
 };
 
 }

@@ -28,33 +28,10 @@ namespace nes {
 Mapper_001::Mapper_001(const fs::Path& fname, const iNES::Header& hdr, std::ifstream& is)
     : Cartridge{TYPE, fname, hdr, is}
 {
-    const size_t chr_size = hdr.chr_size();
-    const size_t prg_size = hdr.prg_size();
-    const size_t ram_size = hdr.prg_ram_size();
-
-    if (ram_size != 0 && (ram_size & RAM_BANK_MASK) != 0)  {
-        throw InvalidCartridge{"{}: Invalid PRG RAM size: {}", fname.c_str(), ram_size};
-    }
-
-    if (prg_size < PRG_BANK_SIZE || (prg_size & PRG_BANK_MASK) != 0) {
-        throw InvalidCartridge{"{}: Invalid PRG ROM size: {}. It must be a multiple of {}K",
-            fname.c_str(), prg_size, PRG_BANK_SIZE / 1024};
-    }
-
-    if (chr_size != 0 && (chr_size & CHR_BANK_MASK) != 0) {
-        throw InvalidCartridge{"{}: Invalid CHR ROM size: {}. It must be a multiple of {}K",
-            fname.string(), chr_size, CHR_BANK_SIZE / 1024};
-    }
-
     load_bit(0, SHIFT_RESET);
 
-    const auto shreg_loader = [this](size_t addr, uint8_t value) {
-        if (addr >= PRG_LO_BASE && addr < PPU_OFFSET) {
-            load_bit(addr, value);
-        }
-    };
-
-    write_observer(shreg_loader);
+    using namespace std::placeholders;
+    write_observer(std::bind(&Mapper_001::shreg_loader, this, _1, _2));
 }
 
 void Mapper_001::reset()
@@ -63,16 +40,34 @@ void Mapper_001::reset()
     load_bit(0, SHIFT_RESET);
 }
 
-void Mapper_001::load_bit(size_t addr, uint8_t data)
+void Mapper_001::shreg_loader(size_t addr, uint8_t value)
 {
-    if (data & SHIFT_RESET) {
+    /*
+     * Shift register loader: Writes to 4000-7FFF (CPU 8000-FFFF).
+     */
+    if (addr >= PRG_BASE_ADDR && addr < PRG_BASE_ADDR + PRG_ASPACE_SIZE) {
+        load_bit(addr, value);
+    }
+}
+
+void Mapper_001::load_bit(size_t addr, uint8_t value)
+{
+    /*
+     * D7 D6 D5 D4 D3 D2 D1 D0
+     *  |  |  |  |  |  |  |  |
+     *  |  x  x  x  x  x  x  +-> Data bit loaded into the shift register (LSB first)
+     *  +----------------------> 0: No effect
+     *                           1: Reset the shift register and write:
+     *                              control = control OR $0C
+     */
+    if (value & SHIFT_RESET) {
         reg_control(CTRL_PRG_FIXED_C000);
 
     } else {
         /*
          * Load data (bit-0) into the shift register.
          */
-        _shreg |= (data & 1) * _shbit;
+        _shreg |= (value & 1) * _shbit;
         _shbit <<= 1;
 
         if (_shbit != D5) {
@@ -83,12 +78,12 @@ void Mapper_001::load_bit(size_t addr, uint8_t data)
          * The shift register is full, copy its value
          * to the destination internal register:
          *
-         * CPU      Mapper      Register
-         * -----------------------------
-         * 8000     4000        Control
-         * A000     6000        CHR-0
-         * C000     8000        CHR-1
-         * E000     A000        PRG
+         * CPU   Mapper  Register
+         * ----------------------
+         * 8000  4000    Control
+         * A000  6000    CHR-0
+         * C000  8000    CHR-1
+         * E000  A000    PRG
          */
         const auto reg = addr >> 13;
         switch (reg) {
@@ -114,7 +109,7 @@ void Mapper_001::load_bit(size_t addr, uint8_t data)
 void Mapper_001::reg_control(uint8_t value)
 {
     /*
-     * Control Register:
+     * Control register:
      *   D4 D3 D2 D1 D0
      *    |  |  |  |  |
      *    |  |  |  +--+-> Nametable arrangement:
@@ -131,23 +126,30 @@ void Mapper_001::reg_control(uint8_t value)
      *                    0: Switch 8K at a time
      *                    1: Switch two separate 4K banks
      */
-    _mirror = static_cast<MirrorType>(value & 3);
+    const auto mtype = static_cast<MirrorType>(value & 3);
+    vram_mirror(mtype);
 
+    const size_t banks = _prg_banks[0].size();
     const auto pmode = (value >> 2) & 3;
+
     switch (pmode) {
     case 0:
     case 1:
         _prg_mode = PrgMode::Mode_32K;
-        _prg_lb.bank(0);
-        _prg_hb.bank(1);
+        _prg_banks[0].bank(0);
+        _prg_banks[1].bank(1);
+        _prg_banks[2].bank(2);
+        _prg_banks[3].bank(3);
         break;
     case 2:
         _prg_mode = PrgMode::Fixed_8000;
-        _prg_lb.bank(0);
+        _prg_banks[0].bank(0);
+        _prg_banks[1].bank(1);
         break;
     case 3:
         _prg_mode = PrgMode::Fixed_C000;
-        _prg_hb.bank(_prg_hb.banks() - 1);
+        _prg_banks[2].bank(banks - 2);
+        _prg_banks[3].bank(banks - 1);
         break;
     }
 
@@ -157,86 +159,105 @@ void Mapper_001::reg_control(uint8_t value)
 void Mapper_001::reg_prg(uint8_t value)
 {
     /*
-     * D4 D3 D2 D1 D0
-     *  |  |  |  |  |
-     *  |  +--+--+--+-> Select 16 KB PRG ROM bank (low bit ignored in 32 KB mode)
-     *  +-------------> MMC1B and later: PRG RAM chip enable (0: enabled; 1: disabled; ignored on MMC1A)
-     *                  MMC1A: Bit 3 bypasses fixed bank logic in 16K mode (0: Fixed bank affects A17-A14;
-     *                         1: Fixed bank affects A16-A14 and bit 3 directly controls A17)
+     * PRG bank select register:
+     *   D4 D3 D2 D1 D0
+     *    |  |  |  |  |
+     *    |  +--+--+--+-> Select 16 KB PRG ROM bank (low bit ignored in 32 KB mode)
+     *    +-------------> MMC1B and later: PRG RAM chip enable (0: enabled; 1: disabled; ignored on MMC1A)
+     *                    MMC1A: Bit 3 bypasses fixed bank logic in 16K mode (0: Fixed bank affects A17-A14;
+     *                           1: Fixed bank affects A16-A14 and bit 3 directly controls A17)
      */
-    const size_t bank = (value & (D3 | D2 | D1 | D0)) | (_prg_A18 * D4);
+    const size_t off = 64 * (_prg_A18);
+    const size_t bank = (((value & (D3 | D2 | D1 | D0)) | (_prg_A18 * D4)) << 1) + off;
 
     switch (_prg_mode) {
     case PrgMode::Mode_32K:
-        _prg_lb.bank(bank & ~D0);
-        _prg_hb.bank(bank | D0);
+        _prg_banks[0].bank(bank);
+        _prg_banks[1].bank(bank + 1);
+        _prg_banks[2].bank(bank + 2);
+        _prg_banks[3].bank(bank + 3);
         break;
     case PrgMode::Fixed_8000:
-        _prg_hb.bank(bank);
+        _prg_banks[2].bank(bank);
+        _prg_banks[3].bank(bank + 1);
         break;
     case PrgMode::Fixed_C000:
-        _prg_lb.bank(bank);
+        _prg_banks[0].bank(bank);
+        _prg_banks[1].bank(bank + 1);
     }
 }
 
 void Mapper_001::reg_chr(bool hi, uint8_t value)
 {
     /*
-     * $A000 (lo) and $C000 (hi):
+     * CHR bank select register:
+     *   A000 (lo) and C000 (hi):
      *
-     * D4 D3 D2 D1 D0
-     *  |  |  |  |  |
-     *  |  |  |  |  +-> CHR A12
-     *  |  |  |  +----> CHR A13 if CHR >= 16K
-     *  |  |  +-------> CHR A14 if CHR >= 32K; PRG RAM A13 if PRG RAM = 32K
-     *  |  +----------> CHR A15 if CHR >= 64K; PRG RAM A13 if PRG RAM = 16K or PRG RAM A14 if PRG RAM = 32K
-     *  +-------------> CHR A16 if CHR = 128K; PRG ROM A18 if PRG ROM = 512K
+     *   D4 D3 D2 D1 D0
+     *    |  |  |  |  |
+     *    |  |  |  |  +-> CHR A12
+     *    |  |  |  +----> CHR A13 if CHR >= 16K
+     *    |  |  +-------> CHR A14 if CHR >= 32K; PRG RAM A13 if PRG RAM = 32K
+     *    |  +----------> CHR A15 if CHR >= 64K; PRG RAM A13 if PRG RAM = 16K or PRG RAM A14 if PRG RAM = 32K
+     *    +-------------> CHR A16 if CHR = 128K; PRG ROM A18 if PRG ROM = 512K
+     *
+     * D4 is PRG-RAM disable for SNROM (PRG-ROM size <= 256 KiB, CHR-RAM size = 8 KiB, PRG-RAM size = 8 KiB)
      */
-    const uint8_t cmask = D0 |
+    const size_t cmask = D0 |
         ((_chr.size() >= 16384)  * D1) |
         ((_chr.size() >= 32768)  * D2) |
         ((_chr.size() >= 65536)  * D3) |
         ((_chr.size() == 131072) * D4);
 
-    const uint8_t cvalue = value & cmask;
-
     if (_chr_mode == ChrMode::Mode_4K) {
-        if (hi) {
-            _chr_hb.bank(cvalue);
-        } else {
-            _chr_lb.bank(cvalue);
-        }
-
+        const size_t bank = (value & cmask) << 2;
+        const size_t r = 4 * hi;
+        _chr_banks[r].bank(bank);
+        _chr_banks[r + 1].bank(bank + 1);
+        _chr_banks[r + 2].bank(bank + 2);
+        _chr_banks[r + 3].bank(bank + 3);
     } else {
-        _chr_lb.bank(cvalue & ~D0);
-        _chr_hb.bank(cvalue | D0);
+        const size_t bank = (value & cmask) << 3;
+        _chr_banks[0].bank(bank);
+        _chr_banks[1].bank(bank + 1);
+        _chr_banks[2].bank(bank + 2);
+        _chr_banks[3].bank(bank + 3);
+        _chr_banks[4].bank(bank + 4);
+        _chr_banks[5].bank(bank + 5);
+        _chr_banks[6].bank(bank + 6);
+        _chr_banks[7].bank(bank + 7);
     }
 
     /* PRG RAM bank */
     if (_ram.size() > 8192) {
         const bool is16k = (_ram.size() == 16384);
-        const auto shift = 2 + is16k;
-        uint8_t rmask = (D3 | (!is16k * D2)) >> shift;
-        const uint8_t rvalue = value & rmask;
-        _ram_b.bank(rvalue);
+        const size_t shift = 2 + is16k;
+        const size_t rmask = (D3 | (!is16k * D2)) >> shift;
+        const size_t rvalue = value & rmask;
+        const size_t bank = rvalue << 3;
+        _ram_banks[0].bank(bank);
+        _ram_banks[1].bank(bank + 1);
+        _ram_banks[2].bank(bank + 2);
+        _ram_banks[3].bank(bank + 3);
+        _ram_banks[4].bank(bank + 4);
+        _ram_banks[5].bank(bank + 5);
+        _ram_banks[6].bank(bank + 6);
+        _ram_banks[7].bank(bank + 7);
     }
 
     /* PRG ROM bank */
-    if (_prg.size() == 524288) {
+    const bool is_D4_A18 = !(_prg.size() < 524288);
+    const bool A18 = (value & D4);
+    if (is_D4_A18 && A18 != _prg_A18) {
         /*
          * D4 specifies the status of A18 of PRG ROM when PRG ROM size is 512K.
          */
-        const bool a18 = value & D4;
-        if (a18 != _prg_A18) {
-            if (a18) {
-                _prg_lb.bank(_prg_lb.bank() | D4);
-                _prg_hb.bank(_prg_hb.bank() | D4);
-            } else {
-                _prg_lb.bank(_prg_lb.bank() & ~D4);
-                _prg_hb.bank(_prg_hb.bank() & ~D4);
-            }
-            _prg_A18 = a18;
-        }
+        _prg_A18 = A18;
+        int8_t off = 64 | (!A18 * 0x80);
+        std::for_each(std::begin(_prg_banks), std::end(_prg_banks), [off](RAMBank& rbank) {
+            const size_t b = rbank.bank();
+            rbank.bank(b + off);
+        });
     }
 }
 

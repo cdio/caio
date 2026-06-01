@@ -39,7 +39,8 @@ namespace iNES {
  * - CHR ROM data, if present (8192 * y bytes)
  * - PlayChoice INST-ROM, if present (0 or 8192 bytes)
  * - PlayChoice PROM, if present (16 bytes Data, 16 bytes CounterOut)
- * - Some ROM-Images additionally contain a 128-byte (or sometimes 127-byte) title at the end of the file.
+ * - Some ROM-Images additionally contain a 128-byte (or sometimes 127-byte)
+ *   title at the end of the file.
  *
  * This format seems to be created without investing
  * any mental effort, and v2.0 is not the exception.
