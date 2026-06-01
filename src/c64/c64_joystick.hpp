@@ -69,7 +69,6 @@ constexpr JoystickPort joystick_port()
     };
 }
 
-
 }
 }
 }

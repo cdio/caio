@@ -295,7 +295,7 @@ void C64::connect_devices()
     const auto kbd_read = [this](uint8_t addr) -> uint8_t {
         switch (addr) {
         case Mos6526::PRA:
-            return ~(_conf.swapj ? _joy1->position() : _joy2->position());
+            return (_kbd->scan_row() & ~(_conf.swapj ? _joy1->position() : _joy2->position()));
 
         case Mos6526::PRB:
             return (_kbd->read() & ~(_conf.swapj ? _joy2->position() : _joy1->position()));

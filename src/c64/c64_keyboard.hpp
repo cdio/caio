@@ -188,6 +188,12 @@ public:
     void write(uint8_t row) override;
 
     /**
+     * Get the row to scan.
+     * @return The Negated row to scan.
+     */
+    uint8_t scan_row() const;
+
+    /**
      * @see Keyboard::add_key_map()
      */
     void add_key_map(const std::string& key_name, bool key_shift, bool key_altgr, const std::string& impl_name,

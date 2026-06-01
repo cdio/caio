@@ -386,6 +386,11 @@ void C64Keyboard::write(uint8_t row)
     _scanrow = row;
 }
 
+uint8_t C64Keyboard::scan_row() const
+{
+    return _scanrow;
+}
+
 void C64Keyboard::add_key_map(const std::string& key_name, bool key_shift, bool key_altgr,
     const std::string& impl_name, bool impl_shift)
 {
