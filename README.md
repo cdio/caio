@@ -13,12 +13,12 @@ The following platforms are emulated:
 
 The emulator of the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64)
 supports audio, video, joystick interfaces, the cartridge CRT format, and the
-C1541 disk drive unit (read and write); the D64 file format is not supported
+C1541 disk drive unit (read and write). The D64 file format is not supported
 (yet).
 
 This emulator concentrates in pre-1994 games and applications and it might
 not work as expected with advanced games that exploit specific video/timing
-"tricks" discovered/developed after 1994.
+tricks discovered after 1994.
 
 ![c64-basic](images/c64-basic.gif "C64 - Basic")
 ![c64-q-bert](images/c64-q-bert.gif "C64 - Q*Bert")
@@ -29,14 +29,19 @@ not work as expected with advanced games that exploit specific video/timing
 ### NES (Nintendo Entertainment System)
 
 The emulator of the [NES](https://en.wikipedia.org/wiki/Nintendo_Entertainment_System)
-platform supports the NTSC version of this machine so games for the USA and
+console supports the NTSC version of this machine so games for the USA and
 Japan markets should run without any problems.
 The [Family BASIC keyboard](https://en.wikipedia.org/wiki/Family_BASIC)
-is also supported.<br>
-Implemented [mappers](https://www.nesdev.org/wiki/Mapper) (Cartridge types):
+is also supported.
+
+Available [mappers](https://www.nesdev.org/wiki/Mapper) (cartridge types):
 - [Mapper 000 / NROM](https://www.nesdev.org/wiki/NROM)
 - [Mapper 001 / MMC1](https://www.nesdev.org/wiki/MMC1)
 - [Mapper 002 / UxROM](https://www.nesdev.org/wiki/UxROM)
+- [Mapper 003 / CNROM](https://www.nesdev.org/wiki/INES_Mapper_003)
+- [Mapper 004 / MMC3](https://www.nesdev.org/wiki/MMC3)
+- [Mapper 071 / Codemasters](https://www.nesdev.org/wiki/INES_Mapper_071)
+- [Mapper 232 / Codemasters](https://www.nesdev.org/wiki/INES_Mapper_232)
 
 Other mappers are on the way.
 
@@ -62,7 +67,7 @@ Tape files .O and .P are supported (read and write).
 ### Sinclair ZX-Spectrum 48K
 
 The emulator of the [Sinclair ZX-Spectrum](https://en.wikipedia.org/wiki/ZX_Spectrum)
-supports the 48K version of this machine including the integrated 1 bit audio,
+supports the 48K version of this machine, the integrated 1 bit audio,
 the Kempston joystick interface, the cassette TAP file format (read and write)
 and snapshot files Z80 and SNA.
 

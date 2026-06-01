@@ -29,7 +29,8 @@ CXXSRCS+=	ines.cpp \
 		nes_config.cpp \
 		nes_joystick.cpp \
 		nes_keyboard.cpp \
-		nes_ppu_aspace.cpp \
+		nes_make_cartridge.cpp \
+		nes_ppu_aspace.cpp
 
 INCS+=		ines.hpp \
 		nes.hpp \
@@ -43,10 +44,18 @@ INCS+=		ines.hpp \
 
 CXXSRCS+=	mapper_000.cpp \
 		mapper_001.cpp \
-		mapper_002.cpp
+		mapper_002.cpp \
+		mapper_003.cpp \
+		mapper_004.cpp \
+		mapper_071.cpp \
+		mapper_232.cpp
 
 INCS+=		mapper_000.hpp \
 		mapper_001.hpp \
-		mapper_002.hpp
+		mapper_002.hpp \
+		mapper_003.hpp \
+		mapper_004.hpp \
+		mapper_071.hpp \
+		mapper_232.hpp
 
 include ${ROOT}/mk/lib.mk
