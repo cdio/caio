@@ -175,9 +175,8 @@ bool _directory(const Path& path, const Path& pattern, bool icase,
     const std::function<bool(const Path&, uint64_t)>& callback)
 {
     const auto& end = std::filesystem::end(IT{});
-    IT it{path, std::filesystem::directory_options::skip_permission_denied};
 
-    for (; it != end; ++it) {
+    for (IT it{path, std::filesystem::directory_options::skip_permission_denied}; it != end; ++it) {
         const auto& entry = it->path();
         if (!std::filesystem::is_directory(entry) && fs::match(entry, pattern, icase)) {
             auto size = std::filesystem::file_size(entry);

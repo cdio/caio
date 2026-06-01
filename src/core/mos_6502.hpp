@@ -257,7 +257,8 @@ public:
     /**
      * @see Device::peek(size_t)
      */
-    virtual uint8_t peek(addr_t addr) const {
+    virtual uint8_t peek(addr_t addr) const
+    {
         return const_cast<Mos6502*>(this)->read(addr, Device::ReadMode::Peek);
     }
 
@@ -507,10 +508,11 @@ protected:
 
     /**
      * Relative branch helper.
-     * @param rel Address to jump relative to the current PC position.
+     * @param rel Address to jump relative to the current PC.
      * @return The number of extra cycles required to take the branch.
      */
-    size_t take_branch(int8_t rel) {
+    size_t take_branch(int8_t rel)
+    {
         const auto crossed = page_crossed_rel(_regs.PC, rel);
         _delayed_irq = !crossed;    /* Skip interrupt sampling */
         _regs.PC += rel;
@@ -525,7 +527,8 @@ protected:
      * Flags: N Z
      * @return v1 & v2
      */
-    uint8_t logic_and(uint8_t v1, uint8_t v2) {
+    uint8_t logic_and(uint8_t v1, uint8_t v2)
+    {
         const uint8_t r = v1 & v2;
         set_N(r);
         set_Z(r);
@@ -537,7 +540,8 @@ protected:
      * Flags: N Z
      * @return v1 | v2.
      */
-    uint8_t logic_or(uint8_t v1, uint8_t v2) {
+    uint8_t logic_or(uint8_t v1, uint8_t v2)
+    {
         const uint8_t r = v1 | v2;
         set_N(r);
         set_Z(r);
@@ -549,7 +553,8 @@ protected:
      * Flags: N Z
      * @return v1 ^ v2
      */
-    uint8_t logic_eor(uint8_t v1, uint8_t v2) {
+    uint8_t logic_eor(uint8_t v1, uint8_t v2)
+    {
         const uint8_t r = v1 ^ v2;
         set_N(r);
         set_Z(r);
@@ -561,7 +566,8 @@ protected:
      * Flags: N Z C
      * @return The shifted value.
      */
-    uint8_t logic_shl(uint8_t v) {
+    uint8_t logic_shl(uint8_t v)
+    {
         flag_C(v & 0x80);
         v <<= 1;
         set_N(v);
@@ -574,7 +580,8 @@ protected:
      * Flags: N Z C
      * @return The rotated value.
      */
-    uint8_t logic_rol(uint8_t v) {
+    uint8_t logic_rol(uint8_t v)
+    {
         const uint8_t c = (test_C() ? 1 : 0);
         flag_C(v & 0x80);
         v = (v << 1) | c;
@@ -588,7 +595,8 @@ protected:
      * Flags: N Z C
      * @return The shifted value.
      */
-    uint8_t logic_shr(uint8_t v) {
+    uint8_t logic_shr(uint8_t v)
+    {
         flag_C(v & 0x01);
         v >>= 1;
         flag_N(false);
@@ -601,7 +609,8 @@ protected:
      * Flags: N Z C
      * @return The rotated value.
      */
-    uint8_t logic_ror(uint8_t v) {
+    uint8_t logic_ror(uint8_t v)
+    {
         const uint8_t c = (test_C() ? 0x80 : 0);
         flag_C(v & 0x01);
         v = (v >> 1) | c;
@@ -614,7 +623,8 @@ protected:
      * CMP helper.
      * Flags: N Z C
      */
-    void cmp(uint8_t v1, uint8_t v2) {
+    void cmp(uint8_t v1, uint8_t v2)
+    {
         const int sum = v1 - v2;
         const uint8_t r = static_cast<uint8_t>(sum & 0xFF);
         set_N(r);

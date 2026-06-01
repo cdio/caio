@@ -206,20 +206,22 @@ void C64::connect_devices()
      * Connect the CPU ports to the PLA.
      */
     const auto cpu_port_read = [this](addr_t addr) -> uint8_t {
-        uint8_t data = _pla->mode();
-        uint8_t cpuval = ((data & PLA::LORAM)  ? Mos6510::P0 : 0) |
-                         ((data & PLA::HIRAM)  ? Mos6510::P1 : 0) |
-                         ((data & PLA::CHAREN) ? Mos6510::P2 : 0);
+        const uint8_t data = _pla->mode();
 
-        /* Cassette input not implemented */
-        cpuval |= Mos6510::P4 | Mos6510::P5;
+        const uint8_t cpuval =
+            (((data & PLA::LORAM) != 0) * Mos6510::P0) |
+            (((data & PLA::HIRAM) != 0) * Mos6510::P1) |
+            (((data & PLA::CHAREN) != 0) * Mos6510::P2) |
+            (Mos6510::P4 | Mos6510::P5); /* Cassette input not implemented */
+
         return cpuval;
     };
 
     const auto cpu_port_write = [this](addr_t addr, uint8_t data, bool force) {
-        uint8_t plaval = ((data & Mos6510::P0) ? PLA::LORAM  : 0) |
-                         ((data & Mos6510::P1) ? PLA::HIRAM  : 0) |
-                         ((data & Mos6510::P2) ? PLA::CHAREN : 0);
+        const uint8_t plaval =
+            (((data & Mos6510::P0) != 0) * PLA::LORAM) |
+            (((data & Mos6510::P1) != 0) * PLA::HIRAM) |
+            (((data & Mos6510::P2) != 0) * PLA::CHAREN);
 
         _pla->mode(plaval, PLA::LORAM | PLA::HIRAM | PLA::CHAREN, force);
 
@@ -244,8 +246,9 @@ void C64::connect_devices()
          * Connect cartridge output ports EXROM and GAME to the PLA.
          */
         const auto cart_port_write = [this](addr_t addr, uint8_t data, bool force) {
-            uint8_t plaval = ((data & Cartridge::GAME)  ? PLA::GAME  : 0) |
-                             ((data & Cartridge::EXROM) ? PLA::EXROM : 0);
+            const uint8_t plaval =
+                (((data & Cartridge::GAME) != 0) * PLA::GAME) |
+                (((data & Cartridge::EXROM) != 0) * PLA::EXROM);
 
             _pla->mode(plaval, PLA::GAME | PLA::EXROM, force);
         };
@@ -364,8 +367,9 @@ void C64::make_widgets()
      */
     const auto floppy_status = [](const sptr_t<C1541>& unit) {
         using Status = ui::widget::Floppy::Status;
-        return (unit ? Status{ .is_attached = true,  .is_idle = unit->is_idle(), .progress = unit->progress()} :
-                       Status{ .is_attached = false, .is_idle = true,            .progress = -1.0f});
+        return (unit ?
+            Status{ .is_attached = true,  .is_idle = unit->is_idle(), .progress = unit->progress()} :
+            Status{ .is_attached = false, .is_idle = true,            .progress = -1.0f});
     };
 
     const auto unit8_status = std::bind(floppy_status, _unit8);
@@ -483,7 +487,7 @@ sptr_t<Cartridge> C64::attach_cartridge()
         return {};
     }
 
-    auto fpath = fs::search(_conf.cartridge);
+    const auto fpath = fs::search(_conf.cartridge);
     if (fpath.empty()) {
         throw IOError{"Can't load Cartridge: {}: {}", _conf.cartridge, Error::to_string(ENOENT)};
     }
@@ -498,7 +502,7 @@ void C64::attach_prg()
         return;
     }
 
-    fs::Path prgfile{fs::search(_conf.prgfile)};
+    const fs::Path prgfile{fs::search(_conf.prgfile)};
     if (prgfile.empty()) {
         throw IOError{"Can't load program: {}: {}", _conf.prgfile, Error::to_string()};
     }
@@ -556,19 +560,23 @@ void C64::attach_prg()
 
 ui::Config C64::ui_config()
 {
-    std::string title = _conf.title;
-    std::string session = LABEL;
+    const auto [title, session] = [this]() -> std::pair<std::string, std::string> {
+        if (!_conf.prgfile.empty()) {
+            const auto& basename = fs::basename(_conf.prgfile);
+            const auto& title = std::format("{} - {}", _conf.title, basename.string());
+            const auto& session = (basename.extension().empty() ? basename : basename.stem());
+            return {title, session};
+        }
 
-    if (!_conf.prgfile.empty()) {
-        const auto& basename = fs::basename(_conf.prgfile);
-        title = std::format("{} - {}", title, basename.string());
-        session = (basename.extension().empty() ? basename : basename.stem());
+        if (_ioexp) {
+            const auto& basename = fs::basename(_ioexp->name());
+            const auto& title = std::format("{} - {}", _conf.title, basename.string());
+            const auto& session = (basename.extension().empty() ? basename : basename.stem());
+            return {title, session};
+        }
 
-    } else if (_ioexp) {
-        const auto& basename = fs::basename(_ioexp->name());
-        title = std::format("{} - {}", title, basename.string());
-        session = (basename.extension().empty() ? basename : basename.stem());
-    }
+        return {_conf.title, LABEL};
+    }();
 
     const ui::Config uiconf {
         .name               = session,
