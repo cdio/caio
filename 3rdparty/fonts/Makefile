@@ -20,22 +20,6 @@ ROOT=		${abspath ../../}
 
 include ${ROOT}/mk/config.mk
 
-FONT_SRC=	UbuntuSansMono-Regular.ttf
-
-FONT_H=		font_${subst -,,${FONT_SRC:%.ttf=%.h}}
-
-SYMBOL_NAME=	${FONT_H:%.h=%}
-
-FONT2C=		../imgui/font2c/font2c
-
-#CLEANFILES+=	${FONT_H}
-
-all debug install: ${FONT_H}
-
-${FONT_H}: ${FONT2C} ${FONT_SRC}
-	${FONT2C} -base85 ${FONT_SRC} ${SYMBOL_NAME} > $@
-
-${FONT2C}:
-	${MAKE} ${MAKEARGS} -C ${dir $@}
+all debug install:
 
 include ${ROOT}/mk/clean.mk
