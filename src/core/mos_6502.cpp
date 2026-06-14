@@ -25,7 +25,7 @@ namespace caio {
 namespace mos {
 
 const Mos6502::Instruction Mos6502::instr_set[256] = {
-    { "BRK",            Mos6502::i_BRK,         MODE_NONE,  7                   },  /* 00 */
+    { "BRK",            Mos6502::i_BRK,         MODE_IMM,   7,  NO_DUMMY_READ   },  /* 00 */
     { "ORA ($*, X)",    Mos6502::i_ORA,         MODE_IND_X, 6                   },  /* 01 */
     { "KIL",            Mos6502::i_KIL,         MODE_NONE,  2                   },  /* 02 */
     { "SLO ($*, X)",    Mos6502::i_SLO,         MODE_IND_X, 8                   },  /* 03 */
@@ -739,7 +739,7 @@ size_t Mos6502::single_step()
     }
 
     /*
-     * A taken branch w/o page crossed delays IRQ sampling.
+     * A taken branch w/o page crossed delays interrupt sampling.
      */
     if (_delayed_irq) {
         _delayed_irq = false;
@@ -748,24 +748,32 @@ size_t Mos6502::single_step()
         /*
          * Sample interrupts.
          */
-        const bool is_nmi = _nmi_pin;
-        addr_t isr_addr{};
-        if (is_nmi) {
-            _nmi_pin.reset();               /* Reset the pin to simulate an edge triggered interrupt */
-            isr_addr = read_addr(vNMI);
-        } else if (is_irq_enabled() && _irq_pin) {
-            isr_addr = read_addr(vIRQ);
-        }
+        const bool is_nmi = (_nmi_pin);
+        const bool is_irq = (is_irq_enabled() && _irq_pin);
+        const auto isr_addr = [this, is_nmi, is_irq]() -> addr_t {
+            if (is_nmi) {
+                _nmi_pin.reset();       /* Edge-triggered */
+                return read_addr(vNMI);
+            }
+            return (is_irq ? read_addr(vIRQ) : 0);
+        }();
 
         if (isr_addr) {
             /*
              * Prepare to serve the interrupt.
              */
-            read_addr(_regs.PC);            /* Dummy reads at PC and PC + 1 */
+            read_addr(_regs.PC);    /* Dummy reads at PC and PC + 1 */
             push_addr(_regs.PC);
-            push(_regs.P | ((_delayed_I && _delayed_I.value()) * Flags::I));    /* SEI */
+
+            const uint8_t flags = (_regs.P & ~Flags::B) | Flags::_;
+            push(flags | ((_delayed_I && _delayed_I.value()) * Flags::I));    /* I delayed on SEI/CLI/PLP */
+
             _regs.PC = isr_addr;
-            flag(Flags::I);
+
+            if (!is_nmi) {
+                flag(Flags::I);
+            }
+
             if (_log.is_debug()) {
                 _log.debug("Detected {} interrupt. Extra cycles=7\n", (is_nmi ? "NMI" : "IRQ"));
             }
@@ -775,7 +783,7 @@ size_t Mos6502::single_step()
 
         if (_delayed_I) {
             /*
-             * I flag is set after interrupt sampling.
+             * A delayed I flag is set after interrupt sampling (SEI/CLI/PLP).
              */
             flag_I(_delayed_I.value());
             _delayed_I.reset();

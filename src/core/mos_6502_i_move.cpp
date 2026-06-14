@@ -260,15 +260,17 @@ int Mos6502::i_PLP(Mos6502& self, addr_t)
      */
     self.read(S_base | self._regs.S);   /* Dummy read from stack */
 
-    const auto saved_P = self.pop();
-    const auto saved_I = saved_P & Flags::I;
-    const auto curr_I  = self._regs.P & Flags::I;
+    const auto popped_P  = self.pop();
+    const auto popped_I  = popped_P & Flags::I;
+    const auto current_I = self._regs.P & Flags::I;
 
-    /* Delay setting of flag I */
-    self._regs.P = (saved_P & ~(Flags::B | Flags::I)) | Flags::_ | curr_I;
+    /*
+     * Delayed set of flag I.
+     */
+    self._regs.P = (popped_P & ~(Flags::I | Flags::B)) | Flags::_ | current_I;
 
-    if (saved_I != curr_I) {
-        self._delayed_I = saved_I;
+    if (popped_I != current_I) {
+        self._delayed_I = popped_I;
     }
 
     return 0;
@@ -279,9 +281,9 @@ int Mos6502::i_PHP(Mos6502& self, addr_t)
     /*
      * Push status flag
      * PHP              - 08
-     * push(P | Flags::B)
+     * push(P | Flags::B | unused_flag)
      */
-    self.push(self._regs.P | Flags::B);
+    self.push(self._regs.P | Flags::B | Flags::_);
     return 0;
 }
 

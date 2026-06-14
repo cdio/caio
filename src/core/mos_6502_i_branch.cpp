@@ -103,8 +103,8 @@ int Mos6502::i_BRK(Mos6502& self, addr_t)
      * P |= Flags::I
      * PC = *($FFFE)
      */
-    self.push_addr(self._regs.PC + 1);
-    self.push(self._regs.P | Flags::B);
+    self.push_addr(self._regs.PC);
+    self.push(self._regs.P | Flags::B | Flags::_);
     self.flag(Flags::I);
     self._regs.PC = self.read_addr(vIRQ);
     return 0;

@@ -49,10 +49,11 @@ int Mos6502::i_CLI(Mos6502& self, addr_t)
      */
     if (self.test_I()) {
         /*
-         * Delay setting of flag I.
+         * Delayed clear of flag I.
          */
         self._delayed_I = false;
     }
+
     return 0;
 }
 
@@ -64,10 +65,11 @@ int Mos6502::i_SEI(Mos6502& self, addr_t)
      */
     if (!self.test_I()) {
         /*
-         * Delay setting of flag I.
+         * Delayed set of flag I.
          */
         self._delayed_I = true;
     }
+
     return 0;
 }
 
