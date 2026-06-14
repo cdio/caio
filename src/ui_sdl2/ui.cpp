@@ -1524,7 +1524,7 @@ void UI::attach_controllers()
         return (ejoy->joyid() == Joystick::JOYID_UNASSIGNED);
     });
 
-    log.debug("ui: Unattached emulated joysticks: {}\n", count);
+    log.debug("ui: Detached emulated joysticks: {}\n", count);
 
     for (int devid = 0; devid < ::SDL_NumJoysticks() && count > 0; ++devid) {
         if (::SDL_IsGameController(devid)) {
