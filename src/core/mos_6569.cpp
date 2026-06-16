@@ -1013,6 +1013,8 @@ void Mos6569::g_access()
              */
             return (_bitmap_base | ((_vc & 0b1100111111) << 3) | _rc);
         }
+
+        return 0; // Idiotic g++
     }();
 
     const uint8_t g_data = _mmap->read(g_addr);
