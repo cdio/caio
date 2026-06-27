@@ -44,7 +44,8 @@ UI_LDADD+=		${ROOT}/3rdparty/sdl2/sdl_image/SDL_image/libSDL2_image.a \
 			${HOMEBREW_DIR}/opt/freetype/lib/libfreetype.a \
 			${HOMEBREW_DIR}/opt/libpng/lib/libpng.a
 
-UI_LDADD+=		${shell ${SDL2_CONFIG} --static-libs}
+# XXX FIXME UI_LDADD+=		${shell ${SDL2_CONFIG} --static-libs}
+UI_LDADD+=		${shell ${SDL2_CONFIG} --libs}
 
 UI_LDADD+=		-lbz2 \
 			-lz
